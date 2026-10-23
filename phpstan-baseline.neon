@@ -43,42 +43,6 @@ parameters:
 			path: src/Ladb/CoreBundle/Composer/ScriptHandler.php
 
 		-
-			message: '#^Instantiated class Elastica\\Query\\Match not found\.$#'
-			identifier: class.notFound
-			count: 6
-			path: src/Ladb/CoreBundle/Controller/Core/SearchController.php
-
-		-
-			message: '#^Instantiated class Elastica\\Query\\Match not found\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Ladb/CoreBundle/Controller/Knowledge/BookController.php
-
-		-
-			message: '#^Instantiated class Elastica\\Query\\Match not found\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Ladb/CoreBundle/Controller/Knowledge/ProviderController.php
-
-		-
-			message: '#^Instantiated class Elastica\\Query\\Match not found\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Ladb/CoreBundle/Controller/Knowledge/SoftwareController.php
-
-		-
-			message: '#^Instantiated class Elastica\\Query\\Match not found\.$#'
-			identifier: class.notFound
-			count: 5
-			path: src/Ladb/CoreBundle/Controller/Knowledge/ToolController.php
-
-		-
-			message: '#^Instantiated class Elastica\\Query\\Match not found\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Ladb/CoreBundle/Controller/Wonder/PlanController.php
-
-		-
 			message: '#^Class Ladb\\CoreBundle\\Entity\\Workflow\\Run referenced with incorrect case\: ladb\\CoreBundle\\Entity\\Workflow\\Run\.$#'
 			identifier: class.nameCase
 			count: 1
@@ -530,12 +494,6 @@ parameters:
 			identifier: method.notFound
 			count: 2
 			path: src/Ladb/CoreBundle/Utils/CommentableUtils.php
-
-		-
-			message: '#^Instantiated class Elastica\\Query\\Match not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Ladb/CoreBundle/Utils/ExplorableUtils.php
 
 		-
 			message: '#^Deprecated in PHP 8\.4\: Parameter \#2 \$followerUser \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'

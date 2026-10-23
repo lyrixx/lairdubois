@@ -858,7 +858,7 @@ class PlanController extends AbstractController {
 
 					case 'file-extension':
 
-						$filters[] = new \Elastica\Query\Match('resources.fileExtension', $facet->value);
+						$filters[] = new \Elastica\Query\MatchQuery('resources.fileExtension', $facet->value);
 
 						break;
 
@@ -1039,7 +1039,7 @@ class PlanController extends AbstractController {
 
 		$searchUtils = $this->get(SearchUtils::NAME);
 		$searchableSoftwareCount = $searchUtils->searchEntitiesCount(array(
-			new \Elastica\Query\Match('supportedFiles', implode(',', $plan->getResourceFileExtensions()))
+			new \Elastica\Query\MatchQuery('supportedFiles', implode(',', $plan->getResourceFileExtensions()))
 		), 'fos_elastica.index.ladb.knowledge_software');
 
 		$explorableUtils = $this->get(ExplorableUtils::NAME);

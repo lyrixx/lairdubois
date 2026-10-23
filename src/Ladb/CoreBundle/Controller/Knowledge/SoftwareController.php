@@ -258,7 +258,7 @@ class SoftwareController extends AbstractController {
 
 					case 'supported-files':
 
-						$filters[] = new \Elastica\Query\Match('supportedFiles', $facet->value);
+						$filters[] = new \Elastica\Query\MatchQuery('supportedFiles', $facet->value);
 
 						break;
 
@@ -388,7 +388,7 @@ class SoftwareController extends AbstractController {
 		), 'fos_elastica.index.ladb.knowledge_software');
 		$searchablePlanCount = is_null($software->getSupportedFiles()) ? 0 : $searchUtils->searchEntitiesCount(array(
 			new \Elastica\Query\Range('visibility', array( 'gte' => HiddableInterface::VISIBILITY_PUBLIC )),
-			new \Elastica\Query\Match('resources.fileExtension', $software->getSupportedFiles())
+			new \Elastica\Query\MatchQuery('resources.fileExtension', $software->getSupportedFiles())
 		), 'fos_elastica.index.ladb.wonder_plan');
 
 		$likableUtils = $this->get(LikableUtils::NAME);

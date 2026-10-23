@@ -197,7 +197,7 @@ class BookController extends AbstractController {
 
 					case 'work':
 
-						$filter = new \Elastica\Query\Match('work', $facet->value);
+						$filter = new \Elastica\Query\MatchQuery('work', $facet->value);
 						$filters[] = $filter;
 
 						break;
@@ -366,7 +366,7 @@ class BookController extends AbstractController {
 		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($book));
 
 		$searchUtils = $this->get(SearchUtils::NAME);
-		$searchableVolumeCount = $searchUtils->searchEntitiesCount(array( new \Elastica\Query\Match('work', $book->getWork()) ), 'fos_elastica.index.ladb.knowledge_book');
+		$searchableVolumeCount = $searchUtils->searchEntitiesCount(array( new \Elastica\Query\MatchQuery('work', $book->getWork()) ), 'fos_elastica.index.ladb.knowledge_book');
 
 		$likableUtils = $this->get(LikableUtils::NAME);
 		$watchableUtils = $this->get(WatchableUtils::NAME);

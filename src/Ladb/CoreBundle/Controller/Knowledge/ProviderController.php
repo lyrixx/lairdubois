@@ -233,7 +233,7 @@ class ProviderController extends AbstractController {
 
 					case 'brand':
 
-						$filter = new \Elastica\Query\Match('brand', $facet->value);
+						$filter = new \Elastica\Query\MatchQuery('brand', $facet->value);
 						$filters[] = $filter;
 
 						break;
@@ -607,7 +607,7 @@ class ProviderController extends AbstractController {
 
 		$searchUtils = $this->get(SearchUtils::NAME);
 		$elasticaQueryUtils = $this->get(ElasticaQueryUtils::NAME);
-		$searchableStoreCount = $searchUtils->searchEntitiesCount(array( new \Elastica\Query\Match('brand', $provider->getBrand()) ), 'fos_elastica.index.ladb.knowledge_provider');
+		$searchableStoreCount = $searchUtils->searchEntitiesCount(array( new \Elastica\Query\MatchQuery('brand', $provider->getBrand()) ), 'fos_elastica.index.ladb.knowledge_provider');
 		$searchableWoodCount = $searchUtils->searchEntitiesCount(array( $elasticaQueryUtils->createShouldMatchPhraseQuery('name', $provider->getWoods()) ), 'fos_elastica.index.ladb.knowledge_wood');
 
 		$likableUtils = $this->get(LikableUtils::NAME);

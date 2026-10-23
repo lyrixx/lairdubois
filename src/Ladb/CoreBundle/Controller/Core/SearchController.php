@@ -83,7 +83,7 @@ class SearchController extends AbstractController {
 			$request,
 			$page,
 			function($facet, &$filters, &$sort, &$noGlobalFilters, &$couldUseDefaultSort) {
-				$filters[] = new \Elastica\Query\Match('label', $facet->value);
+				$filters[] = new \Elastica\Query\MatchQuery('label', $facet->value);
 			},
 			null,
 			null,
@@ -109,7 +109,7 @@ class SearchController extends AbstractController {
 			$request,
 			$page,
 			function($facet, &$filters, &$sort, &$noGlobalFilters, &$couldUseDefaultSort) {
-				$filters[] = new \Elastica\Query\Match('label', $facet->value);
+				$filters[] = new \Elastica\Query\MatchQuery('label', $facet->value);
 			},
 			null,
 			null,
@@ -135,7 +135,7 @@ class SearchController extends AbstractController {
 			$request,
 			$page,
 			function($facet, &$filters, &$sort, &$noGlobalFilters, &$couldUseDefaultSort) {
-				$filters[] = new \Elastica\Query\Match('label', $facet->value);
+				$filters[] = new \Elastica\Query\MatchQuery('label', $facet->value);
 			},
 			null,
 			null,
@@ -161,7 +161,7 @@ class SearchController extends AbstractController {
 			$request,
 			$page,
 			function($facet, &$filters, &$sort, &$noGlobalFilters, &$couldUseDefaultSort) {
-				$filters[] = new \Elastica\Query\Match('label', $facet->value);
+				$filters[] = new \Elastica\Query\MatchQuery('label', $facet->value);
 			},
 			null,
 			null,
@@ -187,7 +187,7 @@ class SearchController extends AbstractController {
 			$request,
 			$page,
 			function($facet, &$filters, &$sort, &$noGlobalFilters, &$couldUseDefaultSort) {
-				$filters[] = new \Elastica\Query\Match('label', $facet->value);
+				$filters[] = new \Elastica\Query\MatchQuery('label', $facet->value);
 			},
 			null,
 			null,
@@ -213,7 +213,7 @@ class SearchController extends AbstractController {
 			$request,
 			$page,
 			function($facet, &$filters, &$sort, &$noGlobalFilters, &$couldUseDefaultSort) {
-				$filters[] = new \Elastica\Query\Match('label', $facet->value);
+				$filters[] = new \Elastica\Query\MatchQuery('label', $facet->value);
 			},
 			null,
 			null,
