@@ -260,7 +260,9 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
     par le formulaire de connexion, en mettant le token dans la session ;
   - `static::getEntityManager()`, `static::findUser()` : les données des fixtures. Le client
     reboote le kernel avant chaque requête sauf la première, et l'entity manager avec : relire une
-    entité après une requête plutôt que de garder celle d'avant.
+    entité après une requête plutôt que de garder celle d'avant. L'entity manager d'une requête
+    peut garder une entité qu'elle a supprimée (article d'un pas à pas) : `clear()` avant de
+    vérifier une suppression par `find()`.
 - Pas de RabbitMQ ni de websocket en test : les producers `old_sound_rabbit_mq.view_producer` et
   `webpush_notification_producer`, et le pusher `gos_web_socket.wamp.pusher`, sont décorés par
   `Tests\Double\InMemoryProducer` et `InMemoryPusher`, qui gardent les messages
@@ -269,12 +271,15 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   `$client->getProfile()` (mails : collector `swiftmailer`, la livraison est coupée en test).
 - Aucun appel réseau sortant. Les GET du smoke test n'en font pas : Stripe ne part qu'en XHR, le
   compteur de partages Facebook qu'avec `?url=`, le titre d'un referer qu'avec `?referer=1`, le
-  scrape Open Graph de Facebook jamais en debug. Ce qu'un test fonctionnel atteindra, à neutraliser
-  en test (double dans `config_test.yml`) avant d'écrire le test : `FindUtils` à la création d'une
-  trouvaille (capture Chromium, Open Graph, API YouTube, Vimeo et Dailymotion de
-  `VideoHostingUtils`), `LocalisableUtils` (géocodage Google) dans les formulaires avec une
-  localisation et la recherche `@location:`, `PictureManager::createFromUrl()`, les API de
-  `VideoHostingUtils` (took, plan, pas-à-pas avec vidéo), Stripe (`/financement`, en XHR).
+  scrape Open Graph de Facebook jamais en debug. Doubles de `config_test.yml`
+  (`Tests\Double\Offline*`, des sous-classes, certains services demandant la classe d'origine) :
+  `PictureManager::createFromUrl()` copie une image des fixtures et garde les URL
+  (`$client->getContainer()->get('tests.picture_manager')->getUrls()`, avant le reboot suivant) ;
+  `OpenGraphUtils::fetchMetas()` ne trouve des métas qu'à `OfflineOpenGraphUtils::URL` ;
+  `VideoHostingUtils::getThumbnailUrl()` répond sans les API (playlist YouTube, Vimeo) ; la capture
+  Chromium de `WebScreenshotUtils` copie une image des fixtures. Reste à neutraliser avant d'écrire
+  le test qui l'atteint : les autres API de `VideoHostingUtils` (took, sitemaps), Stripe
+  (`/financement`, en XHR).
 - Une `\Error` PHP sort du kernel en 3.4 : elle remonte de `$client->request()` au lieu de donner
   une 500. Un warning PHP devient une exception (gestionnaire d'erreurs de PHPUnit) : 500.
 - Smoke test (`tests/Smoke/RouteSmokeTest.php`) : chaque route GET en anonyme, `user` et `admin`
@@ -285,6 +290,17 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   passe, pour qu'on retire la ligne. Routes non appelées dans `UNTESTED`, avec la raison (sorties
   en « skipped »). Une nouvelle route GET sans valeur pour un de ses paramètres fait échouer le
   test. Filtrer sur une route : `castor qa:phpunit -- --filter 'core_creation_show'`.
+- `Tests\PublicationTestCase` : les tests communs aux types publiables (show, new, create, edit,
+  update, publish, unpublish, delete, lock, chown, avec les droits de l'anonyme, de l'auteur, d'un
+  autre compte et de l'admin, et ce que la publication déclenche : compteurs, activité, liste
+  issue de l'index), sur le contenu d'id 1. Une sous-classe donne le préfixe des routes, l'entité,
+  le nom des compteurs de `UserMeta` et les valeurs du formulaire d'un nouveau contenu ;
+  `createPicture()` lui crée une image avec la fabrique des fixtures (`tests.fixture_factory`).
+  Échecs connus dans `KNOWN_FAILURES` (nom du test avec son jeu de données, issue), comme le smoke
+  test. Exemples : `tests/Wonder/`, `tests/Find/`.
+- Le `DomCrawler` de Symfony 3.4 lit l'UTF-8 comme de l'ISO-8859-1 depuis PHP 8.2 (`chÃªne`), et
+  un formulaire relu par le crawler renverrait ses valeurs accentuées ainsi : le client de test
+  (`Tests\Utf8Client`, qui décore `test.client`) lui passe la page en entités HTML.
 - Logs de test au niveau `notice` (`var/logs/test.log`) : le niveau `debug` du dev écrit 200 Mo
   par passage du smoke test.
 - Comptes et profils (`tests/User/`) : connexion par le vrai formulaire (`form[action$="/login_check"]`),
@@ -305,8 +321,6 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
 - Bug connu d'un test fonctionnel : vérifier le mauvais comportement avec le message « passes now:
   remove the known failure (#N) », puis `self::markTestIncomplete('Known failure, see #N.')`. Le
   test échoue quand le bug est corrigé.
-- Le crawler lit mal les accents de certaines pages (`/@{username}/parametres`) : y chercher un
-  texte accentué dans `$client->getResponse()->getContent()`.
 
 ## Pièges connus
 

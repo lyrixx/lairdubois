@@ -59,3 +59,37 @@ services:
         class: Tests\Double\OfflineLocalisableUtils
         decorates: ladb_core.localisable_utils
         arguments: ['@service_container']
+
+    # No outgoing request from the tests (issue #6): the pictures "downloaded" from a URL, the
+    # Open Graph metas, the thumbnails of the video APIs and the Chromium screenshots of a find
+    # come from the fixtures. Subclasses, as some services ask for the class of the original.
+    tests.open_graph_utils:
+        class: Tests\Double\OfflineOpenGraphUtils
+        decorates: ladb_core.open_graph_utils
+        arguments: ['@service_container']
+    tests.picture_manager:
+        class: Tests\Double\OfflinePictureManager
+        decorates: ladb_core.core_picture_manager
+        arguments: ['@service_container']
+        public: true
+    tests.video_hosting_utils:
+        class: Tests\Double\OfflineVideoHostingUtils
+        decorates: ladb_core.video_hosting_utils
+        arguments: ['@service_container']
+    tests.web_screenshot_utils:
+        class: Tests\Double\OfflineWebScreenshotUtils
+        decorates: ladb_core.web_screenshot_utils
+        arguments: ['@service_container']
+
+    # The factory of the fixtures, to create the pictures and resources of a new content
+    tests.fixture_factory:
+        alias: Ladb\CoreBundle\DataFixtures\FixtureFactory
+        public: true
+
+    # A crawler which reads UTF-8 (issue #6): see Tests\Utf8Client
+    tests.client:
+        class: Tests\Utf8Client
+        decorates: test.client
+        arguments: ['@kernel', '%test.client.parameters%', '@test.client.history', '@test.client.cookiejar']
+        shared: false
+        public: true
