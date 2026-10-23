@@ -1,0 +1,586 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Non\-abstract class AppKernel implements the Serializable interface, but does not implement __serialize\(\)\.$#'
+			identifier: class.serializable
+			count: 1
+			path: app/AppKernel.php
+
+		-
+			message: '#^Non\-abstract class AppKernel implements the Serializable interface, but does not implement __unserialize\(\)\.$#'
+			identifier: class.serializable
+			count: 1
+			path: app/AppKernel.php
+
+		-
+			message: '#^Access to undefined constant Ladb\\CoreBundle\\Entity\\Core\\Picture\:\:STORAGE_MAX_HEIGHT\.$#'
+			identifier: classConstant.notFound
+			count: 1
+			path: src/Ladb/CoreBundle/Command/BatchResizeUploadsPicturesCommand.php
+
+		-
+			message: '#^Access to undefined constant Ladb\\CoreBundle\\Entity\\Core\\Picture\:\:STORAGE_MAX_WIDTH\.$#'
+			identifier: classConstant.notFound
+			count: 1
+			path: src/Ladb/CoreBundle/Command/BatchResizeUploadsPicturesCommand.php
+
+		-
+			message: '#^Call to deprecated function curl_close\(\)\.$#'
+			identifier: function.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Command/CronSpotlightCommand.php
+
+		-
+			message: '#^Access to undefined constant Ladb\\CoreBundle\\Entity\\Find\\Find\:\:KIND_EVENT\.$#'
+			identifier: classConstant.notFound
+			count: 1
+			path: src/Ladb/CoreBundle/Command/MigrateEventsCommand.php
+
+		-
+			message: '#^Parameter \$event of method Ladb\\CoreBundle\\Composer\\ScriptHandler\:\:updateDirectoryStructure\(\) has invalid type Composer\\Script\\Event\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Ladb/CoreBundle/Composer/ScriptHandler.php
+
+		-
+			message: '#^Instantiated class Elastica\\Query\\Match not found\.$#'
+			identifier: class.notFound
+			count: 6
+			path: src/Ladb/CoreBundle/Controller/Core/SearchController.php
+
+		-
+			message: '#^Instantiated class Elastica\\Query\\Match not found\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Ladb/CoreBundle/Controller/Knowledge/BookController.php
+
+		-
+			message: '#^Instantiated class Elastica\\Query\\Match not found\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Ladb/CoreBundle/Controller/Knowledge/ProviderController.php
+
+		-
+			message: '#^Instantiated class Elastica\\Query\\Match not found\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Ladb/CoreBundle/Controller/Knowledge/SoftwareController.php
+
+		-
+			message: '#^Instantiated class Elastica\\Query\\Match not found\.$#'
+			identifier: class.notFound
+			count: 5
+			path: src/Ladb/CoreBundle/Controller/Knowledge/ToolController.php
+
+		-
+			message: '#^Instantiated class Elastica\\Query\\Match not found\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Ladb/CoreBundle/Controller/Wonder/PlanController.php
+
+		-
+			message: '#^Class Ladb\\CoreBundle\\Entity\\Workflow\\Run referenced with incorrect case\: ladb\\CoreBundle\\Entity\\Workflow\\Run\.$#'
+			identifier: class.nameCase
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Workflow/TaskController.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/AbstractAuthoredPublication.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$mainPicture \(Ladb\\CoreBundle\\Entity\\Core\\Picture\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Blog/Post.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$mainPicture \(Ladb\\CoreBundle\\Entity\\Core\\Picture\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Collection/Collection.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$collection \(Ladb\\CoreBundle\\Entity\\Collection\\Collection\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Collection/Entry.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Core/Activity/Publish.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$parent \(Ladb\\CoreBundle\\Entity\\Core\\Comment\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Core/Comment.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Core/Comment.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$vote \(Ladb\\CoreBundle\\Entity\\Core\\Vote\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Core/Comment.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Core/Feedback.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Core/Join.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$entityUser \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Core/Like.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Core/Like.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$mentionedUser \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Core/Mention.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Core/Mention.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Core/Picture.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$thumbnail \(Ladb\\CoreBundle\\Entity\\Core\\Picture\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Core/Resource.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Core/Review.php
+
+		-
+			message: '#^Access to an undefined property Ladb\\CoreBundle\\Entity\\Core\\User\:\:\$skills\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Core/User.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$avatar \(Ladb\\CoreBundle\\Entity\\Core\\Picture\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Core/User.php
+
+		-
+			message: '#^Non\-abstract class Ladb\\CoreBundle\\Entity\\Core\\User implements the Serializable interface, but does not implement __serialize\(\)\.$#'
+			identifier: class.serializable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Core/User.php
+
+		-
+			message: '#^Non\-abstract class Ladb\\CoreBundle\\Entity\\Core\\User implements the Serializable interface, but does not implement __unserialize\(\)\.$#'
+			identifier: class.serializable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Core/User.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$banner \(Ladb\\CoreBundle\\Entity\\Core\\Picture\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Core/UserMeta.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$biography \(Ladb\\CoreBundle\\Entity\\Core\\Biography\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Core/UserMeta.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$comment \(Ladb\\CoreBundle\\Entity\\Core\\Comment\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Core/Vote.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Core/Vote.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Core/Watch.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$mainPicture \(Ladb\\CoreBundle\\Entity\\Core\\Picture\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Event/Event.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$mainPicture \(Ladb\\CoreBundle\\Entity\\Core\\Picture\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Faq/Question.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$thumbnail \(Ladb\\CoreBundle\\Entity\\Core\\Picture\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Find/Content/Link.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$mainPicture \(Ladb\\CoreBundle\\Entity\\Core\\Picture\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Find/Find.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$howto \(Ladb\\CoreBundle\\Entity\\Howto\\Howto\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Howto/Article.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$sticker \(Ladb\\CoreBundle\\Entity\\Core\\Picture\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Howto/Article.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Howto/Article.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$mainPicture \(Ladb\\CoreBundle\\Entity\\Core\\Picture\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Howto/Howto.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$spotlight \(Ladb\\CoreBundle\\Entity\\Core\\Spotlight\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Howto/Howto.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$sticker \(Ladb\\CoreBundle\\Entity\\Core\\Picture\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Howto/Howto.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$strip \(Ladb\\CoreBundle\\Entity\\Core\\Picture\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Howto/Howto.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$mainPicture \(Ladb\\CoreBundle\\Entity\\Core\\Picture\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Knowledge/AbstractKnowledge.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$school \(Ladb\\CoreBundle\\Entity\\Knowledge\\School\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Knowledge/School/Testimonial.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Knowledge/School/Testimonial.php
+
+		-
+			message: '#^Access to an undefined property Ladb\\CoreBundle\\Entity\\Knowledge\\Software\:\:\$sourceDocsValues\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Knowledge/Software.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Knowledge/Value/BaseValue.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$mosaicPicture \(Ladb\\CoreBundle\\Entity\\Core\\Picture\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Knowledge/Wood/Texture.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$singlePicture \(Ladb\\CoreBundle\\Entity\\Core\\Picture\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Knowledge/Wood/Texture.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$wood \(Ladb\\CoreBundle\\Entity\\Knowledge\\Wood\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Knowledge/Wood/Texture.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$mainPicture \(Ladb\\CoreBundle\\Entity\\Core\\Picture\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Offer/Offer.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$mainPicture \(Ladb\\CoreBundle\\Entity\\Core\\Picture\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Promotion/Graphic.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Qa/Answer.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$bestAnswer \(Ladb\\CoreBundle\\Entity\\Qa\\Answer\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Qa/Question.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$mainPicture \(Ladb\\CoreBundle\\Entity\\Core\\Picture\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Qa/Question.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$mainPicture \(Ladb\\CoreBundle\\Entity\\Core\\Picture\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Wonder/AbstractWonder.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$sticker \(Ladb\\CoreBundle\\Entity\\Core\\Picture\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Wonder/AbstractWonder.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$strip \(Ladb\\CoreBundle\\Entity\\Core\\Picture\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Wonder/AbstractWonder.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$spotlight \(Ladb\\CoreBundle\\Entity\\Core\\Spotlight\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Wonder/Creation.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$workflow \(Ladb\\CoreBundle\\Entity\\Workflow\\Workflow\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Workflow/Label.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$workflow \(Ladb\\CoreBundle\\Entity\\Workflow\\Workflow\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Workflow/Part.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$task \(Ladb\\CoreBundle\\Entity\\Workflow\\Task\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Workflow/Run.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$run \(Ladb\\CoreBundle\\Entity\\Workflow\\Run\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Workflow/Task.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$targetTask \(Ladb\\CoreBundle\\Entity\\Workflow\\Task\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Workflow/Task.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$workflow \(Ladb\\CoreBundle\\Entity\\Workflow\\Workflow\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Workflow/Task.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$mainPicture \(Ladb\\CoreBundle\\Entity\\Core\\Picture\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Workflow/Workflow.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$mainPicture \(Ladb\\CoreBundle\\Entity\\Core\\Picture\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Entity/Youtook/Took.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#3 \$owner \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Handler/PictureUploadHandler.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Model/AuthoredInterface.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$spotlight \(Ladb\\CoreBundle\\Entity\\Core\\Spotlight\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Model/SpotlightableInterface.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#2 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Collection/CollectionRepository.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Core/TipRepository.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Event/EventRepository.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#2 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Offer/OfferRepository.php
+
+		-
+			message: '''
+				#^Call to deprecated method fetchAll\(\) of class Doctrine\\DBAL\\Statement\:
+				Use fetchAllNumeric\(\), fetchAllAssociative\(\) or fetchFirstColumn\(\) instead\.$#
+			'''
+			identifier: method.deprecated
+			count: 2
+			path: src/Ladb/CoreBundle/Repository/Opencutlist/AccessRepository.php
+
+		-
+			message: '#^Caught class Ladb\\CoreBundle\\Repository\\Qa\\NonUniqueResultException not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Qa/AnswerRepository.php
+
+		-
+			message: '#^Call to an undefined method Ladb\\CoreBundle\\Topic\\AbstractTopic\:\:getClientManipulator\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Ladb/CoreBundle/Topic/AbstractTopic.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#4 \$publisherUser \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Utils/ActivityUtils.php
+
+		-
+			message: '#^Call to an undefined method Ladb\\CoreBundle\\Utils\\CommentableUtils\:\:createNotFoundException\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/Ladb/CoreBundle/Utils/CommentableUtils.php
+
+		-
+			message: '#^Instantiated class Elastica\\Query\\Match not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Ladb/CoreBundle/Utils/ExplorableUtils.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#2 \$followerUser \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Utils/FollowerUtils.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#2 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Utils/JoinableUtils.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#2 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Utils/LikableUtils.php
+
+		-
+			message: '#^Call to deprecated function curl_close\(\)\.$#'
+			identifier: function.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Utils/OpenGraphUtils.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$picture \(Ladb\\CoreBundle\\Entity\\Core\\Picture\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Utils/PicturedUtils.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#2 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 2
+			path: src/Ladb/CoreBundle/Utils/VotableUtils.php
+
+		-
+			message: '#^Deprecated in PHP 8\.4\: Parameter \#2 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
+			identifier: parameter.implicitlyNullable
+			count: 1
+			path: src/Ladb/CoreBundle/Utils/WatchableUtils.php
+
+		-
+			message: '#^Class Ladb\\CoreBundle\\Entity\\Knowledge\\Value\\ToolIdentity not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Ladb/CoreBundle/Validator/Constraints/ValidToolIdentityValueValidator.php

@@ -303,6 +303,32 @@ function docker_compose_run(
 }
 
 /**
+ * Same as docker_compose_run(), but a failure of the command returns its exit code instead of
+ * stopping the task.
+ *
+ * @param list<string> $runCommand
+ */
+function docker_exit_code(
+    array $runCommand,
+    ?Context $c = null,
+    ?string $service = null,
+    bool $noDeps = true,
+    ?string $workDir = null,
+): int {
+    $c = ($c ?? context())->withAllowFailure();
+
+    $process = docker_compose_run(
+        params: $runCommand,
+        c: $c,
+        service: $service,
+        noDeps: $noDeps,
+        workDir: $workDir,
+    );
+
+    return $process->getExitCode() ?? 0;
+}
+
+/**
  * @return array<string, array{image?: string, profiles?: list<string>, build?: array{context: string, target?: string}}>
  */
 function get_services(?string $profile = null): array

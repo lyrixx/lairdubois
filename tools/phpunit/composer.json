@@ -1,0 +1,12 @@
+{
+    "type": "project",
+    "require": {
+        "phpunit/phpunit": "^9.6"
+    },
+    "config": {
+        "platform": {
+            "php": "8.5"
+        },
+        "sort-packages": true
+    }
+}
