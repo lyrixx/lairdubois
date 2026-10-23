@@ -128,7 +128,8 @@ abstract class WebTestCase extends BaseWebTestCase
      */
     protected static function getEntityManager(): EntityManagerInterface
     {
-        if (null === static::$kernel) {
+        // No kernel yet, or the one of the previous test, shut down
+        if (null === static::$kernel || null === static::$kernel->getContainer()) {
             static::bootKernel();
         }
 
