@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- https://docs.phpunit.de/en/9.6/configuration.html -->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="tools/phpunit/vendor/phpunit/phpunit/phpunit.xsd"
+         backupGlobals="false"
+         colors="true"
+         bootstrap="app/autoload.php"
+         cacheResultFile="var/.phpunit.result.cache"
+         failOnRisky="true"
+         failOnWarning="true"
+>
+    <php>
+        <!-- E_DEPRECATED too, unlike the php.ini of the images: castor qa:deprecations tells
+             the deprecations of PHP from the ones of Symfony by their error level -->
+        <ini name="error_reporting" value="-1" />
+        <server name="KERNEL_CLASS" value="AppKernel" />
+        <!-- Without castor qa:phpunit, which collects them: only count the deprecations -->
+        <env name="SYMFONY_DEPRECATIONS_HELPER" value="weak" />
+    </php>
+
+    <testsuites>
+        <testsuite name="Project Test Suite">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>

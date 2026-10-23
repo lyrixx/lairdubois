@@ -139,6 +139,43 @@ Conventions :
    `variable('root_domain')`.
 3. Une tâche récurrente est une tâche Castor (`castor.php` ou `.castor/*.php`), pas un script.
 
+## CI et QA
+
+GitHub Actions (`.github/workflows/ci.yml`) sur les PR vers `next` et les push sur `next`. Elle lance
+les tâches Castor dans Docker, en contexte `ci`. Les tâches QA sont dans `.castor/qa.php`. Pour
+refaire la CI en local, sur une stack démarrée (`castor start`) :
+
+```bash
+castor -c ci qa:all          # qa:lint, qa:phpstan, qa:phpunit, puis qa:deprecations
+castor -c ci qa:lint         # lint:twig, lint:yaml, doctrine:schema:validate, cache:warmup --env=prod, composer validate
+castor qa:phpstan [-b]       # niveau 0, phpstan-baseline.neon ; -b la régénère
+castor qa:phpunit [-- --filter …]
+castor qa:deprecations       # var/deprecations/report.md, et le résumé du job en CI
+castor qa:install            # outils de tools/ (PHPStan, PHPUnit), installés à la volée sinon
+```
+
+- PHPUnit 9.6, dans `tools/phpunit` et pas dans le `composer.json` de l'application : c'est la
+  dernière version qui marche à la fois avec le `WebTestCase` de Symfony 3.4 (setUp/tearDown
+  `void` via `ForwardCompatTestTrait`) et avec `symfony/phpunit-bridge` 3.4 (`TestListener` et
+  `ErrorHandler` de PHPUnit, supprimés en 10). Le `simple-phpunit` du bridge 3.4 ne sait pas
+  installer PHPUnit 9.6 (il garde le `composer.lock` du paquet et n'installe pas le bridge).
+- Tests dans `tests/` (namespace `Tests\`, `autoload-dev`), configuration `phpunit.xml.dist` à la
+  racine, `KERNEL_CLASS=AppKernel`. Les tests de `src/Ladb/CoreBundle/Tests` (générés par
+  `sensio/generator-bundle`, morts) ne sont pas dans la suite, ni analysés par PHPStan. PHPStan
+  n'analyse pas `tests/` (il n'y trouverait pas PHPUnit).
+- Rapport de dépréciations : celles de la compilation du container (le kernel les écrit dans
+  `var/cache/test/*Deprecations.log`, sauf sous PHPUnit) et celles du dernier `qa:phpunit`.
+  `qa:phpunit` passe `SYMFONY_DEPRECATIONS_SERIALIZE` au bridge, qui sérialise alors chaque
+  dépréciation au lieu de les compter. Les dépréciations de PHP lui-même (`E_DEPRECATED`, d'où
+  `error_reporting=-1` dans `phpunit.xml.dist`) sont comptées, pas listées. Le rapport ne fait
+  jamais échouer la CI.
+- Les dépréciations d'un template Twig ne sortent qu'à sa compilation : `qa:deprecations` vide le
+  cache de test sans les warmers optionnels, pour que le `qa:phpunit` suivant les voie.
+- En 3.4, `lint:yaml` ne prend qu'un chemin et compte les dépréciations comme des erreurs ;
+  `lint:twig` exige des chemins.
+- Cache GitHub Actions : couches Docker (`type=gha`, un scope par cible du Dockerfile, via un
+  `docker-compose.override.yml` écrit par le workflow) et cache Composer (`.home/.cache/composer`).
+
 ## Pièges connus
 
 - La plupart des paquets du lock déclarent PHP 7 (`"php": "^7.1"`…) : toute commande composer qui
