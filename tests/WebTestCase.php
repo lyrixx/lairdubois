@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use DAMA\DoctrineTestBundle\Doctrine\DBAL\StaticDriver;
 use Doctrine\ORM\EntityManagerInterface;
 use Ladb\CoreBundle\Entity\Core\User;
 use Symfony\Bundle\FrameworkBundle\Client;
@@ -171,8 +172,17 @@ abstract class WebTestCase extends BaseWebTestCase
      */
     private static function countIndexWrites(): int
     {
-        $indexing = static::bootKernel()->getContainer()->get('fos_elastica.index.ladb')->getStats()->get('_all', 'primaries', 'indexing');
-        static::ensureKernelShutdown();
+        // Out of a test, a plain connection: when this boot rebuilds the container, its cache
+        // warmers connect to the database, and the connection dama/doctrine-test-bundle keeps
+        // for the tests would start with a transaction the first test cannot begin again
+        $keepStaticConnections = StaticDriver::isKeepStaticConnections();
+        StaticDriver::setKeepStaticConnections(false);
+        try {
+            $indexing = static::bootKernel()->getContainer()->get('fos_elastica.index.ladb')->getStats()->get('_all', 'primaries', 'indexing');
+            static::ensureKernelShutdown();
+        } finally {
+            StaticDriver::setKeepStaticConnections($keepStaticConnections);
+        }
 
         return $indexing['index_total'] + $indexing['delete_total'];
     }

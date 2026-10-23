@@ -97,7 +97,7 @@ castor stop
 castor builder                    # shell dans le builder
 castor builder -- bin/console …   # une commande dans le builder
 castor logs [--service=frontend]
-castor app:install                # composer install
+castor app:install                # composer install, clé DKIM jetable si absente
 castor app:db:schema              # base, schéma (doctrine:schema:update) et table sessions
 castor app:db:fixtures           # recrée la base avec les fixtures, notifications, index
 castor app:elasticsearch:populate # fos:elastica:populate
@@ -285,6 +285,26 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   test. Filtrer sur une route : `castor qa:phpunit -- --filter 'core_creation_show'`.
 - Logs de test au niveau `notice` (`var/logs/test.log`) : le niveau `debug` du dev écrit 200 Mo
   par passage du smoke test.
+- Comptes et profils (`tests/User/`) : connexion par le vrai formulaire (`form[action$="/login_check"]`),
+  dont un compte au hash sha512 de FOSUserBundle écrit tel quel en base (`LoginTest`, il protège
+  #24).
+- Mails : `static::getSentEmails($client)` (après `$client->enableProfiler()`) et
+  `static::getEmailRecipients($message)`. Le `delivery_address` de `config_dev.yml` remplace les
+  destinataires de chaque mail par `dev@lairdubois.fr`, ceux d'origine restent dans l'en-tête
+  `X-Swift-To`. Spool en mémoire en test : le spool fichier de `config.yml` (`app/spool/`) est
+  partagé avec le dev.
+- Géocodage (`LocalisableUtils`, profils, collectifs et tous les formulaires avec une
+  localisation) : remplacé en test par `Tests\Double\OfflineLocalisableUtils`, qui connaît les
+  adresses de sa constante `ADDRESSES` (`Bordeaux, France`) ; toute autre adresse n'a pas de
+  résultat.
+- `AbstractController::createLock()` pose un verrou Memcached de 3 secondes par action et par
+  compte, contre le double envoi : la deuxième création d'un même compte dans un test répond 404.
+  `Tests\WebTestCase` vide Memcached après chaque test (il ne sert qu'à ces verrous).
+- Bug connu d'un test fonctionnel : vérifier le mauvais comportement avec le message « passes now:
+  remove the known failure (#N) », puis `self::markTestIncomplete('Known failure, see #N.')`. Le
+  test échoue quand le bug est corrigé.
+- Le crawler lit mal les accents de certaines pages (`/@{username}/parametres`) : y chercher un
+  texte accentué dans `$client->getResponse()->getContent()`.
 
 ## Pièges connus
 
@@ -343,3 +363,7 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
 - Les managers (`publish()`…) parcourent les collections inverses (créations d'un plan…), qui ne sont
   initialisées que sur une entité chargée depuis la base : `FixtureFactory::create()` fait un
   `refresh()` après le premier `flush()`.
+- `MailerUtils` signe chaque mail avec la clé DKIM de la prod (`keys/private.pem`, hors git) : sans
+  elle, tout mail du site (confirmation d'adresse, notifications…) donne une 500. `castor
+  app:install` en génère une jetable si elle manque. Les mails de FOSUserBundle (mot de passe
+  oublié) ne passent pas par là.

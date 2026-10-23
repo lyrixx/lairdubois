@@ -6,6 +6,7 @@ use Ladb\CoreBundle\DataFixtures\UserFixtures;
 use Ladb\CoreBundle\Entity\Core\UserWitness;
 use Ladb\CoreBundle\Utils\CryptoUtils;
 use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Component\DomCrawler\Crawler;
 use Tests\Double\OfflineLocalisableUtils;
 use Tests\WebTestCase;
 
@@ -55,7 +56,7 @@ final class SettingsTest extends WebTestCase
     {
         $client = static::createClientAs(UserFixtures::USER);
 
-        $crawler = $this->submitSettings($client, UserFixtures::USER, [
+        $this->submitSettings($client, UserFixtures::USER, [
             'ladb_usersettings[username]' => UserFixtures::USER2,
             'ladb_usersettings[email]' => 'user2@lairdubois.test',
         ]);
@@ -170,7 +171,7 @@ final class SettingsTest extends WebTestCase
     /**
      * @param array<string, string> $values
      */
-    private function submitSettings(Client $client, string $username, array $values): \Symfony\Component\DomCrawler\Crawler
+    private function submitSettings(Client $client, string $username, array $values): Crawler
     {
         $crawler = $client->request('GET', "/@{$username}/parametres");
         self::assertSame(200, $client->getResponse()->getStatusCode());

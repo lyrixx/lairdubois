@@ -59,7 +59,7 @@ function start(): void
     about();
 }
 
-#[AsTask(description: 'Installs the application (composer)', namespace: 'app', aliases: ['install'])]
+#[AsTask(description: 'Installs the application (composer, throwaway DKIM key)', namespace: 'app', aliases: ['install'])]
 function install(): void
 {
     io()->title('Installing the application');

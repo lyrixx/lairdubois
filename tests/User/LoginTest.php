@@ -8,12 +8,12 @@ use Symfony\Component\DomCrawler\Crawler;
 use Tests\WebTestCase;
 
 /**
- * Login through the form of /login, logout and remember me.
+ * Login through the form of /login, logout, remember me and switch user.
  *
  * The accounts of the production database keep the password hash of FOSUserBundle: sha512, 5000
  * iterations, base64, with a salt. They must log in without a reset across the whole migration,
- * including the replacement of FOSUserBundle (#24): the hash below is the one of the production,
- * written as is in the database, independent of the encoder the application uses.
+ * including the replacement of FOSUserBundle (#24): the hash below is computed the same way, and
+ * written as is in the database, whatever the encoder the application uses.
  */
 final class LoginTest extends WebTestCase
 {
@@ -96,6 +96,28 @@ final class LoginTest extends WebTestCase
         $client->getCookieJar()->clear();
         $client->getCookieJar()->set($rememberMe);
 
+        self::assertLoggedInAs($client, UserFixtures::USER);
+    }
+
+    public function testSwitchUserAsAdmin(): void
+    {
+        $client = static::createClientAs(UserFixtures::ADMIN);
+
+        $client->request('GET', '/notifications?_switch_to=user');
+        self::assertSame('https://lairdubois.test/notifications', $client->getResponse()->headers->get('Location'));
+        self::assertLoggedInAs($client, UserFixtures::USER);
+
+        $client->request('GET', '/notifications?_switch_to=_exit');
+        self::assertLoggedInAs($client, UserFixtures::ADMIN);
+    }
+
+    public function testSwitchUserAsUser(): void
+    {
+        $client = static::createClientAs(UserFixtures::USER);
+
+        $client->request('GET', '/notifications?_switch_to=user2');
+
+        self::assertSame(403, $client->getResponse()->getStatusCode());
         self::assertLoggedInAs($client, UserFixtures::USER);
     }
 
