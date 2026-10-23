@@ -7,7 +7,6 @@ use function Castor\guard_min_version;
 use function Castor\import;
 use function Castor\io;
 use function Castor\notify;
-use function Castor\slug;
 use function Castor\variable;
 use function docker\about;
 use function docker\build;
@@ -26,21 +25,12 @@ import(__DIR__ . '/.castor');
  */
 function create_default_variables(): array
 {
-    // Each copy of the repository (clone, git worktree) runs its own stack, named
-    // after its directory: compose project (containers, volumes, network) and domain
     $projectName = 'lairdubois';
-    $rootDomain = 'lairdubois.test';
-
-    // Docker Compose rejects dots and most symbols in a project name
-    $copyName = strtolower(slug(basename(__DIR__)));
-    if ($copyName !== $projectName) {
-        $projectName .= "-{$copyName}";
-        $rootDomain = "{$copyName}.{$rootDomain}";
-    }
+    $tld = 'test';
 
     return [
         'project_name' => $projectName,
-        'root_domain' => $rootDomain,
+        'root_domain' => "{$projectName}.{$tld}",
         'extra_domains' => [],
         'php_version' => '8.5',
     ];
