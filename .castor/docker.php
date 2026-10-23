@@ -69,6 +69,10 @@ function about(): void
             if ("frontend-{$projectName}" === $router['service']) {
                 continue;
             }
+            // The websocket router also matches a path (/ws): it adds no URL
+            if (str_contains($router['rule'], '&&')) {
+                continue;
+            }
             if (!preg_match('{^Host\(`(?P<hosts>.*)`\)$}', $router['rule'], $matches)) {
                 continue;
             }
