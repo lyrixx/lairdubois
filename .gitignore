@@ -23,3 +23,12 @@
 /composer.phar
 .idea
 .DS_Store
+
+# Binaries of the dependencies (composer "bin-dir")
+/bin/*
+!/bin/console
+!/bin/symfony_requirements
+
+# Docker
+/.castor.stub.php
+/infrastructure/docker/docker-compose.override.yml

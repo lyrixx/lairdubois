@@ -75,19 +75,88 @@ Ordre :
 
 ## Environnement
 
-- PHP 8.5 dès le départ. Vérifié le 2026-10-23 : le code actuel démarre, compile le container,
-  passe `lint:twig` et `doctrine:schema:validate` et rend les pages en 8.5.
-- `E_DEPRECATED` est coupé en dev, sinon PHP 8.4 et 8.5 noient chaque commande de deprecations.
-- Docker n'est pas encore en place. Une fois docker-starter installé : merger son `AGENTS.md` ici
-  et ne plus lancer PHP ni Composer sur l'hôte.
+- PHP 8.5 dès le départ, dans Docker (`jolicode/docker-starter`, voir la section suivante). Vérifié
+  le 2026-10-23 : le code actuel démarre, compile le container, passe `lint:twig` et
+  `doctrine:schema:validate` et rend les pages en 8.5.
+- `E_DEPRECATED` est coupé en dev, sinon PHP 8.4 et 8.5 noient chaque commande de deprecations :
+  dans le `php.ini` des images et dans `bin/console` (`Debug::enable()` remet `E_ALL` sinon). Les
+  dépréciations Symfony (`E_USER_DEPRECATED`) restent.
+
+## Docker
+
+Issu de l'`AGENTS.md` de docker-starter. Jamais PHP, Node ni Composer sur l'hôte : tout passe par
+le conteneur `builder`, via Castor. Prérequis de l'hôte : Docker et Castor.
+
+```bash
+castor start                      # build, composer, up, schéma, index Elasticsearch, workers
+castor about                      # URL de la copie
+castor stop
+castor builder                    # shell dans le builder
+castor builder -- bin/console …   # une commande dans le builder
+castor logs [--service=frontend]
+castor app:install                # composer install
+castor app:db:schema              # base, schéma (doctrine:schema:update) et table sessions
+castor app:elasticsearch:populate # fos:elastica:populate
+castor app:assets:dump            # CSS et JS de prod (Assetic, closure compiler, yuicompressor)
+castor docker:build [--service=…]
+castor docker:worker:start        # et docker:worker:stop
+castor docker:destroy --force     # conteneurs, volumes, réseau et images de la copie
+```
+
+Contextes : `--context=test` (`SYMFONY_ENV=test`), `--context=ci` (le même, sans couleurs).
+
+- Application à la racine, docroot `web/`, front controller `app_dev.php`. Service `frontend` :
+  nginx et php-fpm. Node 10 et `less@3.13.1` dans toutes les images (en dev, le contrôleur Assetic
+  compile le LESS à la demande), Java dans le builder seulement.
+- MariaDB 10.11 (`root`/`app`), Elasticsearch 5.6, RabbitMQ 3.13 (`app`/`app`), Memcached. Workers
+  (profil `worker`) : les deux consumers RabbitMQ et `websocket` (routé sur `/ws`).
+- `app/config/parameters.yml` est écrit par composer (`incenteev/composer-parameter-handler`) : les
+  valeurs propres à Docker viennent de l'environnement du builder (`env-map` de `composer.json`,
+  `parameters_environment` de `docker-compose.yml`) et sont réécrites à chaque `composer install`.
+
+Plusieurs copies du repo (clones, worktrees) tournent en même temps :
+
+- Tout dérive du nom du dossier : projet Compose `lairdubois` et domaine `lairdubois.test` pour le
+  dossier `lairdubois`, `lairdubois-<dossier>` et `<dossier>.lairdubois.test` sinon. Conteneurs,
+  volumes, réseau et images sont donc propres à chaque copie. Deux dossiers de même nom entrent en
+  conflit.
+- Aucun port publié, sauf par le routeur global `castor-docker-router` (Caddy, le même que celui de
+  `castor-php/docker`, ports 80 et 443) : `castor start` le démarre s'il ne tourne pas, ne l'arrête
+  ni ne le recrée jamais, et le branche sur le réseau de la copie avec ses domaines en alias.
+- Pour lire une page sans toucher à `/etc/hosts` : `curl --resolve <domaine>:443:127.0.0.1
+  https://<domaine>/` (`-k` sans mkcert).
+- Avant de supprimer un worktree : `castor docker:destroy --force`, sinon ses volumes restent.
+
+Conventions :
+
+1. Jamais `docker compose` à la main : `docker_compose()` et `docker_compose_run()` de
+   `.castor/docker.php` pour écrire une tâche.
+2. Jamais de nom de projet, de domaine ni de port en dur : `variable('project_name')`,
+   `variable('root_domain')`.
+3. Une tâche récurrente est une tâche Castor (`castor.php` ou `.castor/*.php`), pas un script.
 
 ## Pièges connus
 
-- `composer install` échoue tant que `composer.json` ne déclare pas `config.allow-plugins` (le lock
-  est antérieur à cette option), et `beberlei/doctrineextensions` exige `php ^7.1`.
+- La plupart des paquets du lock déclarent PHP 7 (`"php": "^7.1"`…) : toute commande composer qui
+  résout les dépendances (`install`, `require`, `update`) prend `--ignore-platform-req=php+`, qui
+  ignore la borne haute et garde la basse. `castor app:install` le fait.
+- Composer 2.2 LTS dans le builder : les versions suivantes embarquent `symfony/process` 5 ou plus,
+  et le `ScriptHandler` de `sensio/distribution-bundle` y fait `new Process(string)` (`TypeError`).
+  Composer 2.2 ne lit pas `COMPOSER_IGNORE_PLATFORM_REQ`.
+- `allow-plugins` doit lister `robloach/component-installer` : il installe `components/` (jQuery…),
+  que les templates lisent via Assetic.
 - Le bundle `symfony/reprise` exige Symfony `^7.4` et PHP 8.4 : avant le saut en 7.4, seul le côté
   JS (Vite et le plugin npm `@symfony/reprise`) est utilisable. Ce plugin demande Node 22.18 ou plus.
-- `trusted_hosts` vaut `^(dev|www)\.lairdubois\.fr$` : une requête sur un autre host répond 400.
+- `trusted_hosts` vaut `^(dev|www)\.lairdubois\.fr$`, plus `(^|\.)lairdubois\.test$` en dev et
+  en test : une requête sur un autre host répond 400, y compris `localhost`, le host par défaut du
+  client de `WebTestCase`.
+- `web/app_dev.php` refuse les requêtes non locales ou qui passent par un proxy : le nginx de
+  Docker les lui présente comme locales, `getClientIp()` vaut donc toujours `127.0.0.1` en dev.
+- Sans index Elasticsearch, la page d'accueil répond 500 (`no such index [ladb]`) :
+  `castor app:elasticsearch:populate`.
+- Le serveur websocket de Gos n'écoute que sur une IP : il tourne avec `--host=0.0.0.0`, et
+  `websocket_host` (`websocket`) ne sert qu'au pusher.
+- `bin/console` lit `SYMFONY_ENV`, pas `APP_ENV`.
 - Les sessions sont en base (`PdoSessionHandler`) : `doctrine:schema:create` ne crée pas la table
   `sessions`.
 - En 3.4, `HttpKernel` n'attrape que les `\Exception` : une `\Error` PHP (appel sur `null`,

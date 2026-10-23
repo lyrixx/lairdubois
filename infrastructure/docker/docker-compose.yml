@@ -1,0 +1,164 @@
+# No port is published: the global router (see .castor/router.php) joins the
+# network of the project and routes its domains to the "caddy" labelled services.
+# Several copies of the repository can run side by side, each one with its own
+# project name (see castor.php).
+
+x-templates:
+    # Values of app/config/parameters.yml for this stack, read by
+    # incenteev/composer-parameter-handler ("env-map" in composer.json) when
+    # composer runs in the builder
+    parameters_environment: &parameters_environment
+        DATABASE_HOST: mariadb
+        DATABASE_PASSWORD: app
+        DATABASE_USER: root
+        ELASTICSEARCH_HOST: elasticsearch
+        MEMCACHED_HOST: memcached
+        RABBITMQ_HOST: rabbitmq
+        RABBITMQ_PASSWORD: app
+        RABBITMQ_USER: app
+        ROUTER_REQUEST_CONTEXT_HOST: "${PROJECT_ROOT_DOMAIN}"
+        WEBSOCKET_HOST: websocket
+        WEBSOCKET_URI: "wss://${PROJECT_ROOT_DOMAIN}/ws"
+    worker_base: &worker_base
+        build:
+            context: services/php
+            target: worker
+        init: true
+        user: "${USER_ID}:${USER_ID}"
+        environment:
+            - SYMFONY_ENV
+        depends_on:
+            elasticsearch:
+                condition: service_healthy
+            mariadb:
+                condition: service_healthy
+            memcached:
+                condition: service_started
+            rabbitmq:
+                condition: service_healthy
+        volumes:
+            - "../..:/var/www:cached"
+            - "../../.home:/home/app:cached"
+        profiles:
+            - worker
+
+volumes:
+    elasticsearch-data: {}
+    mariadb-data: {}
+    rabbitmq-data: {}
+
+services:
+    mariadb:
+        image: mariadb:10.11
+        environment:
+            - MARIADB_ROOT_PASSWORD=app
+        volumes:
+            - mariadb-data:/var/lib/mysql
+        healthcheck:
+            test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+            interval: 5s
+            timeout: 5s
+            retries: 10
+        profiles:
+            - default
+
+    elasticsearch:
+        image: elasticsearch:5.6.16-alpine
+        environment:
+            # Transport bound to the loopback: development mode, the bootstrap checks
+            # (vm.max_map_count...) only warn instead of failing
+            - transport.host=127.0.0.1
+            - http.host=0.0.0.0
+            - ES_JAVA_OPTS=-Xms512m -Xmx512m
+        volumes:
+            - elasticsearch-data:/usr/share/elasticsearch/data
+        healthcheck:
+            test: ["CMD-SHELL", "wget -q -O - 'http://127.0.0.1:9200/_cluster/health?wait_for_status=yellow&timeout=5s' > /dev/null"]
+            interval: 5s
+            timeout: 10s
+            retries: 30
+        profiles:
+            - default
+
+    rabbitmq:
+        image: rabbitmq:3.13-alpine
+        environment:
+            - RABBITMQ_DEFAULT_USER=app
+            - RABBITMQ_DEFAULT_PASS=app
+        volumes:
+            - rabbitmq-data:/var/lib/rabbitmq
+        healthcheck:
+            test: ["CMD", "rabbitmq-diagnostics", "-q", "check_port_connectivity"]
+            interval: 5s
+            timeout: 10s
+            retries: 30
+        profiles:
+            - default
+
+    memcached:
+        image: memcached:1.6-alpine
+        profiles:
+            - default
+
+    frontend:
+        build:
+            context: services/php
+            target: frontend
+        user: "${USER_ID}:${USER_ID}"
+        volumes:
+            - "../..:/var/www:cached"
+            - "../../.home:/home/app:cached"
+        depends_on:
+            elasticsearch:
+                condition: service_healthy
+            mariadb:
+                condition: service_healthy
+            memcached:
+                condition: service_started
+            rabbitmq:
+                condition: service_healthy
+        profiles:
+            - default
+        labels:
+            # Routing of the global router (caddy-docker-proxy)
+            caddy: "${PROJECT_DOMAINS}"
+            caddy.reverse_proxy: "{{upstreams 8080}}"
+            caddy.tls: internal
+            caddy.tls.on_demand: ""
+
+    worker_consumer_view:
+        <<: *worker_base
+        command: php bin/console rabbitmq:consumer view
+
+    worker_consumer_webpush_notification:
+        <<: *worker_base
+        command: php bin/console rabbitmq:consumer webpush_notification
+
+    # The parameter "websocket_host" is the host the pusher of the frontend connects
+    # to, and the address the server listens on: an IP only, hence "--host"
+    websocket:
+        <<: *worker_base
+        command: php bin/console gos:websocket:server --host=0.0.0.0
+        labels:
+            caddy: "${PROJECT_ROOT_DOMAIN}"
+            caddy.reverse_proxy: "/ws* {{upstreams 8080}}"
+
+    builder:
+        build:
+            context: services/php
+            target: builder
+        init: true
+        user: "${USER_ID}:${USER_ID}"
+        environment:
+            <<: *parameters_environment
+            SYMFONY_ENV: "${SYMFONY_ENV:-}"
+            # The following list contains the common environment variables exposed by CI platforms
+            GITHUB_ACTIONS: "${GITHUB_ACTIONS:-}"
+            CI: "${CI:-}"
+        volumes:
+            - "../..:/var/www:cached"
+            - "../../.home:/home/app:cached"
+        depends_on:
+            - mariadb
+        profiles:
+            - builder
