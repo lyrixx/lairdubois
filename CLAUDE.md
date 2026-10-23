@@ -34,8 +34,8 @@ Une session pilote, des agents codent.
   nouvel agent ; à 100 %, tout s'arrête jusqu'à la nouvelle fenêtre de 5 h ou jusqu'au lendemain.
 - Au plus 3 ou 4 agents en parallèle : au-delà, les conflits (`composer.lock`, fixtures) et la
   relecture deviennent le goulot.
-- Chaque worktree lance sa propre stack Docker, sans conflit de conteneurs, de ports ni de
-  domaines avec les autres : c'est ce qui permet le parallélisme.
+- Chaque worktree lance sa propre stack Docker, sans conflit de conteneurs ni de ports avec les
+  autres : c'est ce qui permet le parallélisme.
 
 Ordre :
 
@@ -92,6 +92,7 @@ le conteneur `builder`, via Castor. Prérequis de l'hôte : Docker et Castor.
 ```bash
 castor start                      # build, composer, up, schéma, fixtures si la base est vide, index, workers
 castor about                      # URL de la copie
+castor docker:ports               # ports du routeur de la copie
 castor stop
 castor builder                    # shell dans le builder
 castor builder -- bin/console …   # une commande dans le builder
@@ -103,7 +104,8 @@ castor app:elasticsearch:populate # fos:elastica:populate
 castor app:assets:dump            # CSS et JS de prod (Assetic, closure compiler, yuicompressor)
 castor docker:build [--service=…]
 castor docker:worker:start        # et docker:worker:stop
-castor docker:destroy --force     # conteneurs, volumes, réseau et images de la copie
+castor docker:destroy --force     # conteneurs, volumes, réseau, images et certificats de la copie
+castor docker:generate-certificates [--force]
 ```
 
 Contextes : `--context=test` (`SYMFONY_ENV=test`), `--context=ci` (le même, sans couleurs).
@@ -113,23 +115,25 @@ Contextes : `--context=test` (`SYMFONY_ENV=test`), `--context=ci` (le même, san
   compile le LESS à la demande), Java dans le builder seulement.
 - MariaDB 10.11 (`root`/`app`), Elasticsearch 5.6, RabbitMQ 3.13 (`app`/`app`), Memcached. Workers
   (profil `worker`) : les deux consumers RabbitMQ et `websocket` (routé sur `/ws`).
+- Routeur : un Traefik par copie (service `router`, `docker-compose.dev.yml`), qui ne route que
+  les conteneurs portant le label `project-name` de sa copie. Certificats dans
+  `infrastructure/docker/services/router/certs/`, générés par `castor docker:build` : mkcert s'il
+  est installé, autosigné sinon.
 - `app/config/parameters.yml` est écrit par composer (`incenteev/composer-parameter-handler`) : les
   valeurs propres à Docker viennent de l'environnement du builder (`env-map` de `composer.json`,
   `parameters_environment` de `docker-compose.yml`) et sont réécrites à chaque `composer install`.
 
-Plusieurs copies du repo (clones, worktrees) tournent en même temps :
+Plusieurs worktrees git tournent en même temps (`.castor/worktree.php`, celui de docker-starter) :
 
-- Tout dérive du nom du dossier : projet Compose `lairdubois` et domaine `lairdubois.test` pour le
-  dossier `lairdubois`, `lairdubois-<dossier>` et `<dossier>.lairdubois.test` sinon. Conteneurs,
-  volumes, réseau et images sont donc propres à chaque copie. Deux dossiers de même nom entrent en
-  conflit.
-- Aucun port publié, sauf par le routeur global `castor-docker-router` (Caddy, celui de
-  `castor-php/docker`, ports 80 et 443) : `castor start` le démarre s'il ne tourne pas, ne l'arrête
-  ni ne le recrée jamais, et le branche sur le réseau de la copie avec ses domaines en alias. Il le
-  démarre avec le compose généré par le plugin (`~/.castor/docker/router/compose.yaml`) s'il
-  existe, sinon avec `infrastructure/docker/services/router/compose.yaml` (machine sans le plugin).
-- Pour lire une page sans toucher à `/etc/hosts` : `curl --resolve <domaine>:443:127.0.0.1
-  https://<domaine>/` (`-k` sans mkcert).
+- Copie principale : projet Compose `lairdubois`, routeur sur les ports 80, 443 et 8080 (admin
+  Traefik), `https://lairdubois.test`.
+- Worktree : projet `lairdubois-wt-<worktree>` (nom du dossier dans `.git/worktrees/`), donc
+  conteneurs, volumes, réseau et images propres. Même domaine, mais ports HTTP, HTTPS et admin
+  dérivés de ce nom (crc32, entre 10000 et 60000) : `https://lairdubois.test:<port>`, voir `castor
+  docker:ports`. Les URL des assets et du websocket portent ce port (`parameters.yml`).
+- Seuls les worktrees sont isolés : deux clones du repo ont le même projet et les mêmes ports.
+- Pour lire une page sans toucher à `/etc/hosts` : `curl --resolve lairdubois.test:<port>:127.0.0.1
+  https://lairdubois.test:<port>/` (`-k` sans mkcert).
 - Avant de supprimer un worktree : `castor docker:destroy --force`, sinon ses volumes restent.
 
 Conventions :
@@ -137,7 +141,7 @@ Conventions :
 1. Jamais `docker compose` à la main : `docker_compose()` et `docker_compose_run()` de
    `.castor/docker.php` pour écrire une tâche.
 2. Jamais de nom de projet, de domaine ni de port en dur : `variable('project_name')`,
-   `variable('root_domain')`.
+   `variable('root_domain')`, `get_worktree_ports()`.
 3. Une tâche récurrente est une tâche Castor (`castor.php` ou `.castor/*.php`), pas un script.
 
 ## CI et QA
@@ -236,9 +240,20 @@ le retrouver par requête plutôt que de supposer ce qu'elle porte.
   que les templates lisent via Assetic.
 - Le bundle `symfony/reprise` exige Symfony `^7.4` et PHP 8.4 : avant le saut en 7.4, seul le côté
   JS (Vite et le plugin npm `@symfony/reprise`) est utilisable. Ce plugin demande Node 22.18 ou plus.
-- `trusted_hosts` vaut `^(dev|www)\.lairdubois\.fr$`, plus `(^|\.)lairdubois\.test$` en dev et
-  en test : une requête sur un autre host répond 400, y compris `localhost`, le host par défaut du
+- `trusted_hosts` vaut `^(dev|www)\.lairdubois\.fr$`, plus `^lairdubois\.test$` en dev et en
+  test : une requête sur un autre host répond 400, y compris `localhost`, le host par défaut du
   client de `WebTestCase`.
+- Les URL des assets sont absolues (`base_urls` de `config.yml`, depuis
+  `router.request_context.host`) : dans un worktree, ce paramètre vaut `lairdubois.test:<port>`.
+  Après un changement de ports (renommage du worktree), `castor app:install` réécrit
+  `parameters.yml`.
+- Le `fastcgi_params` de Debian passe `HTTP_HOST` sans le port (`$host`) : le nginx du `frontend`
+  le remplace par `$http_host`, sinon les URL absolues et les redirections d'un worktree visent
+  le port 443, celui de la copie principale.
+- Juste après la recréation d'un conteneur (`castor up --service=frontend`…), Traefik répond
+  quelques secondes `404 page not found`, le temps de le reprendre.
+- La redirection HTTP → HTTPS de Traefik (`redirect-to-https`, comme dans docker-starter) perd le
+  port : dans un worktree, passer directement par le port HTTPS.
 - `web/app_dev.php` refuse les requêtes non locales ou qui passent par un proxy : le nginx de
   Docker les lui présente comme locales, `getClientIp()` vaut donc toujours `127.0.0.1` en dev.
 - Sans index Elasticsearch, la page d'accueil répond 500 (`no such index [ladb]`) :

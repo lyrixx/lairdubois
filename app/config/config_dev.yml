@@ -6,9 +6,8 @@ imports:
 framework:
     router:   { resource: "%kernel.root_dir%/config/routing_dev.yml" }
     profiler: { only_exceptions: false }
-    # Domains of the Docker stacks: lairdubois.test, and <copy>.lairdubois.test for
-    # the other copies of the repository (see castor.php)
-    trusted_hosts: ['(^|\.)lairdubois\.test$']
+    # Domain of the Docker stacks (see castor.php), the same for every git worktree
+    trusted_hosts: ['^lairdubois\.test$']
 
 web_profiler:
     toolbar: true

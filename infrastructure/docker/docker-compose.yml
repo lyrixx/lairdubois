@@ -1,8 +1,4 @@
-# No port is published: the global router (see .castor/router.php) joins the
-# network of the project and routes its domains to the "caddy" labelled services.
-# Several copies of the repository can run side by side, each one with its own
-# project name (see castor.php).
-
+# Templates to factorize the service definitions
 x-templates:
     # Values of app/config/parameters.yml for this stack, read by
     # incenteev/composer-parameter-handler ("env-map" in composer.json) when
@@ -16,9 +12,11 @@ x-templates:
         RABBITMQ_HOST: rabbitmq
         RABBITMQ_PASSWORD: app
         RABBITMQ_USER: app
-        ROUTER_REQUEST_CONTEXT_HOST: "${PROJECT_ROOT_DOMAIN}"
+        # The port of the router is part of the host in a worktree (see
+        # .castor/worktree.php): the assets URLs are absolute (base_urls in config.yml)
+        ROUTER_REQUEST_CONTEXT_HOST: "${PROJECT_ROOT_DOMAIN}${PROJECT_HTTPS_PORT:+:${PROJECT_HTTPS_PORT}}"
         WEBSOCKET_HOST: websocket
-        WEBSOCKET_URI: "wss://${PROJECT_ROOT_DOMAIN}/ws"
+        WEBSOCKET_URI: "wss://${PROJECT_ROOT_DOMAIN}${PROJECT_HTTPS_PORT:+:${PROJECT_HTTPS_PORT}}/ws"
     worker_base: &worker_base
         build:
             context: services/php
@@ -120,11 +118,13 @@ services:
         profiles:
             - default
         labels:
-            # Routing of the global router (caddy-docker-proxy)
-            caddy: "${PROJECT_DOMAINS}"
-            caddy.reverse_proxy: "{{upstreams 8080}}"
-            caddy.tls: internal
-            caddy.tls.on_demand: ""
+            - "traefik.enable=true"
+            - "project-name=${PROJECT_NAME}"
+            - "traefik.http.routers.${PROJECT_NAME}-frontend.rule=Host(${PROJECT_DOMAINS})"
+            - "traefik.http.routers.${PROJECT_NAME}-frontend.tls=true"
+            - "traefik.http.routers.${PROJECT_NAME}-frontend-unsecure.rule=Host(${PROJECT_DOMAINS})"
+            # Comment the next line to be able to access frontend via HTTP instead of HTTPS
+            - "traefik.http.routers.${PROJECT_NAME}-frontend-unsecure.middlewares=redirect-to-https@file"
 
     worker_consumer_view:
         <<: *worker_base
@@ -139,9 +139,14 @@ services:
     websocket:
         <<: *worker_base
         command: php bin/console gos:websocket:server --host=0.0.0.0
+        # Its rule is longer than the one of the frontend: Traefik gives it the priority on /ws
         labels:
-            caddy: "${PROJECT_ROOT_DOMAIN}"
-            caddy.reverse_proxy: "/ws* {{upstreams 8080}}"
+            - "traefik.enable=true"
+            - "project-name=${PROJECT_NAME}"
+            - "traefik.http.routers.${PROJECT_NAME}-websocket.rule=Host(${PROJECT_DOMAINS}) && PathPrefix(`/ws`)"
+            - "traefik.http.routers.${PROJECT_NAME}-websocket.tls=true"
+            # The worker image exposes no port
+            - "traefik.http.services.${PROJECT_NAME}-websocket.loadbalancer.server.port=8080"
 
     builder:
         build:

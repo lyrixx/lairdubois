@@ -9,12 +9,30 @@ use Castor\Context;
 use Symfony\Component\Console\Completion\CompletionInput;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Process\Exception\ExceptionInterface;
+use Symfony\Component\Process\ExecutableFinder;
 use Symfony\Component\Process\Process;
+use Symfony\Contracts\HttpClient\Exception\ExceptionInterface as HttpExceptionInterface;
 
+use function Castor\capture;
 use function Castor\context;
+use function Castor\finder;
+use function Castor\fs;
+use function Castor\http_client;
 use function Castor\io;
 use function Castor\run;
 use function Castor\variable;
+use function worktree\get_worktree_name;
+use function worktree\get_worktree_ports;
+
+/** @return array<string, array{env: string, default: int, label: string}> */
+function get_port_specs(): array
+{
+    return [
+        'http' => ['env' => 'PROJECT_HTTP_PORT',  'default' => 80,   'label' => 'HTTP'],
+        'https' => ['env' => 'PROJECT_HTTPS_PORT', 'default' => 443,  'label' => 'HTTPS'],
+        'admin' => ['env' => 'PROJECT_ADMIN_PORT', 'default' => 8080, 'label' => 'Traefik admin'],
+    ];
+}
 
 #[AsTask(description: 'Displays some help and available urls for the current project', namespace: '')]
 function about(): void
@@ -26,7 +44,50 @@ function about(): void
     io()->comment('Run <comment>castor help [command]</comment> to display Castor help.');
 
     io()->section('Available URLs for this project:');
-    io()->listing(array_map(static fn (string $domain) => "https://{$domain}", get_domains()));
+
+    if (!has_router()) {
+        io()->listing([\sprintf('http://127.0.0.1:%s', getenv('HTTP_PORT') ?: '8000')]);
+
+        return;
+    }
+
+    $urls = [variable('root_domain'), ...variable('extra_domains')];
+
+    $worktreeName = get_worktree_name();
+    $adminPort = get_worktree_ports($worktreeName)['admin'];
+
+    try {
+        $routers = http_client()
+            ->request('GET', \sprintf('http://%s:%d/api/http/routers', variable('root_domain'), $adminPort))
+            ->toArray()
+        ;
+        $projectName = variable('project_name');
+        foreach ($routers as $router) {
+            if (!preg_match("{^{$projectName}-(.*)@docker$}", $router['name'])) {
+                continue;
+            }
+            if ("frontend-{$projectName}" === $router['service']) {
+                continue;
+            }
+            // The websocket router also matches a path (/ws): it adds no URL
+            if (str_contains($router['rule'], '&&')) {
+                continue;
+            }
+            if (!preg_match('{^Host\(`(?P<hosts>.*)`\)$}', $router['rule'], $matches)) {
+                continue;
+            }
+            $hosts = explode('`) || Host(`', $matches['hosts']);
+            $urls = [...$urls, ...$hosts];
+        }
+    } catch (HttpExceptionInterface) {
+    }
+
+    $httpsPort = null !== $worktreeName ? get_worktree_ports($worktreeName)['https'] : null;
+    $formatUrl = static function (string $host) use ($httpsPort): string {
+        return null !== $httpsPort ? "https://{$host}:{$httpsPort}" : "https://{$host}";
+    };
+
+    io()->listing(array_map($formatUrl, array_unique($urls)));
 }
 
 #[AsTask(description: 'Builds the infrastructure', aliases: ['build'])]
@@ -34,11 +95,14 @@ function build(
     #[AsOption(description: 'The service to build (default: all services)', autocomplete: 'docker\complete_service_names')]
     ?string $service = null,
 ): void {
+    generate_certificates(force: false);
+
     io()->title('Building infrastructure');
 
     $command = [
         'build',
         '--build-arg', 'PHP_VERSION=' . variable('php_version'),
+        '--build-arg', 'PROJECT_NAME=' . variable('project_name'),
     ];
 
     if ($service) {
@@ -51,7 +115,7 @@ function build(
 /**
  * @param list<string> $profiles
  */
-#[AsTask(description: 'Starts the infrastructure, and registers it on the global router', aliases: ['up'])]
+#[AsTask(description: 'Starts the infrastructure', aliases: ['up'])]
 function up(
     #[AsOption(description: 'The service to start (default: all services)', autocomplete: 'docker\complete_service_names')]
     ?string $service = null,
@@ -61,8 +125,6 @@ function up(
     if (!$service && !$profiles) {
         io()->title('Starting infrastructure');
     }
-
-    \router\start();
 
     $command = ['up', '--detach', '--wait', '--no-build'];
 
@@ -78,8 +140,6 @@ function up(
 
         throw $e;
     }
-
-    \router\connect(get_network_name(), get_domains());
 }
 
 /**
@@ -167,10 +227,93 @@ function destroy(
         }
     }
 
-    // Docker refuses to remove a network that still has an endpoint
-    \router\disconnect(get_network_name());
-
     docker_compose(['down', '--remove-orphans', '--volumes', '--rmi=local'], profiles: ['*']);
+
+    if (!has_router()) {
+        return;
+    }
+
+    $files = finder()
+        ->in(variable('root_dir') . '/infrastructure/docker/services/router/certs/')
+        ->name('*.pem')
+        ->files()
+    ;
+    fs()->remove($files);
+}
+
+#[AsTask(description: 'Generates SSL certificates (with mkcert if available or self-signed if not)')]
+function generate_certificates(
+    #[AsOption(description: 'Force the certificates re-generation without confirmation', shortcut: 'f')]
+    bool $force = false,
+): void {
+    if (!has_router()) {
+        io()->comment('No router in this stack, no SSL certificates to generate.');
+
+        return;
+    }
+
+    $sslDir = variable('root_dir') . '/infrastructure/docker/services/router/certs';
+
+    if (file_exists("{$sslDir}/cert.pem") && !$force) {
+        io()->comment('SSL certificates already exists.');
+        io()->note('Run "castor docker:generate-certificates --force" to generate new certificates.');
+
+        return;
+    }
+
+    io()->title('Generating SSL certificates');
+
+    if ($force) {
+        if (file_exists($f = "{$sslDir}/cert.pem")) {
+            io()->comment('Removing existing certificates in infrastructure/docker/services/router/certs/*.pem.');
+            unlink($f);
+        }
+
+        if (file_exists($f = "{$sslDir}/key.pem")) {
+            unlink($f);
+        }
+    }
+
+    $finder = new ExecutableFinder();
+    $mkcert = $finder->find('mkcert');
+
+    if ($mkcert) {
+        $pathCaRoot = capture(['mkcert', '-CAROOT']);
+
+        if (!is_dir($pathCaRoot)) {
+            io()->warning('You must have mkcert CA Root installed on your host with "mkcert -install" command.');
+
+            return;
+        }
+
+        $rootDomain = variable('root_domain');
+
+        run([
+            'mkcert',
+            '-cert-file', "{$sslDir}/cert.pem",
+            '-key-file', "{$sslDir}/key.pem",
+            $rootDomain,
+            "*.{$rootDomain}",
+            ...variable('extra_domains'),
+        ]);
+
+        io()->success('Successfully generated SSL certificates with mkcert.');
+
+        if ($force) {
+            io()->note('Please restart the infrastructure to use the new certificates with "castor up" or "castor start".');
+        }
+
+        return;
+    }
+
+    run(['infrastructure/docker/services/router/generate-ssl.sh'], context: context()->withQuiet());
+
+    io()->success('Successfully generated self-signed SSL certificates in infrastructure/docker/services/router/certs/*.pem.');
+    io()->comment('Consider installing mkcert to generate locally trusted SSL certificates and run "castor docker:generate-certificates --force".');
+
+    if ($force) {
+        io()->note('Please restart the infrastructure to use the new certificates with "castor up" or "castor start".');
+    }
 }
 
 #[AsTask(description: 'Starts the workers', namespace: 'docker:worker', name: 'start', aliases: ['start-workers'])]
@@ -190,32 +333,17 @@ function workers_stop(): void
 }
 
 /**
- * @return list<string>
- */
-function get_domains(?Context $c = null): array
-{
-    $c ??= context();
-
-    return [$c['root_domain'], ...$c['extra_domains']];
-}
-
-function get_network_name(?Context $c = null): string
-{
-    $c ??= context();
-
-    return $c['project_name'] . '_default';
-}
-
-/**
  * @return array<string, string>
  */
 function get_compose_environment(Context $c): array
 {
+    $domains = [$c['root_domain'], ...$c['extra_domains']];
+    $domains = '`' . implode('`) || Host(`', $domains) . '`';
+
     return [
         'PROJECT_NAME' => $c['project_name'],
         'PROJECT_ROOT_DOMAIN' => $c['root_domain'],
-        // Site addresses of the "caddy" labels
-        'PROJECT_DOMAINS' => implode(' ', get_domains($c)),
+        'PROJECT_DOMAINS' => $domains,
         'USER_ID' => $c['user_id'],
         'PHP_VERSION' => $c['php_version'],
     ];
@@ -231,6 +359,16 @@ function docker_compose(array $subCommand, ?Context $c = null, array $profiles =
     $profiles = $profiles ?: ['default'];
 
     $c = $c->withEnvironment(get_compose_environment($c));
+
+    $worktreeName = get_worktree_name();
+    if ($worktreeName) {
+        $ports = get_worktree_ports($worktreeName);
+        $portsEnv = [];
+        foreach (get_port_specs() as $key => $spec) {
+            $portsEnv[$spec['env']] = (string) $ports[$key];
+        }
+        $c = $c->withEnvironment($portsEnv);
+    }
 
     $command = [
         'docker',
@@ -329,6 +467,15 @@ function docker_exit_code(
 }
 
 /**
+ * Whether the current stack includes the traefik router (dev), which needs SSL certificates
+ * and gives the project its URLs.
+ */
+function has_router(): bool
+{
+    return isset(get_services()['router']);
+}
+
+/**
  * @return array<string, array{image?: string, profiles?: list<string>, build?: array{context: string, target?: string}}>
  */
 function get_services(?string $profile = null): array
@@ -370,4 +517,27 @@ function get_service_names(?string $profile = null): array
 function complete_service_names(CompletionInput $input): array
 {
     return get_service_names();
+}
+
+#[AsTask(description: 'Displays the ports allocated for the current project', namespace: 'docker')]
+function ports(): void
+{
+    $project = variable('project_name');
+    $domain = variable('root_domain');
+    $name = get_worktree_name();
+    $ports = get_worktree_ports($name);
+
+    io()->title('Ports');
+    $list = [['Project' => $project]];
+    foreach (get_port_specs() as $key => $spec) {
+        $scheme = 'admin' === $key ? 'http' : $key;
+        $host = 'admin' === $key ? 'localhost' : $domain;
+        $list[] = [$spec['label'] => "{$scheme}://{$host}:{$ports[$key]}"];
+    }
+
+    if ($name) {
+        array_unshift($list, ['Worktree' => $name]);
+    }
+
+    io()->definitionList(...$list);
 }
