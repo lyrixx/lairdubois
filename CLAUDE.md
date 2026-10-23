@@ -9,7 +9,9 @@ la fin.
 Exception à mes règles globales, valable uniquement sur ce repo (`lyrixx/lairdubois`) : commits,
 push, ouverture, mise à jour et merge de PR, issues, commentaires, sans me demander.
 
-- Une branche par PR, PR vers `next`. On merge dans `next` quand la CI est verte et le diff relu.
+- Une branche par PR, PR vers `next`, partie de `origin/next`. On merge dans `next` (squash) quand
+  la CI est verte et le diff relu. `Fixes #N` ne ferme pas l'issue, la PR ne visant pas la branche
+  par défaut (`master`) : on la ferme à la main après le merge.
 - `master` est l'état du repo de Boris au moment du fork : on n'y touche pas.
 - Jamais rien sur `lairdubois/lairdubois` : pas de remote `upstream`, pas de `gh -R
   lairdubois/lairdubois`. La synchro avec Boris se fera à la fin.
