@@ -1,11 +1,16 @@
 # The global router, shared by every project of the machine: one Caddy
 # (caddy-docker-proxy) on the ports 80 and 443, which routes the domains declared
-# by the "caddy" labels of the containers. It is the same router as the one of the
-# castor-php/docker plugin (same compose project, container, volume and
-# certificates directory), so the projects using either of them share it.
+# by the "caddy" labels of the containers.
 #
-# Started by "castor docker:router:start" only when it is not already running: it
-# outlives the project, so nothing here refers to the project directory.
+# Only for the machines without the castor-php/docker plugin: when the compose file
+# it generates (~/.castor/docker/router/compose.yaml) exists, "castor
+# docker:router:start" starts the router from that file instead (see
+# .castor/router.php). This one is a simpler copy of it, with the same compose
+# project, container, volume and certificates directory, so that the plugin takes
+# it over once installed.
+#
+# Started only when it is not already running: it outlives the project, so nothing
+# here refers to the project directory.
 
 name: castor-docker-router
 

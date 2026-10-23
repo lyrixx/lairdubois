@@ -120,9 +120,11 @@ Plusieurs copies du repo (clones, worktrees) tournent en même temps :
   dossier `lairdubois`, `lairdubois-<dossier>` et `<dossier>.lairdubois.test` sinon. Conteneurs,
   volumes, réseau et images sont donc propres à chaque copie. Deux dossiers de même nom entrent en
   conflit.
-- Aucun port publié, sauf par le routeur global `castor-docker-router` (Caddy, le même que celui de
+- Aucun port publié, sauf par le routeur global `castor-docker-router` (Caddy, celui de
   `castor-php/docker`, ports 80 et 443) : `castor start` le démarre s'il ne tourne pas, ne l'arrête
-  ni ne le recrée jamais, et le branche sur le réseau de la copie avec ses domaines en alias.
+  ni ne le recrée jamais, et le branche sur le réseau de la copie avec ses domaines en alias. Il le
+  démarre avec le compose généré par le plugin (`~/.castor/docker/router/compose.yaml`) s'il
+  existe, sinon avec `infrastructure/docker/services/router/compose.yaml` (machine sans le plugin).
 - Pour lire une page sans toucher à `/etc/hosts` : `curl --resolve <domaine>:443:127.0.0.1
   https://<domaine>/` (`-k` sans mkcert).
 - Avant de supprimer un worktree : `castor docker:destroy --force`, sinon ses volumes restent.

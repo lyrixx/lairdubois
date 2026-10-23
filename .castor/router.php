@@ -15,7 +15,9 @@ use function Castor\variable;
 /*
  * The global router: a single Caddy for every project of the machine, the only
  * container that publishes ports (80 and 443). It is the router of the
- * castor-php/docker plugin, see infrastructure/docker/services/router/compose.yaml.
+ * castor-php/docker plugin: started from the compose file the plugin generated
+ * when it is installed, from infrastructure/docker/services/router/compose.yaml
+ * otherwise.
  *
  * Each project keeps its own network: the router joins it, with the domains of
  * the project as aliases, so that the containers of the project reach their own
@@ -34,16 +36,19 @@ function start(): void
 
     io()->section('Starting the global router');
 
-    $certsDirectory = get_certs_directory();
-    // Created by Docker, as root, otherwise
-    fs()->mkdir($certsDirectory);
-    install_certificate_authority($certsDirectory);
+    // The projects of the plugin must run behind the exact router it generated
+    // (Caddyfile, labels it checks): its files are left as they are
+    $composeFile = get_plugin_compose_file();
+    if (!is_file($composeFile)) {
+        $composeFile = variable('root_dir') . '/infrastructure/docker/services/router/compose.yaml';
 
-    run([
-        'docker', 'compose',
-        '-f', variable('root_dir') . '/infrastructure/docker/services/router/compose.yaml',
-        'up', '--detach', '--wait',
-    ]);
+        $certsDirectory = get_certs_directory();
+        // Created by Docker, as root, otherwise
+        fs()->mkdir($certsDirectory);
+        install_certificate_authority($certsDirectory);
+    }
+
+    run(['docker', 'compose', '-f', $composeFile, 'up', '--detach', '--wait']);
 }
 
 function is_running(): bool
@@ -96,6 +101,14 @@ function get_networks(): array
     );
 
     return array_values(array_filter(array_map(trim(...), explode("\n", $output))));
+}
+
+/**
+ * Written by "castor docker:router:enable" of the castor-php/docker plugin.
+ */
+function get_plugin_compose_file(): string
+{
+    return getenv('HOME') . '/.castor/docker/router/compose.yaml';
 }
 
 function get_certs_directory(): string
