@@ -30,9 +30,11 @@ push, ouverture et mise à jour de PR et d'issues, commentaires, sans me demande
 ## Plan
 
 1. Filet de sécurité, en Symfony 3.4 : Docker (`jolicode/docker-starter`), fixtures, smoke test sur
-   toutes les routes (anonyme, connecté, admin), tests fonctionnels sur toutes les features du test. Certaines on besoin de JS, il faudrait utiliser un navigateur headless pour ces tests, crons, CI et GitHub Actions.
+   toutes les routes (anonyme, connecté, admin), tests fonctionnels sur toutes les features du site,
+   crons, CI GitHub Actions. Tests Symfony (WebTestCase) dès que c'est possible, ils sont beaucoup
+   plus rapides ; Playwright (l'officiel, en Node) seulement pour ce qui a besoin de JS.
 2. Ménage, toujours en 3.4 : dépendances mortes, injection de dépendances à la place de
-   `$this->get()`, Assetic → Symfony Reprise à rendu identique.
+   `$this->get()`, Assetic → Symfony Reprise à rendu identique (voir les pièges).
 3. Sauts de version : 4.4 → 5.4 → 6.4 → 7.4 → 8.2. Avant chaque saut, zéro dépréciation Symfony en CI.
    - 4.4 : Swiftmailer → Mailer, `transchoice` → `trans`.
    - 5.4 : FOSUserBundle → sécurité native, Gos WebSocket → Mercure, RabbitMqBundle → Messenger.
@@ -51,6 +53,8 @@ push, ouverture et mise à jour de PR et d'issues, commentaires, sans me demande
 
 - `composer install` échoue tant que `composer.json` ne déclare pas `config.allow-plugins` (le lock
   est antérieur à cette option), et `beberlei/doctrineextensions` exige `php ^7.1`.
+- Le bundle `symfony/reprise` exige Symfony `^7.4` et PHP 8.4 : avant le saut en 7.4, seul le côté
+  JS (Vite et le plugin npm `@symfony/reprise`) est utilisable. Ce plugin demande Node 22.18 ou plus.
 - `trusted_hosts` vaut `^(dev|www)\.lairdubois\.fr$` : une requête sur un autre host répond 400.
 - Les sessions sont en base (`PdoSessionHandler`) : `doctrine:schema:create` ne crée pas la table
   `sessions`.
