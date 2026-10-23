@@ -6403,26 +6403,32 @@
         },
         {
             "name": "ruflin/elastica",
-            "version": "6.1.1",
+            "version": "6.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ruflin/Elastica.git",
-                "reference": "333dff62346adf835c0a0fd198e8c9f9ec8da65a"
+                "reference": "f95cf646f884a8e7b73bd12eda3e5753994b24d3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ruflin/Elastica/zipball/333dff62346adf835c0a0fd198e8c9f9ec8da65a",
-                "reference": "333dff62346adf835c0a0fd198e8c9f9ec8da65a",
+                "url": "https://api.github.com/repos/ruflin/Elastica/zipball/f95cf646f884a8e7b73bd12eda3e5753994b24d3",
+                "reference": "f95cf646f884a8e7b73bd12eda3e5753994b24d3",
                 "shasum": ""
             },
             "require": {
                 "elasticsearch/elasticsearch": "^6.0",
-                "php": "^7.0",
+                "ext-json": "*",
+                "php": "^7.0||^8.0",
                 "psr/log": "~1.0"
+            },
+            "conflict": {
+                "elasticsearch/elasticsearch": "6.8.0 || 6.8.1"
             },
             "require-dev": {
                 "aws/aws-sdk-php": "~3.0",
-                "guzzlehttp/guzzle": "~6.0"
+                "guzzlehttp/guzzle": "~6.0",
+                "phpunit/phpunit": "^6.0||^8.5.20",
+                "yoast/phpunit-polyfills": "1.0.1"
             },
             "suggest": {
                 "aws/aws-sdk-php": "Allow using IAM authentication with Amazon ElasticSearch Service",
@@ -6459,9 +6465,9 @@
             ],
             "support": {
                 "issues": "https://github.com/ruflin/Elastica/issues",
-                "source": "https://github.com/ruflin/Elastica/tree/master"
+                "source": "https://github.com/ruflin/Elastica/tree/6.2.1"
             },
-            "time": "2019-01-29T09:38:03+00:00"
+            "time": "2022-04-14T06:57:28+00:00"
         },
         {
             "name": "sensio/distribution-bundle",

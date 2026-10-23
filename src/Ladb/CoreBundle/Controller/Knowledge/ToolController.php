@@ -223,9 +223,9 @@ class ToolController extends AbstractController {
 					case 'name':
 
 						if (strpos($facet->value, ',')) {
-							$filter = new \Elastica\Query\Match('name', $facet->value);
+							$filter = new \Elastica\Query\MatchQuery('name', $facet->value);
 						} else {
-							$filter = new \Elastica\Query\Match('nameKeyword', $facet->value);
+							$filter = new \Elastica\Query\MatchQuery('nameKeyword', $facet->value);
 						}
 						$filters[] = $filter;
 
@@ -237,7 +237,7 @@ class ToolController extends AbstractController {
 							$filter = new \Elastica\Query\QueryString($facet->value);
 							$filter->setFields(array( 'brand' ));
 						} else {
-							$filter = new \Elastica\Query\Match('brand', $facet->value);
+							$filter = new \Elastica\Query\MatchQuery('brand', $facet->value);
 						}
 						$filters[] = $filter;
 
@@ -245,7 +245,7 @@ class ToolController extends AbstractController {
 
 					case 'family':
 
-						$filter = new \Elastica\Query\Match('family', $facet->value);
+						$filter = new \Elastica\Query\MatchQuery('family', $facet->value);
 						$filters[] = $filter;
 
 						break;
@@ -388,7 +388,7 @@ class ToolController extends AbstractController {
 
 		$searchUtils = $this->get(SearchUtils::NAME);
 		$elasticaQueryUtils = $this->get(ElasticaQueryUtils::NAME);
-		$searchableBrotherCount = $searchUtils->searchEntitiesCount(array( new \Elastica\Query\Match('nameKeyword', $tool->getName()) ), 'fos_elastica.index.ladb.knowledge_tool');
+		$searchableBrotherCount = $searchUtils->searchEntitiesCount(array( new \Elastica\Query\MatchQuery('nameKeyword', $tool->getName()) ), 'fos_elastica.index.ladb.knowledge_tool');
 		$searchableCreationCount = $searchUtils->searchEntitiesCount(array( $elasticaQueryUtils->createShouldMatchPhraseQuery('tools.label', $tool->getTitle()) ), 'fos_elastica.index.ladb.wonder_creation');
 
 		$likableUtils = $this->get(LikableUtils::NAME);
