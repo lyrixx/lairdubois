@@ -1,0 +1,48 @@
+# The global router, shared by every project of the machine: one Caddy
+# (caddy-docker-proxy) on the ports 80 and 443, which routes the domains declared
+# by the "caddy" labels of the containers.
+#
+# Only for the machines without the castor-php/docker plugin: when the compose file
+# it generates (~/.castor/docker/router/compose.yaml) exists, "castor
+# docker:router:start" starts the router from that file instead (see
+# .castor/router.php). This one is a simpler copy of it, with the same compose
+# project, container, volume and certificates directory, so that the plugin takes
+# it over once installed.
+#
+# Started only when it is not already running: it outlives the project, so nothing
+# here refers to the project directory.
+
+name: castor-docker-router
+
+volumes:
+    router-data: {}
+
+configs:
+    caddyfile:
+        content: |
+            {
+                # Sign the certificates with the mkcert root CA when it is installed
+                # in the certificates directory (see .castor/router.php)
+                import /certs/caddy/*.caddy
+            }
+
+services:
+    router:
+        image: lucaslorentz/caddy-docker-proxy:2.13.1-alpine
+        container_name: castor-docker-router
+        restart: unless-stopped
+        environment:
+            CADDY_DOCKER_CADDYFILE_PATH: /etc/caddy/Caddyfile
+        configs:
+            - source: caddyfile
+              target: /etc/caddy/Caddyfile
+        volumes:
+            - "/var/run/docker.sock:/var/run/docker.sock"
+            - "router-data:/data"
+            - "${HOME}/.castor/docker/router/certs:/certs:cached"
+        ports:
+            - "80:80"
+            - "443:443"
+        labels:
+            castor.managed: "true"
+            castor.router: "true"

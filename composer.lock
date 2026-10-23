@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e200a3e2e4dfceb5e1d705c2e63caa2a",
+    "content-hash": "c095d67dba152399dd2cceb543155d3e",
     "packages": [
         {
             "name": "afarkas/html5shiv",

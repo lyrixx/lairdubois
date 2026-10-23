@@ -110,6 +110,12 @@
         ]
     },
     "config": {
+        "allow-plugins": {
+            "composer/installers": true,
+            "composer/package-versions-deprecated": true,
+            "oomphinc/composer-installers-extender": true,
+            "robloach/component-installer": true
+        },
         "bin-dir": "bin"
     },
     "extra": {
@@ -120,7 +126,20 @@
         "symfony-tests-dir": "tests",
         "symfony-assets-install": "relative",
         "incenteev-parameters": {
-            "file": "app/config/parameters.yml"
+            "file": "app/config/parameters.yml",
+            "env-map": {
+                "database_host": "DATABASE_HOST",
+                "database_password": "DATABASE_PASSWORD",
+                "database_user": "DATABASE_USER",
+                "elasticsearch_host": "ELASTICSEARCH_HOST",
+                "memcached_host": "MEMCACHED_HOST",
+                "rabbitmq_host": "RABBITMQ_HOST",
+                "rabbitmq_password": "RABBITMQ_PASSWORD",
+                "rabbitmq_user": "RABBITMQ_USER",
+                "router.request_context.host": "ROUTER_REQUEST_CONTEXT_HOST",
+                "websocket_host": "WEBSOCKET_HOST",
+                "websocket_uri": "WEBSOCKET_URI"
+            }
         }
     }
 }
