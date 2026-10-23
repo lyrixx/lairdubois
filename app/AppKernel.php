@@ -41,6 +41,10 @@ class AppKernel extends Kernel
 			$bundles[] = new Doctrine\Bundle\FixturesBundle\DoctrineFixturesBundle();
         }
 
+        if ('test' === $this->getEnvironment()) {
+			$bundles[] = new DAMA\DoctrineTestBundle\DAMADoctrineTestBundle();
+        }
+
         return $bundles;
     }
 

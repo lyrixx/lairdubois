@@ -81,11 +81,9 @@ jobs:
             - name: Start the infrastructure
               run: castor docker:up
 
-            - name: Create the database schema
-              run: castor app:db:schema
-
-            - name: Populate Elasticsearch
-              run: castor app:elasticsearch:populate
+            # Database and index of the test environment (context "ci"): schema, fixtures and index
+            - name: Load the fixtures
+              run: castor app:db:fixtures
 
             - name: Install the QA tooling
               id: tooling
