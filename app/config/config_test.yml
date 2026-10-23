@@ -15,6 +15,9 @@ web_profiler:
 
 swiftmailer:
     disable_delivery: true
+    # Not the file spool of config.yml, shared with the dev environment
+    spool:
+        type: memory
 
 # The debug level of config_dev.yml writes 200 MB per run of the smoke test
 monolog:
@@ -50,3 +53,9 @@ services:
         class: Tests\Double\InMemoryProducer
         decorates: old_sound_rabbit_mq.webpush_notification_producer
         public: true
+
+    # No call to the geocoding API of Google: addresses of Tests\Double\OfflineLocalisableUtils
+    tests.localisable_utils:
+        class: Tests\Double\OfflineLocalisableUtils
+        decorates: ladb_core.localisable_utils
+        arguments: ['@service_container']
