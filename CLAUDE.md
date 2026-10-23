@@ -244,7 +244,10 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   reviennent pas (l'`AUTO_INCREMENT` d'InnoDB n'est pas annulé).
 - Ce qui n'est pas en base n'est pas annulé, `Tests\WebTestCase` s'en charge :
   - l'index : quand les tests d'une classe l'ont modifié (publication, suppression…), il est
-    rempli à nouveau depuis la base après le dernier (`fos:elastica:populate`, quelques secondes) ;
+    rempli à nouveau depuis la base après le dernier (`fos:elastica:populate`, quelques secondes).
+    Entre deux tests de la classe, il est seulement rafraîchi (`refresh`) : un test voit les
+    écritures des précédents, toutes, quel que soit le temps écoulé. Un résultat de recherche peut
+    donc dépendre de l'ordre des tests de la classe ;
   - `uploads/`, partagé avec le dev : un fichier qu'un test supprime (images d'un contenu supprimé,
     `@ORM\PostRemove` de `Picture` et `Resource`) est remis après le test, depuis des liens durs
     pris au début de la classe (`var/tests/uploads/`). Les fichiers qu'un test crée (stickers,

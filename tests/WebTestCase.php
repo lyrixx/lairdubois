@@ -56,6 +56,13 @@ abstract class WebTestCase extends BaseWebTestCase
 
     protected function tearDown(): void
     {
+        // The writes to the index are searchable after its next refresh, every second: the next
+        // test sees all of them, whatever the time between the two
+        $container = null === static::$kernel ? null : static::$kernel->getContainer();
+        if (null !== $container) {
+            $container->get('fos_elastica.index.ladb')->refresh();
+        }
+
         foreach (new \FilesystemIterator(self::UPLOADS_BACKUP_DIR) as $file) {
             if (!file_exists(self::UPLOADS_DIR.'/'.$file->getFilename())) {
                 link($file->getPathname(), self::UPLOADS_DIR.'/'.$file->getFilename());

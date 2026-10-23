@@ -62,7 +62,6 @@ final class RouteSmokeTest extends WebTestCase
         'core_promotion_graphic_unpublish' => ['admin' => 42],
         'core_qa_question_unpublish' => ['admin' => 42],
         'core_review_edit' => ['admin' => 50],
-        'core_school_list_geojson' => ['anonymous' => 47, 'user' => 47],
         'core_tag_usage_highlight_create' => ['user' => 44, 'admin' => 44],
         'core_tag_usage_highlight_delete' => ['user' => 44, 'admin' => 44],
         'core_user_admin_delete' => ['admin' => 48],
