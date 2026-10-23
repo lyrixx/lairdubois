@@ -61,6 +61,13 @@ abstract class WebTestCase extends BaseWebTestCase
         $container = null === static::$kernel ? null : static::$kernel->getContainer();
         if (null !== $container) {
             $container->get('fos_elastica.index.ladb')->refresh();
+
+            // AbstractController::createLock() keeps a lock per action and user for a few
+            // seconds, against double submissions: the next test would get a 404. Memcached
+            // holds nothing else.
+            $memcached = new \Memcached();
+            $memcached->addServer($container->getParameter('memcached_host'), $container->getParameter('memcached_port'));
+            $memcached->flush();
         }
 
         foreach (new \FilesystemIterator(self::UPLOADS_BACKUP_DIR) as $file) {
@@ -135,6 +142,28 @@ abstract class WebTestCase extends BaseWebTestCase
         }
 
         return $user;
+    }
+
+    /**
+     * The emails sent during the last request of the client, which needs $client->enableProfiler()
+     * before it. Nothing is delivered (config_test.yml).
+     *
+     * @return list<\Swift_Message>
+     */
+    protected static function getSentEmails(Client $client): array
+    {
+        return array_values($client->getProfile()->getCollector('swiftmailer')->getMessages());
+    }
+
+    /**
+     * The recipients of an email, before delivery_address of config_dev.yml replaced them (it
+     * keeps them in the X-Swift-To header).
+     *
+     * @return list<string>
+     */
+    protected static function getEmailRecipients(\Swift_Message $message): array
+    {
+        return array_keys($message->getHeaders()->get('X-Swift-To')->getFieldBodyModel());
     }
 
     /**

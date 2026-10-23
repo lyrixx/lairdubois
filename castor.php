@@ -69,6 +69,10 @@ function install(): void
     // The composer scripts also write app/config/parameters.yml, install the
     // bundles assets and clear the cache.
     docker_compose_run(['composer', 'install', '-n', '--prefer-dist', '--optimize-autoloader', '--ignore-platform-req=php+']);
+
+    // MailerUtils signs every email with the DKIM key of the production server (keys/private.pem,
+    // out of git): without a key, sending an email fails. A throwaway one for dev and test.
+    docker_compose_run(['sh', '-c', 'test -f keys/private.pem || (mkdir -p keys && openssl genrsa -out keys/private.pem 2048)']);
 }
 
 #[AsTask(description: 'Creates the database, or updates its schema, as on the production server', namespace: 'app:db', name: 'schema')]
