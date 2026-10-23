@@ -26,6 +26,10 @@ Une session pilote, des agents codent.
 - L'état fait foi sur GitHub (issues, PR), pas dans la mémoire de la session : une nouvelle
   session reprend depuis là.
 - Point d'avancement toutes les heures : mergé, en cours, bloqué, prochaine étape.
+- Budget de tokens : au plus 50 % de la limite sur 5 h, et 50 % de la limite hebdomadaire ramenée
+  à la journée (7,1 points du compteur hebdomadaire par jour). Les chiffres sont ceux du compte,
+  lus dans la status line (`.claude/tmp/budget/`, hors git). À 85 % de l'un des deux, plus de
+  nouvel agent ; à 100 %, tout s'arrête jusqu'à la nouvelle fenêtre de 5 h ou jusqu'au lendemain.
 - Au plus 3 ou 4 agents en parallèle : au-delà, les conflits (`composer.lock`, fixtures) et la
   relecture deviennent le goulot.
 - Chaque worktree lance sa propre stack Docker, sans conflit de conteneurs, de ports ni de
