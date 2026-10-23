@@ -90,7 +90,7 @@ Issu de l'`AGENTS.md` de docker-starter. Jamais PHP, Node ni Composer sur l'hôt
 le conteneur `builder`, via Castor. Prérequis de l'hôte : Docker et Castor.
 
 ```bash
-castor start                      # build, composer, up, schéma, index Elasticsearch, workers
+castor start                      # build, composer, up, schéma, fixtures si la base est vide, index, workers
 castor about                      # URL de la copie
 castor stop
 castor builder                    # shell dans le builder
@@ -98,6 +98,7 @@ castor builder -- bin/console …   # une commande dans le builder
 castor logs [--service=frontend]
 castor app:install                # composer install
 castor app:db:schema              # base, schéma (doctrine:schema:update) et table sessions
+castor app:db:fixtures           # recrée la base avec les fixtures, notifications, index
 castor app:elasticsearch:populate # fos:elastica:populate
 castor app:assets:dump            # CSS et JS de prod (Assetic, closure compiler, yuicompressor)
 castor docker:build [--service=…]
@@ -176,6 +177,53 @@ castor qa:install            # outils de tools/ (PHPStan, PHPUnit), installés �
 - Cache GitHub Actions : couches Docker (`type=gha`, un scope par cible du Dockerfile, via un
   `docker-compose.override.yml` écrit par le workflow) et cache Composer (`.home/.cache/composer`).
 
+## Fixtures
+
+Jeu de données de dev et de test, sans donnée de prod : `src/Ladb/CoreBundle/DataFixtures/`
+(`doctrine/doctrine-fixtures-bundle`, en dev et en test), services dans `app/config/fixtures.yml`.
+
+- `castor app:db:fixtures` supprime et recrée la base (les `AUTO_INCREMENT` repartent à 1, les ids
+  sont donc stables), charge les fixtures, transforme les activités en notifications
+  (`ladb:cron:notification:populate`) et remplit l'index. `castor start` le lance quand la base n'a
+  aucun compte (copie neuve) ; sinon il garde la base telle quelle.
+- Les fixtures rejouent les create et publish des controllers (`FixtureFactory`, managers, utils,
+  événements) pour que compteurs, activités, tags, watches et index soient cohérents. Quand un
+  controller change sa façon de créer un contenu, la fixture suit.
+- Images : des JPEG et PNG de quelques Ko dans `src/Ladb/CoreBundle/Resources/fixtures/pictures/`,
+  copiés dans `uploads/` sous un nom stable (`fixture-<nom>.jpg`), avec les placeholders
+  (`empty.png`, `avatar.png`…) que les templates demandent à Liip Imagine.
+
+Comptes (mot de passe = identifiant, hashé en sha512 par FOSUserBundle, connexion par le formulaire
+`/login`) :
+
+| Identifiant | Id | Rôle |
+|-------------|----|------|
+| `admin`     | 1  | `ROLE_ADMIN`, aussi `admin_username` (expéditeur des messages de bienvenue) |
+| `user`      | 2  | « Personne », autrice de tous les contenus de référence |
+| `user2`     | 3  | « Personne », commente, aime, répond, vote, donne son avis sur les contenus de `user` |
+| `team`      | 4  | « Collectif » de `user` et `user2`, qui invite `admin` ; pas de connexion possible |
+
+Retrouver « le » contenu d'un type dans un test : chaque type a un contenu publié d'id 1, de `user`
+(sauf blog, FAQ et astuce : `admin`), avec image, tags, commentaire et like de `user2`. Les routes
+prennent donc `{id}` = 1 et `{username}` = `user` (`team` pour un collectif). En PHP, les
+identifiants des comptes sont des constantes : `UserFixtures::ADMIN`, `USER`, `USER2`, `TEAM`.
+
+| Type | Page |
+|------|------|
+| Création, atelier, plan | `/creations/1.html`, `/ateliers/1.html`, `/plans/1.html` |
+| Pas à pas et son article | `/pas-a-pas/1.html`, `/pas-a-pas/articles/1.html` |
+| Trouvaille, événement, annonce | `/trouvailles/1.html`, `/evenements/1.html`, `/annonces/1.html` |
+| Question et réponse | `/questions/1.html`, `/questions/reponses/1` |
+| Processus, collection, graphisme | `/processus/1.html`, `/collections/1.html`, `/promouvoir/1.html` |
+| Xylothèque (et texture), fournisseur, école (et témoignage) | `/xylotheque/1.html`, `/fournisseurs/1.html`, `/ecoles/1.html` |
+| Livre, logiciel, outil (avis sur le livre et le logiciel) | `/livres/1.html`, `/logiciels/1.html`, `/outils/1.html` |
+| Blog, FAQ, astuce (redirige vers son URL), took (redirige vers YouTube) | `/blog/1.html`, `/faq/1.html`, `/astuces/1.html`, `/yt/1.html` |
+| Messagerie : fil de `user2` à `user` | `/messagerie/thread/1` |
+
+Les autres tables (commentaires, likes, votes, avis, feedbacks, valeurs de la xylothèque,
+notifications…) ont aussi une ligne d'id 1, mais son contenu dépend de l'ordre de chargement :
+le retrouver par requête plutôt que de supposer ce qu'elle porte.
+
 ## Pièges connus
 
 - La plupart des paquets du lock déclarent PHP 7 (`"php": "^7.1"`…) : toute commande composer qui
@@ -204,3 +252,19 @@ castor qa:install            # outils de tools/ (PHPStan, PHPUnit), installés �
   `TypeError`) sort du kernel au lieu de donner une 500.
 - Les mots de passe sont hashés en sha512 par FOSUserBundle : les comptes existants doivent continuer
   à se connecter sans reset, d'un bout à l'autre de la migration.
+- PHPStan lit la version de PHP dans `composer.json` (`>=7.3`) : la syntaxe PHP 8 (propriétés
+  promues, `readonly`, virgule finale dans une signature) y est une erreur, même si tout tourne en
+  8.5.
+- `ruflin/elastica` déclare `Elastica\Query\Match` jusqu'en 6.1 : `match` est un mot réservé depuis
+  PHP 8, d'où une erreur de parsing (500) dès qu'une page avec des tags cherche des contenus
+  similaires. Passé en 6.2, utiliser `Elastica\Query\MatchQuery`.
+- `--context=test` utilise la même base que le dev (`config_test.yml` ne change pas `database_name`) :
+  y charger les fixtures écrase la base de dev.
+- `doctrine:fixtures:load` sans `--append` vide les tables par `DELETE`, qui ne remet pas les
+  `AUTO_INCREMENT` à zéro : `castor app:db:fixtures` supprime la base à la place.
+- Hors requête HTTP (fixtures, commandes), les listeners et utils qui lisent l'utilisateur ou la
+  session de la requête (`GlobalUtils`) échouent : `FixtureFactory::actAs()` connecte l'auteur dans
+  une requête avec une session en mémoire.
+- Les managers (`publish()`…) parcourent les collections inverses (créations d'un plan…), qui ne sont
+  initialisées que sur une entité chargée depuis la base : `FixtureFactory::create()` fait un
+  `refresh()` après le premier `flush()`.

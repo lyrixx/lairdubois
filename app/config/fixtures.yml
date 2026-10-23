@@ -1,0 +1,40 @@
+# Dev and test data, loaded by "castor app:db:fixtures" (doctrine:fixtures:load)
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+        # The services of the bundle are named "ladb_core.*": autowiring cannot find them by type
+        bind:
+            $activityUtils: '@ladb_core.activity_utils'
+            $blockBodiedUtils: '@ladb_core.block_bodied_utils'
+            $collectionManager: '@ladb_core.collection_collection_manager'
+            $collectionnableUtils: '@ladb_core.collectionnable_utils'
+            $commentableUtils: '@ladb_core.commentable_utils'
+            $creationManager: '@ladb_core.wonder_creation_manager'
+            $eventManager: '@ladb_core.event_event_manager'
+            $faqQuestionManager: '@ladb_core.faq_question_manager'
+            $fieldPreprocessorUtils: '@ladb_core.field_preprocessor_utils'
+            $findManager: '@ladb_core.find_find_manager'
+            $findUtils: '@ladb_core.find_utils'
+            $graphicManager: '@ladb_core.promotion_graphic_manager'
+            $graphicUtils: '@ladb_core.graphic_utils'
+            $howtoManager: '@ladb_core.howto_howto_manager'
+            $memberInvitationManager: '@ladb_core.core_member_invitation_manager'
+            $memberManager: '@ladb_core.core_member_manager'
+            $messageUtils: '@ladb_core.message_utils'
+            $offerManager: '@ladb_core.offer_offer_manager'
+            $pictureManager: '@ladb_core.core_picture_manager'
+            $planManager: '@ladb_core.wonder_plan_manager'
+            $planUtils: '@ladb_core.plan_utils'
+            $postManager: '@ladb_core.blog_post_manager'
+            $qaQuestionManager: '@ladb_core.qa_question_manager'
+            $reviewableUtils: '@ladb_core.reviewable_utils'
+            $uploadsDir: '%kernel.project_dir%/uploads'
+            $userManager: '@ladb_core.fos.user_manager'
+            $watchableUtils: '@ladb_core.watchable_utils'
+            $workflowManager: '@ladb_core.workflow_workflow_manager'
+            $workshopManager: '@ladb_core.wonder_workshop_manager'
+
+    Ladb\CoreBundle\DataFixtures\:
+        resource: '../../src/Ladb/CoreBundle/DataFixtures'

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+	<rect x="50" y="50" width="300" height="20" fill="none" stroke="#000" stroke-width="2"/>
+	<rect x="70" y="70" width="20" height="180" fill="none" stroke="#000" stroke-width="2"/>
+	<rect x="310" y="70" width="20" height="180" fill="none" stroke="#000" stroke-width="2"/>
+	<text x="200" y="290" font-family="sans-serif" font-size="16" text-anchor="middle">Table basse - 1200 x 600 mm</text>
+</svg>

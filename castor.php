@@ -2,6 +2,7 @@
 
 use Castor\Attribute\AsTask;
 
+use function Castor\context;
 use function Castor\guard_min_version;
 use function Castor\import;
 use function Castor\io;
@@ -45,7 +46,7 @@ function create_default_variables(): array
     ];
 }
 
-#[AsTask(description: 'Builds and starts the infrastructure, then installs the application (composer, database, index, workers)')]
+#[AsTask(description: 'Builds and starts the infrastructure, then installs the application (composer, database, fixtures if empty, index, workers)')]
 function start(): void
 {
     io()->title('Starting the stack');
@@ -54,7 +55,12 @@ function start(): void
     install();
     up(profiles: ['default']); // We can't start worker now, they are not installed
     db_schema();
-    elasticsearch_populate();
+    // A new copy gets the fixtures, to be browsable at once: a database with accounts is kept as is
+    if (db_has_users()) {
+        elasticsearch_populate();
+    } else {
+        db_fixtures();
+    }
     workers_start();
 
     notify('The stack is now up and running.');
@@ -84,6 +90,29 @@ function db_schema(): void
     docker_compose_run(['bin/console', 'doctrine:schema:update', '--force']);
     // The sessions live in the database (PdoSessionHandler), in a table Doctrine does not know
     docker_compose_run(['bin/console', 'doctrine:query:sql', '--', file_get_contents(variable('root_dir') . '/docs/database/schema-sessions.sql')]);
+}
+
+#[AsTask(description: 'Recreates the database with the fixtures (dev and test data), then fills the Elasticsearch index', namespace: 'app:db', name: 'fixtures')]
+function db_fixtures(): void
+{
+    io()->title('Loading the fixtures');
+
+    // A new database restarts the AUTO_INCREMENT counters: the fixtures get the same ids on every load
+    docker_compose_run(['bin/console', 'doctrine:database:drop', '--force', '--if-exists']);
+    db_schema();
+    docker_compose_run(['bin/console', 'doctrine:fixtures:load', '--append', '--no-interaction']);
+    // Turns the activities of the fixtures (likes, comments, follows...) into notifications, as the cron does
+    docker_compose_run(['bin/console', 'ladb:cron:notification:populate', '--force']);
+
+    elasticsearch_populate();
+}
+
+function db_has_users(): bool
+{
+    // The column name only shows in the output when a row is found
+    $output = docker_compose_run(['bin/console', 'doctrine:query:sql', 'SELECT 1 AS has_users FROM tbl_core_user LIMIT 1'], c: context()->withQuiet())->getOutput();
+
+    return str_contains($output, 'has_users');
 }
 
 #[AsTask(description: 'Creates the Elasticsearch index and fills it from the database', namespace: 'app:elasticsearch', name: 'populate')]
