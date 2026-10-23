@@ -5,6 +5,9 @@ framework:
     test: ~
     session:
         storage_id: session.storage.mock_file
+    # The profiler only collects on demand: $client->enableProfiler()
+    profiler:
+        collect: false
 
 web_profiler:
     toolbar: false
@@ -12,3 +15,38 @@ web_profiler:
 
 swiftmailer:
     disable_delivery: true
+
+# The debug level of config_dev.yml writes 200 MB per run of the smoke test
+monolog:
+    handlers:
+        main:
+            level: notice
+
+# Their own database and index, loaded with the fixtures (castor -c test app:db:fixtures): the
+# tests do not overwrite the data of the dev environment. Each test runs in a transaction rolled
+# back at its end (dama/doctrine-test-bundle).
+doctrine:
+    dbal:
+        dbname: "%database_name%_test"
+
+fos_elastica:
+    indexes:
+        ladb:
+            index_name: ladb_test
+
+services:
+    # Neither RabbitMQ nor the websocket server get messages from the tests: the workers of the
+    # dev stack would process them on the dev database, and the CI does not start them.
+    # Decorated, not redefined: the definitions of the bundles would win over the ones of the app
+    tests.view_producer:
+        class: Tests\Double\InMemoryProducer
+        decorates: old_sound_rabbit_mq.view_producer
+        public: true
+    tests.wamp_pusher:
+        class: Tests\Double\InMemoryPusher
+        decorates: gos_web_socket.wamp.pusher
+        public: true
+    tests.webpush_notification_producer:
+        class: Tests\Double\InMemoryProducer
+        decorates: old_sound_rabbit_mq.webpush_notification_producer
+        public: true

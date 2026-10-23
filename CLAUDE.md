@@ -170,10 +170,12 @@ castor qa:install            # outils de tools/ (PHPStan, PHPUnit), installés �
   n'analyse pas `tests/` (il n'y trouverait pas PHPUnit).
 - Rapport de dépréciations : celles de la compilation du container (le kernel les écrit dans
   `var/cache/test/*Deprecations.log`, sauf sous PHPUnit) et celles du dernier `qa:phpunit`.
-  `qa:phpunit` passe `SYMFONY_DEPRECATIONS_SERIALIZE` au bridge, qui sérialise alors chaque
-  dépréciation au lieu de les compter. Les dépréciations de PHP lui-même (`E_DEPRECATED`, d'où
-  `error_reporting=-1` dans `phpunit.xml.dist`) sont comptées, pas listées. Le rapport ne fait
-  jamais échouer la CI.
+  `qa:phpunit` coupe le gestionnaire du bridge (`SYMFONY_DEPRECATIONS_HELPER=disabled`) et passe
+  `PHPUNIT_DEPRECATIONS_FILE` à `tests/bootstrap.php`, qui enregistre `Tests\DeprecationCollector` :
+  il compte les dépréciations par message. Le `SYMFONY_DEPRECATIONS_SERIALIZE` du bridge garde
+  chaque occurrence en mémoire, des centaines par requête : le smoke test dépasse la limite de
+  mémoire. Les dépréciations de PHP lui-même (`E_DEPRECATED`, d'où `error_reporting=-1` dans
+  `phpunit.xml.dist`) sont comptées, pas listées. Le rapport ne fait jamais échouer la CI.
 - Les dépréciations d'un template Twig ne sortent qu'à sa compilation : `qa:deprecations` vide le
   cache de test sans les warmers optionnels, pour que le `qa:phpunit` suivant les voie.
 - En 3.4, `lint:yaml` ne prend qu'un chemin et compte les dépréciations comme des erreurs ;
@@ -228,6 +230,62 @@ Les autres tables (commentaires, likes, votes, avis, feedbacks, valeurs de la xy
 notifications…) ont aussi une ligne d'id 1, mais son contenu dépend de l'ordre de chargement :
 le retrouver par requête plutôt que de supposer ce qu'elle porte.
 
+## Tests
+
+Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par feature
+(`tests/Smoke/`…), lancés par `castor qa:phpunit [-- --filter …]`.
+
+- Base et index propres à l'environnement `test` (`config_test.yml`) : `db_fr_lairdubois_www_test`
+  et `ladb_test`, chargés avec les fixtures. `qa:phpunit` les charge s'ils sont vides, `castor -c
+  test app:db:fixtures` les recharge. Les données de dev ne bougent pas.
+- Chaque test tourne dans une transaction annulée à sa fin (`dama/doctrine-test-bundle`, extension
+  PHPUnit de `phpunit.xml.dist`), y compris à travers les reboots du kernel entre deux requêtes :
+  un test crée, modifie et supprime sans nettoyer derrière lui. Les ids créés par un test ne
+  reviennent pas (l'`AUTO_INCREMENT` d'InnoDB n'est pas annulé).
+- Ce qui n'est pas en base n'est pas annulé, `Tests\WebTestCase` s'en charge :
+  - l'index : quand les tests d'une classe l'ont modifié (publication, suppression…), il est
+    rempli à nouveau depuis la base après le dernier (`fos:elastica:populate`, quelques secondes).
+    Entre deux tests de la classe, il est seulement rafraîchi (`refresh`) : un test voit les
+    écritures des précédents, toutes, quel que soit le temps écoulé. Un résultat de recherche peut
+    donc dépendre de l'ordre des tests de la classe ;
+  - `uploads/`, partagé avec le dev : un fichier qu'un test supprime (images d'un contenu supprimé,
+    `@ORM\PostRemove` de `Picture` et `Resource`) est remis après le test, depuis des liens durs
+    pris au début de la classe (`var/tests/uploads/`). Les fichiers qu'un test crée (stickers,
+    avatars…) restent.
+- `Tests\WebTestCase` :
+  - `static::createClient()` : anonyme, en HTTPS sur `lairdubois.test` (`trusted_hosts`) ;
+  - `static::createClientAs(UserFixtures::USER)` : connecté (`ADMIN`, `USER`, `USER2`) sans passer
+    par le formulaire de connexion, en mettant le token dans la session ;
+  - `static::getEntityManager()`, `static::findUser()` : les données des fixtures. Le client
+    reboote le kernel avant chaque requête sauf la première, et l'entity manager avec : relire une
+    entité après une requête plutôt que de garder celle d'avant.
+- Pas de RabbitMQ ni de websocket en test : les producers `old_sound_rabbit_mq.view_producer` et
+  `webpush_notification_producer`, et le pusher `gos_web_socket.wamp.pusher`, sont décorés par
+  `Tests\Double\InMemoryProducer` et `InMemoryPusher`, qui gardent les messages
+  (`$client->getContainer()->get('tests.view_producer')->getMessages()`, avant le reboot suivant).
+- Le profiler ne collecte qu'à la demande : `$client->enableProfiler()` avant la requête, puis
+  `$client->getProfile()` (mails : collector `swiftmailer`, la livraison est coupée en test).
+- Aucun appel réseau sortant. Les GET du smoke test n'en font pas : Stripe ne part qu'en XHR, le
+  compteur de partages Facebook qu'avec `?url=`, le titre d'un referer qu'avec `?referer=1`, le
+  scrape Open Graph de Facebook jamais en debug. Ce qu'un test fonctionnel atteindra, à neutraliser
+  en test (double dans `config_test.yml`) avant d'écrire le test : `FindUtils` à la création d'une
+  trouvaille (capture Chromium, Open Graph, API YouTube, Vimeo et Dailymotion de
+  `VideoHostingUtils`), `LocalisableUtils` (géocodage Google) dans les formulaires avec une
+  localisation et la recherche `@location:`, `PictureManager::createFromUrl()`, les API de
+  `VideoHostingUtils` (took, plan, pas-à-pas avec vidéo), Stripe (`/financement`, en XHR).
+- Une `\Error` PHP sort du kernel en 3.4 : elle remonte de `$client->request()` au lieu de donner
+  une 500. Un warning PHP devient une exception (gestionnaire d'erreurs de PHPUnit) : 500.
+- Smoke test (`tests/Smoke/RouteSmokeTest.php`) : chaque route GET en anonyme, `user` et `admin`
+  (les assets d'Assetic en anonyme seulement), rien en 5xx ni en `\Error`. Une action qui refuse
+  une requête hors XHR (« Only XML request allowed ») est rappelée en XHR. Paramètres des routes :
+  `PARAMETERS` (par nom) et `getRouteParameters()` (par route). Échecs connus dans
+  `KNOWN_FAILURES` (route, rôle, issue) : marqués incomplets, et le test échoue quand l'un d'eux
+  passe, pour qu'on retire la ligne. Routes non appelées dans `UNTESTED`, avec la raison (sorties
+  en « skipped »). Une nouvelle route GET sans valeur pour un de ses paramètres fait échouer le
+  test. Filtrer sur une route : `castor qa:phpunit -- --filter 'core_creation_show'`.
+- Logs de test au niveau `notice` (`var/logs/test.log`) : le niveau `debug` du dev écrit 200 Mo
+  par passage du smoke test.
+
 ## Pièges connus
 
 - La plupart des paquets du lock déclarent PHP 7 (`"php": "^7.1"`…) : toute commande composer qui
@@ -273,8 +331,10 @@ le retrouver par requête plutôt que de supposer ce qu'elle porte.
 - `ruflin/elastica` déclare `Elastica\Query\Match` jusqu'en 6.1 : `match` est un mot réservé depuis
   PHP 8, d'où une erreur de parsing (500) dès qu'une page avec des tags cherche des contenus
   similaires. Passé en 6.2, utiliser `Elastica\Query\MatchQuery`.
-- `--context=test` utilise la même base que le dev (`config_test.yml` ne change pas `database_name`) :
-  y charger les fixtures écrase la base de dev.
+- `--context=test` et `--context=ci` visent la base et l'index de test (`config_test.yml`), pas ceux
+  du dev : la CI charge les fixtures avec `castor app:db:fixtures` dans son contexte.
+- Une action qui finit par `exit(0)` (`PictureController::uploadAction()`,
+  `ResourceController::uploadAction()`) arrête PHPUnit, sans erreur : ne pas l'appeler dans un test.
 - `doctrine:fixtures:load` sans `--append` vide les tables par `DELETE`, qui ne remet pas les
   `AUTO_INCREMENT` à zéro : `castor app:db:fixtures` supprime la base à la place.
 - Hors requête HTTP (fixtures, commandes), les listeners et utils qui lisent l'utilisateur ou la

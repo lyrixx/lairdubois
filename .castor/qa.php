@@ -9,6 +9,9 @@ use Castor\Attribute\AsTask;
 use function Castor\fs;
 use function Castor\io;
 use function Castor\variable;
+use function Castor\with;
+use function db_fixtures;
+use function db_has_users;
 use function docker\docker_compose_run;
 use function docker\docker_exit_code;
 
@@ -85,17 +88,25 @@ function phpunit(#[AsRawTokens] array $rawTokens = []): int
 {
     install_if_missing();
 
+    // The tests have their own database and index (config_test.yml), loaded once: each test rolls
+    // its changes back. castor -c test app:db:fixtures reloads them.
+    with(static function (): void {
+        if (!db_has_users()) {
+            db_fixtures();
+        }
+    }, context: 'test');
+
     io()->section('Running PHPUnit');
 
     fs()->mkdir(\dirname(variable('root_dir') . '/' . PHPUNIT_DEPRECATIONS_FILE));
 
-    // With this variable, the bootstrap of symfony/phpunit-bridge does not register its usual
-    // deprecations handler (summary at the end of the run, exit code): it serializes every
-    // deprecation, [error_reporting() & $type, $message, $file], in the given file instead.
-    // The bridge uses it for the tests run in a separate process; it is the only structured
-    // output of the bridge of Symfony 3.4.
+    // The deprecations handler of symfony/phpunit-bridge (summary at the end of the run, exit
+    // code) is disabled: tests/bootstrap.php registers Tests\DeprecationCollector, which counts
+    // the deprecations by message in the given file. The bridge of Symfony 3.4 has no structured
+    // output but SYMFONY_DEPRECATIONS_SERIALIZE, which keeps every occurrence in memory: too many
+    // for the smoke test.
     return docker_exit_code([
-        'env', 'SYMFONY_DEPRECATIONS_SERIALIZE=/var/www/' . PHPUNIT_DEPRECATIONS_FILE,
+        'env', 'SYMFONY_DEPRECATIONS_HELPER=disabled', 'PHPUNIT_DEPRECATIONS_FILE=/var/www/' . PHPUNIT_DEPRECATIONS_FILE,
         'tools/phpunit/vendor/bin/phpunit',
         ...$rawTokens,
     ]);
@@ -132,13 +143,14 @@ function deprecations(): void
     if (null !== $phpunitRun) {
         // error_reporting is -1 in phpunit.xml.dist: the first value is E_DEPRECATED for the
         // deprecations of PHP itself, 0 for the ones Symfony silences (@trigger_error())
-        foreach (unserialize(file_get_contents($phpunitFile), ['allowed_classes' => false]) as [$unsilenced, $message]) {
+        // (Tests\DeprecationCollector)
+        foreach (unserialize(file_get_contents($phpunitFile), ['allowed_classes' => false]) as [$unsilenced, $message, $count]) {
             if (\E_DEPRECATED === $unsilenced) {
-                $phpCounts[$message] = ($phpCounts[$message] ?? 0) + 1;
+                $phpCounts[$message] = ($phpCounts[$message] ?? 0) + $count;
 
                 continue;
             }
-            $counts[$message]['phpunit'] = ($counts[$message]['phpunit'] ?? 0) + 1;
+            $counts[$message]['phpunit'] = ($counts[$message]['phpunit'] ?? 0) + $count;
         }
     }
 

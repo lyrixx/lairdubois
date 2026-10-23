@@ -5,7 +5,7 @@
          xsi:noNamespaceSchemaLocation="tools/phpunit/vendor/phpunit/phpunit/phpunit.xsd"
          backupGlobals="false"
          colors="true"
-         bootstrap="app/autoload.php"
+         bootstrap="tests/bootstrap.php"
          cacheResultFile="var/.phpunit.result.cache"
          failOnRisky="true"
          failOnWarning="true"
@@ -24,4 +24,9 @@
             <directory>tests</directory>
         </testsuite>
     </testsuites>
+
+    <extensions>
+        <!-- Each test runs in a transaction, rolled back at its end -->
+        <extension class="DAMA\DoctrineTestBundle\PHPUnit\PHPUnitExtension" />
+    </extensions>
 </phpunit>

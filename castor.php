@@ -99,8 +99,9 @@ function db_fixtures(): void
 
 function db_has_users(): bool
 {
-    // The column name only shows in the output when a row is found
-    $output = docker_compose_run(['bin/console', 'doctrine:query:sql', 'SELECT 1 AS has_users FROM tbl_core_user LIMIT 1'], c: context()->withQuiet())->getOutput();
+    // The column name only shows in the output when a row is found. The query fails when the
+    // database does not exist yet (the one of the tests, on a new copy).
+    $output = docker_compose_run(['bin/console', 'doctrine:query:sql', 'SELECT 1 AS has_users FROM tbl_core_user LIMIT 1'], c: context()->withQuiet()->withAllowFailure())->getOutput();
 
     return str_contains($output, 'has_users');
 }
