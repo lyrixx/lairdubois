@@ -44,7 +44,9 @@ Ordre :
 2. #2 CI et #3 fixtures en parallèle.
 3. #4 smoke test, seul : il pose l'outillage de test commun (classe de base, connexion en anonyme,
    membre et admin) que les tests suivants réutilisent.
-4. En parallèle : #5 à #12 et les bugs #32 à #34.
+4. En parallèle : #5 à #12. Ensuite les bugs (label `bug` : #32 à #34, #42 à #51 et ceux que
+   trouvent les tests), un agent pour quelques bugs à la fois. Ce sont des bugs du site qui
+   existaient déjà : on les corrige quand même, l'échec connu du test est retiré avec le correctif.
 5. Ménage : #13 et #17 en parallèle, #14 avant #15 et #16.
 6. Sauts de version en série, un agent par saut. Les chantiers d'un milestone qui ne dépendent pas
    du saut se font en parallèle.
