@@ -7,13 +7,41 @@ la fin.
 ## Git et publication
 
 Exception à mes règles globales, valable uniquement sur ce repo (`lyrixx/lairdubois`) : commits,
-push, ouverture et mise à jour de PR et d'issues, commentaires, sans me demander.
+push, ouverture, mise à jour et merge de PR, issues, commentaires, sans me demander.
 
-- Une branche par PR, PR vers `next`.
+- Une branche par PR, PR vers `next`. On merge dans `next` quand la CI est verte et le diff relu.
 - `master` est l'état du repo de Boris au moment du fork : on n'y touche pas.
 - Jamais rien sur `lairdubois/lairdubois` : pas de remote `upstream`, pas de `gh -R
   lairdubois/lairdubois`. La synchro avec Boris se fera à la fin.
-- Le backlog vit dans les issues du fork. Une session = une issue = une PR.
+- Le backlog vit dans les issues du fork, rangées par milestone.
+
+## Organisation du travail
+
+Une session pilote, des agents codent.
+
+- La session principale tient le backlog, lance un agent par issue, relit le diff de chaque PR
+  (pas le résumé de l'agent), vérifie la CI et merge. Elle ne code pas elle-même.
+- Un agent = une issue = une PR. Chaque agent travaille dans son propre worktree git. S'il bute
+  sur un choix qui n'est pas tranché ici ou dans l'issue, il s'arrête et le remonte.
+- L'état fait foi sur GitHub (issues, PR), pas dans la mémoire de la session : une nouvelle
+  session reprend depuis là.
+- Point d'avancement toutes les heures : mergé, en cours, bloqué, prochaine étape.
+- Au plus 3 ou 4 agents en parallèle : au-delà, les conflits (`composer.lock`, fixtures) et la
+  relecture deviennent le goulot.
+- Chaque worktree lance sa propre stack Docker, sans conflit de conteneurs, de ports ni de
+  domaines avec les autres : c'est ce qui permet le parallélisme.
+
+Ordre :
+
+1. #1 Docker, seul : tant qu'il n'est pas mergé, les agents partageraient la base et
+   Elasticsearch de l'hôte.
+2. #2 CI et #3 fixtures en parallèle.
+3. #4 smoke test, seul : il pose l'outillage de test commun (classe de base, connexion en anonyme,
+   membre et admin) que les tests suivants réutilisent.
+4. En parallèle : #5 à #12 et les bugs #32 à #34.
+5. Ménage : #13 et #17 en parallèle, #14 avant #15 et #16.
+6. Sauts de version en série, un agent par saut. Les chantiers d'un milestone qui ne dépendent pas
+   du saut se font en parallèle.
 
 ## Principes de la migration
 
