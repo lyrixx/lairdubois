@@ -37,7 +37,7 @@ services:
     arguments: ['@fos_user.util.username_canonicalizer', '@fos_user.util.email_canonicalizer', '@ladb_core.fos.displayname_canonicalizer']
   ladb_core.fos.user_manager:
     class: Ladb\CoreBundle\Fos\UserManager
-    arguments: ['@fos_user.util.password_updater', '@ladb_core.fos.canonical_fields_updater', '@doctrine.orm.entity_manager', %fos_user.model.user.class%]
+    arguments: ['@fos_user.util.password_updater', '@ladb_core.fos.canonical_fields_updater', '@doctrine.orm.entity_manager', '%fos_user.model.user.class%']
 
   # Utils
   ladb_core.global_utils:
