@@ -61,6 +61,8 @@ class UserListener implements EventSubscriberInterface {
 		$adminUsername = $this->container->getParameter('admin_username');
 		$sender = $userManager->findUserByUsername($adminUsername);
 		if (!is_null($sender)) {
+			// Unread message count: composeThread() leaves it to the caller
+			$user->getMeta()->incrementUnreadMessageCount();
 			$messageUtils->composeThread($sender, array( $user ), 'Bienvenue !', $templating->render('LadbCoreBundle:Core/User:message-welcome.md.twig', array( 'recipientUser' => $user )), null, true);
 		}
 

@@ -58,10 +58,6 @@ class MessageUtils {
 			$messageMeta->setIsRead($participant === $sender);
 			$message->addMeta($messageMeta);
 
-			if ($participant != $sender) {
-				$participant->getMeta()->incrementUnreadMessageCount();
-			}
-
 		}
 
 		$this->om->persist($thread);

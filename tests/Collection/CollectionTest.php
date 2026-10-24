@@ -114,7 +114,6 @@ final class CollectionTest extends WebTestCase
         yield 'unpublish' => ['GET', 'unpublish', ['id' => self::ID]];
         yield 'delete' => ['GET', 'delete', ['id' => self::ID]];
         yield 'lock' => ['GET', 'lock', ['id' => self::ID]];
-        yield 'add' => ['GET', 'add', ['id' => self::ID, 'entityType' => Find::TYPE, 'entityId' => self::ID]];
         yield 'list available' => ['GET', 'list_available', ['entityType' => Find::TYPE, 'entityId' => self::ID]];
         yield 'list available, page' => ['GET', 'list_available_page', ['entityType' => Find::TYPE, 'entityId' => self::ID, 'page' => 1]];
         yield 'entry create' => ['GET', 'entry_create', ['id' => self::ID, 'entityType' => Find::TYPE, 'entityId' => self::ID]];
@@ -418,19 +417,6 @@ final class CollectionTest extends WebTestCase
         $removed = 200 === $status ? 1 : 0;
         self::assertSame($entryCount - $removed, $this->find()->getEntryCount());
         self::assertSame($creationCount - $removed, $this->findCreation()->getPublicCollectionCount());
-    }
-
-    /**
-     * A copy of the deletion, that no template uses: #63.
-     */
-    public function testAdd(): void
-    {
-        $client = static::createClientAs(UserFixtures::USER);
-        $client->request('GET', $this->path('add', ['id' => self::ID, 'entityType' => Find::TYPE, 'entityId' => self::ID]));
-
-        static::getEntityManager()->clear();
-        self::assertNull($this->find(), 'The collection stays now: remove the known failure (#63).');
-        self::markTestIncomplete('Known failure, see #63.');
     }
 
     private function path(string $action, array $parameters = []): string

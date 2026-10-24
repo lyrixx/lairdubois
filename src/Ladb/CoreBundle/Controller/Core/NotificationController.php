@@ -88,6 +88,9 @@ class NotificationController extends AbstractController {
 		if (is_null($notification)) {
 			throw $this->createNotFoundException('Unable to find Notification entity (id='.$id.').');
 		}
+		if ($notification->getUser()->getId() != $this->getUser()->getId()) {
+			throw $this->createNotFoundException('Not allowed (core_notification_show)');
+		}
 
 		// Update notification
 

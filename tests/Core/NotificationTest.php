@@ -94,16 +94,13 @@ final class NotificationTest extends InteractionTestCase
         self::assertRedirectsToLogin($client);
     }
 
-    /**
-     * The action does not check whose notification it is: #68.
-     */
     public function testShowAsOtherUser(): void
     {
         $client = static::createClientAs(UserFixtures::USER2);
         $client->request('GET', static::generatePath('core_notification_show', ['id' => $this->findLikeNotification()->getId()]));
 
-        self::assertTrue($client->getResponse()->isRedirect(), 'The action refuses it now: remove the known failure (#68).');
-        self::markTestIncomplete('Known failure, see #68.');
+        self::assertSame(404, $client->getResponse()->getStatusCode());
+        self::assertFalse($this->findLikeNotification()->getIsShown());
     }
 
     /**

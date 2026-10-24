@@ -60,7 +60,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'l', 'u' ))
-			->from('LadbCoreBundle:Like', 'l')
+			->from('LadbCoreBundle:Core\Like', 'l')
 			->innerJoin('l.user', 'u')
 		;
 

@@ -33,6 +33,8 @@ final class MessageFixtures extends Fixture implements DependentFixtureInterface
 
 		$this->factory->actAs($user2);
 
+		// Unread message count: composeThread() leaves it to the caller (notifyRecipientsForIncomingMessage() in the controller)
+		$user->getMeta()->incrementUnreadMessageCount();
 		$this->messageUtils->composeThread($user2, array( $user ), 'Ta table basse', 'Bonjour Jeanne, où as-tu acheté ton **chêne** ?');
 	}
 

@@ -297,27 +297,6 @@ class CollectionController extends AbstractCollectionBasedController {
 	}
 
 	/**
-	 * @Route("/{id}/{entityType}/{entityId}/+", requirements={"id" = "\d+", "entityType" = "\d+", "entityId" = "\d+"}, name="core_collection_add")
-	 */
-	public function addAction($id, $entityType, $entityId) {
-
-		$collection = $this->retrievePublication($id, Collection::CLASS_NAME);
-
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && $collection->getUser()->getId() != $this->getUser()->getId()) {
-			throw $this->createNotFoundException('Not allowed (core_collection_add)');
-		}
-
-		// Delete
-		$collectionManager = $this->get(CollectionManager::NAME);
-		$collectionManager->delete($collection);
-
-		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('collection.collection.form.alert.delete_success', array( '%title%' => $collection->getTitle() )));
-
-		return $this->redirect($this->generateUrl('core_collection_list'));
-	}
-
-	/**
 	 * @Route("/", name="core_collection_list")
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_collection_list_page")
 	 * @Template("LadbCoreBundle:Collection:Collection/list.html.twig")
