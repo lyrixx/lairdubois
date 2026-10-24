@@ -277,13 +277,13 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   `PictureManager::createFromUrl()` copie une image des fixtures et garde les URL
   (`$client->getContainer()->get('tests.picture_manager')->getUrls()`, avant le reboot suivant) ;
   `OpenGraphUtils::fetchMetas()` ne trouve des métas qu'à `OfflineOpenGraphUtils::URL` ;
-  `VideoHostingUtils::getThumbnailUrl()` répond sans les API (playlist YouTube, Vimeo) ; la capture
+  `VideoHostingUtils::getThumbnailUrl()` répond sans les API (playlist YouTube, Vimeo), comme
+  `getVideoSitemapData()` (`SITEMAP_TITLE`) ; la capture
   Chromium de `WebScreenshotUtils` copie une image des fixtures. Stripe, appelé en statique par
   `FundingController` : un listener de `kernel.request` lui donne le client HTTP
   `Tests\Double\OfflineStripeClient`, qui ne connaît que le payment intent qu'il crée
   (`PAYMENT_INTENT_ID`) et garde les requêtes (`tests.stripe_client`, `getRequests()`). Reste à
-  neutraliser avant d'écrire le test qui l'atteint : les autres API de `VideoHostingUtils` (took,
-  sitemaps).
+  neutraliser avant d'écrire le test qui l'atteint : les autres API de `VideoHostingUtils` (took).
 - Une `\Error` PHP sort du kernel en 3.4 : elle remonte de `$client->request()` au lieu de donner
   une 500. Un warning PHP devient une exception (gestionnaire d'erreurs de PHPUnit) : 500.
 - Smoke test (`tests/Smoke/RouteSmokeTest.php`) : chaque route GET en anonyme, `user` et `admin`
@@ -337,6 +337,18 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   destinataires de chaque mail par `dev@lairdubois.fr`, ceux d'origine restent dans l'en-tête
   `X-Swift-To`. Spool en mémoire en test : le spool fichier de `config.yml` (`app/spool/`) est
   partagé avec le dev.
+- Commandes (`tests/Command/`) : `static::runCommand('ladb:cron:offers --force')` lance une ligne
+  de commande dans la transaction du test et rend son code de sortie et sa sortie ; le kernel
+  reste celui de la commande (`static::getEntityManager()`), ses mails sont dans
+  `static::getSentEmailsByCommand()`. `CommandTest` lance chaque commande `ladb:` en verbeux avec
+  ses options (`COMMANDS`, une nouvelle commande sans entrée fait échouer le test), `UNTESTED` et
+  `KNOWN_FAILURES` comme le smoke test. `CrontabTest` lance les lignes de la crontab de
+  `docs/01-installation.md` (étape 13) et vérifie l'effet de chaque cron ; il remet les
+  `web/sitemap-*.xml` qu'écrit `ladb:cron:sitemaps`. Mastodon (curl dans `ladb:cron:spotlight`) est
+  hors ligne par `mastodon_instance` (`config_test.yml`), un protocole que curl ne connaît pas ;
+  Twitter et Facebook y sont coupés dans le code. Un `file_get_contents()` d'URL sans service à
+  doubler (ip-api.com) : `Tests\Double\OfflineHttpStream::register([$url => $body])`, puis
+  `unregister()` ; toute autre URL échoue.
 - Géocodage (`LocalisableUtils`, profils, collectifs et tous les formulaires avec une
   localisation) : remplacé en test par `Tests\Double\OfflineLocalisableUtils`, qui connaît les
   adresses de sa constante `ADDRESSES` (`Bordeaux, France`) ; toute autre adresse n'a pas de

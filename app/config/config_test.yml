@@ -25,6 +25,11 @@ monolog:
         main:
             level: notice
 
+# No status posted on Mastodon by ladb:cron:spotlight, which calls its API with curl: curl knows
+# no such protocol, and fails before any connection
+parameters:
+    mastodon_instance: 'offline://mastodon'
+
 # Their own database and index, loaded with the fixtures (castor -c test app:db:fixtures): the
 # tests do not overwrite the data of the dev environment. Each test runs in a transaction rolled
 # back at its end (dama/doctrine-test-bundle).
@@ -61,8 +66,8 @@ services:
         arguments: ['@service_container']
 
     # No outgoing request from the tests (issue #6): the pictures "downloaded" from a URL, the
-    # Open Graph metas, the thumbnails of the video APIs and the Chromium screenshots of a find
-    # come from the fixtures. Subclasses, as some services ask for the class of the original.
+    # Open Graph metas, the thumbnails and the sitemap data of the video APIs and the Chromium
+    # screenshots of a find come from the fixtures. Subclasses, as some services ask for the class of the original.
     tests.open_graph_utils:
         class: Tests\Double\OfflineOpenGraphUtils
         decorates: ladb_core.open_graph_utils
