@@ -18,8 +18,8 @@ use Tests\XhrTrait;
  * unpublishes it, and its author deletes it once private. The workflow of the fixtures, published
  * by "user", has two tasks ("Débiter les planches", then "Poncer et huiler"), a label and a part.
  *
- * Hiddable, not draftable: PublicationTestCase does not fit it (no draft, and the trait of the
- * controllers checks neither the visibility on show nor the one of publish).
+ * Hiddable, not draftable: PublicationTestCase does not fit it (no draft, the visibility plays its
+ * role).
  */
 final class WorkflowTest extends WebTestCase
 {
@@ -171,6 +171,7 @@ final class WorkflowTest extends WebTestCase
         yield 'lock' => ['GET', 'lock', ['id' => self::ID]];
         yield 'chown' => ['GET', 'chown', ['id' => self::ID]];
         yield 'copy' => ['GET', 'copy', ['id' => self::ID]];
+        yield 'restart' => ['GET', 'restart', ['id' => self::ID]];
     }
 
     /**
@@ -317,8 +318,8 @@ final class WorkflowTest extends WebTestCase
     }
 
     /**
-     * "Ce processus est privé. Vous seul pouvez le consulter.": the others see it anyway, and the
-     * page of the author fails for anonymous.
+     * "Ce processus est privé. Vous seul pouvez le consulter.": its author and the admins only;
+     * gone for the others, as it was published. The widget is for no one.
      *
      * @dataProvider providePrivatePages
      */
@@ -329,8 +330,7 @@ final class WorkflowTest extends WebTestCase
         $client = $this->createClientFor($username);
         static::xhr($client, 'GET', static::generatePath($route, ['id' => self::ID]));
 
-        self::assertSame($status, $client->getResponse()->getStatusCode(), 'The private workflow is hidden now: remove the known failure (#75).');
-        self::markTestIncomplete('Known failure, see #75.');
+        self::assertSame($status, $client->getResponse()->getStatusCode());
     }
 
     /**
@@ -338,25 +338,42 @@ final class WorkflowTest extends WebTestCase
      */
     public static function providePrivatePages(): iterable
     {
-        yield 'show, anonymous' => ['core_workflow_show', null, 500];
-        yield 'show, other user' => ['core_workflow_show', UserFixtures::USER2, 200];
-        yield 'widget, anonymous' => ['core_workflow_widget', null, 200];
-        yield 'tasks, anonymous' => ['core_workflow_task_list', null, 200];
+        yield 'show, anonymous' => ['core_workflow_show', null, 410];
+        yield 'show, author' => ['core_workflow_show', UserFixtures::USER, 200];
+        yield 'show, other user' => ['core_workflow_show', UserFixtures::USER2, 410];
+        yield 'show, admin' => ['core_workflow_show', UserFixtures::ADMIN, 200];
+        yield 'widget, anonymous' => ['core_workflow_widget', null, 404];
+        yield 'widget, author' => ['core_workflow_widget', UserFixtures::USER, 404];
+        yield 'tasks, anonymous' => ['core_workflow_task_list', null, 410];
+        yield 'tasks, author' => ['core_workflow_task_list', UserFixtures::USER, 200];
+        yield 'tasks, other user' => ['core_workflow_task_list', UserFixtures::USER2, 410];
+        yield 'statistics, other user' => ['core_workflow_statistics', UserFixtures::USER2, 410];
     }
 
     /**
-     * Nothing stops unpublishing a private workflow: its counters move again.
+     * Never published: not found for the others.
      */
+    public function testShowNew(): void
+    {
+        $this->submitNewForm(static::createClientAs(UserFixtures::USER), UserFixtures::USER);
+        $id = $this->findLast()->getId();
+
+        $client = static::createClientAs(UserFixtures::USER2);
+        $client->request('GET', $this->path('show', ['id' => $id]));
+
+        self::assertSame(404, $client->getResponse()->getStatusCode());
+    }
+
     public function testUnpublishPrivate(): void
     {
         $this->unpublish();
         [$privateCount, $publicCount] = $this->getCounts(UserFixtures::USER);
 
-        $client = $this->unpublish();
+        $client = static::createClientAs(UserFixtures::ADMIN);
+        $client->request('GET', $this->path('unpublish', ['id' => self::ID, 'rtu' => '/']));
 
-        self::assertSame(302, $client->getResponse()->getStatusCode(), 'A private workflow is not unpublished again now: remove the known failure (#76).');
-        self::assertSame([$privateCount + 1, $publicCount - 1], $this->getCounts(UserFixtures::USER));
-        self::markTestIncomplete('Known failure, see #76.');
+        self::assertSame(404, $client->getResponse()->getStatusCode());
+        self::assertSame([$privateCount, $publicCount], $this->getCounts(UserFixtures::USER));
     }
 
     /**
@@ -401,18 +418,28 @@ final class WorkflowTest extends WebTestCase
     }
 
     /**
-     * Nothing stops publishing a public workflow: its counters move again.
+     * @dataProvider providePublicPublishers
      */
-    public function testPublishPublic(): void
+    public function testPublishPublic(string $username): void
     {
         [$privateCount, $publicCount] = $this->getCounts(UserFixtures::USER);
+        $creationCount = $this->findCreation()->getWorkflowCount();
 
-        $client = static::createClientAs(UserFixtures::USER);
+        $client = static::createClientAs($username);
         $client->request('GET', $this->path('publish', ['id' => self::ID]));
 
-        self::assertSame(302, $client->getResponse()->getStatusCode(), 'A public workflow is not published again now: remove the known failure (#76).');
-        self::assertSame([$privateCount - 1, $publicCount + 1], $this->getCounts(UserFixtures::USER));
-        self::markTestIncomplete('Known failure, see #76.');
+        self::assertSame(404, $client->getResponse()->getStatusCode());
+        self::assertSame([$privateCount, $publicCount], $this->getCounts(UserFixtures::USER));
+        self::assertSame($creationCount, $this->findCreation()->getWorkflowCount());
+    }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function providePublicPublishers(): iterable
+    {
+        yield 'author' => [UserFixtures::USER];
+        yield 'admin' => [UserFixtures::ADMIN];
     }
 
     /**
@@ -455,9 +482,6 @@ final class WorkflowTest extends WebTestCase
         yield 'admin, public' => [UserFixtures::ADMIN, false, 302];
     }
 
-    /**
-     * Unlike the other types, the page does not check the witness of the deletion: #79.
-     */
     public function testShowDeleted(): void
     {
         $client = static::createClientAs(UserFixtures::ADMIN);
@@ -467,8 +491,7 @@ final class WorkflowTest extends WebTestCase
         $client = static::createClient();
         $client->request('GET', $this->path('show', ['id' => self::ID]));
 
-        self::assertSame(404, $client->getResponse()->getStatusCode(), 'The deleted workflow is gone now: remove the known failure (#79).');
-        self::markTestIncomplete('Known failure, see #79.');
+        self::assertSame(410, $client->getResponse()->getStatusCode());
     }
 
     /**
@@ -510,30 +533,38 @@ final class WorkflowTest extends WebTestCase
     }
 
     /**
-     * The action loads a workshop instead of the workflow: #45.
-     *
      * @dataProvider provideChowners
      */
-    public function testChown(string $username, string $owner): void
+    public function testChown(string $username, string $owner, int $status): void
     {
-        $client = static::createClientAs($username);
-        try {
-            $client->request('GET', $this->path('chown', ['id' => self::ID, 'owner' => $owner]));
-            self::fail('The change of owner passes now: remove the known failure (#45).');
-        } catch (\TypeError $e) {
-            self::assertStringContainsString('Workshop given', $e->getMessage());
-        }
+        [, $publicCount] = $this->getCounts(UserFixtures::USER);
+        [, $ownerPublicCount] = $this->getCounts($owner);
 
-        self::markTestIncomplete('Known failure, see #45.');
+        $client = static::createClientAs($username);
+        $client->request('GET', $this->path('chown', ['id' => self::ID, 'owner' => $owner]));
+
+        self::assertSame($status, $client->getResponse()->getStatusCode());
+        if (302 === $status) {
+            self::assertTrue($client->getResponse()->isRedirect($this->getShowPath()));
+            self::assertSame($owner, $this->find()->getUser()->getUsername());
+            self::assertSame($publicCount - 1, $this->getCounts(UserFixtures::USER)[1]);
+            self::assertSame($ownerPublicCount + 1, $this->getCounts($owner)[1]);
+        } else {
+            self::assertSame(UserFixtures::USER, $this->find()->getUser()->getUsername());
+        }
     }
 
     /**
-     * @return iterable<string, array{string, string}>
+     * An admin gives the workflow to anyone, its author only to one of its teams.
+     *
+     * @return iterable<string, array{string, string, int}>
      */
     public static function provideChowners(): iterable
     {
-        yield 'admin to another user' => [UserFixtures::ADMIN, UserFixtures::USER2];
-        yield 'author to its team' => [UserFixtures::USER, UserFixtures::TEAM];
+        yield 'admin to another user' => [UserFixtures::ADMIN, UserFixtures::USER2, 302];
+        yield 'author to its team' => [UserFixtures::USER, UserFixtures::TEAM, 302];
+        yield 'author to another user' => [UserFixtures::USER, UserFixtures::USER2, 404];
+        yield 'other user to itself' => [UserFixtures::USER2, UserFixtures::USER2, 404];
     }
 
     /**
@@ -560,8 +591,7 @@ final class WorkflowTest extends WebTestCase
     }
 
     /**
-     * Another account copies it too: the copy is inspired by the workflow. But the counter of
-     * the author of the workflow goes up instead of the one of the copier.
+     * Another account copies it too: the copy is inspired by the workflow.
      */
     public function testCopyAsOtherUser(): void
     {
@@ -580,8 +610,7 @@ final class WorkflowTest extends WebTestCase
         self::assertSame([self::ID], array_values($copy->getInspirations()->map(fn (Workflow $workflow) => $workflow->getId())->toArray()));
         self::assertSame($copyCount + 1, $this->find()->getCopyCount());
 
-        self::assertSame([$authorPrivateCount + 1, $privateCount], [$this->getCounts(UserFixtures::USER)[0], $this->getCounts(UserFixtures::USER2)[0]], 'The counter of the copier goes up now: remove the known failure (#78).');
-        self::markTestIncomplete('Known failure, see #78.');
+        self::assertSame([$authorPrivateCount, $privateCount + 1], [$this->getCounts(UserFixtures::USER)[0], $this->getCounts(UserFixtures::USER2)[0]]);
     }
 
     /**
@@ -612,8 +641,7 @@ final class WorkflowTest extends WebTestCase
     }
 
     /**
-     * The action only checks that the workflow is showable: #46 as anonymous, and any account
-     * restarts the workflow of another one.
+     * Only the author of the workflow and the admins restart it, as they change its tasks.
      */
     public function testRestartAsOtherUser(): void
     {
@@ -622,9 +650,9 @@ final class WorkflowTest extends WebTestCase
         $client = static::createClientAs(UserFixtures::USER2);
         $client->request('GET', $this->path('restart', ['id' => self::ID]));
 
-        self::assertSame(200, $client->getResponse()->getStatusCode(), 'The restart is refused now: remove the known failure (#77).');
-        self::assertSame(Task::STATUS_WORKABLE, $this->findTask('Débiter les planches')->getStatus());
-        self::markTestIncomplete('Known failure, see #77.');
+        self::assertSame(404, $client->getResponse()->getStatusCode());
+        self::assertSame(Task::STATUS_DONE, $this->findTask('Débiter les planches')->getStatus());
+        self::assertSame([], $client->getContainer()->get('tests.wamp_pusher')->getMessages());
     }
 
     private function path(string $action, array $parameters = []): string
