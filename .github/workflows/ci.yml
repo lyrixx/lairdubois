@@ -23,24 +23,29 @@ jobs:
         name: CI
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+            - &checkout
+              uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
               with:
                   persist-credentials: false
 
-            - name: Set up Docker Buildx
+            - &buildx
+              name: Set up Docker Buildx
               uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 
             # The "gha" cache of BuildKit needs the runtime variables (ACTIONS_RUNTIME_TOKEN...),
             # which the steps "run" do not get otherwise
-            - name: Expose the GitHub Actions runtime
+            - &runtime
+              name: Expose the GitHub Actions runtime
               uses: crazy-max/ghaction-github-runtime@04d248b84655b509d8c44dc1d6f990c879747487 # v4.0.0
 
-            - name: setup-castor
+            - &castor
+              name: setup-castor
               uses: castor-php/setup-castor@2a495b8c91f00be6768ad8a040ba8634c797d386 # v1.1.0
 
             # One cache per Dockerfile target. The override file is ignored by git, and loaded
             # by Castor when it exists (.castor/context.php)
-            - name: Cache the Docker layers in the GitHub Actions cache
+            - &docker_cache
+              name: Cache the Docker layers in the GitHub Actions cache
               run: |
                   cat > infrastructure/docker/docker-compose.override.yml <<'EOF'
                   services:
@@ -65,20 +70,24 @@ jobs:
                   EOF
 
             # The home directory of the builder (composer cache...) is .home/
-            - name: Cache the Composer packages
+            - &composer_cache
+              name: Cache the Composer packages
               uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
               with:
                   path: .home/.cache/composer
                   key: composer-${{ hashFiles('composer.lock', 'tools/*/composer.lock') }}
                   restore-keys: composer-
 
-            - name: Build the images
+            - &build
+              name: Build the images
               run: castor docker:build
 
-            - name: Install the application
+            - &install
+              name: Install the application
               run: castor app:install
 
-            - name: Start the infrastructure
+            - &up
+              name: Start the infrastructure
               run: castor docker:up
 
             # Database and index of the test environment (context "ci"): schema, fixtures and index
@@ -115,4 +124,32 @@ jobs:
               with:
                   name: deprecations
                   path: var/deprecations/report.md
+                  if-no-files-found: ignore
+
+    # The end-to-end tests (tests/e2e) beside the QA: same setup (YAML anchors of the job "ci"),
+    # then castor qa:e2e resets the database of the site, starts the websocket server and runs
+    # Playwright in its container
+    e2e:
+        name: E2E
+        runs-on: ubuntu-latest
+        steps:
+            - *checkout
+            - *buildx
+            - *runtime
+            - *castor
+            - *docker_cache
+            - *composer_cache
+            - *build
+            - *install
+            - *up
+
+            - name: Run the end-to-end tests
+              run: castor qa:e2e
+
+            - name: Upload the traces and screenshots of the failed tests
+              if: ${{ failure() }}
+              uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+              with:
+                  name: e2e-test-results
+                  path: var/e2e/test-results/
                   if-no-files-found: ignore

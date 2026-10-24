@@ -6,12 +6,14 @@ use Castor\Attribute\AsOption;
 use Castor\Attribute\AsRawTokens;
 use Castor\Attribute\AsTask;
 
+use function Castor\context;
 use function Castor\fs;
 use function Castor\io;
 use function Castor\variable;
 use function Castor\with;
 use function db_fixtures;
 use function db_has_users;
+use function docker\docker_compose;
 use function docker\docker_compose_run;
 use function docker\docker_exit_code;
 
@@ -181,6 +183,44 @@ function deprecations(): void
     }
 
     io()->text(\sprintf('%d Symfony deprecations, %d distinct messages: see %s.', $total, \count($rows), DEPRECATIONS_REPORT_FILE));
+}
+
+/**
+ * @param list<string> $rawTokens
+ */
+#[AsTask(description: 'Resets the database and the index of the site, then runs the end-to-end tests (Playwright, tests/e2e)', aliases: ['e2e'])]
+function e2e(#[AsRawTokens] array $rawTokens = []): int
+{
+    e2e_install_if_missing();
+
+    // The site serves the dev environment (web/app_dev.php) in every context: the suite resets
+    // its database and index. The websocket server keeps a connection to the dropped database:
+    // it restarts, in the dev environment too (it reads the sessions of the site). The suite
+    // needs no consumer of RabbitMQ.
+    with(static function (): void {
+        db_fixtures();
+        docker_compose(['up', '--detach', '--wait', '--no-build', '--no-deps', '--force-recreate', 'websocket'], profiles: ['default', 'worker']);
+    }, context: context()->withEnvironment(['SYMFONY_ENV' => 'dev']));
+
+    io()->section('Running Playwright');
+
+    return docker_exit_code(['npx', 'playwright', 'test', ...$rawTokens], service: 'playwright');
+}
+
+function e2e_install_if_missing(): void
+{
+    $e2eDir = variable('root_dir') . '/tests/e2e';
+
+    // npm writes node_modules/.package-lock.json on each install: when it is older than the
+    // lock, the dependencies changed since. The browsers are in the image.
+    $installed = $e2eDir . '/node_modules/.package-lock.json';
+    if (is_file($installed) && filemtime($installed) >= filemtime($e2eDir . '/package-lock.json')) {
+        return;
+    }
+
+    io()->section('Installing Playwright');
+
+    docker_compose_run(['npm', 'ci', '--no-audit', '--no-fund'], service: 'playwright');
 }
 
 function install_if_missing(): void
