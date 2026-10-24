@@ -244,16 +244,43 @@ final class ValueTest extends WebTestCase
 
     /**
      * Even its author does not delete the value of a mandatory field. The admins neither, when it
-     * is the last one: #51.
+     * is the last one.
+     *
+     * @dataProvider provideMandatoryDeleters
      */
-    public function testDeleteMandatory(): void
+    public function testDeleteMandatory(string $username): void
     {
         $value = $this->findWood()->getNameValues()->first();
 
-        $client = static::createClientAs(UserFixtures::USER);
+        $client = static::createClientAs($username);
         static::xhr($client, 'GET', $this->getValuePath('delete', $value, Wood::FIELD_NAME));
 
         self::assertSame(404, $client->getResponse()->getStatusCode());
+        self::assertSame('Chêne', $this->findWood()->getName());
+    }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function provideMandatoryDeleters(): iterable
+    {
+        yield 'author' => [UserFixtures::USER];
+        yield 'admin' => [UserFixtures::ADMIN];
+    }
+
+    /**
+     * An admin deletes the value of a mandatory field that has another one.
+     */
+    public function testDeleteMandatoryWithAnotherValue(): void
+    {
+        static::proposeValue(static::createClientAs(UserFixtures::USER2), $this->findWood(), Wood::FIELD_NAME, ['ladb_knowledge_value_text[data]' => 'Oak']);
+        $value = static::findLastValue();
+        self::assertSame('Oak,Chêne', $this->findWood()->getName());
+
+        $client = static::createClientAs(UserFixtures::ADMIN);
+        static::xhr($client, 'GET', $this->getValuePath('delete', $value, Wood::FIELD_NAME));
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
         self::assertSame('Chêne', $this->findWood()->getName());
     }
 
@@ -296,6 +323,27 @@ final class ValueTest extends WebTestCase
     {
         yield 'author' => [UserFixtures::USER2, 404];
         yield 'admin' => [UserFixtures::ADMIN, 200];
+    }
+
+    /**
+     * Not the last value of a mandatory field.
+     */
+    public function testMoveMandatory(): void
+    {
+        $value = $this->findWood()->getNameValues()->first();
+
+        $client = static::createClientAs(UserFixtures::ADMIN);
+        static::xhr($client, 'GET', static::generatePath('core_knowledge_value_admin_move', [
+            'entityType' => Wood::TYPE,
+            'entityId' => self::ID,
+            'fieldSrc' => Wood::FIELD_NAME,
+            'fieldDest' => Wood::FIELD_ENGLISHNAME,
+            'id' => $value->getId(),
+        ]));
+
+        self::assertSame(404, $client->getResponse()->getStatusCode());
+        self::assertSame('Chêne', $this->findWood()->getName());
+        self::assertSame(Wood::FIELD_NAME, static::getEntityManager()->getRepository(BaseValue::class)->find($value->getId())->getParentEntityField());
     }
 
     public function testVoteUp(): void

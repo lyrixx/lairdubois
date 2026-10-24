@@ -169,9 +169,13 @@ class ReviewController extends AbstractController {
 			throw $this->createNotFoundException('Not allowed (core_core_review_edit)');
 		}
 
+		// Retrieve related entity
+		$entity = $this->_retrieveRelatedEntity($review->getEntityType(), $review->getEntityId());
+
 		$form = $this->createForm(ReviewType::class, $review);
 
 		return array(
+			'entity' => $entity,
 			'review' => $review,
 			'form'   => $form->createView(),
 		);
@@ -197,13 +201,13 @@ class ReviewController extends AbstractController {
 			throw $this->createNotFoundException('Not allowed (core_knowledge_book_review_update)');
 		}
 
+		// Retrieve related entity
+		$entity = $this->_retrieveRelatedEntity($review->getEntityType(), $review->getEntityId());
+
 		$form = $this->createForm(ReviewType::class, $review);
 		$form->handleRequest($request);
 
 		if ($form->isValid()) {
-
-			// Retrieve related entity
-			$entity = $this->_retrieveRelatedEntity($review->getEntityType(), $review->getEntityId());
 
 			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($review);
@@ -229,6 +233,7 @@ class ReviewController extends AbstractController {
 		}
 
 		return array(
+			'entity' => $entity,
 			'review' => $review,
 			'form'   => $form->createView(),
 		);

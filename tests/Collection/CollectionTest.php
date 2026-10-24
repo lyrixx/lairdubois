@@ -114,6 +114,9 @@ final class CollectionTest extends WebTestCase
         yield 'unpublish' => ['GET', 'unpublish', ['id' => self::ID]];
         yield 'delete' => ['GET', 'delete', ['id' => self::ID]];
         yield 'lock' => ['GET', 'lock', ['id' => self::ID]];
+        yield 'add' => ['GET', 'add', ['id' => self::ID, 'entityType' => Find::TYPE, 'entityId' => self::ID]];
+        yield 'list available' => ['GET', 'list_available', ['entityType' => Find::TYPE, 'entityId' => self::ID]];
+        yield 'list available, page' => ['GET', 'list_available_page', ['entityType' => Find::TYPE, 'entityId' => self::ID, 'page' => 1]];
         yield 'entry create' => ['GET', 'entry_create', ['id' => self::ID, 'entityType' => Find::TYPE, 'entityId' => self::ID]];
         yield 'entry delete' => ['GET', 'entry_delete', ['id' => self::ID, 'entityType' => Creation::TYPE, 'entityId' => self::ID]];
     }
@@ -160,18 +163,20 @@ final class CollectionTest extends WebTestCase
     }
 
     /**
-     * The template of the form misses a variable: #62.
+     * An invalid form comes back with its errors, and keeps the content to add.
      */
     public function testCreateInvalid(): void
     {
         $client = static::createClientAs(UserFixtures::USER2);
         $lastId = $this->findLast()->getId();
 
-        $client->submit($this->getNewForm($client));
+        $form = $this->getNewForm($client);
+        $crawler = $client->request('POST', $form->getUri().'?entityType='.Find::TYPE.'&entityId='.self::ID, $form->getPhpValues());
 
+        self::assertSame(200, $client->getResponse()->getStatusCode());
         self::assertSame($lastId, $this->findLast()->getId());
-        self::assertSame(500, $client->getResponse()->getStatusCode(), 'The form passes now: remove the known failure (#62).');
-        self::markTestIncomplete('Known failure, see #62.');
+        self::assertNotCount(0, $crawler->filter('.alert-danger'));
+        self::assertCount(1, $crawler->filter(\sprintf('form[action="%s"]', $this->path('create', ['entityType' => Find::TYPE, 'entityId' => self::ID]))));
     }
 
     /**

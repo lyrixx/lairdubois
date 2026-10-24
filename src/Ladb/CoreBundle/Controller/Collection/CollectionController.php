@@ -118,6 +118,8 @@ class CollectionController extends AbstractCollectionBasedController {
 			'collection'   => $collection,
 			'form'         => $form->createView(),
 			'tagProposals' => $tagUtils->getProposals($collection),
+			'entityType'   => $request->get('entityType', null),
+			'entityId'     => $request->get('entityId', null),
 		);
 	}
 
