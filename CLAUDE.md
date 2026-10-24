@@ -227,6 +227,7 @@ identifiants des comptes sont des constantes : `UserFixtures::ADMIN`, `USER`, `U
 | Livre, logiciel, outil (avis sur le livre et le logiciel) | `/livres/1.html`, `/logiciels/1.html`, `/outils/1.html` |
 | Blog, FAQ, astuce (redirige vers son URL), took (redirige vers YouTube) | `/blog/1.html`, `/faq/1.html`, `/astuces/1.html`, `/yt/1.html` |
 | Messagerie : fil de `user2` à `user` | `/messagerie/thread/1` |
+| Financement : mois précédent (charge récurrente et autre charge), mois courant (don de `user2`) | `/financement/` |
 
 Les autres tables (commentaires, likes, votes, avis, feedbacks, valeurs de la xylothèque,
 notifications…) ont aussi une ligne d'id 1, mais son contenu dépend de l'ordre de chargement :
@@ -277,9 +278,12 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   (`$client->getContainer()->get('tests.picture_manager')->getUrls()`, avant le reboot suivant) ;
   `OpenGraphUtils::fetchMetas()` ne trouve des métas qu'à `OfflineOpenGraphUtils::URL` ;
   `VideoHostingUtils::getThumbnailUrl()` répond sans les API (playlist YouTube, Vimeo) ; la capture
-  Chromium de `WebScreenshotUtils` copie une image des fixtures. Reste à neutraliser avant d'écrire
-  le test qui l'atteint : les autres API de `VideoHostingUtils` (took, sitemaps), Stripe
-  (`/financement`, en XHR).
+  Chromium de `WebScreenshotUtils` copie une image des fixtures. Stripe, appelé en statique par
+  `FundingController` : un listener de `kernel.request` lui donne le client HTTP
+  `Tests\Double\OfflineStripeClient`, qui ne connaît que le payment intent qu'il crée
+  (`PAYMENT_INTENT_ID`) et garde les requêtes (`tests.stripe_client`, `getRequests()`). Reste à
+  neutraliser avant d'écrire le test qui l'atteint : les autres API de `VideoHostingUtils` (took,
+  sitemaps).
 - Une `\Error` PHP sort du kernel en 3.4 : elle remonte de `$client->request()` au lieu de donner
   une 500. Un warning PHP devient une exception (gestionnaire d'erreurs de PHPUnit) : 500.
 - Smoke test (`tests/Smoke/RouteSmokeTest.php`) : chaque route GET en anonyme, `user` et `admin`
@@ -297,7 +301,11 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   le nom des compteurs de `UserMeta` et les valeurs du formulaire d'un nouveau contenu ;
   `createPicture()` lui crée une image avec la fabrique des fixtures (`tests.fixture_factory`).
   Échecs connus dans `KNOWN_FAILURES` (nom du test avec son jeu de données, issue), comme le smoke
-  test. Exemples : `tests/Wonder/`, `tests/Find/`.
+  test. Exemples : `tests/Wonder/`, `tests/Find/`. Annonce : `KEEPS_ITS_ACTIVITIES_WHEN_UNPUBLISHED`
+  (republiable, l'activité ne vient qu'à la première publication) et suppression par l'auteur.
+- `Tests\EditorialTestCase` : la même chose pour le blog et la FAQ, que seuls les admins écrivent,
+  publient et suppriment (contenu d'id 1 d'`admin`, `user` est l'autre compte) ; ni compteurs ni
+  collectifs.
 - Requêtes du JS du site (`Tests\XhrTrait`) : `static::xhr($client, $method, $uri, $parameters)`, le
   client de 3.4 n'a pas `xmlHttpRequest()` ; `static::generatePath($route, $parameters)`.
 - Connaissances (`tests/Knowledge/`) : ni auteur, ni brouillon, ni formulaire d'édition. Une
