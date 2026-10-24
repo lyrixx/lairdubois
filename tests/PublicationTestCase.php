@@ -33,6 +33,10 @@ abstract class PublicationTestCase extends WebTestCase
      */
     protected const KNOWN_FAILURES = [];
 
+    // Whether an unpublished content keeps its publish activities: a republishable one (offer)
+    // gets an activity on its first publication only
+    protected const KEEPS_ITS_ACTIVITIES_WHEN_UNPUBLISHED = false;
+
     /**
      * Prefix of the names of the routes of the type: "core_creation" for "core_creation_show"...
      */
@@ -249,13 +253,14 @@ abstract class PublicationTestCase extends WebTestCase
     public function testUnpublishHidesTheContent(): void
     {
         [$privateCount, $publicCount] = $this->getCounts(UserFixtures::USER);
+        $activityCount = $this->countPublishActivities();
 
         $client = $this->unpublish();
 
         self::assertTrue($client->getResponse()->isRedirect('/'));
         self::assertTrue($this->find(static::ID)->getIsDraft());
         self::assertSame([$privateCount + 1, $publicCount - 1], $this->getCounts(UserFixtures::USER));
-        self::assertSame(0, $this->countPublishActivities());
+        self::assertSame(static::KEEPS_ITS_ACTIVITIES_WHEN_UNPUBLISHED ? $activityCount : 0, $this->countPublishActivities());
         self::assertFalse($this->isListed($this->getShowPath()));
 
         // Gone for the others, as it was published

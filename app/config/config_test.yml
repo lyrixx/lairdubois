@@ -81,6 +81,14 @@ services:
         decorates: ladb_core.web_screenshot_utils
         arguments: ['@service_container']
 
+    # No call to the API of Stripe (/financement): FundingController calls its static API, which
+    # gets the HTTP client of Tests\Double\OfflineStripeClient at each request
+    tests.stripe_client:
+        class: Tests\Double\OfflineStripeClient
+        public: true
+        tags:
+            - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest, priority: 4096 }
+
     # The factory of the fixtures, to create the pictures and resources of a new content
     tests.fixture_factory:
         alias: Ladb\CoreBundle\DataFixtures\FixtureFactory
