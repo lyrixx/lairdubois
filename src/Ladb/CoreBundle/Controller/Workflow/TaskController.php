@@ -2,6 +2,7 @@
 
 namespace Ladb\CoreBundle\Controller\Workflow;
 
+use Ladb\CoreBundle\Controller\PublicationControllerTrait;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -14,6 +15,8 @@ use Ladb\CoreBundle\Form\Type\Workflow\TaskType;
  * @Route("/processus")
  */
 class TaskController extends AbstractWorkflowBasedController {
+
+	use PublicationControllerTrait;
 
 	private function _assertValidWorkflow(Task $task, Workflow $workflow, $wrongWorkflowException = true) {
 		if ($task->getWorkflow() != $workflow) {
@@ -555,6 +558,7 @@ class TaskController extends AbstractWorkflowBasedController {
 
 		// Retrieve Workflow
 		$workflow = $this->_retrieveWorkflow($id);
+		$this->assertShowable($workflow);
 
 		// Retrieve readOnly parameter
 		$readOnly = $request->get('readOnly', false);

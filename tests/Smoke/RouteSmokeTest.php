@@ -69,8 +69,6 @@ final class RouteSmokeTest extends WebTestCase
         'core_user_team_list_geojson' => ['anonymous' => 47, 'user' => 47, 'admin' => 47],
         'core_watch_create' => ['user' => 42, 'admin' => 42],
         'core_watch_delete' => ['user' => 42],
-        'core_workflow_chown' => ['user' => 45, 'admin' => 45],
-        'core_workflow_restart' => ['anonymous' => 46],
         'core_workflow_unpublish' => ['admin' => 42],
         'core_workshop_unpublish' => ['admin' => 42],
         'fos_user_profile_show' => ['anonymous' => 32],

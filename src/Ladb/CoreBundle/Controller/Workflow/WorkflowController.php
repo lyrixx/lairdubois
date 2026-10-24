@@ -270,7 +270,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	 */
 	public function chownAction(Request $request, $id) {
 
-		$workflow = $this->retrievePublication($id, Workshop::CLASS_NAME);
+		$workflow = $this->retrievePublication($id, Workflow::CLASS_NAME);
 		$this->assertChownable($workflow);
 
 		$targetUser = $this->retrieveOwner($request);
@@ -547,7 +547,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	public function restartAction($id) {
 
 		$workflow = $this->retrievePublication($id, Workflow::CLASS_NAME);
-		$this->assertShowable($workflow);
+		$this->_assertAuthorizedWorkflow($workflow);
 
 		// Restart
 		$workflowManager = $this->get(WorkflowManager::NAME);
@@ -615,11 +615,21 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	 * @Template("LadbCoreBundle:Workflow:Workflow/show.html.twig")
 	 */
 	public function showAction(Request $request, $id) {
+		$om = $this->getDoctrine()->getManager();
+		$workflowRepository = $om->getRepository(Workflow::CLASS_NAME);
 		$witnessManager = $this->get(WitnessManager::NAME);
 
 		$layout = $request->get('layout', 'page');
 
-		$workflow = $this->retrievePublication($id, Workflow::CLASS_NAME);
+		$id = intval($id);
+
+		$workflow = $workflowRepository->findOneById($id);
+		if (is_null($workflow)) {
+			if ($response = $witnessManager->checkResponse(Workflow::TYPE, $id)) {
+				return $response;
+			}
+			throw $this->createNotFoundException('Unable to find Workflow entity (id='.$id.').');
+		}
 		$this->assertShowable($workflow);
 
 		// Dispatch publication event

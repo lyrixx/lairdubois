@@ -141,6 +141,9 @@ trait PublicationControllerTrait {
 		if ($publication instanceof DraftableInterface && $publication->getIsDraft() === false) {
 			throw $this->createNotFoundException('Already published ('.$context.')');
 		}
+		if (!($publication instanceof DraftableInterface) && $publication instanceof HiddableInterface && $publication->getIsPublic()) {
+			throw $this->createNotFoundException('Already published ('.$context.')');
+		}
 		if ($publication->getIsLocked() === true) {
 			throw $this->createNotFoundException('Locked ('.$context.')');
 		}
@@ -165,6 +168,9 @@ trait PublicationControllerTrait {
 		if ($publication instanceof DraftableInterface && $publication->getIsDraft() === true) {
 			throw $this->createNotFoundException('Already draft ('.$context.')');
 		}
+		if (!($publication instanceof DraftableInterface) && $publication instanceof HiddableInterface && !$publication->getIsPublic()) {
+			throw $this->createNotFoundException('Already private ('.$context.')');
+		}
 	}
 
 	protected function assertDeletable(PublicationInterface $publication, $ownerAllowed = false, $context = '') {
@@ -187,7 +193,8 @@ trait PublicationControllerTrait {
 	}
 
 	protected function assertShowable(PublicationInterface $publication, $publicly = false, $context = '') {
-		if ($publication instanceof DraftableInterface && $publication->getIsDraft() === true) {
+		// Without draft (workflows, collections), a private publication is an unpublished one
+		if ($publication instanceof DraftableInterface && $publication->getIsDraft() === true || !($publication instanceof DraftableInterface) && $publication instanceof HiddableInterface && !$publication->getIsPublic()) {
 			if ($publicly) {
 				throw $this->createNotFoundException('Not allowed ('.$context.')');
 			}

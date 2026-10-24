@@ -260,7 +260,7 @@ class WorkflowManager extends AbstractAuthoredPublicationManager {
 		}
 
 		// Increment user workflow count
-		$workflow->getUser()->getMeta()->incrementPrivateWorkflowCount();
+		$user->getMeta()->incrementPrivateWorkflowCount();
 
 		$om->persist($newWorkflow);
 		if ($flush) {
