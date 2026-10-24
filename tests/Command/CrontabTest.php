@@ -35,9 +35,7 @@ final class CrontabTest extends WebTestCase
      *
      * @var array<string, int>
      */
-    private const KNOWN_FAILURES = [
-        'ladb:cron:opencutlist:download:analyze --force' => 71,
-    ];
+    private const KNOWN_FAILURES = [];
 
     /** @var array<string, string> */
     private array $sitemaps = [];
@@ -261,8 +259,7 @@ final class CrontabTest extends WebTestCase
             'http://ip-api.com/json/192.0.2.1?lang=fr&fields=status,message,continentCode,country,countryCode,city,lat,lon' => json_encode(['status' => 'success', 'continentCode' => 'EU', 'country' => 'France', 'countryCode' => 'FR', 'city' => 'Bordeaux', 'lat' => 44.84, 'lon' => -0.58]),
         ]);
         try {
-            // Not the line of the crontab, which runs a command that does not exist (#71)
-            [$exitCode, $output] = static::runCommand('ladb:cron:opencutlist:access:analyze --force');
+            [$exitCode, $output] = static::runCommand(self::getCron('ladb:cron:opencutlist:access:analyze'));
         } finally {
             OfflineHttpStream::unregister();
         }
