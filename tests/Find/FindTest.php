@@ -14,10 +14,6 @@ use Tests\PublicationTestCase;
  */
 final class FindTest extends PublicationTestCase
 {
-    protected const KNOWN_FAILURES = [
-        'testCreateWebsiteWithoutOpenGraph' => 56,
-    ];
-
     protected static function getRoutePrefix(): string
     {
         return 'core_find';
@@ -69,7 +65,11 @@ final class FindTest extends PublicationTestCase
         $find = $this->findLast();
         self::assertSame(Find::KIND_WEBSITE, $find->getKind());
         self::assertNull($find->getContent()->getTitle());
-        self::assertNull($find->getMainPicture()->getWidth());
+        // An empty picture, without file
+        self::assertSame(0, $find->getMainPicture()->getWidth());
+
+        $client->followRedirect();
+        self::assertSame(200, $client->getResponse()->getStatusCode());
     }
 
     /**

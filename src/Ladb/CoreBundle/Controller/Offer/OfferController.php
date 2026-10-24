@@ -406,7 +406,7 @@ class OfferController extends AbstractController {
 
 						if ($this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
 
-							if ($facet->value == 'draft') {
+							if (isset($facet->value) && $facet->value == 'draft') {
 
 								$filter = (new \Elastica\Query\BoolQuery())
 									->addFilter(new \Elastica\Query\MatchPhrase('user.username', $this->getUser()->getUsername()))
