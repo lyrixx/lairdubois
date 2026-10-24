@@ -82,7 +82,7 @@ final class FundingTest extends WebTestCase
     }
 
     /**
-     * The dashboard divides by the charges of the month.
+     * The dashboard divides by the charges of the month: without charges, the circle stays empty.
      */
     public function testDashboardOfAMonthWithoutCharges(): void
     {
@@ -95,14 +95,10 @@ final class FundingTest extends WebTestCase
         static::getEntityManager()->flush();
 
         $client = static::createClient();
-        try {
-            $client->request('GET', static::generatePath('core_funding_dashboard'));
-            $error = null;
-        } catch (\DivisionByZeroError $error) {
-        }
+        $crawler = $client->request('GET', static::generatePath('core_funding_dashboard'));
 
-        self::assertNotNull($error, 'The page passes now: remove the known failure (#64).');
-        self::markTestIncomplete('Known failure, see #64.');
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertSame('0', $crawler->filter('#ladb_funding_dashboard')->attr('data-ladb-balance-ratio'));
     }
 
     /**

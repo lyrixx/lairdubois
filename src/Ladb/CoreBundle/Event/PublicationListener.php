@@ -94,7 +94,8 @@ class PublicationListener implements EventSubscriberInterface {
 				continue;
 			}
 			// An empty picture has no file (website find without Open Graph image)
-			if (!is_file($picture->getAbsolutePath())) {
+			$absolutePath = $picture->getAbsolutePath();
+			if (is_null($absolutePath) || !is_file($absolutePath)) {
 				continue;
 			}
 			$path = $picture->getPath();
