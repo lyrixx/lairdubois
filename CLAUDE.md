@@ -298,6 +298,15 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   `createPicture()` lui crée une image avec la fabrique des fixtures (`tests.fixture_factory`).
   Échecs connus dans `KNOWN_FAILURES` (nom du test avec son jeu de données, issue), comme le smoke
   test. Exemples : `tests/Wonder/`, `tests/Find/`.
+- Requêtes du JS du site (`Tests\XhrTrait`) : `static::xhr($client, $method, $uri, $parameters)`, le
+  client de 3.4 n'a pas `xmlHttpRequest()` ; `static::generatePath($route, $parameters)`.
+- Connaissances (`tests/Knowledge/`) : ni auteur, ni brouillon, ni formulaire d'édition. Une
+  sous-classe de `KnowledgeTestCase` donne ses valeurs de création et une valeur à proposer ; le
+  mécanisme commun (proposer, modifier, retirer, déplacer une valeur, voter) est dans `ValueTest`,
+  sur le bois, avec les helpers de `ValueTrait` (`proposeValue()`, `vote()`…). Le verrou de
+  `createLock()` vaut aussi pour les votes, même après un formulaire invalide : un second vote du
+  même compte dans un test répond 404. Les avis exigent un compte de plus de 7 jours :
+  `setCreatedAt()` sur le compte dans le test.
 - Le `DomCrawler` de Symfony 3.4 lit l'UTF-8 comme de l'ISO-8859-1 depuis PHP 8.2 (`chÃªne`), et
   un formulaire relu par le crawler renverrait ses valeurs accentuées ainsi : le client de test
   (`Tests\Utf8Client`, qui décore `test.client`) lui passe la page en entités HTML.
