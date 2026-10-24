@@ -8,3 +8,6 @@ if (false !== $deprecationsFile = getenv('PHPUNIT_DEPRECATIONS_FILE')) {
 }
 
 require dirname(__DIR__).'/app/autoload.php';
+
+// No call to the Graph API of Facebook: its SDK has no service to replace (see the double)
+require __DIR__.'/Double/OfflineFacebookGraph.php';

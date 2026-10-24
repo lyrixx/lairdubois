@@ -278,12 +278,17 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   (`$client->getContainer()->get('tests.picture_manager')->getUrls()`, avant le reboot suivant) ;
   `OpenGraphUtils::fetchMetas()` ne trouve des métas qu'à `OfflineOpenGraphUtils::URL` ;
   `VideoHostingUtils::getThumbnailUrl()` répond sans les API (playlist YouTube, Vimeo), comme
-  `getVideoSitemapData()` (`SITEMAP_TITLE`) ; la capture
+  `getVideoSitemapData()` (`SITEMAP_TITLE`) et `getVideoGwData()` (Youtook) ; la capture
   Chromium de `WebScreenshotUtils` copie une image des fixtures. Stripe, appelé en statique par
   `FundingController` : un listener de `kernel.request` lui donne le client HTTP
   `Tests\Double\OfflineStripeClient`, qui ne connaît que le payment intent qu'il crée
-  (`PAYMENT_INTENT_ID`) et garde les requêtes (`tests.stripe_client`, `getRequests()`). Reste à
-  neutraliser avant d'écrire le test qui l'atteint : les autres API de `VideoHostingUtils` (took).
+  (`PAYMENT_INTENT_ID`) et garde les requêtes (`tests.stripe_client`, `getRequests()`).
+- Graph API de Facebook (`ApiController`, `OpenGraphUtils`) : le SDK est créé dans le code du site,
+  sans service à remplacer ; `Tests\Double\OfflineFacebookGraph`, chargé par
+  `tests/bootstrap.php`, définit les fonctions `curl_*()` du namespace du SDK, qui passent avant
+  celles de PHP (comme `ClockMock` du bridge). Il connaît le compteur de partages de
+  `OfflineFacebookGraph::URL`, répond une erreur pour `ERROR_URL` et pour toute autre requête, et
+  rend les URL appelées (`popRequests()`).
 - Une `\Error` PHP sort du kernel en 3.4 : elle remonte de `$client->request()` au lieu de donner
   une 500. Un warning PHP devient une exception (gestionnaire d'erreurs de PHPUnit) : 500.
 - Smoke test (`tests/Smoke/RouteSmokeTest.php`) : chaque route GET en anonyme, `user` et `admin`
