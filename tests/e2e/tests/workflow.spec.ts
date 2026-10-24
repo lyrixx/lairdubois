@@ -18,10 +18,6 @@ test('connects to the websocket server, then loads the tasks', async ({ page }) 
 });
 
 test('edits a workflow, and its other windows follow through the websocket', async ({ page, context }) => {
-    // #83: the pusher fails, every edition answers 500. #82: the server sees the account as
-    // anonymous, and refuses the subscription to the workflow.
-    test.fail();
-
     const other = await context.newPage();
     await openWorkspace(page);
     await openWorkspace(other);

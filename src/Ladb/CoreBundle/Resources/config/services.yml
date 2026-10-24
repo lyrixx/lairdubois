@@ -632,6 +632,19 @@ services:
       - { name: gos_web_socket.topic }
     arguments: ['@service_container']
 
+  # Gos WebSocket in PHP 8 (to remove with it, #21)
+  gos_web_socket.wamp.pusher:  # Redefined: LadbCoreBundle is registered after GosWebSocketBundle, its definition wins
+    parent: gos_web_socket.abstract.pusher
+    class: Ladb\CoreBundle\WebSocket\WampPusher
+    public: true
+    tags:
+      - { name: gos_web_socket.pusher, alias: wamp }
+  ladb_core.websocket.session_listener:
+    class: Ladb\CoreBundle\WebSocket\SessionListener
+    arguments: ['@gos_web_socket.session_handler']
+    tags:
+      - { name: kernel.event_listener, event: gos_web_socket.client_connected, method: onClientConnect, priority: 10 }  # Before the authentication of Gos
+
   # Consumer
   Ladb\CoreBundle\Consumer\ViewConsumer:
     arguments: ['@service_container']
