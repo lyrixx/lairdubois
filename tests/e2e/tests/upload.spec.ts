@@ -33,17 +33,11 @@ test('uploads a PDF file', async ({ page }) => {
 });
 
 test('uploads an SVG file', async ({ page }) => {
-    // #84: ImageMagick of the Docker image cannot read SVG, the upload answers 500
-    test.fail();
-
     await openNewPlan(page);
     await uploadResource(page, 'plan.svg');
 });
 
 test('uploads a picture, then creates the plan', async ({ page }) => {
-    // #85: every picture upload answers 500 in PHP 8
-    test.fail();
-
     await openNewPlan(page);
     await uploadResource(page, 'plan.pdf');
 
