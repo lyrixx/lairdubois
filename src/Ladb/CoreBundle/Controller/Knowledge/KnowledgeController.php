@@ -428,6 +428,9 @@ class KnowledgeController extends AbstractController {
 		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && ($value->getUser()->getId() != $this->getUser()->getId() || $value->getVoteCount() > 0 || $fieldMandatory)) {
 			throw $this->createNotFoundException('Not allowed (core_knowledge_value_delete)');
 		}
+		if ($fieldMandatory && count($propertyUtils->getValue($entity, $field.'_values')) <= 1) {
+			throw $this->createNotFoundException('Not allowed - Mandatory field must keep a value (core_knowledge_value_delete)');
+		}
 
 		$propertyUtils->removeValue($entity, $field.'_value', $value);
 
@@ -656,9 +659,13 @@ class KnowledgeController extends AbstractController {
 
 		$fieldSrcType = $fieldSrcDef[AbstractKnowledge::ATTRIB_TYPE];
 		$fieldDestType = $fieldDestDef[AbstractKnowledge::ATTRIB_TYPE];
+		$fieldSrcMandatory = isset($fieldSrcDef[AbstractKnowledge::ATTRIB_MANDATORY]) && $fieldSrcDef[AbstractKnowledge::ATTRIB_MANDATORY];
 
 		if ($fieldSrcType != $fieldDestType) {
 			throw $this->createNotFoundException('Incompatible field types (core_knowledge_value_admin_move)');
+		}
+		if ($fieldSrcMandatory && count($propertyUtils->getValue($entity, $fieldSrc.'_values')) <= 1) {
+			throw $this->createNotFoundException('Not allowed - Mandatory field must keep a value (core_knowledge_value_admin_move)');
 		}
 
 		$entityClass = $this->_computeEntityClass($fieldSrcType);

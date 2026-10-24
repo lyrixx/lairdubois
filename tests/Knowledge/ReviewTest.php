@@ -8,6 +8,7 @@ use Ladb\CoreBundle\Entity\Core\Review;
 use Ladb\CoreBundle\Entity\Knowledge\Book;
 use Ladb\CoreBundle\Entity\Knowledge\Software;
 use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Component\DomCrawler\Form;
 use Tests\WebTestCase;
 use Tests\XhrTrait;
 
@@ -93,17 +94,18 @@ final class ReviewTest extends WebTestCase
     }
 
     /**
-     * The template of the form misses a variable, for its author too: #50.
-     *
      * @dataProvider provideEditors
      */
     public function testEdit(string $username): void
     {
-        $client = static::createClientAs($username);
-        static::xhr($client, 'GET', static::generatePath('core_review_edit', ['id' => $this->findReviewOfUser2()->getId()]));
+        $review = $this->findReviewOfUser2();
 
-        self::assertSame(500, $client->getResponse()->getStatusCode(), 'The form passes now: remove the known failure (#50).');
-        self::markTestIncomplete('Known failure, see #50.');
+        $client = static::createClientAs($username);
+        $crawler = static::xhr($client, 'GET', static::generatePath('core_review_edit', ['id' => $review->getId()]));
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        $form = $crawler->filter(\sprintf('form[action="%s"]', static::generatePath('core_review_update', ['id' => $review->getId()])))->form();
+        self::assertSame($review->getTitle(), $form->get('ladb_core_review[title]')->getValue());
     }
 
     /**
@@ -115,20 +117,11 @@ final class ReviewTest extends WebTestCase
         yield 'admin' => [UserFixtures::ADMIN];
     }
 
-    /**
-     * Without its edit form (#50), the update takes the token of the form of a new review, of the
-     * same name.
-     */
     public function testUpdate(): void
     {
-        $client = $this->createClientOfOldAccount(UserFixtures::USER2);
+        $client = static::createClientAs(UserFixtures::USER2);
         $review = $this->findReviewOfUser2();
-        $crawler = static::xhr($client, 'GET', $this->getNewPath(Book::TYPE));
-        $values = $crawler->filter(\sprintf('form[action="%s"]', static::generatePath('core_review_create', ['entityType' => Book::TYPE, 'entityId' => self::ID])))->form([
-            'ladb_core_review[title]' => $review->getTitle(),
-            'ladb_core_review[rating]' => '3',
-            'ladb_core_review[body]' => $review->getBody(),
-        ])->getPhpValues();
+        $values = $this->getEditForm($client, $review->getId())->setValues(['ladb_core_review[rating]' => '3'])->getPhpValues();
 
         static::xhr($client, 'POST', static::generatePath('core_review_update', ['id' => $review->getId()]), $values);
 
@@ -140,6 +133,24 @@ final class ReviewTest extends WebTestCase
         $client = static::createClientAs(UserFixtures::USER);
         static::xhr($client, 'POST', static::generatePath('core_review_update', ['id' => $review->getId()]), $values);
         self::assertSame(404, $client->getResponse()->getStatusCode());
+    }
+
+    /**
+     * An invalid form comes back with its errors.
+     */
+    public function testUpdateInvalid(): void
+    {
+        $client = static::createClientAs(UserFixtures::USER2);
+        $review = $this->findReviewOfUser2();
+        $values = $this->getEditForm($client, $review->getId())->setValues(['ladb_core_review[title]' => ''])->getPhpValues();
+
+        $crawler = static::xhr($client, 'POST', static::generatePath('core_review_update', ['id' => $review->getId()]), $values);
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertCount(1, $crawler->filter(\sprintf('form[action="%s"]', static::generatePath('core_review_update', ['id' => $review->getId()]))));
+        // The form emptied the title of the review of the request, without flushing it
+        static::getEntityManager()->clear();
+        self::assertSame($review->getTitle(), $this->findReviewOfUser2()->getTitle());
     }
 
     /**
@@ -189,6 +200,14 @@ final class ReviewTest extends WebTestCase
     private function getNewPath(int $entityType): string
     {
         return static::generatePath('core_review_new', ['entityType' => $entityType, 'entityId' => self::ID]);
+    }
+
+    private function getEditForm(Client $client, int $id): Form
+    {
+        $crawler = static::xhr($client, 'GET', static::generatePath('core_review_edit', ['id' => $id]));
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+
+        return $crawler->filter(\sprintf('form[action="%s"]', static::generatePath('core_review_update', ['id' => $id])))->form();
     }
 
     /**
