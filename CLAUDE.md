@@ -99,7 +99,7 @@ castor stop
 castor builder                    # shell dans le builder
 castor builder -- bin/console …   # une commande dans le builder
 castor logs [--service=frontend]
-castor app:install                # composer install, clé DKIM jetable si absente
+castor app:install                # composer install, clés DKIM et VAPID jetables si absentes
 castor app:db:schema              # base, schéma (doctrine:schema:update) et table sessions
 castor app:db:fixtures           # recrée la base avec les fixtures, notifications, index
 castor app:elasticsearch:populate # fos:elastica:populate
@@ -426,6 +426,9 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `castor app:elasticsearch:populate`.
 - Le serveur websocket de Gos n'écoute que sur une IP : il tourne avec `--host=0.0.0.0`, et
   `websocket_host` (`websocket`) ne sert qu'au pusher.
+- Gos WebSocket ne marche pas tel quel en PHP 8 : le pusher WAMP (son client lit mal la réponse du
+  serveur) et la lecture de la session par le serveur (`unserialize()` de Ratchet, PHP 8.3) sont
+  remplacés par les classes de `src/Ladb/CoreBundle/WebSocket/`, à retirer avec Gos (#21).
 - `bin/console` lit `SYMFONY_ENV`, pas `APP_ENV`.
 - Les sessions sont en base (`PdoSessionHandler`) : `doctrine:schema:create` ne crée pas la table
   `sessions`.
@@ -455,3 +458,7 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   elle, tout mail du site (confirmation d'adresse, notifications…) donne une 500. `castor
   app:install` en génère une jetable si elle manque. Les mails de FOSUserBundle (mot de passe
   oublié) ne passent pas par là.
+- Les notifications web push sont signées avec les clés VAPID de la prod (`bentools_webpush.*` de
+  `parameters.yml`) : avec celles de `parameters.yml.dist`, le consumer `webpush_notification`
+  s'arrête au premier message. `castor app:install` y écrit une paire jetable, que les `composer
+  install` suivants gardent.

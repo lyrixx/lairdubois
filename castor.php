@@ -59,7 +59,7 @@ function start(): void
     about();
 }
 
-#[AsTask(description: 'Installs the application (composer, throwaway DKIM key)', namespace: 'app', aliases: ['install'])]
+#[AsTask(description: 'Installs the application (composer, throwaway DKIM and VAPID keys)', namespace: 'app', aliases: ['install'])]
 function install(): void
 {
     io()->title('Installing the application');
@@ -73,6 +73,20 @@ function install(): void
     // MailerUtils signs every email with the DKIM key of the production server (keys/private.pem,
     // out of git): without a key, sending an email fails. A throwaway one for dev and test.
     docker_compose_run(['sh', '-c', 'test -f keys/private.pem || (mkdir -p keys && openssl genrsa -out keys/private.pem 2048)']);
+
+    // The web push notifications are signed with the VAPID keys of the production server
+    // (parameters.yml, out of git): with the placeholders of parameters.yml.dist, the
+    // webpush_notification consumer stops on its first message. A throwaway pair for dev and
+    // test, that the next composer install keeps.
+    docker_compose_run(['php', '-r', <<<'PHP'
+        require 'vendor/autoload.php';
+        $file = 'app/config/parameters.yml';
+        $keys = Minishlink\WebPush\VAPID::createVapidKeys();
+        file_put_contents($file, strtr(file_get_contents($file), [
+            'YOUR_WEBPUSH_PUBLIC_KEY' => $keys['publicKey'],
+            'YOUR_WEBPUSH_PRIVATE_KEY' => $keys['privateKey'],
+        ]));
+        PHP]);
 }
 
 #[AsTask(description: 'Creates the database, or updates its schema, as on the production server', namespace: 'app:db', name: 'schema')]
