@@ -27,6 +27,10 @@ Une session pilote, des agents codent.
   sur un choix qui n'est pas tranché ici ou dans l'issue, il s'arrête et le remonte.
 - L'état fait foi sur GitHub (issues, PR), pas dans la mémoire de la session : une nouvelle
   session reprend depuis là.
+- Journal (#92, épinglé) : ce qui change pour un utilisateur ou un admin, ce qui est supprimé
+  (route, commande), les comportements gardés volontairement, les contournements temporaires et
+  les actions à faire en prod. Un agent le liste dans sa PR, section « À consigner » ; la session
+  principale met le journal à jour après chaque merge.
 - Point d'avancement toutes les heures : mergé, en cours, bloqué, prochaine étape.
 - Budget de tokens : au plus 50 % de la limite sur 5 h, et 50 % de la limite hebdomadaire ramenée
   à la journée (7,1 points du compteur hebdomadaire par jour). Les chiffres sont ceux du compte,
