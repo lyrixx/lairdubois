@@ -313,9 +313,9 @@ class WorkshopManager extends AbstractWonderManager {
 
 	protected function updateUserCounterAfterChangeOwner(User $user, $by, $isPrivate) {
 		if ($isPrivate) {
-			$user->getMeta()->incrementPrivatePlanCount($by);
+			$user->getMeta()->incrementPrivateWorkshopCount($by);
 		} else {
-			$user->getMeta()->incrementPublicPlanCount($by);
+			$user->getMeta()->incrementPublicWorkshopCount($by);
 		}
 	}
 

@@ -17,13 +17,6 @@ final class EventTest extends PublicationTestCase
 {
     use XhrTrait;
 
-    // A form with a time answers 500, and the edit form of the event of the fixtures has its times
-    protected const KNOWN_FAILURES = [
-        'testCreateWithTimes' => 60,
-        'testUpdate with data set "author"' => 60,
-        'testUpdate with data set "admin"' => 60,
-    ];
-
     protected static function getRoutePrefix(): string
     {
         return 'core_event';
@@ -81,6 +74,26 @@ final class EventTest extends PublicationTestCase
         $event = $this->findLast();
         self::assertSame('2030-06-15 09:00', $event->getStartAt()->format('Y-m-d H:i'));
         self::assertSame('2030-06-16 17:30', $event->getEndAt()->format('Y-m-d H:i'));
+    }
+
+    /**
+     * The edit form shows the times of the event, and keeps them.
+     */
+    public function testUpdateKeepsTheTimes(): void
+    {
+        $client = static::createClientAs(UserFixtures::USER);
+        $crawler = $client->request('GET', $this->path('edit', ['id' => static::ID]));
+        $form = $this->selectForm($crawler, $this->path('update', ['id' => static::ID]));
+
+        self::assertSame('10:00', $form['ladb_event_event[startTime]']->getValue());
+        self::assertSame('18:00', $form['ladb_event_event[endTime]']->getValue());
+
+        $client->submit($form);
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        $event = $this->find(static::ID);
+        self::assertSame('10:00', $event->getStartAt()->format('H:i'));
+        self::assertSame('18:00', $event->getEndAt()->format('H:i'));
     }
 
     /**

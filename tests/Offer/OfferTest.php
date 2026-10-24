@@ -14,12 +14,6 @@ use Tests\PublicationTestCase;
  */
 final class OfferTest extends PublicationTestCase
 {
-    // No publish activity: neither the offer of the fixtures nor a new one has any
-    protected const KNOWN_FAILURES = [
-        'testPublishShowsTheContent' => 61,
-        'testPublishCreatesAnActivityOnce' => 61,
-    ];
-
     protected const KEEPS_ITS_ACTIVITIES_WHEN_UNPUBLISHED = true;
 
     protected static function getRoutePrefix(): string
@@ -121,8 +115,7 @@ final class OfferTest extends PublicationTestCase
     }
 
     /**
-     * Each publication counts: past Offer::MAX_PUBLISH_COUNT, the offer stays a draft. What
-     * testPublishShowsTheContent checks after the activity, known to fail.
+     * Each publication counts: past Offer::MAX_PUBLISH_COUNT, the offer stays a draft.
      */
     public function testRepublish(): void
     {

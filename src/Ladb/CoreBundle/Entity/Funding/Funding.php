@@ -238,12 +238,19 @@ class Funding {
 	// Visibility /////
 
 	public function getVisibility() {
+		// Without charges, nothing is funded (0%, like the balance ratio of the dashboard)
+		if ($this->getChargeBalance() == 0) {
+			return 0;
+		}
 		return max(0, floor(($this->getEarningsBalance() - $this->getDonationFeeBalance()) / $this->getChargeBalance()));
 	}
 
 	// PartialVisibility /////
 
 	public function getPartialVisibility() {
+		if ($this->getChargeBalance() == 0) {
+			return 0;
+		}
 		return max(0, ceil(($this->getEarningsBalance() - $this->getDonationFeeBalance()) / $this->getChargeBalance()));
 	}
 

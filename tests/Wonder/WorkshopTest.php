@@ -9,11 +9,6 @@ use Tests\PublicationTestCase;
 
 final class WorkshopTest extends PublicationTestCase
 {
-    protected const KNOWN_FAILURES = [
-        'testChown with data set "admin to another user"' => 57,
-        'testChown with data set "author to its team"' => 57,
-    ];
-
     protected static function getRoutePrefix(): string
     {
         return 'core_workshop';

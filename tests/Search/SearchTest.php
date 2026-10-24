@@ -134,26 +134,47 @@ final class SearchTest extends WebTestCase
     }
 
     /**
-     * The facet without value reads its value: a warning, and a 500 out of prod (#67).
+     * "@mine" without value keeps the contents of the user.
      *
      * @dataProvider provideMine
      */
-    public function testMine(string $username): void
+    public function testMine(string $username, bool $listed): void
     {
         $client = static::createClientAs($username);
-        $client->request('GET', static::generatePath('core_creation_list', ['q' => '@mine']));
 
-        self::assertSame(500, $client->getResponse()->getStatusCode(), 'The list passes now: remove the known failure (#67).');
-        self::markTestIncomplete('Known failure, see #67.');
+        self::assertSame($listed, $this->isListed($client, 'core_creation_list', '@mine', $this->findCreation()));
     }
 
     /**
-     * @return iterable<string, array{string}>
+     * @return iterable<string, array{string, bool}>
      */
     public static function provideMine(): iterable
     {
-        yield 'author' => [UserFixtures::USER];
-        yield 'other user' => [UserFixtures::USER2];
+        yield 'author' => [UserFixtures::USER, true];
+        yield 'other user' => [UserFixtures::USER2, false];
+    }
+
+    /**
+     * @dataProvider provideMineLists
+     */
+    public function testMineInEachList(string $route): void
+    {
+        $client = static::createClientAs(UserFixtures::USER);
+        $client->request('GET', static::generatePath($route, ['q' => '@mine']));
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+    }
+
+    /**
+     * The lists that know "@mine:draft".
+     *
+     * @return iterable<string, array{string}>
+     */
+    public static function provideMineLists(): iterable
+    {
+        foreach (['core_blog_post_list', 'core_creation_list', 'core_event_list', 'core_faq_question_list', 'core_find_list', 'core_howto_list', 'core_offer_list', 'core_plan_list', 'core_promotion_graphic_list', 'core_qa_question_list', 'core_workshop_list'] as $route) {
+            yield $route => [$route];
+        }
     }
 
     /**

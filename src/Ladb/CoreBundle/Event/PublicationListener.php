@@ -93,6 +93,11 @@ class PublicationListener implements EventSubscriberInterface {
 			if (is_null($picture)) {
 				continue;
 			}
+			// An empty picture has no file (website find without Open Graph image)
+			$absolutePath = $picture->getAbsolutePath();
+			if (is_null($absolutePath) || !is_file($absolutePath)) {
+				continue;
+			}
 			$path = $picture->getPath();
 			if (!$cacheManager->isStored($path, $filter)) {
 				$binary = $dataManager->find($filter, $path);
@@ -350,9 +355,10 @@ class PublicationListener implements EventSubscriberInterface {
 
 		}
 
+		// The publish count is already incremented: 1 on the first publication
 		if ($publication->getNotificationStrategy() != PublicationInterface::NOTIFICATION_STRATEGY_NONE
 			&& $publication instanceof AuthoredInterface
-			&& !($publication instanceof RepublishableInterface && $publication->getPublishCount() > 0)) {
+			&& !($publication instanceof RepublishableInterface && $publication->getPublishCount() > 1)) {
 
 			// Get session user as "publisher"
 			$globalUtils = $this->container->get(GlobalUtils::NAME);
