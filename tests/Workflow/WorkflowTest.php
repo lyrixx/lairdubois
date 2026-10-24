@@ -1,0 +1,751 @@
+<?php
+
+namespace Tests\Workflow;
+
+use Ladb\CoreBundle\DataFixtures\UserFixtures;
+use Ladb\CoreBundle\Entity\Core\Activity\Publish;
+use Ladb\CoreBundle\Entity\Wonder\Creation;
+use Ladb\CoreBundle\Entity\Workflow\Task;
+use Ladb\CoreBundle\Entity\Workflow\Workflow;
+use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Component\DomCrawler\Crawler;
+use Symfony\Component\DomCrawler\Form;
+use Tests\WebTestCase;
+use Tests\XhrTrait;
+
+/**
+ * A workflow is private at its creation, with a first task; its author publishes it, an admin
+ * unpublishes it, and its author deletes it once private. The workflow of the fixtures, published
+ * by "user", has two tasks ("Débiter les planches", then "Poncer et huiler"), a label and a part.
+ *
+ * Hiddable, not draftable: PublicationTestCase does not fit it (no draft, and the trait of the
+ * controllers checks neither the visibility on show nor the one of publish).
+ */
+final class WorkflowTest extends WebTestCase
+{
+    use XhrTrait;
+
+    private const ID = 1;
+
+    /**
+     * @dataProvider provideUsers
+     */
+    public function testShow(?string $username): void
+    {
+        $client = $this->createClientFor($username);
+        $crawler = $client->request('GET', $this->path('show', ['id' => self::ID]));
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertStringContainsStringIgnoringCase('fabrication d\'une table basse', $crawler->filter('title')->text());
+    }
+
+    /**
+     * @return iterable<string, array{?string}>
+     */
+    public static function provideUsers(): iterable
+    {
+        yield 'anonymous' => [null];
+        yield 'author' => [UserFixtures::USER];
+        yield 'other user' => [UserFixtures::USER2];
+        yield 'admin' => [UserFixtures::ADMIN];
+    }
+
+    /**
+     * The tasks of the workspace come from the JS (core_workflow_task_list); the author and the
+     * admins edit them and get the changes from the websocket, the others only read them. The
+     * JS itself: see #11.
+     *
+     * @dataProvider provideWorkspaceUsers
+     */
+    public function testShowWorkspace(string $username, bool $readOnly): void
+    {
+        // Read from $_SERVER, which the client of the tests does not fill: bots get the page
+        $_SERVER['HTTP_USER_AGENT'] = 'Mozilla/5.0';
+        try {
+            $client = static::createClientAs($username);
+            $client->request('GET', $this->path('show', ['id' => self::ID, 'layout' => 'workspace']));
+        } finally {
+            unset($_SERVER['HTTP_USER_AGENT']);
+        }
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        $content = $client->getResponse()->getContent();
+        self::assertStringContainsString("listTaskPath: '/processus/1/tasks'", $content);
+        self::assertStringContainsString('readOnly: '.($readOnly ? 'true' : 'false'), $content);
+        self::assertSame(!$readOnly, str_contains($content, "wsChannel: 'workflow/1'"));
+    }
+
+    /**
+     * @return iterable<string, array{string, bool}>
+     */
+    public static function provideWorkspaceUsers(): iterable
+    {
+        yield 'author' => [UserFixtures::USER, false];
+        yield 'other user' => [UserFixtures::USER2, true];
+        yield 'admin' => [UserFixtures::ADMIN, false];
+    }
+
+    /**
+     * Bots get the page instead of the workspace.
+     */
+    public function testShowWorkspaceToBot(): void
+    {
+        $_SERVER['HTTP_USER_AGENT'] = 'Googlebot/2.1';
+        try {
+            $client = static::createClient();
+            $client->request('GET', $this->path('show', ['id' => self::ID, 'layout' => 'workspace']));
+        } finally {
+            unset($_SERVER['HTTP_USER_AGENT']);
+        }
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertStringNotContainsString('listTaskPath', $client->getResponse()->getContent());
+    }
+
+    public function testList(): void
+    {
+        self::assertTrue($this->isListed($this->getShowPath()));
+    }
+
+    /**
+     * The contents linked to the workflow: creation 1 of the fixtures.
+     */
+    public function testCreations(): void
+    {
+        $client = static::createClient();
+        $crawler = $client->request('GET', $this->path('creations', ['id' => self::ID]));
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertNotCount(0, $crawler->filter('a[href*="/creations/1-"]'));
+    }
+
+    /**
+     * The durations per label (XHR, from the page of the workflow).
+     */
+    public function testStatistics(): void
+    {
+        $client = static::createClient();
+        static::xhr($client, 'GET', $this->path('statistics', ['id' => self::ID]));
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertStringContainsString("labels: ['Débit']", $client->getResponse()->getContent());
+        self::assertStringContainsString("backgroundColor: ['#1abc9c']", $client->getResponse()->getContent());
+    }
+
+    /**
+     * The widget of the workflow, in the body of another content.
+     */
+    public function testWidget(): void
+    {
+        $client = static::createClient();
+        $crawler = static::xhr($client, 'GET', $this->path('widget', ['id' => self::ID]));
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertNotCount(0, $crawler->filter(\sprintf('a[href$="%s"]', $this->getShowPath())));
+    }
+
+    /**
+     * @dataProvider provideActions
+     */
+    public function testActionSendsAnonymousToLogin(string $method, string $action, array $parameters): void
+    {
+        $client = static::createClient();
+        $client->request($method, $this->path($action, $parameters));
+
+        self::assertTrue($client->getResponse()->isRedirect());
+        self::assertStringEndsWith('/login', $client->getResponse()->headers->get('Location'));
+    }
+
+    /**
+     * @return iterable<string, array{string, string, array<string, int>}>
+     */
+    public static function provideActions(): iterable
+    {
+        yield 'new' => ['GET', 'new', []];
+        yield 'create' => ['POST', 'create', []];
+        yield 'edit' => ['GET', 'edit', ['id' => self::ID]];
+        yield 'update' => ['POST', 'update', ['id' => self::ID]];
+        yield 'publish' => ['GET', 'publish', ['id' => self::ID]];
+        yield 'unpublish' => ['GET', 'unpublish', ['id' => self::ID]];
+        yield 'delete' => ['GET', 'delete', ['id' => self::ID]];
+        yield 'lock' => ['GET', 'lock', ['id' => self::ID]];
+        yield 'chown' => ['GET', 'chown', ['id' => self::ID]];
+        yield 'copy' => ['GET', 'copy', ['id' => self::ID]];
+    }
+
+    /**
+     * A new workflow is private, with a first task, and opens in the workspace.
+     */
+    public function testCreate(): void
+    {
+        $client = static::createClientAs(UserFixtures::USER);
+        [$privateCount, $publicCount] = $this->getCounts(UserFixtures::USER);
+
+        $this->submitNewForm($client, UserFixtures::USER);
+
+        $workflow = $this->findLast();
+        self::assertTrue($client->getResponse()->isRedirect($this->path('show', ['id' => $workflow->getId(), 'layout' => 'workspace'])));
+        self::assertSame(UserFixtures::USER, $workflow->getUser()->getUsername());
+        self::assertSame('Fabrication d\'un tabouret', $workflow->getTitle());
+        self::assertTrue($workflow->getIsPrivate());
+        self::assertSame([$privateCount + 1, $publicCount], $this->getCounts(UserFixtures::USER));
+        self::assertSame(1, $workflow->getTaskCount());
+        self::assertSame(['Tâche 1 : Changer le monde'], $workflow->getTasks()->map(fn (Task $task) => $task->getTitle())->toArray());
+        self::assertSame(Task::STATUS_WORKABLE, $workflow->getTasks()->first()->getStatus());
+    }
+
+    public function testCreateForTeam(): void
+    {
+        $client = static::createClientAs(UserFixtures::USER2);
+        [$privateCount] = $this->getCounts(UserFixtures::TEAM);
+
+        $this->submitNewForm($client, UserFixtures::TEAM);
+
+        self::assertSame(UserFixtures::TEAM, $this->findLast()->getUser()->getUsername());
+        self::assertSame($privateCount + 1, $this->getCounts(UserFixtures::TEAM)[0]);
+    }
+
+    public function testCreateInvalid(): void
+    {
+        $client = static::createClientAs(UserFixtures::USER);
+        $lastId = $this->findLast()->getId();
+
+        $client->submit($this->getNewForm($client, UserFixtures::USER));
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertNotCount(0, $client->getCrawler()->filter('.alert-danger'));
+        self::assertSame($lastId, $this->findLast()->getId());
+    }
+
+    /**
+     * @dataProvider provideEditors
+     */
+    public function testEdit(string $username, int $status): void
+    {
+        $client = static::createClientAs($username);
+        $client->request('GET', $this->path('edit', ['id' => self::ID]));
+
+        self::assertSame($status, $client->getResponse()->getStatusCode());
+    }
+
+    /**
+     * @return iterable<string, array{string, int}>
+     */
+    public static function provideEditors(): iterable
+    {
+        yield 'author' => [UserFixtures::USER, 200];
+        yield 'other user' => [UserFixtures::USER2, 404];
+        yield 'admin' => [UserFixtures::ADMIN, 200];
+    }
+
+    /**
+     * @dataProvider provideUpdaters
+     */
+    public function testUpdate(string $username): void
+    {
+        $client = static::createClientAs($username);
+        $crawler = $client->request('GET', $this->path('edit', ['id' => self::ID]));
+        $form = $this->selectForm($crawler, $this->path('update', ['id' => self::ID]));
+        $form['ladb_workflow_workflow[title]'] = 'Un titre mis à jour';
+
+        $client->submit($form);
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertCount(1, $client->getCrawler()->filter('.alert-success'));
+        self::assertSame('Un titre mis à jour', $this->find()->getTitle());
+    }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function provideUpdaters(): iterable
+    {
+        yield 'author' => [UserFixtures::USER];
+        yield 'admin' => [UserFixtures::ADMIN];
+    }
+
+    public function testUpdateAsOtherUser(): void
+    {
+        $client = static::createClientAs(UserFixtures::ADMIN);
+        $crawler = $client->request('GET', $this->path('edit', ['id' => self::ID]));
+        $form = $this->selectForm($crawler, $this->path('update', ['id' => self::ID]));
+        $form['ladb_workflow_workflow[title]'] = 'Un titre mis à jour';
+
+        $client = static::createClientAs(UserFixtures::USER2);
+        $client->request('POST', $form->getUri(), $form->getPhpValues());
+
+        self::assertSame(404, $client->getResponse()->getStatusCode());
+        self::assertNotSame('Un titre mis à jour', $this->find()->getTitle());
+    }
+
+    /**
+     * @dataProvider provideUnpublishers
+     */
+    public function testUnpublish(string $username, int $status): void
+    {
+        $client = static::createClientAs($username);
+        $client->request('GET', $this->path('unpublish', ['id' => self::ID, 'rtu' => '/']));
+
+        self::assertSame($status, $client->getResponse()->getStatusCode());
+        self::assertSame(302 !== $status, $this->find()->getIsPublic());
+    }
+
+    /**
+     * @return iterable<string, array{string, int}>
+     */
+    public static function provideUnpublishers(): iterable
+    {
+        yield 'author' => [UserFixtures::USER, 404];
+        yield 'other user' => [UserFixtures::USER2, 404];
+        yield 'admin' => [UserFixtures::ADMIN, 302];
+    }
+
+    public function testUnpublishHidesTheWorkflow(): void
+    {
+        [$privateCount, $publicCount] = $this->getCounts(UserFixtures::USER);
+        $creationCount = $this->findCreation()->getWorkflowCount();
+
+        $client = $this->unpublish();
+
+        self::assertTrue($client->getResponse()->isRedirect('/'));
+        self::assertTrue($this->find()->getIsPrivate());
+        self::assertSame([$privateCount + 1, $publicCount - 1], $this->getCounts(UserFixtures::USER));
+        self::assertSame($creationCount - 1, $this->findCreation()->getWorkflowCount());
+        self::assertSame(0, $this->countPublishActivities());
+        self::assertFalse($this->isListed($this->getShowPath()));
+        $this->assertShowStatus(200, UserFixtures::USER);
+    }
+
+    /**
+     * "Ce processus est privé. Vous seul pouvez le consulter.": the others see it anyway, and the
+     * page of the author fails for anonymous.
+     *
+     * @dataProvider providePrivatePages
+     */
+    public function testShowPrivate(string $route, ?string $username, int $status): void
+    {
+        $this->unpublish();
+
+        $client = $this->createClientFor($username);
+        static::xhr($client, 'GET', static::generatePath($route, ['id' => self::ID]));
+
+        self::assertSame($status, $client->getResponse()->getStatusCode(), 'The private workflow is hidden now: remove the known failure (#75).');
+        self::markTestIncomplete('Known failure, see #75.');
+    }
+
+    /**
+     * @return iterable<string, array{string, ?string, int}>
+     */
+    public static function providePrivatePages(): iterable
+    {
+        yield 'show, anonymous' => ['core_workflow_show', null, 500];
+        yield 'show, other user' => ['core_workflow_show', UserFixtures::USER2, 200];
+        yield 'widget, anonymous' => ['core_workflow_widget', null, 200];
+        yield 'tasks, anonymous' => ['core_workflow_task_list', null, 200];
+    }
+
+    /**
+     * Nothing stops unpublishing a private workflow: its counters move again.
+     */
+    public function testUnpublishPrivate(): void
+    {
+        $this->unpublish();
+        [$privateCount, $publicCount] = $this->getCounts(UserFixtures::USER);
+
+        $client = $this->unpublish();
+
+        self::assertSame(302, $client->getResponse()->getStatusCode(), 'A private workflow is not unpublished again now: remove the known failure (#76).');
+        self::assertSame([$privateCount + 1, $publicCount - 1], $this->getCounts(UserFixtures::USER));
+        self::markTestIncomplete('Known failure, see #76.');
+    }
+
+    /**
+     * @dataProvider providePublishers
+     */
+    public function testPublish(string $username, int $status): void
+    {
+        $this->unpublish();
+
+        $client = static::createClientAs($username);
+        $client->request('GET', $this->path('publish', ['id' => self::ID]));
+
+        self::assertSame($status, $client->getResponse()->getStatusCode());
+        self::assertSame(302 === $status, $this->find()->getIsPublic());
+    }
+
+    /**
+     * @return iterable<string, array{string, int}>
+     */
+    public static function providePublishers(): iterable
+    {
+        yield 'author' => [UserFixtures::USER, 302];
+        yield 'other user' => [UserFixtures::USER2, 404];
+        yield 'admin' => [UserFixtures::ADMIN, 302];
+    }
+
+    public function testPublishShowsTheWorkflow(): void
+    {
+        $this->unpublish();
+        [$privateCount, $publicCount] = $this->getCounts(UserFixtures::USER);
+        $creationCount = $this->findCreation()->getWorkflowCount();
+
+        $client = static::createClientAs(UserFixtures::USER);
+        $client->request('GET', $this->path('publish', ['id' => self::ID]));
+
+        self::assertTrue($client->getResponse()->isRedirect($this->getShowPath()));
+        self::assertTrue($this->find()->getIsPublic());
+        self::assertSame([$privateCount - 1, $publicCount + 1], $this->getCounts(UserFixtures::USER));
+        self::assertSame($creationCount + 1, $this->findCreation()->getWorkflowCount());
+        self::assertSame(1, $this->countPublishActivities());
+        self::assertTrue($this->isListed($this->getShowPath()));
+    }
+
+    /**
+     * Nothing stops publishing a public workflow: its counters move again.
+     */
+    public function testPublishPublic(): void
+    {
+        [$privateCount, $publicCount] = $this->getCounts(UserFixtures::USER);
+
+        $client = static::createClientAs(UserFixtures::USER);
+        $client->request('GET', $this->path('publish', ['id' => self::ID]));
+
+        self::assertSame(302, $client->getResponse()->getStatusCode(), 'A public workflow is not published again now: remove the known failure (#76).');
+        self::assertSame([$privateCount - 1, $publicCount + 1], $this->getCounts(UserFixtures::USER));
+        self::markTestIncomplete('Known failure, see #76.');
+    }
+
+    /**
+     * Only the admins delete a public workflow: its author once it is private.
+     *
+     * @dataProvider provideDeleters
+     */
+    public function testDelete(string $username, bool $private, int $status): void
+    {
+        if ($private) {
+            $this->unpublish();
+        }
+        [$privateCount, $publicCount] = $this->getCounts(UserFixtures::USER);
+        $showPath = $this->getShowPath();
+
+        $client = static::createClientAs($username);
+        $client->request('GET', $this->path('delete', ['id' => self::ID]));
+
+        self::assertSame($status, $client->getResponse()->getStatusCode());
+        static::getEntityManager()->clear();
+        if (302 === $status) {
+            self::assertTrue($client->getResponse()->isRedirect($this->path('list')));
+            self::assertNull($this->find());
+            self::assertCount(0, static::getEntityManager()->getRepository(Task::class)->findBy(['workflow' => self::ID]));
+            self::assertSame($private ? [$privateCount - 1, $publicCount] : [$privateCount, $publicCount - 1], $this->getCounts(UserFixtures::USER));
+            self::assertFalse($this->isListed($showPath));
+        } else {
+            self::assertNotNull($this->find());
+        }
+    }
+
+    /**
+     * @return iterable<string, array{string, bool, int}>
+     */
+    public static function provideDeleters(): iterable
+    {
+        yield 'author, public' => [UserFixtures::USER, false, 404];
+        yield 'author, private' => [UserFixtures::USER, true, 302];
+        yield 'other user, private' => [UserFixtures::USER2, true, 404];
+        yield 'admin, public' => [UserFixtures::ADMIN, false, 302];
+    }
+
+    /**
+     * Unlike the other types, the page does not check the witness of the deletion: #79.
+     */
+    public function testShowDeleted(): void
+    {
+        $client = static::createClientAs(UserFixtures::ADMIN);
+        $client->request('GET', $this->path('delete', ['id' => self::ID]));
+        self::assertSame(302, $client->getResponse()->getStatusCode());
+
+        $client = static::createClient();
+        $client->request('GET', $this->path('show', ['id' => self::ID]));
+
+        self::assertSame(404, $client->getResponse()->getStatusCode(), 'The deleted workflow is gone now: remove the known failure (#79).');
+        self::markTestIncomplete('Known failure, see #79.');
+    }
+
+    /**
+     * @dataProvider provideLockers
+     */
+    public function testLock(string $username, int $status): void
+    {
+        $client = static::createClientAs($username);
+        $client->request('GET', $this->path('lock', ['id' => self::ID]));
+
+        self::assertSame($status, $client->getResponse()->getStatusCode());
+        self::assertSame(302 === $status, $this->find()->getIsLocked());
+    }
+
+    /**
+     * @return iterable<string, array{string, int}>
+     */
+    public static function provideLockers(): iterable
+    {
+        yield 'author' => [UserFixtures::USER, 404];
+        yield 'admin' => [UserFixtures::ADMIN, 302];
+    }
+
+    /**
+     * Once unpublished, a locked workflow stays private.
+     */
+    public function testPublishLocked(): void
+    {
+        $client = static::createClientAs(UserFixtures::ADMIN);
+        $client->request('GET', $this->path('lock', ['id' => self::ID]));
+        self::assertSame(302, $client->getResponse()->getStatusCode());
+        $this->unpublish();
+
+        $client = static::createClientAs(UserFixtures::USER);
+        $client->request('GET', $this->path('publish', ['id' => self::ID]));
+
+        self::assertSame(404, $client->getResponse()->getStatusCode());
+        self::assertTrue($this->find()->getIsPrivate());
+    }
+
+    /**
+     * The action loads a workshop instead of the workflow: #45.
+     *
+     * @dataProvider provideChowners
+     */
+    public function testChown(string $username, string $owner): void
+    {
+        $client = static::createClientAs($username);
+        try {
+            $client->request('GET', $this->path('chown', ['id' => self::ID, 'owner' => $owner]));
+            self::fail('The change of owner passes now: remove the known failure (#45).');
+        } catch (\TypeError $e) {
+            self::assertStringContainsString('Workshop given', $e->getMessage());
+        }
+
+        self::markTestIncomplete('Known failure, see #45.');
+    }
+
+    /**
+     * @return iterable<string, array{string, string}>
+     */
+    public static function provideChowners(): iterable
+    {
+        yield 'admin to another user' => [UserFixtures::ADMIN, UserFixtures::USER2];
+        yield 'author to its team' => [UserFixtures::USER, UserFixtures::TEAM];
+    }
+
+    /**
+     * Its author duplicates a workflow: a private one, with the same tasks, labels and parts.
+     */
+    public function testCopy(): void
+    {
+        [$privateCount] = $this->getCounts(UserFixtures::USER);
+
+        $client = static::createClientAs(UserFixtures::USER);
+        $client->request('GET', $this->path('copy', ['id' => self::ID]));
+
+        $copy = $this->findLast();
+        self::assertNotSame(self::ID, $copy->getId());
+        self::assertTrue($client->getResponse()->isRedirect($this->path('show', ['id' => $copy->getSluggedId()])));
+        self::assertSame(UserFixtures::USER, $copy->getUser()->getUsername());
+        self::assertTrue($copy->getIsPrivate());
+        self::assertSame('Fabrication d\'une table basse - copie', $copy->getTitle());
+        self::assertSame($privateCount + 1, $this->getCounts(UserFixtures::USER)[0]);
+        self::assertSame(['Débiter les planches', 'Poncer et huiler'], $this->getTaskTitles($copy));
+        self::assertSame(['Débit'], $copy->getLabels()->map(fn ($label) => $label->getName())->toArray());
+        self::assertSame(['Plateau'], $copy->getParts()->map(fn ($part) => $part->getName())->toArray());
+        self::assertCount(0, $copy->getInspirations());
+    }
+
+    /**
+     * Another account copies it too: the copy is inspired by the workflow. But the counter of
+     * the author of the workflow goes up instead of the one of the copier.
+     */
+    public function testCopyAsOtherUser(): void
+    {
+        [$authorPrivateCount] = $this->getCounts(UserFixtures::USER);
+        [$privateCount] = $this->getCounts(UserFixtures::USER2);
+        $copyCount = $this->find()->getCopyCount();
+
+        $client = static::createClientAs(UserFixtures::USER2);
+        $client->request('GET', $this->path('copy', ['id' => self::ID]));
+
+        $copy = $this->findLast();
+        self::assertTrue($client->getResponse()->isRedirect($this->path('show', ['id' => $copy->getSluggedId()])));
+        self::assertSame(UserFixtures::USER2, $copy->getUser()->getUsername());
+        self::assertTrue($copy->getIsPrivate());
+        self::assertSame(['Débiter les planches', 'Poncer et huiler'], $this->getTaskTitles($copy));
+        self::assertSame([self::ID], array_values($copy->getInspirations()->map(fn (Workflow $workflow) => $workflow->getId())->toArray()));
+        self::assertSame($copyCount + 1, $this->find()->getCopyCount());
+
+        self::assertSame([$authorPrivateCount + 1, $privateCount], [$this->getCounts(UserFixtures::USER)[0], $this->getCounts(UserFixtures::USER2)[0]], 'The counter of the copier goes up now: remove the known failure (#78).');
+        self::markTestIncomplete('Known failure, see #78.');
+    }
+
+    /**
+     * The tasks start again: their durations become the estimated ones, the first ones are
+     * workable, the others pending. The workspaces get it from the websocket.
+     */
+    public function testRestart(): void
+    {
+        $this->findTask('Débiter les planches')->setDuration(1800);
+        $this->setStatus('Débiter les planches', Task::STATUS_DONE);
+        $this->setStatus('Poncer et huiler', Task::STATUS_RUNNING);
+
+        $client = static::createClientAs(UserFixtures::USER);
+        $client->request('GET', $this->path('restart', ['id' => self::ID]));
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        $task = $this->findTask('Débiter les planches');
+        self::assertSame([0, 1800], [$task->getDuration(), $task->getEstimatedDuration()]);
+        self::assertSame([0, 1800], [$this->find()->getDuration(), $this->find()->getEstimatedDuration()]);
+        $messages = $client->getContainer()->get('tests.wamp_pusher')->getMessages();
+        self::assertCount(1, $messages);
+        self::assertSame('workflow_show_topic', $messages[0]['routeName']);
+        self::assertSame(['id' => self::ID], $messages[0]['routeParameters']);
+        self::assertSame(['workflowInfos', 'updatedTaskInfos'], array_keys($messages[0]['data']));
+        self::assertCount(2, $messages[0]['data']['updatedTaskInfos']);
+        self::assertSame(Task::STATUS_WORKABLE, $this->findTask('Débiter les planches')->getStatus());
+        self::assertSame(Task::STATUS_PENDING, $this->findTask('Poncer et huiler')->getStatus());
+    }
+
+    /**
+     * The action only checks that the workflow is showable: #46 as anonymous, and any account
+     * restarts the workflow of another one.
+     */
+    public function testRestartAsOtherUser(): void
+    {
+        $this->setStatus('Débiter les planches', Task::STATUS_DONE);
+
+        $client = static::createClientAs(UserFixtures::USER2);
+        $client->request('GET', $this->path('restart', ['id' => self::ID]));
+
+        self::assertSame(200, $client->getResponse()->getStatusCode(), 'The restart is refused now: remove the known failure (#77).');
+        self::assertSame(Task::STATUS_WORKABLE, $this->findTask('Débiter les planches')->getStatus());
+        self::markTestIncomplete('Known failure, see #77.');
+    }
+
+    private function path(string $action, array $parameters = []): string
+    {
+        return static::generatePath('core_workflow_'.$action, $parameters);
+    }
+
+    private function createClientFor(?string $username): Client
+    {
+        return null === $username ? static::createClient() : static::createClientAs($username);
+    }
+
+    private function find(int $id = self::ID): ?Workflow
+    {
+        return static::getEntityManager()->getRepository(Workflow::class)->find($id);
+    }
+
+    private function findLast(): Workflow
+    {
+        return static::getEntityManager()->getRepository(Workflow::class)->findOneBy([], ['id' => 'DESC']);
+    }
+
+    private function findTask(string $title, int $workflowId = self::ID): Task
+    {
+        return static::getEntityManager()->getRepository(Task::class)->findOneBy(['workflow' => $workflowId, 'title' => $title]);
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function getTaskTitles(Workflow $workflow): array
+    {
+        $titles = $workflow->getTasks()->map(fn (Task $task) => $task->getTitle())->toArray();
+        sort($titles);
+
+        return $titles;
+    }
+
+    private function setStatus(string $title, int $status): void
+    {
+        $this->findTask($title)->setStatus($status);
+        static::getEntityManager()->flush();
+    }
+
+    private function findCreation(): Creation
+    {
+        return static::getEntityManager()->getRepository(Creation::class)->find(1);
+    }
+
+    private function submitNewForm(Client $client, string $owner): void
+    {
+        $client->submit($this->getNewForm($client, $owner)->setValues([
+            'ladb_workflow_workflow[title]' => 'fabrication d\'un tabouret',
+            'ladb_workflow_workflow[body]' => 'Un tabouret en chêne, assemblé à tenons et mortaises.',
+            'ladb_workflow_workflow[tags]' => 'tabouret,chêne',
+        ]));
+
+        // On an invalid form, the message tells which field
+        self::assertSame(302, $client->getResponse()->getStatusCode(), implode("\n", $client->getCrawler()->filter('.help-block')->each(fn (Crawler $node) => $node->text())));
+    }
+
+    private function getNewForm(Client $client, string $owner): Form
+    {
+        $crawler = $client->request('GET', $this->path('new', UserFixtures::TEAM === $owner ? ['owner' => $owner] : []));
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+
+        return $this->selectForm($crawler, $this->path('create'));
+    }
+
+    private function selectForm(Crawler $crawler, string $action): Form
+    {
+        return $crawler->filter(\sprintf('form[action="%s"]', $action))->form();
+    }
+
+    /**
+     * @return array{int, int} The private and public workflow counts of $username
+     */
+    private function getCounts(string $username): array
+    {
+        $meta = static::findUser($username)->getMeta();
+
+        return [$meta->getPrivateWorkflowCount(), $meta->getPublicWorkflowCount()];
+    }
+
+    private function countPublishActivities(): int
+    {
+        return \count(static::getEntityManager()->getRepository(Publish::class)->findBy(['entityType' => Workflow::TYPE, 'entityId' => self::ID]));
+    }
+
+    private function unpublish(): Client
+    {
+        $client = static::createClientAs(UserFixtures::ADMIN);
+        $client->request('GET', $this->path('unpublish', ['id' => self::ID, 'rtu' => '/']));
+        self::assertSame(302, $client->getResponse()->getStatusCode());
+
+        return $client;
+    }
+
+    private function getShowPath(): string
+    {
+        return $this->path('show', ['id' => $this->find()->getSluggedId()]);
+    }
+
+    /**
+     * Whether the list of the workflows, which comes from the index, links to $showPath.
+     */
+    private function isListed(string $showPath): bool
+    {
+        $client = static::createClient();
+        $client->getContainer()->get('fos_elastica.index.ladb')->refresh();
+        $client->request('GET', $this->path('list'));
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+
+        return 0 < $client->getCrawler()->filter(\sprintf('a[href$="%s"]', $showPath))->count();
+    }
+
+    private function assertShowStatus(int $status, ?string $username): void
+    {
+        $client = $this->createClientFor($username);
+        $client->request('GET', $this->path('show', ['id' => self::ID]));
+
+        self::assertSame($status, $client->getResponse()->getStatusCode(), \sprintf('Show as %s.', $username ?? 'anonymous'));
+    }
+}

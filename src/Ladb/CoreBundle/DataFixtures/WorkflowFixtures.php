@@ -70,9 +70,11 @@ final class WorkflowFixtures extends Fixture implements DependentFixtureInterfac
 		$debit->setStatus(Task::STATUS_WORKABLE);
 		$debit->setPositionLeft(20);
 		$debit->setPositionTop(20);
+		// In the workflow first: Task::addLabel() and addPart() ignore those of another workflow
+		$workflow->addTask($debit);
 		$debit->addLabel($label);
 		$debit->addPart($part);
-		$workflow->addTask($debit);
+		$debit->setPartCount(1);	// As TaskController::_computePartCount()
 		$workflow->incrementTaskCount();
 
 		$finish = new Task();

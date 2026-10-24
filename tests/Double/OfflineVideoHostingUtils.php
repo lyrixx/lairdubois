@@ -6,7 +6,8 @@ use Ladb\CoreBundle\Utils\VideoHostingUtils;
 
 /**
  * Video hosting of the test environment (config_test.yml): the thumbnails the YouTube (playlist)
- * and Vimeo APIs give, without calling them. The other hosts build the URL themselves.
+ * and Vimeo APIs give, the data of the videos for the sitemaps and for Youtook, without calling
+ * them. The other hosts build the URL themselves.
  */
 final class OfflineVideoHostingUtils extends VideoHostingUtils
 {
@@ -46,6 +47,31 @@ final class OfflineVideoHostingUtils extends VideoHostingUtils
             'publication_date' => null,
             'category' => null,
             'uploader' => null,
+        ];
+    }
+
+    /**
+     * The video and its channel as the YouTube API gives them to Youtook (NewTookType), for any
+     * video; null for the other hosts, as the original.
+     */
+    public function getVideoGwData($kind, $embedIdentifier)
+    {
+        if (self::KIND_YOUTUBE !== $kind) {
+            return null;
+        }
+
+        return [
+            'videoData' => [
+                'thumbnail_loc' => 'https://video.example/'.$kind.'/'.$embedIdentifier.'.jpg',
+                'title' => 'Affûter un ciseau à bois ('.$embedIdentifier.')',
+                'description' => 'Une pierre à eau et un guide d\'affûtage.',
+            ],
+            'channelData' => [
+                'id' => 'UCvideoexample',
+                'thumbnail_loc' => 'https://video.example/channel.jpg',
+                'title' => 'Une chaîne d\'ébénisterie',
+                'description' => 'Des vidéos sur le travail du bois.',
+            ],
         ];
     }
 }
