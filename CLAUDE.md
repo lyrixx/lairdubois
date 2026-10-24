@@ -117,6 +117,9 @@ Contextes : `--context=test` (`SYMFONY_ENV=test`), `--context=ci` (le même, san
   compile le LESS à la demande), Java dans le builder seulement.
 - MariaDB 10.11 (`root`/`app`), Elasticsearch 5.6, RabbitMQ 3.13 (`app`/`app`), Memcached. Workers
   (profil `worker`) : les deux consumers RabbitMQ et `websocket` (routé sur `/ws`).
+- Playwright (service `playwright`, profil `e2e`, lancé par `castor qa:e2e`) : l'image officielle
+  `mcr.microsoft.com/playwright`, avec Node 24 et les navigateurs, à la version de
+  `@playwright/test` dans `tests/e2e/package.json`.
 - Routeur : un Traefik par copie (service `router`, `docker-compose.dev.yml`), qui ne route que
   les conteneurs portant le label `project-name` de sa copie. Certificats dans
   `infrastructure/docker/services/router/certs/`, générés par `castor docker:build` : mkcert s'il
@@ -159,6 +162,7 @@ castor qa:phpstan [-b]       # niveau 0, phpstan-baseline.neon ; -b la régénè
 castor qa:phpunit [-- --filter …]
 castor qa:deprecations       # var/deprecations/report.md, et le résumé du job en CI
 castor qa:install            # outils de tools/ (PHPStan, PHPUnit), installés à la volée sinon
+castor qa:e2e [-- --grep …]  # tests E2E (Playwright) : recharge la base du dev, hors qa:all, job E2E en CI
 ```
 
 - PHPUnit 9.6, dans `tools/phpunit` et pas dans le `composer.json` de l'application : c'est la
@@ -364,6 +368,28 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
 - Bug connu d'un test fonctionnel : vérifier le mauvais comportement avec le message « passes now:
   remove the known failure (#N) », puis `self::markTestIncomplete('Known failure, see #N.')`. Le
   test échoue quand le bug est corrigé.
+
+Tests E2E (`tests/e2e/`, Playwright en TypeScript, son `package.json` et son lock) : seulement ce
+que `WebTestCase` ne peut pas tester (JS, uploads, websocket), un parcours par feature. Rien de
+Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
+
+- `castor qa:e2e [-- --grep …]` recharge les fixtures dans la base et l'index du dev (le site sert
+  `app_dev.php`, quel que soit le contexte : les données de dev sont perdues), redémarre le serveur
+  websocket en dev, puis lance la suite dans le service `playwright` (`npm ci` si `node_modules`
+  manque ou date d'avant le lock). Aucun consumer RabbitMQ n'est nécessaire.
+- Traces, captures et contexte des tests en échec dans `var/e2e/test-results/` (artifact
+  `e2e-test-results` en CI) : `npx playwright show-trace`, ou trace.playwright.dev.
+- Le navigateur joint le site par le réseau de la stack : `--host-resolver-rules` de Chromium
+  envoie le domaine, port du worktree compris, vers `router:443` (`E2E_BASE_URL`, `E2E_ROUTER`).
+- `auth.setup.ts` connecte chaque compte une fois par le formulaire et garde ses cookies
+  (`var/e2e/auth/`) ; un test les prend avec `test.use({ storageState: storageStateOf(USER) })`.
+  Importer `test` de `support/test.ts`, qui cache la barre de debug de Symfony.
+- Un seul worker, une seule base pour toute la suite : un test ne suppose rien des autres, et
+  prend un contenu ou un compte que les autres ne touchent pas (un like surveille le contenu).
+- Bootstrap 3 laisse `aria-hidden` sur ses fenêtres modales : pas de `getByRole()` dedans.
+- Le verrou de `createLock()` est pris même quand le formulaire est refusé : le renvoyer dans les
+  3 secondes répond 404, et le JS ne dit rien.
+- Bug connu : `test.fail()`, avec l'issue en commentaire. Le test casse quand le bug est corrigé.
 
 ## Pièges connus
 

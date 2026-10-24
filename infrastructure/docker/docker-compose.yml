@@ -167,3 +167,26 @@ services:
             - mariadb
         profiles:
             - builder
+
+    # End-to-end tests (tests/e2e, castor qa:e2e): Playwright, its browsers and Node 24. Keep the
+    # version in sync with @playwright/test in tests/e2e/package.json.
+    playwright:
+        image: mcr.microsoft.com/playwright:v1.64.1-noble
+        init: true
+        user: "${USER_ID}:${USER_ID}"
+        environment:
+            HOME: /home/app
+            NPM_CONFIG_UPDATE_NOTIFIER: "false"
+            CI: "${CI:-}"
+            # The URL of the site in the browser of a developer, port included in a worktree,
+            # and the router that serves it in the network of the stack (tests/e2e/playwright.config.ts)
+            E2E_BASE_URL: "https://${PROJECT_ROOT_DOMAIN}${PROJECT_HTTPS_PORT:+:${PROJECT_HTTPS_PORT}}"
+            E2E_ROUTER: "router:443"
+        volumes:
+            - "../..:/var/www:cached"
+            - "../../.home:/home/app:cached"
+        working_dir: /var/www/tests/e2e
+        # Chromium shares its memory in /dev/shm, 64 MB by default
+        shm_size: 1gb
+        profiles:
+            - e2e
