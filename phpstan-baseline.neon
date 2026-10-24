@@ -31,12 +31,6 @@ parameters:
 			path: src/Ladb/CoreBundle/Command/CronSpotlightCommand.php
 
 		-
-			message: '#^Access to undefined constant Ladb\\CoreBundle\\Entity\\Find\\Find\:\:KIND_EVENT\.$#'
-			identifier: classConstant.notFound
-			count: 1
-			path: src/Ladb/CoreBundle/Command/MigrateEventsCommand.php
-
-		-
 			message: '#^Parameter \$event of method Ladb\\CoreBundle\\Composer\\ScriptHandler\:\:updateDirectoryStructure\(\) has invalid type Composer\\Script\\Event\.$#'
 			identifier: class.notFound
 			count: 1

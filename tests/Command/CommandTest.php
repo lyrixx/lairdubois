@@ -76,12 +76,8 @@ final class CommandTest extends WebTestCase
         // the mapping (doctrine:schema:validate in the CI)
         'ladb:init' => [''],
         'ladb:mailing:weeknews' => ['', '--force --limit=1'],
-        'ladb:migrate:books' => self::DRY_RUN_AND_FORCE,
-        'ladb:migrate:events' => self::DRY_RUN_AND_FORCE,
         'ladb:migrate:finds' => self::DRY_RUN_AND_FORCE,
-        'ladb:migrate:providers' => self::DRY_RUN_AND_FORCE,
         'ladb:migrate:signs' => self::DRY_RUN_AND_FORCE,
-        'ladb:migrate:spotlights' => self::DRY_RUN_AND_FORCE,
         'ladb:migrate:users' => self::DRY_RUN_AND_FORCE,
         'ladb:reset:stickers' => self::DRY_RUN_AND_FORCE,
         'ladb:reset:unreadmessagecount' => self::DRY_RUN_AND_FORCE,
@@ -111,16 +107,6 @@ final class CommandTest extends WebTestCase
         'ladb:cleanup:blocks --force' => 72,
         'ladb:cleanup:tags' => 72,
         'ladb:cleanup:tags --force' => 72,
-        'ladb:generate:likes' => 72,
-        'ladb:generate:likes --force' => 72,
-        'ladb:migrate:books' => 73,
-        'ladb:migrate:books --force' => 73,
-        'ladb:migrate:events' => 73,
-        'ladb:migrate:events --force' => 73,
-        'ladb:migrate:providers' => 73,
-        'ladb:migrate:providers --force' => 73,
-        'ladb:migrate:spotlights' => 72,
-        'ladb:migrate:spotlights --force' => 72,
     ];
 
     /**
