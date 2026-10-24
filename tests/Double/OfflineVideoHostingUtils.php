@@ -10,6 +10,11 @@ use Ladb\CoreBundle\Utils\VideoHostingUtils;
  */
 final class OfflineVideoHostingUtils extends VideoHostingUtils
 {
+    /**
+     * The title getVideoSitemapData() gives to every video, followed by its identifier.
+     */
+    public const SITEMAP_TITLE = 'Vidéo hors ligne';
+
     public function getThumbnailUrl($kind, $embedIdentifier)
     {
         if (self::KIND_YOUTUBEPLAYLIST === $kind || self::KIND_VIMEO === $kind) {
@@ -17,5 +22,30 @@ final class OfflineVideoHostingUtils extends VideoHostingUtils
         }
 
         return parent::getThumbnailUrl($kind, $embedIdentifier);
+    }
+
+    /**
+     * The data of the YouTube, Vimeo and Dailymotion APIs for the sitemaps (ladb:cron:sitemaps),
+     * without calling them. The parent knows no other host.
+     */
+    public function getVideoSitemapData($kind, $embedIdentifier)
+    {
+        if (!\in_array($kind, [self::KIND_YOUTUBE, self::KIND_VIMEO, self::KIND_DAILYMOTION], true)) {
+            return parent::getVideoSitemapData($kind, $embedIdentifier);
+        }
+
+        return [
+            'thumbnail_loc' => 'https://video.example/'.$kind.'/'.$embedIdentifier.'.jpg',
+            'title' => self::SITEMAP_TITLE.' '.$embedIdentifier,
+            'description' => 'Une vidéo de démonstration.',
+            'content_loc' => null,
+            'player_loc' => 'https://video.example/'.$kind.'/'.$embedIdentifier,
+            'duration' => 60,
+            'rating' => null,
+            'view_count' => null,
+            'publication_date' => null,
+            'category' => null,
+            'uploader' => null,
+        ];
     }
 }

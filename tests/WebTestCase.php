@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase as BaseWebTestCase;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
@@ -166,6 +167,41 @@ abstract class WebTestCase extends BaseWebTestCase
     protected static function getEmailRecipients(\Swift_Message $message): array
     {
         return array_keys($message->getHeaders()->get('X-Swift-To')->getFieldBodyModel());
+    }
+
+    /**
+     * Runs a console command line ("ladb:cron:offers --force") in a new kernel, in the
+     * transaction of the test: its changes are rolled back with it. Its exceptions are not
+     * caught. The kernel stays booted after it: static::getEntityManager() and the services are
+     * the ones of the command.
+     *
+     * @return array{int, string} The exit code and the output
+     */
+    protected static function runCommand(string $commandLine): array
+    {
+        $application = new Application(static::bootKernel());
+        $application->setAutoExit(false);
+        $application->setCatchExceptions(false);
+        $exitCode = $application->run(new StringInput($commandLine), $output = new BufferedOutput());
+
+        return [$exitCode, $output->fetch()];
+    }
+
+    /**
+     * The emails sent by the last static::runCommand(). Nothing is delivered (config_test.yml).
+     *
+     * @return list<\Swift_Message>
+     */
+    protected static function getSentEmailsByCommand(): array
+    {
+        // The logger keeps a copy of each message twice: when the command sends it to the memory
+        // spool, then when the end of the command flushes the spool
+        $messages = [];
+        foreach (static::$kernel->getContainer()->get('swiftmailer.mailer.default.plugin.messagelogger')->getMessages() as $message) {
+            $messages[$message->getId()] = $message;
+        }
+
+        return array_values($messages);
     }
 
     /**
