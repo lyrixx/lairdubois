@@ -315,6 +315,15 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   `createLock()` vaut aussi pour les votes, même après un formulaire invalide : un second vote du
   même compte dans un test répond 404. Les avis exigent un compte de plus de 7 jours :
   `setCreatedAt()` sur le compte dans le test.
+- Interactions (`tests/Core/`, sous-classes de `Tests\Core\InteractionTestCase`) : commentaires,
+  likes, suivis, signalements, votes, retours d'expérience, tags et notifications, sur la création
+  d'id 1 (`findCreation()`, `unpublishCreation()` pour un brouillon) ;
+  `getWebpushNotifications($client)` désérialise les notifications webpush de la dernière requête.
+  Le premier de deux votes d'un même compte passe par `tests.fixture_factory` (`vote()`), pas par
+  le controller et son verrou. Messagerie dans `tests/Message/`, recherche dans `tests/Search/`.
+- Une entité lue avant la première requête d'un client est celle que la requête modifie (même
+  entity manager) : lire avant la requête les valeurs à comparer ; une entité supprimée n'a plus
+  d'id.
 - Le `DomCrawler` de Symfony 3.4 lit l'UTF-8 comme de l'ISO-8859-1 depuis PHP 8.2 (`chÃªne`), et
   un formulaire relu par le crawler renverrait ses valeurs accentuées ainsi : le client de test
   (`Tests\Utf8Client`, qui décore `test.client`) lui passe la page en entités HTML.
