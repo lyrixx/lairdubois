@@ -1,6 +1,6 @@
-import { test as base } from '@playwright/test';
+import { test as base, type Page } from '@playwright/test';
 
-export { expect } from '@playwright/test';
+export { expect, type Page } from '@playwright/test';
 
 export const test = base.extend({
     context: async ({ context }, use) => {
@@ -16,3 +16,13 @@ export const test = base.extend({
         await use(context);
     },
 });
+
+/**
+ * Opens a page, then waits for the end of the requests it sends (/@me/counters.json...), before
+ * a form loaded in XHR: the sessions have no lock, such a request would write the session back
+ * without the CSRF token of the form (#88).
+ */
+export async function gotoAndSettle(page: Page, url: string): Promise<void> {
+    await page.goto(url);
+    await page.waitForLoadState('networkidle');
+}

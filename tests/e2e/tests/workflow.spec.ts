@@ -1,4 +1,4 @@
-import { test, expect, type Page } from '../support/test';
+import { test, expect, gotoAndSettle, type Page } from '../support/test';
 import { USER, storageStateOf } from '../support/accounts';
 
 test.use({ storageState: storageStateOf(USER) });
@@ -7,7 +7,7 @@ test.use({ storageState: storageStateOf(USER) });
 // websocket server (Gos WebSocket). An edition answers with JSON: the board only changes on the
 // message the server pushes to every window of the workflow.
 async function openWorkspace(page: Page): Promise<void> {
-    await page.goto('/processus/1.html?layout=workspace');
+    await gotoAndSettle(page, '/processus/1.html?layout=workspace');
     // "Connexion...", then "Chargement des tâches..."
     await expect(page.locator('.ladb-workflow-workspace .ladb-loading-panel')).toBeHidden();
     await expect(page.locator('.ladb-workflow-task-widget', { hasText: 'Débiter les planches' })).toBeVisible();

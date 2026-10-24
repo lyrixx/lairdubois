@@ -1,4 +1,4 @@
-import { test, expect } from '../support/test';
+import { test, expect, gotoAndSettle } from '../support/test';
 import { ADMIN, USER, USER2, storageStateOf } from '../support/accounts';
 
 // Creation 1 of the fixtures, by user: liked, watched and commented by user2
@@ -64,7 +64,7 @@ test.describe('as admin', () => {
 
     test('votes for an answer, then withdraws the vote', async ({ page }) => {
         // Answer 1 of question 1, by user2
-        await page.goto('/questions/1.html');
+        await gotoAndSettle(page, '/questions/1.html');
         const widget = page.locator('.ladb-vote-widget').first();
         const score = widget.locator('.ladb-vote-score');
         const initialScore = Number(await score.textContent());
@@ -88,7 +88,7 @@ test.describe('as user2', () => {
     test.use({ storageState: storageStateOf(USER2) });
 
     test('comments a creation', async ({ page }) => {
-        await page.goto(CREATION);
+        await gotoAndSettle(page, CREATION);
         const widget = page.locator('#ladb_comment_100_1_widget');
         const body = 'Un commentaire écrit depuis le navigateur.';
 
@@ -113,7 +113,7 @@ test.describe('as user', () => {
     test('changes a vote for into a vote against, with a reason', async ({ page }) => {
         // Answer 1 of question 1, by user2, with a vote for of user in the fixtures. Not admin: a
         // second vote of an account within 3 seconds is refused (AbstractController::createLock())
-        await page.goto('/questions/1.html');
+        await gotoAndSettle(page, '/questions/1.html');
         const widget = page.locator('.ladb-vote-widget').first();
         const score = widget.locator('.ladb-vote-score');
         const initialScore = Number(await score.textContent());
@@ -138,7 +138,7 @@ test.describe('as user', () => {
 
     test('answers a message', async ({ page }) => {
         // Thread 1 of the fixtures, from user2 to user
-        await page.goto('/messagerie/thread/1');
+        await gotoAndSettle(page, '/messagerie/thread/1');
         const body = 'Merci, je regarde ça ce week-end.';
 
         // The form loads in XHR, in place of the fake one
