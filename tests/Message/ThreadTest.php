@@ -127,10 +127,7 @@ final class ThreadTest extends WebTestCase
         self::assertCount(1, $webpushMessages);
         self::assertStringStartsWith('Nouveau message de ', unserialize($webpushMessages[0]['body'])['body']);
 
-        // composeThread() counts the message for the recipient, then the controller counts it
-        // again: #69
-        self::assertSame($unreadMessageCount + 2, static::findUser(UserFixtures::USER2)->getMeta()->getUnreadMessageCount(), 'The message counts once now: remove the known failure (#69).');
-        self::markTestIncomplete('Known failure, see #69.');
+        self::assertSame($unreadMessageCount + 1, static::findUser(UserFixtures::USER2)->getMeta()->getUnreadMessageCount());
     }
 
     /**

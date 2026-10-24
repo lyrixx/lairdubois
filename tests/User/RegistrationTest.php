@@ -49,6 +49,7 @@ final class RegistrationTest extends WebTestCase
         self::assertNotNull($threadMeta);
         self::assertSame('Bienvenue !', $threadMeta->getThread()->getSubject());
         self::assertSame(UserFixtures::ADMIN, $threadMeta->getThread()->getCreatedBy()->getUsername());
+        self::assertSame(1, $user->getMeta()->getUnreadMessageCount());
 
         // Logged in after the registration
         $client->followRedirect();
