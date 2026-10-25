@@ -36,6 +36,11 @@ framework:
     fragments:       ~
 
 services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
     pdo:
         class: PDO
         arguments:
