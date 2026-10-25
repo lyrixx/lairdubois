@@ -13,18 +13,6 @@ parameters:
 			path: app/AppKernel.php
 
 		-
-			message: '#^Access to undefined constant Ladb\\CoreBundle\\Entity\\Core\\Picture\:\:STORAGE_MAX_HEIGHT\.$#'
-			identifier: classConstant.notFound
-			count: 1
-			path: src/Ladb/CoreBundle/Command/BatchResizeUploadsPicturesCommand.php
-
-		-
-			message: '#^Access to undefined constant Ladb\\CoreBundle\\Entity\\Core\\Picture\:\:STORAGE_MAX_WIDTH\.$#'
-			identifier: classConstant.notFound
-			count: 1
-			path: src/Ladb/CoreBundle/Command/BatchResizeUploadsPicturesCommand.php
-
-		-
 			message: '#^Call to deprecated function curl_close\(\)\.$#'
 			identifier: function.deprecated
 			count: 1
