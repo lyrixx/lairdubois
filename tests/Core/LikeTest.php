@@ -67,13 +67,25 @@ final class LikeTest extends InteractionTestCase
         self::assertStringStartsWith('Nouveau coup de coeur de ', $notifications[0]['body']);
     }
 
-    public function testCreateWithoutXhrRedirectsToRtu(): void
+    /**
+     * @dataProvider provideSiteRtus
+     */
+    public function testCreateWithoutXhrRedirectsToRtu(string $rtu): void
     {
         $client = static::createClientAs(UserFixtures::ADMIN);
-        $client->request('GET', $this->getCreatePath(['rtu' => '/creations/']));
+        $client->request('GET', $this->getCreatePath(['rtu' => $rtu]));
 
-        self::assertTrue($client->getResponse()->isRedirect('/creations/'));
+        self::assertTrue($client->getResponse()->isRedirect($rtu));
         self::assertNotNull($this->findLikeOf(UserFixtures::ADMIN));
+    }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function provideSiteRtus(): iterable
+    {
+        yield 'path' => ['/creations/'];
+        yield 'absolute URL on the host of the request' => ['https://lairdubois.test/creations/'];
     }
 
     /**
@@ -87,6 +99,35 @@ final class LikeTest extends InteractionTestCase
 
         self::assertTrue($client->getResponse()->isRedirect('/'));
         self::assertNotNull($this->findLikeOf(UserFixtures::ADMIN));
+    }
+
+    /**
+     * A "rtu" that does not lead to the site (forged URL, #102), as none.
+     *
+     * @dataProvider provideForeignRtus
+     */
+    public function testCreateWithoutXhrAndWithForeignRtuRedirectsToHome($rtu): void
+    {
+        $client = static::createClientAs(UserFixtures::ADMIN);
+        $client->request('GET', $this->getCreatePath(['rtu' => $rtu]));
+
+        self::assertTrue($client->getResponse()->isRedirect('/'));
+        self::assertNotNull($this->findLikeOf(UserFixtures::ADMIN));
+    }
+
+    /**
+     * @return iterable<string, array{string|string[]}>
+     */
+    public static function provideForeignRtus(): iterable
+    {
+        yield 'other host' => ['https://example.com/'];
+        yield 'other host, the site as user info' => ['https://lairdubois.test@example.com/'];
+        yield 'relative to the protocol' => ['//example.com/'];
+        yield 'javascript scheme' => ['javascript:alert(1)'];
+        yield 'other scheme on the host of the request' => ['ftp://lairdubois.test/'];
+        yield 'backslash' => ['/\\example.com/'];
+        yield 'tab' => ["/\t/example.com/"];
+        yield 'array' => [['/creations/']];
     }
 
     /**

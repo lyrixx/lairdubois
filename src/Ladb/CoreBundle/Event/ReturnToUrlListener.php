@@ -7,8 +7,9 @@ use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
- * Without "rtu" (return to URL), the actions that read it redirect to the referer. An empty one, that
- * the site never sends (forged URL), is removed: they would redirect to an empty URL (500).
+ * Without "rtu" (return to URL), the actions that read it redirect to the referer. The site only sends
+ * its own URLs: any other one (forged URL) is removed. An empty one would redirect to an empty URL
+ * (500), another site's one would be an open redirect.
  */
 class ReturnToUrlListener implements EventSubscriberInterface {
 
@@ -22,12 +23,31 @@ class ReturnToUrlListener implements EventSubscriberInterface {
 
 	public function onKernelRequest(GetResponseEvent $event) {
 		$request = $event->getRequest();
-		if ($request->query->get('rtu') === '') {
-			$request->query->remove('rtu');
+		foreach (array( $request->query, $request->request ) as $parameters) {
+			if ($parameters->has('rtu') && !$this->isSiteUrl($parameters->get('rtu'), $request->getHost())) {
+				$parameters->remove('rtu');
+			}
 		}
-		if ($request->request->get('rtu') === '') {
-			$request->request->remove('rtu');
+	}
+
+	/////
+
+	/**
+	 * A path of the site, or an absolute http(s) URL on the host of the request. Browsers read a
+	 * backslash as a slash and drop tabs and newlines: "/\example.com" and "/<tab>/example.com" are
+	 * "//example.com", relative to the protocol.
+	 */
+	private function isSiteUrl($url, $host) {
+		if (!is_string($url) || $url === '' || preg_match('/[\x00-\x1F\x7F\\\\]/', $url)) {
+			return false;
 		}
+		if ($url[0] === '/') {
+			return strpos($url, '//') !== 0;
+		}
+		$scheme = parse_url($url, PHP_URL_SCHEME);
+		$urlHost = parse_url($url, PHP_URL_HOST);
+		return is_string($scheme) && in_array(strtolower($scheme), array( 'http', 'https' ), true)
+			&& is_string($urlHost) && strtolower($urlHost) === $host;
 	}
 
 }
