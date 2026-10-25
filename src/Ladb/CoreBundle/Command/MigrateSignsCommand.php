@@ -2,7 +2,8 @@
 
 namespace Ladb\CoreBundle\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -10,11 +11,19 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Ladb\CoreBundle\Entity\Core\Vote;
 
-class MigrateSignsCommand extends ContainerAwareCommand {
+class MigrateSignsCommand extends Command {
+
+	protected static $defaultName = 'ladb:migrate:signs';
+
+	private $om;
+
+	public function __construct(EntityManagerInterface $om) {
+		$this->om = $om;
+		parent::__construct();
+	}
 
 	protected function configure() {
 		$this
-			->setName('ladb:migrate:signs')
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
 			->setDescription('Migrate signs')
 			->setHelp(<<<EOT
@@ -27,7 +36,7 @@ EOT
 
 		$forced = $input->getOption('force');
 
-		$om = $this->getContainer()->get('doctrine')->getManager();
+		$om = $this->om;
 		$voteRepository = $om->getRepository(Vote::CLASS_NAME);
 
 		// Retrieve Signs

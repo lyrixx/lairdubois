@@ -2,18 +2,27 @@
 
 namespace Ladb\CoreBundle\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class GenerateChangedAtCommand extends ContainerAwareCommand {
+class GenerateChangedAtCommand extends Command {
+
+	protected static $defaultName = 'ladb:generate:changedat';
+
+	private $em;
+
+	public function __construct(EntityManagerInterface $em) {
+		$this->em = $em;
+		parent::__construct();
+	}
 
 	protected function configure() {
 		$this
-			->setName('ladb:generate:changedat')
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
 			->setDescription('Generate ChangedAt')
 			->setHelp(<<<EOT
@@ -53,7 +62,7 @@ EOT
 
 		$forced = $input->getOption('force');
 
-		$em = $this->getContainer()->get('doctrine')->getManager();
+		$em = $this->em;
 
 		$entityCount = 0;
 

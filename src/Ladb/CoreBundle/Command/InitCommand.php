@@ -2,18 +2,19 @@
 
 namespace Ladb\CoreBundle\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class InitCommand extends ContainerAwareCommand {
+class InitCommand extends Command {
+
+	protected static $defaultName = 'ladb:init';
 
 	protected function configure() {
 		$this
-			->setName('ladb:init')
 			->setDescription('Reset database')
 			->setHelp(<<<EOT
 The <info>ladb:init</info> command create the default connections

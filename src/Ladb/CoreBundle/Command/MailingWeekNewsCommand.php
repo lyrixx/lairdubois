@@ -2,7 +2,8 @@
 
 namespace Ladb\CoreBundle\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\LockableTrait;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
@@ -10,13 +11,23 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Ladb\CoreBundle\Utils\MailerUtils;
 
-class MailingWeekNewsCommand extends ContainerAwareCommand {
+class MailingWeekNewsCommand extends Command {
+
+	protected static $defaultName = 'ladb:mailing:weeknews';
+
+	private $mailerUtils;
+	private $om;
+
+	public function __construct(MailerUtils $mailerUtils, EntityManagerInterface $om) {
+		$this->mailerUtils = $mailerUtils;
+		$this->om = $om;
+		parent::__construct();
+	}
 
 	use LockableTrait;
 
 	protected function configure() {
 		$this
-			->setName('ladb:mailing:weeknews')
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force sending')
 			->addOption('limit', null, InputOption::VALUE_REQUIRED, 'Limit the number of users')
 			->setDescription('Send week news')
@@ -37,8 +48,8 @@ EOT
 		$verbose = $input->getOption('verbose');
 		$limit = $input->getOption('limit');
 
-		$om = $this->getContainer()->get('doctrine')->getManager();
-		$mailerUtils = $this->getContainer()->get(MailerUtils::NAME);
+		$om = $this->om;
+		$mailerUtils = $this->mailerUtils;
 
 		$now = new \DateTime();
 		$date = $now->sub(new \DateInterval('P7D'));	// 7 days

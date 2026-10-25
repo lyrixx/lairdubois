@@ -5,7 +5,8 @@ namespace Ladb\CoreBundle\Command;
 use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Fos\DisplaynameCanonicalizer;
 use Ladb\CoreBundle\Fos\UserManager;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -13,11 +14,27 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class MigrateUsersCommand extends ContainerAwareCommand {
+class MigrateUsersCommand extends Command {
+
+	protected static $defaultName = 'ladb:migrate:users';
+
+	private $displaynameCanonicalizer;
+	private $om;
+	private $userManager;
+
+	public function __construct(
+		DisplaynameCanonicalizer $displaynameCanonicalizer,
+		EntityManagerInterface $om,
+		UserManager $userManager
+	) {
+		$this->displaynameCanonicalizer = $displaynameCanonicalizer;
+		$this->om = $om;
+		$this->userManager = $userManager;
+		parent::__construct();
+	}
 
 	protected function configure() {
 		$this
-			->setName('ladb:migrate:users')
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
 			->setDescription('Migrate users')
 			->setHelp(<<<EOT
@@ -31,10 +48,10 @@ EOT
 		$verbose = $input->getOption('verbose');
 		$forced = $input->getOption('force');
 
-		$om = $this->getContainer()->get('doctrine')->getManager();
+		$om = $this->om;
 		$userRepository = $om->getRepository(User::class);
-		$userManager = $this->getContainer()->get(UserManager::NAME);
-		$displaynameCanonicalizer = $this->getContainer()->get(DisplaynameCanonicalizer::NAME);
+		$userManager = $this->userManager;
+		$displaynameCanonicalizer = $this->displaynameCanonicalizer;
 
 		// Count users /////
 

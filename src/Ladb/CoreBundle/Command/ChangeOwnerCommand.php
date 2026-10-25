@@ -13,18 +13,35 @@ use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Model\MultiPicturedInterface;
 use Ladb\CoreBundle\Model\PublicationInterface;
 use Ladb\CoreBundle\Utils\TypableUtils;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ChangeOwnerCommand extends ContainerAwareCommand {
+class ChangeOwnerCommand extends Command {
+
+	protected static $defaultName = 'ladb:change:owner';
+
+	private $om;
+	private $typableUtils;
+	private $userManager;
+
+	public function __construct(
+		EntityManagerInterface $om,
+		TypableUtils $typableUtils,
+		UserManager $userManager
+	) {
+		$this->om = $om;
+		$this->typableUtils = $typableUtils;
+		$this->userManager = $userManager;
+		parent::__construct();
+	}
 
 	protected function configure() {
 		$this
-			->setName('ladb:change:owner')
 			->addOption('target-username', null, InputOption::VALUE_REQUIRED, 'Target username')
 			->addOption('entity-type', null, InputOption::VALUE_REQUIRED, 'Entity type')
 			->addOption('entity-id', null, InputOption::VALUE_REQUIRED, 'Entity ID')
@@ -43,11 +60,11 @@ EOT
 		$entityType = $input->getOption('entity-type');
 		$entityId = $input->getOption('entity-id');
 
-		$om = $this->getContainer()->get('doctrine')->getManager();
+		$om = $this->om;
 
 		// Retrieve target user ////
 
-		$userManager = $this->getContainer()->get(UserManager::NAME);
+		$userManager = $this->userManager;
 		$targetUser = $userManager->findUserByUsername($targetUsername);
 
 		if (is_null($targetUser)) {
@@ -57,7 +74,7 @@ EOT
 
 		// Retrieve creation ////
 
-		$typableUtils = $this->getContainer()->get(TypableUtils::NAME);
+		$typableUtils = $this->typableUtils;
 		$typable = $typableUtils->findTypable($entityType, $entityId);
 
 		$output->write('<info>Changing Owner of typable="'.$typable->getTitle().'" to targetUser='.$targetUser->getDisplayName().'...</info>');

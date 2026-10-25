@@ -2,7 +2,8 @@
 
 namespace Ladb\CoreBundle\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -10,11 +11,21 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Ladb\CoreBundle\Utils\BlockBodiedUtils;
 
-class GenerateBodyBlockPictureCountCommand extends ContainerAwareCommand {
+class GenerateBodyBlockPictureCountCommand extends Command {
+
+	protected static $defaultName = 'ladb:generate:bodyblockpicturecount';
+
+	private $blockBodiedUtils;
+	private $om;
+
+	public function __construct(BlockBodiedUtils $blockBodiedUtils, EntityManagerInterface $om) {
+		$this->blockBodiedUtils = $blockBodiedUtils;
+		$this->om = $om;
+		parent::__construct();
+	}
 
 	protected function configure() {
 		$this
-			->setName('ladb:generate:bodyblockpicturecount')
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
 			->setDescription('Generate bodyblockpicturecount')
 			->setHelp(<<<EOT
@@ -55,8 +66,8 @@ EOT
 
 		$forced = $input->getOption('force');
 
-		$om = $this->getContainer()->get('doctrine')->getManager();
-		$blockBodiedUtils = $this->getContainer()->get(BlockBodiedUtils::NAME);
+		$om = $this->om;
+		$blockBodiedUtils = $this->blockBodiedUtils;
 
 		$entityCount = 0;
 

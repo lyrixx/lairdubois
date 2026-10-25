@@ -2,7 +2,7 @@
 
 namespace Ladb\CoreBundle\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -10,11 +10,33 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Filesystem\Filesystem;
 
-class BackupDumpdbCommand extends ContainerAwareCommand {
+class BackupDumpdbCommand extends Command {
+
+	protected static $defaultName = 'ladb:backup:dumpdb';
+
+	private $databaseHost;
+	private $databaseName;
+	private $databasePassword;
+	private $databasePort;
+	private $databaseUser;
+
+	public function __construct(
+		$databaseHost,
+		$databaseName,
+		$databasePassword,
+		$databasePort,
+		$databaseUser
+	) {
+		$this->databaseHost = $databaseHost;
+		$this->databaseName = $databaseName;
+		$this->databasePassword = $databasePassword;
+		$this->databasePort = $databasePort;
+		$this->databaseUser = $databaseUser;
+		parent::__construct();
+	}
 
 	protected function configure() {
 		$this
-			->setName('ladb:backup:dumpdb')
 			->addOption('dump-dir', null, InputOption::VALUE_REQUIRED, 'Define the dump dir', 'backups')
 			->addOption('compress', null, InputOption::VALUE_NONE, 'Define if dump file is compressed')
 			->addOption('overwrite', null, InputOption::VALUE_NONE, 'Define previous dump file is overwrited')
@@ -37,11 +59,11 @@ EOT
 		$ignoreTable = $input->getOption('ignore-table');
 		$where = $input->getOption('where');
 
-		$dbHost = $this->getContainer()->getParameter('database_host');
-		$dbPort = $this->getContainer()->getParameter('database_port');
-		$dbUser = $this->getContainer()->getParameter('database_user');
-		$dbPassword = $this->getContainer()->getParameter('database_password');
-		$dbName = $this->getContainer()->getParameter('database_name');
+		$dbHost = $this->databaseHost;
+		$dbPort = $this->databasePort;
+		$dbUser = $this->databaseUser;
+		$dbPassword = $this->databasePassword;
+		$dbName = $this->databaseName;
 		$sqlFile = date('Ymd_His').'.'.$dbName.(!is_null($table) ? '.'.$table : '').'.sql';
 		$fs = new Filesystem();
 

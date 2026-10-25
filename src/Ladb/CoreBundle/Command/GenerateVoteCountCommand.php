@@ -2,17 +2,26 @@
 
 namespace Ladb\CoreBundle\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Ladb\CoreBundle\Entity\Core\Vote;
 
-class GenerateVoteCountCommand extends ContainerAwareCommand {
+class GenerateVoteCountCommand extends Command {
+
+	protected static $defaultName = 'ladb:generate:votecount';
+
+	private $om;
+
+	public function __construct(EntityManagerInterface $om) {
+		$this->om = $om;
+		parent::__construct();
+	}
 
 	protected function configure() {
 		$this
-			->setName('ladb:generate:votecount')
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
 			->setDescription('Generate votecount')
 			->setHelp(<<<EOT
@@ -25,7 +34,7 @@ EOT
 
 		$forced = $input->getOption('force');
 
-		$om = $this->getContainer()->get('doctrine')->getManager();
+		$om = $this->om;
 		$voteRepository = $om->getRepository(Vote::CLASS_NAME);
 
 		// Retrieve Woods

@@ -2,7 +2,10 @@
 
 namespace Ladb\CoreBundle\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
+use Symfony\Component\Asset\Packages;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -16,13 +19,38 @@ use Ladb\CoreBundle\Model\PicturedInterface;
 use Ladb\CoreBundle\Utils\PicturedUtils;
 use Ladb\CoreBundle\Utils\VideoHostingUtils;
 
-class CronSitemapsCommand extends ContainerAwareCommand {
+class CronSitemapsCommand extends Command {
+
+	protected static $defaultName = 'ladb:cron:sitemaps';
+
+	private $om;
+	private $packages;
+	private $picturedUtils;
+	private $router;
+	private $templating;
+	private $videoHostingUtils;
+
+	public function __construct(
+		EntityManagerInterface $om,
+		Packages $packages,
+		PicturedUtils $picturedUtils,
+		UrlGeneratorInterface $router,
+		EngineInterface $templating,
+		VideoHostingUtils $videoHostingUtils
+	) {
+		$this->om = $om;
+		$this->packages = $packages;
+		$this->picturedUtils = $picturedUtils;
+		$this->router = $router;
+		$this->templating = $templating;
+		$this->videoHostingUtils = $videoHostingUtils;
+		parent::__construct();
+	}
 
 	private $exportedVideosIdentifiers;
 
 	protected function configure() {
 		$this
-			->setName('ladb:cron:sitemaps')
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
 			->setDescription('Generate sitemaps')
 			->setHelp(<<<EOT
@@ -154,7 +182,7 @@ EOT
 
 		/////
 
-		$templating = $this->getContainer()->get('templating');
+		$templating = $this->templating;
 
 		if ($verbose) {
 			$output->write('<info>Building index sitemap...</info>');
@@ -195,7 +223,7 @@ EOT
 	}
 
 	private function _createSitemapFile($entityClassName, $entityName, $section, $forced, $verbose, OutputInterface $output, $slugged = true) {
-		$templating = $this->getContainer()->get('templating');
+		$templating = $this->templating;
 
 		if ($verbose) {
 			$output->writeln('<info>Building '.$section.' sitemap...</info>');
@@ -234,11 +262,11 @@ EOT
 	/////
 
 	private function _getEntityUrls($entityClassName, $entityName, $forced, $verbose, OutputInterface $output, $slugged = true) {
-		$router = $this->getContainer()->get('router');
-		$om = $this->getContainer()->get('doctrine')->getManager();
+		$router = $this->router;
+		$om = $this->om;
 		$entityRepository = $om->getRepository($entityClassName);
-		$picturedUtils = $this->getContainer()->get(PicturedUtils::NAME);
-		$videoHostingUtils = $this->getContainer()->get(VideoHostingUtils::NAME);
+		$picturedUtils = $this->picturedUtils;
+		$videoHostingUtils = $this->videoHostingUtils;
 
 		$urls = array();
 		$entities = $entityRepository->findAll();
@@ -376,7 +404,7 @@ EOT
 	/////
 
 	private function _getEntitySitemap($entityClassName, $section) {
-		$om = $this->getContainer()->get('doctrine')->getManager();
+		$om = $this->om;
 		$entityRepository = $om->getRepository($entityClassName);
 		$lastCreatedEntity = $entityRepository->findLastCreated();
 		$lastUpdatedEntity = $entityRepository->findLastUpdated();
@@ -390,7 +418,7 @@ EOT
 			$lastmod = date_format(new \DateTime(), 'Y-m-d\TH:i:sP');
 		}
 		return array(
-			'loc'     => $this->getContainer()->get('assets.packages')->getUrl('/sitemap-'.$section.'.xml', 'sitemaps'),
+			'loc'     => $this->packages->getUrl('/sitemap-'.$section.'.xml', 'sitemaps'),
 			'lastmod' => $lastmod,
 		);
 	}

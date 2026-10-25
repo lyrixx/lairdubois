@@ -3,7 +3,9 @@
 namespace Ladb\CoreBundle\Command;
 
 use Ladb\CoreBundle\Entity\Core\Member;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -14,11 +16,63 @@ use Ladb\CoreBundle\Entity\Core\Spotlight;
 use Ladb\CoreBundle\Utils\MailerUtils;
 use Ladb\CoreBundle\Utils\TypableUtils;
 
-class CronSpotlightCommand extends ContainerAwareCommand {
+class CronSpotlightCommand extends Command {
+
+	protected static $defaultName = 'ladb:cron:spotlight';
+
+	private $facebookAccessToken;
+	private $facebookAppId;
+	private $facebookAppSecret;
+	private $facebookPageId;
+	private $mailerUtils;
+	private $mastodonAccessToken;
+	private $mastodonInstance;
+	private $om;
+	private $searchUtils;
+	private $templating;
+	private $twitterAccessSecret;
+	private $twitterAccessToken;
+	private $twitterConsumerKey;
+	private $twitterConsumerSecret;
+	private $typableUtils;
+
+	public function __construct(
+		$facebookAccessToken,
+		$facebookAppId,
+		$facebookAppSecret,
+		$facebookPageId,
+		MailerUtils $mailerUtils,
+		$mastodonAccessToken,
+		$mastodonInstance,
+		EntityManagerInterface $om,
+		SearchUtils $searchUtils,
+		EngineInterface $templating,
+		$twitterAccessSecret,
+		$twitterAccessToken,
+		$twitterConsumerKey,
+		$twitterConsumerSecret,
+		TypableUtils $typableUtils
+	) {
+		$this->facebookAccessToken = $facebookAccessToken;
+		$this->facebookAppId = $facebookAppId;
+		$this->facebookAppSecret = $facebookAppSecret;
+		$this->facebookPageId = $facebookPageId;
+		$this->mailerUtils = $mailerUtils;
+		$this->mastodonAccessToken = $mastodonAccessToken;
+		$this->mastodonInstance = $mastodonInstance;
+		$this->om = $om;
+		$this->searchUtils = $searchUtils;
+		$this->templating = $templating;
+		$this->twitterAccessSecret = $twitterAccessSecret;
+		$this->twitterAccessToken = $twitterAccessToken;
+		$this->twitterConsumerKey = $twitterConsumerKey;
+		$this->twitterConsumerSecret = $twitterConsumerSecret;
+		$this->typableUtils = $typableUtils;
+		parent::__construct();
+	}
 
 	protected function configure() {
 		$this
-			->setName('ladb:cron:spotlight')
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
 			->addOption('force-twitter', null, InputOption::VALUE_NONE, 'Force posting on Twitter')
 			->addOption('force-facebook', null, InputOption::VALUE_NONE, 'Force posting on Facebook')
@@ -42,9 +96,9 @@ EOT
 		$forcedMastodon = $input->getOption('force-mastodon');
 		$verbose = $input->getOption('verbose');
 
-		$om = $this->getContainer()->get('doctrine')->getManager();
+		$om = $this->om;
 		$spotlightRepository = $om->getRepository(Spotlight::CLASS_NAME);
-		$typableUtils = $this->getContainer()->get(TypableUtils::NAME);
+		$typableUtils = $this->typableUtils;
 
 		// Retrieve current spotlight
 
@@ -224,7 +278,7 @@ EOT
 				if ($entity instanceof IndexableInterface && $entity->isIndexable()) {
 
 					// Search index update
-					$searchUtils = $this->getContainer()->get(SearchUtils::NAME);
+					$searchUtils = $this->searchUtils;
 					$searchUtils->replaceEntityInIndex($entity);
 
 				}
@@ -241,7 +295,7 @@ EOT
 				}
 
 				// Email notification
-				$mailerUtils = $this->getContainer()->get(MailerUtils::NAME);
+				$mailerUtils = $this->mailerUtils;
 				if ($verbose) {
 					$output->write('<info>Sending notification to '.$entity->getUser()->getDisplayname().'...</info>');
 				}
@@ -282,16 +336,16 @@ EOT
         return false;
 
 		$success = false;
-		$status = $this->getContainer()->get('templating')->render('LadbCoreBundle:Command:_cron-spotlight-twitter-status.txt.twig', array( 'spotlight' => $spotlight, 'entity' => $entity));
+		$status = $this->templating->render('LadbCoreBundle:Command:_cron-spotlight-twitter-status.txt.twig', array( 'spotlight' => $spotlight, 'entity' => $entity));
 		$mediaIds = '';
 		if ($verbose) {
 			$output->writeln('<info>Posting to Twitter (<fg=yellow>'.$status.'</fg=yellow>) ...</info>');
 		}
 
-		$consumerKey = $this->getContainer()->getParameter('twitter_consumer_key');
-		$consumerSecret = $this->getContainer()->getParameter('twitter_consumer_secret');
-		$accessToken = $this->getContainer()->getParameter('twitter_access_token');
-		$accessTokenSecret = $this->getContainer()->getParameter('twitter_access_secret');
+		$consumerKey = $this->twitterConsumerKey;
+		$consumerSecret = $this->twitterConsumerSecret;
+		$accessToken = $this->twitterAccessToken;
+		$accessTokenSecret = $this->twitterAccessSecret;
 
 		// Setup CodeBird
 		\Codebird\Codebird::setConsumerKey($consumerKey, $consumerSecret);
@@ -351,16 +405,16 @@ EOT
         return false;
 
 		$success = true;
-		$message = $this->getContainer()->get('templating')->render('LadbCoreBundle:Command:_cron-spotlight-facebook-message.txt.twig', array( 'spotlight' => $spotlight, 'entity' => $entity));
-		$link = $this->getContainer()->get('templating')->render('LadbCoreBundle:Command:_cron-spotlight-facebook-link.txt.twig', array( 'spotlight' => $spotlight, 'entity' => $entity));
+		$message = $this->templating->render('LadbCoreBundle:Command:_cron-spotlight-facebook-message.txt.twig', array( 'spotlight' => $spotlight, 'entity' => $entity));
+		$link = $this->templating->render('LadbCoreBundle:Command:_cron-spotlight-facebook-link.txt.twig', array( 'spotlight' => $spotlight, 'entity' => $entity));
 		if ($verbose) {
 			$output->writeln('<info>Posting to Facebook (<fg=yellow>'.$message.' '.$link.'</fg=yellow>) ...</info>');
 		}
 
-		$appId = $this->getContainer()->getParameter('facebook_app_id');
-		$appSecret = $this->getContainer()->getParameter('facebook_app_secret');
-		$pageId = $this->getContainer()->getParameter('facebook_page_id');
-		$accessToken = $this->getContainer()->getParameter('facebook_access_token');
+		$appId = $this->facebookAppId;
+		$appSecret = $this->facebookAppSecret;
+		$pageId = $this->facebookPageId;
+		$accessToken = $this->facebookAccessToken;
 
 		try {
 
@@ -411,13 +465,13 @@ EOT
 
 	private function _publishOnMastodon($spotlight, $entity, $forced, $forcedMastodon, $verbose, $output) {
 
-		$status = $this->getContainer()->get('templating')->render('LadbCoreBundle:Command:_cron-spotlight-mastodon-status.txt.twig', array( 'spotlight' => $spotlight, 'entity' => $entity));
+		$status = $this->templating->render('LadbCoreBundle:Command:_cron-spotlight-mastodon-status.txt.twig', array( 'spotlight' => $spotlight, 'entity' => $entity));
 		if ($verbose) {
 			$output->writeln('<info>Posting to Mastodon (<fg=yellow>'.$status.'</fg=yellow>) ...</info>');
 		}
 
-		$mastodonInstance = $this->getContainer()->getParameter('mastodon_instance');
-		$accessToken = $this->getContainer()->getParameter('mastodon_access_token');
+		$mastodonInstance = $this->mastodonInstance;
+		$accessToken = $this->mastodonAccessToken;
 
 		$headers = array(
 			'Authorization: Bearer '.$accessToken,

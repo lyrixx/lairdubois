@@ -3,18 +3,29 @@
 namespace Ladb\CoreBundle\Command;
 
 use Ladb\CoreBundle\Utils\EmbeddableUtils;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ResetStickersCommand extends ContainerAwareCommand {
+class ResetStickersCommand extends Command {
+
+	protected static $defaultName = 'ladb:reset:stickers';
+
+	private $embeddableUtils;
+	private $om;
+
+	public function __construct(EmbeddableUtils $embeddableUtils, EntityManagerInterface $om) {
+		$this->embeddableUtils = $embeddableUtils;
+		$this->om = $om;
+		parent::__construct();
+	}
 
 	protected function configure() {
 		$this
-			->setName('ladb:reset:stickers')
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force reseting')
 			->setDescription('Reset stickers')
 			->setHelp(<<<EOT
@@ -25,8 +36,8 @@ EOT
 
 	protected function execute(InputInterface $input, OutputInterface $output) {
 
-		$om = $this->getContainer()->get('doctrine')->getManager();
-		$embaddableUtils = $this->getContainer()->get(EmbeddableUtils::NAME);
+		$om = $this->om;
+		$embaddableUtils = $this->embeddableUtils;
 
 		$resetStickerCount = 0;
 

@@ -5,17 +5,28 @@ namespace Ladb\CoreBundle\Command;
 use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Utils\KnowledgeUtils;
 use Ladb\CoreBundle\Utils\TypableUtils;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Ladb\CoreBundle\Utils\PropertyUtils;
 
-class GenerateCompletionCountersCommand extends ContainerAwareCommand {
+class GenerateCompletionCountersCommand extends Command {
+
+	protected static $defaultName = 'ladb:generate:completioncounters';
+
+	private $knowledgeUtils;
+	private $om;
+
+	public function __construct(KnowledgeUtils $knowledgeUtils, EntityManagerInterface $om) {
+		$this->knowledgeUtils = $knowledgeUtils;
+		$this->om = $om;
+		parent::__construct();
+	}
 
 	protected function configure() {
 		$this
-			->setName('ladb:generate:completioncounters')
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
 			->setDescription('Generate completion counters')
 			->setHelp(<<<EOT
@@ -29,8 +40,8 @@ EOT
 		$forced = $input->getOption('force');
 		$verbose = $input->getOption('verbose');
 
-		$om = $this->getContainer()->get('doctrine')->getManager();
-		$knowledgeUtils = $this->getContainer()->get(KnowledgeUtils::NAME);
+		$om = $this->om;
+		$knowledgeUtils = $this->knowledgeUtils;
 
 		$defs = array(
 			array(
@@ -81,7 +92,7 @@ EOT
 
 	private function _computeEntitiesCountersByUser($entityClassName, $entityName, $hiddable, $user, $forced, $verbose, OutputInterface $output) {
 
-		$om = $this->getContainer()->get('doctrine')->getManager();
+		$om = $this->om;
 
 		// Retrieve Entities
 

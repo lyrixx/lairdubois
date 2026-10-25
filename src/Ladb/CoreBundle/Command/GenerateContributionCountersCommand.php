@@ -3,17 +3,28 @@
 namespace Ladb\CoreBundle\Command;
 
 use Ladb\CoreBundle\Model\HiddableInterface;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Ladb\CoreBundle\Utils\PropertyUtils;
 
-class GenerateContributionCountersCommand extends ContainerAwareCommand {
+class GenerateContributionCountersCommand extends Command {
+
+	protected static $defaultName = 'ladb:generate:contributioncounters';
+
+	private $om;
+	private $propertyUtils;
+
+	public function __construct(EntityManagerInterface $om, PropertyUtils $propertyUtils) {
+		$this->om = $om;
+		$this->propertyUtils = $propertyUtils;
+		parent::__construct();
+	}
 
 	protected function configure() {
 		$this
-			->setName('ladb:generate:contributioncounters')
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
 			->setDescription('Generate contribution counters')
 			->setHelp(<<<EOT
@@ -27,8 +38,8 @@ EOT
 		$forced = $input->getOption('force');
 		$verbose = $input->getOption('verbose');
 
-		$om = $this->getContainer()->get('doctrine')->getManager();
-		$propertyUtils = $this->getContainer()->get(PropertyUtils::NAME);
+		$om = $this->om;
+		$propertyUtils = $this->propertyUtils;
 
 		$defs = array(
 			array(
@@ -181,7 +192,7 @@ EOT
 
 	private function _computeEntitiesCountersByUser($entityClassName, $entityName, $hiddable, $user, $forced, $verbose, OutputInterface $output) {
 
-		$om = $this->getContainer()->get('doctrine')->getManager();
+		$om = $this->om;
 
 		// Retrieve Entities
 
