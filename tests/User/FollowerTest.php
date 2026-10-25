@@ -11,7 +11,7 @@ use Tests\WebTestCase;
  * fixtures, user2 follows user.
  *
  * The links of the site go through a page, which gives the Referer header to come back to:
- * without it, a request without XHR answers 500 (#42).
+ * without it, a request without XHR returns to the home page.
  */
 final class FollowerTest extends WebTestCase
 {
@@ -36,6 +36,17 @@ final class FollowerTest extends WebTestCase
         $crawler = $client->request('GET', '/@user2/abonnes');
         self::assertSame(200, $client->getResponse()->getStatusCode());
         self::assertGreaterThan(0, $crawler->filter('a[href="/@user"]')->count());
+    }
+
+    public function testFollowWithoutReferer(): void
+    {
+        $client = static::createClientAs(UserFixtures::USER);
+        $user2 = static::findUser(UserFixtures::USER2);
+
+        $client->request('GET', "/followers/{$user2->getId()}/create");
+
+        self::assertSame('/', $client->getResponse()->headers->get('Location'));
+        self::assertNotNull($this->findFollower(static::findUser(UserFixtures::USER)->getId(), $user2->getId()));
     }
 
     public function testFollowInXhr(): void

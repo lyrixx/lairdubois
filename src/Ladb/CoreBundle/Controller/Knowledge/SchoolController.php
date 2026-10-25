@@ -391,11 +391,15 @@ class SchoolController extends AbstractController {
 
 			$features = array();
 			foreach ($searchParameters['entities'] as $school) {
+				$geoPoint = $school->getGeoPoint();
+				if (is_null($geoPoint)) {
+					continue;
+				}
 				$properties = array(
 					'color'   => 'green',
 					'cardUrl' => $this->generateUrl('core_school_card', array('id' => $school->getId())),
 				);
-				$gerometry = new \GeoJson\Geometry\Point($school->getGeoPoint());
+				$gerometry = new \GeoJson\Geometry\Point($geoPoint);
 				$features[] = new \GeoJson\Feature\Feature($gerometry, $properties);
 			}
 			$crs = new \GeoJson\CoordinateReferenceSystem\Named('urn:ogc:def:crs:OGC:1.3:CRS84');

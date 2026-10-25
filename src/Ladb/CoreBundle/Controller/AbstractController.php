@@ -11,6 +11,17 @@ abstract class AbstractController extends Controller {
 
 	const LOCK_TTL_CREATE_ACTION = 3;		// 3 seconds
 
+	/**
+	 * The page to return to after an action: the referer, or the home page if the browser did not send it (like after the logout).
+	 */
+	protected function getRefererUrl(Request $request) {
+		$referer = $request->headers->get('referer');
+		if (is_null($referer) || $referer === '') {
+			return $this->generateUrl('core_welcome');
+		}
+		return $referer;
+	}
+
 	protected function createLock($name, $blocking = false, $ttl = 300.0, $autoRelease = true) {
 
 		// Lock / Check resource

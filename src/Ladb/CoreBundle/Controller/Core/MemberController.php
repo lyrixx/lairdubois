@@ -2,7 +2,6 @@
 
 namespace Ladb\CoreBundle\Controller\Core;
 
-use Elastica\Exception\NotFoundException;
 use Ladb\CoreBundle\Fos\UserManager;
 use Ladb\CoreBundle\Model\AuthoredInterface;
 use Ladb\CoreBundle\Utils\WebpushNotificationUtils;
@@ -183,7 +182,7 @@ class MemberController extends AbstractController {
 		if (is_null($returnToUrl)) {
 			$returnToUrl = $request->headers->get('referer');
 			if (is_null($returnToUrl)) {
-				$returnToUrl = $this->redirect($this->generateUrl('core_user_show', array( 'username' => $memberInvitation->getTeam()->getUsernameCanonical() )));
+				$returnToUrl = $this->generateUrl('core_user_show', array( 'username' => $memberInvitation->getTeam()->getUsernameCanonical() ));
 			}
 		}
 
@@ -302,7 +301,7 @@ class MemberController extends AbstractController {
 		if (is_null($returnToUrl)) {
 			$returnToUrl = $request->headers->get('referer');
 			if (is_null($returnToUrl)) {
-				$returnToUrl = $this->redirect($this->generateUrl('core_user_show', array( 'username' => $memberRequest->getTeam()->getUsernameCanonical() )));
+				$returnToUrl = $this->generateUrl('core_user_show', array( 'username' => $memberRequest->getTeam()->getUsernameCanonical() ));
 			}
 		}
 
@@ -347,7 +346,7 @@ class MemberController extends AbstractController {
 
 		$team = $this->_retrieveTeam($teamId);
 		if ($team->getMeta()->getMemberCount() <= 1 ) {
-			throw new NotFoundException('Not allowed - last survivor (core_member_delete)');
+			throw $this->createNotFoundException('Not allowed - last survivor (core_member_delete)');
 		}
 
 		$om = $this->getDoctrine()->getManager();
@@ -381,6 +380,9 @@ class MemberController extends AbstractController {
 
 		$titleTransKey = $request->get('title-trans-key');
 		$route = $request->get('route');
+		if (is_null($route)) {
+			throw $this->createNotFoundException('Missing route (core_member_list_session_teams)');
+		}
 
 		$om = $this->getDoctrine()->getManager();
 		$memberRepository = $om->getRepository(Member::class);

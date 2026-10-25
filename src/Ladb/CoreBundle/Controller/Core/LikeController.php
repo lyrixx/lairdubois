@@ -119,7 +119,7 @@ class LikeController extends AbstractController {
 			// Return to
 			$returnToUrl = $request->get('rtu');
 			if (is_null($returnToUrl)) {
-				$returnToUrl = $request->headers->get('referer');
+				$returnToUrl = $this->getRefererUrl($request);
 			}
 
 			return $this->redirect($returnToUrl);
@@ -184,7 +184,7 @@ class LikeController extends AbstractController {
 		if (!$request->isXmlHttpRequest()) {
 
 			// Return to (use referer because the user is already logged)
-			$returnToUrl = $request->headers->get('referer');
+			$returnToUrl = $this->getRefererUrl($request);
 
 			return $this->redirect($returnToUrl);
 		}

@@ -4,6 +4,7 @@ namespace Tests\User;
 
 use Ladb\CoreBundle\DataFixtures\UserFixtures;
 use Ladb\CoreBundle\Entity\Core\Member;
+use Ladb\CoreBundle\Entity\Core\Picture;
 use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Fos\UserManager;
 use Tests\WebTestCase;
@@ -41,6 +42,16 @@ final class ProfileTest extends WebTestCase
         self::assertSame('/@user', $client->getResponse()->headers->get('Location'));
         $client->request('GET', '/me');
         self::assertSame('/@user', $client->getResponse()->headers->get('Location'));
+    }
+
+    public function testShowOwnProfileAnonymous(): void
+    {
+        $client = static::createClient();
+
+        foreach (['/@me', '/me'] as $url) {
+            $client->request('GET', $url);
+            self::assertSame('https://lairdubois.test/login', $client->getResponse()->headers->get('Location'), $url);
+        }
     }
 
     public function testShowProfileOfAnotherUser(): void
@@ -97,6 +108,18 @@ final class ProfileTest extends WebTestCase
         self::assertGreaterThan(0, $crawler->filter('a[href="/@team"]')->count());
     }
 
+    public function testListUsersOnMap(): void
+    {
+        // user and user2 are located, admin and team are not: they are left out of the map
+        $client = static::createClient();
+
+        foreach (['/boiseux.geojson' => 2, '/collectifs.geojson' => 0] as $url => $count) {
+            $client->request('GET', $url);
+            self::assertSame(200, $client->getResponse()->getStatusCode(), $url);
+            self::assertCount($count, json_decode($client->getResponse()->getContent(), true)['features'], $url);
+        }
+    }
+
     public function testDeactivateAndActivate(): void
     {
         $client = static::createClientAs(UserFixtures::ADMIN);
@@ -147,23 +170,47 @@ final class ProfileTest extends WebTestCase
     }
 
     /**
-     * An account without content: deleting one with contents answers 500 (#48).
+     * An account without content, with its avatar and its banner.
      */
     public function testDelete(): void
     {
-        $userManager = static::bootKernel()->getContainer()->get(UserManager::NAME);
+        $container = static::bootKernel()->getContainer();
+        $userManager = $container->get(UserManager::NAME);
+        $factory = $container->get('tests.fixture_factory');
         $user = $userManager->createUser();
         $user->setUsername('apprenti');
         $user->setEmail('apprenti@lairdubois.test');
         $user->setPlainPassword('apprenti');
         $user->setEnabled(true);
+        $user->setAvatar($factory->picture($user, 'avatar-user.png', 'avatar-apprenti'));
+        $user->getMeta()->setBanner($factory->picture($user, 'wood-1.jpg', 'banner-apprenti'));
         $userManager->updateUser($user);
+        $avatarId = $user->getAvatar()->getId();
+        $bannerId = $user->getMeta()->getBanner()->getId();
         $client = static::createClientAs(UserFixtures::ADMIN);
 
         $client->request('GET', '/@apprenti/admin/delete');
 
         self::assertSame('/', $client->getResponse()->headers->get('Location'));
         self::assertNull(static::getEntityManager()->getRepository(User::class)->findOneBy(['usernameCanonical' => 'apprenti']));
+        self::assertNull(static::getEntityManager()->find(Picture::class, $avatarId));
+        self::assertNull(static::getEntityManager()->find(Picture::class, $bannerId));
+    }
+
+    public function testDeleteWithContents(): void
+    {
+        $avatar = static::findUser(UserFixtures::USER)->getAvatar();
+        $client = static::createClientAs(UserFixtures::ADMIN);
+
+        $client->request('GET', '/@user/admin/delete');
+
+        // Neither the account nor its avatar is removed
+        static::getEntityManager()->clear();
+        self::assertSame($avatar->getId(), static::findUser(UserFixtures::USER)->getAvatar()->getId());
+        self::assertFileExists($avatar->getAbsoluteMasterPath());
+        // ForeignKeyConstraintViolationException: the contents of the account stay
+        self::assertSame(500, $client->getResponse()->getStatusCode(), 'The page passes now: remove the known failure (#48).');
+        self::markTestIncomplete('Known failure, see #48.');
     }
 
     public function testAdminActionsAsUser(): void

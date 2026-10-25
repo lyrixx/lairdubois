@@ -440,11 +440,15 @@ class ProviderController extends AbstractController {
 
 			$features = array();
 			foreach ($searchParameters['entities'] as $provider) {
+				$geoPoint = $provider->getGeoPoint();
+				if (is_null($geoPoint)) {
+					continue;
+				}
 				$properties = array(
 					'color'   => 'blue',
 					'cardUrl' => $this->generateUrl('core_provider_card', array('id' => $provider->getId())),
 				);
-				$gerometry = new \GeoJson\Geometry\Point($provider->getGeoPoint());
+				$gerometry = new \GeoJson\Geometry\Point($geoPoint);
 				$features[] = new \GeoJson\Feature\Feature($gerometry, $properties);
 			}
 			$crs = new \GeoJson\CoordinateReferenceSystem\Named('urn:ogc:def:crs:OGC:1.3:CRS84');
