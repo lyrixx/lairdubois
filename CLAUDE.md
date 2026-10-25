@@ -178,9 +178,8 @@ castor qa:e2e [-- --grep …]  # tests E2E (Playwright) : recharge la base du de
   `ErrorHandler` de PHPUnit, supprimés en 10). Le `simple-phpunit` du bridge 3.4 ne sait pas
   installer PHPUnit 9.6 (il garde le `composer.lock` du paquet et n'installe pas le bridge).
 - Tests dans `tests/` (namespace `Tests\`, `autoload-dev`), configuration `phpunit.xml.dist` à la
-  racine, `KERNEL_CLASS=AppKernel`. Les tests de `src/Ladb/CoreBundle/Tests` (générés par
-  `sensio/generator-bundle`, morts) ne sont pas dans la suite, ni analysés par PHPStan. PHPStan
-  n'analyse pas `tests/` (il n'y trouverait pas PHPUnit).
+  racine, `KERNEL_CLASS=AppKernel`. PHPStan n'analyse pas `tests/` (il n'y trouverait pas
+  PHPUnit).
 - Rapport de dépréciations : celles de la compilation du container (le kernel les écrit dans
   `var/cache/test/*Deprecations.log`, sauf sous PHPUnit) et celles du dernier `qa:phpunit`.
   `qa:phpunit` coupe le gestionnaire du bridge (`SYMFONY_DEPRECATIONS_HELPER=disabled`) et passe
