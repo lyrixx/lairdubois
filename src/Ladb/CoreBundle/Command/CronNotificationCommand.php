@@ -3,18 +3,19 @@
 namespace Ladb\CoreBundle\Command;
 
 use Ladb\CoreBundle\Utils\TypableUtils;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class CronNotificationCommand extends ContainerAwareCommand {
+class CronNotificationCommand extends Command {
+
+	protected static $defaultName = 'ladb:cron:notification';
 
 	protected function configure() {
 		$this
-			->setName('ladb:cron:notification')
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
 			->setDescription('Execute notifications commands')
 			->setHelp(<<<EOT

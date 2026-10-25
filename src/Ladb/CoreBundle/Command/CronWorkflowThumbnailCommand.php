@@ -7,7 +7,8 @@ use Ladb\CoreBundle\Entity\Howto\Howto;
 use Ladb\CoreBundle\Entity\Wonder\Creation;
 use Ladb\CoreBundle\Model\StripableInterface;
 use Ladb\CoreBundle\Utils\WebScreenshotUtils;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -18,11 +19,27 @@ use Ladb\CoreBundle\Utils\TypableUtils;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\Router;
 
-class CronWorkflowThumbnailCommand extends ContainerAwareCommand {
+class CronWorkflowThumbnailCommand extends Command {
+
+	protected static $defaultName = 'ladb:cron:workflow:thumbnails';
+
+	private $om;
+	private $router;
+	private $webScreenshotUtils;
+
+	public function __construct(
+		EntityManagerInterface $om,
+		UrlGeneratorInterface $router,
+		WebScreenshotUtils $webScreenshotUtils
+	) {
+		$this->om = $om;
+		$this->router = $router;
+		$this->webScreenshotUtils = $webScreenshotUtils;
+		parent::__construct();
+	}
 
 	protected function configure() {
 		$this
-			->setName('ladb:cron:workflow:thumbnails')
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
 			->setDescription('Update workflow thumbnails')
 			->setHelp(<<<EOT
@@ -38,9 +55,9 @@ EOT
 		$forced = $input->getOption('force');
 		$verbose = $input->getOption('verbose');
 
-		$om = $this->getContainer()->get('doctrine')->getManager();
-		$webScreenshotUtils = $this->getContainer()->get(WebScreenshotUtils::NAME);
-		$router = $this->getContainer()->get('router');
+		$om = $this->om;
+		$webScreenshotUtils = $this->webScreenshotUtils;
+		$router = $this->router;
 
 		// Retrieve workflows
 

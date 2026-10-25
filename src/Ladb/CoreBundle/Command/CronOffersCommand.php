@@ -9,7 +9,8 @@ use Ladb\CoreBundle\Entity\Wonder\Creation;
 use Ladb\CoreBundle\Manager\Offer\OfferManager;
 use Ladb\CoreBundle\Model\StripableInterface;
 use Ladb\CoreBundle\Utils\WebScreenshotUtils;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -20,11 +21,27 @@ use Ladb\CoreBundle\Utils\TypableUtils;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\Router;
 
-class CronOffersCommand extends ContainerAwareCommand {
+class CronOffersCommand extends Command {
+
+	protected static $defaultName = 'ladb:cron:offers';
+
+	private $mailerUtils;
+	private $offerManager;
+	private $om;
+
+	public function __construct(
+		MailerUtils $mailerUtils,
+		OfferManager $offerManager,
+		EntityManagerInterface $om
+	) {
+		$this->mailerUtils = $mailerUtils;
+		$this->offerManager = $offerManager;
+		$this->om = $om;
+		parent::__construct();
+	}
 
 	protected function configure() {
 		$this
-			->setName('ladb:cron:offers')
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
 			->setDescription('Check offers lifetime')
 			->setHelp(<<<EOT
@@ -40,9 +57,9 @@ EOT
 		$forced = $input->getOption('force');
 		$verbose = $input->getOption('verbose');
 
-		$om = $this->getContainer()->get('doctrine')->getManager();
-		$offerManager = $this->getContainer()->get(OfferManager::NAME);
-		$mailerUtils = $this->getContainer()->get(MailerUtils::NAME);
+		$om = $this->om;
+		$offerManager = $this->offerManager;
+		$mailerUtils = $this->mailerUtils;
 
 		// Retrieve OUTDATED offers
 

@@ -4,18 +4,27 @@ namespace Ladb\CoreBundle\Command;
 
 use Ladb\CoreBundle\Entity\Core\TagUsage;
 use Ladb\CoreBundle\Model\TaggableInterface;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class GenerateTagUsagesCommand extends ContainerAwareCommand {
+class GenerateTagUsagesCommand extends Command {
+
+	protected static $defaultName = 'ladb:generate:tagusages';
+
+	private $om;
+
+	public function __construct(EntityManagerInterface $om) {
+		$this->om = $om;
+		parent::__construct();
+	}
 
 	protected function configure() {
 		$this
-			->setName('ladb:generate:tagusages')
 			->setDescription('Generate TagUsages')
 			->setHelp(<<<EOT
 The <info>ladb:generate:tagusages</info> command generate tag usages
@@ -25,7 +34,7 @@ EOT
 
 	protected function execute(InputInterface $input, OutputInterface $output) {
 
-		$om = $this->getContainer()->get('doctrine')->getManager();
+		$om = $this->om;
 
 		// Check creations /////
 
@@ -156,7 +165,7 @@ EOT
 	}
 
 	private function _generateTagUsages(TaggableInterface $taggable) {
-		$om = $this->getContainer()->get('doctrine')->getManager();
+		$om = $this->om;
 		$tagUsageRepository = $om->getRepository(TagUsage::CLASS_NAME);
 		foreach ($taggable->getTags() as $tag) {
 			$tagUsage = $tagUsageRepository->findOneByTagAndEntityType($tag, $taggable->getType());

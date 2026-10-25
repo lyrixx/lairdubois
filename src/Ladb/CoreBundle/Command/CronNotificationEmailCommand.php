@@ -4,7 +4,10 @@ namespace Ladb\CoreBundle\Command;
 
 use Ladb\CoreBundle\Entity\Core\Comment;
 use Ladb\CoreBundle\Entity\Qa\Answer;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -14,11 +17,33 @@ use Ladb\CoreBundle\Utils\MailerUtils;
 use Ladb\CoreBundle\Utils\TypableUtils;
 use Ladb\CoreBundle\Model\WatchableChildInterface;
 
-class CronNotificationEmailCommand extends ContainerAwareCommand {
+class CronNotificationEmailCommand extends Command {
+
+	protected static $defaultName = 'ladb:cron:notification:email';
+
+	private $mailerUtils;
+	private $om;
+	private $templating;
+	private $translator;
+	private $typableUtils;
+
+	public function __construct(
+		MailerUtils $mailerUtils,
+		EntityManagerInterface $om,
+		EngineInterface $templating,
+		TranslatorInterface $translator,
+		TypableUtils $typableUtils
+	) {
+		$this->mailerUtils = $mailerUtils;
+		$this->om = $om;
+		$this->templating = $templating;
+		$this->translator = $translator;
+		$this->typableUtils = $typableUtils;
+		parent::__construct();
+	}
 
 	protected function configure() {
 		$this
-			->setName('ladb:cron:notification:email')
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
 			->setDescription('Process notifications to send emails')
 			->setHelp(<<<EOT
@@ -34,7 +59,7 @@ EOT
 		$forced = $input->getOption('force');
 		$verbose = $input->getOption('verbose');
 
-		$om = $this->getContainer()->get('doctrine')->getManager();
+		$om = $this->om;
 		$notificationRepository = $om->getRepository(Notification::CLASS_NAME);
 
 		$this->_processActivityByActivityStrippedName(\Ladb\CoreBundle\Entity\Core\Activity\Comment::STRIPPED_NAME, $output, $forced, $verbose, $om, $notificationRepository);
@@ -86,10 +111,10 @@ EOT
 	private function _processUserNotifications(User $recipientUser, $notifications, $activityStrippedName, $output, $forced, $verbose, $om) {
 		if ($this->_isNotificationEnabledByActivityStrippedName($recipientUser, $activityStrippedName) && $recipientUser->getEmailConfirmed()) {
 
-			$typableUtils = $this->getContainer()->get(TypableUtils::NAME);
-			$mailerUtils = $this->getContainer()->get(MailerUtils::NAME);
-			$translator = $this->getContainer()->get('translator');
-			$templating = $this->getContainer()->get('templating');
+			$typableUtils = $this->typableUtils;
+			$mailerUtils = $this->mailerUtils;
+			$translator = $this->translator;
+			$templating = $this->templating;
 
 			$rows = array();
 

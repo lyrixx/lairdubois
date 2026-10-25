@@ -4,16 +4,25 @@ namespace Ladb\CoreBundle\Command;
 
 use Ladb\CoreBundle\Entity\Core\Picture;
 use Ladb\CoreBundle\Entity\Core\Resource;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class CleanupUploadsCommand extends ContainerAwareCommand {
+class CleanupUploadsCommand extends Command {
+
+	protected static $defaultName = 'ladb:cleanup:uploads';
+
+	private $om;
+
+	public function __construct(EntityManagerInterface $om) {
+		$this->om = $om;
+		parent::__construct();
+	}
 
 	protected function configure() {
 		$this
-			->setName('ladb:cleanup:uploads')
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force removing')
 			->setDescription('Cleanup uploads')
 			->setHelp(<<<EOT
@@ -24,7 +33,7 @@ EOT
 
 	protected function execute(InputInterface $input, OutputInterface $output) {
 
-		$om = $this->getContainer()->get('doctrine')->getManager();
+		$om = $this->om;
 
 		$forced = $input->getOption('force');
 		$verbose = $input->getOption('verbose');

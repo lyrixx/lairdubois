@@ -2,18 +2,19 @@
 
 namespace Ladb\CoreBundle\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ClearCommand extends ContainerAwareCommand {
+class ClearCommand extends Command {
+
+	protected static $defaultName = 'ladb:clear';
 
 	protected function configure() {
 		$this
-			->setName('ladb:clear')
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force removing')
 			->setDescription('Clear database')
 			->setHelp(<<<EOT

@@ -2,18 +2,29 @@
 
 namespace Ladb\CoreBundle\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Utils\ActivityUtils;
 
-class CleanupLikesCommand extends ContainerAwareCommand {
+class CleanupLikesCommand extends Command {
+
+	protected static $defaultName = 'ladb:cleanup:likes';
+
+	private $activityUtils;
+	private $om;
+
+	public function __construct(ActivityUtils $activityUtils, EntityManagerInterface $om) {
+		$this->activityUtils = $activityUtils;
+		$this->om = $om;
+		parent::__construct();
+	}
 
 	protected function configure() {
 		$this
-			->setName('ladb:cleanup:likes')
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force removing')
 			->setDescription('Cleanup likes by removing doubles')
 			->setHelp(<<<EOT
@@ -26,9 +37,9 @@ EOT
 
 		$forced = $input->getOption('force');
 
-		$om = $this->getContainer()->get('doctrine')->getManager();
+		$om = $this->om;
 		$userRepository = $om->getRepository(User::CLASS_NAME);
-		$activityUtils = $this->getContainer()->get(ActivityUtils::NAME);
+		$activityUtils = $this->activityUtils;
 
 		$sql = '
 			SELECT count(id) as counter, entity_type, entity_id, user_id

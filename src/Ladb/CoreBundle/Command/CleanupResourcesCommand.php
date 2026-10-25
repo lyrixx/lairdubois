@@ -2,18 +2,27 @@
 
 namespace Ladb\CoreBundle\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
+use Symfony\Component\Console\Command\Command;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class CleanupResourcesCommand extends ContainerAwareCommand {
+class CleanupResourcesCommand extends Command {
+
+	protected static $defaultName = 'ladb:cleanup:resources';
+
+	private $om;
+
+	public function __construct(EntityManagerInterface $om) {
+		$this->om = $om;
+		parent::__construct();
+	}
 
 	protected function configure() {
 		$this
-			->setName('ladb:cleanup:resources')
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force removing')
 			->setDescription('Cleanup resources')
 			->setHelp(<<<EOT
@@ -24,7 +33,7 @@ EOT
 
 	protected function execute(InputInterface $input, OutputInterface $output) {
 
-		$om = $this->getContainer()->get('doctrine')->getManager();
+		$om = $this->om;
 
 		// Extract resources /////
 

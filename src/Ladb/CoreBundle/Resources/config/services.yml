@@ -18,7 +18,7 @@ services:
     tags:
       - { name: liip_imagine.filter.post_processor, post_processor: ladb_imageoptimizer }
 
-  # Fos (public until #15/#16)
+  # Fos (public until #16)
   ladb_core.fos.displayname_canonicalizer:
     class: Ladb\CoreBundle\Fos\DisplaynameCanonicalizer
     public: true
@@ -33,7 +33,7 @@ services:
     arguments: ['@fos_user.util.password_updater', '@ladb_core.fos.canonical_fields_updater', '@doctrine.orm.entity_manager', '%fos_user.model.user.class%']
   Ladb\CoreBundle\Fos\UserManager: '@ladb_core.fos.user_manager'
 
-  # Utils (public until #15/#16)
+  # Utils (public until #16)
   ladb_core.global_utils:
     class: Ladb\CoreBundle\Utils\GlobalUtils
     public: true
@@ -255,7 +255,7 @@ services:
     arguments: ['@service_container']
   Ladb\CoreBundle\Utils\MemberUtils: '@ladb_core.member_utils'
 
-  # Managers (public until #15/#16, TypableUtils::getManagerByType() also builds their ids)
+  # Managers (public until #16, TypableUtils::getManagerByType() also builds their ids)
   ladb_core.core_picture_manager:
     class: Ladb\CoreBundle\Manager\Core\PictureManager
     public: true
@@ -602,7 +602,7 @@ services:
   ladb_core.return_to_url_listener:
     class: Ladb\CoreBundle\Event\ReturnToUrlListener
 
-  # Handlers (public until #15/#16)
+  # Handlers (public until #16)
   ladb_core.authentification_handler:
     class: Ladb\CoreBundle\Handler\AuthenticationHandler
     arguments: ['@router']
@@ -730,7 +730,7 @@ services:
   gos_web_socket.wamp.pusher:  # Redefined: LadbCoreBundle is registered after GosWebSocketBundle, its definition wins
     parent: gos_web_socket.abstract.pusher
     class: Ladb\CoreBundle\WebSocket\WampPusher
-    # A child definition does not inherit _defaults: explicit, as in its parent (public until #15/#16)
+    # A child definition does not inherit _defaults: explicit, as in its parent (public until #16)
     autowire: false
     autoconfigure: false
     public: true
@@ -747,6 +747,27 @@ services:
     arguments: ['@service_container']
   Ladb\CoreBundle\Consumer\WebpushNotificationConsumer:
     arguments: ['@service_container']
+
+  # Commands: tagged console.command by autoconfigure, loaded lazily by their $defaultName
+  Ladb\CoreBundle\Command\:
+    resource: '../../Command'
+    bind:
+      $databaseHost: '%database_host%'
+      $databaseName: '%database_name%'
+      $databasePassword: '%database_password%'
+      $databasePort: '%database_port%'
+      $databaseUser: '%database_user%'
+      $facebookAccessToken: '%facebook_access_token%'
+      $facebookAppId: '%facebook_app_id%'
+      $facebookAppSecret: '%facebook_app_secret%'
+      $facebookPageId: '%facebook_page_id%'
+      $mastodonAccessToken: '%mastodon_access_token%'
+      $mastodonInstance: '%mastodon_instance%'
+      $secret: '%secret%'
+      $twitterAccessSecret: '%twitter_access_secret%'
+      $twitterAccessToken: '%twitter_access_token%'
+      $twitterConsumerKey: '%twitter_consumer_key%'
+      $twitterConsumerSecret: '%twitter_consumer_secret%'
 
   # WebPush
   Ladb\CoreBundle\Manager\Webpush\UserSubscriptionManager:
