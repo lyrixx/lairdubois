@@ -40,7 +40,6 @@
         "symfony/symfony": "3.4.*",
         "symfony/intl": "^3.3",
         "symfony/lock": "^3.4",
-        "symfony/webpack-encore-bundle": "^1.7",
         "twig/twig": "^2.0",
         "monolog/monolog": "^1.0",
 
