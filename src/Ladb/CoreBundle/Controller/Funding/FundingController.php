@@ -390,7 +390,7 @@ class FundingController extends AbstractController {
 		\Stripe\Stripe::setApiKey($this->getParameter('stripe_secret_key'));
 
 		$payload = @file_get_contents('php://input');
-		$sig_header = $_SERVER['HTTP_STRIPE_SIGNATURE'];
+		$sig_header = $request->headers->get('Stripe-Signature', '');
 		$event = null;
 
 		try {

@@ -39,7 +39,6 @@ final class RouteSmokeTest extends WebTestCase
      * @var array<string, array<string, int>>
      */
     private const KNOWN_FAILURES = [
-        'core_funding_donation_webhook' => ['anonymous' => 34, 'user' => 34, 'admin' => 34],
         'core_user_admin_delete' => ['admin' => 48],
     ];
 

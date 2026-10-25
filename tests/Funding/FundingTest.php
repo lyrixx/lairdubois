@@ -17,7 +17,7 @@ use Tests\XhrTrait;
  * The funding of the fixtures: the previous month, with a recurrent charge and another one, and
  * the current month, where "user2" gave. The payments go through Stripe, offline here
  * (Tests\Double\OfflineStripeClient); its webhook reads php://input, which the client of the
- * tests does not fill: it is not tested.
+ * tests does not fill: only its refusal of an unsigned request is tested.
  */
 final class FundingTest extends WebTestCase
 {
@@ -328,6 +328,32 @@ final class FundingTest extends WebTestCase
     {
         yield 'without payment intent' => [[]];
         yield 'unknown payment intent' => [['intent_id' => 'pi_inconnu']];
+    }
+
+    /**
+     * Stripe signs the events it sends to the webhook: an unsigned request is refused before its
+     * body is read.
+     *
+     * @dataProvider provideUnsignedWebhookRequests
+     */
+    public function testDonationWebhookUnsigned(array $server): void
+    {
+        $donationCount = \count(static::getEntityManager()->getRepository(Donation::class)->findAll());
+
+        $client = static::createClient();
+        $client->request('POST', static::generatePath('core_funding_donation_webhook'), [], [], $server);
+
+        self::assertSame(400, $client->getResponse()->getStatusCode());
+        self::assertSame($donationCount, \count(static::getEntityManager()->getRepository(Donation::class)->findAll()));
+    }
+
+    /**
+     * @return iterable<string, array{array<string, string>}>
+     */
+    public static function provideUnsignedWebhookRequests(): iterable
+    {
+        yield 'without signature' => [[]];
+        yield 'invalid signature' => [['HTTP_STRIPE_SIGNATURE' => 't=1,v1=invalide']];
     }
 
     /**
