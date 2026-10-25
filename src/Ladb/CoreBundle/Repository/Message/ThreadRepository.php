@@ -2,6 +2,7 @@
 
 namespace Ladb\CoreBundle\Repository\Message;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Ladb\CoreBundle\Entity\Core\User;
@@ -93,6 +94,38 @@ class ThreadRepository extends AbstractEntityRepository {
 		} catch (\Doctrine\ORM\NoResultException $e) {
 			return 0;
 		}
+	}
+
+	/**
+	 * The unread messages of each user, as reading the threads of the mailbox counts them
+	 * (ThreadController::showAction()): the messages without a read meta of the user, in the
+	 * threads they or one of their teams did not delete. Replies and threads to a team only have
+	 * a meta for their sender.
+	 *
+	 * @param User[] $users
+	 * @return array<int, int> The count by user id, without the users who have read everything
+	 */
+	public function countUnreadMessageByUsers(array $users) {
+		$userIds = array_map(function (User $user) { return $user->getId(); }, $users);
+
+		// UNION: a thread to a user and to one of their teams is counted once
+		$sql = 'SELECT v.user_id, COUNT(m.id) ';
+		$sql .= 'FROM (';
+		$sql .= 	'SELECT tm.participant_user_id AS user_id, tm.thread_id FROM tbl_message_thread_meta tm ';
+		$sql .= 	'WHERE tm.participant_user_id IN (:userIds) AND tm.is_deleted = 0 ';
+		$sql .= 	'UNION ';
+		$sql .= 	'SELECT mb.user_id, tm.thread_id FROM tbl_core_member mb ';
+		$sql .= 	'INNER JOIN tbl_message_thread_meta tm ON tm.participant_user_id = mb.team_id ';
+		$sql .= 	'WHERE mb.user_id IN (:userIds) AND tm.is_deleted = 0';
+		$sql .= ') v ';
+		$sql .= 'INNER JOIN tbl_message m ON m.thread_id = v.thread_id ';
+		$sql .= 'LEFT JOIN tbl_message_meta mm ON mm.message_id = m.id AND mm.participant_user_id = v.user_id AND mm.is_read = 1 ';
+		$sql .= 'WHERE mm.id IS NULL ';
+		$sql .= 'GROUP BY v.user_id';
+
+		$counts = $this->getEntityManager()->getConnection()->fetchAllKeyValue($sql, array( 'userIds' => $userIds ), array( 'userIds' => Connection::PARAM_INT_ARRAY ));
+
+		return array_map('intval', $counts);
 	}
 
 	/////

@@ -303,6 +303,32 @@ final class ThreadTest extends WebTestCase
     }
 
     /**
+     * ladb:reset:unreadmessagecount counts the unread messages as reading the threads does,
+     * replies and threads to a team included: they have no meta for their recipients.
+     */
+    public function testResetUnreadMessageCount(): void
+    {
+        $this->reply(static::createClientAs(UserFixtures::USER2), 'Tu as reçu mon message ?');
+        // "user" gets it twice, directly and through the team: one unread message
+        $this->submitNewThread(static::createClientAs(UserFixtures::ADMIN), UserFixtures::TEAM.','.UserFixtures::USER, 'Portes ouvertes', 'Votre atelier sera-t-il ouvert samedi ?');
+        $usernames = [UserFixtures::ADMIN, UserFixtures::USER, UserFixtures::USER2, UserFixtures::TEAM];
+        foreach ($usernames as $username) {
+            static::findUser($username)->getMeta()->setUnreadMessageCount(42);
+        }
+        static::getEntityManager()->flush();
+
+        [$exitCode, $output] = static::runCommand('ladb:reset:unreadmessagecount --force');
+
+        self::assertSame(0, $exitCode, $output);
+        static::getEntityManager()->clear();
+        $unreadMessageCounts = [];
+        foreach ($usernames as $username) {
+            $unreadMessageCounts[$username] = static::findUser($username)->getMeta()->getUnreadMessageCount();
+        }
+        self::assertSame([UserFixtures::ADMIN => 0, UserFixtures::USER => 3, UserFixtures::USER2 => 1, UserFixtures::TEAM => 0], $unreadMessageCounts);
+    }
+
+    /**
      * Fills the form of a new thread to $recipient and submits it, with the profiler.
      */
     private function submitNewThread(Client $client, string $recipient, string $subject, string $body): void
