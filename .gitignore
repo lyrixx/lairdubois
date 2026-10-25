@@ -4,7 +4,6 @@
 /web/js/
 /web/.htaccess
 /web/sitemap-*
-/app/bootstrap.php.cache
 /app/cache/*
 /app/config/parameters.yml
 /app/sessions/*
@@ -27,7 +26,6 @@
 # Binaries of the dependencies (composer "bin-dir")
 /bin/*
 !/bin/console
-!/bin/symfony_requirements
 
 # Docker
 /.castor.stub.php

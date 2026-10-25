@@ -4,19 +4,6 @@ services:
   _defaults: { public: true }
 
   # Twig extensions
-  twig.extension.text:
-    class: Twig_Extensions_Extension_Text
-    tags:
-      - { name: twig.extension }
-  twig.extension.intl:
-    class: Twig_Extensions_Extension_Intl
-    tags:
-      - { name: twig.extension }
-  twig.extension.date:
-    class: Twig_Extensions_Extension_Date
-    tags:
-      - { name: twig.extension }
-    arguments: ['@translator']
   ladb.twig.ladb_extension:
     class: Ladb\CoreBundle\Twig\LadbExtension
     tags:
