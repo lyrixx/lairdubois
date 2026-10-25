@@ -43,6 +43,12 @@ fos_elastica:
             index_name: ladb_test
 
 services:
+    # Public only for the doubles that the tests read from the container
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
     # Neither RabbitMQ nor the websocket server get messages from the tests: the workers of the
     # dev stack would process them on the dev database, and the CI does not start them.
     # Decorated, not redefined: the definitions of the bundles would win over the ones of the app
