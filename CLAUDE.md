@@ -405,9 +405,10 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
 - La plupart des paquets du lock déclarent PHP 7 (`"php": "^7.1"`…) : toute commande composer qui
   résout les dépendances (`install`, `require`, `update`) prend `--ignore-platform-req=php+`, qui
   ignore la borne haute et garde la basse. `castor app:install` le fait.
-- Composer 2.2 LTS dans le builder : les versions suivantes embarquent `symfony/process` 5 ou plus,
-  et le `ScriptHandler` de `sensio/distribution-bundle` y fait `new Process(string)` (`TypeError`).
-  Composer 2.2 ne lit pas `COMPOSER_IGNORE_PLATFORM_REQ`.
+- Composer 2.2 LTS dans le builder. Il avait été choisi pour le `ScriptHandler` de
+  `sensio/distribution-bundle`, parti depuis : un `composer install` sur un clone neuf passe aussi
+  avec Composer 2.10, rien n'empêche plus de monter. Composer 2.2 ne lit pas
+  `COMPOSER_IGNORE_PLATFORM_REQ` et n'a pas `composer audit` (2.4 et plus).
 - `allow-plugins` doit lister `robloach/component-installer` : il installe `components/` (jQuery…),
   que les templates lisent via Assetic.
 - Le bundle `symfony/reprise` exige Symfony `^7.4` et PHP 8.4 : avant le saut en 7.4, seul le côté
