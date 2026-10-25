@@ -1337,6 +1337,7 @@ user:
       deactivate_success: Le compte <strong>%displayname%</strong> a été désactivé avec succès.
       empty_success: Le compte <strong>%displayname%</strong> a été vidé avec succès.
       delete_success: Le compte <strong>%displayname%</strong> a été supprimé avec succès.
+      delete_error: <i class="ladb-icon-warning"></i> Le compte <strong>%displayname%</strong> n'a pas été supprimé, car il a des publications ou d'autres contenus sur le site (commentaires, likes, messages…). Il peut être désactivé.
   form:
     alert:
       settings_success: Vos paramètres ont été enregistrés.

@@ -2079,6 +2079,16 @@ class UserController extends AbstractController {
 		$avatar = $user->getAvatar();
 		$banner = $user->getMeta()->getBanner();
 
+		// Its publications, comments, likes, messages... reference the user: the database would refuse its deletion
+		$userRepository = $om->getRepository(User::CLASS_NAME);
+		if ($userRepository->existsReferences($user, array_filter(array( $avatar, $banner )))) {
+
+			// Flashbag
+			$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('user.admin.alert.delete_error', array( '%displayname%' => $user->getDisplayname() )));
+
+			return $this->redirect($this->generateUrl('core_user_show_admin', array( 'username' => $username )));
+		}
+
 		$user->setAvatar(null);
 		$user->getMeta()->setBanner(null);
 
