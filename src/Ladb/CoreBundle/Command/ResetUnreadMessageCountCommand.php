@@ -7,7 +7,7 @@ use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Ladb\CoreBundle\Entity\Message\MessageMeta;
+use Ladb\CoreBundle\Entity\Message\Thread;
 
 class ResetUnreadMessageCountCommand extends ContainerAwareCommand {
 
@@ -29,7 +29,7 @@ EOT
 		$forced = $input->getOption('force');
 
 		$om = $this->getContainer()->get('doctrine')->getManager();
-		$messageMetaRepository = $om->getRepository(MessageMeta::CLASS_NAME);
+		$threadRepository = $om->getRepository(Thread::CLASS_NAME);
 
 		// Count users /////
 
@@ -69,6 +69,9 @@ EOT
 				$users = array();
 			}
 
+			// A team does not read its threads: its members do
+			$unreadMessageCounts = $threadRepository->countUnreadMessageByUsers(array_filter($users, function ($user) { return !$user->getIsTeam(); }));
+
 			foreach ($users as $user) {
 				$progress->advance();
 
@@ -76,14 +79,7 @@ EOT
 					$output->write('<info>Processing User username='.$user->getUsername().'...</info>');
 				}
 
-				$unreadMessageCount = 0;
-
-				$messageMetas = $messageMetaRepository->findByParticipant($user);
-				foreach ($messageMetas as $messageMeta) {
-					if (!$messageMeta->getIsRead()) {
-						$unreadMessageCount++;
-					}
-				}
+				$unreadMessageCount = $unreadMessageCounts[$user->getId()] ?? 0;
 
 				// Set unread message count
 				$user->getMeta()->setUnreadMessageCount($unreadMessageCount);

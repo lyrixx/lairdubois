@@ -25,20 +25,15 @@ final class CommandTest extends WebTestCase
      * @var array<string, list<string>>
      */
     private const COMMANDS = [
-        // --force rewrites the bigger pictures of uploads/ (shared with the dev environment) in
-        // place: the backup of Tests\WebTestCase, hard links, would change with them
-        'ladb:batch:rup' => [''],
         'ladb:change:owner' => [
             '--target-username='.UserFixtures::USER2.' --entity-type='.Creation::TYPE.' --entity-id=1',
             '--target-username='.UserFixtures::USER2.' --entity-type='.Creation::TYPE.' --entity-id=1 --force',
         ],
-        'ladb:cleanup:blocks' => self::DRY_RUN_AND_FORCE,
         'ladb:cleanup:finishes' => self::DRY_RUN_AND_FORCE,
         'ladb:cleanup:joins' => self::DRY_RUN_AND_FORCE,
         'ladb:cleanup:likes' => self::DRY_RUN_AND_FORCE,
         'ladb:cleanup:pictures' => self::DRY_RUN_AND_FORCE,
         'ladb:cleanup:resources' => self::DRY_RUN_AND_FORCE,
-        'ladb:cleanup:tags' => self::DRY_RUN_AND_FORCE,
         'ladb:cleanup:tools' => self::DRY_RUN_AND_FORCE,
         // --force deletes the files of uploads/ the test database does not know: the ones of the
         // dev environment
@@ -101,13 +96,7 @@ final class CommandTest extends WebTestCase
      *
      * @var array<string, int>
      */
-    private const KNOWN_FAILURES = [
-        'ladb:batch:rup' => 73,
-        'ladb:cleanup:blocks' => 72,
-        'ladb:cleanup:blocks --force' => 72,
-        'ladb:cleanup:tags' => 72,
-        'ladb:cleanup:tags --force' => 72,
-    ];
+    private const KNOWN_FAILURES = [];
 
     /**
      * @return iterable<string, array{string}>
