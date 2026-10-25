@@ -105,6 +105,21 @@ test.describe('as user2', () => {
         await page.reload();
         await expect(widget.locator('.ladb-comment-row', { hasText: body })).toBeVisible();
     });
+
+    test('answers a message as soon as the page is loaded', async ({ page }) => {
+        // Thread 1 of the fixtures, from user2 to user. Without gotoAndSettle(): /@me/counters.json,
+        // still running, no longer writes the session back without the CSRF token of the form (#88).
+        // The race is rare here, this test passed before the fix too: CountersTest guards it.
+        await page.goto('/messagerie/thread/1');
+        const body = 'Une réponse envoyée dès le chargement.';
+
+        await page.locator('.ladb-fake-new button').click();
+        const form = page.locator('.ladb-messages .ladb-new form');
+        await form.locator('textarea').fill(body);
+        await form.locator('[type=submit]').click();
+
+        await expect(page.locator('.ladb-message-row.ladb-message-mine', { hasText: body })).toBeVisible();
+    });
 });
 
 test.describe('as user', () => {

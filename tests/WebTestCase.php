@@ -66,7 +66,8 @@ abstract class WebTestCase extends BaseWebTestCase
 
             // AbstractController::createLock() keeps a lock per action and user for a few
             // seconds, against double submissions: the next test would get a 404. Memcached
-            // holds nothing else.
+            // holds nothing else but the refresh dates of the unlisted counters of each user
+            // (UserUtils), for 3 to 5 minutes.
             $memcached = new \Memcached();
             $memcached->addServer($container->getParameter('memcached_host'), $container->getParameter('memcached_port'));
             $memcached->flush();

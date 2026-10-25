@@ -41,25 +41,37 @@ class UserUtils extends AbstractContainerAwareUtils {
 		\Ladb\CoreBundle\Entity\Faq\Question::TYPE,
 	);
 
+	private $memcached;
+
 	/////
 
-	public function _getUnlistedCounterRefreshDateSessionKeyByEntityType($entityType) {
-		return '_ladb_unlisted_counter_refresh_date_'.$entityType;
+	// The refresh dates are in Memcached, per user, not in the session: /@me/counters.json would write the session back, and erase what a concurrent request has just put in it (the CSRF token of a form loaded in XHR)
+	private function getMemcached() {
+		if (is_null($this->memcached)) {
+			$this->memcached = new \Memcached();
+			$this->memcached->addServer($this->getParameter('memcached_host'), $this->getParameter('memcached_port'));
+		}
+		return $this->memcached;
 	}
 
-	public function _setUnlistedCounterRefreshDateByEntityType($entityType, $refreshDate) {
-		$globalUtils = $this->get(GlobalUtils::NAME);
-		$session = $globalUtils->getSession();
-		$key = $this->_getUnlistedCounterRefreshDateSessionKeyByEntityType($entityType);
-		$session->set($key, $refreshDate);
+	public function _getUnlistedCounterRefreshDateKeyByEntityType(User $user, $entityType) {
+		return 'ladb_unlisted_counter_refresh_date_'.$user->getId().'_'.$entityType;
 	}
 
-	public function _getUnlistedCounterRefreshDateByEntityType($entityType, $now) {
-		$globalUtils = $this->get(GlobalUtils::NAME);
-		$session = $globalUtils->getSession();
-		$key = $this->_getUnlistedCounterRefreshDateSessionKeyByEntityType($entityType);
-		$refreshDate = $session->get($key);
+	public function _setUnlistedCounterRefreshDateByEntityType(User $user, $entityType, $refreshDate) {
+		$key = $this->_getUnlistedCounterRefreshDateKeyByEntityType($user, $entityType);
 		if (is_null($refreshDate)) {
+			$this->getMemcached()->delete($key);
+		} else {
+			// Kept until the refresh date, after which the counter is computed again
+			$this->getMemcached()->set($key, $refreshDate, $refreshDate->getTimestamp() - time());
+		}
+	}
+
+	public function _getUnlistedCounterRefreshDateByEntityType(User $user, $entityType, $now) {
+		$key = $this->_getUnlistedCounterRefreshDateKeyByEntityType($user, $entityType);
+		$refreshDate = $this->getMemcached()->get($key);
+		if ($refreshDate === false) {
 			return $now;
 		}
 		return $refreshDate;
@@ -112,13 +124,13 @@ class UserUtils extends AbstractContainerAwareUtils {
 
 		// Check refresh date
 		$now = new \DateTime();
-		$refreshDate = $this->_getUnlistedCounterRefreshDateByEntityType($entityType, $now);
+		$refreshDate = $this->_getUnlistedCounterRefreshDateByEntityType($user, $entityType, $now);
 		if ($now < $refreshDate) {
 			return false;
 		}
 
 		if ($incrementUnlistedCounterRefreshTime) {
-			$this->incrementUnlistedCounterRefreshTimeByEntityType($entityType, 'PT'.mt_rand(180, 300).'S' /* = between 3 and 5 min */);
+			$this->incrementUnlistedCounterRefreshTimeByEntityType($user, $entityType, 'PT'.mt_rand(180, 300).'S' /* = between 3 and 5 min */);
 		}
 
 		$om = $this->getDoctrine()->getManager();
@@ -169,12 +181,12 @@ class UserUtils extends AbstractContainerAwareUtils {
 		return false;	// Returns updated
 	}
 
-	public function incrementUnlistedCounterRefreshTimeByEntityType($entityType, $inc) {
-		$this->_setUnlistedCounterRefreshDateByEntityType($entityType, (new \DateTime())->add(new \DateInterval($inc)));
+	public function incrementUnlistedCounterRefreshTimeByEntityType(User $user, $entityType, $inc) {
+		$this->_setUnlistedCounterRefreshDateByEntityType($user, $entityType, (new \DateTime())->add(new \DateInterval($inc)));
 	}
 
-	public function resetUnlistedCounterRefreshTimeByEntityType($entityType) {
-		$this->_setUnlistedCounterRefreshDateByEntityType($entityType, null);
+	public function resetUnlistedCounterRefreshTimeByEntityType(User $user, $entityType) {
+		$this->_setUnlistedCounterRefreshDateByEntityType($user, $entityType, null);
 	}
 
 	/////
