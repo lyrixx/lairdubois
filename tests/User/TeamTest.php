@@ -50,10 +50,11 @@ final class TeamTest extends WebTestCase
         $client = static::createClientAs(UserFixtures::USER);
 
         $client->request('GET', '/collectifs/new');
+        self::assertSame(404, $client->getResponse()->getStatusCode());
 
-        // Elastica\Exception\NotFoundException instead of a 404
-        self::assertSame(500, $client->getResponse()->getStatusCode(), 'The page passes now: remove the known failure (#54).');
-        self::markTestIncomplete('Known failure, see #54.');
+        $client->request('POST', '/collectifs/create', ['ladb_userteam' => ['username' => 'ebenistes']]);
+        self::assertSame(404, $client->getResponse()->getStatusCode());
+        self::assertNull(static::getEntityManager()->getRepository(User::class)->findOneBy(['usernameCanonical' => 'ebenistes']));
     }
 
     public function testCreateTeamAnonymous(): void
@@ -194,10 +195,8 @@ final class TeamTest extends WebTestCase
 
         $client->request('GET', "/members/invitation/{$invitationId}/delete");
 
+        self::assertSame('/@team', $client->getResponse()->headers->get('Location'));
         self::assertNull($this->findInvitation(UserFixtures::ADMIN));
-        // The Location is the whole serialized RedirectResponse, instead of /@team
-        self::assertStringStartsWith('HTTP/1.0 302 Found', $client->getResponse()->headers->get('Location'), 'The redirection is right now: remove the known failure (#55).');
-        self::markTestIncomplete('Known failure, see #55.');
     }
 
     public function testRequestMembership(): void
@@ -249,6 +248,49 @@ final class TeamTest extends WebTestCase
         self::assertFalse($this->isMember(static::findUser(UserFixtures::TEAM), 'apprenti'));
     }
 
+    public function testRefuseRequestWithoutReferer(): void
+    {
+        $this->createUser('apprenti');
+        $client = static::createClientAs('apprenti');
+        $team = static::findUser(UserFixtures::TEAM);
+        $client->request('GET', "/members/{$team->getId()}/request/create");
+        $requestId = $this->findRequest('apprenti')->getId();
+
+        $client = static::createClientAs(UserFixtures::USER2);
+        $client->request('GET', "/members/request/{$requestId}/delete");
+
+        self::assertSame('/@team', $client->getResponse()->headers->get('Location'));
+        self::assertNull($this->findRequest('apprenti'));
+    }
+
+    public function testListSessionTeams(): void
+    {
+        $client = static::createClientAs(UserFixtures::USER);
+
+        $crawler = $client->request('GET', '/members/', ['title-trans-key' => 'wonder.creation.new', 'route' => 'core_creation_new'], [], ['HTTP_X_REQUESTED_WITH' => 'XMLHttpRequest']);
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertGreaterThan(0, $crawler->filter('[onclick*="/creations/new?owner=team"]')->count());
+    }
+
+    public function testListSessionTeamsWithoutRoute(): void
+    {
+        $client = static::createClientAs(UserFixtures::USER);
+
+        $client->request('GET', '/members/', [], [], ['HTTP_X_REQUESTED_WITH' => 'XMLHttpRequest']);
+
+        self::assertSame(404, $client->getResponse()->getStatusCode());
+    }
+
+    public function testListSessionTeamsAnonymous(): void
+    {
+        $client = static::createClient();
+
+        $client->request('GET', '/members/');
+
+        self::assertSame('https://lairdubois.test/login', $client->getResponse()->headers->get('Location'));
+    }
+
     public function testLeaveTeam(): void
     {
         $client = static::createClientAs(UserFixtures::USER2);
@@ -267,10 +309,8 @@ final class TeamTest extends WebTestCase
         // The last member cannot leave
         $client = static::createClientAs(UserFixtures::USER);
         $client->request('GET', "/members/{$team->getId()}/delete");
-        // Elastica\Exception\NotFoundException instead of a 404
-        self::assertSame(500, $client->getResponse()->getStatusCode(), 'The page passes now: remove the known failure (#54).');
+        self::assertSame(404, $client->getResponse()->getStatusCode());
         self::assertTrue($this->isMember(static::findUser(UserFixtures::TEAM), UserFixtures::USER));
-        self::markTestIncomplete('Known failure, see #54.');
     }
 
     private function createUser(string $username): User

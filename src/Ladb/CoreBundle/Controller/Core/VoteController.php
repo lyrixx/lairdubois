@@ -323,7 +323,7 @@ class VoteController extends AbstractController {
 
 		$returnToUrl = $request->get('rtu');
 		if (is_null($returnToUrl)) {
-			$returnToUrl = $request->headers->get('referer');
+			$returnToUrl = $this->getRefererUrl($request);
 		}
 
 		return $this->redirect($returnToUrl);
@@ -405,7 +405,7 @@ class VoteController extends AbstractController {
 
 		// Return to (use referer because the user is already logged)
 
-		$returnToUrl = $request->headers->get('referer');
+		$returnToUrl = $this->getRefererUrl($request);
 
 		return $this->redirect($returnToUrl);
 	}

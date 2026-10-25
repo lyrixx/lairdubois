@@ -133,7 +133,7 @@ security:
 
 resetting:
     password_already_requested: Un nouveau mot de passe a déjà été demandé pour cet utilisateur dans les dernières 24 heures.
-    check_email: Un e-mail a été envoyé à l'adresse <strong>%email%</strong>. Il contient un lien sur lequel il vous faudra cliquer afin de réinitialiser votre mot de passe.
+    check_email: Un e-mail a été envoyé. Il contient un lien sur lequel il vous faudra cliquer afin de réinitialiser votre mot de passe.
     request:
         heading: Mot de passe oublié ?
         invalid_username: Le nom d'utilisateur ou l'adresse e-mail <strong>%username%</strong> n'existe pas.

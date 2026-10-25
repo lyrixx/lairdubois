@@ -51,4 +51,17 @@ final class ProviderTest extends KnowledgeTestCase
         $geoJson = json_decode($client->getResponse()->getContent(), true);
         self::assertCount(1, $geoJson['features']);
     }
+
+    /**
+     * The provider of the fixtures has no location: the map leaves it out.
+     */
+    public function testListOnMapWithoutLocation(): void
+    {
+        $client = static::createClient();
+
+        $client->request('GET', '/fournisseurs.geojson');
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertCount(0, json_decode($client->getResponse()->getContent(), true)['features']);
+    }
 }

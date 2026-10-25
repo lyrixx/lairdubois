@@ -106,7 +106,7 @@ class NotificationController extends AbstractController {
 		$typableUtils = $this->get(TypableUtils::NAME);
 
 		$activity = $notification->getActivity();
-		$returnToUrl = $request->headers->get('referer');
+		$returnToUrl = $this->getRefererUrl($request);
 
 		if ($activity instanceof \Ladb\CoreBundle\Entity\Core\Activity\Comment) {
 			$returnToUrl = $typableUtils->getUrlAction($activity->getComment());

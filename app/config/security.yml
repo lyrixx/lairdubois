@@ -44,8 +44,10 @@ security:
         - { path: ^/email/confirm, role: ROLE_USER }
 
         - { path: ^/@me$, role: ROLE_USER }
+        - { path: ^/me$, role: ROLE_USER }
         - { path: /parametres$, role: ROLE_USER }
         - { path: ^/messagerie, role: ROLE_USER }
+        - { path: ^/members/, role: ROLE_USER }
         - { path: ^/notifications, role: ROLE_USER }
         - { path: /mes-dons$, role: ROLE_USER }
         - { path: /mes-tooks$, role: ROLE_USER }

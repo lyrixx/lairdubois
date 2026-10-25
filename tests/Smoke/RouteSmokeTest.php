@@ -39,31 +39,8 @@ final class RouteSmokeTest extends WebTestCase
      * @var array<string, array<string, int>>
      */
     private const KNOWN_FAILURES = [
-        'core_blog_post_unpublish' => ['admin' => 42],
-        'core_collection_unpublish' => ['admin' => 42],
-        'core_creation_unpublish' => ['admin' => 42],
-        'core_event_unpublish' => ['admin' => 42],
-        'core_faq_question_unpublish' => ['admin' => 42],
-        'core_find_unpublish' => ['admin' => 42],
-        'core_follower_create' => ['user' => 42, 'admin' => 42],
         'core_funding_donation_webhook' => ['anonymous' => 34, 'user' => 34, 'admin' => 34],
-        'core_howto_article_unpublish' => ['admin' => 42],
-        'core_howto_unpublish' => ['admin' => 42],
-        'core_join_create' => ['user' => 42, 'admin' => 42],
-        'core_like_create' => ['user' => 42, 'admin' => 42],
-        'core_member_list_session_teams' => ['anonymous' => 33, 'user' => 43, 'admin' => 43],
-        'core_offer_unpublish' => ['admin' => 42],
-        'core_plan_unpublish' => ['admin' => 42],
-        'core_promotion_graphic_unpublish' => ['admin' => 42],
-        'core_qa_question_unpublish' => ['admin' => 42],
         'core_user_admin_delete' => ['admin' => 48],
-        'core_user_list_geojson' => ['anonymous' => 47, 'user' => 47, 'admin' => 47],
-        'core_user_team_list_geojson' => ['anonymous' => 47, 'user' => 47, 'admin' => 47],
-        'core_watch_create' => ['user' => 42, 'admin' => 42],
-        'core_watch_delete' => ['user' => 42],
-        'core_workflow_unpublish' => ['admin' => 42],
-        'core_workshop_unpublish' => ['admin' => 42],
-        'fos_user_profile_show' => ['anonymous' => 32],
     ];
 
     /**

@@ -188,7 +188,7 @@ class CreationController extends AbstractController {
 		// Return to
 		$returnToUrl = $request->get('rtu');
 		if (is_null($returnToUrl)) {
-			$returnToUrl = $request->headers->get('referer');
+			$returnToUrl = $this->getRefererUrl($request);
 		}
 
 		return $this->redirect($returnToUrl);

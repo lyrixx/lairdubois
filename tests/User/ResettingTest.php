@@ -84,10 +84,10 @@ final class ResettingTest extends WebTestCase
     {
         $client = static::createClient();
 
-        $client->request('GET', '/resetting/check-email?username=user');
+        $crawler = $client->request('GET', '/resetting/check-email?username=user');
 
-        self::assertSame(500, $client->getResponse()->getStatusCode(), 'The page passes now: remove the known failure (#53).');
-        self::markTestIncomplete('Known failure, see #53.');
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertStringContainsString('Un e-mail a été envoyé.', $crawler->filter('.panel-body')->text());
     }
 
     private function requestReset(Client $client, string $username): void

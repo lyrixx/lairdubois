@@ -2,7 +2,6 @@
 
 namespace Ladb\CoreBundle\Controller\Core;
 
-use Elastica\Exception\NotFoundException;
 use FOS\UserBundle\Model\UserInterface;
 use Jaybizzle\CrawlerDetect\CrawlerDetect;
 use Ladb\CoreBundle\Controller\AbstractController;
@@ -386,11 +385,15 @@ class UserController extends AbstractController {
 
 			$features = array();
 			foreach ($searchParameters['entities'] as $user) {
+				$geoPoint = $user->getGeoPoint();
+				if (is_null($geoPoint)) {
+					continue;
+				}
 				$properties = array(
 					'color' => array( 'orange', 'green', 'blue', 'orange', 'green' )[$user->getAccountType()],
 					'cardUrl' => $this->generateUrl('core_user_card', array( 'username' => $user->getUsernameCanonical() )),
 				);
-				$gerometry = new \GeoJson\Geometry\Point($user->getGeoPoint());
+				$gerometry = new \GeoJson\Geometry\Point($geoPoint);
 				$features[] = new \GeoJson\Feature\Feature($gerometry, $properties);
 			}
 			$crs = new \GeoJson\CoordinateReferenceSystem\Named('urn:ogc:def:crs:OGC:1.3:CRS84');
@@ -1785,7 +1788,7 @@ class UserController extends AbstractController {
 	 */
 	public function teamNewAction() {
 		if (!$this->getUser()->getEmailConfirmed()) {
-			throw new NotFoundException('Not allowed (core_user_team_new)');
+			throw $this->createNotFoundException('Not allowed (core_user_team_new)');
 		}
 
 		$userManager = $this->get(UserManager::NAME);
@@ -1804,7 +1807,7 @@ class UserController extends AbstractController {
 	 */
 	public function teamCreateAction(Request $request) {
 		if (!$this->getUser()->getEmailConfirmed()) {
-			throw new NotFoundException('Not allowed (core_user_team_create)');
+			throw $this->createNotFoundException('Not allowed (core_user_team_create)');
 		}
 
 		$this->createLock('core_user_team_create', false, self::LOCK_TTL_CREATE_ACTION, false);
@@ -2079,15 +2082,23 @@ class UserController extends AbstractController {
 		$user->setAvatar(null);
 		$user->getMeta()->setBanner(null);
 
+		// The avatar and the banner reference the user: detach them to remove them (with their files) only once the user is, in case its deletion fails
+		if (!is_null($avatar)) {
+			$avatar->setUser(null);
+		}
+		if (!is_null($banner)) {
+			$banner->setUser(null);
+		}
+
+		$om->remove($user);
+		$om->flush();
+
 		if (!is_null($avatar)) {
 			$om->remove($avatar);
 		}
 		if (!is_null($banner)) {
 			$om->remove($banner);
 		}
-		$om->flush();
-
-		$om->remove($user);
 		$om->flush();
 
 		// Search index update
