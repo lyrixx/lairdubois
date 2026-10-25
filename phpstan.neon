@@ -7,4 +7,7 @@ parameters:
         - app/AppCache.php
         - app/AppKernel.php
         - src
+    # The functions of Twig 2 (twig_date_converter()...) live next to CoreExtension, out of the autoloader
+    scanFiles:
+        - vendor/twig/twig/src/Extension/CoreExtension.php
     tmpDir: tools/phpstan/var

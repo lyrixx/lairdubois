@@ -8,6 +8,7 @@ use Ladb\CoreBundle\Utils\VideoHostingUtils;
 use Ladb\CoreBundle\Parser\Markdown\LadbMarkdown;
 use Ladb\CoreBundle\Utils\TypableUtils;
 use Ladb\CoreBundle\Fos\UserManager;
+use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
@@ -31,6 +32,11 @@ class LadbExtension extends AbstractExtension {
 			new TwigFilter('ladb_url_beautify', array( $this, 'urlBeautifyFilter' )),
 			new TwigFilter('ladb_duration', array( $this, 'durationFilter' )),
 			new TwigFilter('ladb_hours_minutes_duration', array( $this, 'hoursMinutesDurationFilter' )),
+
+			// Filters of the abandoned twig/extensions, with the same code
+			new TwigFilter('localizeddate', array( $this, 'localizedDateFilter' ), array( 'needs_environment' => true )),
+			new TwigFilter('time_diff', array( $this, 'timeDiffFilter' ), array( 'needs_environment' => true )),
+			new TwigFilter('truncate', array( $this, 'truncateFilter' ), array( 'needs_environment' => true )),
 		);
 	}
 
@@ -153,6 +159,74 @@ class LadbExtension extends AbstractExtension {
 			}
 		}
 		return $str;
+	}
+
+	// Copy of twig_localized_date_filter() of twig/extensions 1.5
+	public function localizedDateFilter(Environment $env, $date, $dateFormat = 'medium', $timeFormat = 'medium', $locale = null, $timezone = null, $format = null, $calendar = 'gregorian') {
+		$date = twig_date_converter($env, $date, $timezone);
+
+		$formatValues = array(
+			'none' => \IntlDateFormatter::NONE,
+			'short' => \IntlDateFormatter::SHORT,
+			'medium' => \IntlDateFormatter::MEDIUM,
+			'long' => \IntlDateFormatter::LONG,
+			'full' => \IntlDateFormatter::FULL,
+		);
+
+		$formatter = \IntlDateFormatter::create(
+			$locale,
+			$formatValues[$dateFormat],
+			$formatValues[$timeFormat],
+			\IntlTimeZone::createTimeZone($date->getTimezone()->getName()),
+			'gregorian' === $calendar ? \IntlDateFormatter::GREGORIAN : \IntlDateFormatter::TRADITIONAL,
+			$format
+		);
+
+		return $formatter->format($date->getTimestamp());
+	}
+
+	// Copy of Twig_Extensions_Extension_Date::diff() of twig/extensions 1.5
+	public function timeDiffFilter(Environment $env, $date, $now = null) {
+		$date = twig_date_converter($env, $date);
+		$now = twig_date_converter($env, $now);
+
+		$diff = $date->diff($now);
+
+		$units = array(
+			'y' => 'year',
+			'm' => 'month',
+			'd' => 'day',
+			'h' => 'hour',
+			'i' => 'minute',
+			's' => 'second',
+		);
+		foreach ($units as $attribute => $unit) {
+			$count = $diff->$attribute;
+			if (0 !== $count) {
+				$id = sprintf('diff.%s.%s', $diff->invert ? 'in' : 'ago', $unit);
+				return $this->container->get('translator')->transChoice($id, $count, array( '%count%' => $count ), 'date');
+			}
+		}
+
+		return '';
+	}
+
+	// Copy of twig_truncate_filter() of twig/extensions 1.5
+	public function truncateFilter(Environment $env, $value, $length = 30, $preserve = false, $separator = '...') {
+		if (mb_strlen($value, $env->getCharset()) > $length) {
+			if ($preserve) {
+				// If breakpoint is on the last word, return the value without separator.
+				if (false === ($breakpoint = mb_strpos($value, ' ', $length, $env->getCharset()))) {
+					return $value;
+				}
+
+				$length = $breakpoint;
+			}
+
+			return rtrim(mb_substr($value, 0, $length, $env->getCharset())).$separator;
+		}
+
+		return $value;
 	}
 
 	public function entityFunction($type, $id) {
