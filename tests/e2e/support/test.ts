@@ -18,9 +18,9 @@ export const test = base.extend({
 });
 
 /**
- * Opens a page, then waits for the end of the requests it sends (/@me/counters.json...), before
- * a form loaded in XHR: the sessions have no lock, such a request would write the session back
- * without the CSRF token of the form (#88).
+ * Opens a page, then waits for the end of the requests it sends, before a form loaded in XHR: the
+ * sessions have no lock, such a request that writes the session back would erase the CSRF token of
+ * the form. /@me/counters.json no longer does (#88).
  */
 export async function gotoAndSettle(page: Page, url: string): Promise<void> {
     await page.goto(url);

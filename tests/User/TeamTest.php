@@ -282,6 +282,27 @@ final class TeamTest extends WebTestCase
         self::assertSame(404, $client->getResponse()->getStatusCode());
     }
 
+    /**
+     * A route that the site never sends (forged URL): unknown, or with parameters that the list
+     * does not give.
+     *
+     * @dataProvider provideInvalidRoutes
+     */
+    public function testListSessionTeamsWithInvalidRoute(string $route): void
+    {
+        $client = static::createClientAs(UserFixtures::USER);
+
+        $client->request('GET', '/members/', ['title-trans-key' => 'wonder.creation.new', 'route' => $route], [], ['HTTP_X_REQUESTED_WITH' => 'XMLHttpRequest']);
+
+        self::assertSame(404, $client->getResponse()->getStatusCode());
+    }
+
+    public static function provideInvalidRoutes(): iterable
+    {
+        yield 'unknown' => ['core_unknown'];
+        yield 'with parameters' => ['core_creation_show'];
+    }
+
     public function testListSessionTeamsAnonymous(): void
     {
         $client = static::createClient();

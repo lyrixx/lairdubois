@@ -8,6 +8,8 @@ use Ladb\CoreBundle\Utils\WebpushNotificationUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Exception\MissingMandatoryParametersException;
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Ladb\CoreBundle\Entity\Core\MemberRequest;
 use Ladb\CoreBundle\Manager\Core\MemberInvitationManager;
@@ -382,6 +384,12 @@ class MemberController extends AbstractController {
 		$route = $request->get('route');
 		if (is_null($route)) {
 			throw $this->createNotFoundException('Missing route (core_member_list_session_teams)');
+		}
+		// The template links to the route without its parameters: an unknown one (forged URL) would fail there
+		try {
+			$this->generateUrl($route);
+		} catch (RouteNotFoundException | MissingMandatoryParametersException $e) {
+			throw $this->createNotFoundException('Invalid route (core_member_list_session_teams)');
 		}
 
 		$om = $this->getDoctrine()->getManager();

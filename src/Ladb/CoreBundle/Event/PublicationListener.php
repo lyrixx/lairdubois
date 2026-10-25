@@ -508,7 +508,7 @@ class PublicationListener implements EventSubscriberInterface {
 			if ($event->isNeedCounterResetRefreshTime()) {
 
 				// Reset unlisted counter refresh time
-				$userUtils->resetUnlistedCounterRefreshTimeByEntityType($entityType);
+				$userUtils->resetUnlistedCounterRefreshTimeByEntityType($user, $entityType);
 
 			}
 

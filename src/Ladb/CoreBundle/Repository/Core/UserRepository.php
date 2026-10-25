@@ -2,7 +2,9 @@
 
 namespace Ladb\CoreBundle\Repository\Core;
 
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\Tools\Pagination\Paginator;
+use Ladb\CoreBundle\Entity\Core\Picture;
 use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Repository\AbstractEntityRepository;
 
@@ -10,6 +12,46 @@ class UserRepository extends AbstractEntityRepository {
 
 	public function createIsEnabledQueryBuilder() {
 		return $this->createQueryBuilder('a')->where('a.enabled = true');	// FOSElasticaBundle bug -> use 'a'
+	}
+
+	/////
+
+	/**
+	 * Whether rows reference the user by a foreign key (its publications, comments, likes, views, messages, registration...): the database refuses its deletion. Except the given pictures (its avatar and its banner), removed with it.
+	 */
+	public function existsReferences(User $user, array $removedPictures) {
+		$om = $this->getEntityManager();
+		$connection = $om->getConnection();
+		$removedPictureIds = array_map(function(Picture $picture) { return $picture->getId(); }, $removedPictures);
+
+		foreach ($om->getMetadataFactory()->getAllMetadata() as $metadata) {
+			if ($metadata->isMappedSuperclass) {
+				continue;
+			}
+			foreach ($metadata->getAssociationMappings() as $mapping) {
+
+				// The foreign keys to the user are the join columns of the associations to it, in the table of the class that declares them
+				if ($mapping['targetEntity'] !== User::class || !isset($mapping['joinColumns']) || isset($mapping['inherited'])) {
+					continue;
+				}
+
+				$sql = 'SELECT 1 FROM '.$metadata->getTableName().' WHERE '.$mapping['joinColumns'][0]['name'].' = ?';
+				$parameters = array( $user->getId() );
+				$types = array( \PDO::PARAM_INT );
+				if ($metadata->getName() === Picture::class && count($removedPictureIds) > 0) {
+					$sql .= ' AND id NOT IN (?)';
+					$parameters[] = $removedPictureIds;
+					$types[] = Connection::PARAM_INT_ARRAY;
+				}
+
+				if ($connection->fetchOne($sql.' LIMIT 1', $parameters, $types) !== false) {
+					return true;
+				}
+
+			}
+		}
+
+		return false;
 	}
 
 	/////

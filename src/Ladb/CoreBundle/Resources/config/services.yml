@@ -423,6 +423,10 @@ services:
     tags:
       - { name: kernel.event_subscriber }
     arguments: ['@service_container']
+  ladb_core.return_to_url_listener:
+    class: Ladb\CoreBundle\Event\ReturnToUrlListener
+    tags:
+      - { name: kernel.event_subscriber }
 
   # Handlers
   ladb_core.authentification_handler:

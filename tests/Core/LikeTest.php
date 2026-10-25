@@ -77,6 +77,19 @@ final class LikeTest extends InteractionTestCase
     }
 
     /**
+     * An empty "rtu", that the site never sends (forged URL), as none: the referer, or the home
+     * page without it.
+     */
+    public function testCreateWithoutXhrAndWithEmptyRtuRedirectsToHome(): void
+    {
+        $client = static::createClientAs(UserFixtures::ADMIN);
+        $client->request('GET', $this->getCreatePath().'?rtu=');
+
+        self::assertTrue($client->getResponse()->isRedirect('/'));
+        self::assertNotNull($this->findLikeOf(UserFixtures::ADMIN));
+    }
+
+    /**
      * The like of "user2" exists: a second one does not count.
      */
     public function testCreateTwice(): void

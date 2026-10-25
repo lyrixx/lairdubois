@@ -5,6 +5,7 @@ namespace Tests\User;
 use Ladb\CoreBundle\DataFixtures\UserFixtures;
 use Ladb\CoreBundle\Entity\Core\Member;
 use Ladb\CoreBundle\Entity\Core\Picture;
+use Ladb\CoreBundle\Entity\Core\Registration;
 use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Fos\UserManager;
 use Tests\WebTestCase;
@@ -197,20 +198,53 @@ final class ProfileTest extends WebTestCase
         self::assertNull(static::getEntityManager()->find(Picture::class, $bannerId));
     }
 
+    /**
+     * Its contents reference the account (foreign keys): refused, with a message.
+     */
     public function testDeleteWithContents(): void
     {
-        $avatar = static::findUser(UserFixtures::USER)->getAvatar();
+        $user = static::findUser(UserFixtures::USER);
+        $avatar = $user->getAvatar();
+        $displayname = $user->getDisplayname();
         $client = static::createClientAs(UserFixtures::ADMIN);
 
         $client->request('GET', '/@user/admin/delete');
 
+        self::assertSame('/@user/admin', $client->getResponse()->headers->get('Location'));
         // Neither the account nor its avatar is removed
         static::getEntityManager()->clear();
         self::assertSame($avatar->getId(), static::findUser(UserFixtures::USER)->getAvatar()->getId());
         self::assertFileExists($avatar->getAbsoluteMasterPath());
-        // ForeignKeyConstraintViolationException: the contents of the account stay
-        self::assertSame(500, $client->getResponse()->getStatusCode(), 'The page passes now: remove the known failure (#48).');
-        self::markTestIncomplete('Known failure, see #48.');
+        $client->followRedirect();
+        self::assertStringContainsString("Le compte <strong>{$displayname}</strong> n'a pas été supprimé", $client->getResponse()->getContent());
+    }
+
+    /**
+     * Not only its publications: anything that references the account, such as its registration
+     * (every account created by the registration form has one, and a welcome message).
+     */
+    public function testDeleteWithRegistration(): void
+    {
+        $container = static::bootKernel()->getContainer();
+        $userManager = $container->get(UserManager::NAME);
+        $user = $userManager->createUser();
+        $user->setUsername('apprenti');
+        $user->setEmail('apprenti@lairdubois.test');
+        $user->setPlainPassword('apprenti');
+        $user->setEnabled(true);
+        $userManager->updateUser($user);
+        $registration = new Registration();
+        $registration->setUser($user);
+        $registration->setClientIp4('127.0.0.1');
+        $om = $container->get('doctrine')->getManager();
+        $om->persist($registration);
+        $om->flush();
+        $client = static::createClientAs(UserFixtures::ADMIN);
+
+        $client->request('GET', '/@apprenti/admin/delete');
+
+        self::assertSame('/@apprenti/admin', $client->getResponse()->headers->get('Location'));
+        self::assertNotNull(static::getEntityManager()->getRepository(User::class)->findOneBy(['usernameCanonical' => 'apprenti']));
     }
 
     public function testAdminActionsAsUser(): void

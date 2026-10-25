@@ -28,6 +28,11 @@ framework:
         save_path: "%kernel.root_dir%/sessions"
         cookie_lifetime: 0
         cookie_samesite: 'strict'
+        # The sessions have no lock (lock_mode below): a request that writes the session back can
+        # erase what a concurrent one has just put in it (the CSRF token of a form loaded in XHR).
+        # Updated every second, the last use date of the metadata would make each request write it
+        # back; every 2 minutes, a request that changes nothing else (/@me/counters.json) does not.
+        metadata_update_threshold: 120
     fragments:       ~
 
 services:

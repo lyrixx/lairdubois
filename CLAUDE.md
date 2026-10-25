@@ -370,7 +370,8 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   résultat.
 - `AbstractController::createLock()` pose un verrou Memcached de 3 secondes par action et par
   compte, contre le double envoi : la deuxième création d'un même compte dans un test répond 404.
-  `Tests\WebTestCase` vide Memcached après chaque test (il ne sert qu'à ces verrous).
+  `Tests\WebTestCase` vide Memcached après chaque test (il ne sert qu'à ces verrous et aux dates de
+  recalcul des compteurs de `UserUtils`, par compte).
 - Bug connu d'un test fonctionnel : vérifier le mauvais comportement avec le message « passes now:
   remove the known failure (#N) », puis `self::markTestIncomplete('Known failure, see #N.')`. Le
   test échoue quand le bug est corrigé.
@@ -393,9 +394,11 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
 - Un seul worker, une seule base pour toute la suite : un test ne suppose rien des autres, et
   prend un contenu ou un compte que les autres ne touchent pas (un like surveille le contenu).
 - Bootstrap 3 laisse `aria-hidden` sur ses fenêtres modales : pas de `getByRole()` dedans.
-- Les sessions n'ont pas de verrou (`lock_mode: 0`) : une requête encore en cours au chargement
-  (`/@me/counters.json`) peut réécrire la session sans le jeton CSRF d'un formulaire chargé en XHR
-  entre-temps, refusé sans message (#88). `gotoAndSettle()` avant d'ouvrir un tel formulaire.
+- Les sessions n'ont pas de verrou (`lock_mode: 0`) : une requête qui réécrit la session peut
+  effacer le jeton CSRF d'un formulaire chargé en XHR entre-temps, refusé sans message.
+  `/@me/counters.json`, lancé au chargement, ne l'écrit plus (#88 : `metadata_update_threshold`,
+  dates de recalcul des compteurs dans Memcached, `Tests\User\CountersTest`) ; `gotoAndSettle()`
+  reste avant d'ouvrir un tel formulaire, contre les autres requêtes qui écrivent la session.
 - Le verrou de `createLock()` est pris même quand le formulaire est refusé : le renvoyer dans les
   3 secondes répond 404, et le JS ne dit rien.
 - Bug connu : `test.fail()`, avec l'issue en commentaire. Le test casse quand le bug est corrigé.

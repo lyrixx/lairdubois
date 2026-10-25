@@ -146,7 +146,7 @@
                         {% endembed %}
                         {% embed 'LadbCoreBundle:Common/Modal:_modal.part.html.twig' with { 'id':'delete_user_admin_modal', 'title':('default.deleting'|trans()) } %}
                             {% block bodyInner %}
-                                <p>La suppression du compte <strong>{{ user.displayname }}</strong> effacera toutes ces publications.</p>
+                                <p>Le compte <strong>{{ user.displayname }}</strong> ne sera supprimé que s'il n'a ni publication ni autre contenu sur le site (commentaires, likes, messages…). Sinon, il restera tel quel et pourra être désactivé.</p>
                                 <p>Confirmez l'action pour continuer.</p>
                             {% endblock %}
                             {% block footerInner %}
