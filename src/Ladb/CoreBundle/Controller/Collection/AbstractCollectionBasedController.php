@@ -10,6 +10,15 @@ use Ladb\CoreBundle\Utils\TypableUtils;
 
 abstract class AbstractCollectionBasedController extends AbstractController {
 
+	private $typableUtils;
+
+	/**
+	 * @required
+	 */
+	public function setTypableUtils(TypableUtils $typableUtils) {
+		$this->typableUtils = $typableUtils;
+	}
+
 	protected function _retrieveCollection($id) {
 		$om = $this->getDoctrine()->getManager();
 		$collectionRepository = $om->getRepository(Collection::CLASS_NAME);
@@ -25,9 +34,8 @@ abstract class AbstractCollectionBasedController extends AbstractController {
 	}
 
 	protected function _retrieveRelatedEntity($entityType, $entityId) {
-		$typableUtils = $this->get(TypableUtils::NAME);
 		try {
-			$entity = $typableUtils->findTypable(intval($entityType), intval($entityId));
+			$entity = $this->typableUtils->findTypable(intval($entityType), intval($entityId));
 		} catch (\Exception $e) {
 			throw $this->createNotFoundException($e->getMessage());
 		}

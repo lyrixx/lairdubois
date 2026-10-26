@@ -34,6 +34,8 @@ use Ladb\CoreBundle\Utils\BlockBodiedUtils;
 use Ladb\CoreBundle\Utils\OfferUtils;
 use Ladb\CoreBundle\Utils\JoinableUtils;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @Route("/annonces")
@@ -46,13 +48,11 @@ class OfferController extends AbstractController {
 	 * @Route("/new", name="core_offer_new")
 	 * @Template("LadbCoreBundle:Offer/Offer:new.html.twig")
 	 */
-	public function newAction(Request $request) {
+	public function newAction(Request $request, TagUtils $tagUtils) {
 
 		$offer = new Offer();
 		$offer->addBodyBlock(new \Ladb\CoreBundle\Entity\Core\Block\Text());	// Add a default Text body block
 		$form = $this->createForm(OfferType::class, $offer);
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'form'         => $form->createView(),
@@ -65,7 +65,7 @@ class OfferController extends AbstractController {
 	 * @Route("/create", methods={"POST"}, name="core_offer_create")
 	 * @Template("LadbCoreBundle:Offer/Offer:new.html.twig")
 	 */
-	public function createAction(Request $request) {
+	public function createAction(Request $request, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$owner = $this->retrieveOwner($request);
 
@@ -79,10 +79,8 @@ class OfferController extends AbstractController {
 
 		if ($form->isValid()) {
 
-			$blockUtils = $this->get(BlockBodiedUtils::NAME);
 			$blockUtils->preprocessBlocks($offer);
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($offer);
 
 			$offer->setUser($owner);
@@ -93,16 +91,13 @@ class OfferController extends AbstractController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($offer));
 
 			return $this->redirect($this->generateUrl('core_offer_show', array('id' => $offer->getSluggedId())));
 		}
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
-
-		$tagUtils = $this->get(TagUtils::NAME);
+		$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 		return array(
 			'offer'        => $offer,
@@ -117,13 +112,12 @@ class OfferController extends AbstractController {
 	 * @Route("/{id}/lock", requirements={"id" = "\d+"}, defaults={"lock" = true}, name="core_offer_lock")
 	 * @Route("/{id}/unlock", requirements={"id" = "\d+"}, defaults={"lock" = false}, name="core_offer_unlock")
 	 */
-	public function lockUnlockAction($id, $lock) {
+	public function lockUnlockAction($id, $lock, OfferManager $offerManager, TranslatorInterface $translator) {
 
 		$offer = $this->retrievePublication($id, Offer::CLASS_NAME);
 		$this->assertLockUnlockable($offer, $lock);
 
 		// Lock or Unlock
-		$offerManager = $this->get(OfferManager::NAME);
 		if ($lock) {
 			$offerManager->lock($offer);
 		} else {
@@ -131,7 +125,7 @@ class OfferController extends AbstractController {
 		}
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('offer.offer.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $offer->getTitle() )));
+		$this->addFlash('success', $translator->trans('offer.offer.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $offer->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_offer_show', array( 'id' => $offer->getSluggedId() )));
 	}
@@ -139,17 +133,16 @@ class OfferController extends AbstractController {
 	/**
 	 * @Route("/{id}/publish", requirements={"id" = "\d+"}, name="core_offer_publish")
 	 */
-	public function publishAction($id) {
+	public function publishAction($id, OfferManager $offerManager, TranslatorInterface $translator) {
 
 		$offer = $this->retrievePublication($id, Offer::CLASS_NAME);
 		$this->assertPublishable($offer, Offer::MAX_PUBLISH_COUNT);
 
 		// Publish
-		$offerManager = $this->get(OfferManager::NAME);
 		$offerManager->publish($offer);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('offer.offer.form.alert.publish_success', array( '%title%' => $offer->getTitle() )));
+		$this->addFlash('success', $translator->trans('offer.offer.form.alert.publish_success', array( '%title%' => $offer->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_offer_show', array( 'id' => $offer->getSluggedId() )));
 	}
@@ -157,17 +150,16 @@ class OfferController extends AbstractController {
 	/**
 	 * @Route("/{id}/unpublish", requirements={"id" = "\d+"}, name="core_offer_unpublish")
 	 */
-	public function unpublishAction(Request $request, $id) {
+	public function unpublishAction(Request $request, $id, OfferManager $offerManager, TranslatorInterface $translator) {
 
 		$offer = $this->retrievePublication($id, Offer::CLASS_NAME);
 		$this->assertUnpublishable($offer);
 
 		// Unpublish
-		$offerManager = $this->get(OfferManager::NAME);
 		$offerManager->unpublish($offer);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('offer.offer.form.alert.unpublish_success', array( '%title%' => $offer->getTitle() )));
+		$this->addFlash('success', $translator->trans('offer.offer.form.alert.unpublish_success', array( '%title%' => $offer->getTitle() )));
 
 		// Return to
 		$returnToUrl = $request->get('rtu');
@@ -182,14 +174,12 @@ class OfferController extends AbstractController {
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_offer_edit")
 	 * @Template("LadbCoreBundle:Offer/Offer:edit.html.twig")
 	 */
-	public function editAction($id) {
+	public function editAction($id, TagUtils $tagUtils) {
 
 		$offer = $this->retrievePublication($id, Offer::CLASS_NAME);
 		$this->assertEditabable($offer);
 
 		$form = $this->createForm(OfferType::class, $offer);
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'offer'        => $offer,
@@ -202,12 +192,11 @@ class OfferController extends AbstractController {
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_offer_update")
 	 * @Template("LadbCoreBundle:Offer/Offer:edit.html.twig")
 	 */
-	public function updateAction(Request $request, $id) {
+	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, PicturedUtils $picturedUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$offer = $this->retrievePublication($id, Offer::CLASS_NAME);
 		$this->assertEditabable($offer);
 
-		$picturedUtils = $this->get(PicturedUtils::NAME);
 		$picturedUtils->resetPictures($offer); // Reset pictures array to consider form pictures order
 
 		$originalBodyBlocks = $offer->getBodyBlocks()->toArray();	// Need to be an array to copy values
@@ -218,10 +207,8 @@ class OfferController extends AbstractController {
 
 		if ($form->isValid()) {
 
-			$blockUtils = $this->get(BlockBodiedUtils::NAME);
 			$blockUtils->preprocessBlocks($offer, $originalBodyBlocks);
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($offer);
 
 			$offer->setMainPicture($mainPicture = $offer->getPictures()->first() ? $mainPicture = $offer->getPictures()->first() : null);
@@ -233,11 +220,10 @@ class OfferController extends AbstractController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_UPDATED, new PublicationEvent($offer, array( 'previouslyUsedTags' => $previouslyUsedTags )));
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('offer.offer.form.alert.update_success', array( '%title%' => $offer->getTitle() )));
+			$this->addFlash('success', $translator->trans('offer.offer.form.alert.update_success', array( '%title%' => $offer->getTitle() )));
 
 			// Regenerate the form
 			$form = $this->createForm(OfferType::class, $offer);
@@ -245,11 +231,9 @@ class OfferController extends AbstractController {
 		} else {
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
+			$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 		}
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'offer'        => $offer,
@@ -261,17 +245,16 @@ class OfferController extends AbstractController {
 	/**
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_offer_delete")
 	 */
-	public function deleteAction($id) {
+	public function deleteAction($id, OfferManager $offerManager, TranslatorInterface $translator) {
 
 		$offer = $this->retrievePublication($id, Offer::CLASS_NAME);
 		$this->assertDeletable($offer, true);
 
 		// Delete
-		$offerManager = $this->get(OfferManager::NAME);
 		$offerManager->delete($offer);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('offer.offer.form.alert.delete_success', array( '%title%' => $offer->getTitle() )));
+		$this->addFlash('success', $translator->trans('offer.offer.form.alert.delete_success', array( '%title%' => $offer->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_offer_list'));
 	}
@@ -279,7 +262,7 @@ class OfferController extends AbstractController {
 	/**
 	 * @Route("/{id}/chown", requirements={"id" = "\d+"}, name="core_offer_chown")
 	 */
-	public function chownAction(Request $request, $id) {
+	public function chownAction(Request $request, $id, OfferManager $offerManager, TranslatorInterface $translator) {
 
 		$offer = $this->retrievePublication($id, Offer::CLASS_NAME);
 		$this->assertChownable($offer);
@@ -287,11 +270,10 @@ class OfferController extends AbstractController {
 		$targetUser = $this->retrieveOwner($request);
 
 		// Change owner
-		$offerManager = $this->get(OfferManager::NAME);
 		$offerManager->changeOwner($offer, $targetUser);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('offer.offer.form.alert.chown_success', array( '%title%' => $offer->getTitle() )));
+		$this->addFlash('success', $translator->trans('offer.offer.form.alert.chown_success', array( '%title%' => $offer->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_offer_show', array( 'id' => $offer->getSluggedId() )));
 	}
@@ -357,15 +339,13 @@ class OfferController extends AbstractController {
 	/**
 	 * @Route("/{id}/message/new", name="core_offer_message_new")
 	 */
-	public function messageNewAction(Request $request, $id) {
+	public function messageNewAction(Request $request, $id, TranslatorInterface $translator) {
 
 		$offer = $this->retrievePublication($id, Offer::CLASS_NAME);
 		$this->assertShowable($offer, true);
 		if ($offer->getUser() === $this->getUser()) {
 			throw $this->createNotFoundException('Unable to send to yourself (core_offer_message_new)');
 		}
-
-		$translator = $this->get('translator');
 
 		return $this->forward('LadbCoreBundle:Message/Thread:new', array(
 			'recipientUsername' => $offer->getUser()->getUsernameCanonical(),
@@ -386,8 +366,7 @@ class OfferController extends AbstractController {
 	 * @Route(".geojson", defaults={"_format" = "json", "page"=-1, "layout"="geojson"}, name="core_offer_list_geojson")
 	 * @Template("LadbCoreBundle:Offer/Offer:list.html.twig")
 	 */
-	public function listAction(Request $request, $page = 0, $layout = 'view') {
-		$searchUtils = $this->get(SearchUtils::NAME);
+	public function listAction(Request $request, EventDispatcherInterface $dispatcher, LocalisableUtils $localisableUtils, SearchUtils $searchUtils, TranslatorInterface $translator, $page = 0, $layout = 'view') {
 
 		// Elasticsearch paginiation limit
 		if ($page > 624) {
@@ -397,14 +376,14 @@ class OfferController extends AbstractController {
 		$searchParameters = $searchUtils->searchPaginedEntities(
 			$request,
 			$page,
-			function($facet, &$filters, &$sort, &$noGlobalFilters, &$couldUseDefaultSort) use ($searchUtils) {
+			function($facet, &$filters, &$sort, &$noGlobalFilters, &$couldUseDefaultSort) use ($searchUtils, $localisableUtils) {
 				switch ($facet->name) {
 
 					// Filters /////
 
 					case 'mine':
 
-						if ($this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
+						if ($this->isGranted('ROLE_USER')) {
 
 							if (isset($facet->value) && $facet->value == 'draft') {
 
@@ -486,7 +465,6 @@ class OfferController extends AbstractController {
 
 					case 'location':
 
-						$localisableUtils = $this->get(LocalisableUtils::NAME);
 						$boundsAndLocation = $localisableUtils->getBoundsAndLocation($facet->value);
 
 						if (!is_null($boundsAndLocation)) {
@@ -590,20 +568,19 @@ class OfferController extends AbstractController {
 		}
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATIONS_LISTED, new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()));
 
 		if ($request->isXmlHttpRequest()) {
 			return $this->render('LadbCoreBundle:Offer/Offer:list-xhr.html.twig', $parameters);
 		}
 
-		if ($this->get('security.authorization_checker')->isGranted('ROLE_USER') && $this->getUser()->getMeta()->getPrivateOfferCount() > 0) {
+		if ($this->isGranted('ROLE_USER') && $this->getUser()->getMeta()->getPrivateOfferCount() > 0) {
 
 			$draftPath = $this->generateUrl('core_offer_list', array( 'q' => '@mine:draft' ));
 			$draftCount = $this->getUser()->getMeta()->getPrivateOfferCount();
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('info', '<i class="ladb-icon-warning"></i> '.$this->get('translator')->transchoice('offer.offer.choice.draft_alert', $draftCount, array( '%count%' => $draftCount )).' <small><a href="'.$draftPath.'" class="alert-link">('.$this->get('translator')->trans('default.show_my_drafts').')</a></small>');
+			$this->addFlash('info', '<i class="ladb-icon-warning"></i> '.$translator->transchoice('offer.offer.choice.draft_alert', $draftCount, array( '%count%' => $draftCount )).' <small><a href="'.$draftPath.'" class="alert-link">('.$translator->trans('default.show_my_drafts').')</a></small>');
 
 		}
 
@@ -614,10 +591,9 @@ class OfferController extends AbstractController {
 	 * @Route("/{id}.html", name="core_offer_show")
 	 * @Template("LadbCoreBundle:Offer/Offer:show.html.twig")
 	 */
-	public function showAction(Request $request, $id) {
+	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();
 		$offerRepository = $om->getRepository(Offer::CLASS_NAME);
-		$witnessManager = $this->get(WitnessManager::NAME);
 
 		$id = intval($id);
 
@@ -631,18 +607,10 @@ class OfferController extends AbstractController {
 		$this->assertShowable($offer);
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($offer));
 
-		$explorableUtils = $this->get(ExplorableUtils::NAME);
 		$userOffers = $explorableUtils->getPreviousAndNextPublishedUserExplorables($offer, $offerRepository, $offer->getUser()->getMeta()->getPublicOfferCount());
 		$similarOffers = $explorableUtils->getSimilarExplorables($offer, 'fos_elastica.index.ladb.offer_offer', Offer::CLASS_NAME, $userOffers, 2, array( new \Elastica\Query\Term(array( 'kind' => $offer->getKind() )), new \Elastica\Query\Term(array( 'category' => $offer->getCategory() )) ));
-
-		$likableUtils = $this->get(LikableUtils::NAME);
-		$watchableUtils = $this->get(WatchableUtils::NAME);
-		$commentableUtils = $this->get(CommentableUtils::NAME);
-		$collectionnableUtils = $this->get(CollectionnableUtils::NAME);
-		$followerUtils = $this->get(FollowerUtils::NAME);
 
 		$hasMap = !is_null($offer->getLatitude()) && !is_null($offer->getLongitude());
 
@@ -664,7 +632,7 @@ class OfferController extends AbstractController {
 	 * @Route("/{id}/admin/converttoquestion", requirements={"id" = "\d+"}, name="core_offer_offer_admin_converttoquestion")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_offer_offer_admin_converttoquestion)")
 	 */
-	public function adminConvertToQuestionAction($id) {
+	public function adminConvertToQuestionAction($id, OfferManager $offerManager, TranslatorInterface $translator) {
 		$om = $this->getDoctrine()->getManager();
 		$offerRepository = $om->getRepository(Offer::CLASS_NAME);
 
@@ -674,11 +642,10 @@ class OfferController extends AbstractController {
 		}
 
 		// Convert
-		$offerManager = $this->get(OfferManager::NAME);
 		$question = $offerManager->convertToQuestion($offer);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('offer.offer.admin.alert.converttoquestion_success', array( '%title%' => $offer->getTitle() )));
+		$this->addFlash('success', $translator->trans('offer.offer.admin.alert.converttoquestion_success', array( '%title%' => $offer->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_qa_question_show', array( 'id' => $question->getSluggedId() )));
 	}

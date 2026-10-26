@@ -2,6 +2,7 @@
 
 namespace Ladb\CoreBundle\Controller\Workflow;
 
+use Gos\Bundle\WebSocketBundle\Pusher\PusherInterface;
 use Ladb\CoreBundle\Controller\AbstractController;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Ladb\CoreBundle\Entity\Workflow\Workflow;
@@ -16,6 +17,15 @@ abstract class AbstractWorkflowBasedController extends AbstractController {
 	const TASKINFO_ROW 				= 0b0010000;
 	const TASKINFO_WIDGET 			= 0b0100000;
 	const TASKINFO_BOX 				= 0b1000000;
+
+	private $pusher;
+
+	/**
+	 * @required
+	 */
+	public function setPusher(PusherInterface $pusher) {
+		$this->pusher = $pusher;
+	}
 
 	/////
 
@@ -34,14 +44,12 @@ abstract class AbstractWorkflowBasedController extends AbstractController {
 	}
 
 	protected function _assertAuthorizedWorkflow(Workflow $workflow) {
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && $workflow->getUser() != $this->getUser()) {
+		if (!$this->isGranted('ROLE_ADMIN') && $workflow->getUser() != $this->getUser()) {
 			throw $this->createNotFoundException('Not allowed');
 		}
 	}
 
 	protected function _generateTaskInfos($tasks = array(), $fieldsStrategy = self::TASKINFO_NONE, $readOnly = false, $durationsHidden = false) {
-		$templating = $this->get('templating');
-
 		if (!is_array($tasks) && !$tasks instanceof \Traversable) {
 			$tasks = array( $tasks );
 		}
@@ -63,13 +71,13 @@ abstract class AbstractWorkflowBasedController extends AbstractController {
 				$taskInfo['sortIndex'] = $task->getPositionTop();
 			}
 			if (($fieldsStrategy & self::TASKINFO_ROW) == self::TASKINFO_ROW) {
-				$taskInfo['row'] = $templating->render('LadbCoreBundle:Workflow:Task/_row.part.html.twig', array( 'task' => $task, 'readOnly' => $readOnly, 'durationsHidden' => $durationsHidden ));
+				$taskInfo['row'] = $this->renderView('LadbCoreBundle:Workflow:Task/_row.part.html.twig', array( 'task' => $task, 'readOnly' => $readOnly, 'durationsHidden' => $durationsHidden ));
 			}
 			if (($fieldsStrategy & self::TASKINFO_WIDGET) == self::TASKINFO_WIDGET) {
-				$taskInfo['widget'] = $templating->render('LadbCoreBundle:Workflow:Task/_widget.part.html.twig', array( 'task' => $task, 'readOnly' => $readOnly, 'durationsHidden' => $durationsHidden ));
+				$taskInfo['widget'] = $this->renderView('LadbCoreBundle:Workflow:Task/_widget.part.html.twig', array( 'task' => $task, 'readOnly' => $readOnly, 'durationsHidden' => $durationsHidden ));
 			}
 			if (($fieldsStrategy & self::TASKINFO_BOX) == self::TASKINFO_BOX) {
-				$taskInfo['box'] = $templating->render('LadbCoreBundle:Workflow:Task/_box.part.html.twig', array( 'task' => $task, 'readOnly' => $readOnly, 'durationsHidden' => $durationsHidden ));
+				$taskInfo['box'] = $this->renderView('LadbCoreBundle:Workflow:Task/_box.part.html.twig', array( 'task' => $task, 'readOnly' => $readOnly, 'durationsHidden' => $durationsHidden ));
 			}
 			$taskInfos[] = $taskInfo;
 		}
@@ -77,16 +85,13 @@ abstract class AbstractWorkflowBasedController extends AbstractController {
 	}
 
 	protected function _generateWorkflowInfos($workflow) {
-		$templating = $this->get('templating');
-
 		return array(
-			'statusPanel' => $templating->render('LadbCoreBundle:Workflow:Workflow/_workflow-status.part.html.twig', array( 'workflow' => $workflow )),
+			'statusPanel' => $this->renderView('LadbCoreBundle:Workflow:Workflow/_workflow-status.part.html.twig', array( 'workflow' => $workflow )),
 		);
 	}
 
 	protected function _push($workflow, $response) {
-		$pusher = $this->get('gos_web_socket.wamp.pusher');
-		$pusher->push($response, 'workflow_show_topic', array( 'id' => $workflow->getId() ));
+		$this->pusher->push($response, 'workflow_show_topic', array( 'id' => $workflow->getId() ));
 	}
 
 }

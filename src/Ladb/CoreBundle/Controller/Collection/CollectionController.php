@@ -27,6 +27,8 @@ use Ladb\CoreBundle\Manager\Core\WitnessManager;
 use Ladb\CoreBundle\Manager\Collection\CollectionManager;
 use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Form\Type\Collection\CollectionType;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @Route("/collections")
@@ -39,12 +41,10 @@ class CollectionController extends AbstractCollectionBasedController {
 	 * @Route("/new", name="core_collection_new")
 	 * @Template("LadbCoreBundle:Collection:Collection/new.html.twig")
 	 */
-	public function newAction(Request $request) {
+	public function newAction(Request $request, TagUtils $tagUtils) {
 
 		$collection = new Collection();
 		$form = $this->createForm(CollectionType::class, $collection);
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'form'         => $form->createView(),
@@ -58,7 +58,7 @@ class CollectionController extends AbstractCollectionBasedController {
 	 * @Route("/create", methods={"POST"}, name="core_collection_create")
 	 * @Template("LadbCoreBundle:Collection:Collection/new.html.twig")
 	 */
-	public function createAction(Request $request) {
+	public function createAction(Request $request, CollectionnableUtils $collectionnableUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator, TypableUtils $typableUtils) {
 
 		$this->createLock('core_collection_create', false, self::LOCK_TTL_CREATE_ACTION, false);
 
@@ -70,7 +70,6 @@ class CollectionController extends AbstractCollectionBasedController {
 
 		if ($form->isValid()) {
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($collection);
 
 			$collection->setUser($this->getUser());
@@ -80,7 +79,6 @@ class CollectionController extends AbstractCollectionBasedController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($collection));
 
 			// Check auto add
@@ -92,7 +90,6 @@ class CollectionController extends AbstractCollectionBasedController {
 				$entity = $this->_retrieveRelatedEntity($entityType, $entityId);
 
 				// Create entry
-				$collectionnableUtils = $this->get(CollectionnableUtils::NAME);
 				try {
 					$collectionnableUtils->createEntry($entity, $collection);
 				} catch (\Exception $e) {
@@ -100,9 +97,8 @@ class CollectionController extends AbstractCollectionBasedController {
 				}
 
 				// Flashbag
-				$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('collection.collection.form.alert.auto_add_success', array( '%title%' => $entity->getTitle(), '%collection%' => $collection->getTitle() )));
+				$this->addFlash('success', $translator->trans('collection.collection.form.alert.auto_add_success', array( '%title%' => $entity->getTitle(), '%collection%' => $collection->getTitle() )));
 
-				$typableUtils = $this->get(TypableUtils::NAME);
 				return $this->redirect($typableUtils->getUrlAction($entity));
 			}
 
@@ -110,9 +106,7 @@ class CollectionController extends AbstractCollectionBasedController {
 		}
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
-
-		$tagUtils = $this->get(TagUtils::NAME);
+		$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 		return array(
 			'collection'   => $collection,
@@ -127,7 +121,7 @@ class CollectionController extends AbstractCollectionBasedController {
 	 * @Route("/{id}/lock", requirements={"id" = "\d+"}, defaults={"lock" = true}, name="core_collection_lock")
 	 * @Route("/{id}/unlock", requirements={"id" = "\d+"}, defaults={"lock" = false}, name="core_collection_unlock")
 	 */
-	public function lockUnlockAction($id, $lock) {
+	public function lockUnlockAction($id, $lock, CollectionManager $collectionManager, TranslatorInterface $translator) {
 
 		$collection = $this->retrievePublication($id, Collection::CLASS_NAME);
 		$this->assertLockUnlockable($collection, $lock);
@@ -137,7 +131,6 @@ class CollectionController extends AbstractCollectionBasedController {
 		}
 
 		// Lock or Unlock
-		$collectionManager = $this->get(CollectionManager::NAME);
 		if ($lock) {
 			$collectionManager->lock($collection);
 		} else {
@@ -145,7 +138,7 @@ class CollectionController extends AbstractCollectionBasedController {
 		}
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('collection.collection.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $collection->getTitle() )));
+		$this->addFlash('success', $translator->trans('collection.collection.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $collection->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_collection_show', array( 'id' => $collection->getSluggedId() )));
 	}
@@ -153,17 +146,16 @@ class CollectionController extends AbstractCollectionBasedController {
 	/**
 	 * @Route("/{id}/publish", requirements={"id" = "\d+"}, name="core_collection_publish")
 	 */
-	public function publishAction($id) {
+	public function publishAction($id, CollectionManager $collectionManager, TranslatorInterface $translator) {
 
 		$collection = $this->retrievePublication($id, Collection::CLASS_NAME);
 		$this->assertPublishable($collection);
 
 		// Publish
-		$collectionManager = $this->get(CollectionManager::NAME);
 		$collectionManager->publish($collection);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('collection.collection.form.alert.publish_success', array( '%title%' => $collection->getTitle() )));
+		$this->addFlash('success', $translator->trans('collection.collection.form.alert.publish_success', array( '%title%' => $collection->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_collection_show', array( 'id' => $collection->getSluggedId() )));
 	}
@@ -171,17 +163,16 @@ class CollectionController extends AbstractCollectionBasedController {
 	/**
 	 * @Route("/{id}/unpublish", requirements={"id" = "\d+"}, name="core_collection_unpublish")
 	 */
-	public function unpublishAction(Request $request, $id) {
+	public function unpublishAction(Request $request, $id, CollectionManager $collectionManager, TranslatorInterface $translator) {
 
 		$collection = $this->retrievePublication($id, Collection::CLASS_NAME);
 		$this->assertUnpublishable($collection);
 
 		// Unpublish
-		$collectionManager = $this->get(CollectionManager::NAME);
 		$collectionManager->unpublish($collection);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('collection.collection.form.alert.unpublish_success', array( '%title%' => $collection->getTitle() )));
+		$this->addFlash('success', $translator->trans('collection.collection.form.alert.unpublish_success', array( '%title%' => $collection->getTitle() )));
 
 		// Return to
 		$returnToUrl = $request->get('rtu');
@@ -196,14 +187,12 @@ class CollectionController extends AbstractCollectionBasedController {
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_collection_edit")
 	 * @Template("LadbCoreBundle:Collection:Collection/edit.html.twig")
 	 */
-	public function editAction($id) {
+	public function editAction($id, TagUtils $tagUtils) {
 
 		$collection = $this->retrievePublication($id, Collection::CLASS_NAME);
 		$this->assertEditabable($collection);
 
 		$form = $this->createForm(CollectionType::class, $collection);
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'collection'   => $collection,
@@ -216,7 +205,7 @@ class CollectionController extends AbstractCollectionBasedController {
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_collection_update")
 	 * @Template("LadbCoreBundle:Collection:Collection/edit.html.twig")
 	 */
-	public function updateAction(Request $request, $id) {
+	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 		$om = $this->getDoctrine()->getManager();
 
 		$collection = $this->retrievePublication($id, Collection::CLASS_NAME);
@@ -229,7 +218,6 @@ class CollectionController extends AbstractCollectionBasedController {
 
 		if ($form->isValid()) {
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($collection);
 
 			if ($collection->getUser()->getId() == $this->getUser()->getId()) {
@@ -239,11 +227,10 @@ class CollectionController extends AbstractCollectionBasedController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_UPDATED, new PublicationEvent($collection, array( 'previouslyUsedTags' => $previouslyUsedTags )));
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('collection.collection.form.alert.update_success', array( '%title%' => $collection->getTitle() )));
+			$this->addFlash('success', $translator->trans('collection.collection.form.alert.update_success', array( '%title%' => $collection->getTitle() )));
 
 			// Regenerate the form
 			$form = $this->createForm(CollectionType::class, $collection);
@@ -251,11 +238,9 @@ class CollectionController extends AbstractCollectionBasedController {
 		} else {
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
+			$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 		}
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'collection'   => $collection,
@@ -267,17 +252,16 @@ class CollectionController extends AbstractCollectionBasedController {
 	/**
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_collection_delete")
 	 */
-	public function deleteAction($id) {
+	public function deleteAction($id, CollectionManager $collectionManager, TranslatorInterface $translator) {
 
 		$collection = $this->retrievePublication($id, Collection::CLASS_NAME);
 		$this->assertDeletable($collection);
 
 		// Delete
-		$collectionManager = $this->get(CollectionManager::NAME);
 		$collectionManager->delete($collection);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('collection.collection.form.alert.delete_success', array( '%title%' => $collection->getTitle() )));
+		$this->addFlash('success', $translator->trans('collection.collection.form.alert.delete_success', array( '%title%' => $collection->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_collection_list'));
 	}
@@ -301,8 +285,7 @@ class CollectionController extends AbstractCollectionBasedController {
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_collection_list_page")
 	 * @Template("LadbCoreBundle:Collection:Collection/list.html.twig")
 	 */
-	public function listAction(Request $request, $page = 0) {
-		$searchUtils = $this->get(SearchUtils::NAME);
+	public function listAction(Request $request, EventDispatcherInterface $dispatcher, SearchUtils $searchUtils, $page = 0) {
 
 		// Elasticsearch paginiation limit
 		if ($page > 624) {
@@ -318,7 +301,7 @@ class CollectionController extends AbstractCollectionBasedController {
 					// Filters /////
 
 					case 'admin-all':
-						if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+						if ($this->isGranted('ROLE_ADMIN')) {
 
 							$filters[] = new \Elastica\Query\MatchAll();
 
@@ -330,7 +313,7 @@ class CollectionController extends AbstractCollectionBasedController {
 
 					case 'mine':
 
-						if ($this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
+						if ($this->isGranted('ROLE_USER')) {
 
 							$filter = new \Elastica\Query\MatchPhrase('user.username', $this->getUser()->getUsernameCanonical());
 							$filters[] = $filter;
@@ -439,7 +422,6 @@ class CollectionController extends AbstractCollectionBasedController {
 		);
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATIONS_LISTED, new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()));
 
 		$parameters = array_merge($searchParameters, array(
@@ -458,10 +440,9 @@ class CollectionController extends AbstractCollectionBasedController {
 	 * @Route("/available/{entityType}/{entityId}/{page}", requirements={"entityType" = "\d+", "entityId" = "\d+", "page" = "\d+"}, name="core_collection_list_available_page")
 	 * @Template("LadbCoreBundle:Collection/Collection:list-available-xhr.html.twig")
 	 */
-	public function listAvailableAction($entityType, $entityId, $page = 0) {
+	public function listAvailableAction($entityType, $entityId, CollectionnableUtils $collectionnableUtils, PaginatorUtils $paginatorUtils, $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 		$collectionRepository = $om->getRepository(Collection::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		// Retrieve related entity
 		$entity = $this->_retrieveRelatedEntity($entityType, $entityId);
@@ -470,8 +451,6 @@ class CollectionController extends AbstractCollectionBasedController {
 		$limit = $paginatorUtils->computePaginatorLimit($page);
 		$paginator = $collectionRepository->findPaginedByUser($this->getUser(), $offset, $limit);
 		$pageUrls = $paginatorUtils->generatePrevAndNextPageUrl('core_collection_list_available_page', array( 'entityType' => $entityType, 'entityId' => $entityId ), $page, $paginator->count());
-
-		$collectionnableUtils = $this->get(CollectionnableUtils::NAME);
 
 		// Compute entryContexts
 		$entryContexts = array();
@@ -499,10 +478,9 @@ class CollectionController extends AbstractCollectionBasedController {
 	 * @Route("/{entityType}/{entityId}/{page}", requirements={"entityType" = "\d+", "entityId" = "\d+", "page" = "\d+"}, name="core_collection_list_byentity_page")
 	 * @Template("LadbCoreBundle:Collection/Collection:list-byentity.html.twig")
 	 */
-	public function listByEntityAction(Request $request, $entityType, $entityId, $page = 0) {
+	public function listByEntityAction(Request $request, $entityType, $entityId, PaginatorUtils $paginatorUtils, $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 		$collectionRepository = $om->getRepository(Collection::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		// Retrieve related entity
 		$entity = $this->_retrieveRelatedEntity($entityType, $entityId);
@@ -532,14 +510,13 @@ class CollectionController extends AbstractCollectionBasedController {
 	 * @Route("/{id}/tab/{entityType}/{page}", requirements={"id" = "\d+", "entityType" = "\d+", "page" = "\d+"}, name="core_collection_show_type_page")
 	 * @Template("LadbCoreBundle:Collection:Collection/showAbout.html.twig")
 	 */
-	public function showAction(Request $request, $id, $entityType = 0, $page = 0) {
-		$witnessManager = $this->get(WitnessManager::NAME);
+	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, FollowerUtils $followerUtils, LikableUtils $likableUtils, PaginatorUtils $paginatorUtils, TypableUtils $typableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager, $entityType = 0, $page = 0) {
 
 		// Retrieve collection
 		$collection = $this->_retrieveCollection($id);
 
 		if (!$collection->getIsPublic()) {
-			if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && (is_null($this->getUser()) || $collection->getUser() != $this->getUser())) {
+			if (!$this->isGranted('ROLE_ADMIN') && (is_null($this->getUser()) || $collection->getUser() != $this->getUser())) {
 				if ($response = $witnessManager->checkResponse(Collection::TYPE, $id)) {
 					return $response;
 				}
@@ -548,14 +525,7 @@ class CollectionController extends AbstractCollectionBasedController {
 		}
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($collection));
-
-		$likableUtils = $this->get(LikableUtils::NAME);
-		$watchableUtils = $this->get(WatchableUtils::NAME);
-		$commentableUtils = $this->get(CommentableUtils::NAME);
-		$collectionnableUtils = $this->get(CollectionnableUtils::NAME);
-		$followerUtils = $this->get(FollowerUtils::NAME);
 
 		$parameters = array(
 			'entityType'        => $entityType,
@@ -572,8 +542,6 @@ class CollectionController extends AbstractCollectionBasedController {
 
 			$om = $this->getDoctrine()->getManager();
 			$entryRepository = $om->getRepository(Entry::CLASS_NAME);
-			$paginatorUtils = $this->get(PaginatorUtils::NAME);
-			$typableUtils = $this->get(TypableUtils::NAME);
 
 			$offset = $paginatorUtils->computePaginatorOffset($page);
 			$limit = $paginatorUtils->computePaginatorLimit($page);

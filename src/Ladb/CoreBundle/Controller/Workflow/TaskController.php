@@ -564,7 +564,7 @@ class TaskController extends AbstractWorkflowBasedController {
 		$readOnly = $request->get('readOnly', false);
 
 		// Compute durationHidden parameter
-		$durationsHidden = !$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && $this->getUser() != $workflow->getUser();
+		$durationsHidden = !$this->isGranted('ROLE_ADMIN') && $this->getUser() != $workflow->getUser();
 
 		$connections = array();
 		foreach ($workflow->getTasks() as $sourceTask) {
