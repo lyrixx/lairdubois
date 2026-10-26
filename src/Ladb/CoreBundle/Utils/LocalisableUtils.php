@@ -7,12 +7,24 @@ use CommerceGuys\Addressing\AddressFormat\AddressFormatRepository;
 use CommerceGuys\Addressing\Country\CountryRepository;
 use CommerceGuys\Addressing\Formatter\DefaultFormatter;
 use CommerceGuys\Addressing\Subdivision\SubdivisionRepository;
+use Geocoder\Provider\GoogleMaps\GoogleMaps;
+use Geocoder\Query\GeocodeQuery;
+use GuzzleHttp\Psr7\Request;
 use Ladb\CoreBundle\Model\LocalisableExtendedInterface;
 use Ladb\CoreBundle\Model\LocalisableInterface;
+use Psr\Http\Client\ClientInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class LocalisableUtils extends AbstractContainerAwareUtils {
 
 	const NAME = 'ladb_core.localisable_utils';
+
+	private $httpClient;
+
+	public function __construct(ContainerInterface $container, ClientInterface $httpClient) {
+		parent::__construct($container);
+		$this->httpClient = $httpClient;
+	}
 
 	/////
 
@@ -20,12 +32,11 @@ class LocalisableUtils extends AbstractContainerAwareUtils {
 		if (!is_null($localisable->getLocation())) {
 
 			$googleApiKey = $this->getParameter('google_api_key');
-			$adapter  = new \Ivory\HttpAdapter\CurlHttpAdapter();
-			$geocoder = new \Geocoder\Provider\GoogleMaps($adapter, null, null, true, $googleApiKey);
-			$geocoder->setLocale('fr_FR');
+			$geocoder = new GoogleMaps($this->httpClient, null, $googleApiKey);
 
 			try {
-				$response = $geocoder->geocode($localisable->getLocation());
+				// GeocodeQuery refuses an empty location: logged like an error of the API
+				$response = $geocoder->geocodeQuery(GeocodeQuery::create($localisable->getLocation())->withLocale('fr_FR'));
 			} catch (\Exception $e) {
 				$this->get('logger')->error($e);
 				return false;
@@ -36,8 +47,8 @@ class LocalisableUtils extends AbstractContainerAwareUtils {
 				$address = $response->first();
 
 				// Location
-				$localisable->setLatitude($address->getLatitude());
-				$localisable->setLongitude($address->getLongitude());
+				$localisable->setLatitude($address->getCoordinates()->getLatitude());
+				$localisable->setLongitude($address->getCoordinates()->getLongitude());
 
 				if ($localisable instanceof LocalisableExtendedInterface) {
 
@@ -98,7 +109,7 @@ class LocalisableUtils extends AbstractContainerAwareUtils {
 
 					$a = new Address();
 
-					$a = $a->withCountryCode($address->getCountryCode());
+					$a = $a->withCountryCode($country ? $country->getCode() : null);
 					if ($address->getStreetNumber() && $address->getStreetName()) {
 						$a = $a->withAddressLine1($address->getStreetNumber().' '.$address->getStreetName());
 					} else if ($address->getStreetName()) {
@@ -113,8 +124,8 @@ class LocalisableUtils extends AbstractContainerAwareUtils {
 					if ($address->getSubLocality()) {
 						$a = $a->withDependentLocality($address->getSubLocality());
 					}
-					if ($address->getAdminLevels()->first()) {
-						$a = $a->withAdministrativeArea($address->getAdminLevels()->first()->getName());
+					if ($adminLevels->count() > 0) {
+						$a = $a->withAdministrativeArea($adminLevels->first()->getName());
 					}
 
 					try {
@@ -125,6 +136,8 @@ class LocalisableUtils extends AbstractContainerAwareUtils {
 
 				return true;
 			}
+
+			$this->get('logger')->warning('No geocoding result for the location.', array( 'location' => $localisable->getLocation() ));
 
 		} else {
 			$localisable->setLatitude(null);
@@ -148,8 +161,12 @@ class LocalisableUtils extends AbstractContainerAwareUtils {
 		try {
 
 			$url = 'https://maps.googleapis.com/maps/api/geocode/json?address='.urlencode($address).'&key='.$googleApiKey.'&language=fr&region=FR';
-			$contents = file_get_contents($url);
-			$hash = json_decode($contents, true);
+			$response = $this->httpClient->sendRequest(new Request('GET', $url));
+			if (200 !== $response->getStatusCode()) {
+				$this->get('logger')->warning('The geocoding API answered an HTTP error.', array( 'status' => $response->getStatusCode() ));
+				return null;
+			}
+			$hash = json_decode((string) $response->getBody(), true);
 
 			if ($hash && isset($hash['results']) && is_array($hash['results'])) {
 

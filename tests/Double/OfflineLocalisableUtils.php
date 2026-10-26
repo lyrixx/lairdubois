@@ -19,7 +19,7 @@ final class OfflineLocalisableUtils extends LocalisableUtils
             'postalCode' => '33000',
             'locality' => 'Bordeaux',
             'country' => 'France',
-            'geographicalAreas' => 'Bordeaux,Gironde,Nouvelle-Aquitaine,France',
+            'geographicalAreas' => 'Bordeaux,Nouvelle-Aquitaine,Gironde,France',
             'formattedAddress' => "33000 Bordeaux\nFrance",
             // Elasticsearch ready bounds [top_left, bottom_right]
             'bounds' => ['44.9161806,-0.6386987', '44.8107826,-0.5328729'],

@@ -377,7 +377,9 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
 - Géocodage (`LocalisableUtils`, profils, collectifs et tous les formulaires avec une
   localisation) : remplacé en test par `Tests\Double\OfflineLocalisableUtils`, qui connaît les
   adresses de sa constante `ADDRESSES` (`Bordeaux, France`) ; toute autre adresse n'a pas de
-  résultat.
+  résultat. Le vrai `LocalisableUtils` est testé dans `tests/Geocoding/`, sur des réponses de
+  l'API de Google (`responses/`) servies par un handler Guzzle, et `ADDRESSES` y est comparé à ce
+  qu'il donne.
 - `AbstractController::createLock()` pose un verrou Memcached de 3 secondes par action et par
   compte, contre le double envoi : la deuxième création d'un même compte dans un test répond 404.
   `Tests\WebTestCase` vide Memcached après chaque test (il ne sert qu'à ces verrous et aux dates de
@@ -486,6 +488,10 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `parameters.yml`) : avec celles de `parameters.yml.dist`, le consumer `webpush_notification`
   s'arrête au premier message. `castor app:install` y écrit une paire jetable, que les `composer
   install` suivants gardent.
+- `guzzlehttp/psr7` reste en 1.x tant que Gos WebSocket est là (`cboden/ratchet` et
+  `ratchet/rfc6455` exigent `^1.0`), sans fabrique PSR-17 : `http-interop/http-factory-guzzle` la
+  fournit au géocodage (`geocoder-php/common-http`, par `php-http/discovery`, dont le plugin
+  Composer est coupé dans `allow-plugins`). À retirer avec Gos (#21), en passant en 2.x.
 - `bentools/webpush-bundle` (0.7 à 0.9) appelle `GuzzleHttp\Promise\settle()`, supprimée de
   `guzzlehttp/promises` 2 : `composer.json` le garde en `^1.5`. Son `PushMessageSender` envoie
   avec un TTL de 0 et sans timeout : `services.yml` le redéfinit avec ceux de web-push 2.0 (4

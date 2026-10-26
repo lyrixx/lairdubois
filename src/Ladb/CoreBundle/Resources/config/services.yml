@@ -112,8 +112,12 @@ services:
   ladb_core.localisable_utils:
     class: Ladb\CoreBundle\Utils\LocalisableUtils
     public: true
-    arguments: ['@service_container']
+    arguments: ['@service_container', '@ladb_core.geocoding_http_client']
   Ladb\CoreBundle\Utils\LocalisableUtils: '@ladb_core.localisable_utils'
+  # Geocoding API of Google
+  ladb_core.geocoding_http_client:
+    class: GuzzleHttp\Client
+    arguments: [{ timeout: 10 }]
   ladb_core.typable_utils:
     class: Ladb\CoreBundle\Utils\TypableUtils
     public: true

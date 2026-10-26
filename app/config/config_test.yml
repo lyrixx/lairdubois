@@ -86,7 +86,7 @@ services:
     tests.localisable_utils:
         class: Tests\Double\OfflineLocalisableUtils
         decorates: ladb_core.localisable_utils
-        arguments: ['@service_container']
+        arguments: ['@service_container', '@ladb_core.geocoding_http_client']
 
     # No outgoing request from the tests (issue #6): the pictures "downloaded" from a URL, the
     # Open Graph metas, the thumbnails and the sitemap data of the video APIs and the Chromium

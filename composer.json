@@ -57,7 +57,9 @@
         "php-amqplib/rabbitmq-bundle": "^1.14",
 
         "facebook/graph-sdk": "~5.0",
-        "willdurand/geocoder": "~3.0",
+        "willdurand/geocoder": "^4.6",
+        "geocoder-php/google-maps-provider": "^4.8",
+        "http-interop/http-factory-guzzle": "^1.2",
         "commerceguys/addressing": "^1.0",
         "twitter/bootstrap": "3.3.7",
         "uikit/uikit": "2.27.2",
@@ -107,6 +109,7 @@
             "composer/installers": true,
             "composer/package-versions-deprecated": true,
             "oomphinc/composer-installers-extender": true,
+            "php-http/discovery": false,
             "robloach/component-installer": true
         },
         "bin-dir": "bin"
