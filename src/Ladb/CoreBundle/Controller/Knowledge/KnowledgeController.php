@@ -27,15 +27,16 @@ use Ladb\CoreBundle\Utils\SearchUtils;
 use Ladb\CoreBundle\Utils\TypableUtils;
 use Ladb\CoreBundle\Utils\ActivityUtils;
 use Ladb\CoreBundle\Utils\PropertyUtils;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Form\FormFactoryInterface;
 
 /**
  * @Route("/knowledge")
  */
 class KnowledgeController extends AbstractController {
 
-	private function _retrieveRelatedEntityRepository($entityType) {
+	private function _retrieveRelatedEntityRepository($entityType, TypableUtils $typableUtils) {
 
-		$typableUtils = $this->get(TypableUtils::NAME);
 		try {
 			$entityRepository = $typableUtils->getRepositoryByType($entityType);
 		} catch (\Exception $e) {
@@ -128,14 +129,13 @@ class KnowledgeController extends AbstractController {
 	 * @Route("/{entityType}/{entityId}/contributors/{page}", requirements={"entityType" = "\d+", "entityId" = "\d+", "page" = "\d+"}, name="core_knowledge_contributors_page")
 	 * @Template("LadbCoreBundle:Knowledge:contributors.html.twig")
 	 */
-	public function contributorsAction(Request $request, $entityType, $entityId, $page = 0) {
+	public function contributorsAction(Request $request, $entityType, $entityId, PaginatorUtils $paginatorUtils, TypableUtils $typableUtils, $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 		$userRepository = $om->getRepository(User::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		// Retrieve related entity
 
-		$entityRepository = $this->_retrieveRelatedEntityRepository($entityType);
+		$entityRepository = $this->_retrieveRelatedEntityRepository($entityType, $typableUtils);
 		$entity = $this->_retrieveRelatedEntity($entityRepository, $entityId);
 
 		// Retrive contributors
@@ -163,7 +163,7 @@ class KnowledgeController extends AbstractController {
 	 * @Route("/{entityType}/{entityId}/{field}/create", requirements={"entityType" = "\d+","entityId" = "\d+", "field" = "\w+"}, methods={"POST"}, name="core_knowledge_value_create")
 	 * @Template("LadbCoreBundle:Knowledge:value-new-xhr.html.twig")
 	 */
-	public function createFieldValueAction(Request $request, $entityType, $entityId, $field) {
+	public function createFieldValueAction(Request $request, $entityType, $entityId, $field, ActivityUtils $activityUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, KnowledgeUtils $knowledgeUtils, PropertyUtils $propertyUtils, TypableUtils $typableUtils, VotableUtils $votableUtils, WatchableUtils $watchableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_knowledge_value_create)');
 		}
@@ -173,13 +173,11 @@ class KnowledgeController extends AbstractController {
 			throw $this->createNotFoundException('Not allowed - User email not confirmed (core_knowledge_value_create)');
 		}
 
-		$knowledgeUtils = $this->get(KnowledgeUtils::NAME);
-		$propertyUtils = $this->get(PropertyUtils::NAME);
 		$om = $this->getDoctrine()->getManager();
 
 		// Retrieve related entity
 
-		$entityRepository = $this->_retrieveRelatedEntityRepository($entityType);
+		$entityRepository = $this->_retrieveRelatedEntityRepository($entityType, $typableUtils);
 		$entity = $this->_retrieveRelatedEntity($entityRepository, $entityId);
 
 		// Process field
@@ -201,7 +199,7 @@ class KnowledgeController extends AbstractController {
 		$form->handleRequest($request);
 		if ($form->isValid()) {
 
-			if ($value->getModerationScore() != 0 && !$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+			if ($value->getModerationScore() != 0 && !$this->isGranted('ROLE_ADMIN')) {
 				throw $this->createNotFoundException('Not allowed - moderationScore (core_knowledge_value_create)');
 			}
 
@@ -214,7 +212,6 @@ class KnowledgeController extends AbstractController {
 			$propertyUtils->addValue($entity, $field.'_value', $value);
 
 			// Dispatch knowledge event
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(KnowledgeListener::FIELD_VALUE_ADDED, new KnowledgeEvent($entity, array('field' => $field, 'value' => $value)));
 
 			// Update contributors
@@ -227,17 +224,14 @@ class KnowledgeController extends AbstractController {
 			$om->persist($value);
 
 			// Create activity
-			$activityUtils = $this->get(ActivityUtils::NAME);
 			$activityUtils->createContributeActivity($value, false);
 
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_CHANGED, new PublicationEvent($entity));
 
 			if ($entity instanceof WatchableInterface) {
-				$watchableUtils = $this->get(WatchableUtils::NAME);
 
 				// Auto watch
 				$watchableUtils->autoCreateWatch($entity, $user);
@@ -248,9 +242,6 @@ class KnowledgeController extends AbstractController {
 			$value = new $entityClass();
 			$form = $this->createForm($formTypeFqcn, $value, array('choices' => $fieldChoices, 'dataConstraints' => $fieldDataConstraints, 'constraints' => $fieldConstraints, 'validation_groups' => array( 'Default', 'mandatory' )));
 			$values = $propertyUtils->getValue($entity, $field.'_values');
-
-			$commentableUtils = $this->get(CommentableUtils::NAME);
-			$votableUtils = $this->get(VotableUtils::NAME);
 
 			return $this->render('LadbCoreBundle:Knowledge:value-create-xhr.html.twig', array(
 				'knowledge'       => $entity,
@@ -276,17 +267,16 @@ class KnowledgeController extends AbstractController {
 	 * @Route("/{entityType}/{entityId}/{field}/{id}/edit", requirements={"entityType" = "\d+","entityId" = "\d+", "field" = "\w+","id" = "\d+"}, name="core_knowledge_value_edit")
 	 * @Template("LadbCoreBundle:Knowledge:value-edit-xhr.html.twig")
 	 */
-	public function editFieldValueAction(Request $request, $entityType, $entityId, $field, $id) {
+	public function editFieldValueAction(Request $request, $entityType, $entityId, $field, $id, FormFactoryInterface $formFactory, KnowledgeUtils $knowledgeUtils, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_knowledge_value_edit)');
 		}
 
-		$knowledgeUtils = $this->get(KnowledgeUtils::NAME);
 		$om = $this->getDoctrine()->getManager();
 
 		// Retrieve related entity
 
-		$entityRepository = $this->_retrieveRelatedEntityRepository($entityType);
+		$entityRepository = $this->_retrieveRelatedEntityRepository($entityType, $typableUtils);
 		$entity = $this->_retrieveRelatedEntity($entityRepository, $entityId);
 
 		// Process field
@@ -303,13 +293,13 @@ class KnowledgeController extends AbstractController {
 
 		$valueRepository = $om->getRepository($entityClass::CLASS_NAME);
 		$value = $this->_retrieveValue($valueRepository, $id);
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && ($value->getUser()->getId() != $this->getUser()->getId() || $value->getVoteCount() > 0)) {
+		if (!$this->isGranted('ROLE_ADMIN') && ($value->getUser()->getId() != $this->getUser()->getId() || $value->getVoteCount() > 0)) {
 			throw $this->createNotFoundException('Not allowed (core_knowledge_value_edit)');
 		}
 
 		$formTypeName = $this->_computeFormTypeName($fieldType, $value);
 
-		$form = $this->get('form.factory')->createNamed($formTypeName, $formTypeFqcn, $value, array('choices' => $fieldChoices, 'dataConstraints' => $fieldDataConstraints, 'constraints' => $fieldConstraints));
+		$form = $formFactory->createNamed($formTypeName, $formTypeFqcn, $value, array('choices' => $fieldChoices, 'dataConstraints' => $fieldDataConstraints, 'constraints' => $fieldConstraints));
 
 		return array(
 			'knowledge'      => $entity,
@@ -323,17 +313,16 @@ class KnowledgeController extends AbstractController {
 	 * @Route("/{entityType}/{entityId}/{field}/{id}/update", requirements={"entityType" = "\d+","entityId" = "\d+", "field" = "\w+","id" = "\d+"}, name="core_knowledge_value_update")
 	 * @Template("LadbCoreBundle:Knowledge:value-edit-xhr.html.twig")
 	 */
-	public function updateFieldValueAction(Request $request, $entityType, $entityId, $field, $id) {
+	public function updateFieldValueAction(Request $request, $entityType, $entityId, $field, $id, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, FormFactoryInterface $formFactory, KnowledgeUtils $knowledgeUtils, TypableUtils $typableUtils, VotableUtils $votableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_knowledge_value_update)');
 		}
 
-		$knowledgeUtils = $this->get(KnowledgeUtils::NAME);
 		$om = $this->getDoctrine()->getManager();
 
 		// Retrieve related entity
 
-		$entityRepository = $this->_retrieveRelatedEntityRepository($entityType);
+		$entityRepository = $this->_retrieveRelatedEntityRepository($entityType, $typableUtils);
 		$entity = $this->_retrieveRelatedEntity($entityRepository, $entityId);
 
 		// Process field
@@ -350,7 +339,7 @@ class KnowledgeController extends AbstractController {
 
 		$valueRepository = $om->getRepository($entityClass::CLASS_NAME);
 		$value = $this->_retrieveValue($valueRepository, $id);
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && ($value->getUser()->getId() != $this->getUser()->getId() || $value->getVoteCount() > 0)) {
+		if (!$this->isGranted('ROLE_ADMIN') && ($value->getUser()->getId() != $this->getUser()->getId() || $value->getVoteCount() > 0)) {
 			throw $this->createNotFoundException('Not allowed (core_knowledge_value_update)');
 		}
 
@@ -358,26 +347,21 @@ class KnowledgeController extends AbstractController {
 
 		$formTypeName = $this->_computeFormTypeName($fieldType, $value);
 
-		$form = $this->get('form.factory')->createNamed($formTypeName, $formTypeFqcn, $value, array('choices' => $fieldChoices, 'dataConstraints' => $fieldDataConstraints, 'constraints' => $fieldConstraints));
+		$form = $formFactory->createNamed($formTypeName, $formTypeFqcn, $value, array('choices' => $fieldChoices, 'dataConstraints' => $fieldDataConstraints, 'constraints' => $fieldConstraints));
 		$form->handleRequest($request);
 		if ($form->isValid()) {
 
-			if ($value->getModerationScore() != $previousMederationScore && !$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+			if ($value->getModerationScore() != $previousMederationScore && !$this->isGranted('ROLE_ADMIN')) {
 				throw $this->createNotFoundException('Not allowed - moderationScore (core_knowledge_value_update)');
 			}
 
 			// Dispatch knowledge event
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(KnowledgeListener::FIELD_VALUE_UPDATED, new KnowledgeEvent($entity, array('field' => $field, 'value' => $value)));
 
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_UPDATED, new PublicationEvent($entity));
-
-			$commentableUtils = $this->get(CommentableUtils::NAME);
-			$votableUtils = $this->get(VotableUtils::NAME);
 
 			return $this->render('LadbCoreBundle:Knowledge:value-update-xhr.html.twig', array(
 				'knowledge'      => $entity,
@@ -401,17 +385,16 @@ class KnowledgeController extends AbstractController {
 	 * @Route("/{entityType}/{entityId}/{field}/{id}/delete", requirements={"entityType" = "\d+","entityId" = "\d+", "field" = "\w+", "id" = "\d+"}, name="core_knowledge_value_delete")
 	 * @Template("LadbCoreBundle:Knowledge:value-delete-xhr.html.twig")
 	 */
-	public function deleteFieldValueAction(Request $request, $entityType, $entityId, $field, $id) {
+	public function deleteFieldValueAction(Request $request, $entityType, $entityId, $field, $id, ActivityUtils $activityUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, PropertyUtils $propertyUtils, TypableUtils $typableUtils, VotableUtils $votableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_knowledge_value_delete)');
 		}
 
-		$propertyUtils = $this->get(PropertyUtils::NAME);
 		$om = $this->getDoctrine()->getManager();
 
 		// Retrieve related entity
 
-		$entityRepository = $this->_retrieveRelatedEntityRepository($entityType);
+		$entityRepository = $this->_retrieveRelatedEntityRepository($entityType, $typableUtils);
 		$entity = $this->_retrieveRelatedEntity($entityRepository, $entityId);
 
 		// Process field
@@ -425,7 +408,7 @@ class KnowledgeController extends AbstractController {
 
 		$valueRepository = $om->getRepository($entityClass::CLASS_NAME);
 		$value = $this->_retrieveValue($valueRepository, $id);
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && ($value->getUser()->getId() != $this->getUser()->getId() || $value->getVoteCount() > 0 || $fieldMandatory)) {
+		if (!$this->isGranted('ROLE_ADMIN') && ($value->getUser()->getId() != $this->getUser()->getId() || $value->getVoteCount() > 0 || $fieldMandatory)) {
 			throw $this->createNotFoundException('Not allowed (core_knowledge_value_delete)');
 		}
 		if ($fieldMandatory && count($propertyUtils->getValue($entity, $field.'_values')) <= 1) {
@@ -435,22 +418,18 @@ class KnowledgeController extends AbstractController {
 		$propertyUtils->removeValue($entity, $field.'_value', $value);
 
 		// Dispatch knowledge event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(KnowledgeListener::FIELD_VALUE_REMOVED, new KnowledgeEvent($entity, array('field' => $field, 'value' => $value)));
 
 		// Decrement user proposal count
 		$value->getUser()->getMeta()->incrementProposalCount(-1);
 
 		// Delete comments
-		$commentableUtils = $this->get(CommentableUtils::NAME);
 		$commentableUtils->deleteComments($value, false);
 
 		// Delete votes
-		$votableUtils = $this->get(VotableUtils::NAME);
 		$votableUtils->deleteVotes($value, $entity, false);
 
 		// Delete activities
-		$activityUtils = $this->get(ActivityUtils::NAME);
 		$activityUtils->deleteActivitiesByValue($value, false);
 
 		$om->remove($value);
@@ -465,15 +444,11 @@ class KnowledgeController extends AbstractController {
 		}
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATION_CHANGED, new PublicationEvent($entity));
 
 		// Reload values
 
 		$values = $propertyUtils->getValue($entity, $field.'_values');
-
-		$commentableUtils = $this->get(CommentableUtils::NAME);
-		$votableUtils = $this->get(VotableUtils::NAME);
 
 		return array(
 			'knowledge'       => $entity,
@@ -487,12 +462,12 @@ class KnowledgeController extends AbstractController {
 	/**
 	 * @Route("/{entityType}/{entityId}/{field}/{id}/download", requirements={"entityType" = "\d+","entityId" = "\d+", "field" = "\w+","id" = "\d+"}, name="core_knowledge_value_download")
 	 */
-	public function downloadFieldValueAction(Request $request, $entityType, $entityId, $field, $id) {
+	public function downloadFieldValueAction(Request $request, $entityType, $entityId, $field, $id, TypableUtils $typableUtils) {
 		$om = $this->getDoctrine()->getManager();
 
 		// Retrieve related entity
 
-		$entityRepository = $this->_retrieveRelatedEntityRepository($entityType);
+		$entityRepository = $this->_retrieveRelatedEntityRepository($entityType, $typableUtils);
 		$entity = $this->_retrieveRelatedEntity($entityRepository, $entityId);
 
 		// Process field
@@ -528,12 +503,12 @@ class KnowledgeController extends AbstractController {
 	 * @Route("/{entityType}/{entityId}/{field}/{id}/view", requirements={"entityType" = "\d+","entityId" = "\d+", "field" = "\w+","id" = "\d+"}, name="core_knowledge_value_view")
 	 * @Template("LadbCoreBundle:Knowledge:value-view.html.twig")
 	 */
-	public function viewFieldValueAction(Request $request, $entityType, $entityId, $field, $id) {
+	public function viewFieldValueAction(Request $request, $entityType, $entityId, $field, $id, TypableUtils $typableUtils) {
 		$om = $this->getDoctrine()->getManager();
 
 		// Retrieve related entity
 
-		$entityRepository = $this->_retrieveRelatedEntityRepository($entityType);
+		$entityRepository = $this->_retrieveRelatedEntityRepository($entityType, $typableUtils);
 		$entity = $this->_retrieveRelatedEntity($entityRepository, $entityId);
 
 		// Process field
@@ -562,13 +537,11 @@ class KnowledgeController extends AbstractController {
 	 * @Route("/{entityType}/{entityId}/{field}.xhr", requirements={"entityType" = "\d+","entityId" = "\d+", "field" = "[a-z_]+"}, name="core_knowledge_field_show")
 	 * @Template("LadbCoreBundle:Knowledge:field-show.html.twig")
 	 */
-	public function showFieldAction(Request $request, $entityType, $entityId, $field, $highlightedValueId = null) {
-		$knowledgeUtils = $this->get(KnowledgeUtils::NAME);
-		$propertyUtils = $this->get(PropertyUtils::NAME);
+	public function showFieldAction(Request $request, $entityType, $entityId, $field, CommentableUtils $commentableUtils, KnowledgeUtils $knowledgeUtils, PropertyUtils $propertyUtils, TypableUtils $typableUtils, VotableUtils $votableUtils, $highlightedValueId = null) {
 
 		// Retrieve related entity
 
-		$entityRepository = $this->_retrieveRelatedEntityRepository($entityType);
+		$entityRepository = $this->_retrieveRelatedEntityRepository($entityType, $typableUtils);
 		$entity = $this->_retrieveRelatedEntity($entityRepository, $entityId);
 
 		// Process field
@@ -586,12 +559,9 @@ class KnowledgeController extends AbstractController {
 		$value = new $entityClass();
 
 		$form = null;
-		if ($this->get('security.authorization_checker')->isGranted('ROLE_USER') && $this->getUser()->getEmailConfirmed()) {
+		if ($this->isGranted('ROLE_USER') && $this->getUser()->getEmailConfirmed()) {
 			$form = $this->createForm($formTypeFqcn, $value, array('choices' => $fieldChoices, 'dataConstraints' => $fieldConstraints));
 		}
-
-		$commentableUtils = $this->get(CommentableUtils::NAME);
-		$votableUtils = $this->get(VotableUtils::NAME);
 
 		$parameters = array(
 			'knowledge'          => $entity,
@@ -636,7 +606,7 @@ class KnowledgeController extends AbstractController {
 	 * @Template("LadbCoreBundle:Knowledge:value-move-xhr.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_knowledge_value_admin_move)")
 	 */
-	public function adminMoveFieldValueAction(Request $request, $entityType, $entityId, $fieldSrc, $fieldDest, $id) {
+	public function adminMoveFieldValueAction(Request $request, $entityType, $entityId, $fieldSrc, $fieldDest, $id, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, PropertyUtils $propertyUtils, TypableUtils $typableUtils, VotableUtils $votableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_knowledge_value_admin_move)');
 		}
@@ -644,12 +614,11 @@ class KnowledgeController extends AbstractController {
 			throw $this->createNotFoundException('Can\'t move to the same field (core_knowledge_value_admin_move)');
 		}
 
-		$propertyUtils = $this->get(PropertyUtils::NAME);
 		$om = $this->getDoctrine()->getManager();
 
 		// Retrieve related entity
 
-		$entityRepository = $this->_retrieveRelatedEntityRepository($entityType);
+		$entityRepository = $this->_retrieveRelatedEntityRepository($entityType, $typableUtils);
 		$entity = $this->_retrieveRelatedEntity($entityRepository, $entityId);
 
 		// Process field
@@ -679,28 +648,22 @@ class KnowledgeController extends AbstractController {
 		$propertyUtils->removeValue($entity, $fieldSrc.'_value', $value);
 
 		// Dispatch knowledge event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(KnowledgeListener::FIELD_VALUE_REMOVED, new KnowledgeEvent($entity, array('field' => $fieldSrc, 'value' => $value)));
 
 		// Add to DEST
 		$propertyUtils->addValue($entity, $fieldDest.'_value', $value);
 
 		// Dispatch knowledge event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(KnowledgeListener::FIELD_VALUE_ADDED, new KnowledgeEvent($entity, array('field' => $fieldDest, 'value' => $value)));
 
 		$om->flush();
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATION_CHANGED, new PublicationEvent($entity));
 
 		// Reload values
 
 		$values = $propertyUtils->getValue($entity, $fieldSrc.'_values');
-
-		$commentableUtils = $this->get(CommentableUtils::NAME);
-		$votableUtils = $this->get(VotableUtils::NAME);
 
 		return array(
 			'knowledge'       => $entity,

@@ -16,6 +16,8 @@ use Ladb\CoreBundle\Form\Type\Knowledge\School\TestimonialType;
 use Ladb\CoreBundle\Manager\Knowledge\School\TestimonialManager;
 use Ladb\CoreBundle\Event\PublicationEvent;
 use Ladb\CoreBundle\Event\PublicationListener;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @Route("/ecoles")
@@ -52,7 +54,7 @@ class TestimonialController extends AbstractController {
 	 * @Route("/{id}/temoignages/create", requirements={"id" = "\d+"}, methods={"POST"}, name="core_knowledge_school_testimonial_create")
 	 * @Template("LadbCoreBundle:Knowledge/School/Testimonial:new-xhr.html.twig")
 	 */
-	public function createAction(Request $request, $id) {
+	public function createAction(Request $request, $id, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, WatchableUtils $watchableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_review_create)');
 		}
@@ -84,7 +86,6 @@ class TestimonialController extends AbstractController {
 
 		if ($form->isValid()) {
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($testimonial);
 
 			$testimonial->setUser($this->getUser());
@@ -97,15 +98,12 @@ class TestimonialController extends AbstractController {
 			$om->persist($testimonial);
 
 			// Create activity
-			$activityUtils = $this->get(ActivityUtils::NAME);
 			$activityUtils->createTestifyActivity($testimonial, false);
 
 			// Dispatch publication event (on School)
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_CHANGED, new PublicationEvent($school));
 
 			// Auto watch
-			$watchableUtils = $this->container->get(WatchableUtils::NAME);
 			$watchableUtils->autoCreateWatch($school, $this->getUser());
 
 			$om->flush();
@@ -134,7 +132,7 @@ class TestimonialController extends AbstractController {
 		if (is_null($testimonial)) {
 			throw $this->createNotFoundException('Unable to find Testimonial entity (id='.$id.').');
 		}
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && $testimonial->getUser()->getId() != $this->getUser()->getId()) {
+		if (!$this->isGranted('ROLE_ADMIN') && $testimonial->getUser()->getId() != $this->getUser()->getId()) {
 			throw $this->createNotFoundException('Not allowed (core_knowledge_school_testimonial_edit)');
 		}
 
@@ -150,7 +148,7 @@ class TestimonialController extends AbstractController {
 	 * @Route("/temoignages/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_knowledge_school_testimonial_update")
 	 * @Template("LadbCoreBundle:Knowledge/School/Testimonial:edit-xhr.html.twig")
 	 */
-	public function updateAction(Request $request, $id) {
+	public function updateAction(Request $request, $id, FieldPreprocessorUtils $fieldPreprocessorUtils) {
 		$om = $this->getDoctrine()->getManager();
 		$testimonialRepository = $om->getRepository(School\Testimonial::CLASS_NAME);
 
@@ -158,7 +156,7 @@ class TestimonialController extends AbstractController {
 		if (is_null($testimonial)) {
 			throw $this->createNotFoundException('Unable to find Testimonial entity (id='.$id.').');
 		}
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && $testimonial->getUser()->getId() != $this->getUser()->getId()) {
+		if (!$this->isGranted('ROLE_ADMIN') && $testimonial->getUser()->getId() != $this->getUser()->getId()) {
 			throw $this->createNotFoundException('Not allowed (core_knowledge_school_testimonial_update)');
 		}
 
@@ -167,7 +165,6 @@ class TestimonialController extends AbstractController {
 
 		if ($form->isValid()) {
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($testimonial);
 
 			if ($testimonial->getUser()->getId() == $this->getUser()->getId()) {
@@ -191,7 +188,7 @@ class TestimonialController extends AbstractController {
 	/**
 	 * @Route("/temoignages/{id}/delete", requirements={"id" = "\d+"}, name="core_knowledge_school_testimonial_delete")
 	 */
-	public function deleteAction(Request $request, $id) {
+	public function deleteAction(Request $request, $id, SearchUtils $searchUtils, TestimonialManager $testimonialManager, TranslatorInterface $translator) {
 		$om = $this->getDoctrine()->getManager();
 		$testimonialRepository = $om->getRepository(School\Testimonial::CLASS_NAME);
 
@@ -199,24 +196,22 @@ class TestimonialController extends AbstractController {
 		if (is_null($testimonial)) {
 			throw $this->createNotFoundException('Unable to find Testimonial entity (id='.$id.').');
 		}
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && $testimonial->getUser()->getId() != $this->getUser()->getId()) {
+		if (!$this->isGranted('ROLE_ADMIN') && $testimonial->getUser()->getId() != $this->getUser()->getId()) {
 			throw $this->createNotFoundException('Not allowed (core_knowledge_school_testimonial_delete)');
 		}
 
 		$school = $testimonial->getSchool();
 
 		// Delete
-		$testimonialManager = $this->get(TestimonialManager::NAME);
 		$testimonialManager->delete($testimonial);
 
 		// Search index update
-		$searchUtils = $this->get(SearchUtils::NAME);
 		$searchUtils->replaceEntityInIndex($school);
 
 		$om->flush();
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('knowledge.school.testimonial.form.alert.delete_success'));
+		$this->addFlash('success', $translator->trans('knowledge.school.testimonial.form.alert.delete_success'));
 
 		return $this->redirect($this->generateUrl('core_school_show', array( 'id' => $school->getSluggedId() )));
 	}

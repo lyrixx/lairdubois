@@ -30,6 +30,8 @@ use Ladb\CoreBundle\Event\PublicationEvent;
 use Ladb\CoreBundle\Event\PublicationListener;
 use Ladb\CoreBundle\Event\KnowledgeEvent;
 use Ladb\CoreBundle\Event\KnowledgeListener;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @Route("/outils")
@@ -42,14 +44,12 @@ class ToolController extends AbstractController {
 	 * @Route("/new", name="core_tool_new")
 	 * @Template("LadbCoreBundle:Knowledge/Tool:new.html.twig")
 	 */
-	public function newAction() {
+	public function newAction(KnowledgeUtils $knowledgeUtils) {
 
 		// Exclude if user is not email confirmed
 		if (!$this->getUser()->getEmailConfirmed()) {
 			throw $this->createNotFoundException('Not allowed - User email not confirmed (core_tool_new)');
 		}
-
-		$knowledgeUtils = $this->get(KnowledgeUtils::NAME);
 
 		$newTool = new NewTool();
 		$form = $this->createForm(NewToolType::class, $newTool);
@@ -64,7 +64,7 @@ class ToolController extends AbstractController {
 	 * @Route("/create", methods={"POST"}, name="core_tool_create")
 	 * @Template("LadbCoreBundle:Knowledge/Tool:new.html.twig")
 	 */
-	public function createAction(Request $request) {
+	public function createAction(Request $request, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, TranslatorInterface $translator) {
 
 		// Exclude if user is not email confirmed
 		if (!$this->getUser()->getEmailConfirmed()) {
@@ -74,7 +74,6 @@ class ToolController extends AbstractController {
 		$this->createLock('core_tool_create', false, self::LOCK_TTL_CREATE_ACTION, false);
 
 		$om = $this->getDoctrine()->getManager();
-		$dispatcher = $this->get('event_dispatcher');
 
 		$newTool = new NewTool();
 		$form = $this->createForm(NewToolType::class, $newTool);
@@ -139,7 +138,6 @@ class ToolController extends AbstractController {
 			if ($brandDefined) $user->getMeta()->incrementProposalCount(1);
 
 			// Create activity
-			$activityUtils = $this->get(ActivityUtils::NAME);
 			$activityUtils->createContributeActivity($nameValue, false);
 			$activityUtils->createContributeActivity($photoValue, false);
 			if ($productNameDefined) $activityUtils->createContributeActivity($productNameValue, false);
@@ -157,7 +155,7 @@ class ToolController extends AbstractController {
 		}
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
+		$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 		return array(
 			'newTool'     => $newTool,
@@ -170,17 +168,16 @@ class ToolController extends AbstractController {
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_tool_delete")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_tool_delete)")
 	 */
-	public function deleteAction($id) {
+	public function deleteAction($id, ToolManager $toolMananger, TranslatorInterface $translator) {
 
 		$tool = $this->retrievePublication($id, Tool::CLASS_NAME);
 		$this->assertDeletable($tool);
 
 		// Delete
-		$toolMananger = $this->get(ToolManager::NAME);
 		$toolMananger->delete($tool);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('knowledge.tool.form.alert.delete_success', array( '%title%' => $tool->getTitle() )));
+		$this->addFlash('success', $translator->trans('knowledge.tool.form.alert.delete_success', array( '%title%' => $tool->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_tool_list'));
 	}
@@ -204,8 +201,7 @@ class ToolController extends AbstractController {
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_tool_list_page")
 	 * @Template("LadbCoreBundle:Knowledge/Tool:list.html.twig")
 	 */
-	public function listAction(Request $request, $page = 0) {
-		$searchUtils = $this->get(SearchUtils::NAME);
+	public function listAction(Request $request, EventDispatcherInterface $dispatcher, SearchUtils $searchUtils, $page = 0) {
 
 		// Elasticsearch paginiation limit
 		if ($page > 624) {
@@ -349,7 +345,6 @@ class ToolController extends AbstractController {
 		);
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATIONS_LISTED, new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()));
 
 		$parameters = array_merge($searchParameters, array(
@@ -367,10 +362,9 @@ class ToolController extends AbstractController {
 	 * @Route("/{id}.html", name="core_tool_show")
 	 * @Template("LadbCoreBundle:Knowledge/Tool:show.html.twig")
 	 */
-	public function showAction(Request $request, $id) {
+	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ElasticaQueryUtils $elasticaQueryUtils, LikableUtils $likableUtils, ReviewableUtils $reviewableUtils, SearchUtils $searchUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();
 		$toolRepository = $om->getRepository(Tool::CLASS_NAME);
-		$witnessManager = $this->get(WitnessManager::NAME);
 
 		$id = intval($id);
 
@@ -383,19 +377,10 @@ class ToolController extends AbstractController {
 		}
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($tool));
 
-		$searchUtils = $this->get(SearchUtils::NAME);
-		$elasticaQueryUtils = $this->get(ElasticaQueryUtils::NAME);
 		$searchableBrotherCount = $searchUtils->searchEntitiesCount(array( new \Elastica\Query\MatchQuery('nameKeyword', $tool->getName()) ), 'fos_elastica.index.ladb.knowledge_tool');
 		$searchableCreationCount = $searchUtils->searchEntitiesCount(array( $elasticaQueryUtils->createShouldMatchPhraseQuery('tools.label', $tool->getTitle()) ), 'fos_elastica.index.ladb.wonder_creation');
-
-		$likableUtils = $this->get(LikableUtils::NAME);
-		$watchableUtils = $this->get(WatchableUtils::NAME);
-		$commentableUtils = $this->get(CommentableUtils::NAME);
-		$reviewableUtils = $this->get(ReviewableUtils::NAME);
-		$collectionnableUtils = $this->get(CollectionnableUtils::NAME);
 
 		return array(
 			'tool'                    => $tool,

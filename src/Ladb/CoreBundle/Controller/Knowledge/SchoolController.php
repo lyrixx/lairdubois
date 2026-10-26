@@ -33,6 +33,8 @@ use Ladb\CoreBundle\Event\PublicationEvent;
 use Ladb\CoreBundle\Event\PublicationListener;
 use Ladb\CoreBundle\Event\KnowledgeEvent;
 use Ladb\CoreBundle\Event\KnowledgeListener;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @Route("/ecoles")
@@ -45,14 +47,12 @@ class SchoolController extends AbstractController {
 	 * @Route("/new", name="core_school_new")
 	 * @Template("LadbCoreBundle:Knowledge/School:new.html.twig")
 	 */
-	public function newAction() {
+	public function newAction(KnowledgeUtils $knowledgeUtils) {
 
 		// Exclude if user is not email confirmed
 		if (!$this->getUser()->getEmailConfirmed()) {
 			throw $this->createNotFoundException('Not allowed - User email not confirmed (core_school_new)');
 		}
-
-		$knowledgeUtils = $this->get(KnowledgeUtils::NAME);
 
 		$newSchool = new NewSchool();
 		$form = $this->createForm(NewSchoolType::class, $newSchool);
@@ -67,7 +67,7 @@ class SchoolController extends AbstractController {
 	 * @Route("/create", methods={"POST"}, name="core_school_create")
 	 * @Template("LadbCoreBundle:Knowledge/School:new.html.twig")
 	 */
-	public function createAction(Request $request) {
+	public function createAction(Request $request, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, TranslatorInterface $translator) {
 
 		// Exclude if user is not email confirmed
 		if (!$this->getUser()->getEmailConfirmed()) {
@@ -77,7 +77,6 @@ class SchoolController extends AbstractController {
 		$this->createLock('core_school_create', false, self::LOCK_TTL_CREATE_ACTION, false);
 
 		$om = $this->getDoctrine()->getManager();
-		$dispatcher = $this->get('event_dispatcher');
 
 		$newSchool = new NewSchool();
 		$form = $this->createForm(NewSchoolType::class, $newSchool);
@@ -114,7 +113,6 @@ class SchoolController extends AbstractController {
 			$user->getMeta()->incrementProposalCount(2);	// Name and Logo of this new school
 
 			// Create activity
-			$activityUtils = $this->get(ActivityUtils::NAME);
 			$activityUtils->createContributeActivity($nameValue, false);
 			$activityUtils->createContributeActivity($logoValue, false);
 
@@ -130,7 +128,7 @@ class SchoolController extends AbstractController {
 		}
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
+		$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 		return array(
 			'newSchool' => $newSchool,
@@ -143,17 +141,16 @@ class SchoolController extends AbstractController {
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_school_delete")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_school_delete)")
 	 */
-	public function deleteAction($id) {
+	public function deleteAction($id, SchoolManager $schoolManager, TranslatorInterface $translator) {
 
 		$school = $this->retrievePublication($id, School::CLASS_NAME);
 		$this->assertDeletable($school);
 
 		// Delete
-		$schoolManager = $this->get(SchoolManager::NAME);
 		$schoolManager->delete($school);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('knowledge.school.form.alert.delete_success', array( '%title%' => $school->getTitle() )));
+		$this->addFlash('success', $translator->trans('knowledge.school.form.alert.delete_success', array( '%title%' => $school->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_school_list'));
 	}
@@ -205,8 +202,7 @@ class SchoolController extends AbstractController {
 	 * @Route(".geojson", defaults={"_format" = "json", "page"=-1, "layout"="geojson"}, name="core_school_list_geojson")
 	 * @Template("LadbCoreBundle:Knowledge/School:list.html.twig")
 	 */
-	public function listAction(Request $request, $page = 0, $layout = 'view') {
-		$searchUtils = $this->get(SearchUtils::NAME);
+	public function listAction(Request $request, EventDispatcherInterface $dispatcher, LocalisableUtils $localisableUtils, SearchUtils $searchUtils, $page = 0, $layout = 'view') {
 
 		// Elasticsearch paginiation limit
 		if ($page > 624) {
@@ -223,7 +219,7 @@ class SchoolController extends AbstractController {
 		$searchParameters = $searchUtils->searchPaginedEntities(
 			$request,
 			$page,
-			function($facet, &$filters, &$sort, &$noGlobalFilters, &$couldUseDefaultSort) use ($searchUtils) {
+			function($facet, &$filters, &$sort, &$noGlobalFilters, &$couldUseDefaultSort) use ($searchUtils, $localisableUtils) {
 
 				switch ($facet->name) {
 
@@ -238,7 +234,6 @@ class SchoolController extends AbstractController {
 
 					case 'location':
 
-						$localisableUtils = $this->get(LocalisableUtils::NAME);
 						$boundsAndLocation = $localisableUtils->getBoundsAndLocation($facet->value);
 
 						if (!is_null($boundsAndLocation)) {
@@ -413,7 +408,6 @@ class SchoolController extends AbstractController {
 		}
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATIONS_LISTED, new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()));
 
 		if ($request->isXmlHttpRequest()) {
@@ -437,7 +431,7 @@ class SchoolController extends AbstractController {
 	 * @Route("/{id}/creations/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_school_creations_filter_page")
 	 * @Template("LadbCoreBundle:Knowledge/School:creations.html.twig")
 	 */
-	public function creationsAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function creationsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 		$schoolRepository = $om->getRepository(School::CLASS_NAME);
 
@@ -449,7 +443,6 @@ class SchoolController extends AbstractController {
 		// Creations
 
 		$creationRepository = $om->getRepository(Creation::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -478,7 +471,7 @@ class SchoolController extends AbstractController {
 	 * @Route("/{id}/plans/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_school_plans_filter_page")
 	 * @Template("LadbCoreBundle:Knowledge/School:plans.html.twig")
 	 */
-	public function plansAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function plansAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 		$schoolRepository = $om->getRepository(School::CLASS_NAME);
 
@@ -490,7 +483,6 @@ class SchoolController extends AbstractController {
 		// Plans
 
 		$planRepository = $om->getRepository(Plan::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -519,7 +511,7 @@ class SchoolController extends AbstractController {
 	 * @Route("/{id}/pas-a-pas/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_school_howtos_filter_page")
 	 * @Template("LadbCoreBundle:Knowledge/School:howtos.html.twig")
 	 */
-	public function howtosAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function howtosAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 		$schoolRepository = $om->getRepository(School::CLASS_NAME);
 
@@ -531,7 +523,6 @@ class SchoolController extends AbstractController {
 		// Howtos
 
 		$howtoRepository = $om->getRepository(Howto::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -582,10 +573,9 @@ class SchoolController extends AbstractController {
 	 * @Route("/{id}.html", name="core_school_show")
 	 * @Template("LadbCoreBundle:Knowledge/School:show.html.twig")
 	 */
-	public function showAction(Request $request, $id) {
+	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, LikableUtils $likableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();
 		$schoolRepository = $om->getRepository(School::CLASS_NAME);
-		$witnessManager = $this->get(WitnessManager::NAME);
 
 		$id = intval($id);
 
@@ -599,7 +589,7 @@ class SchoolController extends AbstractController {
 
 		$user = $this->getUser();
 		$userTestimonial = null;
-		if ($this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
+		if ($this->isGranted('ROLE_USER')) {
 			foreach ($school->getTestimonials() as $testimonial) {
 				if ($testimonial->getUser()->getId() == $user->getId()) {
 					$userTestimonial = $testimonial;
@@ -609,13 +599,7 @@ class SchoolController extends AbstractController {
 		}
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($school));
-
-		$likableUtils = $this->get(LikableUtils::NAME);
-		$watchableUtils = $this->get(WatchableUtils::NAME);
-		$commentableUtils = $this->get(CommentableUtils::NAME);
-		$collectionnableUtils = $this->get(CollectionnableUtils::NAME);
 
 		return array(
 			'school'            => $school,

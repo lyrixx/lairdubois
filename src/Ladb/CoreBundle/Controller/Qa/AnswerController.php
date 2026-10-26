@@ -25,6 +25,8 @@ use Ladb\CoreBundle\Event\PublicationListener;
 use Ladb\CoreBundle\Manager\Qa\QuestionManager;
 use Ladb\CoreBundle\Utils\ActivityUtils;
 use Ladb\CoreBundle\Utils\WatchableUtils;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @Route("/questions")
@@ -62,7 +64,7 @@ class AnswerController extends AbstractController {
 	 * @Route("/{id}/reponses/create", requirements={"id" = "\d+"}, methods={"POST"}, name="core_qa_answer_create")
 	 * @Template("LadbCoreBundle:Qa/Answer:new-xhr.html.twig")
 	 */
-	public function createAction(Request $request, $id) {
+	public function createAction(Request $request, $id, ActivityUtils $activityUtils, BlockBodiedUtils $blockUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, MentionUtils $mentionUtils, QuestionManager $questionManager, VotableUtils $votableUtils, WatchableUtils $watchableUtils, WebpushNotificationUtils $webpushNotificationUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_qa_answer_create)');
 		}
@@ -92,10 +94,8 @@ class AnswerController extends AbstractController {
 
 		if ($form->isValid()) {
 
-			$blockUtils = $this->get(BlockBodiedUtils::NAME);
 			$blockUtils->preprocessBlocks($answer);
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($answer);
 
 			$answer->setUser($this->getUser());
@@ -113,33 +113,24 @@ class AnswerController extends AbstractController {
 			$om->flush();
 
 			// Process mentions
-			$mentionUtils = $this->get(MentionUtils::NAME);
 			$mentionUtils->processMentions($answer);
 
 			// Compute answer counters
-			$questionManager = $this->get(QuestionManager::NAME);
 			$questionManager->computeAnswerCounters($question);
 
 			// Create activity
-			$activityUtils = $this->get(ActivityUtils::NAME);
 			$activityUtils->createAnswerActivity($answer, false);
 
 			// Dispatch publication event (on Question)
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_CHANGED, new PublicationEvent($question));
 
 			// Auto watch
-			$watchableUtils = $this->container->get(WatchableUtils::NAME);
 			$watchableUtils->autoCreateWatch($question, $this->getUser());
 
 			if ($answer->getUser() !== $question->getUser()) {
 				// Publish a webpush notification in queue
-				$webpushNotificationUtils = $this->get(WebpushNotificationUtils::class);
 				$webpushNotificationUtils->enqueueNewAnswerNotification($answer, $question);
 			}
-
-			$commentableUtils = $this->get(CommentableUtils::NAME);
-			$votableUtils = $this->get(VotableUtils::NAME);
 
 			return $this->render('LadbCoreBundle:Qa/Answer:create-xhr.html.twig', array(
 				'question'       => $question,
@@ -171,7 +162,7 @@ class AnswerController extends AbstractController {
 		if (is_null($answer)) {
 			throw $this->createNotFoundException('Unable to find Answer entity (id='.$id.').');
 		}
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && $answer->getUser()->getId() != $this->getUser()->getId()) {
+		if (!$this->isGranted('ROLE_ADMIN') && $answer->getUser()->getId() != $this->getUser()->getId()) {
 			throw $this->createNotFoundException('Not allowed (core_qa_answer_edit)');
 		}
 
@@ -187,7 +178,7 @@ class AnswerController extends AbstractController {
 	 * @Route("/reponses/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_qa_answer_update")
 	 * @Template("LadbCoreBundle:Qa/Answer:edit-xhr.html.twig")
 	 */
-	public function updateAction(Request $request, $id) {
+	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, MentionUtils $mentionUtils, VotableUtils $votableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_qa_answer_update)');
 		}
@@ -199,7 +190,7 @@ class AnswerController extends AbstractController {
 		if (is_null($answer)) {
 			throw $this->createNotFoundException('Unable to find Answer entity (id='.$id.').');
 		}
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && $answer->getUser()->getId() != $this->getUser()->getId()) {
+		if (!$this->isGranted('ROLE_ADMIN') && $answer->getUser()->getId() != $this->getUser()->getId()) {
 			throw $this->createNotFoundException('Not allowed (core_qa_answer_update)');
 		}
 
@@ -212,10 +203,8 @@ class AnswerController extends AbstractController {
 
 		if ($form->isValid()) {
 
-			$blockUtils = $this->get(BlockBodiedUtils::NAME);
 			$blockUtils->preprocessBlocks($answer, $originalBodyBlocks);
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($answer);
 
 			if ($answer->getUser() == $this->getUser()) {
@@ -225,15 +214,10 @@ class AnswerController extends AbstractController {
 			$om->flush();
 
 			// Process mentions
-			$mentionUtils = $this->get(MentionUtils::NAME);
 			$mentionUtils->processMentions($answer);
 
 			// Dispatch publication event (on Question)
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_UPDATED, new PublicationEvent($answer->getQuestion()));
-
-			$commentableUtils = $this->get(CommentableUtils::NAME);
-			$votableUtils = $this->get(VotableUtils::NAME);
 
 			return $this->render('LadbCoreBundle:Qa/Answer:update-xhr.html.twig', array(
 				'question'       => $answer->getQuestion(),
@@ -253,7 +237,7 @@ class AnswerController extends AbstractController {
 	 * @Route("/reponses/{id}/best/create", requirements={"id" = "\d+"}, defaults={"action" = "create"}, name="core_qa_answer_best_create")
 	 * @Route("/reponses/{id}/best/delete", requirements={"id" = "\d+"}, defaults={"action" = "delete"}, name="core_qa_answer_best_delete")
 	 */
-	public function bestToggleAction(Request $request, $id, $action) {
+	public function bestToggleAction(Request $request, $id, $action, EventDispatcherInterface $dispatcher) {
 		$om = $this->getDoctrine()->getManager();
 		$answerRepository = $om->getRepository(Answer::CLASS_NAME);
 
@@ -267,7 +251,7 @@ class AnswerController extends AbstractController {
 
 		$question = $answer->getQuestion();
 
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && $question->getUser()->getId() != $this->getUser()->getId()) {
+		if (!$this->isGranted('ROLE_ADMIN') && $question->getUser()->getId() != $this->getUser()->getId()) {
 			throw $this->createNotFoundException('Not allowed (core_qa_answer_best_create or core_qa_answer_best_delete)');
 		}
 
@@ -284,7 +268,6 @@ class AnswerController extends AbstractController {
 		$om->flush();
 
 		// Dispatch publication event (on Question)
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATION_UPDATED, new PublicationEvent($question));
 
 		return $this->redirect($this->generateUrl('core_qa_answer_show', array( 'id' => $answer->getId() )));
@@ -293,7 +276,7 @@ class AnswerController extends AbstractController {
 	/**
 	 * @Route("/reponses/{id}/delete", requirements={"id" = "\d+"}, name="core_qa_answer_delete")
 	 */
-	public function deleteAction(Request $request, $id) {
+	public function deleteAction(Request $request, $id, AnswerManager $answerManager, SearchUtils $searchUtils, TranslatorInterface $translator) {
 		$om = $this->getDoctrine()->getManager();
 		$answerRepository = $om->getRepository(Answer::CLASS_NAME);
 
@@ -301,22 +284,20 @@ class AnswerController extends AbstractController {
 		if (is_null($answer)) {
 			throw $this->createNotFoundException('Unable to find Answer entity (id='.$id.').');
 		}
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && $answer->getUser()->getId() != $this->getUser()->getId()) {
+		if (!$this->isGranted('ROLE_ADMIN') && $answer->getUser()->getId() != $this->getUser()->getId()) {
 			throw $this->createNotFoundException('Not allowed (core_qa_answer_delete)');
 		}
 
 		$question = $answer->getQuestion();
 
 		// Delete
-		$answerManager = $this->get(AnswerManager::NAME);
 		$answerManager->delete($answer);
 
 		// Search index update
-		$searchUtils = $this->get(SearchUtils::NAME);
 		$searchUtils->replaceEntityInIndex($question);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('qa.answer.form.alert.delete_success'));
+		$this->addFlash('success', $translator->trans('qa.answer.form.alert.delete_success'));
 
 		return $this->redirect($this->generateUrl('core_qa_question_show', array( 'id' => $question->getSluggedId() )));
 	}
@@ -335,7 +316,7 @@ class AnswerController extends AbstractController {
 
 		$question = $answer->getQuestion();
 		if ($question->getIsDraft() === true) {
-			if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && (is_null($this->getUser()) || $question->getUser()->getId() != $this->getUser()->getId())) {
+			if (!$this->isGranted('ROLE_ADMIN') && (is_null($this->getUser()) || $question->getUser()->getId() != $this->getUser()->getId())) {
 				throw $this->createNotFoundException('Not allowed (core_qa_answer_show)');
 			}
 		}
@@ -348,7 +329,7 @@ class AnswerController extends AbstractController {
 	 * @Route("/{id}/reponses/{sorter}", requirements={"id" = "\d+", "sorter" = "[a-z-]+"}, name="core_qa_answer_list_sorter")
 	 * @Template("LadbCoreBundle:Qa/Answer:list-xhr.html.twig")
 	 */
-	public function listAction(Request $request, $id, $sorter = 'score') {
+	public function listAction(Request $request, $id, CommentableUtils $commentableUtils, VotableUtils $votableUtils, $sorter = 'score') {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_qa_answer_list_sorter)');
 		}
@@ -366,9 +347,6 @@ class AnswerController extends AbstractController {
 
 		$answers = $answerRepository->findByQuestion($question, $sorter);
 
-		$commentableUtils = $this->get(CommentableUtils::NAME);
-		$votableUtils = $this->get(VotableUtils::NAME);
-
 		return array(
 			'sorter'          => $sorter,
 			'question'        => $question,
@@ -382,7 +360,7 @@ class AnswerController extends AbstractController {
 	 * @Route("/{id}/reponses/admin/converttocomment", requirements={"id" = "\d+"}, name="core_qa_answer_admin_converttocomment")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_qa_answer_admin_converttocomment)")
 	 */
-	public function adminConvertToCommentAction($id) {
+	public function adminConvertToCommentAction($id, AnswerManager $answerManager, TranslatorInterface $translator) {
 		$om = $this->getDoctrine()->getManager();
 		$answerRepository = $om->getRepository(Answer::CLASS_NAME);
 
@@ -393,11 +371,10 @@ class AnswerController extends AbstractController {
 		$question = $answer->getQuestion();
 
 		// Convert
-		$answerManager = $this->get(AnswerManager::NAME);
 		$find = $answerManager->convertToComment($answer, $question);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('qa.answer.admin.alert.converttocomment_success', array( '%title%' => $answer->getTitle() )));
+		$this->addFlash('success', $translator->trans('qa.answer.admin.alert.converttocomment_success', array( '%title%' => $answer->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_qa_question_show', array( 'id' => $question->getSluggedId() )));
 	}

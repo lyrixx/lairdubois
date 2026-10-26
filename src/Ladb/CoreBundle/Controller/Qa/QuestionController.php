@@ -37,6 +37,8 @@ use Ladb\CoreBundle\Event\PublicationsEvent;
 use Ladb\CoreBundle\Manager\Qa\QuestionManager;
 use Ladb\CoreBundle\Manager\Core\WitnessManager;
 use Ladb\CoreBundle\Model\HiddableInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @Route("/questions")
@@ -49,13 +51,11 @@ class QuestionController extends AbstractController {
 	 * @Route("/new", name="core_qa_question_new")
 	 * @Template("LadbCoreBundle:Qa/Question:new.html.twig")
 	 */
-	public function newAction(Request $request) {
+	public function newAction(Request $request, TagUtils $tagUtils) {
 
 		$question = new Question();
 		$question->addBodyBlock(new \Ladb\CoreBundle\Entity\Core\Block\Text());	// Add a default Text body block
 		$form = $this->createForm(QuestionType::class, $question);
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'form'         => $form->createView(),
@@ -68,7 +68,7 @@ class QuestionController extends AbstractController {
 	 * @Route("/create", methods={"POST"}, name="core_qa_question_create")
 	 * @Template("LadbCoreBundle:Qa/Question:new.html.twig")
 	 */
-	public function createAction(Request $request) {
+	public function createAction(Request $request, BlockBodiedUtils $blockBodiedUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$owner = $this->retrieveOwner($request);
 
@@ -82,10 +82,8 @@ class QuestionController extends AbstractController {
 
 		if ($form->isValid()) {
 
-			$blockBodiedUtils = $this->get(BlockBodiedUtils::NAME);
 			$blockBodiedUtils->preprocessBlocks($question);
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($question);
 
 			if ($question->getBodyBlockPictureCount() > 0) {
@@ -99,16 +97,13 @@ class QuestionController extends AbstractController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($question));
 
 			return $this->redirect($this->generateUrl('core_qa_question_show', array( 'id' => $question->getSluggedId() )));
 		}
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
-
-		$tagUtils = $this->get(TagUtils::NAME);
+		$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 
 
@@ -124,13 +119,12 @@ class QuestionController extends AbstractController {
 	 * @Route("/{id}/lock", requirements={"id" = "\d+"}, defaults={"lock" = true}, name="core_qa_question_lock")
 	 * @Route("/{id}/unlock", requirements={"id" = "\d+"}, defaults={"lock" = false}, name="core_qa_question_unlock")
 	 */
-	public function lockUnlockAction($id, $lock) {
+	public function lockUnlockAction($id, $lock, QuestionManager $questionManager, TranslatorInterface $translator) {
 
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
 		$this->assertLockUnlockable($question, $lock);
 
 		// Lock or Unlock
-		$questionManager = $this->get(QuestionManager::NAME);
 		if ($lock) {
 			$questionManager->lock($question);
 		} else {
@@ -138,7 +132,7 @@ class QuestionController extends AbstractController {
 		}
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('qa.question.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $question->getTitle() )));
+		$this->addFlash('success', $translator->trans('qa.question.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $question->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_qa_question_show', array( 'id' => $question->getSluggedId() )));
 	}
@@ -146,17 +140,16 @@ class QuestionController extends AbstractController {
 	/**
 	 * @Route("/{id}/publish", requirements={"id" = "\d+"}, name="core_qa_question_publish")
 	 */
-	public function publishAction($id) {
+	public function publishAction($id, QuestionManager $questionManager, TranslatorInterface $translator) {
 
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
 		$this->assertPublishable($question);
 
 		// Publish
-		$questionManager = $this->get(QuestionManager::NAME);
 		$questionManager->publish($question);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('qa.question.form.alert.publish_success', array( '%title%' => $question->getTitle() )));
+		$this->addFlash('success', $translator->trans('qa.question.form.alert.publish_success', array( '%title%' => $question->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_qa_question_show', array( 'id' => $question->getSluggedId() )));
 	}
@@ -164,17 +157,16 @@ class QuestionController extends AbstractController {
 	/**
 	 * @Route("/{id}/unpublish", requirements={"id" = "\d+"}, name="core_qa_question_unpublish")
 	 */
-	public function unpublishAction(Request $request, $id) {
+	public function unpublishAction(Request $request, $id, QuestionManager $questionManager, TranslatorInterface $translator) {
 
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
 		$this->assertUnpublishable($question);
 
 		// Unpublish
-		$questionManager = $this->get(QuestionManager::NAME);
 		$questionManager->unpublish($question);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('qa.question.form.alert.unpublish_success', array( '%title%' => $question->getTitle() )));
+		$this->addFlash('success', $translator->trans('qa.question.form.alert.unpublish_success', array( '%title%' => $question->getTitle() )));
 
 		// Return to
 		$returnToUrl = $request->get('rtu');
@@ -189,14 +181,12 @@ class QuestionController extends AbstractController {
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_qa_question_edit")
 	 * @Template("LadbCoreBundle:Qa/Question:edit.html.twig")
 	 */
-	public function editAction($id) {
+	public function editAction($id, TagUtils $tagUtils) {
 
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
 		$this->assertEditabable($question);
 
 		$form = $this->createForm(QuestionType::class, $question);
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'question'     => $question,
@@ -209,7 +199,7 @@ class QuestionController extends AbstractController {
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_qa_question_update")
 	 * @Template("LadbCoreBundle:Qa/Question:edit.html.twig")
 	 */
-	public function updateAction(Request $request, $id) {
+	public function updateAction(Request $request, $id, BlockBodiedUtils $blockBodiedUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
 		$this->assertEditabable($question);
@@ -224,10 +214,8 @@ class QuestionController extends AbstractController {
 
 		if ($form->isValid()) {
 
-			$blockBodiedUtils = $this->get(BlockBodiedUtils::NAME);
 			$blockBodiedUtils->preprocessBlocks($question, $originalBodyBlocks);
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($question);
 
 			if ($question->getBodyBlockPictureCount() > 0) {
@@ -242,11 +230,10 @@ class QuestionController extends AbstractController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_UPDATED, new PublicationEvent($question, array( 'previouslyUsedTags' => $previouslyUsedTags )));
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('blog.post.form.alert.update_success', array( '%title%' => $question->getTitle() )));
+			$this->addFlash('success', $translator->trans('blog.post.form.alert.update_success', array( '%title%' => $question->getTitle() )));
 
 			// Regenerate the form
 			$form = $this->createForm(QuestionType::class, $question);
@@ -254,11 +241,9 @@ class QuestionController extends AbstractController {
 		} else {
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
+			$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 		}
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'question'     => $question,
@@ -270,17 +255,16 @@ class QuestionController extends AbstractController {
 	/**
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_qa_question_delete")
 	 */
-	public function deleteAction($id) {
+	public function deleteAction($id, QuestionManager $questionManager, TranslatorInterface $translator) {
 
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
 		$this->assertDeletable($question);
 
 		// Delete
-		$questionManager = $this->get(QuestionManager::NAME);
 		$questionManager->delete($question);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('blog.post.form.alert.delete_success', array( '%title%' => $question->getTitle() )));
+		$this->addFlash('success', $translator->trans('blog.post.form.alert.delete_success', array( '%title%' => $question->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_qa_question_list'));
 	}
@@ -288,7 +272,7 @@ class QuestionController extends AbstractController {
 	/**
 	 * @Route("/{id}/chown", requirements={"id" = "\d+"}, name="core_qa_question_chown")
 	 */
-	public function chownAction(Request $request, $id) {
+	public function chownAction(Request $request, $id, QuestionManager $questionManager, TranslatorInterface $translator) {
 
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
 		$this->assertChownable($question);
@@ -296,11 +280,10 @@ class QuestionController extends AbstractController {
 		$targetUser = $this->retrieveOwner($request);
 
 		// Change owner
-		$questionManager = $this->get(QuestionManager::NAME);
 		$questionManager->changeOwner($question, $targetUser);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('qa.question.form.alert.chown_success', array( '%title%' => $question->getTitle() )));
+		$this->addFlash('success', $translator->trans('qa.question.form.alert.chown_success', array( '%title%' => $question->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_qa_question_show', array( 'id' => $question->getSluggedId() )));
 	}
@@ -324,8 +307,7 @@ class QuestionController extends AbstractController {
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_qa_question_list_page")
 	 * @Template("LadbCoreBundle:Qa/Question:list.html.twig")
 	 */
-	public function listAction(Request $request, $page = 0) {
-		$searchUtils = $this->get(SearchUtils::NAME);
+	public function listAction(Request $request, EventDispatcherInterface $dispatcher, MaybeUtils $maybeUtils, SearchUtils $searchUtils, TranslatorInterface $translator, $page = 0) {
 
 		// Elasticsearch paginiation limit
 		if ($page > 624) {
@@ -346,7 +328,6 @@ class QuestionController extends AbstractController {
 
 			// Tip & Offer highlight
 
-			$maybeUtils = $this->get(MaybeUtils::NAME);
 			if ($maybeUtils->canDoIt(0, 10, 'tip')) {
 				$tipRepository = $om->getRepository(Tip::CLASS_NAME);
 				$highlightedTip = $tipRepository->findOneRandomByUser($this->getUser());
@@ -367,7 +348,7 @@ class QuestionController extends AbstractController {
 
 					case 'mine':
 
-						if ($this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
+						if ($this->isGranted('ROLE_USER')) {
 
 							if (isset($facet->value) && $facet->value == 'draft') {
 
@@ -557,7 +538,6 @@ class QuestionController extends AbstractController {
 		);
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATIONS_LISTED, new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()));
 
 		$parameters = array_merge($searchParameters, array(
@@ -583,13 +563,13 @@ class QuestionController extends AbstractController {
 			'highlightedOffer' => isset($highlightedOffer) ? $highlightedOffer : null,
 		));
 
-		if ($this->get('security.authorization_checker')->isGranted('ROLE_USER') && $this->getUser()->getMeta()->getPrivateQuestionCount() > 0) {
+		if ($this->isGranted('ROLE_USER') && $this->getUser()->getMeta()->getPrivateQuestionCount() > 0) {
 
 			$draftPath = $this->generateUrl('core_qa_question_list', array( 'q' => '@mine:draft' ));
 			$draftCount = $this->getUser()->getMeta()->getPrivateQuestionCount();
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('info', '<i class="ladb-icon-warning"></i> '.$this->get('translator')->transchoice('qa.question.choice.draft_alert', $draftCount, array( '%count%' => $draftCount )).' <small><a href="'.$draftPath.'" class="alert-link">('.$this->get('translator')->trans('default.show_my_drafts').')</a></small>');
+			$this->addFlash('info', '<i class="ladb-icon-warning"></i> '.$translator->transchoice('qa.question.choice.draft_alert', $draftCount, array( '%count%' => $draftCount )).' <small><a href="'.$draftPath.'" class="alert-link">('.$translator->trans('default.show_my_drafts').')</a></small>');
 
 		}
 
@@ -602,7 +582,7 @@ class QuestionController extends AbstractController {
 	 * @Route("/{id}/creations/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_qa_question_creations_filter_page")
 	 * @Template("LadbCoreBundle:Qa/Question:creations.html.twig")
 	 */
-	public function creationsAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function creationsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
@@ -611,7 +591,6 @@ class QuestionController extends AbstractController {
 		// Creations
 
 		$creationRepository = $om->getRepository(Creation::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -640,7 +619,7 @@ class QuestionController extends AbstractController {
 	 * @Route("/{id}/plans/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_qa_question_plans_filter_page")
 	 * @Template("LadbCoreBundle:Qa/Question:plans.html.twig")
 	 */
-	public function plansAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function plansAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
@@ -649,7 +628,6 @@ class QuestionController extends AbstractController {
 		// Plans
 
 		$planRepository = $om->getRepository(Plan::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -678,7 +656,7 @@ class QuestionController extends AbstractController {
 	 * @Route("/{id}/pas-a-pas/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_qa_question_howtos_filter_page")
 	 * @Template("LadbCoreBundle:Qa/Question:howtos.html.twig")
 	 */
-	public function howtosAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function howtosAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
@@ -687,7 +665,6 @@ class QuestionController extends AbstractController {
 		// Howtos
 
 		$howtoRepository = $om->getRepository(Howto::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -714,11 +691,10 @@ class QuestionController extends AbstractController {
 	 * @Route("/{id}.html", name="core_qa_question_show")
 	 * @Template("LadbCoreBundle:Qa/Question:show.html.twig")
 	 */
-	public function showAction(Request $request, $id) {
+	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, VotableUtils $votableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();
 		$questionRepository = $om->getRepository(\Ladb\CoreBundle\Entity\Qa\Question::CLASS_NAME);
 		$answerRepository = $om->getRepository(\Ladb\CoreBundle\Entity\Qa\Answer::CLASS_NAME);
-		$witnessManager = $this->get(WitnessManager::NAME);
 
 		$id = intval($id);
 
@@ -741,7 +717,7 @@ class QuestionController extends AbstractController {
 
 		$user = $this->getUser();
 		$userAnswer = null;
-		if ($this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
+		if ($this->isGranted('ROLE_USER')) {
 			foreach ($question->getAnswers() as $answer) {
 				if ($answer->getUser()->getId() == $user->getId()) {
 					$userAnswer = $answer;
@@ -750,20 +726,11 @@ class QuestionController extends AbstractController {
 			}
 		}
 
-		$explorableUtils = $this->get(ExplorableUtils::NAME);
 		$userQuestions = $explorableUtils->getPreviousAndNextPublishedUserExplorables($question, $questionRepository, $question->getUser()->getMeta()->getPublicQuestionCount());
 		$similarQuestions = $explorableUtils->getSimilarExplorables($question, 'fos_elastica.index.ladb.qa_question', Question::CLASS_NAME, $userQuestions);
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($question));
-
-		$likableUtils = $this->get(LikableUtils::NAME);
-		$watchableUtils = $this->get(WatchableUtils::NAME);
-		$commentableUtils = $this->get(CommentableUtils::NAME);
-		$collectionnableUtils = $this->get(CollectionnableUtils::NAME);
-		$followerUtils = $this->get(FollowerUtils::NAME);
-		$votableUtils = $this->get(VotableUtils::NAME);
 
 		return array(
 			'question'          => $question,
@@ -787,7 +754,7 @@ class QuestionController extends AbstractController {
 	 * @Route("/{id}/admin/converttooffer", requirements={"id" = "\d+"}, name="core_qa_question_admin_converttooffer")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_qa_question_admin_converttooffer)")
 	 */
-	public function adminConvertToOfferAction($id) {
+	public function adminConvertToOfferAction($id, QuestionManager $questionManager, TranslatorInterface $translator) {
 		$om = $this->getDoctrine()->getManager();
 		$questionRepository = $om->getRepository(Question::CLASS_NAME);
 
@@ -797,11 +764,10 @@ class QuestionController extends AbstractController {
 		}
 
 		// Convert
-		$questionManager = $this->get(QuestionManager::NAME);
 		$offer = $questionManager->convertToOffer($question);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('qa.question.admin.alert.converttooffer_success', array( '%title%' => $question->getTitle() )));
+		$this->addFlash('success', $translator->trans('qa.question.admin.alert.converttooffer_success', array( '%title%' => $question->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_offer_show', array( 'id' => $offer->getSluggedId() )));
 	}

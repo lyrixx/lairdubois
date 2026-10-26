@@ -31,6 +31,8 @@ use Ladb\CoreBundle\Event\PublicationEvent;
 use Ladb\CoreBundle\Event\PublicationListener;
 use Ladb\CoreBundle\Event\KnowledgeEvent;
 use Ladb\CoreBundle\Event\KnowledgeListener;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @Route("/logiciels")
@@ -43,14 +45,12 @@ class SoftwareController extends AbstractController {
 	 * @Route("/new", name="core_software_new")
 	 * @Template("LadbCoreBundle:Knowledge/Software:new.html.twig")
 	 */
-	public function newAction() {
+	public function newAction(KnowledgeUtils $knowledgeUtils) {
 
 		// Exclude if user is not email confirmed
 		if (!$this->getUser()->getEmailConfirmed()) {
 			throw $this->createNotFoundException('Not allowed - User email not confirmed (core_software_new)');
 		}
-
-		$knowledgeUtils = $this->get(KnowledgeUtils::NAME);
 
 		$newSoftware = new NewSoftware();
 		$form = $this->createForm(NewSoftwareType::class, $newSoftware);
@@ -65,7 +65,7 @@ class SoftwareController extends AbstractController {
 	 * @Route("/create", methods={"POST"}, name="core_software_create")
 	 * @Template("LadbCoreBundle:Knowledge/Software:new.html.twig")
 	 */
-	public function createAction(Request $request) {
+	public function createAction(Request $request, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, TranslatorInterface $translator) {
 
 		// Exclude if user is not email confirmed
 		if (!$this->getUser()->getEmailConfirmed()) {
@@ -75,7 +75,6 @@ class SoftwareController extends AbstractController {
 		$this->createLock('core_software_create', false, self::LOCK_TTL_CREATE_ACTION, false);
 
 		$om = $this->getDoctrine()->getManager();
-		$dispatcher = $this->get('event_dispatcher');
 
 		$newSoftware = new NewSoftware();
 		$form = $this->createForm(NewSoftwareType::class, $newSoftware);
@@ -117,7 +116,6 @@ class SoftwareController extends AbstractController {
 			$user->getMeta()->incrementProposalCount(2);	// Name and Grain of this new software
 
 			// Create activity
-			$activityUtils = $this->get(ActivityUtils::NAME);
 			$activityUtils->createContributeActivity($identityValue, false);
 			$activityUtils->createContributeActivity($iconValue, false);
 
@@ -133,7 +131,7 @@ class SoftwareController extends AbstractController {
 		}
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
+		$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 		return array(
 			'newSoftware' => $newSoftware,
@@ -146,17 +144,16 @@ class SoftwareController extends AbstractController {
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_software_delete")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_software_delete)")
 	 */
-	public function deleteAction($id) {
+	public function deleteAction($id, SoftwareManager $softwareMananger, TranslatorInterface $translator) {
 
 		$software = $this->retrievePublication($id, Software::CLASS_NAME);
 		$this->assertDeletable($software);
 
 		// Delete
-		$softwareMananger = $this->get(SoftwareManager::NAME);
 		$softwareMananger->delete($software);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('knowledge.software.form.alert.delete_success', array( '%title%' => $software->getTitle() )));
+		$this->addFlash('success', $translator->trans('knowledge.software.form.alert.delete_success', array( '%title%' => $software->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_software_list'));
 	}
@@ -180,8 +177,7 @@ class SoftwareController extends AbstractController {
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_software_list_page")
 	 * @Template("LadbCoreBundle:Knowledge/Software:list.html.twig")
 	 */
-	public function listAction(Request $request, $page = 0) {
-		$searchUtils = $this->get(SearchUtils::NAME);
+	public function listAction(Request $request, EventDispatcherInterface $dispatcher, ElasticaQueryUtils $elasticaQueryUtils, SearchUtils $searchUtils, $page = 0) {
 
 		// Elasticsearch paginiation limit
 		if ($page > 624) {
@@ -191,7 +187,7 @@ class SoftwareController extends AbstractController {
 		$searchParameters = $searchUtils->searchPaginedEntities(
 			$request,
 			$page,
-			function($facet, &$filters, &$sort, &$noGlobalFilters, &$couldUseDefaultSort) use ($searchUtils) {
+			function($facet, &$filters, &$sort, &$noGlobalFilters, &$couldUseDefaultSort) use ($searchUtils, $elasticaQueryUtils) {
 				switch ($facet->name) {
 
 					// Filters /////
@@ -245,7 +241,6 @@ class SoftwareController extends AbstractController {
 
 					case 'languages':
 
-						$elasticaQueryUtils = $this->get(ElasticaQueryUtils::NAME);
 						$filters[] = $elasticaQueryUtils->createShouldMatchPhraseQuery('languages', $facet->value);
 
 						break;
@@ -342,7 +337,6 @@ class SoftwareController extends AbstractController {
 		);
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATIONS_LISTED, new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()));
 
 		$parameters = array_merge($searchParameters, array(
@@ -360,10 +354,9 @@ class SoftwareController extends AbstractController {
 	 * @Route("/{id}.html", name="core_software_show")
 	 * @Template("LadbCoreBundle:Knowledge/Software:show.html.twig")
 	 */
-	public function showAction(Request $request, $id) {
+	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, LikableUtils $likableUtils, ReviewableUtils $reviewableUtils, SearchUtils $searchUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();
 		$softwareRepository = $om->getRepository(Software::CLASS_NAME);
-		$witnessManager = $this->get(WitnessManager::NAME);
 
 		$id = intval($id);
 
@@ -376,12 +369,10 @@ class SoftwareController extends AbstractController {
 		}
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($software));
 
 		$hostSoftware = $software->getIsAddOn() && !is_null($software->getHostSoftwareName()) ? $softwareRepository->findOneByName($software->getHostSoftwareName()) : null;
 
-		$searchUtils = $this->get(SearchUtils::NAME);
 		$searchableAddonCount = $software->getIsAddOn() ? 0 : $searchUtils->searchEntitiesCount(array(
 			new \Elastica\Query\Term(['isAddOn' => ['value' => true, 'boost' => 1.0]]),
 			new \Elastica\Query\Term(['hostSoftwareName' => ['value' => strtolower($software->getName()), 'boost' => 1.0]])
@@ -390,12 +381,6 @@ class SoftwareController extends AbstractController {
 			new \Elastica\Query\Range('visibility', array( 'gte' => HiddableInterface::VISIBILITY_PUBLIC )),
 			new \Elastica\Query\MatchQuery('resources.fileExtension', $software->getSupportedFiles())
 		), 'fos_elastica.index.ladb.wonder_plan');
-
-		$likableUtils = $this->get(LikableUtils::NAME);
-		$watchableUtils = $this->get(WatchableUtils::NAME);
-		$commentableUtils = $this->get(CommentableUtils::NAME);
-		$reviewableUtils = $this->get(ReviewableUtils::NAME);
-		$collectionnableUtils = $this->get(CollectionnableUtils::NAME);
 
 		return array(
 			'software'             => $software,
