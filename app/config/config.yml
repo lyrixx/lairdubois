@@ -17,6 +17,11 @@ framework:
         version_format: '%%s?v=%%s'
         base_urls:  ["%router.request_context.scheme%://%router.request_context.host%"]
         packages:
+             # The CSS and JS of Vite (vite.config.js, castor app:assets:build): the manifest gives
+             # the hashed file of each one, e.g. asset('build/base.css', 'build')
+             build:
+                json_manifest_path: "%kernel.root_dir%/../web/build/manifest.json"
+                base_urls:  ["%router.request_context.scheme%://%router.request_context.host%"]
              sitemaps:
                 version:    ""
                 base_urls:  ["%router.request_context.scheme%://%router.request_context.host%"]
@@ -62,22 +67,6 @@ twig:
         ga_tracking_id: "%ga_tracking_id%"
         stripe_publishable_key: "%stripe_publishable_key%"
         websocket_uri: "%websocket_uri%"
-
-# Assetic Configuration
-assetic:
-    debug:          "%kernel.debug%"
-    use_controller: false
-    bundles:        [ LadbCoreBundle, FOSUserBundle, TwigBundle ]
-    #java: /usr/bin/java
-    filters:
-        less:
-            node: "%node%"
-            node_paths: "%node_paths%"
-            apply_to: \.less$
-        closure:
-            jar: "%kernel.root_dir%/Resources/java/closure-compiler-v20180101.jar"
-        yui_css:
-            jar: "%kernel.root_dir%/Resources/java/yuicompressor-2.4.7.jar"
 
 # Doctrine Configuration
 doctrine:

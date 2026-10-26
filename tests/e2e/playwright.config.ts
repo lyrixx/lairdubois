@@ -23,7 +23,7 @@ export default defineConfig({
     workers: 1,
     forbidOnly: !!process.env.CI,
     reporter: process.env.CI ? [['github'], ['list']] : 'list',
-    // The dev environment compiles the assets on demand (Assetic controller)
+    // The dev environment (debug, profiler) is slow to answer
     expect: { timeout: 10_000 },
     use: {
         baseURL,

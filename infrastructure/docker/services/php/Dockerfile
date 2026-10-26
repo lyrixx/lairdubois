@@ -73,17 +73,6 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
-# The "less" filter of Assetic runs this node with less@3.13.1 (parameters "node" and
-# "node_paths"): in dev, the Assetic controller compiles the stylesheets on each change
-ARG NODEJS_VERSION=10.24.1
-RUN arch="$(dpkg --print-architecture)" \
-    && case "${arch}" in amd64) arch=x64 ;; esac \
-    && curl -sSL "https://nodejs.org/dist/v${NODEJS_VERSION}/node-v${NODEJS_VERSION}-linux-${arch}.tar.xz" \
-        | tar -xJ -C /usr/local --strip-components=1 --no-same-owner --exclude=CHANGELOG.md --exclude=LICENSE --exclude=README.md \
-    && ln -s /usr/local/bin/node /usr/bin/node \
-    && npm install -g less@3.13.1 \
-    && rm -rf /root/.npm /tmp/*
-
 # Every PHP setting of every image: each stage enables its own ones with phpenmod
 COPY php/mods-available/ /etc/php/${PHP_VERSION}/mods-available/
 
@@ -131,16 +120,21 @@ FROM php-base AS builder
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-# Java runs the closure compiler and yuicompressor of Assetic (app/Resources/java), only
-# used without debug ("?closure" and "?yui_css" filters), e.g. "assetic:dump --env=prod"
-RUN mkdir -p /usr/share/man/man1 \
-    && apt-get update \
+RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        "default-jre-headless" \
         "git" \
         "unzip" \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
+
+# Node builds the CSS and JS of the site with Vite (package.json, vite.config.js, castor
+# app:assets:build): in the builder only, the other images serve what it writes in web/build/
+ARG NODEJS_VERSION=24.22.1
+RUN arch="$(dpkg --print-architecture)" \
+    && case "${arch}" in amd64) arch=x64 ;; esac \
+    && curl -sSL "https://nodejs.org/dist/v${NODEJS_VERSION}/node-v${NODEJS_VERSION}-linux-${arch}.tar.xz" \
+        | tar -xJ -C /usr/local --strip-components=1 --no-same-owner --exclude=CHANGELOG.md --exclude=LICENSE --exclude=README.md \
+    && rm -rf /tmp/*
 
 RUN phpenmod app-default
 

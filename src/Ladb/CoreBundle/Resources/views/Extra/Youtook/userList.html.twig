@@ -9,10 +9,7 @@
 
 {% block bodyJavascripts %}
     {{ parent() }}
-    {% javascripts filter='?closure'
-        '@LadbCoreBundle/Resources/assets/js/ladb/jquery.ladb.youtookwidget.js' %}
-        <script src="{{ asset_url }}"></script>
-    {% endjavascripts %}
+    <script src="{{ asset('build/youtook.js', 'build') }}"></script>
     <script>
         $(document).ready(function() {
             $('#ladb_youtook_widget').ladbYoutookWidget();

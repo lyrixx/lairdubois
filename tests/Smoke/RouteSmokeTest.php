@@ -102,13 +102,6 @@ final class RouteSmokeTest extends WebTestCase
             if (isset(self::UNTESTED[$name])) {
                 continue;
             }
-            // The CSS and JS of the dev controller of Assetic are the same for everyone, and slow
-            // to build (LESS): anonymous only
-            if (str_starts_with($name, '_assetic_')) {
-                yield "{$name} (anonymous)" => [$name, 'anonymous'];
-
-                continue;
-            }
             foreach (array_keys(self::ROLES) as $role) {
                 yield "{$name} ({$role})" => [$name, $role];
             }

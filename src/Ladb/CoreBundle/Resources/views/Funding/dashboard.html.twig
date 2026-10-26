@@ -4,25 +4,14 @@
 
 {% block headStylesheets %}
     {{ parent() }}
-    {% stylesheets filter='less,?yui_css'
-        '@LadbCoreBundle/Resources/assets/less/ladb/icons/ladbcc.less' %}
-        <link rel="stylesheet" type="text/css" href="{{ asset_url }}" media="screen" />
-    {% endstylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{ asset('build/funding.css', 'build') }}" media="screen" />
 {% endblock %}
 
 {% block bodyJavascripts %}
     {{ parent() }}
-    {% javascripts filter='?closure'
-        '@LadbCoreBundle/Resources/assets/js/jquery-circle-progress/jquery.circle-progress.js'
-        '@LadbCoreBundle/Resources/assets/js/ladb/jquery.ladb.fundingdashboard.js'
-        '@LadbCoreBundle/Resources/assets/js/ladb/jquery.ladb.fundingwidget.js' %}
-        <script src="{{ asset_url }}"></script>
-    {% endjavascripts %}
+    <script src="{{ asset('build/funding.js', 'build') }}"></script>
     {% if is_granted('ROLE_ADMIN') %}
-        {% javascripts filter='?closure'
-            '@LadbCoreBundle/Resources/assets/js/ladb/jquery.ladb.fundingchargeinfos.js' %}
-            <script src="{{ asset_url }}"></script>
-        {% endjavascripts %}
+        <script src="{{ asset('build/funding-charge-infos.js', 'build') }}"></script>
     {% endif %}
     <script src="https://js.stripe.com/v3/"></script>
     <script>

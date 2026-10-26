@@ -36,9 +36,6 @@ parameters:
     router.request_context.host:    www.lairdubois.fr
     router.request_context.scheme:  https
 
-    node:                           /usr/bin/node
-    node_paths:                     [/usr/local/lib/node_modules/]
-
     chromium:                       /usr/bin/chromium
 
     google_api_key:                 YOUR_GOOGLE_API_KEY

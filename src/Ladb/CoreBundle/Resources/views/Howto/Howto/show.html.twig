@@ -54,18 +54,12 @@
 
 {% block headStylesheets %}
     {{ parent() }}
-    {% stylesheets filter='?yui_css'
-        '@LadbCoreBundle/Resources/assets/css/jquery-tocify/jquery.tocify.css' %}
-        <link rel="stylesheet" type="text/css" href="{{ asset_url }}" media="screen" />
-    {% endstylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{ asset('build/tocify.css', 'build') }}" media="screen" />
 {% endblock %}
 
 {% block bodyJavascripts %}
     {{ parent() }}
-    {% javascripts filter='?closure'
-        '@LadbCoreBundle/Resources/assets/js/jquery-tocify/jquery.tocify.js' %}
-        <script src="{{ asset_url }}"></script>
-    {% endjavascripts %}
+    <script src="{{ asset('build/tocify.js', 'build') }}"></script>
     <script>
         $(function() {
             if ($(window).width() >= 768) {

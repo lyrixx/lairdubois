@@ -14,10 +14,7 @@
 
 {% block headStylesheets %}
     {{ parent() }}
-    {% stylesheets filter='less,?yui_css'
-        '@LadbCoreBundle/Resources/assets/less/ladb/layout/qa.less' %}
-        <link rel="stylesheet" type="text/css" href="{{ asset_url }}" media="screen" />
-    {% endstylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{ asset('build/qa.css', 'build') }}" media="screen" />
 {% endblock %}
 
 {% block bodyHeaderContainerContent %}

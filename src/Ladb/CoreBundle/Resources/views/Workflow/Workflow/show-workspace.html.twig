@@ -9,12 +9,7 @@
 {% block headStylesheets %}
     {{ parent() }}
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css" media="screen" />
-    {% stylesheets filter='less,?yui_css'
-        '@LadbCoreBundle/Resources/assets/less/ladb/component/inputcolor.less'
-        '@LadbCoreBundle/Resources/assets/less/ladb/component/inputduration.less'
-        '@LadbCoreBundle/Resources/assets/less/ladb/layout/workflow.less' %}
-        <link rel="stylesheet" type="text/css" href="{{ asset_url }}" media="screen,print" />
-    {% endstylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{ asset('build/workflow-workspace.css', 'build') }}" media="screen,print" />
 {% endblock %}
 
 {% block bodyJavascripts %}
@@ -24,14 +19,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-mousewheel/3.1.13/jquery.mousewheel.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.min.js"></script>
-    {% javascripts filter='?closure'
-        '@LadbCoreBundle/Resources/assets/js/jquery-panzoom/jquery.panzoom.min.js'
-        '@LadbCoreBundle/Resources/assets/js/ladb/jquery.ladb.inputcolor.js'
-        '@LadbCoreBundle/Resources/assets/js/ladb/jquery.ladb.inputduration.js'
-        '@LadbCoreBundle/Resources/assets/js/ladb/jquery.ladb.remotemodal.js'
-        '@LadbCoreBundle/Resources/assets/js/ladb/jquery.ladb.workflowworkspace.js' %}
-        <script src="{{ asset_url }}"></script>
-    {% endjavascripts %}
+    <script src="{{ asset('build/workflow-workspace.js', 'build') }}"></script>
     {{ ws_client() }}
     <script>
         $(document).ready(function() {

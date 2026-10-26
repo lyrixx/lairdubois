@@ -78,6 +78,14 @@ jobs:
                   key: composer-${{ hashFiles('composer.lock', 'tools/*/composer.lock') }}
                   restore-keys: composer-
 
+            - &npm_cache
+              name: Cache the npm packages
+              uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+              with:
+                  path: .home/.npm
+                  key: npm-${{ hashFiles('package-lock.json', 'tests/e2e/package-lock.json') }}
+                  restore-keys: npm-
+
             - &build
               name: Build the images
               run: castor docker:build
@@ -85,6 +93,11 @@ jobs:
             - &install
               name: Install the application
               run: castor app:install
+
+            # The pages need the manifest of the build (asset())
+            - &assets
+              name: Build the assets
+              run: castor app:assets:build
 
             - &up
               name: Start the infrastructure
@@ -139,8 +152,10 @@ jobs:
             - *castor
             - *docker_cache
             - *composer_cache
+            - *npm_cache
             - *build
             - *install
+            - *assets
             - *up
 
             - name: Run the end-to-end tests

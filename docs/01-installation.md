@@ -126,14 +126,16 @@ Restart PHP FPM.
     $ sudo curl -sS https://getcomposer.org/installer | sudo php -- --install-dir=/usr/local/bin --filename=composer
 ```
 
-### Install [NodeJS](https://nodejs.org) and **[Less](http://lesscss.org/) package** - *The CSS pre-processor*
+### Install [NodeJS](https://nodejs.org) 24 - *To build the CSS and JS*
 
-Caution that node.js version > 10.x are not compatible with assetic. Try to install node.js 10.x.
+Vite and its plugins (`package.json`) need Node.js 22.18 or later: the one of Debian is too old. Node.js 24 from [NodeSource](https://github.com/nodesource/distributions) :
 
 ``` bash
-    $ sudo apt-get install nodejs npm
-    $ sudo npm install -g less@3.13.1
+    $ curl -fsSL https://deb.nodesource.com/setup_24.x | sudo bash -
+    $ sudo apt-get install nodejs
 ```
+
+Neither Less nor Java is needed any more for the assets: Less comes with the Node packages of the project.
 
 ### Install *Java8* - *Used to run Elesticsearch*
 
@@ -226,6 +228,7 @@ alias ladb-maintenance-stop='sudo scripts/maintenanceStop.sh'
 alias ladb-git-pull-master='sudo --user=www-data git pull origin master'
 alias ladb-log='sudo --user=www-data lnav var/logs/prod.log'
 alias ladb-install='sudo --user=www-data composer install'
+alias ladb-assets='sudo --user=www-data npm ci --no-audit --no-fund && sudo --user=www-data npx vite build'
 ```
 
 > If you are on the **DEV** server :
@@ -237,6 +240,7 @@ alias ladb-git='sudo --user=www-data git'
 alias ladb-git-pull-master='sudo --user=www-data git pull origin master'
 alias ladb-log='sudo --user=www-data lnav var/logs/dev.log'
 alias ladb-install='sudo --user=www-data composer install'
+alias ladb-assets='sudo --user=www-data npm ci --no-audit --no-fund && sudo --user=www-data npx vite build'
 ```
 
 Now you are ready to setup the website itself !
@@ -385,11 +389,13 @@ Execute the SQL script located at [`docs/database/schema-sessions.sql`](database
 
 *⚠️&nbsp;️&nbsp;Note : Be sure that the current directory is the project's root directory. (ie: `/var/www/www.lairdubois.fr` for PROD environment)*
 
-This step will create `web/js` and `web/css` folders and fill them with compiled and minimized assets. 
+This step will install the Node packages in `node_modules`, then create the `web/build` folder and fill it with the compiled and minimized CSS and JS (Vite, `vite.config.js`), with the `manifest.json` that gives their versioned names to the templates. The sources are in `vendor` and `components`: run it after composer (step 4).
 
 ``` bash
-    $ ladb assetic:dump
+    $ ladb-assets
 ```
+
+Run it again after each update of the code (`ladb-git-pull-master`, `ladb-install`): without `web/build/manifest.json`, every page fails. The `web/css` and `web/js` folders of the former `assetic:dump` are no longer used.
 
 ## Step 10 - Install bundle's assets
 
