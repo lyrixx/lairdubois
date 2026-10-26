@@ -13,6 +13,7 @@ use function Castor\fs;
 use function Castor\io;
 use function Castor\variable;
 use function Castor\with;
+use function assets_build_if_missing;
 use function db_fixtures;
 use function db_has_users;
 use function docker\docker_compose;
@@ -91,6 +92,8 @@ function phpstan(
 function phpunit(#[AsRawTokens] array $rawTokens = []): int
 {
     install_if_missing();
+    // The pages need the manifest of the assets
+    assets_build_if_missing();
 
     // The tests have their own database and index (config_test.yml), loaded once: each test rolls
     // its changes back. castor -c test app:db:fixtures reloads them.
@@ -194,6 +197,7 @@ function deprecations(): void
 function e2e(#[AsRawTokens] array $rawTokens = []): int
 {
     e2e_install_if_missing();
+    assets_build_if_missing();
 
     // The site serves the dev environment (web/app_dev.php) in every context: the suite resets
     // its database and index. The websocket server keeps a connection to the dropped database:

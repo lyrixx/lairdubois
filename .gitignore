@@ -1,7 +1,7 @@
+/node_modules/
+/web/build/
 /web/bundles/
 /web/media/
-/web/css/
-/web/js/
 /web/.htaccess
 /web/sitemap-*
 /app/cache/*

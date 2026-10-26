@@ -99,7 +99,7 @@ Issu de l'`AGENTS.md` de docker-starter. Jamais PHP, Node ni Composer sur l'hôt
 le conteneur `builder`, via Castor. Prérequis de l'hôte : Docker et Castor.
 
 ```bash
-castor start                      # build, composer, up, schéma, fixtures si la base est vide, index, workers
+castor start                      # build, composer, assets, up, schéma, fixtures si la base est vide, index, workers
 castor about                      # URL de la copie
 castor docker:ports               # ports du routeur de la copie
 castor stop
@@ -110,7 +110,8 @@ castor app:install                # composer install, clés DKIM et VAPID jetabl
 castor app:db:schema              # base, schéma (doctrine:schema:update) et table sessions
 castor app:db:fixtures           # recrée la base avec les fixtures, notifications, index
 castor app:elasticsearch:populate # fos:elastica:populate
-castor app:assets:dump            # CSS et JS de prod (Assetic, closure compiler, yuicompressor)
+castor app:assets:build           # CSS et JS minifiés dans web/build/ (npm ci si besoin, Vite)
+castor app:assets:watch           # les reconstruit à chaque modification, sans minifier
 castor docker:build [--service=…]
 castor docker:worker:start        # et docker:worker:stop
 castor docker:destroy --force     # conteneurs, volumes, réseau, images et certificats de la copie
@@ -120,8 +121,15 @@ castor docker:generate-certificates [--force]
 Contextes : `--context=test` (`SYMFONY_ENV=test`), `--context=ci` (le même, sans couleurs).
 
 - Application à la racine, docroot `web/`, front controller `app_dev.php`. Service `frontend` :
-  nginx et php-fpm. Node 10 et `less@3.13.1` dans toutes les images (en dev, le contrôleur Assetic
-  compile le LESS à la demande), Java dans le builder seulement.
+  nginx et php-fpm. Node 24 dans le builder seulement, pour Vite : les autres images servent les
+  fichiers de `web/build/`. Pas de Java.
+- Assets (CSS et JS) : Vite et le plugin npm de Symfony Reprise (`package.json`, `vite.config.js`),
+  dans `web/build/` avec `manifest.json`, hors git. Une entrée par groupe des anciennes balises
+  `{% stylesheets %}` et `{% javascripts %}` d'Assetic, mêmes fichiers dans le même ordre, et des
+  balises écrites à la main : `{{ asset('build/base.css', 'build') }}` (package `build` de
+  `config.yml`, `json_manifest_path`). Un fichier LESS ou JS ajouté à un groupe va dans
+  `vite.config.js`. Le dev sert le build : `castor app:assets:watch` pendant qu'on modifie un
+  LESS ou un JS, pas de serveur de Vite.
 - MariaDB 10.11 (`root`/`app`), Elasticsearch 5.6, RabbitMQ 3.13 (`app`/`app`), Memcached. Workers
   (profil `worker`) : les deux consumers RabbitMQ et `websocket` (routé sur `/ws`).
 - Playwright (service `playwright`, profil `e2e`, lancé par `castor qa:e2e`) : l'image officielle
@@ -194,7 +202,10 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() des ac
 - En 3.4, `lint:yaml` ne prend qu'un chemin et compte les dépréciations comme des erreurs ;
   `lint:twig` exige des chemins.
 - Cache GitHub Actions : couches Docker (`type=gha`, un scope par cible du Dockerfile, via un
-  `docker-compose.override.yml` écrit par le workflow) et cache Composer (`.home/.cache/composer`).
+  `docker-compose.override.yml` écrit par le workflow), cache Composer (`.home/.cache/composer`)
+  et cache npm (`.home/.npm`).
+- Les deux jobs construisent les assets (`castor app:assets:build`) : `asset()` lit leur manifest
+  sur chaque page. `qa:phpunit` et `qa:e2e` les construisent aussi s'il manque.
 - Rector 2 dans `tools/rector`, hors `qa:install` (la CI n'en a pas besoin), avec les règles du
   projet (`tools/rector/src/`). `ControllerGetToActionArgumentRector` laisse
   `__RECTOR_REMOVED_LINE__;` à la place des lignes qu'il supprime, que `qa:rector` retire ensuite :
@@ -311,8 +322,8 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   rend les URL appelées (`popRequests()`).
 - Une `\Error` PHP sort du kernel en 3.4 : elle remonte de `$client->request()` au lieu de donner
   une 500. Un warning PHP devient une exception (gestionnaire d'erreurs de PHPUnit) : 500.
-- Smoke test (`tests/Smoke/RouteSmokeTest.php`) : chaque route GET en anonyme, `user` et `admin`
-  (les assets d'Assetic en anonyme seulement), rien en 5xx ni en `\Error`. Une action qui refuse
+- Smoke test (`tests/Smoke/RouteSmokeTest.php`) : chaque route GET en anonyme, `user` et `admin`,
+  rien en 5xx ni en `\Error`. Une action qui refuse
   une requête hors XHR (« Only XML request allowed ») est rappelée en XHR. Paramètres des routes :
   `PARAMETERS` (par nom) et `getRouteParameters()` (par route). Échecs connus dans
   `KNOWN_FAILURES` (route, rôle, issue) : marqués incomplets, et le test échoue quand l'un d'eux
@@ -425,9 +436,27 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   avec Composer 2.10, rien n'empêche plus de monter. Composer 2.2 ne lit pas
   `COMPOSER_IGNORE_PLATFORM_REQ` et n'a pas `composer audit` (2.4 et plus).
 - `allow-plugins` doit lister `robloach/component-installer` : il installe `components/` (jQuery…),
-  que les templates lisent via Assetic.
+  que `vite.config.js` concatène. Il garde `kriswallsmith/assetic` dans le lock, sans le bundle.
 - Le bundle `symfony/reprise` exige Symfony `^7.4` et PHP 8.4 : avant le saut en 7.4, seul le côté
   JS (Vite et le plugin npm `@symfony/reprise`) est utilisable. Ce plugin demande Node 22.18 ou plus.
+- Sans `web/build/manifest.json`, `asset(…, 'build')` lève une exception : toute page répond 500.
+  Après un `git pull` qui touche aux assets, `castor app:assets:build`.
+- Les scripts du site sont écrits pour la portée globale (`var` et `function` en tête de fichier,
+  jQuery et ses plugins en globales) : Vite en ferait des modules. `vite.config.js` les concatène
+  tels quels et les écrit comme fichiers du build, que le plugin de Reprise met dans le manifest ;
+  terser les minifie (le minifieur de Vite écrit des template literals et `**`). Le bundle de
+  Reprise (#29) rend des `<script type="module">` : ces groupes garderont `asset()`.
+- Vite 8 déclare `less ^4` en dépendance optionnelle : l'`overrides` de `package.json` lui donne
+  `less@3.13.1`, celle d'Assetic, pour un CSS identique.
+- Le CSS n'est minifié que de ses espaces et commentaires (esbuild, sans cible ni `minifySyntax`).
+  Lightning CSS, le minifieur par défaut de Vite, arrondit les nombres (`1.42857143` → `1.42857`,
+  le texte bouge d'une fraction de pixel), retire des préfixes et réécrit les couleurs selon les
+  navigateurs visés ; esbuild avec une cible ajoute des préfixes (`-webkit-hyphens` : Safari
+  couperait les mots).
+- Les `url()` absolues des CSS (`/bundles/ladbcore/…`, `assets:install`) restent telles quelles.
+  Deux relatives ne résolvaient déjà pas avec Assetic et ne résolvent toujours pas (404) : les
+  glyphicons de Bootstrap (`../fonts/`, aucune page n'en affiche) et `images/layers.png` de
+  Leaflet (contrôle non utilisé). Vite les signale à chaque build.
 - `trusted_hosts` vaut `^(dev|www)\.lairdubois\.fr$`, plus `^lairdubois\.test$` en dev et en
   test : une requête sur un autre host répond 400, y compris `localhost`, le host par défaut du
   client de `WebTestCase`.
@@ -450,7 +479,9 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `websocket_host` (`websocket`) ne sert qu'au pusher.
 - Gos WebSocket ne marche pas tel quel en PHP 8 : le pusher WAMP (son client lit mal la réponse du
   serveur) et la lecture de la session par le serveur (`unserialize()` de Ratchet, PHP 8.3) sont
-  remplacés par les classes de `src/Ladb/CoreBundle/WebSocket/`, à retirer avec Gos (#21).
+  remplacés par les classes de `src/Ladb/CoreBundle/WebSocket/`, à retirer avec Gos (#21). Le
+  template de `{{ ws_client() }}`, écrit pour Assetic, est remplacé par
+  `app/Resources/GosWebSocketBundle/views/client.html.twig` (groupe `websocket` de Vite).
 - `bin/console` lit `SYMFONY_ENV`, pas `APP_ENV`.
 - Les sessions sont en base (`PdoSessionHandler`) : `doctrine:schema:create` ne crée pas la table
   `sessions`.

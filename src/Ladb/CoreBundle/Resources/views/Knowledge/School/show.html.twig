@@ -60,21 +60,14 @@
 
 {% block headStylesheets %}
     {{ parent() }}
-    {% stylesheets filter='less,?yui_css'
-        '@LadbCoreBundle/Resources/assets/less/ladb/layout/school.less' %}
-        <link rel="stylesheet" type="text/css" href="{{ asset_url }}" media="screen" />
-    {% endstylesheets %}
+    <link rel="stylesheet" type="text/css" href="{{ asset('build/school.css', 'build') }}" media="screen" />
     {{ block('mapAreaStylesheets') }}
 {% endblock %}
 
 {% block bodyJavascripts %}
     {{ parent() }}
     {{ block('mapAreaJavascripts') }}
-    {% javascripts filter='?closure'
-        '@LadbCoreBundle/Resources/assets/js/ladb/jquery.ladb.schoolpage.js'
-        '@LadbCoreBundle/Resources/assets/js/ladb/ladb-values.js' %}
-        <script src="{{ asset_url }}"></script>
-    {% endjavascripts %}
+    <script src="{{ asset('build/school.js', 'build') }}"></script>
     <script>
         $(document).ready(function() {
             $('#container').ladbSchoolPage({

@@ -36,13 +36,14 @@ function create_default_variables(): array
     ];
 }
 
-#[AsTask(description: 'Builds and starts the infrastructure, then installs the application (composer, database, fixtures if empty, index, workers)')]
+#[AsTask(description: 'Builds and starts the infrastructure, then installs the application (composer, assets, database, fixtures if empty, index, workers)')]
 function start(): void
 {
     io()->title('Starting the stack');
 
     build();
     install();
+    assets_build();
     up(profiles: ['default']); // We can't start worker now, they are not installed
     db_schema();
     // A new copy gets the fixtures, to be browsable at once: a database with accounts is kept as is
@@ -132,10 +133,54 @@ function elasticsearch_populate(): void
     docker_compose_run(['bin/console', 'fos:elastica:populate']);
 }
 
-#[AsTask(description: 'Builds the CSS and JS as on the production server, in web/css and web/js (Assetic, with Java)', namespace: 'app:assets', name: 'dump')]
-function assets_dump(): void
+#[AsTask(description: 'Builds the CSS and JS in web/build/, minified as on the production server (Vite, vite.config.js)', namespace: 'app:assets', name: 'build')]
+function assets_build(): void
 {
-    io()->title('Dumping the assets');
+    io()->title('Building the assets');
 
-    docker_compose_run(['bin/console', 'assetic:dump', '--env=prod', '--no-debug']);
+    assets_install();
+    docker_compose_run(['npx', 'vite', 'build']);
+}
+
+#[AsTask(description: 'Builds the CSS and JS in web/build/ again on each change of their files, not minified (Vite)', namespace: 'app:assets', name: 'watch')]
+function assets_watch(): void
+{
+    assets_install();
+
+    io()->title('Watching the assets');
+
+    docker_compose_run(['npx', 'vite', 'build', '--watch', '--mode', 'development'], c: context()->toInteractive()->withTrappedSignals());
+}
+
+/**
+ * The template helper asset() fails without the manifest of the build (web/build/manifest.json):
+ * every page, the tests included.
+ */
+function assets_build_if_missing(): void
+{
+    if (!is_file(variable('root_dir') . '/web/build/manifest.json')) {
+        assets_build();
+    }
+}
+
+function assets_install(): void
+{
+    $rootDir = variable('root_dir');
+
+    // The sources of the assets: the bundles of vendor/, and components/ (jQuery...) that
+    // robloach/component-installer writes
+    if (!is_dir($rootDir . '/vendor') || !is_dir($rootDir . '/components')) {
+        install();
+    }
+
+    // npm writes node_modules/.package-lock.json on each install: when it is older than the
+    // lock, the dependencies changed since
+    $installed = $rootDir . '/node_modules/.package-lock.json';
+    if (is_file($installed) && filemtime($installed) >= filemtime($rootDir . '/package-lock.json')) {
+        return;
+    }
+
+    io()->section('Installing the Node packages');
+
+    docker_compose_run(['npm', 'ci', '--no-audit', '--no-fund']);
 }

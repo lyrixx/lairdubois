@@ -157,6 +157,7 @@ services:
         environment:
             <<: *parameters_environment
             SYMFONY_ENV: "${SYMFONY_ENV:-}"
+            NPM_CONFIG_UPDATE_NOTIFIER: "false"
             # The following list contains the common environment variables exposed by CI platforms
             GITHUB_ACTIONS: "${GITHUB_ACTIONS:-}"
             CI: "${CI:-}"

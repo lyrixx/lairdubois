@@ -1,0 +1,16 @@
+{
+    "name": "lairdubois",
+    "private": true,
+    "description": "CSS and JS of the site, built by Vite in web/build/ (castor app:assets:build)",
+    "type": "module",
+    "devDependencies": {
+        "@symfony/reprise": "1.3.0",
+        "esbuild": "0.28.2",
+        "less": "3.13.1",
+        "terser": "5.51.2",
+        "vite": "8.3.5"
+    },
+    "overrides": {
+        "less": "$less"
+    }
+}

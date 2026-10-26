@@ -121,23 +121,7 @@
             <meta name="theme-color" content="#3E3B33">
             <meta name="application-name" content="L'Air du Bois">
             {% block headStylesheets %}
-                {% stylesheets filter='less,?yui_css'
-                    '@LadbCoreBundle/Resources/assets/css/jquery-lazyloadxt/jquery.lazyloadxt.fadein.css'
-                    '@LadbCoreBundle/Resources/assets/css/emojionearea/emojionearea.css'
-                    '@LadbCoreBundle/Resources/assets/less/bootstrap/bootstrap.less'
-                    '@LadbCoreBundle/Resources/assets/less/jquery-autocomplete/jquery-autocomplete.less'
-                    '@LadbCoreBundle/Resources/assets/less/jquery-textcomplete/jquery-textcomplete.less'
-                    '@LadbCoreBundle/Resources/assets/less/uikit/core/animation.less'
-                    '@LadbCoreBundle/Resources/assets/less/uikit/core/nav.less'
-                    '@LadbCoreBundle/Resources/assets/less/uikit/core/offcanvas.less'
-                    '@LadbCoreBundle/Resources/assets/less/uikit/core/overlay.less'
-                    '@LadbCoreBundle/Resources/assets/less/uikit/components/notify.less'
-                    '@LadbCoreBundle/Resources/assets/less/bootstrap-markdown/bootstrap-markdown-v1.less'
-                    '@LadbCoreBundle/Resources/assets/less/bootstrap-datetimepicker/bootstrap-datetimepicker.less'
-                    '@LadbCoreBundle/Resources/assets/less/ladb/ladb.less'
-                    '@LadbCoreBundle/Resources/assets/less/ladb/icons/ladbicons.less' %}
-                    <link rel="stylesheet" type="text/css" href="{{ asset_url }}" media="screen,print" />
-                {% endstylesheets %}
+                <link rel="stylesheet" type="text/css" href="{{ asset('build/base.css', 'build') }}" media="screen,print" />
             {% endblock %}
             {% block headJavascripts %}
                 {% if pageSectionUrl and pageSectionName %}
@@ -167,16 +151,9 @@
                     </script>
                     <link itemprop="breadcrumb" href="#ladb_breadcrumb_list" />
                 {% endif %}
-                {% javascripts filter='?closure'
-                    '../components/jquery/jquery.js' %}
-                    <script src="{{ asset_url }}"></script>
-                {% endjavascripts %}
+                <script src="{{ asset('build/jquery.js', 'build') }}"></script>
                 <!--[if lt IE 9]>
-                    {% javascripts filter='?closure'
-                        '../components/html5shiv/dist/html5shiv.js'
-                        '@LadbCoreBundle/Resources/assets/js/respond/respond.js' %}
-                        <script src="{{ asset_url }}"></script>
-                    {% endjavascripts %}
+                    <script src="{{ asset('build/ie.js', 'build') }}"></script>
                 <![endif]-->
             {% endblock %}
         {% endblock %}
@@ -206,74 +183,7 @@
             {% block bodyFooter %}{% endblock %}
         {% endblock %}
         {% block bodyJavascripts %}
-            {% javascripts filter='?closure'
-                '../components/jquery-ui/jquery-ui.js'
-                '../components/jquery-ui/ui/widgets/sortable.js'
-                '../components/jquery-ui/ui/effect.js'
-                '../components/jquery-ui/ui/effects/effect-highlight.js'
-                '../components/masonry/masonry.pkgd.js'
-                '../components/moment/moment.js'
-                '../components/moment/locale/fr.js'
-                '../components/bootstrap-datetimepicker/src/js/bootstrap-datetimepicker.js'
-                '@LadbCoreBundle/Resources/assets/js/modernizr/modernizr-custom.js'
-                '@LadbCoreBundle/Resources/assets/js/jquery-form/jquery.form.js'
-                '@LadbCoreBundle/Resources/assets/js/jquery-ui-touch-punch/jquery.ui.touch-punch.js'
-                '@LadbCoreBundle/Resources/assets/js/jquery-textcomplete/jquery.textcomplete.min.js'
-                '@LadbCoreBundle/Resources/assets/js/jquery-autocomplete/jquery.autocomplete.js'
-                '../vendor/twitter/bootstrap/js/modal.js'
-                '../vendor/twitter/bootstrap/js/tooltip.js'
-                '../vendor/twitter/bootstrap/js/popover.js'
-                '../vendor/twitter/bootstrap/js/button.js'
-                '../vendor/twitter/bootstrap/js/collapse.js'
-                '../vendor/twitter/bootstrap/js/dropdown.js'
-                '../vendor/twitter/bootstrap/js/affix.js'
-                '../vendor/twitter/bootstrap/js/tab.js'
-                '../vendor/uikit/uikit/src/js/core/core.js'
-                '../vendor/uikit/uikit/src/js/core/offcanvas.js'
-                '../vendor/uikit/uikit/src/js/core/scrollspy.js'
-                '../vendor/uikit/uikit/src/js/components/notify.js'
-                '@LadbCoreBundle/Resources/assets/js/bootbox/bootbox.js'
-                '@LadbCoreBundle/Resources/assets/js/bootstrap-markdown/bootstrap-markdown-v1.js'
-                '@LadbCoreBundle/Resources/assets/js/jquery-scrollto/jquery.scrollto.js'
-                '@LadbCoreBundle/Resources/assets/js/jquery-jscroll/jquery.jscroll.js'
-                '@LadbCoreBundle/Resources/assets/js/jquery-cornerslider/jquery.cornerslider.js'
-                '@LadbCoreBundle/Resources/assets/js/jquery-sticky/jquery.sticky.js'
-                '@LadbCoreBundle/Resources/assets/js/jquery-lazy/jquery.lazy.js'
-                '@LadbCoreBundle/Resources/assets/js/jquery-lazy/jquery.lazy.ajax.js'
-                '@LadbCoreBundle/Resources/assets/js/readmorejs/readmore.js'
-                '@LadbCoreBundle/Resources/assets/js/emojionearea/emojionearea.js'
-                '@LadbCoreBundle/Resources/assets/js/autosize/autosize.js'
-
-                '@LadbCoreBundle/Resources/assets/js/javascript-load-image/load-image.min.js'
-                '@LadbCoreBundle/Resources/assets/js/javascript-canvas-to-blob/canvas-to-blob.min.js'
-                '@LadbCoreBundle/Resources/assets/js/infinite/collections.js'
-                '../vendor/blueimp/jquery-file-upload/js/jquery.fileupload.js'
-                '../vendor/blueimp/jquery-file-upload/js/jquery.iframe-transport.js'
-                '../vendor/blueimp/jquery-file-upload/js/jquery.fileupload-process.js'
-                '../vendor/blueimp/jquery-file-upload/js/jquery.fileupload-image.js'
-                '../vendor/blueimp/jquery-file-upload/js/jquery.fileupload-validate.js'
-
-                '@LadbCoreBundle/Resources/assets/js/ladb/jquery.ladb.counters.js'
-                '@LadbCoreBundle/Resources/assets/js/ladb/jquery.ladb.hrefajax.js'
-                '@LadbCoreBundle/Resources/assets/js/ladb/jquery.ladb.textcompletify.js'
-                '@LadbCoreBundle/Resources/assets/js/ladb/jquery.ladb.sharebuttonsbuilder.js'
-                '@LadbCoreBundle/Resources/assets/js/ladb/jquery.ladb.scrollto.js'
-                '@LadbCoreBundle/Resources/assets/js/ladb/jquery.ladb.appendscrolltotopbtn.js'
-                '@LadbCoreBundle/Resources/assets/js/ladb/jquery.ladb.autopager.js'
-                '@LadbCoreBundle/Resources/assets/js/ladb/jquery.ladb.maparea.js'
-                '@LadbCoreBundle/Resources/assets/js/ladb/jquery.ladb.smartsearch.js'
-                '@LadbCoreBundle/Resources/assets/js/ladb/jquery.ladb.topbartranslucent.js'
-                '@LadbCoreBundle/Resources/assets/js/ladb/jquery.ladb.commentwidget.js'
-                '@LadbCoreBundle/Resources/assets/js/ladb/jquery.ladb.votewidget.js'
-                '@LadbCoreBundle/Resources/assets/js/ladb/jquery.ladb.reviewwidget.js'
-                '@LadbCoreBundle/Resources/assets/js/ladb/jquery.ladb.feedbackwidget.js'
-                '@LadbCoreBundle/Resources/assets/js/ladb/jquery.ladb.boxlinkclick.js'
-                '@LadbCoreBundle/Resources/assets/js/ladb/ladb-common.js'
-                '@LadbCoreBundle/Resources/assets/js/ladb/ladb-reports.js'
-                '@LadbCoreBundle/Resources/assets/js/ladb/ladb-pictures.js'
-                '@LadbCoreBundle/Resources/assets/js/ladb/ladb-webpush-client.js' %}
-                <script src="{{ asset_url }}"></script>
-            {% endjavascripts %}
+            <script src="{{ asset('build/base.js', 'build') }}"></script>
             <script>
                 {% if not noLazyLoad %}
                     $(window).on('load orientationchange', lazyLoadUpdate);
