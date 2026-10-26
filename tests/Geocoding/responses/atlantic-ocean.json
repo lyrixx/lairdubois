@@ -1,0 +1,44 @@
+{
+   "results" : [
+      {
+         "address_components" : [
+            {
+               "long_name" : "Océan Atlantique",
+               "short_name" : "Océan Atlantique",
+               "types" : [ "natural_feature", "establishment" ]
+            }
+         ],
+         "formatted_address" : "Océan Atlantique",
+         "geometry" : {
+            "bounds" : {
+               "northeast" : {
+                  "lat" : 68.6187515,
+                  "lng" : 20.0000001
+               },
+               "southwest" : {
+                  "lat" : -60.0000001,
+                  "lng" : -83.2160578
+               }
+            },
+            "location" : {
+               "lat" : -14.5994134,
+               "lng" : -28.6731465
+            },
+            "location_type" : "APPROXIMATE",
+            "viewport" : {
+               "northeast" : {
+                  "lat" : 68.6187515,
+                  "lng" : 20.0000001
+               },
+               "southwest" : {
+                  "lat" : -60.0000001,
+                  "lng" : -83.2160578
+               }
+            }
+         },
+         "place_id" : "ChIJ_7hu48qBWgYRT1MQ81HVACI",
+         "types" : [ "natural_feature", "establishment" ]
+      }
+   ],
+   "status" : "OK"
+}

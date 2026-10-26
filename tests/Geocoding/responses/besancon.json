@@ -1,0 +1,68 @@
+{
+   "results" : [
+      {
+         "address_components" : [
+            {
+               "long_name" : "12",
+               "short_name" : "12",
+               "types" : [ "street_number" ]
+            },
+            {
+               "long_name" : "Rue de l'Église",
+               "short_name" : "Rue de l'Église",
+               "types" : [ "route" ]
+            },
+            {
+               "long_name" : "Besançon",
+               "short_name" : "Besançon",
+               "types" : [ "locality", "political" ]
+            },
+            {
+               "long_name" : "Doubs",
+               "short_name" : "Doubs",
+               "types" : [ "administrative_area_level_2", "political" ]
+            },
+            {
+               "long_name" : "Bourgogne-Franche-Comté",
+               "short_name" : "BFC",
+               "types" : [ "administrative_area_level_1", "political" ]
+            },
+            {
+               "long_name" : "France",
+               "short_name" : "FR",
+               "types" : [ "country", "political" ]
+            },
+            {
+               "long_name" : "25000",
+               "short_name" : "25000",
+               "types" : [ "postal_code" ]
+            }
+         ],
+         "formatted_address" : "12 Rue de l'Église, 25000 Besançon, France",
+         "geometry" : {
+            "location" : {
+               "lat" : 47.2465147,
+               "lng" : 6.0420493
+            },
+            "location_type" : "ROOFTOP",
+            "viewport" : {
+               "northeast" : {
+                  "lat" : 47.2478636802915,
+                  "lng" : 6.043398280291502
+               },
+               "southwest" : {
+                  "lat" : 47.2451657197085,
+                  "lng" : 6.040700319708498
+               }
+            }
+         },
+         "place_id" : "ChIJN1t_tDeuEmsRUsoyG83frY4",
+         "plus_code" : {
+            "compound_code" : "6XWR+JR Besançon, France",
+            "global_code" : "8FV96XWR+JR"
+         },
+         "types" : [ "street_address" ]
+      }
+   ],
+   "status" : "OK"
+}

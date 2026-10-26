@@ -1,0 +1,69 @@
+{
+   "results" : [
+      {
+         "address_components" : [
+            {
+               "long_name" : "4200",
+               "short_name" : "4200",
+               "types" : [ "street_number" ]
+            },
+            {
+               "long_name" : "Rue Saint-Denis",
+               "short_name" : "Rue Saint-Denis",
+               "types" : [ "route" ]
+            },
+            {
+               "long_name" : "Le Plateau-Mont-Royal",
+               "short_name" : "Le Plateau-Mont-Royal",
+               "types" : [ "political", "sublocality", "sublocality_level_1" ]
+            },
+            {
+               "long_name" : "Montréal",
+               "short_name" : "Montréal",
+               "types" : [ "locality", "political" ]
+            },
+            {
+               "long_name" : "Communauté-Urbaine-de-Montréal",
+               "short_name" : "Communauté-Urbaine-de-Montréal",
+               "types" : [ "administrative_area_level_2", "political" ]
+            },
+            {
+               "long_name" : "Québec",
+               "short_name" : "QC",
+               "types" : [ "administrative_area_level_1", "political" ]
+            },
+            {
+               "long_name" : "Canada",
+               "short_name" : "CA",
+               "types" : [ "country", "political" ]
+            },
+            {
+               "long_name" : "H2W 2M5",
+               "short_name" : "H2W 2M5",
+               "types" : [ "postal_code" ]
+            }
+         ],
+         "formatted_address" : "4200 Rue Saint-Denis, Montréal, QC H2W 2M5, Canada",
+         "geometry" : {
+            "location" : {
+               "lat" : 45.5215328,
+               "lng" : -73.5826459
+            },
+            "location_type" : "ROOFTOP",
+            "viewport" : {
+               "northeast" : {
+                  "lat" : 45.5228817802915,
+                  "lng" : -73.58129691970849
+               },
+               "southwest" : {
+                  "lat" : 45.5201838197085,
+                  "lng" : -73.5839948802915
+               }
+            }
+         },
+         "place_id" : "ChIJ8z2Ec8MbyUwRiS1BP2Nd_5o",
+         "types" : [ "street_address" ]
+      }
+   ],
+   "status" : "OK"
+}
