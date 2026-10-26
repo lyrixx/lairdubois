@@ -4,10 +4,12 @@ namespace Ladb\CoreBundle\Utils;
 
 use Ladb\CoreBundle\Entity\Core\MemberInvitation;
 use Ladb\CoreBundle\Entity\Core\MemberRequest;
-use Minishlink\WebPush\WebPush;
+use Ladb\CoreBundle\Manager\Webpush\UserSubscriptionManager;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use BenTools\WebPushBundle\Model\Message\Notification;
-use BenTools\WebPushBundle\Registry\WebPushManagerRegistry;
+use BenTools\WebPushBundle\Model\Message\PushMessage;
+use BenTools\WebPushBundle\Sender\PushMessageSender;
 use Ladb\CoreBundle\Entity\Core\Like;
 use Ladb\CoreBundle\Entity\Message\Thread;
 use Ladb\CoreBundle\Entity\Qa\Answer;
@@ -16,6 +18,19 @@ use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Model\LikableInterface;
 
 class WebpushNotificationUtils extends AbstractContainerAwareUtils {
+
+	private $pushMessageSender;
+	private $userSubscriptionManager;
+	private $logger;
+
+	public function __construct(ContainerInterface $container, PushMessageSender $pushMessageSender, UserSubscriptionManager $userSubscriptionManager, LoggerInterface $logger) {
+		parent::__construct($container);
+		$this->pushMessageSender = $pushMessageSender;
+		$this->userSubscriptionManager = $userSubscriptionManager;
+		$this->logger = $logger;
+	}
+
+	/////
 
 	public function enqueueNewAnswerNotification(Answer $answer, Question $question) {
 		$this->enqueueNotification(
@@ -71,36 +86,37 @@ class WebpushNotificationUtils extends AbstractContainerAwareUtils {
 
 	public function sendNotification(User $user, string $body, string $icon = 'https://www.lairdubois.fr/favicon-144x144.png', string $link = 'https://www.lairdubois.fr') {
 
-		$webpush = $this->container->get(WebPush::class);
-		$managers = $this->container->get(WebPushManagerRegistry::class);
-		$myUserManager = $managers->getManager($user);
+		// The payload of the Notification of bentools/webpush-bundle 0.3, that ladb-webpush-sw.js reads:
+		// the PushNotification of the bundle 0.7 has "title" and "options" keys instead
+		$message = new PushMessage(json_encode(array(
+			'notification' => array(
+				'title' => 'L\'Air du Bois',
+				'body'  => $body,
+				'icon'  => $icon,
+				'data'  => array(
+					'link' => $link,
+				),
+			),
+		)));
 
-		foreach ($myUserManager->findByUser($user) as $subscription) {
-			$webpush->sendNotification(
-				$subscription->getEndpoint(),
-				new Notification([
-					'title' => 'L\'Air du Bois',
-					'body'  => $body,
-					'icon'  => $icon,
-					'data'  => [
-						'link' => $link,
-					],
-				]),
-				$subscription->getPublicKey(),
-				$subscription->getAuthToken()
-			);
-		}
-		$results = $webpush->flush();
+		$subscriptions = $this->userSubscriptionManager->findByUser($user);
+		foreach ($this->pushMessageSender->push($message, $subscriptions) as $response) {
 
-		// Delete expired subscriptions
-		if (is_array($results)) {
-			foreach ($results as $result) {
-				if (!empty($result['expired'])) {
-					foreach ($myUserManager->findByHash($myUserManager->hash($result['endpoint'])) as $subscription) {
-						$myUserManager->delete($subscription);
-					}
-				}
+			// Not sent (no answer from the push service...)
+			if ($response instanceof \Throwable) {
+				$this->logger->warning('WebpushNotificationUtils/sendNotification', array( 'exception' => $response ));
+				continue;
 			}
+
+			// Delete expired subscriptions
+			if ($response->isExpired()) {
+				foreach ($this->userSubscriptionManager->findByHash($response->getSubscription()->getSubscriptionHash()) as $subscription) {
+					$this->userSubscriptionManager->delete($subscription);
+				}
+			} else if (!$response->isSuccessFul()) {
+				$this->logger->warning('WebpushNotificationUtils/sendNotification: refused by the push service.', array( 'statusCode' => $response->getStatusCode() ));
+			}
+
 		}
 
 	}

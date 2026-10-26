@@ -24,12 +24,6 @@ fos_user_profile_show:
 _liip_imagine:
     resource: "@LiipImagineBundle/Resources/config/routing.yaml"
 
-# Webpush Bundle
-
-bentools_webpush:
-    resource: '@WebPushBundle/Resources/config/routing.xml'
-    prefix: /webpush
-
 # Ladb Bundles
 
 ladb_core:
@@ -38,6 +32,10 @@ ladb_core:
 
 ladb_core_api:
     resource: "Ladb\\CoreBundle\\Controller\\Core\\ApiController"
+    type:     annotation
+
+ladb_core_webpush:
+    resource: "Ladb\\CoreBundle\\Controller\\Core\\WebpushController"
     type:     annotation
 
 ladb_core_wonder_creation:

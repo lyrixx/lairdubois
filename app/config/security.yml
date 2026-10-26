@@ -49,6 +49,7 @@ security:
         - { path: ^/messagerie, role: ROLE_USER }
         - { path: ^/members/, role: ROLE_USER }
         - { path: ^/notifications, role: ROLE_USER }
+        - { path: ^/webpush/, role: ROLE_USER }
         - { path: /mes-dons$, role: ROLE_USER }
         - { path: /mes-tooks$, role: ROLE_USER }
         - { path: ^/collections/available/, role: ROLE_USER }

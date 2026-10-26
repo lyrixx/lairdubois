@@ -1,8 +1,9 @@
 <?php
 namespace Ladb\CoreBundle\Consumer;
 
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Doctrine\ORM\EntityManagerInterface;
 use PhpAmqpLib\Message\AMQPMessage;
+use Psr\Log\LoggerInterface;
 use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Utils\WebpushNotificationUtils;
 use OldSound\RabbitMqBundle\RabbitMq\ConsumerInterface;
@@ -14,13 +15,13 @@ class WebpushNotificationConsumer implements ConsumerInterface {
 	private $userRepository;
 	private $webpushNotificationUtils;
 
-	public function __construct(ContainerInterface $container) {
+	public function __construct(LoggerInterface $logger, EntityManagerInterface $om, WebpushNotificationUtils $webpushNotificationUtils) {
 
-		$this->logger = $container->get('logger');
+		$this->logger = $logger;
 
-		$this->om = $container->get('doctrine')->getManager();
+		$this->om = $om;
 		$this->userRepository = $this->om->getRepository(User::CLASS_NAME);
-		$this->webpushNotificationUtils = $container->get(WebpushNotificationUtils::class);
+		$this->webpushNotificationUtils = $webpushNotificationUtils;
 
 	}
 

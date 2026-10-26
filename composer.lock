@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "64d8293022513c9a72c8f931db094473",
+    "content-hash": "885a6cb54641421c31834651a305fcaf",
     "packages": [
         {
             "name": "afarkas/html5shiv",
@@ -96,65 +96,6 @@
                 "source": "https://github.com/apix/log/tree/1.2.1"
             },
             "time": "2016-09-22T10:51:22+00:00"
-        },
-        {
-            "name": "beberlei/assert",
-            "version": "v2.9.9",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/beberlei/assert.git",
-                "reference": "124317de301b7c91d5fce34c98bba2c6925bec95"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/beberlei/assert/zipball/124317de301b7c91d5fce34c98bba2c6925bec95",
-                "reference": "124317de301b7c91d5fce34c98bba2c6925bec95",
-                "shasum": ""
-            },
-            "require": {
-                "ext-mbstring": "*",
-                "php": ">=5.3"
-            },
-            "require-dev": {
-                "friendsofphp/php-cs-fixer": "^2.1.1",
-                "phpunit/phpunit": "^4.8.35|^5.7"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Assert\\": "lib/Assert"
-                },
-                "files": [
-                    "lib/Assert/functions.php"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "BSD-2-Clause"
-            ],
-            "authors": [
-                {
-                    "name": "Benjamin Eberlei",
-                    "email": "kontakt@beberlei.de",
-                    "role": "Lead Developer"
-                },
-                {
-                    "name": "Richard Quadling",
-                    "email": "rquadling@gmail.com",
-                    "role": "Collaborator"
-                }
-            ],
-            "description": "Thin assertion library for input validation in business models.",
-            "keywords": [
-                "assert",
-                "assertion",
-                "validation"
-            ],
-            "support": {
-                "issues": "https://github.com/beberlei/assert/issues",
-                "source": "https://github.com/beberlei/assert/tree/v2.9.9"
-            },
-            "time": "2019-05-28T15:27:37+00:00"
         },
         {
             "name": "beberlei/doctrineextensions",
@@ -264,27 +205,44 @@
         },
         {
             "name": "bentools/webpush-bundle",
-            "version": "0.3.4",
+            "version": "0.7.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/bpolaszek/webpush-bundle.git",
-                "reference": "ed8c1c3e418fe42aa2b72c4ac391bc458c4bbc10"
+                "reference": "2ef24c128e4dd71a8c4edf85860769493e0cd38b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bpolaszek/webpush-bundle/zipball/ed8c1c3e418fe42aa2b72c4ac391bc458c4bbc10",
-                "reference": "ed8c1c3e418fe42aa2b72c4ac391bc458c4bbc10",
+                "url": "https://api.github.com/repos/bpolaszek/webpush-bundle/zipball/2ef24c128e4dd71a8c4edf85860769493e0cd38b",
+                "reference": "2ef24c128e4dd71a8c4edf85860769493e0cd38b",
                 "shasum": ""
             },
             "require": {
-                "minishlink/web-push": "^2.0",
-                "php": ">=7.1"
+                "ext-curl": "*",
+                "ext-json": "*",
+                "ext-mbstring": "*",
+                "ext-openssl": "*",
+                "guzzlehttp/guzzle": "~6.0|~7.0",
+                "minishlink/web-push": "~4.0|~5.0|~6.0",
+                "php": ">=7.1",
+                "symfony/http-kernel": "~3.0|~4.0|~5.0"
             },
             "require-dev": {
-                "symfony/symfony": "^2.7|^3.0|^4.0",
-                "symfony/var-dumper": "^3.3"
+                "bentools/doctrine-static": "1.0.x-dev",
+                "doctrine/dbal": "~2.5 <=2.9",
+                "nyholm/symfony-bundle-test": "~1.4",
+                "phpunit/phpunit": "~5.0|~6.0|~7.0",
+                "symfony/config": "~4.0",
+                "symfony/dependency-injection": "~3.0|~4.0|~5.0",
+                "symfony/framework-bundle": "~3.0|~4.0|~5.0",
+                "symfony/http-foundation": "~3.0|~4.0|~5.0",
+                "symfony/routing": "~3.0|~4.0|~5.0",
+                "symfony/security": "~3.0|~4.0|~5.0",
+                "symfony/var-dumper": "~3.0|~4.0|~5.0",
+                "symfony/yaml": "~3.0|~4.0|~5.0",
+                "twig/twig": "~1.0|~2.0"
             },
-            "type": "library",
+            "type": "symfony-bundle",
             "extra": {
                 "branch-alias": {
                     "dev-master": "1.0.x-dev"
@@ -305,12 +263,106 @@
                     "email": "bpolaszek@gmail.com"
                 }
             ],
-            "description": "Symfony Bundle: Associate your users to webpush subscriptions.",
+            "description": "Send push notifications through Web Push Protocol to your Symfony users.",
+            "keywords": [
+                "FCM",
+                "PushNotification",
+                "PushNotification bundle",
+                "PushSubsciption",
+                "PushSubsciption bundle",
+                "Web Push",
+                "WebPush",
+                "browser",
+                "chrome",
+                "firefox",
+                "flex",
+                "notification",
+                "notification bundle",
+                "notifications",
+                "notifications bundle",
+                "push",
+                "push bundle",
+                "push notification",
+                "push notification bundle",
+                "push notifications",
+                "push notifications bundle",
+                "push subscription",
+                "push subscription bundle",
+                "push subscriptions",
+                "push subscriptions bundle",
+                "subscription",
+                "subscription bundle",
+                "subscriptions",
+                "subscriptions bundle",
+                "symfony PushNotification",
+                "symfony PushNotification bundle",
+                "symfony PushSubsciption",
+                "symfony PushSubsciption bundle",
+                "symfony notification",
+                "symfony notification bundle",
+                "symfony notifications",
+                "symfony notifications bundle",
+                "symfony push",
+                "symfony push bundle",
+                "symfony push notification",
+                "symfony push notification bundle",
+                "symfony push notifications",
+                "symfony push notifications bundle",
+                "symfony push subscription",
+                "symfony push subscription bundle",
+                "symfony push subscriptions",
+                "symfony push subscriptions bundle",
+                "symfony subscription",
+                "symfony subscription bundle",
+                "symfony subscriptions",
+                "symfony subscriptions bundle",
+                "symfony web push",
+                "symfony web push bundle",
+                "symfony web push notification",
+                "symfony web push notification bundle",
+                "symfony web push notifications",
+                "symfony web push notifications bundle",
+                "symfony web push subscription",
+                "symfony web push subscription bundle",
+                "symfony web push subscriptions",
+                "symfony web push subscriptions bundle",
+                "symfony webpush",
+                "symfony webpush bundle",
+                "symfony webpush notification",
+                "symfony webpush notification bundle",
+                "symfony webpush notifications",
+                "symfony webpush notifications bundle",
+                "symfony webpush subscription",
+                "symfony webpush subscription bundle",
+                "symfony webpush subscriptions",
+                "symfony webpush subscriptions bundle",
+                "vapid",
+                "web push bundle",
+                "web push notification",
+                "web push notification bundle",
+                "web push notifications",
+                "web push notifications bundle",
+                "web push protocol",
+                "web push subscription",
+                "web push subscription bundle",
+                "web push subscriptions",
+                "web push subscriptions bundle",
+                "webpush bundle",
+                "webpush notification",
+                "webpush notification bundle",
+                "webpush notifications",
+                "webpush notifications bundle",
+                "webpush protocol",
+                "webpush subscription",
+                "webpush subscription bundle",
+                "webpush subscriptions",
+                "webpush subscriptions bundle"
+            ],
             "support": {
                 "issues": "https://github.com/bpolaszek/webpush-bundle/issues",
-                "source": "https://github.com/bpolaszek/webpush-bundle/tree/master"
+                "source": "https://github.com/bpolaszek/webpush-bundle/tree/0.7.1"
             },
-            "time": "2018-11-09T17:16:54+00:00"
+            "time": "2022-02-28T10:12:17+00:00"
         },
         {
             "name": "biblys/isbn",
@@ -426,6 +478,66 @@
                 }
             ],
             "time": "2020-04-29T10:10:34+00:00"
+        },
+        {
+            "name": "brick/math",
+            "version": "0.9.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/brick/math.git",
+                "reference": "ca57d18f028f84f777b2168cd1911b0dee2343ae"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/brick/math/zipball/ca57d18f028f84f777b2168cd1911b0dee2343ae",
+                "reference": "ca57d18f028f84f777b2168cd1911b0dee2343ae",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "php": "^7.1 || ^8.0"
+            },
+            "require-dev": {
+                "php-coveralls/php-coveralls": "^2.2",
+                "phpunit/phpunit": "^7.5.15 || ^8.5 || ^9.0",
+                "vimeo/psalm": "4.9.2"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Brick\\Math\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Arbitrary-precision arithmetic library",
+            "keywords": [
+                "Arbitrary-precision",
+                "BigInteger",
+                "BigRational",
+                "arithmetic",
+                "bigdecimal",
+                "bignum",
+                "brick",
+                "math"
+            ],
+            "support": {
+                "issues": "https://github.com/brick/math/issues",
+                "source": "https://github.com/brick/math/tree/0.9.3"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/BenMorel",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/brick/math",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2021-08-15T20:50:18+00:00"
         },
         {
             "name": "cboden/ratchet",
@@ -3695,37 +3807,47 @@
         },
         {
             "name": "guzzlehttp/guzzle",
-            "version": "6.5.8",
+            "version": "7.8.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/guzzle.git",
-                "reference": "a52f0440530b54fa079ce76e8c5d196a42cad981"
+                "reference": "f4152d9eb85c445fe1f992001d1748e8bec070d2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/a52f0440530b54fa079ce76e8c5d196a42cad981",
-                "reference": "a52f0440530b54fa079ce76e8c5d196a42cad981",
+                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/f4152d9eb85c445fe1f992001d1748e8bec070d2",
+                "reference": "f4152d9eb85c445fe1f992001d1748e8bec070d2",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
-                "guzzlehttp/promises": "^1.0",
-                "guzzlehttp/psr7": "^1.9",
-                "php": ">=5.5",
-                "symfony/polyfill-intl-idn": "^1.17"
+                "guzzlehttp/promises": "^1.5.3 || ^2.0.3",
+                "guzzlehttp/psr7": "^1.9.1 || ^2.6.3",
+                "php": "^7.2.5 || ^8.0",
+                "psr/http-client": "^1.0",
+                "symfony/deprecation-contracts": "^2.2 || ^3.0"
+            },
+            "provide": {
+                "psr/http-client-implementation": "1.0"
             },
             "require-dev": {
+                "bamarni/composer-bin-plugin": "^1.8.2",
                 "ext-curl": "*",
-                "phpunit/phpunit": "^4.8.35 || ^5.7 || ^6.4 || ^7.0",
-                "psr/log": "^1.1"
+                "guzzle/client-integration-tests": "3.0.2",
+                "php-http/message-factory": "^1.1",
+                "phpunit/phpunit": "^8.5.39 || ^9.6.20",
+                "psr/log": "^1.1 || ^2.0 || ^3.0"
             },
             "suggest": {
+                "ext-curl": "Required for CURL handler support",
+                "ext-intl": "Required for Internationalized Domain Name (IDN) support",
                 "psr/log": "Required for using the Log middleware"
             },
             "type": "library",
             "extra": {
-                "branch-alias": {
-                    "dev-master": "6.5-dev"
+                "bamarni-bin": {
+                    "bin-links": true,
+                    "forward-command": false
                 }
             },
             "autoload": {
@@ -3778,19 +3900,20 @@
                 }
             ],
             "description": "Guzzle is a PHP HTTP client library",
-            "homepage": "http://guzzlephp.org/",
             "keywords": [
                 "client",
                 "curl",
                 "framework",
                 "http",
                 "http client",
+                "psr-18",
+                "psr-7",
                 "rest",
                 "web service"
             ],
             "support": {
                 "issues": "https://github.com/guzzle/guzzle/issues",
-                "source": "https://github.com/guzzle/guzzle/tree/6.5.8"
+                "source": "https://github.com/guzzle/guzzle/tree/7.8.2"
             },
             "funding": [
                 {
@@ -3806,20 +3929,20 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-06-20T22:16:07+00:00"
+            "time": "2024-07-18T11:12:18+00:00"
         },
         {
             "name": "guzzlehttp/promises",
-            "version": "1.4.0",
+            "version": "1.5.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/promises.git",
-                "reference": "60d379c243457e073cff02bc323a2a86cb355631"
+                "reference": "67ab6e18aaa14d753cc148911d273f6e6cb6721e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/promises/zipball/60d379c243457e073cff02bc323a2a86cb355631",
-                "reference": "60d379c243457e073cff02bc323a2a86cb355631",
+                "url": "https://api.github.com/repos/guzzle/promises/zipball/67ab6e18aaa14d753cc148911d273f6e6cb6721e",
+                "reference": "67ab6e18aaa14d753cc148911d273f6e6cb6721e",
                 "shasum": ""
             },
             "require": {
@@ -3829,18 +3952,13 @@
                 "symfony/phpunit-bridge": "^4.4 || ^5.1"
             },
             "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "1.4-dev"
-                }
-            },
             "autoload": {
-                "psr-4": {
-                    "GuzzleHttp\\Promise\\": "src/"
-                },
                 "files": [
                     "src/functions_include.php"
-                ]
+                ],
+                "psr-4": {
+                    "GuzzleHttp\\Promise\\": "src/"
+                }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -3848,9 +3966,24 @@
             ],
             "authors": [
                 {
+                    "name": "Graham Campbell",
+                    "email": "hello@gjcampbell.co.uk",
+                    "homepage": "https://github.com/GrahamCampbell"
+                },
+                {
                     "name": "Michael Dowling",
                     "email": "mtdowling@gmail.com",
                     "homepage": "https://github.com/mtdowling"
+                },
+                {
+                    "name": "Tobias Nyholm",
+                    "email": "tobias.nyholm@gmail.com",
+                    "homepage": "https://github.com/Nyholm"
+                },
+                {
+                    "name": "Tobias Schultze",
+                    "email": "webmaster@tubo-world.de",
+                    "homepage": "https://github.com/Tobion"
                 }
             ],
             "description": "Guzzle promises library",
@@ -3859,9 +3992,23 @@
             ],
             "support": {
                 "issues": "https://github.com/guzzle/promises/issues",
-                "source": "https://github.com/guzzle/promises/tree/1.4.0"
+                "source": "https://github.com/guzzle/promises/tree/1.5.3"
             },
-            "time": "2020-09-30T07:37:28+00:00"
+            "funding": [
+                {
+                    "url": "https://github.com/GrahamCampbell",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/Nyholm",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/guzzlehttp/promises",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2023-05-21T12:31:43+00:00"
         },
         {
             "name": "guzzlehttp/psr7",
@@ -4712,106 +4859,35 @@
             "time": "2020-06-26T05:55:54+00:00"
         },
         {
-            "name": "mdanter/ecc",
-            "version": "v0.5.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/phpecc/phpecc.git",
-                "reference": "b95f25cc1bacc83a9f0ccd375900b7cfd343029e"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/phpecc/phpecc/zipball/b95f25cc1bacc83a9f0ccd375900b7cfd343029e",
-                "reference": "b95f25cc1bacc83a9f0ccd375900b7cfd343029e",
-                "shasum": ""
-            },
-            "require": {
-                "ext-gmp": "*",
-                "fgrosse/phpasn1": "^2.0",
-                "php": "^7.0"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "^6.0",
-                "squizlabs/php_codesniffer": "^2.0",
-                "symfony/yaml": "^2.6|^3.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Mdanter\\Ecc\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Matyas Danter",
-                    "homepage": "http://matejdanter.com/",
-                    "role": "Author"
-                },
-                {
-                    "name": "Thibaud Fabre",
-                    "email": "thibaud@aztech.io",
-                    "homepage": "http://aztech.io",
-                    "role": "Maintainer"
-                },
-                {
-                    "name": "Thomas Kerin",
-                    "email": "afk11@users.noreply.github.com",
-                    "role": "Maintainer"
-                }
-            ],
-            "description": "PHP Elliptic Curve Cryptography library",
-            "homepage": "https://github.com/phpecc/phpecc",
-            "keywords": [
-                "Diffie",
-                "ECDSA",
-                "Hellman",
-                "curve",
-                "ecdh",
-                "elliptic",
-                "nistp192",
-                "nistp224",
-                "nistp256",
-                "nistp384",
-                "nistp521",
-                "phpecc",
-                "secp256k1",
-                "secp256r1"
-            ],
-            "support": {
-                "issues": "https://github.com/phpecc/phpecc/issues",
-                "source": "https://github.com/phpecc/phpecc/tree/master"
-            },
-            "time": "2018-12-03T18:17:01+00:00"
-        },
-        {
             "name": "minishlink/web-push",
-            "version": "v2.0.1",
+            "version": "v6.0.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/web-push-libs/web-push-php.git",
-                "reference": "6e1b88c46351ea3850cb1e9ae9565b8c61a58396"
+                "reference": "23a78b8585bdcecaa323f1dd1acdc548e28892fe"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/web-push-libs/web-push-php/zipball/6e1b88c46351ea3850cb1e9ae9565b8c61a58396",
-                "reference": "6e1b88c46351ea3850cb1e9ae9565b8c61a58396",
+                "url": "https://api.github.com/repos/web-push-libs/web-push-php/zipball/23a78b8585bdcecaa323f1dd1acdc548e28892fe",
+                "reference": "23a78b8585bdcecaa323f1dd1acdc548e28892fe",
                 "shasum": ""
             },
             "require": {
-                "guzzlehttp/guzzle": "^6.2",
-                "lib-openssl": "*",
-                "mdanter/ecc": "^0.5.0",
-                "php": "^7.0",
-                "spomky-labs/base64url": "^1.0",
-                "spomky-labs/jose": "^7.0",
-                "spomky-labs/php-aes-gcm": "^1.2"
+                "ext-curl": "*",
+                "ext-json": "*",
+                "ext-mbstring": "*",
+                "ext-openssl": "*",
+                "guzzlehttp/guzzle": "^7.0.1|^6.2",
+                "php": ">=7.2",
+                "web-token/jwt-key-mgmt": "^2.0",
+                "web-token/jwt-signature": "^2.0",
+                "web-token/jwt-signature-algorithm-ecdsa": "^2.0",
+                "web-token/jwt-util-ecc": "^2.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "5.7.*"
+                "friendsofphp/php-cs-fixer": "^2.14",
+                "phpstan/phpstan": "^0.11|^0.12",
+                "phpunit/phpunit": "^8.0|^9.0"
             },
             "type": "library",
             "autoload": {
@@ -4841,9 +4917,9 @@
             ],
             "support": {
                 "issues": "https://github.com/web-push-libs/web-push-php/issues",
-                "source": "https://github.com/web-push-libs/web-push-php/tree/master"
+                "source": "https://github.com/web-push-libs/web-push-php/tree/v6.0.7"
             },
-            "time": "2017-11-22T20:04:25+00:00"
+            "time": "2021-11-22T17:36:01+00:00"
         },
         {
             "name": "moment/moment",
@@ -5692,6 +5768,113 @@
                 "source": "https://github.com/php-fig/container/tree/master"
             },
             "time": "2017-02-14T16:28:37+00:00"
+        },
+        {
+            "name": "psr/http-client",
+            "version": "1.0.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-fig/http-client.git",
+                "reference": "bb5906edc1c324c9a05aa0873d40117941e5fa90"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-fig/http-client/zipball/bb5906edc1c324c9a05aa0873d40117941e5fa90",
+                "reference": "bb5906edc1c324c9a05aa0873d40117941e5fa90",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.0 || ^8.0",
+                "psr/http-message": "^1.0 || ^2.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Psr\\Http\\Client\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "https://www.php-fig.org/"
+                }
+            ],
+            "description": "Common interface for HTTP clients",
+            "homepage": "https://github.com/php-fig/http-client",
+            "keywords": [
+                "http",
+                "http-client",
+                "psr",
+                "psr-18"
+            ],
+            "support": {
+                "source": "https://github.com/php-fig/http-client"
+            },
+            "time": "2023-09-23T14:17:50+00:00"
+        },
+        {
+            "name": "psr/http-factory",
+            "version": "1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-fig/http-factory.git",
+                "reference": "2b4765fddfe3b508ac62f829e852b1501d3f6e8a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-fig/http-factory/zipball/2b4765fddfe3b508ac62f829e852b1501d3f6e8a",
+                "reference": "2b4765fddfe3b508ac62f829e852b1501d3f6e8a",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.1",
+                "psr/http-message": "^1.0 || ^2.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Psr\\Http\\Message\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "https://www.php-fig.org/"
+                }
+            ],
+            "description": "PSR-17: Common interfaces for PSR-7 HTTP message factories",
+            "keywords": [
+                "factory",
+                "http",
+                "message",
+                "psr",
+                "psr-17",
+                "psr-7",
+                "request",
+                "response"
+            ],
+            "support": {
+                "source": "https://github.com/php-fig/http-factory"
+            },
+            "time": "2024-04-15T12:06:14+00:00"
         },
         {
             "name": "psr/http-message",
@@ -6638,69 +6821,6 @@
             "time": "2019-07-08T08:31:25+00:00"
         },
         {
-            "name": "spomky-labs/aes-key-wrap",
-            "version": "v4.0.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Spomky-Labs/aes-key-wrap.git",
-                "reference": "6d302dc2d20cd61fc8bf0e253d628c70724d302a"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Spomky-Labs/aes-key-wrap/zipball/6d302dc2d20cd61fc8bf0e253d628c70724d302a",
-                "reference": "6d302dc2d20cd61fc8bf0e253d628c70724d302a",
-                "shasum": ""
-            },
-            "require": {
-                "ext-mbstring": "*",
-                "lib-openssl": "*",
-                "php": "^7.0"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "^6.0",
-                "satooshi/php-coveralls": "^1.0"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "4.0.x-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "AESKW\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Florent Morselli",
-                    "homepage": "https://github.com/Spomky-Labs/aes-key-wrap/contributors"
-                }
-            ],
-            "description": "AES Key Wrap for PHP.",
-            "homepage": "https://github.com/Spomky-Labs/aes-key-wrap",
-            "keywords": [
-                "A128KW",
-                "A192KW",
-                "A256KW",
-                "RFC3394",
-                "RFC5649",
-                "aes",
-                "key",
-                "padding",
-                "wrap"
-            ],
-            "support": {
-                "issues": "https://github.com/Spomky-Labs/aes-key-wrap/issues",
-                "source": "https://github.com/Spomky-Labs/aes-key-wrap/tree/master"
-            },
-            "time": "2017-10-28T16:15:26+00:00"
-        },
-        {
             "name": "spomky-labs/base64url",
             "version": "v1.0.2",
             "source": {
@@ -6755,158 +6875,6 @@
                 "source": "https://github.com/Spomky-Labs/base64url/tree/master"
             },
             "time": "2016-01-21T19:50:30+00:00"
-        },
-        {
-            "name": "spomky-labs/jose",
-            "version": "v7.1.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Spomky-Labs/jose.git",
-                "reference": "c7835297fa6a2c00dcdcbfadd67f7ea099b226a1"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Spomky-Labs/jose/zipball/c7835297fa6a2c00dcdcbfadd67f7ea099b226a1",
-                "reference": "c7835297fa6a2c00dcdcbfadd67f7ea099b226a1",
-                "shasum": ""
-            },
-            "require": {
-                "beberlei/assert": "^2.4",
-                "fgrosse/phpasn1": "^2.0",
-                "lib-openssl": "*",
-                "mdanter/ecc": "0.5.*",
-                "php": "^7.0",
-                "psr/cache": "^1.0",
-                "spomky-labs/aes-key-wrap": "^3.0|^4.0",
-                "spomky-labs/base64url": "^1.0",
-                "spomky-labs/php-aes-gcm": "^1.2",
-                "symfony/polyfill-mbstring": "^1.1"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "^6.0",
-                "satooshi/php-coveralls": "^2.0",
-                "symfony/cache": "^2.0|^3.0|^4.0"
-            },
-            "suggest": {
-                "ext-crypto": "Highly recommended when you use AES GCM based algorithms.",
-                "ext-curve25519": "For EdDSA with X25519 curves support.",
-                "ext-ed25519": "For EdDSA with Ed25519 curves support."
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "7.1.x-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Jose\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Florent Morselli",
-                    "homepage": "https://github.com/Spomky"
-                },
-                {
-                    "name": "All contributors",
-                    "homepage": "https://github.com/Spomky-Labs/jose/contributors"
-                }
-            ],
-            "description": "JSON Object Signing and Encryption library for PHP.",
-            "homepage": "https://github.com/Spomky-Labs/Jose",
-            "keywords": [
-                "JOSE",
-                "JWE",
-                "JWK",
-                "JWKSet",
-                "JWS",
-                "Jot",
-                "RFC7515",
-                "RFC7516",
-                "RFC7517",
-                "RFC7518",
-                "RFC7519",
-                "RFC7520",
-                "jwa",
-                "jwt"
-            ],
-            "support": {
-                "issues": "https://github.com/Spomky-Labs/jose/issues",
-                "source": "https://github.com/Spomky-Labs/jose/tree/master"
-            },
-            "abandoned": "web-token/jwt-framework",
-            "time": "2018-05-03T07:34:56+00:00"
-        },
-        {
-            "name": "spomky-labs/php-aes-gcm",
-            "version": "v1.2.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Spomky-Labs/php-aes-gcm.git",
-                "reference": "e3900f2eb29a98476ae94c25c5c4aebb32ebf338"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Spomky-Labs/php-aes-gcm/zipball/e3900f2eb29a98476ae94c25c5c4aebb32ebf338",
-                "reference": "e3900f2eb29a98476ae94c25c5c4aebb32ebf338",
-                "shasum": ""
-            },
-            "require": {
-                "beberlei/assert": "^2.4",
-                "lib-openssl": "*",
-                "php": ">=5.4",
-                "symfony/polyfill-mbstring": "^1.1"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "^4.5|^5.0",
-                "satooshi/php-coveralls": "^1.0"
-            },
-            "suggest": {
-                "ext-crypto": "Highly recommended for better performance."
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "1.2.x-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "AESGCM\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Florent Morselli",
-                    "homepage": "https://github.com/Spomky"
-                },
-                {
-                    "name": "All contributors",
-                    "homepage": "https://github.com/Spomky-Labs/php-aes-gcm/contributors"
-                }
-            ],
-            "description": "AES GCM (Galois Counter Mode) PHP implementation.",
-            "homepage": "https://github.com/Spomky-Labs/php-aes-gcm",
-            "keywords": [
-                "AES-GCM",
-                "Galois Counter Mode",
-                "aes",
-                "gcm"
-            ],
-            "support": {
-                "issues": "https://github.com/Spomky-Labs/php-aes-gcm/issues",
-                "source": "https://github.com/Spomky-Labs/php-aes-gcm/tree/v1.x"
-            },
-            "time": "2018-11-07T14:39:44+00:00"
         },
         {
             "name": "stof/doctrine-extensions-bundle",
@@ -8708,6 +8676,381 @@
                 "source": "https://github.com/uikit/uikit/tree/v2.27.2"
             },
             "time": "2016-10-24T07:49:19+00:00"
+        },
+        {
+            "name": "web-token/jwt-core",
+            "version": "v2.2.11",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/web-token/jwt-core.git",
+                "reference": "53beb6f6c1eec4fa93c1c3e5d9e5701e71fa1678"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/web-token/jwt-core/zipball/53beb6f6c1eec4fa93c1c3e5d9e5701e71fa1678",
+                "reference": "53beb6f6c1eec4fa93c1c3e5d9e5701e71fa1678",
+                "shasum": ""
+            },
+            "require": {
+                "brick/math": "^0.8.17|^0.9",
+                "ext-json": "*",
+                "ext-mbstring": "*",
+                "fgrosse/phpasn1": "^2.0",
+                "php": ">=7.2",
+                "spomky-labs/base64url": "^1.0|^2.0"
+            },
+            "conflict": {
+                "spomky-labs/jose": "*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Jose\\Component\\Core\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Florent Morselli",
+                    "homepage": "https://github.com/Spomky"
+                },
+                {
+                    "name": "All contributors",
+                    "homepage": "https://github.com/web-token/jwt-framework/contributors"
+                }
+            ],
+            "description": "Core component of the JWT Framework.",
+            "homepage": "https://github.com/web-token",
+            "keywords": [
+                "JOSE",
+                "JWE",
+                "JWK",
+                "JWKSet",
+                "JWS",
+                "Jot",
+                "RFC7515",
+                "RFC7516",
+                "RFC7517",
+                "RFC7518",
+                "RFC7519",
+                "RFC7520",
+                "bundle",
+                "jwa",
+                "jwt",
+                "symfony"
+            ],
+            "support": {
+                "source": "https://github.com/web-token/jwt-core/tree/v2.2.11"
+            },
+            "funding": [
+                {
+                    "url": "https://www.patreon.com/FlorentMorselli",
+                    "type": "patreon"
+                }
+            ],
+            "abandoned": "web-token/jwt-library",
+            "time": "2021-03-17T14:55:52+00:00"
+        },
+        {
+            "name": "web-token/jwt-key-mgmt",
+            "version": "v2.2.11",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/web-token/jwt-key-mgmt.git",
+                "reference": "0b116379515700d237b4e5de86879078ccb09d8a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/web-token/jwt-key-mgmt/zipball/0b116379515700d237b4e5de86879078ccb09d8a",
+                "reference": "0b116379515700d237b4e5de86879078ccb09d8a",
+                "shasum": ""
+            },
+            "require": {
+                "ext-openssl": "*",
+                "psr/http-client": "^1.0",
+                "psr/http-factory": "^1.0",
+                "web-token/jwt-core": "^2.0"
+            },
+            "suggest": {
+                "ext-sodium": "Sodium is required for OKP key creation, EdDSA signature algorithm and ECDH-ES key encryption with OKP keys",
+                "php-http/httplug": "To enable JKU/X5U support.",
+                "php-http/message-factory": "To enable JKU/X5U support.",
+                "web-token/jwt-util-ecc": "To use EC key analyzers."
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Jose\\Component\\KeyManagement\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Florent Morselli",
+                    "homepage": "https://github.com/Spomky"
+                },
+                {
+                    "name": "All contributors",
+                    "homepage": "https://github.com/web-token/jwt-key-mgmt/contributors"
+                }
+            ],
+            "description": "Key Management component of the JWT Framework.",
+            "homepage": "https://github.com/web-token",
+            "keywords": [
+                "JOSE",
+                "JWE",
+                "JWK",
+                "JWKSet",
+                "JWS",
+                "Jot",
+                "RFC7515",
+                "RFC7516",
+                "RFC7517",
+                "RFC7518",
+                "RFC7519",
+                "RFC7520",
+                "bundle",
+                "jwa",
+                "jwt",
+                "symfony"
+            ],
+            "support": {
+                "source": "https://github.com/web-token/jwt-key-mgmt/tree/v2.2.11"
+            },
+            "funding": [
+                {
+                    "url": "https://www.patreon.com/FlorentMorselli",
+                    "type": "patreon"
+                }
+            ],
+            "abandoned": "web-token/jwt-library",
+            "time": "2021-03-17T14:55:52+00:00"
+        },
+        {
+            "name": "web-token/jwt-signature",
+            "version": "v2.2.11",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/web-token/jwt-signature.git",
+                "reference": "015b59aaf3b6e8fb9f5bd1338845b7464c7d8103"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/web-token/jwt-signature/zipball/015b59aaf3b6e8fb9f5bd1338845b7464c7d8103",
+                "reference": "015b59aaf3b6e8fb9f5bd1338845b7464c7d8103",
+                "shasum": ""
+            },
+            "require": {
+                "web-token/jwt-core": "^2.1"
+            },
+            "suggest": {
+                "web-token/jwt-signature-algorithm-ecdsa": "ECDSA Based Signature Algorithms",
+                "web-token/jwt-signature-algorithm-eddsa": "EdDSA Based Signature Algorithms",
+                "web-token/jwt-signature-algorithm-experimental": "Experimental Signature Algorithms",
+                "web-token/jwt-signature-algorithm-hmac": "HMAC Based Signature Algorithms",
+                "web-token/jwt-signature-algorithm-none": "None Signature Algorithm",
+                "web-token/jwt-signature-algorithm-rsa": "RSA Based Signature Algorithms"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Jose\\Component\\Signature\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Florent Morselli",
+                    "homepage": "https://github.com/Spomky"
+                },
+                {
+                    "name": "All contributors",
+                    "homepage": "https://github.com/web-token/jwt-signature/contributors"
+                }
+            ],
+            "description": "Signature component of the JWT Framework.",
+            "homepage": "https://github.com/web-token",
+            "keywords": [
+                "JOSE",
+                "JWE",
+                "JWK",
+                "JWKSet",
+                "JWS",
+                "Jot",
+                "RFC7515",
+                "RFC7516",
+                "RFC7517",
+                "RFC7518",
+                "RFC7519",
+                "RFC7520",
+                "bundle",
+                "jwa",
+                "jwt",
+                "symfony"
+            ],
+            "support": {
+                "source": "https://github.com/web-token/jwt-signature/tree/v2.2.11"
+            },
+            "funding": [
+                {
+                    "url": "https://www.patreon.com/FlorentMorselli",
+                    "type": "patreon"
+                }
+            ],
+            "abandoned": "web-token/jwt-library",
+            "time": "2021-03-01T19:55:28+00:00"
+        },
+        {
+            "name": "web-token/jwt-signature-algorithm-ecdsa",
+            "version": "v2.2.11",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/web-token/jwt-signature-algorithm-ecdsa.git",
+                "reference": "44cbbb4374c51f1cf48b82ae761efbf24e1a8591"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/web-token/jwt-signature-algorithm-ecdsa/zipball/44cbbb4374c51f1cf48b82ae761efbf24e1a8591",
+                "reference": "44cbbb4374c51f1cf48b82ae761efbf24e1a8591",
+                "shasum": ""
+            },
+            "require": {
+                "ext-openssl": "*",
+                "web-token/jwt-signature": "^2.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Jose\\Component\\Signature\\Algorithm\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Florent Morselli",
+                    "homepage": "https://github.com/Spomky"
+                },
+                {
+                    "name": "All contributors",
+                    "homepage": "https://github.com/web-token/jwt-framework/contributors"
+                }
+            ],
+            "description": "ECDSA Based Signature Algorithms the JWT Framework.",
+            "homepage": "https://github.com/web-token",
+            "keywords": [
+                "JOSE",
+                "JWE",
+                "JWK",
+                "JWKSet",
+                "JWS",
+                "Jot",
+                "RFC7515",
+                "RFC7516",
+                "RFC7517",
+                "RFC7518",
+                "RFC7519",
+                "RFC7520",
+                "bundle",
+                "jwa",
+                "jwt",
+                "symfony"
+            ],
+            "support": {
+                "source": "https://github.com/web-token/jwt-signature-algorithm-ecdsa/tree/v2.2.11"
+            },
+            "funding": [
+                {
+                    "url": "https://www.patreon.com/FlorentMorselli",
+                    "type": "patreon"
+                }
+            ],
+            "abandoned": "web-token/jwt-library",
+            "time": "2021-01-21T19:18:03+00:00"
+        },
+        {
+            "name": "web-token/jwt-util-ecc",
+            "version": "v2.2.11",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/web-token/jwt-util-ecc.git",
+                "reference": "915f3fde86f5236c205620d61177b9ef43863deb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/web-token/jwt-util-ecc/zipball/915f3fde86f5236c205620d61177b9ef43863deb",
+                "reference": "915f3fde86f5236c205620d61177b9ef43863deb",
+                "shasum": ""
+            },
+            "require": {
+                "brick/math": "^0.8.17|^0.9"
+            },
+            "suggest": {
+                "ext-bcmath": "GMP or BCMath is highly recommended to improve the library performance",
+                "ext-gmp": "GMP or BCMath is highly recommended to improve the library performance"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Jose\\Component\\Core\\Util\\Ecc\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Florent Morselli",
+                    "homepage": "https://github.com/Spomky"
+                },
+                {
+                    "name": "All contributors",
+                    "homepage": "https://github.com/web-token/jwt-framework/contributors"
+                }
+            ],
+            "description": "ECC Tools for the JWT Framework.",
+            "homepage": "https://github.com/web-token",
+            "keywords": [
+                "JOSE",
+                "JWE",
+                "JWK",
+                "JWKSet",
+                "JWS",
+                "Jot",
+                "RFC7515",
+                "RFC7516",
+                "RFC7517",
+                "RFC7518",
+                "RFC7519",
+                "RFC7520",
+                "bundle",
+                "jwa",
+                "jwt",
+                "symfony"
+            ],
+            "support": {
+                "source": "https://github.com/web-token/jwt-util-ecc/tree/v2.2.11"
+            },
+            "funding": [
+                {
+                    "url": "https://www.patreon.com/FlorentMorselli",
+                    "type": "patreon"
+                }
+            ],
+            "abandoned": "web-token/jwt-library",
+            "time": "2021-03-24T13:35:17+00:00"
         },
         {
             "name": "willdurand/geocoder",

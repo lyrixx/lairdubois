@@ -65,6 +65,23 @@ services:
         decorates: old_sound_rabbit_mq.webpush_notification_producer
         public: true
 
+    # No push service: the requests of the web push notifications go to Tests\Double\InMemoryPushHandler.
+    # The consumer, that RabbitMQ would call, is run by the tests
+    tests.webpush_notification_consumer:
+        alias: Ladb\CoreBundle\Consumer\WebpushNotificationConsumer
+        public: true
+    tests.webpush_push_handler:
+        class: Tests\Double\InMemoryPushHandler
+        public: true
+    tests.webpush_http_client:
+        class: GuzzleHttp\Client
+        decorates: ladb_core.webpush_http_client
+        arguments: [{ handler: '@tests.webpush_handler_stack' }]
+    tests.webpush_handler_stack:
+        class: GuzzleHttp\HandlerStack
+        factory: ['GuzzleHttp\HandlerStack', 'create']
+        arguments: ['@tests.webpush_push_handler']
+
     # No call to the geocoding API of Google: addresses of Tests\Double\OfflineLocalisableUtils
     tests.localisable_utils:
         class: Tests\Double\OfflineLocalisableUtils

@@ -79,4 +79,12 @@ class UserSubscription implements UserSubscriptionInterface {
 		return $this->subscription['keys']['auth'] ?? null;
 	}
 
+	// ContentEncoding /////
+
+	public function getContentEncoding(): string {
+		// The one of minishlink/web-push 2.0: the JS of the site (ladb-webpush-client.js) does not send
+		// the encodings the browser supports (PushManager.supportedContentEncodings)
+		return 'aesgcm';
+	}
+
 }

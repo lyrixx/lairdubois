@@ -278,6 +278,11 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   `webpush_notification_producer`, et le pusher `gos_web_socket.wamp.pusher`, sont décorés par
   `Tests\Double\InMemoryProducer` et `InMemoryPusher`, qui gardent les messages
   (`$client->getContainer()->get('tests.view_producer')->getMessages()`, avant le reboot suivant).
+- Envoi des notifications web push (`tests/Webpush/`) : le test lance le consumer
+  (`tests.webpush_notification_consumer`), le client Guzzle de l'envoi passe par
+  `Tests\Double\InMemoryPushHandler` (`tests.webpush_push_handler`), qui garde les requêtes et
+  répond 201, 410 (`expire()`) ou rien (`makeUnreachable()`). `NotificationTest` vérifie le JWT
+  VAPID et déchiffre le contenu avec les clés de l'abonnement.
 - Le profiler ne collecte qu'à la demande : `$client->enableProfiler()` avant la requête, puis
   `$client->getProfile()` (mails : collector `swiftmailer`, la livraison est coupée en test).
 - Aucun appel réseau sortant. Les GET du smoke test n'en font pas : Stripe ne part qu'en XHR, le
@@ -472,3 +477,8 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `parameters.yml`) : avec celles de `parameters.yml.dist`, le consumer `webpush_notification`
   s'arrête au premier message. `castor app:install` y écrit une paire jetable, que les `composer
   install` suivants gardent.
+- `bentools/webpush-bundle` (0.7 à 0.9) appelle `GuzzleHttp\Promise\settle()`, supprimée de
+  `guzzlehttp/promises` 2 : `composer.json` le garde en `^1.5`. Son `PushMessageSender` envoie
+  avec un TTL de 0 et sans timeout : `services.yml` le redéfinit avec ceux de web-push 2.0 (4
+  semaines, 30 s). Sa route d'abonnement lit `{"subscription": …}`, alors que le JS du site envoie
+  la `PushSubscription` telle quelle : `WebpushController` la remplace (même nom, même chemin).
