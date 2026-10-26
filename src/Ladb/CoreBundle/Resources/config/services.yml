@@ -730,12 +730,15 @@ services:
   gos_web_socket.wamp.pusher:  # Redefined: LadbCoreBundle is registered after GosWebSocketBundle, its definition wins
     parent: gos_web_socket.abstract.pusher
     class: Ladb\CoreBundle\WebSocket\WampPusher
-    # A child definition does not inherit _defaults: explicit, as in its parent (public until #16)
+    # A child definition does not inherit _defaults: explicit, autowire and autoconfigure as in its parent
     autowire: false
     autoconfigure: false
-    public: true
+    public: false
     tags:
       - { name: gos_web_socket.pusher, alias: wamp }
+  # Gos has no alias by type for it (AbstractWorkflowBasedController::setPusher()). An alias of the id,
+  # not of the class: it follows the decorators (Tests\Double\InMemoryPusher, PusherDecorator in debug)
+  Gos\Bundle\WebSocketBundle\Pusher\PusherInterface: '@gos_web_socket.wamp.pusher'
   ladb_core.websocket.session_listener:
     class: Ladb\CoreBundle\WebSocket\SessionListener
     arguments: ['@gos_web_socket.session_handler']

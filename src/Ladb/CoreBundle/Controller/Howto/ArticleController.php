@@ -19,6 +19,9 @@ use Ladb\CoreBundle\Event\PublicationEvent;
 use Ladb\CoreBundle\Event\PublicationListener;
 use Ladb\CoreBundle\Manager\Howto\ArticleManager;
 use Ladb\CoreBundle\Manager\Core\WitnessManager;
+use Liip\ImagineBundle\Controller\ImagineController;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 class ArticleController extends AbstractHowtoBasedController {
 
@@ -61,7 +64,7 @@ class ArticleController extends AbstractHowtoBasedController {
 	 * @Route("/pas-a-pas/{id}/articles/create", requirements={"id" = "\d+"}, methods={"POST"}, name="core_howto_article_create")
 	 * @Template("LadbCoreBundle:Howto/Article:new.html.twig")
 	 */
-	public function createAction(Request $request, $id) {
+	public function createAction(Request $request, $id, BlockBodiedUtils $blockUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, TranslatorInterface $translator) {
 
 		$this->createLock('core_howto_article_create', false, self::LOCK_TTL_CREATE_ACTION, false);
 
@@ -77,10 +80,8 @@ class ArticleController extends AbstractHowtoBasedController {
 
 		if ($form->isValid()) {
 
-			$blockUtils = $this->get(BlockBodiedUtils::NAME);
 			$blockUtils->preprocessBlocks($article);
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($article);
 
 			$article->setSortIndex($howto->getArticleMaxSortIndex() + 1);	// Default sort index is max value = new articles at the end of the list
@@ -99,7 +100,7 @@ class ArticleController extends AbstractHowtoBasedController {
 		}
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
+		$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 		return array(
 			'howto' => $howto,
@@ -111,24 +112,22 @@ class ArticleController extends AbstractHowtoBasedController {
 	/**
 	 * @Route("/pas-a-pas/articles/{id}/publish", requirements={"id" = "\d+"}, name="core_howto_article_publish")
 	 */
-	public function publishAction($id) {
+	public function publishAction($id, ArticleManager $articleManager, MentionUtils $mentionUtils, TranslatorInterface $translator) {
 
 		$article = $this->retrievePublication($id, Article::CLASS_NAME);
 		$this->assertPublishable($article);
 
 		// Publish
-		$articleManager = $this->get(ArticleManager::NAME);
 		$articleManager->publish($article);
 
 		// Process mentions
-		$mentionUtils = $this->get(MentionUtils::NAME);
 		$mentionUtils->processMentions($article);
 
 		$howto = $article->getHowto();
 		$this->_updateHowtoBlockVideoCount($howto);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('howto.article.form.alert.publish_success', array( '%title%' => $article->getTitle() )));
+		$this->addFlash('success', $translator->trans('howto.article.form.alert.publish_success', array( '%title%' => $article->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_howto_show', array( 'id' => $article->getHowto()->getSluggedId() )).'#'.$article->getSluggedId());
 	}
@@ -137,17 +136,16 @@ class ArticleController extends AbstractHowtoBasedController {
 	 * @Route("/pas-a-pas/articles/{id}/unpublish", requirements={"id" = "\d+"}, name="core_howto_article_unpublish")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_howto_article_unpublish)")
 	 */
-	public function unpublishAction(Request $request, $id) {
+	public function unpublishAction(Request $request, $id, ArticleManager $articleManager, TranslatorInterface $translator) {
 
 		$article = $this->retrievePublication($id, Article::CLASS_NAME);
 		$this->assertUnpublishable($article->getHowto(), true);
 
 		// Unpublish
-		$articleManager = $this->get(ArticleManager::NAME);
 		$articleManager->unpublish($article);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('howto.article.form.alert.unpublish_success', array( '%title%' => $article->getTitle() )));
+		$this->addFlash('success', $translator->trans('howto.article.form.alert.unpublish_success', array( '%title%' => $article->getTitle() )));
 
 		// Return to
 		$returnToUrl = $request->get('rtu');
@@ -188,7 +186,7 @@ class ArticleController extends AbstractHowtoBasedController {
 	 * @Route("/pas-a-pas/articles/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_howto_article_update")
 	 * @Template("LadbCoreBundle:Howto/Article:edit.html.twig")
 	 */
-	public function updateAction(Request $request, $id) {
+	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EmbeddableUtils $embaddableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, MentionUtils $mentionUtils, SearchUtils $searchUtils, TranslatorInterface $translator) {
 
 		$article = $this->retrievePublication($id, Article::CLASS_NAME);
 		$this->assertEditabable($article->getHowto());
@@ -202,13 +200,10 @@ class ArticleController extends AbstractHowtoBasedController {
 
 		if ($form->isValid()) {
 
-			$blockUtils = $this->get(BlockBodiedUtils::NAME);
 			$blockUtils->preprocessBlocks($article, $originalBodyBlocks);
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($article);
 
-			$embaddableUtils = $this->get(EmbeddableUtils::NAME);
 			$embaddableUtils->resetSticker($article);
 
 			$howto = $article->getHowto();
@@ -223,15 +218,13 @@ class ArticleController extends AbstractHowtoBasedController {
 			$om->flush();
 
 			// Process mentions
-			$mentionUtils = $this->get(MentionUtils::NAME);
 			$mentionUtils->processMentions($article);
 
 			// Search index update
-			$searchUtils = $this->get(SearchUtils::NAME);
 			$searchUtils->replaceEntityInIndex($howto);
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('howto.article.form.alert.update_success', array( '%title%' => $article->getTitle() )));
+			$this->addFlash('success', $translator->trans('howto.article.form.alert.update_success', array( '%title%' => $article->getTitle() )));
 
 			// Regenerate the form
 			$form = $this->createForm(HowtoArticleType::class, $article);
@@ -239,7 +232,7 @@ class ArticleController extends AbstractHowtoBasedController {
 		} else {
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
+			$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 		}
 
@@ -254,7 +247,7 @@ class ArticleController extends AbstractHowtoBasedController {
 	/**
 	 * @Route("/pas-a-pas/articles/{id}/delete", requirements={"id" = "\d+"}, name="core_howto_article_delete")
 	 */
-	public function deleteAction($id) {
+	public function deleteAction($id, ArticleManager $articleManager, SearchUtils $searchUtils, TranslatorInterface $translator) {
 		$om = $this->getDoctrine()->getManager();
 
 		$article = $this->retrievePublication($id, Article::CLASS_NAME);
@@ -263,7 +256,6 @@ class ArticleController extends AbstractHowtoBasedController {
 		$howto = $article->getHowto();
 
 		// Delete
-		$articleManager = $this->get(ArticleManager::NAME);
 		$articleManager->delete($article, true, false);
 
 		$this->_updateHowtoBlockVideoCount($howto);
@@ -271,11 +263,10 @@ class ArticleController extends AbstractHowtoBasedController {
 		$om->flush();
 
 		// Search index update
-		$searchUtils = $this->get(SearchUtils::NAME);
 		$searchUtils->replaceEntityInIndex($howto);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('howto.article.form.alert.delete_success', array( '%title%' => $article->getTitle() )));
+		$this->addFlash('success', $translator->trans('howto.article.form.alert.delete_success', array( '%title%' => $article->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_howto_edit', array( 'id' => $howto->getId() )));
 	}
@@ -306,7 +297,7 @@ class ArticleController extends AbstractHowtoBasedController {
 	/**
 	 * @Route("/pas-a-pas/articles/{id}/sticker", requirements={"id" = "\d+"}, name="core_howto_article_sticker")
 	 */
-	public function stickerAction(Request $request, $id) {
+	public function stickerAction(Request $request, $id, EmbeddableUtils $embeddableUtils, ImagineController $imagineController) {
 		$om = $this->getDoctrine()->getManager();
 		$articleRepository = $om->getRepository(Article::CLASS_NAME);
 
@@ -325,7 +316,6 @@ class ArticleController extends AbstractHowtoBasedController {
 
 		$sticker = $article->getSticker();
 		if (is_null($sticker)) {
-			$embeddableUtils = $this->get(EmbeddableUtils::NAME);
 			$sticker = $embeddableUtils->generateSticker($article);
 			if (!is_null($sticker)) {
 				$om->flush();
@@ -336,7 +326,7 @@ class ArticleController extends AbstractHowtoBasedController {
 
 		if (!is_null($sticker)) {
 
-			$response = $this->get('liip_imagine.controller')->filterAction($request, $sticker->getWebPath(), '598w');
+			$response = $imagineController->filterAction($request, $sticker->getWebPath(), '598w');
 			return $response;
 
 		} else {
@@ -356,10 +346,9 @@ class ArticleController extends AbstractHowtoBasedController {
 	 * @Route("/pas-a-pas/articles/{id}.html", name="core_howto_article_show")
 	 * @Template("LadbCoreBundle:Howto/Article:show.html.twig")
 	 */
-	public function showAction(Request $request, $id) {
+	public function showAction(Request $request, $id, EventDispatcherInterface $dispatcher, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();
 		$articleRepository = $om->getRepository(Article::CLASS_NAME);
-		$witnessManager = $this->get(WitnessManager::NAME);
 
 		$id = intval($id);
 
@@ -376,7 +365,6 @@ class ArticleController extends AbstractHowtoBasedController {
 		$mainPicture = null;
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($howto));
 
 		$parameters = array_merge($this->computeShowParameters($howto, $request), array(

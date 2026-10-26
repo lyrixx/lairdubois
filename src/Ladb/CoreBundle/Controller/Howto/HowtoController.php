@@ -28,6 +28,9 @@ use Ladb\CoreBundle\Event\PublicationListener;
 use Ladb\CoreBundle\Event\PublicationsEvent;
 use Ladb\CoreBundle\Manager\Howto\HowtoManager;
 use Ladb\CoreBundle\Manager\Core\WitnessManager;
+use Liip\ImagineBundle\Controller\ImagineController;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @Route("/pas-a-pas")
@@ -40,12 +43,10 @@ class HowtoController extends AbstractHowtoBasedController {
 	 * @Route("/new", name="core_howto_new")
 	 * @Template("LadbCoreBundle:Howto/Howto:new.html.twig")
 	 */
-	public function newAction(Request $request) {
+	public function newAction(Request $request, TagUtils $tagUtils) {
 
 		$howto = new Howto();
 		$form = $this->createForm(HowtoType::class, $howto);
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'form'         => $form->createView(),
@@ -58,7 +59,7 @@ class HowtoController extends AbstractHowtoBasedController {
 	 * @Route("/create", methods={"POST"}, name="core_howto_create")
 	 * @Template("LadbCoreBundle:Howto/Howto:new.html.twig")
 	 */
-	public function createAction(Request $request) {
+	public function createAction(Request $request, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$owner = $this->retrieveOwner($request);
 
@@ -72,7 +73,6 @@ class HowtoController extends AbstractHowtoBasedController {
 
 		if ($form->isValid()) {
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($howto);
 
 			$howto->setUser($owner);
@@ -82,16 +82,13 @@ class HowtoController extends AbstractHowtoBasedController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($howto));
 
 			return $this->redirect($this->generateUrl('core_howto_article_new', array( 'id' => $howto->getId(), 'owner' => $owner->getUsernameCanonical() )));
 		}
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
-
-		$tagUtils = $this->get(TagUtils::NAME);
+		$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 		return array(
 			'howto'        => $howto,
@@ -108,13 +105,12 @@ class HowtoController extends AbstractHowtoBasedController {
 	 * @Route("/{id}/lock", requirements={"id" = "\d+"}, defaults={"lock" = true}, name="core_howto_lock")
 	 * @Route("/{id}/unlock", requirements={"id" = "\d+"}, defaults={"lock" = false}, name="core_howto_unlock")
 	 */
-	public function lockUnlockAction($id, $lock) {
+	public function lockUnlockAction($id, $lock, HowtoManager $howtoManager, TranslatorInterface $translator) {
 
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
 		$this->assertLockUnlockable($howto, $lock);
 
 		// Lock or Unlock
-		$howtoManager = $this->get(HowtoManager::NAME);
 		if ($lock) {
 			$howtoManager->lock($howto);
 		} else {
@@ -122,7 +118,7 @@ class HowtoController extends AbstractHowtoBasedController {
 		}
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('howto.howto.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $howto->getTitle() )));
+		$this->addFlash('success', $translator->trans('howto.howto.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $howto->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_howto_show', array( 'id' => $howto->getSluggedId() )));
 	}
@@ -130,17 +126,16 @@ class HowtoController extends AbstractHowtoBasedController {
 	/**
 	 * @Route("/{id}/publish", requirements={"id" = "\d+"}, name="core_howto_publish")
 	 */
-	public function publishAction($id) {
+	public function publishAction($id, HowtoManager $howtoManager, TranslatorInterface $translator) {
 
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
 		$this->assertPublishable($howto);
 
 		// Publish
-		$howtoManager = $this->get(HowtoManager::NAME);
 		$howtoManager->publish($howto);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('howto.howto.form.alert.publish_success', array( '%title%' => $howto->getTitle() )));
+		$this->addFlash('success', $translator->trans('howto.howto.form.alert.publish_success', array( '%title%' => $howto->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_howto_show', array( 'id' => $howto->getSluggedId() )));
 	}
@@ -148,17 +143,16 @@ class HowtoController extends AbstractHowtoBasedController {
 	/**
 	 * @Route("/{id}/unpublish", requirements={"id" = "\d+"}, name="core_howto_unpublish")
 	 */
-	public function unpublishAction(Request $request, $id) {
+	public function unpublishAction(Request $request, $id, HowtoManager $howtoManager, TranslatorInterface $translator) {
 
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
 		$this->assertUnpublishable($howto);
 
 		// Unpublish
-		$howtoManager = $this->get(HowtoManager::NAME);
 		$howtoManager->unpublish($howto);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('howto.howto.form.alert.unpublish_success', array( '%title%' => $howto->getTitle() )));
+		$this->addFlash('success', $translator->trans('howto.howto.form.alert.unpublish_success', array( '%title%' => $howto->getTitle() )));
 
 		// Return to
 		$returnToUrl = $request->get('rtu');
@@ -173,14 +167,12 @@ class HowtoController extends AbstractHowtoBasedController {
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_howto_edit")
 	 * @Template("LadbCoreBundle:Howto/Howto:edit.html.twig")
 	 */
-	public function editAction($id) {
+	public function editAction($id, TagUtils $tagUtils) {
 
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
 		$this->assertEditabable($howto);
 
 		$form = $this->createForm(HowtoType::class, $howto);
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'howto'        => $howto,
@@ -193,7 +185,7 @@ class HowtoController extends AbstractHowtoBasedController {
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_howto_update")
 	 * @Template("LadbCoreBundle:Howto/Howto:edit.html.twig")
 	 */
-	public function updateAction(Request $request, $id) {
+	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, EmbeddableUtils $embaddableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
 		$this->assertEditabable($howto);
@@ -207,10 +199,8 @@ class HowtoController extends AbstractHowtoBasedController {
 
 		if ($form->isValid()) {
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($howto);
 
-			$embaddableUtils = $this->get(EmbeddableUtils::NAME);
 			$embaddableUtils->resetSticker($howto);
 
 			if ($howto->getUser() == $this->getUser()) {
@@ -221,11 +211,10 @@ class HowtoController extends AbstractHowtoBasedController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_UPDATED, new PublicationEvent($howto, array( 'previouslyUsedTags' => $previouslyUsedTags )));
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('howto.howto.form.alert.update_success', array( '%title%' => $howto->getTitle() )));
+			$this->addFlash('success', $translator->trans('howto.howto.form.alert.update_success', array( '%title%' => $howto->getTitle() )));
 
 			// Regenerate the form
 			$form = $this->createForm(HowtoType::class, $howto);
@@ -233,11 +222,9 @@ class HowtoController extends AbstractHowtoBasedController {
 		} else {
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
+			$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 		}
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'howto'        => $howto,
@@ -249,17 +236,16 @@ class HowtoController extends AbstractHowtoBasedController {
 	/**
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_howto_delete")
 	 */
-	public function deleteAction($id) {
+	public function deleteAction($id, HowtoManager $howtoManager, TranslatorInterface $translator) {
 
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
 		$this->assertDeletable($howto);
 
 		// Delete
-		$howtoManager = $this->get(HowtoManager::NAME);
 		$howtoManager->delete($howto);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('howto.howto.form.alert.delete_success', array( '%title%' => $howto->getTitle() )));
+		$this->addFlash('success', $translator->trans('howto.howto.form.alert.delete_success', array( '%title%' => $howto->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_howto_list'));
     }
@@ -267,7 +253,7 @@ class HowtoController extends AbstractHowtoBasedController {
 	/**
 	 * @Route("/{id}/chown", requirements={"id" = "\d+"}, name="core_howto_chown")
 	 */
-	public function chownAction(Request $request, $id) {
+	public function chownAction(Request $request, $id, HowtoManager $howtoManager, TranslatorInterface $translator) {
 
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
 		$this->assertChownable($howto);
@@ -275,11 +261,10 @@ class HowtoController extends AbstractHowtoBasedController {
 		$targetUser = $this->retrieveOwner($request);
 
 		// Change owner
-		$howtoManager = $this->get(HowtoManager::NAME);
 		$howtoManager->changeOwner($howto, $targetUser);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('howto.howto.form.alert.chown_success', array( '%title%' => $howto->getTitle() )));
+		$this->addFlash('success', $translator->trans('howto.howto.form.alert.chown_success', array( '%title%' => $howto->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_howto_show', array( 'id' => $howto->getSluggedId() )));
 	}
@@ -288,7 +273,7 @@ class HowtoController extends AbstractHowtoBasedController {
 	 * @Route("/{id}/sticker.png", requirements={"id" = "\d+"}, name="core_howto_sticker_png")
 	 * @Route("/{id}/sticker", requirements={"id" = "\d+"}, name="core_howto_sticker")
 	 */
-	public function stickerAction(Request $request, $id) {
+	public function stickerAction(Request $request, $id, EmbeddableUtils $embeddableUtils, ImagineController $imagineController) {
 		$om = $this->getDoctrine()->getManager();
 
 		$id = intval($id);
@@ -298,7 +283,6 @@ class HowtoController extends AbstractHowtoBasedController {
 
 		$sticker = $howto->getSticker();
 		if (is_null($sticker)) {
-			$embeddableUtils = $this->get(EmbeddableUtils::NAME);
 			$sticker = $embeddableUtils->generateSticker($howto);
 			if (!is_null($sticker)) {
 				$om->flush();
@@ -309,7 +293,7 @@ class HowtoController extends AbstractHowtoBasedController {
 
 		if (!is_null($sticker)) {
 
-			$response = $this->get('liip_imagine.controller')->filterAction($request, $sticker->getWebPath(), '598w');
+			$response = $imagineController->filterAction($request, $sticker->getWebPath(), '598w');
 			return $response;
 
 		} else {
@@ -321,7 +305,7 @@ class HowtoController extends AbstractHowtoBasedController {
 	/**
 	 * @Route("/{id}/strip", requirements={"id" = "\d+"}, name="core_howto_strip")
 	 */
-	public function stripAction(Request $request, $id) {
+	public function stripAction(Request $request, $id, ImagineController $imagineController, StripableUtils $stripableUtils) {
 		$om = $this->getDoctrine()->getManager();
 
 		$id = intval($id);
@@ -331,7 +315,6 @@ class HowtoController extends AbstractHowtoBasedController {
 
 		$strip = $howto->getStrip();
 		if (is_null($strip)) {
-			$stripableUtils = $this->get(StripableUtils::NAME);
 			$strip = $stripableUtils->generateStrip($howto);
 			if (!is_null($strip)) {
 				$om->flush();
@@ -342,7 +325,7 @@ class HowtoController extends AbstractHowtoBasedController {
 
 		if (!is_null($strip)) {
 
-			$response = $this->get('liip_imagine.controller')->filterAction($request, $strip->getWebPath(), '564w');
+			$response = $imagineController->filterAction($request, $strip->getWebPath(), '564w');
 			return $response;
 
 		} else {
@@ -380,8 +363,7 @@ class HowtoController extends AbstractHowtoBasedController {
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_howto_list_page")
 	 * @Template("LadbCoreBundle:Howto/Howto:list.html.twig")
 	 */
-	public function listAction(Request $request, $page = 0) {
-		$searchUtils = $this->get(SearchUtils::NAME);
+	public function listAction(Request $request, EventDispatcherInterface $dispatcher, SearchUtils $searchUtils, TranslatorInterface $translator, $page = 0) {
 
 		// Elasticsearch paginiation limit
 		if ($page > 624) {
@@ -405,7 +387,7 @@ class HowtoController extends AbstractHowtoBasedController {
 
 					case 'mine':
 
-						if ($this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
+						if ($this->isGranted('ROLE_USER')) {
 
 							if (isset($facet->value) && $facet->value == 'draft') {
 
@@ -593,7 +575,6 @@ class HowtoController extends AbstractHowtoBasedController {
 		);
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATIONS_LISTED, new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()));
 
 		$parameters = array_merge($searchParameters, array(
@@ -614,13 +595,13 @@ class HowtoController extends AbstractHowtoBasedController {
 			return $this->render('LadbCoreBundle:Howto/Howto:list-choice.html.twig', $parameters);
 		}
 
-		if ($this->get('security.authorization_checker')->isGranted('ROLE_USER') && $this->getUser()->getMeta()->getPrivateHowtoCount() > 0) {
+		if ($this->isGranted('ROLE_USER') && $this->getUser()->getMeta()->getPrivateHowtoCount() > 0) {
 
 			$draftPath = $this->generateUrl('core_howto_list', array( 'q' => '@mine:draft' ));
 			$draftCount = $this->getUser()->getMeta()->getPrivateHowtoCount();
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('info', '<i class="ladb-icon-warning"></i> '.$this->get('translator')->transchoice('howto.howto.choice.draft_alert', $draftCount, array( '%count%' => $draftCount )).' <small><a href="'.$draftPath.'" class="alert-link">('.$this->get('translator')->trans('default.show_my_drafts').')</a></small>');
+			$this->addFlash('info', '<i class="ladb-icon-warning"></i> '.$translator->transchoice('howto.howto.choice.draft_alert', $draftCount, array( '%count%' => $draftCount )).' <small><a href="'.$draftPath.'" class="alert-link">('.$translator->trans('default.show_my_drafts').')</a></small>');
 
 		}
 
@@ -633,7 +614,7 @@ class HowtoController extends AbstractHowtoBasedController {
 	 * @Route("/{id}/creations/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_howto_creations_filter_page")
 	 * @Template("LadbCoreBundle:Howto/Howto:creations.html.twig")
 	 */
-	public function creationsAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function creationsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
@@ -642,7 +623,6 @@ class HowtoController extends AbstractHowtoBasedController {
 		// Creations
 
 		$creationRepository = $om->getRepository(Creation::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -671,7 +651,7 @@ class HowtoController extends AbstractHowtoBasedController {
 	 * @Route("/{id}/ateliers/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_howto_workshops_filter_page")
 	 * @Template("LadbCoreBundle:Howto/Howto:workshops.html.twig")
 	 */
-	public function workshopsAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function workshopsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
@@ -680,7 +660,6 @@ class HowtoController extends AbstractHowtoBasedController {
 		// Workshops
 
 		$workshopRepository = $om->getRepository(Workshop::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -709,7 +688,7 @@ class HowtoController extends AbstractHowtoBasedController {
 	 * @Route("/{id}/plans/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_howto_plans_filter_page")
 	 * @Template("LadbCoreBundle:Howto/Howto:plans.html.twig")
 	 */
-	public function plansAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function plansAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
@@ -718,7 +697,6 @@ class HowtoController extends AbstractHowtoBasedController {
 		// Plans
 
 		$planRepository = $om->getRepository(Plan::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -747,7 +725,7 @@ class HowtoController extends AbstractHowtoBasedController {
 	 * @Route("/{id}/questions/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_howto_questions_filter_page")
 	 * @Template("LadbCoreBundle:Howto/Howto:questions.html.twig")
 	 */
-	public function questionsAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function questionsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
@@ -756,7 +734,6 @@ class HowtoController extends AbstractHowtoBasedController {
 		// Plans
 
 		$questionRepository = $om->getRepository(Question::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -785,7 +762,7 @@ class HowtoController extends AbstractHowtoBasedController {
 	 * @Route("/{id}/processus/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_howto_workflows_filter_page")
 	 * @Template("LadbCoreBundle:Howto/Howto:workflows.html.twig")
 	 */
-	public function workflowsAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function workflowsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
@@ -794,7 +771,6 @@ class HowtoController extends AbstractHowtoBasedController {
 		// Workflows
 
 		$workflowRepository = $om->getRepository(Workflow::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -823,7 +799,7 @@ class HowtoController extends AbstractHowtoBasedController {
 	 * @Route("/{id}/fournisseurs/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_howto_providers_filter_page")
 	 * @Template("LadbCoreBundle:Howto/Howto:providers.html.twig")
 	 */
-	public function providersAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function providersAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
@@ -832,7 +808,6 @@ class HowtoController extends AbstractHowtoBasedController {
 		// Providers
 
 		$providerRepository = $om->getRepository(Provider::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -861,7 +836,7 @@ class HowtoController extends AbstractHowtoBasedController {
 	 * @Route("/{id}/ecoles/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_howto_schools_filter_page")
 	 * @Template("LadbCoreBundle:Howto/Howto:schools.html.twig")
 	 */
-	public function schoolsAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function schoolsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
@@ -870,7 +845,6 @@ class HowtoController extends AbstractHowtoBasedController {
 		// Schools
 
 		$schoolRepository = $om->getRepository(School::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -897,10 +871,9 @@ class HowtoController extends AbstractHowtoBasedController {
 	 * @Route("/{id}.html", name="core_howto_show")
 	 * @Template("LadbCoreBundle:Howto/Howto:show.html.twig")
 	 */
-	public function showAction(Request $request, $id) {
+	public function showAction(Request $request, $id, EventDispatcherInterface $dispatcher, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();
 		$howtoRepository = $om->getRepository(Howto::CLASS_NAME);
-		$witnessManager = $this->get(WitnessManager::NAME);
 
 		$id = intval($id);
 
@@ -914,7 +887,6 @@ class HowtoController extends AbstractHowtoBasedController {
 		$this->assertShowable($howto);
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($howto));
 
 		return $this->computeShowParameters($howto, $request);

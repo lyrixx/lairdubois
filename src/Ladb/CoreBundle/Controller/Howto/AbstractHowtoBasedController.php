@@ -18,35 +18,91 @@ abstract class AbstractHowtoBasedController extends AbstractController {
 
 	use PublicationControllerTrait;
 
+	private $collectionnableUtils;
+	private $commentableUtils;
+	private $embeddableUtils;
+	private $explorableUtils;
+	private $followerUtils;
+	private $globalUtils;
+	private $likableUtils;
+	private $watchableUtils;
+
+	/**
+	 * @required
+	 */
+	public function setCollectionnableUtils(CollectionnableUtils $collectionnableUtils) {
+		$this->collectionnableUtils = $collectionnableUtils;
+	}
+
+	/**
+	 * @required
+	 */
+	public function setCommentableUtils(CommentableUtils $commentableUtils) {
+		$this->commentableUtils = $commentableUtils;
+	}
+
+	/**
+	 * @required
+	 */
+	public function setEmbeddableUtils(EmbeddableUtils $embeddableUtils) {
+		$this->embeddableUtils = $embeddableUtils;
+	}
+
+	/**
+	 * @required
+	 */
+	public function setExplorableUtils(ExplorableUtils $explorableUtils) {
+		$this->explorableUtils = $explorableUtils;
+	}
+
+	/**
+	 * @required
+	 */
+	public function setFollowerUtils(FollowerUtils $followerUtils) {
+		$this->followerUtils = $followerUtils;
+	}
+
+	/**
+	 * @required
+	 */
+	public function setGlobalUtils(GlobalUtils $globalUtils) {
+		$this->globalUtils = $globalUtils;
+	}
+
+	/**
+	 * @required
+	 */
+	public function setLikableUtils(LikableUtils $likableUtils) {
+		$this->likableUtils = $likableUtils;
+	}
+
+	/**
+	 * @required
+	 */
+	public function setWatchableUtils(WatchableUtils $watchableUtils) {
+		$this->watchableUtils = $watchableUtils;
+	}
+
 	protected function computeShowParameters(Howto $howto, $request) {
 		$om = $this->getDoctrine()->getManager();
 		$howtoRepository = $om->getRepository(Howto::CLASS_NAME);
 
-		$explorableUtils = $this->get(ExplorableUtils::NAME);
-		$userHowtos = $explorableUtils->getPreviousAndNextPublishedUserExplorables($howto, $howtoRepository, $howto->getUser()->getMeta()->getPublicHowtoCount());
-		$similarHowtos = $explorableUtils->getSimilarExplorables($howto, 'fos_elastica.index.ladb.howto_howto', Howto::CLASS_NAME, $userHowtos);
+		$userHowtos = $this->explorableUtils->getPreviousAndNextPublishedUserExplorables($howto, $howtoRepository, $howto->getUser()->getMeta()->getPublicHowtoCount());
+		$similarHowtos = $this->explorableUtils->getSimilarExplorables($howto, 'fos_elastica.index.ladb.howto_howto', Howto::CLASS_NAME, $userHowtos);
 
-		$globalUtils = $this->get(GlobalUtils::NAME);
-		$likableUtils = $this->get(LikableUtils::NAME);
-		$watchableUtils = $this->get(WatchableUtils::NAME);
-		$commentableUtils = $this->get(CommentableUtils::NAME);
-		$collectionnableUtils = $this->get(CollectionnableUtils::NAME);
-		$followerUtils = $this->get(FollowerUtils::NAME);
-		$embaddableUtils = $this->get(EmbeddableUtils::NAME);
-
-		$user = $globalUtils->getUser();
+		$user = $this->globalUtils->getUser();
 
 		return array(
 			'howto'             => $howto,
 			'permissionContext' => $this->getPermissionContext($howto),
 			'userHowtos'        => $userHowtos,
 			'similarHowtos'     => $similarHowtos,
-			'likeContext'       => $likableUtils->getLikeContext($howto, $user),
-			'watchContext'      => $watchableUtils->getWatchContext($howto, $user),
-			'commentContext'    => $commentableUtils->getCommentContext($howto),
-			'collectionContext' => $collectionnableUtils->getCollectionContext($howto),
-			'followerContext'   => $followerUtils->getFollowerContext($howto->getUser(), $user),
-			'referral'          => $embaddableUtils->processReferer($howto, $request),
+			'likeContext'       => $this->likableUtils->getLikeContext($howto, $user),
+			'watchContext'      => $this->watchableUtils->getWatchContext($howto, $user),
+			'commentContext'    => $this->commentableUtils->getCommentContext($howto),
+			'collectionContext' => $this->collectionnableUtils->getCollectionContext($howto),
+			'followerContext'   => $this->followerUtils->getFollowerContext($howto->getUser(), $user),
+			'referral'          => $this->embeddableUtils->processReferer($howto, $request),
 		);
 	}
 

@@ -30,6 +30,8 @@ use Ladb\CoreBundle\Entity\Wonder\Plan;
 use Ladb\CoreBundle\Entity\Wonder\Workshop;
 use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Utils\PaginatorUtils;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @Route("/processus")
@@ -42,12 +44,10 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	 * @Route("/new", name="core_workflow_new")
 	 * @Template("LadbCoreBundle:Workflow:Workflow/new.html.twig")
 	 */
-	public function newAction(Request $request) {
+	public function newAction(Request $request, TagUtils $tagUtils) {
 
 		$workflow = new Workflow();
 		$form = $this->createForm(WorkflowType::class, $workflow);
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'form'         => $form->createView(),
@@ -60,7 +60,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	 * @Route("/create", methods={"POST"}, name="core_workflow_create")
 	 * @Template("LadbCoreBundle:Workflow:Workflow/new.html.twig")
 	 */
-	public function createAction(Request $request) {
+	public function createAction(Request $request, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$owner = $this->retrieveOwner($request);
 
@@ -74,7 +74,6 @@ class WorkflowController extends AbstractWorkflowBasedController {
 
 		if ($form->isValid()) {
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($workflow);
 
 			$workflow->setUser($owner);
@@ -91,16 +90,13 @@ class WorkflowController extends AbstractWorkflowBasedController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($workflow));
 
 			return $this->redirect($this->generateUrl('core_workflow_show', array( 'id' => $workflow->getId(), 'layout' => 'workspace' )));
 		}
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
-
-		$tagUtils = $this->get(TagUtils::NAME);
+		$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 		return array(
 			'workflow'     => $workflow,
@@ -114,13 +110,12 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	 * @Route("/{id}/lock", requirements={"id" = "\d+"}, defaults={"lock" = true}, name="core_workflow_lock")
 	 * @Route("/{id}/unlock", requirements={"id" = "\d+"}, defaults={"lock" = false}, name="core_workflow_unlock")
 	 */
-	public function lockUnlockAction($id, $lock) {
+	public function lockUnlockAction($id, $lock, TranslatorInterface $translator, WorkflowManager $workflowManager) {
 
 		$workflow = $this->retrievePublication($id, Workflow::CLASS_NAME);
 		$this->assertLockUnlockable($workflow, $lock);
 
 		// Lock or Unlock
-		$workflowManager = $this->get(WorkflowManager::NAME);
 		if ($lock) {
 			$workflowManager->lock($workflow);
 		} else {
@@ -128,7 +123,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		}
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('workflow.workflow.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $workflow->getTitle() )));
+		$this->addFlash('success', $translator->trans('workflow.workflow.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $workflow->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_workflow_show', array( 'id' => $workflow->getSluggedId() )));
 	}
@@ -136,17 +131,16 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	/**
 	 * @Route("/{id}/publish", requirements={"id" = "\d+"}, name="core_workflow_publish")
 	 */
-	public function publishAction($id) {
+	public function publishAction($id, TranslatorInterface $translator, WorkflowManager $workflowManager) {
 
 		$workflow = $this->retrievePublication($id, Workflow::CLASS_NAME);
 		$this->assertPublishable($workflow);
 
 		// Publish
-		$workflowManager = $this->get(WorkflowManager::NAME);
 		$workflowManager->publish($workflow);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('workflow.workflow.form.alert.publish_success', array( '%title%' => $workflow->getTitle() )));
+		$this->addFlash('success', $translator->trans('workflow.workflow.form.alert.publish_success', array( '%title%' => $workflow->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_workflow_show', array( 'id' => $workflow->getSluggedId() )));
 	}
@@ -154,17 +148,16 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	/**
 	 * @Route("/{id}/unpublish", requirements={"id" = "\d+"}, name="core_workflow_unpublish")
 	 */
-	public function unpublishAction(Request $request, $id) {
+	public function unpublishAction(Request $request, $id, TranslatorInterface $translator, WorkflowManager $workflowManager) {
 
 		$workflow = $this->retrievePublication($id, Workflow::CLASS_NAME);
 		$this->assertUnpublishable($workflow);
 
 		// Unpublish
-		$workflowManager = $this->get(WorkflowManager::NAME);
 		$workflowManager->unpublish($workflow);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('workflow.workflow.form.alert.unpublish_success', array( '%title%' => $workflow->getTitle() )));
+		$this->addFlash('success', $translator->trans('workflow.workflow.form.alert.unpublish_success', array( '%title%' => $workflow->getTitle() )));
 
 		// Return to
 		$returnToUrl = $request->get('rtu');
@@ -179,14 +172,12 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_workflow_edit")
 	 * @Template("LadbCoreBundle:Workflow:Workflow/edit.html.twig")
 	 */
-	public function editAction($id) {
+	public function editAction($id, TagUtils $tagUtils) {
 
 		$workflow = $this->retrievePublication($id, Workflow::CLASS_NAME);
 		$this->assertEditabable($workflow);
 
 		$form = $this->createForm(WorkflowType::class, $workflow);
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'workflow'     => $workflow,
@@ -199,7 +190,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_workflow_update")
 	 * @Template("LadbCoreBundle:Workflow:Workflow/edit.html.twig")
 	 */
-	public function updateAction(Request $request, $id) {
+	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$workflow = $this->retrievePublication($id, Workflow::CLASS_NAME);
 		$this->assertEditabable($workflow);
@@ -211,7 +202,6 @@ class WorkflowController extends AbstractWorkflowBasedController {
 
 		if ($form->isValid()) {
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($workflow);
 
 			if ($workflow->getUser() == $this->getUser()) {
@@ -222,11 +212,10 @@ class WorkflowController extends AbstractWorkflowBasedController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_UPDATED, new PublicationEvent($workflow, array( 'previouslyUsedTags' => $previouslyUsedTags )));
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('workflow.workflow.form.alert.update_success', array( '%title%' => $workflow->getTitle() )));
+			$this->addFlash('success', $translator->trans('workflow.workflow.form.alert.update_success', array( '%title%' => $workflow->getTitle() )));
 
 			// Regenerate the form
 			$form = $this->createForm(WorkflowType::class, $workflow);
@@ -234,11 +223,9 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		} else {
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
+			$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 		}
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'workflow'     => $workflow,
@@ -250,17 +237,16 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	/**
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_workflow_delete")
 	 */
-	public function deleteAction($id) {
+	public function deleteAction($id, TranslatorInterface $translator, WorkflowManager $workflowManager) {
 
 		$workflow = $this->retrievePublication($id, Workflow::CLASS_NAME);
 		$this->assertDeletable($workflow);
 
 		// Delete
-		$workflowManager = $this->get(WorkflowManager::NAME);
 		$workflowManager->delete($workflow);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('workflow.workflow.form.alert.delete_success', array( '%title%' => $workflow->getTitle() )));
+		$this->addFlash('success', $translator->trans('workflow.workflow.form.alert.delete_success', array( '%title%' => $workflow->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_workflow_list'));
 	}
@@ -268,7 +254,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	/**
 	 * @Route("/{id}/chown", requirements={"id" = "\d+"}, name="core_workflow_chown")
 	 */
-	public function chownAction(Request $request, $id) {
+	public function chownAction(Request $request, $id, TranslatorInterface $translator, WorkflowManager $workflowManager) {
 
 		$workflow = $this->retrievePublication($id, Workflow::CLASS_NAME);
 		$this->assertChownable($workflow);
@@ -276,11 +262,10 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		$targetUser = $this->retrieveOwner($request);
 
 		// Change owner
-		$workflowManager = $this->get(WorkflowManager::NAME);
 		$workflowManager->changeOwner($workflow, $targetUser);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('workflow.workflow.form.alert.chown_success', array( '%title%' => $workflow->getTitle() )));
+		$this->addFlash('success', $translator->trans('workflow.workflow.form.alert.chown_success', array( '%title%' => $workflow->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_workflow_show', array( 'id' => $workflow->getSluggedId() )));
 	}
@@ -305,7 +290,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	 * @Route("/{id}/pas-a-pas/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_workflow_howtos_filter_page")
 	 * @Template("LadbCoreBundle:Workflow:Workflow/howtos.html.twig")
 	 */
-	public function howtosAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function howtosAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 
 		$workflow = $this->retrievePublication($id, Workflow::CLASS_NAME);
@@ -314,7 +299,6 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		// Howtos
 
 		$howtoRepository = $om->getRepository(Howto::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -343,7 +327,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	 * @Route("/{id}/creations/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_workflow_creations_filter_page")
 	 * @Template("LadbCoreBundle:Workflow:Workflow/creations.html.twig")
 	 */
-	public function creationsAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function creationsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 
 		$workflow = $this->retrievePublication($id, Workflow::CLASS_NAME);
@@ -352,7 +336,6 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		// Creations
 
 		$creationRepository = $om->getRepository(Creation::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -381,7 +364,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	 * @Route("/{id}/plans/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_workflow_plans_filter_page")
 	 * @Template("LadbCoreBundle:Workflow:Workflow/plans.html.twig")
 	 */
-	public function plansAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function plansAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 
 		$workflow = $this->retrievePublication($id, Workflow::CLASS_NAME);
@@ -390,7 +373,6 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		// Plans
 
 		$planRepository = $om->getRepository(Plan::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -419,7 +401,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	 * @Route("/{id}/ateliers/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_workflow_workshops_filter_page")
 	 * @Template("LadbCoreBundle:Workflow:Workflow/workshops.html.twig")
 	 */
-	public function workshopsAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function workshopsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 
 		$workflow = $this->retrievePublication($id, Workflow::CLASS_NAME);
@@ -428,7 +410,6 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		// Workshops
 
 		$workshopRepository = $om->getRepository(Workshop::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -457,7 +438,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	 * @Route("/{id}/inspirations/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_workflow_inspirations_filter_page")
 	 * @Template("LadbCoreBundle:Workflow:Workflow/inspirations.html.twig")
 	 */
-	public function inspirationsAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function inspirationsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 		$workflowRepository = $om->getRepository(Workflow::CLASS_NAME);
 
@@ -465,8 +446,6 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		$this->assertShowable($workflow);
 
 		// Inspirations
-
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -495,7 +474,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	 * @Route("/{id}/rebonds/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_workflow_rebounds_filter_page")
 	 * @Template("LadbCoreBundle:Workflow:Workflow/rebounds.html.twig")
 	 */
-	public function reboundsAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function reboundsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 		$workflowRepository = $om->getRepository(Workflow::CLASS_NAME);
 
@@ -503,8 +482,6 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		$this->assertShowable($workflow);
 
 		// Rebounds
-
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -544,13 +521,12 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	/**
 	 * @Route("/{id}/restart", requirements={"id" = "\d+"}, name="core_workflow_restart")
 	 */
-	public function restartAction($id) {
+	public function restartAction($id, WorkflowManager $workflowManager) {
 
 		$workflow = $this->retrievePublication($id, Workflow::CLASS_NAME);
 		$this->_assertAuthorizedWorkflow($workflow);
 
 		// Restart
-		$workflowManager = $this->get(WorkflowManager::NAME);
 		$workflowManager->restart($workflow, $this->getUser());
 
 		$this->_push($workflow, array(
@@ -564,17 +540,16 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	/**
 	 * @Route("/{id}/copy", requirements={"id" = "\d+"}, name="core_workflow_copy")
 	 */
-	public function copyAction($id) {
+	public function copyAction($id, TranslatorInterface $translator, WorkflowManager $workflowManager) {
 
 		$workflow = $this->retrievePublication($id, Workflow::CLASS_NAME);
 		$this->assertShowable($workflow);
 
 		// Copy
-		$workflowManager = $this->get(WorkflowManager::NAME);
 		$newWorkflow = $workflowManager->copy($workflow, $this->getUser());
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('workflow.workflow.form.alert.copy_success', array( '%title%' => $workflow->getTitle() )));
+		$this->addFlash('success', $translator->trans('workflow.workflow.form.alert.copy_success', array( '%title%' => $workflow->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_workflow_show', array( 'id' => $newWorkflow->getSluggedId() )));
 	}
@@ -614,10 +589,9 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	 * @Route("/{id}.html", name="core_workflow_show")
 	 * @Template("LadbCoreBundle:Workflow:Workflow/show.html.twig")
 	 */
-	public function showAction(Request $request, $id) {
+	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, FollowerUtils $followerUtils, LikableUtils $likableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();
 		$workflowRepository = $om->getRepository(Workflow::CLASS_NAME);
-		$witnessManager = $this->get(WitnessManager::NAME);
 
 		$layout = $request->get('layout', 'page');
 
@@ -633,17 +607,13 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		$this->assertShowable($workflow);
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($workflow));
-
-		$followerUtils = $this->get(FollowerUtils::NAME);
-		$likableUtils = $this->get(LikableUtils::NAME);
 
 		$parameters = array(
 			'workflow'          => $workflow,
 			'permissionContext' => $this->getPermissionContext($workflow),
-			'readOnly'          => !$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && $workflow->getUser() != $this->getUser(),
-			'durationsHidden'   => !$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && $workflow->getUser() != $this->getUser(),
+			'readOnly'          => !$this->isGranted('ROLE_ADMIN') && $workflow->getUser() != $this->getUser(),
+			'durationsHidden'   => !$this->isGranted('ROLE_ADMIN') && $workflow->getUser() != $this->getUser(),
 			'followerContext'   => $followerUtils->getFollowerContext($workflow->getUser(), $this->getUser()),
 			'likeContext'       => $likableUtils->getLikeContext($workflow, $this->getUser()),
 		);
@@ -661,10 +631,6 @@ class WorkflowController extends AbstractWorkflowBasedController {
 
 		}
 
-		$watchableUtils = $this->get(WatchableUtils::NAME);
-		$commentableUtils = $this->get(CommentableUtils::NAME);
-		$collectionnableUtils = $this->get(CollectionnableUtils::NAME);
-
 		$parameters = array_merge($parameters, array(
 			'watchContext'      => $watchableUtils->getWatchContext($workflow, $this->getUser()),
 			'commentContext'    => $commentableUtils->getCommentContext($workflow),
@@ -679,8 +645,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_workflow_list_page")
 	 * @Template("LadbCoreBundle:Workflow:Workflow/list.html.twig")
 	 */
-	public function listAction(Request $request, $page = 0) {
-		$searchUtils = $this->get(SearchUtils::NAME);
+	public function listAction(Request $request, EventDispatcherInterface $dispatcher, SearchUtils $searchUtils, $page = 0) {
 
 		// Elasticsearch paginiation limit
 		if ($page > 624) {
@@ -703,7 +668,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 					// Filters /////
 
 					case 'admin-all':
-						if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+						if ($this->isGranted('ROLE_ADMIN')) {
 
 							$filters[] = new \Elastica\Query\MatchAll();
 
@@ -715,7 +680,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 
 					case 'mine':
 
-						if ($this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
+						if ($this->isGranted('ROLE_USER')) {
 
 							$filter = new \Elastica\Query\MatchPhrase('user.username', $this->getUser()->getUsernameCanonical());
 							$filters[] = $filter;
@@ -849,7 +814,6 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		);
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATIONS_LISTED, new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()));
 
 		$parameters = array_merge($searchParameters, array(
