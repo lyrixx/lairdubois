@@ -256,7 +256,7 @@ class OpencutlistController extends AbstractController {
 	 * @Template("LadbCoreBundle:Opencutlist:stats.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_OPENCUTLIST')", statusCode=404, message="Not allowed (core_opencutlist_stats)")
 	 */
-	public function statsAction(Request $request, $page = 0) {
+	public function statsAction(Request $request, PaginatorUtils $paginatorUtils, $page = 0) {
 
         set_time_limit(300); // Et time limit to 5 min
 
@@ -268,7 +268,6 @@ class OpencutlistController extends AbstractController {
 
 		$om = $this->getDoctrine()->getManager();
 		$accessRepository = $om->getRepository(Access::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);

@@ -2,11 +2,13 @@
 
 namespace qa;
 
+use Castor\Attribute\AsArgument;
 use Castor\Attribute\AsOption;
 use Castor\Attribute\AsRawTokens;
 use Castor\Attribute\AsTask;
 
 use function Castor\context;
+use function Castor\finder;
 use function Castor\fs;
 use function Castor\io;
 use function Castor\variable;
@@ -205,6 +207,72 @@ function e2e(#[AsRawTokens] array $rawTokens = []): int
     io()->section('Running Playwright');
 
     return docker_exit_code(['npx', 'playwright', 'test', ...$rawTokens], service: 'playwright');
+}
+
+/**
+ * @param list<string> $paths
+ */
+#[AsTask(description: 'Rewrites the given paths with Rector (tools/rector): $this->get() of the controller actions to arguments (#16)')]
+function rector(
+    #[AsArgument(description: 'Files or directories, relative to the root directory')]
+    array $paths,
+    #[AsOption(description: 'Shows the diff without writing it, with __RECTOR_REMOVED_LINE__; for the removed lines')]
+    bool $dryRun = false,
+): int {
+    $rootDir = variable('root_dir');
+
+    // Not in qa:install: the CI does not need it
+    if (!is_dir($rootDir . '/tools/rector/vendor')) {
+        docker_compose_run(['composer', 'install', '-n', '--prefer-dist', '--optimize-autoloader'], workDir: '/var/www/tools/rector');
+    }
+
+    io()->section('Running Rector');
+
+    $command = ['tools/rector/vendor/bin/rector', 'process', '--config=tools/rector/rector.php', '--no-progress-bar'];
+    if ($dryRun) {
+        $command[] = '--dry-run';
+    }
+    $exitCode = docker_exit_code([...$command, ...$paths]);
+
+    if (!$dryRun) {
+        foreach ($paths as $path) {
+            $files = is_file($rootDir . '/' . $path) ? [$rootDir . '/' . $path] : array_keys(iterator_to_array(finder()->files()->name('*.php')->in($rootDir . '/' . $path)));
+            foreach ($files as $file) {
+                rector_remove_lines($file);
+            }
+        }
+    }
+
+    return $exitCode;
+}
+
+/**
+ * ControllerGetToActionArgumentRector leaves "__RECTOR_REMOVED_LINE__;" in place of the statements
+ * it removes (php-parser would reprint the comments before them): removed here with their line,
+ * and the empty line after them when it would double the one before, or detach a comment from the
+ * next statement.
+ */
+function rector_remove_lines(string $file): void
+{
+    $lines = explode("\n", file_get_contents($file));
+    $kept = [];
+    $removed = false;
+    for ($i = 0, $count = \count($lines); $i < $count; ++$i) {
+        if ('__RECTOR_REMOVED_LINE__;' !== trim($lines[$i])) {
+            $kept[] = $lines[$i];
+
+            continue;
+        }
+        $removed = true;
+        $previous = trim($kept[\count($kept) - 1] ?? '');
+        if (('' === $previous || str_starts_with($previous, '//')) && $i + 1 < $count && '' === trim($lines[$i + 1])) {
+            ++$i;
+        }
+    }
+
+    if ($removed) {
+        fs()->dumpFile($file, implode("\n", $kept));
+    }
 }
 
 function e2e_install_if_missing(): void

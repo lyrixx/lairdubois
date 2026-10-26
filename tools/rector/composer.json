@@ -1,0 +1,18 @@
+{
+    "type": "project",
+    "require": {
+        "rector/rector": "^2.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "Ladb\\Rector\\": "src/"
+        }
+    },
+    "config": {
+        "bump-after-update": true,
+        "platform": {
+            "php": "8.3"
+        },
+        "sort-packages": true
+    }
+}

@@ -33,6 +33,8 @@ use Ladb\CoreBundle\Manager\Core\WitnessManager;
 use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Utils\BlockBodiedUtils;
 use Ladb\CoreBundle\Utils\FindUtils;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @Route("/trouvailles")
@@ -45,13 +47,11 @@ class FindController extends AbstractController {
 	 * @Route("/new", name="core_find_new")
 	 * @Template("LadbCoreBundle:Find/Find:new.html.twig")
 	 */
-	public function newAction(Request $request) {
+	public function newAction(Request $request, TagUtils $tagUtils) {
 
 		$find = new Find();
 		$find->addBodyBlock(new \Ladb\CoreBundle\Entity\Core\Block\Text());	// Add a default Text body block
 		$form = $this->createForm(FindType::class, $find);
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'form'         => $form->createView(),
@@ -64,7 +64,7 @@ class FindController extends AbstractController {
 	 * @Route("/create", methods={"POST"}, name="core_find_create")
 	 * @Template("LadbCoreBundle:Find/Find:new.html.twig")
 	 */
-	public function createAction(Request $request) {
+	public function createAction(Request $request, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, FindUtils $findUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$owner = $this->retrieveOwner($request);
 
@@ -78,13 +78,10 @@ class FindController extends AbstractController {
 
 		if ($form->isValid()) {
 
-			$blockUtils = $this->get(BlockBodiedUtils::NAME);
 			$blockUtils->preprocessBlocks($find);
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($find);
 
-			$findUtils = $this->get(FindUtils::NAME);
 			$findUtils->generateMainPicture($find);
 
 			$find->setUser($owner);
@@ -94,16 +91,13 @@ class FindController extends AbstractController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($find));
 
 			return $this->redirect($this->generateUrl('core_find_show', array('id' => $find->getSluggedId())));
 		}
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
-
-		$tagUtils = $this->get(TagUtils::NAME);
+		$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 		return array(
 			'find'         => $find,
@@ -118,13 +112,12 @@ class FindController extends AbstractController {
 	 * @Route("/{id}/lock", requirements={"id" = "\d+"}, defaults={"lock" = true}, name="core_find_lock")
 	 * @Route("/{id}/unlock", requirements={"id" = "\d+"}, defaults={"lock" = false}, name="core_find_unlock")
 	 */
-	public function lockUnlockAction($id, $lock) {
+	public function lockUnlockAction($id, $lock, FindManager $findManager, TranslatorInterface $translator) {
 
 		$find = $this->retrievePublication($id, Find::CLASS_NAME);
 		$this->assertLockUnlockable($find, $lock);
 
 		// Lock or Unlock
-		$findManager = $this->get(FindManager::NAME);
 		if ($lock) {
 			$findManager->lock($find);
 		} else {
@@ -132,7 +125,7 @@ class FindController extends AbstractController {
 		}
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('find.find.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $find->getTitle() )));
+		$this->addFlash('success', $translator->trans('find.find.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $find->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_find_show', array( 'id' => $find->getSluggedId() )));
 	}
@@ -140,17 +133,16 @@ class FindController extends AbstractController {
 	/**
 	 * @Route("/{id}/publish", requirements={"id" = "\d+"}, name="core_find_publish")
 	 */
-	public function publishAction($id) {
+	public function publishAction($id, FindManager $findManager, TranslatorInterface $translator) {
 
 		$find = $this->retrievePublication($id, Find::CLASS_NAME);
 		$this->assertPublishable($find);
 
 		// Publish
-		$findManager = $this->get(FindManager::NAME);
 		$findManager->publish($find);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('find.find.form.alert.publish_success', array( '%title%' => $find->getTitle() )));
+		$this->addFlash('success', $translator->trans('find.find.form.alert.publish_success', array( '%title%' => $find->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_find_show', array( 'id' => $find->getSluggedId() )));
 	}
@@ -158,17 +150,16 @@ class FindController extends AbstractController {
 	/**
 	 * @Route("/{id}/unpublish", requirements={"id" = "\d+"}, name="core_find_unpublish")
 	 */
-	public function unpublishAction(Request $request, $id) {
+	public function unpublishAction(Request $request, $id, FindManager $findManager, TranslatorInterface $translator) {
 
 		$find = $this->retrievePublication($id, Find::CLASS_NAME);
 		$this->assertUnpublishable($find);
 
 		// Unpublish
-		$findManager = $this->get(FindManager::NAME);
 		$findManager->unpublish($find);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('find.find.form.alert.unpublish_success', array( '%title%' => $find->getTitle() )));
+		$this->addFlash('success', $translator->trans('find.find.form.alert.unpublish_success', array( '%title%' => $find->getTitle() )));
 
 		// Return to
 		$returnToUrl = $request->get('rtu');
@@ -183,14 +174,12 @@ class FindController extends AbstractController {
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_find_edit")
 	 * @Template("LadbCoreBundle:Find/Find:edit.html.twig")
 	 */
-	public function editAction($id) {
+	public function editAction($id, TagUtils $tagUtils) {
 
 		$find = $this->retrievePublication($id, Find::CLASS_NAME);
 		$this->assertEditabable($find);
 
 		$form = $this->createForm(FindType::class, $find);
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'find'         => $find,
@@ -203,15 +192,14 @@ class FindController extends AbstractController {
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_find_update")
 	 * @Template("LadbCoreBundle:Find/Find:edit.html.twig")
 	 */
-	public function updateAction(Request $request, $id) {
+	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, FindUtils $findUtils, PicturedUtils $picturedUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
-		$doUp = $request->get('ladb_do_up', false) && $this->get('security.authorization_checker')->isGranted('ROLE_ADMIN');
+		$doUp = $request->get('ladb_do_up', false) && $this->isGranted('ROLE_ADMIN');
 
 		$find = $this->retrievePublication($id, Find::CLASS_NAME);
 		$this->assertEditabable($find);
 
 		if ($find->getContent() instanceof Gallery) {
-			$picturedUtils = $this->get(PicturedUtils::NAME);
 			$picturedUtils->resetPictures($find->getContent()); // Reset pictures array to consider form pictures order
 		}
 
@@ -223,13 +211,10 @@ class FindController extends AbstractController {
 
 		if ($form->isValid()) {
 
-			$blockUtils = $this->get(BlockBodiedUtils::NAME);
 			$blockUtils->preprocessBlocks($find, $originalBodyBlocks);
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($find);
 
-			$findUtils = $this->get(FindUtils::NAME);
 			$findUtils->generateMainPicture($find);
 
 			if ($doUp) {
@@ -243,14 +228,13 @@ class FindController extends AbstractController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher = $this->get('event_dispatcher');
 			if ($doUp) {
 				$dispatcher->dispatch(PublicationListener::PUBLICATION_CHANGED, new PublicationEvent($find));
 			}
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_UPDATED, new PublicationEvent($find, array( 'previouslyUsedTags' => $previouslyUsedTags )));
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('find.find.form.alert.update_success', array( '%title%' => $find->getTitle() )));
+			$this->addFlash('success', $translator->trans('find.find.form.alert.update_success', array( '%title%' => $find->getTitle() )));
 
 			// Regenerate the form
 			$form = $this->createForm(FindType::class, $find);
@@ -258,11 +242,9 @@ class FindController extends AbstractController {
 		} else {
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
+			$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 		}
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'find'         => $find,
@@ -274,17 +256,16 @@ class FindController extends AbstractController {
 	/**
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_find_delete")
 	 */
-	public function deleteAction($id) {
+	public function deleteAction($id, FindManager $findManager, TranslatorInterface $translator) {
 
 		$find = $this->retrievePublication($id, Find::CLASS_NAME);
 		$this->assertDeletable($find);
 
 		// Delete
-		$findManager = $this->get(FindManager::NAME);
 		$findManager->delete($find);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('find.find.form.alert.delete_success', array( '%title%' => $find->getTitle() )));
+		$this->addFlash('success', $translator->trans('find.find.form.alert.delete_success', array( '%title%' => $find->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_find_list'));
 	}
@@ -292,7 +273,7 @@ class FindController extends AbstractController {
 	/**
 	 * @Route("/{id}/chown", requirements={"id" = "\d+"}, name="core_find_chown")
 	 */
-	public function chownAction(Request $request, $id) {
+	public function chownAction(Request $request, $id, FindManager $findManager, TranslatorInterface $translator) {
 
 		$find = $this->retrievePublication($id, Find::CLASS_NAME);
 		$this->assertChownable($find);
@@ -300,11 +281,10 @@ class FindController extends AbstractController {
 		$targetUser = $this->retrieveOwner($request);
 
 		// Change owner
-		$findManager = $this->get(FindManager::NAME);
 		$findManager->changeOwner($find, $targetUser);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('find.find.form.alert.chown_success', array( '%title%' => $find->getTitle() )));
+		$this->addFlash('success', $translator->trans('find.find.form.alert.chown_success', array( '%title%' => $find->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_find_show', array( 'id' => $find->getSluggedId() )));
 	}
@@ -381,8 +361,7 @@ class FindController extends AbstractController {
 	 * @Route(".geojson", defaults={"_format" = "json", "page"=-1, "layout"="geojson"}, name="core_find_list_geojson")
 	 * @Template("LadbCoreBundle:Find/Find:list.html.twig")
 	 */
-	public function listAction(Request $request, $page = 0, $layout = 'view') {
-		$searchUtils = $this->get(SearchUtils::NAME);
+	public function listAction(Request $request, EventDispatcherInterface $dispatcher, LocalisableUtils $localisableUtils, SearchUtils $searchUtils, TranslatorInterface $translator, $page = 0, $layout = 'view') {
 
 		// Elasticsearch paginiation limit
 		if ($page > 624) {
@@ -392,14 +371,14 @@ class FindController extends AbstractController {
 		$searchParameters = $searchUtils->searchPaginedEntities(
 			$request,
 			$page,
-			function($facet, &$filters, &$sort, &$noGlobalFilters, &$couldUseDefaultSort) use ($searchUtils) {
+			function($facet, &$filters, &$sort, &$noGlobalFilters, &$couldUseDefaultSort) use ($searchUtils, $localisableUtils) {
 				switch ($facet->name) {
 
 					// Filters /////
 
 					case 'mine':
 
-						if ($this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
+						if ($this->isGranted('ROLE_USER')) {
 
 							if (isset($facet->value) && $facet->value == 'draft') {
 
@@ -474,7 +453,6 @@ class FindController extends AbstractController {
 
 					case 'location':
 
-						$localisableUtils = $this->get(LocalisableUtils::NAME);
 						$boundsAndLocation = $localisableUtils->getBoundsAndLocation($facet->value);
 
 						if (!is_null($boundsAndLocation)) {
@@ -574,20 +552,19 @@ class FindController extends AbstractController {
 		}
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATIONS_LISTED, new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()));
 
 		if ($request->isXmlHttpRequest()) {
 			return $this->render('LadbCoreBundle:Find/Find:list-xhr.html.twig', $parameters);
 		}
 
-		if ($this->get('security.authorization_checker')->isGranted('ROLE_USER') && $this->getUser()->getMeta()->getPrivateFindCount() > 0) {
+		if ($this->isGranted('ROLE_USER') && $this->getUser()->getMeta()->getPrivateFindCount() > 0) {
 
 			$draftPath = $this->generateUrl('core_find_list', array( 'q' => '@mine:draft' ));
 			$draftCount = $this->getUser()->getMeta()->getPrivateFindCount();
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('info', '<i class="ladb-icon-warning"></i> '.$this->get('translator')->transchoice('find.find.choice.draft_alert', $draftCount, array( '%count%' => $draftCount )).' <small><a href="'.$draftPath.'" class="alert-link">('.$this->get('translator')->trans('default.show_my_drafts').')</a></small>');
+			$this->addFlash('info', '<i class="ladb-icon-warning"></i> '.$translator->transchoice('find.find.choice.draft_alert', $draftCount, array( '%count%' => $draftCount )).' <small><a href="'.$draftPath.'" class="alert-link">('.$translator->trans('default.show_my_drafts').')</a></small>');
 
 		}
 
@@ -598,10 +575,9 @@ class FindController extends AbstractController {
 	 * @Route("/{id}.html", name="core_find_show")
 	 * @Template("LadbCoreBundle:Find/Find:show.html.twig")
 	 */
-	public function showAction(Request $request, $id) {
+	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();
 		$findRepository = $om->getRepository(Find::CLASS_NAME);
-		$witnessManager = $this->get(WitnessManager::NAME);
 
 		$id = intval($id);
 
@@ -615,18 +591,10 @@ class FindController extends AbstractController {
 		$this->assertShowable($find);
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($find));
 
-		$explorableUtils = $this->get(ExplorableUtils::NAME);
 		$userFinds = $explorableUtils->getPreviousAndNextPublishedUserExplorables($find, $findRepository, $find->getUser()->getMeta()->getPublicFindCount());
 		$similarFinds = $explorableUtils->getSimilarExplorables($find, 'fos_elastica.index.ladb.find_find', Find::CLASS_NAME, $userFinds);
-
-		$likableUtils = $this->get(LikableUtils::NAME);
-		$watchableUtils = $this->get(WatchableUtils::NAME);
-		$commentableUtils = $this->get(CommentableUtils::NAME);
-		$collectionnableUtils = $this->get(CollectionnableUtils::NAME);
-		$followerUtils = $this->get(FollowerUtils::NAME);
 
 		if ($find->getContent() instanceof LocalisableInterface) {
 			$hasMap = !is_null($find->getContent()->getLatitude()) && !is_null($find->getContent()->getLongitude());

@@ -12,6 +12,7 @@ use Ladb\CoreBundle\Utils\FieldPreprocessorUtils;
 use Ladb\CoreBundle\Form\Type\Message\ReplyMessageType;
 use Ladb\CoreBundle\Utils\MailerUtils;
 use Ladb\CoreBundle\Utils\WebpushNotificationUtils;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @Route("/messagerie")
@@ -47,7 +48,7 @@ class MessageController extends AbstractThreadController {
 	 * @Route("/thread/{threadId}/create", requirements={"threadId" = "\d+"}, name="core_message_create")
 	 * @Template("LadbCoreBundle:Message:new-xhr.html.twig")
 	 */
-	public function createAction(Request $request, $threadId) {
+	public function createAction(Request $request, $threadId, FieldPreprocessorUtils $fieldPreprocessorUtils, TranslatorInterface $translator) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_message_create)');
 		}
@@ -67,7 +68,6 @@ class MessageController extends AbstractThreadController {
 		if ($form->isValid()) {
 
 			$om = $this->getDoctrine()->getManager();
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 
 			$sender = $this->getUser();
 			$participants = $thread->getParticipants();
@@ -98,7 +98,7 @@ class MessageController extends AbstractThreadController {
 			}
 
 			if (!$sender->getEmailConfirmed() && $sender->getMeta()->getIncomingMessageEmailNotificationEnabled()) {
-				$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.alert.email_not_confirmed_error'));
+				$this->addFlash('error', $translator->trans('default.alert.email_not_confirmed_error'));
 			}
 
 			// Notifications (after flush to have a thread id)
@@ -147,7 +147,7 @@ class MessageController extends AbstractThreadController {
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, name="core_message_update")
 	 * @Template("LadbCoreBundle:Message:edit-xhr.html.twig")
 	 */
-	public function updateAction(Request $request, $id) {
+	public function updateAction(Request $request, $id, FieldPreprocessorUtils $fieldPreprocessorUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_message_update)');
 		}
@@ -170,7 +170,6 @@ class MessageController extends AbstractThreadController {
 
 			$om = $this->getDoctrine()->getManager();
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($message);
 
 			$om->flush();

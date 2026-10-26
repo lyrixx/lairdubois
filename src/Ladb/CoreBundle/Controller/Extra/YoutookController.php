@@ -16,6 +16,8 @@ use Ladb\CoreBundle\Event\PublicationEvent;
 use Ladb\CoreBundle\Event\PublicationListener;
 use Ladb\CoreBundle\Manager\Youtook\TookManager;
 use Ladb\CoreBundle\Manager\Core\WitnessManager;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @Route("/yt")
@@ -26,7 +28,7 @@ class YoutookController extends AbstractController {
 	 * @Route("/create", methods={"POST"}, name="core_youtook_create")
 	 * @Template("LadbCoreBundle:Extra/Youtook:create-xhr.html.twig")
 	 */
-	public function createAction(Request $request) {
+	public function createAction(Request $request, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TranslatorInterface $translator) {
 
 		$this->createLock('core_youtook_create', false, self::LOCK_TTL_CREATE_ACTION, false);
 
@@ -49,7 +51,6 @@ class YoutookController extends AbstractController {
 
 			} else {
 
-				$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 				$fieldPreprocessorUtils->preprocessFields($took);
 
 				$took->setUser($this->getUser());
@@ -60,11 +61,10 @@ class YoutookController extends AbstractController {
 			}
 
 			// Dispatch publication event
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($took));
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('youtook.form.alert.create_success'));
+			$this->addFlash('success', $translator->trans('youtook.form.alert.create_success'));
 
 			$success = true;
 		}
@@ -88,7 +88,7 @@ class YoutookController extends AbstractController {
 		if (is_null($took)) {
 			throw $this->createNotFoundException('Unable to find Video entity (id='.$id.').');
 		}
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && $took->getUser()->getId() != $this->getUser()->getId()) {
+		if (!$this->isGranted('ROLE_ADMIN') && $took->getUser()->getId() != $this->getUser()->getId()) {
 			throw $this->createNotFoundException('Not allowed (core_youtook_edit)');
 		}
 
@@ -104,7 +104,7 @@ class YoutookController extends AbstractController {
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_youtook_update")
 	 * @Template("LadbCoreBundle:Extra/Youtook:edit.html.twig")
 	 */
-	public function updateAction(Request $request, $id) {
+	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TranslatorInterface $translator) {
 		$om = $this->getDoctrine()->getManager();
 		$tookRepository = $om->getRepository(Took::CLASS_NAME);
 
@@ -112,7 +112,7 @@ class YoutookController extends AbstractController {
 		if (is_null($took)) {
 			throw $this->createNotFoundException('Unable to find Video entity (id='.$id.').');
 		}
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && $took->getUser()->getId() != $this->getUser()->getId()) {
+		if (!$this->isGranted('ROLE_ADMIN') && $took->getUser()->getId() != $this->getUser()->getId()) {
 			throw $this->createNotFoundException('Not allowed (core_youtook_update)');
 		}
 
@@ -121,7 +121,6 @@ class YoutookController extends AbstractController {
 
 		if ($form->isValid()) {
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($took);
 
 			if ($took->getUser()->getId() == $this->getUser()->getId()) {
@@ -131,11 +130,10 @@ class YoutookController extends AbstractController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_UPDATED, new PublicationEvent($took));
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('youtook.form.alert.update_success', array( '%title%' => $took->getTitle() )));
+			$this->addFlash('success', $translator->trans('youtook.form.alert.update_success', array( '%title%' => $took->getTitle() )));
 
 			// Regenerate the form
 			$form = $this->createForm(EditTookType::class, $took);
@@ -143,7 +141,7 @@ class YoutookController extends AbstractController {
 		} else {
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
+			$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 		}
 
@@ -156,7 +154,7 @@ class YoutookController extends AbstractController {
 	/**
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_youtook_delete")
 	 */
-	public function deleteAction($id) {
+	public function deleteAction($id, TookManager $tookManager, TranslatorInterface $translator) {
 		$om = $this->getDoctrine()->getManager();
 		$tookRepository = $om->getRepository(Took::CLASS_NAME);
 
@@ -164,16 +162,15 @@ class YoutookController extends AbstractController {
 		if (is_null($took)) {
 			throw $this->createNotFoundException('Unable to find Took entity (id='.$id.').');
 		}
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && $took->getUser()->getId() != $this->getUser()->getId()) {
+		if (!$this->isGranted('ROLE_ADMIN') && $took->getUser()->getId() != $this->getUser()->getId()) {
 			throw $this->createNotFoundException('Not allowed (core_youtook_delete)');
 		}
 
 		// Delete
-		$tookManager = $this->get(TookManager::NAME);
 		$tookManager->delete($took);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('youtook.form.alert.delete_success', array( '%title%' => $took->getTitle() )));
+		$this->addFlash('success', $translator->trans('youtook.form.alert.delete_success', array( '%title%' => $took->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_youtook_user_list'));
 	}
@@ -184,14 +181,13 @@ class YoutookController extends AbstractController {
 	 * @Route("/{filter}/{page}", requirements={"filter" = "\w+", "page" = "\d+"}, name="core_youtook_list_filter_page")
 	 * @Template("LadbCoreBundle:Extra/Youtook:list.html.twig")
 	 */
-	public function listAction(Request $request, $filter = 'all', $page = 0) {
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+	public function listAction(Request $request, PaginatorUtils $paginatorUtils, $filter = 'all', $page = 0) {
+		if (!$this->isGranted('ROLE_ADMIN')) {
 			throw $this->createNotFoundException('Access denied');
 		}
 
 		$om = $this->getDoctrine()->getManager();
 		$tookRepository = $om->getRepository(Took::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page, 20, 20);
 		$limit = $paginatorUtils->computePaginatorLimit($page, 20, 20);
@@ -218,14 +214,13 @@ class YoutookController extends AbstractController {
 	 * @Route("/mes-tooks/{filter}/{page}", requirements={"filter" = "\w+", "page" = "\d+"}, name="core_youtook_user_list_filter_page")
 	 * @Template("LadbCoreBundle:Extra/Youtook:userList.html.twig")
 	 */
-	public function userListAction(Request $request, $filter = 'all', $page = 0) {
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
+	public function userListAction(Request $request, PaginatorUtils $paginatorUtils, $filter = 'all', $page = 0) {
+		if (!$this->isGranted('ROLE_USER')) {
 			throw $this->createNotFoundException('Access denied');
 		}
 
 		$om = $this->getDoctrine()->getManager();
 		$tookRepository = $om->getRepository(Took::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page, 20, 20);
 		$limit = $paginatorUtils->computePaginatorLimit($page, 20, 20);
@@ -254,10 +249,9 @@ class YoutookController extends AbstractController {
 	 * @Route("/{id}.html", name="core_youtook_show")
 	 * @Template("LadbCoreBundle:Extra/Youtook:show.html.twig")
 	 */
-	public function showAction(Request $request, $id) {
+	public function showAction(Request $request, $id, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();
 		$tookRepository = $om->getRepository(Took::CLASS_NAME);
-		$witnessManager = $this->get(WitnessManager::NAME);
 
 		$id = intval($id);
 

@@ -312,7 +312,7 @@ class MemberController extends AbstractController {
 
 	/////
 
-	public function createAction(User $team, User $user) {
+	private function createAction(User $team, User $user) {
 
 		$this->createLock('core_member_create', false, self::LOCK_TTL_CREATE_ACTION, false);
 

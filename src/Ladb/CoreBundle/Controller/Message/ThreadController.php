@@ -16,6 +16,7 @@ use Ladb\CoreBundle\Utils\MessageUtils;
 use Ladb\CoreBundle\Form\Type\Message\NewThreadMessageType;
 use Ladb\CoreBundle\Form\Model\NewThreadMessage;
 use Ladb\CoreBundle\Utils\MailerUtils;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @Route("/messagerie")
@@ -27,7 +28,7 @@ class ThreadController extends AbstractThreadController {
 	 * @Route("/thread/to/{recipientUsername}/new", requirements={"recipientUsername" = "[a-zA-Z0-9]+"}, name="core_message_thread_new_recipientusername", defaults={"announcement" = false})
 	 * @Template("LadbCoreBundle:Message:newThread.html.twig")
 	 */
-	public function newAction($recipientUsername, $subject = null, $message = null, $alertTemplate =  null) {
+	public function newAction($recipientUsername, UserManager $userManager, $subject = null, $message = null, $alertTemplate =  null) {
 //		if (!is_null($this->getUser()) && $this->getUser()->getIsTeam()) {
 //			throw $this->createNotFoundException('Team not allowed (core_message_thread_new)');
 //		}
@@ -35,7 +36,6 @@ class ThreadController extends AbstractThreadController {
 		$newThreadMessage = new NewThreadMessage();
 
 		if (!is_null($recipientUsername)) {
-			$userManager = $this->get(UserManager::NAME);
 			$recipient = $userManager->findUserByUsername($recipientUsername);
 			if (is_null($recipient)) {
 				throw $this->createNotFoundException('User not found (core_message_thread_new_recipientusername)');
@@ -63,7 +63,7 @@ class ThreadController extends AbstractThreadController {
 	 * @Route("/thread/create", methods={"POST"}, name="core_message_thread_create")
 	 * @Template("LadbCoreBundle:Message:newThread.html.twig")
 	 */
-	public function createAction(Request $request) {
+	public function createAction(Request $request, MailerUtils $mailerUtils, MessageUtils $messageUtils, TranslatorInterface $translator) {
 //		if (!is_null($this->getUser()) && $this->getUser()->getIsTeam()) {
 //			throw $this->createNotFoundException('Team not allowed (core_message_thread_create)');
 //		}
@@ -85,13 +85,11 @@ class ThreadController extends AbstractThreadController {
 			if ($threadRepository->existsBySenderAndSubjectAndBody($sender, $newThreadMessage->getSubject(), $newThreadMessage->getBody())) {
 
 				// Email notification
-				$mailerUtils = $this->get(MailerUtils::NAME);
 				$mailerUtils->sendSpamThreadNotificationEmailMessage($sender, $recipients, $newThreadMessage->getSubject(), $newThreadMessage->getBody());
 
 				throw $this->createNotFoundException('SPAM thread detected (sender='.$sender->getUsername().', subject='.$newThreadMessage->getSubject().').');
 			}
 
-			$messageUtils = $this->get(MessageUtils::NAME);
 			$thread = $messageUtils->composeThread($sender, $recipients, $newThreadMessage->getSubject(), $newThreadMessage->getBody(), $newThreadMessage->getPictures());
 
 			// Flashbag
@@ -102,10 +100,10 @@ class ThreadController extends AbstractThreadController {
 				}
 				$recipientNames .= $recipient->getDisplayname();
 			}
-			$this->get('session')->getFlashBag()->add('success', 'Votre message a été envoyé à <strong>'.$recipientNames.'</strong>.');
+			$this->addFlash('success', 'Votre message a été envoyé à <strong>'.$recipientNames.'</strong>.');
 
 			if (!$sender->getEmailConfirmed() && $sender->getMeta()->getIncomingMessageEmailNotificationEnabled()) {
-				$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.alert.email_not_confirmed_error'));
+				$this->addFlash('error', $translator->trans('default.alert.email_not_confirmed_error'));
 			}
 
 			// Notifications (after flush to have a thread id)
@@ -216,10 +214,9 @@ class ThreadController extends AbstractThreadController {
 	 * @Route("/{filter}/{page}", requirements={"filter" = "\w+", "page" = "\d+"}, name="core_message_mailbox_filter_page")
 	 * @Template("LadbCoreBundle:Message:mailbox.html.twig")
 	 */
-	public function mailboxAction(Request $request, $filter = 'all', $page = 0) {
+	public function mailboxAction(Request $request, PaginatorUtils $paginatorUtils, $filter = 'all', $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 		$threadRepository = $om->getRepository(Thread::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		// Compute allowed user list by adding user's teams
 		$users = array( $this->getUser() );

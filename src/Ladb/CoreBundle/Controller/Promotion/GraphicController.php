@@ -30,6 +30,8 @@ use Ladb\CoreBundle\Utils\PicturedUtils;
 use Ladb\CoreBundle\Event\PublicationEvent;
 use Ladb\CoreBundle\Event\PublicationListener;
 use Ladb\CoreBundle\Event\PublicationsEvent;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @Route("/promouvoir")
@@ -42,12 +44,10 @@ class GraphicController extends AbstractController {
 	 * @Route("/new", name="core_promotion_graphic_new")
 	 * @Template("LadbCoreBundle:Promotion/Graphic:new.html.twig")
 	 */
-	public function newAction(Request $request) {
+	public function newAction(Request $request, TagUtils $tagUtils) {
 
 		$graphic = new Graphic();
 		$form = $this->createForm(GraphicType::class, $graphic);
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'form'         => $form->createView(),
@@ -60,7 +60,7 @@ class GraphicController extends AbstractController {
 	 * @Route("/create", methods={"POST"}, name="core_promotion_graphic_create")
 	 * @Template("LadbCoreBundle:Promotion/Graphic:new.html.twig")
 	 */
-	public function createAction(Request $request) {
+	public function createAction(Request $request, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, GraphicUtils $graphicUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$owner = $this->retrieveOwner($request);
 
@@ -74,7 +74,6 @@ class GraphicController extends AbstractController {
 
 		if ($form->isValid()) {
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($graphic);
 
 			$graphic->setUser($owner);
@@ -85,22 +84,18 @@ class GraphicController extends AbstractController {
 			$om->flush();
 
 			// Create zip archive after inserting graphic into database to be sure we have an ID
-			$graphicUtils = $this->get(GraphicUtils::NAME);
 			$graphicUtils->createZipArchive($graphic);
 
 			$om->flush();	// Resave to store file size
 
 			// Dispatch publication event
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($graphic));
 
 			return $this->redirect($this->generateUrl('core_promotion_graphic_show', array('id' => $graphic->getSluggedId())));
 		}
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
-
-		$tagUtils = $this->get(TagUtils::NAME);
+		$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 		return array(
 			'graphic'         => $graphic,
@@ -115,13 +110,12 @@ class GraphicController extends AbstractController {
 	 * @Route("/{id}/lock", requirements={"id" = "\d+"}, defaults={"lock" = true}, name="core_promotion_graphic_lock")
 	 * @Route("/{id}/unlock", requirements={"id" = "\d+"}, defaults={"lock" = false}, name="core_promotion_graphic_unlock")
 	 */
-	public function lockUnlockAction($id, $lock) {
+	public function lockUnlockAction($id, $lock, GraphicManager $graphicManager, TranslatorInterface $translator) {
 
 		$graphic = $this->retrievePublication($id, Graphic::CLASS_NAME);
 		$this->assertLockUnlockable($graphic, $lock);
 
 		// Lock or Unlock
-		$graphicManager = $this->get(GraphicManager::NAME);
 		if ($lock) {
 			$graphicManager->lock($graphic);
 		} else {
@@ -129,7 +123,7 @@ class GraphicController extends AbstractController {
 		}
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('promotion.graphic.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $graphic->getTitle() )));
+		$this->addFlash('success', $translator->trans('promotion.graphic.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $graphic->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_promotion_graphic_show', array( 'id' => $graphic->getSluggedId() )));
 	}
@@ -137,17 +131,16 @@ class GraphicController extends AbstractController {
 	/**
 	 * @Route("/{id}/publish", requirements={"id" = "\d+"}, name="core_promotion_graphic_publish")
 	 */
-	public function publishAction($id) {
+	public function publishAction($id, GraphicManager $graphicManager, TranslatorInterface $translator) {
 
 		$graphic = $this->retrievePublication($id, Graphic::CLASS_NAME);
 		$this->assertPublishable($graphic);
 
 		// Publish
-		$graphicManager = $this->get(GraphicManager::NAME);
 		$graphicManager->publish($graphic);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('promotion.graphic.form.alert.publish_success', array( '%title%' => $graphic->getTitle() )));
+		$this->addFlash('success', $translator->trans('promotion.graphic.form.alert.publish_success', array( '%title%' => $graphic->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_promotion_graphic_show', array( 'id' => $graphic->getSluggedId() )));
 	}
@@ -155,17 +148,16 @@ class GraphicController extends AbstractController {
 	/**
 	 * @Route("/{id}/unpublish", requirements={"id" = "\d+"}, name="core_promotion_graphic_unpublish")
 	 */
-	public function unpublishAction(Request $request, $id) {
+	public function unpublishAction(Request $request, $id, GraphicManager $graphicManager, TranslatorInterface $translator) {
 
 		$graphic = $this->retrievePublication($id, Graphic::CLASS_NAME);
 		$this->assertUnpublishable($graphic);
 
 		// Unpublish
-		$graphicManager = $this->get(GraphicManager::NAME);
 		$graphicManager->unpublish($graphic);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('promotion.graphic.form.alert.unpublish_success', array( '%title%' => $graphic->getTitle() )));
+		$this->addFlash('success', $translator->trans('promotion.graphic.form.alert.unpublish_success', array( '%title%' => $graphic->getTitle() )));
 
 		// Return to
 		$returnToUrl = $request->get('rtu');
@@ -180,14 +172,12 @@ class GraphicController extends AbstractController {
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_promotion_graphic_edit")
 	 * @Template("LadbCoreBundle:Promotion/Graphic:edit.html.twig")
 	 */
-	public function editAction($id) {
+	public function editAction($id, TagUtils $tagUtils) {
 
 		$graphic = $this->retrievePublication($id, Graphic::CLASS_NAME);
 		$this->assertEditabable($graphic);
 
 		$form = $this->createForm(GraphicType::class, $graphic);
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'graphic'         => $graphic,
@@ -200,12 +190,11 @@ class GraphicController extends AbstractController {
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_promotion_graphic_update")
 	 * @Template("LadbCoreBundle:Promotion/Graphic:edit.html.twig")
 	 */
-	public function updateAction(Request $request, $id) {
+	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, GraphicUtils $graphicUtils, PicturedUtils $picturedUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$graphic = $this->retrievePublication($id, Graphic::CLASS_NAME);
 		$this->assertEditabable($graphic);
 
-		$picturedUtils = $this->get(PicturedUtils::NAME);
 		$picturedUtils->resetPictures($graphic); // Reset pictures array to consider form pictures order
 
 		$previouslyUsedTags = $graphic->getTags()->toArray();	// Need to be an array to copy values
@@ -215,10 +204,8 @@ class GraphicController extends AbstractController {
 
 		if ($form->isValid()) {
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($graphic);
 
-			$graphicUtils = $this->get(GraphicUtils::NAME);
 			$graphicUtils->createZipArchive($graphic);
 
 			$graphic->setMainPicture($graphic->getResource()->getThumbnail());
@@ -230,11 +217,10 @@ class GraphicController extends AbstractController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_UPDATED, new PublicationEvent($graphic, array( 'previouslyUsedTags' => $previouslyUsedTags )));
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('promotion.graphic.form.alert.update_success', array( '%title%' => $graphic->getTitle() )));
+			$this->addFlash('success', $translator->trans('promotion.graphic.form.alert.update_success', array( '%title%' => $graphic->getTitle() )));
 
 			// Regenerate the form
 			$form = $this->createForm(GraphicType::class, $graphic);
@@ -242,11 +228,9 @@ class GraphicController extends AbstractController {
 		} else {
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
+			$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 		}
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'graphic'         => $graphic,
@@ -258,17 +242,16 @@ class GraphicController extends AbstractController {
 	/**
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_promotion_graphic_delete")
 	 */
-	public function deleteAction($id) {
+	public function deleteAction($id, GraphicManager $graphicManager, TranslatorInterface $translator) {
 
 		$graphic = $this->retrievePublication($id, Graphic::CLASS_NAME);
 		$this->assertDeletable($graphic);
 
 		// Delete
-		$graphicManager = $this->get(GraphicManager::NAME);
 		$graphicManager->delete($graphic);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('promotion.graphic.form.alert.delete_success', array( '%title%' => $graphic->getTitle() )));
+		$this->addFlash('success', $translator->trans('promotion.graphic.form.alert.delete_success', array( '%title%' => $graphic->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_promotion_graphic_list'));
 	}
@@ -276,7 +259,7 @@ class GraphicController extends AbstractController {
 	/**
 	 * @Route("/{id}/chown", requirements={"id" = "\d+"}, name="core_promotion_graphic_chown")
 	 */
-	public function chownAction(Request $request, $id) {
+	public function chownAction(Request $request, $id, GraphicManager $graphicManager, TranslatorInterface $translator) {
 
 		$graphic = $this->retrievePublication($id, Graphic::CLASS_NAME);
 		$this->assertChownable($graphic);
@@ -284,11 +267,10 @@ class GraphicController extends AbstractController {
 		$targetUser = $this->retrieveOwner($request);
 
 		// Change owner
-		$graphicManager = $this->get(GraphicManager::NAME);
 		$graphicManager->changeOwner($graphic, $targetUser);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('promotion.graphic.form.alert.chown_success', array( '%title%' => $graphic->getTitle() )));
+		$this->addFlash('success', $translator->trans('promotion.graphic.form.alert.chown_success', array( '%title%' => $graphic->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_promotion_graphic_show', array( 'id' => $graphic->getSluggedId() )));
 	}
@@ -310,13 +292,12 @@ class GraphicController extends AbstractController {
 	/**
 	 * @Route("/{id}/download", requirements={"id" = "\d+"}, name="core_promotion_graphic_download")
 	 */
-	public function downloadAction($id) {
+	public function downloadAction($id, GraphicUtils $graphicUtils, SearchUtils $searchUtils) {
 		$om = $this->getDoctrine()->getManager();
 
 		$graphic = $this->retrievePublication($id, Graphic::CLASS_NAME);
 		$this->assertShowable($graphic);
 
-		$graphicUtils = $this->get(GraphicUtils::NAME);
 		$zipAbsolutePath = $graphicUtils->getZipAbsolutePath($graphic);
 		if (!file_exists($zipAbsolutePath)) {
 			if (!$graphicUtils->createZipArchive($graphic)) {
@@ -329,7 +310,6 @@ class GraphicController extends AbstractController {
 		$om->flush();
 
 		// Update index
-		$searchUtils = $this->get(SearchUtils::NAME);
 		$searchUtils->replaceEntityInIndex($graphic);
 
 		$content = file_get_contents($zipAbsolutePath);
@@ -352,8 +332,7 @@ class GraphicController extends AbstractController {
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_promotion_graphic_list_page")
 	 * @Template("LadbCoreBundle:Promotion/Graphic:list.html.twig")
 	 */
-	public function listAction(Request $request, $page = 0) {
-		$searchUtils = $this->get(SearchUtils::NAME);
+	public function listAction(Request $request, EventDispatcherInterface $dispatcher, SearchUtils $searchUtils, TranslatorInterface $translator, $page = 0) {
 
 		// Elasticsearch paginiation limit
 		if ($page > 624) {
@@ -377,7 +356,7 @@ class GraphicController extends AbstractController {
 
 					case 'mine':
 
-						if ($this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
+						if ($this->isGranted('ROLE_USER')) {
 
 							if (isset($facet->value) && $facet->value == 'draft') {
 
@@ -494,7 +473,6 @@ class GraphicController extends AbstractController {
 		);
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATIONS_LISTED, new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()));
 
 		$parameters = array_merge($searchParameters, array(
@@ -507,13 +485,13 @@ class GraphicController extends AbstractController {
 			return $this->render('LadbCoreBundle:Promotion/Graphic:list-xhr.html.twig', $parameters);
 		}
 
-		if ($this->get('security.authorization_checker')->isGranted('ROLE_USER') && $this->getUser()->getMeta()->getPrivateGraphicCount() > 0) {
+		if ($this->isGranted('ROLE_USER') && $this->getUser()->getMeta()->getPrivateGraphicCount() > 0) {
 
 			$draftPath = $this->generateUrl('core_promotion_graphic_list', array( 'q' => '@mine:draft' ));
 			$draftCount = $this->getUser()->getMeta()->getPrivateGraphicCount();
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('info', '<i class="ladb-icon-warning"></i> '.$this->get('translator')->transchoice('promotion.graphic.choice.draft_alert', $draftCount, array( '%count%' => $draftCount )).' <small><a href="'.$draftPath.'" class="alert-link">('.$this->get('translator')->trans('default.show_my_drafts').')</a></small>');
+			$this->addFlash('info', '<i class="ladb-icon-warning"></i> '.$translator->transchoice('promotion.graphic.choice.draft_alert', $draftCount, array( '%count%' => $draftCount )).' <small><a href="'.$draftPath.'" class="alert-link">('.$translator->trans('default.show_my_drafts').')</a></small>');
 
 		}
 
@@ -524,10 +502,9 @@ class GraphicController extends AbstractController {
 	 * @Route("/{id}.html", name="core_promotion_graphic_show")
 	 * @Template("LadbCoreBundle:Promotion/Graphic:show.html.twig")
 	 */
-	public function showAction(Request $request, $id) {
+	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();
 		$graphicRepository = $om->getRepository(Graphic::CLASS_NAME);
-		$witnessManager = $this->get(WitnessManager::NAME);
 
 		$id = intval($id);
 
@@ -541,18 +518,10 @@ class GraphicController extends AbstractController {
 		$this->assertShowable($graphic);
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($graphic));
 
-		$explorableUtils = $this->get(ExplorableUtils::NAME);
 		$userGraphics = $explorableUtils->getPreviousAndNextPublishedUserExplorables($graphic, $graphicRepository, $graphic->getUser()->getMeta()->getPublicGraphicCount());
 		$similarGraphics = $explorableUtils->getSimilarExplorables($graphic, 'fos_elastica.index.ladb.promotion_graphic', Graphic::CLASS_NAME, $userGraphics);
-
-		$likableUtils = $this->get(LikableUtils::NAME);
-		$watchableUtils = $this->get(WatchableUtils::NAME);
-		$commentableUtils = $this->get(CommentableUtils::NAME);
-		$collectionnableUtils = $this->get(CollectionnableUtils::NAME);
-		$followerUtils = $this->get(FollowerUtils::NAME);
 
 		return array(
 			'graphic'           => $graphic,

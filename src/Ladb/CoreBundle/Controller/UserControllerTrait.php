@@ -7,10 +7,17 @@ use Ladb\CoreBundle\Fos\UserManager;
 
 trait UserControllerTrait {
 
-	protected function retrieveUserByUsername($username) {
-		$userManager = $this->get(UserManager::NAME);
+	private $userManager;
 
-		$user = $userManager->findUserByUsername($username);
+	/**
+	 * @required
+	 */
+	public function setUserManager(UserManager $userManager) {
+		$this->userManager = $userManager;
+	}
+
+	protected function retrieveUserByUsername($username) {
+		$user = $this->userManager->findUserByUsername($username);
 		if (is_null($user)) {
 
 			// Try to load user witness
@@ -24,7 +31,7 @@ trait UserControllerTrait {
 			$user = $userWitness->getUser();
 
 		}
-		if (!$user->isEnabled() && !$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+		if (!$user->isEnabled() && !$this->isGranted('ROLE_ADMIN')) {
 			throw $this->createNotFoundException('User not enabled (username='.$username.')');
 		}
 
