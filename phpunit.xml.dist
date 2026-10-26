@@ -14,11 +14,6 @@
         <!-- E_DEPRECATED too, unlike the php.ini of the images: castor qa:deprecations tells
              the deprecations of PHP from the ones of Symfony by their error level -->
         <ini name="error_reporting" value="-1" />
-        <!-- Above the 512M of the images: the suite peaks at 586M (3 490 tests, #113). Each request
-             boots a new container, which requires its service files again: PHP recompiles them
-             (no OPcache in CLI) and keeps part of that memory until the end of the process. No
-             kernel nor container stays alive between two tests -->
-        <ini name="memory_limit" value="768M" />
         <server name="KERNEL_CLASS" value="AppKernel" />
         <!-- Without castor qa:phpunit, which collects them: only count the deprecations -->
         <env name="SYMFONY_DEPRECATIONS_HELPER" value="weak" />

@@ -112,8 +112,14 @@ function phpunit(#[AsRawTokens] array $rawTokens = []): int
     // the deprecations by message in the given file. The bridge of Symfony 3.4 has no structured
     // output but SYMFONY_DEPRECATIONS_SERIALIZE, which keeps every occurrence in memory: too many
     // for the smoke test.
+    // OPcache (#113): each request of a test boots a new container, which requires its service
+    // files again. Compiled without OPcache, the file of argument_resolver.service (a closure per
+    // controller action) keeps 143K at each require until the end of the process: 708M for the
+    // suite, 107M with OPcache. file_update_protection=0: the process writes the test container
+    // itself, OPcache would not cache it otherwise (Symfony writes its cache files by renaming).
     return docker_exit_code([
         'env', 'SYMFONY_DEPRECATIONS_HELPER=disabled', 'PHPUNIT_DEPRECATIONS_FILE=/var/www/' . PHPUNIT_DEPRECATIONS_FILE,
+        'php', '-d', 'opcache.enable_cli=1', '-d', 'opcache.file_update_protection=0',
         'tools/phpunit/vendor/bin/phpunit',
         ...$rawTokens,
     ]);
