@@ -37,6 +37,9 @@ use Ladb\CoreBundle\Manager\Wonder\WorkshopManager;
 use Ladb\CoreBundle\Entity\Workflow\Workflow;
 use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Utils\LocalisableUtils;
+use Liip\ImagineBundle\Controller\ImagineController;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @Route("/ateliers")
@@ -49,13 +52,11 @@ class WorkshopController extends AbstractController {
 	 * @Route("/new", name="core_workshop_new")
 	 * @Template("LadbCoreBundle:Wonder/Workshop:new.html.twig")
 	 */
-	public function newAction(Request $request) {
+	public function newAction(Request $request, TagUtils $tagUtils) {
 
 		$workshop = new Workshop();
 		$workshop->addBodyBlock(new \Ladb\CoreBundle\Entity\Core\Block\Text());	// Add a default Text body block
 		$form = $this->createForm(WorkshopType::class, $workshop);
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'form'         => $form->createView(),
@@ -68,7 +69,7 @@ class WorkshopController extends AbstractController {
 	 * @Route("/create", methods={"POST"}, name="core_workshop_create")
 	 * @Template("LadbCoreBundle:Wonder/Workshop:new.html.twig")
 	 */
-	public function createAction(Request $request) {
+	public function createAction(Request $request, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$owner = $this->retrieveOwner($request);
 
@@ -82,10 +83,8 @@ class WorkshopController extends AbstractController {
 
 		if ($form->isValid()) {
 
-			$blockUtils = $this->get(BlockBodiedUtils::NAME);
 			$blockUtils->preprocessBlocks($workshop);
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($workshop);
 
 			$workshop->setUser($owner);
@@ -96,16 +95,13 @@ class WorkshopController extends AbstractController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($workshop));
 
 			return $this->redirect($this->generateUrl('core_workshop_show', array('id' => $workshop->getSluggedId())));
 		}
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
-
-		$tagUtils = $this->get(TagUtils::NAME);
+		$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 		return array(
 			'workshop'     => $workshop,
@@ -120,13 +116,12 @@ class WorkshopController extends AbstractController {
 	 * @Route("/{id}/lock", requirements={"id" = "\d+"}, defaults={"lock" = true}, name="core_workshop_lock")
 	 * @Route("/{id}/unlock", requirements={"id" = "\d+"}, defaults={"lock" = false}, name="core_workshop_unlock")
 	 */
-	public function lockUnlockAction($id, $lock) {
+	public function lockUnlockAction($id, $lock, TranslatorInterface $translator, WorkshopManager $workshopManager) {
 
 		$workshop = $this->retrievePublication($id, Workshop::CLASS_NAME);
 		$this->assertLockUnlockable($workshop, $lock);
 
 		// Lock or Unlock
-		$workshopManager = $this->get(WorkshopManager::NAME);
 		if ($lock) {
 			$workshopManager->lock($workshop);
 		} else {
@@ -134,7 +129,7 @@ class WorkshopController extends AbstractController {
 		}
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('wonder.creation.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $workshop->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.creation.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $workshop->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_workshop_show', array( 'id' => $workshop->getSluggedId() )));
 	}
@@ -142,17 +137,16 @@ class WorkshopController extends AbstractController {
 	/**
 	 * @Route("/{id}/publish", requirements={"id" = "\d+"}, name="core_workshop_publish")
 	 */
-	public function publishAction($id) {
+	public function publishAction($id, TranslatorInterface $translator, WorkshopManager $workshopManager) {
 
 		$workshop = $this->retrievePublication($id, Workshop::CLASS_NAME);
 		$this->assertPublishable($workshop);
 
 		// Publish
-		$workshopManager = $this->get(WorkshopManager::NAME);
 		$workshopManager->publish($workshop);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('wonder.workshop.form.alert.publish_success', array( '%title%' => $workshop->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.workshop.form.alert.publish_success', array( '%title%' => $workshop->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_workshop_show', array( 'id' => $workshop->getSluggedId() )));
 	}
@@ -160,17 +154,16 @@ class WorkshopController extends AbstractController {
 	/**
 	 * @Route("/{id}/unpublish", requirements={"id" = "\d+"}, name="core_workshop_unpublish")
 	 */
-	public function unpublishAction(Request $request, $id) {
+	public function unpublishAction(Request $request, $id, TranslatorInterface $translator, WorkshopManager $workshopManager) {
 
 		$workshop = $this->retrievePublication($id, Workshop::CLASS_NAME);
 		$this->assertUnpublishable($workshop);
 
 		// Unpublish
-		$workshopManager = $this->get(WorkshopManager::NAME);
 		$workshopManager->unpublish($workshop);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('wonder.workshop.form.alert.unpublish_success', array( '%title%' => $workshop->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.workshop.form.alert.unpublish_success', array( '%title%' => $workshop->getTitle() )));
 
 		// Return to
 		$returnToUrl = $request->get('rtu');
@@ -185,14 +178,12 @@ class WorkshopController extends AbstractController {
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_workshop_edit")
 	 * @Template("LadbCoreBundle:Wonder/Workshop:edit.html.twig")
 	 */
-	public function editAction($id) {
+	public function editAction($id, TagUtils $tagUtils) {
 
 		$workshop = $this->retrievePublication($id, Workshop::CLASS_NAME);
 		$this->assertEditabable($workshop);
 
 		$form = $this->createForm(WorkshopType::class, $workshop);
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'workshop'     => $workshop,
@@ -205,7 +196,7 @@ class WorkshopController extends AbstractController {
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_workshop_update")
 	 * @Template("LadbCoreBundle:Wonder/Workshop:edit.html.twig")
 	 */
-	public function updateAction(Request $request, $id) {
+	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, EmbeddableUtils $embaddableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, PicturedUtils $picturedUtils, StripableUtils $stripableUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$workshop = $this->retrievePublication($id, Workshop::CLASS_NAME);
 		$this->assertEditabable($workshop);
@@ -213,7 +204,6 @@ class WorkshopController extends AbstractController {
 		$originalBodyBlocks = $workshop->getBodyBlocks()->toArray();	// Need to be an array to copy values
 		$previouslyUsedTags = $workshop->getTags()->toArray();	// Need to be an array to copy values
 
-		$picturedUtils = $this->get(PicturedUtils::NAME);
 		$picturedUtils->resetPictures($workshop); // Reset pictures array to consider form pictures order
 
 		$workshop->resetBodyBlocks(); // Reset bodyBlocks array to consider form bodyBlocks order
@@ -223,16 +213,12 @@ class WorkshopController extends AbstractController {
 
 		if ($form->isValid()) {
 
-			$blockUtils = $this->get(BlockBodiedUtils::NAME);
 			$blockUtils->preprocessBlocks($workshop, $originalBodyBlocks);
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($workshop);
 
-			$embaddableUtils = $this->get(EmbeddableUtils::NAME);
 			$embaddableUtils->resetSticker($workshop);
 
-			$stripableUtils = $this->get(StripableUtils::NAME);
 			$stripableUtils->resetStrip($workshop);
 
 			$workshop->setMainPicture($workshop->getPictures()->first());
@@ -244,11 +230,10 @@ class WorkshopController extends AbstractController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_UPDATED, new PublicationEvent($workshop, array( 'previouslyUsedTags' => $previouslyUsedTags )));
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('wonder.workshop.form.alert.update_success', array( '%title%' => $workshop->getTitle() )));
+			$this->addFlash('success', $translator->trans('wonder.workshop.form.alert.update_success', array( '%title%' => $workshop->getTitle() )));
 
 			// Regenerate the form
 			$form = $this->createForm(WorkshopType::class, $workshop);
@@ -256,11 +241,9 @@ class WorkshopController extends AbstractController {
 		} else {
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
+			$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 		}
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'workshop'     => $workshop,
@@ -272,17 +255,16 @@ class WorkshopController extends AbstractController {
 	/**
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_workshop_delete")
 	 */
-	public function deleteAction($id) {
+	public function deleteAction($id, TranslatorInterface $translator, WorkshopManager $workshopManager) {
 
 		$workshop = $this->retrievePublication($id, Workshop::CLASS_NAME);
 		$this->assertDeletable($workshop);
 
 		// Delete
-		$workshopManager = $this->get(WorkshopManager::NAME);
 		$workshopManager->delete($workshop);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('wonder.workshop.form.alert.delete_success', array( '%title%' => $workshop->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.workshop.form.alert.delete_success', array( '%title%' => $workshop->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_workshop_list'));
 	}
@@ -290,7 +272,7 @@ class WorkshopController extends AbstractController {
 	/**
 	 * @Route("/{id}/chown", requirements={"id" = "\d+"}, name="core_workshop_chown")
 	 */
-	public function chownAction(Request $request, $id) {
+	public function chownAction(Request $request, $id, TranslatorInterface $translator, WorkshopManager $workshopManager) {
 
 		$workshop = $this->retrievePublication($id, Workshop::CLASS_NAME);
 		$this->assertChownable($workshop);
@@ -298,11 +280,10 @@ class WorkshopController extends AbstractController {
 		$targetUser = $this->retrieveOwner($request);
 
 		// Change owner
-		$workshopManager = $this->get(WorkshopManager::NAME);
 		$workshopManager->changeOwner($workshop, $targetUser);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('wonder.workshop.form.alert.chown_success', array( '%title%' => $workshop->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.workshop.form.alert.chown_success', array( '%title%' => $workshop->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_workshop_show', array( 'id' => $workshop->getSluggedId() )));
 	}
@@ -313,7 +294,7 @@ class WorkshopController extends AbstractController {
 	 * @Route("/{id}/plans/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_workshop_plans_filter_page")
 	 * @Template("LadbCoreBundle:Wonder/Workshop:plans.html.twig")
 	 */
-	public function plansAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function plansAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 
 		$workshop = $this->retrievePublication($id, Workshop::CLASS_NAME);
@@ -322,7 +303,6 @@ class WorkshopController extends AbstractController {
 		// Plans
 
 		$planRepository = $om->getRepository(Plan::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -358,7 +338,7 @@ class WorkshopController extends AbstractController {
 	 * @Route("/{id}/pas-a-pas/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_workshop_howtos_filter_page")
 	 * @Template("LadbCoreBundle:Wonder/Workshop:howtos.html.twig")
 	 */
-	public function howtosAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function howtosAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 
 		$workshop = $this->retrievePublication($id, Workshop::CLASS_NAME);
@@ -367,7 +347,6 @@ class WorkshopController extends AbstractController {
 		// Howtos
 
 		$howtoRepository = $om->getRepository(Howto::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -396,7 +375,7 @@ class WorkshopController extends AbstractController {
 	 * @Route("/{id}/processus/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_workshop_workflows_filter_page")
 	 * @Template("LadbCoreBundle:Wonder/Workshop:workflows.html.twig")
 	 */
-	public function workflowsAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function workflowsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 
 		$workshop = $this->retrievePublication($id, Workshop::CLASS_NAME);
@@ -405,7 +384,6 @@ class WorkshopController extends AbstractController {
 		// Howtos
 
 		$workflowRepository = $om->getRepository(Workflow::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -438,7 +416,7 @@ class WorkshopController extends AbstractController {
 	/**
 	 * @Route("/{id}/sticker", requirements={"id" = "\d+"}, name="core_workshop_sticker")
 	 */
-	public function stickerAction(Request $request, $id) {
+	public function stickerAction(Request $request, $id, EmbeddableUtils $embeddableUtils, ImagineController $imagineController) {
 		$om = $this->getDoctrine()->getManager();
 
 		$workshop = $this->retrievePublication($id, Workshop::CLASS_NAME);
@@ -446,7 +424,6 @@ class WorkshopController extends AbstractController {
 
 		$sticker = $workshop->getSticker();
 		if (is_null($sticker)) {
-			$embeddableUtils = $this->get(EmbeddableUtils::NAME);
 			$sticker = $embeddableUtils->generateSticker($workshop);
 			if (!is_null($sticker)) {
 				$om->flush();
@@ -457,7 +434,7 @@ class WorkshopController extends AbstractController {
 
 		if (!is_null($sticker)) {
 
-			$response = $this->get('liip_imagine.controller')->filterAction($request, $sticker->getWebPath(), '598w');
+			$response = $imagineController->filterAction($request, $sticker->getWebPath(), '598w');
 			return $response;
 
 		} else {
@@ -469,7 +446,7 @@ class WorkshopController extends AbstractController {
 	/**
 	 * @Route("/{id}/strip", requirements={"id" = "\d+"}, name="core_workshop_strip")
 	 */
-	public function stripAction(Request $request, $id) {
+	public function stripAction(Request $request, $id, ImagineController $imagineController, StripableUtils $stripableUtils) {
 		$om = $this->getDoctrine()->getManager();
 
 		$workshop = $this->retrievePublication($id, Workshop::CLASS_NAME);
@@ -477,7 +454,6 @@ class WorkshopController extends AbstractController {
 
 		$strip = $workshop->getStrip();
 		if (is_null($strip)) {
-			$stripableUtils = $this->get(StripableUtils::NAME);
 			$strip = $stripableUtils->generateStrip($workshop);
 			if (!is_null($strip)) {
 				$om->flush();
@@ -488,7 +464,7 @@ class WorkshopController extends AbstractController {
 
 		if (!is_null($strip)) {
 
-			$response = $this->get('liip_imagine.controller')->filterAction($request, $strip->getWebPath(), '564w');
+			$response = $imagineController->filterAction($request, $strip->getWebPath(), '564w');
 			return $response;
 
 		} else {
@@ -569,8 +545,7 @@ class WorkshopController extends AbstractController {
 	 * @Route(".geojson", defaults={"_format" = "json", "page"=-1, "layout"="geojson"}, name="core_workshop_list_geojson")
 	 * @Template("LadbCoreBundle:Wonder/Workshop:list.html.twig")
 	 */
-	public function listAction(Request $request, $page = 0, $layout = 'view') {
-		$searchUtils = $this->get(SearchUtils::NAME);
+	public function listAction(Request $request, EventDispatcherInterface $dispatcher, LocalisableUtils $localisableUtils, SearchUtils $searchUtils, TranslatorInterface $translator, $page = 0, $layout = 'view') {
 
 		// Elasticsearch paginiation limit
 		if ($page > 624) {
@@ -580,14 +555,14 @@ class WorkshopController extends AbstractController {
 		$searchParameters = $searchUtils->searchPaginedEntities(
 			$request,
 			$page,
-			function($facet, &$filters, &$sort, &$noGlobalFilters, &$couldUseDefaultSort) use ($searchUtils) {
+			function($facet, &$filters, &$sort, &$noGlobalFilters, &$couldUseDefaultSort) use ($searchUtils, $localisableUtils) {
 				switch ($facet->name) {
 
 					// Filters /////
 
 					case 'mine':
 
-						if ($this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
+						if ($this->isGranted('ROLE_USER')) {
 
 							if (isset($facet->value) && $facet->value == 'draft') {
 
@@ -711,7 +686,6 @@ class WorkshopController extends AbstractController {
 
 					case 'location':
 
-						$localisableUtils = $this->get(LocalisableUtils::NAME);
 						$boundsAndLocation = $localisableUtils->getBoundsAndLocation($facet->value);
 
 						if (!is_null($boundsAndLocation)) {
@@ -815,20 +789,19 @@ class WorkshopController extends AbstractController {
 		}
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATIONS_LISTED, new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()));
 
 		if ($request->isXmlHttpRequest()) {
 			return $this->render('LadbCoreBundle:Wonder/Workshop:list-xhr.html.twig', $parameters);
 		}
 
-		if ($this->get('security.authorization_checker')->isGranted('ROLE_USER') && $this->getUser()->getMeta()->getPrivateWorkshopCount() > 0) {
+		if ($this->isGranted('ROLE_USER') && $this->getUser()->getMeta()->getPrivateWorkshopCount() > 0) {
 
 			$draftPath = $this->generateUrl('core_workshop_list', array( 'q' => '@mine:draft' ));
 			$draftCount = $this->getUser()->getMeta()->getPrivateWorkshopCount();
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('info', '<i class="ladb-icon-warning"></i> '.$this->get('translator')->transchoice('wonder.workshop.choice.draft_alert', $draftCount, array( '%count%' => $draftCount )).' <small><a href="'.$draftPath.'" class="alert-link">('.$this->get('translator')->trans('default.show_my_drafts').')</a></small>');
+			$this->addFlash('info', '<i class="ladb-icon-warning"></i> '.$translator->transchoice('wonder.workshop.choice.draft_alert', $draftCount, array( '%count%' => $draftCount )).' <small><a href="'.$draftPath.'" class="alert-link">('.$translator->trans('default.show_my_drafts').')</a></small>');
 
 		}
 
@@ -839,10 +812,9 @@ class WorkshopController extends AbstractController {
 	 * @Route("/{id}.html", name="core_workshop_show")
 	 * @Template("LadbCoreBundle:Wonder/Workshop:show.html.twig")
 	 */
-	public function showAction(Request $request, $id) {
+	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, EmbeddableUtils $embaddableUtils, ExplorableUtils $explorableUtils, FeedbackableUtils $feedbackableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();
 		$workshopRepository = $om->getRepository(Workshop::CLASS_NAME);
-		$witnessManager = $this->get(WitnessManager::NAME);
 
 		$id = intval($id);
 
@@ -855,23 +827,13 @@ class WorkshopController extends AbstractController {
 		}
 		$this->assertShowable($workshop);
 
-		$embaddableUtils = $this->get(EmbeddableUtils::NAME);
 		$referral = $embaddableUtils->processReferer($workshop, $request);
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($workshop));
 
-		$explorableUtils = $this->get(ExplorableUtils::NAME);
 		$userWorkshops = $explorableUtils->getPreviousAndNextPublishedUserExplorables($workshop, $workshopRepository, $workshop->getUser()->getMeta()->getPublicWorkshopCount());
 		$similarWorkshops = $explorableUtils->getSimilarExplorables($workshop, 'fos_elastica.index.ladb.wonder_workshop', Workshop::CLASS_NAME, $userWorkshops);
-
-		$likableUtils = $this->get(LikableUtils::NAME);
-		$watchableUtils = $this->get(WatchableUtils::NAME);
-		$feedbackableUtils = $this->get(FeedbackableUtils::NAME);
-		$commentableUtils = $this->get(CommentableUtils::NAME);
-		$collectionnableUtils = $this->get(CollectionnableUtils::NAME);
-		$followerUtils = $this->get(FollowerUtils::NAME);
 
 		return array(
 			'workshop'          => $workshop,
@@ -893,7 +855,7 @@ class WorkshopController extends AbstractController {
 	 * @Route("/{id}/admin/converttocreation", requirements={"id" = "\d+"}, name="core_workshop_admin_converttocreation")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_workshop_admin_converttocreation)")
 	 */
-	public function adminConvertToCreationAction($id) {
+	public function adminConvertToCreationAction($id, TranslatorInterface $translator, WorkshopManager $workshopManager) {
 		$om = $this->getDoctrine()->getManager();
 		$workshopRepository = $om->getRepository(Workshop::CLASS_NAME);
 
@@ -903,11 +865,10 @@ class WorkshopController extends AbstractController {
 		}
 
 		// Convert
-		$workshopManager = $this->get(WorkshopManager::NAME);
 		$creation = $workshopManager->convertToCreation($workshop);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('wonder.workshop.admin.alert.converttocreation_success', array( '%title%' => $workshop->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.workshop.admin.alert.converttocreation_success', array( '%title%' => $workshop->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_creation_show', array( 'id' => $creation->getSluggedId() )));
 	}
@@ -916,7 +877,7 @@ class WorkshopController extends AbstractController {
 	 * @Route("/{id}/admin/converttohowto", requirements={"id" = "\d+"}, name="core_workshop_admin_converttohowto")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_workshop_admin_converttohowto)")
 	 */
-	public function adminConvertToHowtoAction($id) {
+	public function adminConvertToHowtoAction($id, TranslatorInterface $translator, WorkshopManager $workshopManager) {
 		$om = $this->getDoctrine()->getManager();
 		$workshopRepository = $om->getRepository(Workshop::CLASS_NAME);
 
@@ -926,11 +887,10 @@ class WorkshopController extends AbstractController {
 		}
 
 		// Convert
-		$workshopManager = $this->get(WorkshopManager::NAME);
 		$howto = $workshopManager->convertToHowto($workshop);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('wonder.workshop.admin.alert.converttohowto_success', array( '%title%' => $workshop->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.workshop.admin.alert.converttohowto_success', array( '%title%' => $workshop->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_howto_show', array( 'id' => $howto->getSluggedId() )));
 	}

@@ -41,7 +41,6 @@ services:
   Ladb\CoreBundle\Utils\GlobalUtils: '@ladb_core.global_utils'
   ladb_core.maybe_utils:
     class: Ladb\CoreBundle\Utils\MaybeUtils
-    public: true
     arguments: ['@service_container']
   Ladb\CoreBundle\Utils\MaybeUtils: '@ladb_core.maybe_utils'
   ladb_core.crypto_utils:
@@ -140,7 +139,6 @@ services:
   Ladb\CoreBundle\Utils\MessageUtils: '@ladb_core.message_utils'
   ladb_core.plan_utils:
     class: Ladb\CoreBundle\Utils\PlanUtils
-    public: true
     arguments: ['@templating', '@router']
   Ladb\CoreBundle\Utils\PlanUtils: '@ladb_core.plan_utils'
   ladb_core.graphic_utils:
@@ -158,7 +156,6 @@ services:
   Ladb\CoreBundle\Utils\SearchUtils: '@ladb_core.search_utils'
   ladb_core.explorable_utils:
     class: Ladb\CoreBundle\Utils\ExplorableUtils
-    public: true
     arguments: ['@ladb_core.search_utils']
   Ladb\CoreBundle\Utils\ExplorableUtils: '@ladb_core.explorable_utils'
   ladb_core.pictured_utils:
@@ -183,12 +180,10 @@ services:
   Ladb\CoreBundle\Utils\BlockBodiedUtils: '@ladb_core.block_bodied_utils'
   ladb_core.embeddable_utils:
     class: Ladb\CoreBundle\Utils\EmbeddableUtils
-    public: true
     arguments: ['@service_container']
   Ladb\CoreBundle\Utils\EmbeddableUtils: '@ladb_core.embeddable_utils'
   ladb_core.stripable_utils:
     class: Ladb\CoreBundle\Utils\StripableUtils
-    public: true
     arguments: ['@service_container']
   Ladb\CoreBundle\Utils\StripableUtils: '@ladb_core.stripable_utils'
   ladb_core.web_screenshot_utils:
@@ -227,7 +222,6 @@ services:
   Ladb\CoreBundle\Utils\PropertyUtils: '@ladb_core.property_utils'
   ladb_core.elastica_query_utils:
     class: Ladb\CoreBundle\Utils\ElasticaQueryUtils
-    public: true
   Ladb\CoreBundle\Utils\ElasticaQueryUtils: '@ladb_core.elastica_query_utils'
   ladb_core.book_utils:
     class: Ladb\CoreBundle\Utils\BookUtils
@@ -235,7 +229,6 @@ services:
   Ladb\CoreBundle\Utils\BookUtils: '@ladb_core.book_utils'
   ladb_core.resource_utils:
     class: Ladb\CoreBundle\Utils\ResourceUtils
-    public: true
   Ladb\CoreBundle\Utils\ResourceUtils: '@ladb_core.resource_utils'
   Ladb\CoreBundle\Utils\WebpushNotificationUtils:
     public: true

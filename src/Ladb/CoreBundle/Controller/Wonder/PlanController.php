@@ -40,6 +40,9 @@ use Ladb\CoreBundle\Manager\Core\WitnessManager;
 use Ladb\CoreBundle\Manager\Wonder\PlanManager;
 use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Utils\StripableUtils;
+use Liip\ImagineBundle\Controller\ImagineController;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @Route("/plans")
@@ -52,12 +55,10 @@ class PlanController extends AbstractController {
 	 * @Route("/new", name="core_plan_new")
 	 * @Template("LadbCoreBundle:Wonder/Plan:new.html.twig")
 	 */
-	public function newAction(Request $request) {
+	public function newAction(Request $request, TagUtils $tagUtils) {
 
 		$plan = new Plan();
 		$form = $this->createForm(PlanType::class, $plan);
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'form'         => $form->createView(),
@@ -70,7 +71,7 @@ class PlanController extends AbstractController {
 	 * @Route("/create", methods={"POST"}, name="core_plan_create")
 	 * @Template("LadbCoreBundle:Wonder/Plan:new.html.twig")
 	 */
-	public function createAction(Request $request) {
+	public function createAction(Request $request, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, PlanUtils $planUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$owner = $this->retrieveOwner($request);
 
@@ -84,14 +85,12 @@ class PlanController extends AbstractController {
 
 		if ($form->isValid()) {
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($plan);
 
 			$plan->setUser($owner);
 			$plan->setMainPicture($plan->getPictures()->first());
 			$owner->getMeta()->incrementPrivatePlanCount();
 
-			$planUtils = $this->get(PlanUtils::NAME);
 			$planUtils->generateKinds($plan);
 			$planUtils->processSketchup3DWarehouseUrl($plan);
 			$planUtils->processA360Url($plan);
@@ -105,16 +104,13 @@ class PlanController extends AbstractController {
 			$om->flush();	// Resave to store file size
 
 			// Dispatch publication event
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($plan));
 
 			return $this->redirect($this->generateUrl('core_plan_show', array('id' => $plan->getSluggedId())));
 		}
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
-
-		$tagUtils = $this->get(TagUtils::NAME);
+		$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 		return array(
 			'plan'         => $plan,
@@ -129,13 +125,12 @@ class PlanController extends AbstractController {
 	 * @Route("/{id}/lock", requirements={"id" = "\d+"}, defaults={"lock" = true}, name="core_plan_lock")
 	 * @Route("/{id}/unlock", requirements={"id" = "\d+"}, defaults={"lock" = false}, name="core_plan_unlock")
 	 */
-	public function lockUnlockAction($id, $lock) {
+	public function lockUnlockAction($id, $lock, PlanManager $planManager, TranslatorInterface $translator) {
 
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
 		$this->assertLockUnlockable($plan, $lock);
 
 		// Lock or Unlock
-		$planManager = $this->get(PlanManager::NAME);
 		if ($lock) {
 			$planManager->lock($plan);
 		} else {
@@ -143,7 +138,7 @@ class PlanController extends AbstractController {
 		}
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('wonder.plan.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $plan->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.plan.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $plan->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_plan_show', array( 'id' => $plan->getSluggedId() )));
 	}
@@ -151,17 +146,16 @@ class PlanController extends AbstractController {
 	/**
 	 * @Route("/{id}/publish", requirements={"id" = "\d+"}, name="core_plan_publish")
 	 */
-	public function publishAction($id) {
+	public function publishAction($id, PlanManager $planManager, TranslatorInterface $translator) {
 
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
 		$this->assertPublishable($plan);
 
 		// Publish
-		$planManager = $this->get(PlanManager::NAME);
 		$planManager->publish($plan);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('wonder.plan.form.alert.publish_success', array( '%title%' => $plan->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.plan.form.alert.publish_success', array( '%title%' => $plan->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_plan_show', array( 'id' => $plan->getSluggedId() )));
 	}
@@ -169,17 +163,16 @@ class PlanController extends AbstractController {
 	/**
 	 * @Route("/{id}/unpublish", requirements={"id" = "\d+"}, name="core_plan_unpublish")
 	 */
-	public function unpublishAction(Request $request, $id) {
+	public function unpublishAction(Request $request, $id, PlanManager $planManager, TranslatorInterface $translator) {
 
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
 		$this->assertUnpublishable($plan);
 
 		// Unpublish
-		$planManager = $this->get(PlanManager::NAME);
 		$planManager->unpublish($plan);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('wonder.plan.form.alert.unpublish_success', array( '%title%' => $plan->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.plan.form.alert.unpublish_success', array( '%title%' => $plan->getTitle() )));
 
 		// Return to
 		$returnToUrl = $request->get('rtu');
@@ -194,14 +187,12 @@ class PlanController extends AbstractController {
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_plan_edit")
 	 * @Template("LadbCoreBundle:Wonder/Plan:edit.html.twig")
 	 */
-	public function editAction($id) {
+	public function editAction($id, TagUtils $tagUtils) {
 
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
 		$this->assertEditabable($plan);
 
 		$form = $this->createForm(PlanType::class, $plan);
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'plan'         => $plan,
@@ -214,12 +205,11 @@ class PlanController extends AbstractController {
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_plan_update")
 	 * @Template("LadbCoreBundle:Wonder/Plan:edit.html.twig")
 	 */
-	public function updateAction(Request $request, $id) {
+	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, EmbeddableUtils $embaddableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, PicturedUtils $picturedUtils, PlanUtils $planUtils, StripableUtils $stripableUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
 		$this->assertEditabable($plan);
 
-		$picturedUtils = $this->get(PicturedUtils::NAME);
 		$picturedUtils->resetPictures($plan); // Reset pictures array to consider form pictures order
 
 		$previouslyUsedTags = $plan->getTags()->toArray();	// Need to be an array to copy values
@@ -229,16 +219,12 @@ class PlanController extends AbstractController {
 
 		if ($form->isValid()) {
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($plan);
 
-			$embaddableUtils = $this->get(EmbeddableUtils::NAME);
 			$embaddableUtils->resetSticker($plan);
 
-			$stripableUtils = $this->get(StripableUtils::NAME);
 			$stripableUtils->resetStrip($plan);
 
-			$planUtils = $this->get(PlanUtils::NAME);
 			$planUtils->generateKinds($plan);
 			$planUtils->processSketchup3DWarehouseUrl($plan);
 			$planUtils->processA360Url($plan);
@@ -253,11 +239,10 @@ class PlanController extends AbstractController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_UPDATED, new PublicationEvent($plan, array( 'previouslyUsedTags' => $previouslyUsedTags )));
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('wonder.plan.form.alert.update_success', array( '%title%' => $plan->getTitle() )));
+			$this->addFlash('success', $translator->trans('wonder.plan.form.alert.update_success', array( '%title%' => $plan->getTitle() )));
 
 			// Regenerate the form
 			$form = $this->createForm(PlanType::class, $plan);
@@ -265,11 +250,9 @@ class PlanController extends AbstractController {
 		} else {
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
+			$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 		}
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'plan'         => $plan,
@@ -281,17 +264,16 @@ class PlanController extends AbstractController {
 	/**
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_plan_delete")
 	 */
-	public function deleteAction($id) {
+	public function deleteAction($id, PlanManager $planManager, TranslatorInterface $translator) {
 
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
 		$this->assertDeletable($plan);
 
 		// Delete
-		$planManager = $this->get(PlanManager::NAME);
 		$planManager->delete($plan);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('wonder.plan.form.alert.delete_success', array( '%title%' => $plan->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.plan.form.alert.delete_success', array( '%title%' => $plan->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_plan_list'));
 	}
@@ -299,7 +281,7 @@ class PlanController extends AbstractController {
 	/**
 	 * @Route("/{id}/chown", requirements={"id" = "\d+"}, name="core_plan_chown")
 	 */
-	public function chownAction(Request $request, $id) {
+	public function chownAction(Request $request, $id, PlanManager $planManager, TranslatorInterface $translator) {
 
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
 		$this->assertChownable($plan);
@@ -307,11 +289,10 @@ class PlanController extends AbstractController {
 		$targetUser = $this->retrieveOwner($request);
 
 		// Change owner
-		$planManager = $this->get(PlanManager::NAME);
 		$planManager->changeOwner($plan, $targetUser);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('wonder.plan.form.alert.chown_success', array( '%title%' => $plan->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.plan.form.alert.chown_success', array( '%title%' => $plan->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_plan_show', array( 'id' => $plan->getSluggedId() )));
 	}
@@ -319,13 +300,12 @@ class PlanController extends AbstractController {
 	/**
 	 * @Route("/{id}/download", requirements={"id" = "\d+"}, name="core_plan_download")
 	 */
-	public function downloadAction($id) {
+	public function downloadAction($id, PlanUtils $planUtils, SearchUtils $searchUtils) {
 		$om = $this->getDoctrine()->getManager();
 
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
 		$this->assertShowable($plan);
 
-		$planUtils = $this->get(PlanUtils::NAME);
 		$zipAbsolutePath = $planUtils->getZipAbsolutePath($plan);
 		if (!file_exists($zipAbsolutePath)) {
 			if (!$planUtils->createZipArchive($plan)) {
@@ -338,7 +318,6 @@ class PlanController extends AbstractController {
 		$om->flush();
 
 		// Update index
-		$searchUtils = $this->get(SearchUtils::NAME);
 		$searchUtils->replaceEntityInIndex($plan);
 
 		$content = file_get_contents($zipAbsolutePath);
@@ -362,7 +341,7 @@ class PlanController extends AbstractController {
 	 * @Route("/{id}/questions/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_plan_questions_filter_page")
 	 * @Template("LadbCoreBundle:Wonder/Plan:questions.html.twig")
 	 */
-	public function questionsAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function questionsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
@@ -371,7 +350,6 @@ class PlanController extends AbstractController {
 		// Questions
 
 		$questionRepository = $om->getRepository(Question::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -400,7 +378,7 @@ class PlanController extends AbstractController {
 	 * @Route("/{id}/pas-a-pas/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_plan_howtos_filter_page")
 	 * @Template("LadbCoreBundle:Wonder/Plan:howtos.html.twig")
 	 */
-	public function howtosAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function howtosAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
@@ -409,7 +387,6 @@ class PlanController extends AbstractController {
 		// Howtos
 
 		$howtoRepository = $om->getRepository(Howto::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -438,7 +415,7 @@ class PlanController extends AbstractController {
 	 * @Route("/{id}/creations/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_plan_creations_filter_page")
 	 * @Template("LadbCoreBundle:Wonder/Plan:creations.html.twig")
 	 */
-	public function creationsAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function creationsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
@@ -447,7 +424,6 @@ class PlanController extends AbstractController {
 		// Creations
 
 		$creationRepository = $om->getRepository(Creation::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -476,7 +452,7 @@ class PlanController extends AbstractController {
 	 * @Route("/{id}/processus/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_plan_workflows_filter_page")
 	 * @Template("LadbCoreBundle:Wonder/Plan:workflows.html.twig")
 	 */
-	public function workflowsAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function workflowsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
@@ -485,7 +461,6 @@ class PlanController extends AbstractController {
 		// Workflows
 
 		$workflowRepository = $om->getRepository(Workflow::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -514,7 +489,7 @@ class PlanController extends AbstractController {
 	 * @Route("/{id}/ateliers/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_plan_workshops_filter_page")
 	 * @Template("LadbCoreBundle:Wonder/Plan:workshops.html.twig")
 	 */
-	public function workshopsAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function workshopsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
@@ -523,7 +498,6 @@ class PlanController extends AbstractController {
 		// Workshops
 
 		$workshopRepository = $om->getRepository(Workshop::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -552,7 +526,7 @@ class PlanController extends AbstractController {
 	 * @Route("/{id}/ecoles/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_plan_schools_filter_page")
 	 * @Template("LadbCoreBundle:Wonder/Plan:schools.html.twig")
 	 */
-	public function schoolsAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function schoolsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
@@ -561,7 +535,6 @@ class PlanController extends AbstractController {
 		// Schools
 
 		$schoolRepository = $om->getRepository(School::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -590,7 +563,7 @@ class PlanController extends AbstractController {
 	 * @Route("/{id}/inspirations/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_plan_inspirations_filter_page")
 	 * @Template("LadbCoreBundle:Wonder/Plan:inspirations.html.twig")
 	 */
-	public function inspirationsAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function inspirationsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 		$planRepository = $om->getRepository(Plan::CLASS_NAME);
 
@@ -598,8 +571,6 @@ class PlanController extends AbstractController {
 		$this->assertShowable($plan);
 
 		// Inspirations
-
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -628,7 +599,7 @@ class PlanController extends AbstractController {
 	 * @Route("/{id}/rebonds/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_plan_rebounds_filter_page")
 	 * @Template("LadbCoreBundle:Wonder/Plan:rebounds.html.twig")
 	 */
-	public function reboundsAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function reboundsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 		$planRepository = $om->getRepository(Plan::CLASS_NAME);
 
@@ -636,8 +607,6 @@ class PlanController extends AbstractController {
 		$this->assertShowable($plan);
 
 		// Rebounds
-
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -670,7 +639,7 @@ class PlanController extends AbstractController {
 	/**
 	 * @Route("/{id}/sticker", requirements={"id" = "\d+"}, name="core_plan_sticker")
 	 */
-	public function stickerAction(Request $request, $id) {
+	public function stickerAction(Request $request, $id, EmbeddableUtils $embeddableUtils, ImagineController $imagineController) {
 		$om = $this->getDoctrine()->getManager();
 
 		$id = intval($id);
@@ -680,7 +649,6 @@ class PlanController extends AbstractController {
 
 		$sticker = $plan->getSticker();
 		if (is_null($sticker)) {
-			$embeddableUtils = $this->get(EmbeddableUtils::NAME);
 			$sticker = $embeddableUtils->generateSticker($plan);
 			if (!is_null($sticker)) {
 				$om->flush();
@@ -691,7 +659,7 @@ class PlanController extends AbstractController {
 
 		if (!is_null($sticker)) {
 
-			$response = $this->get('liip_imagine.controller')->filterAction($request, $sticker->getWebPath(), '598w');
+			$response = $imagineController->filterAction($request, $sticker->getWebPath(), '598w');
 			return $response;
 
 		} else {
@@ -703,7 +671,7 @@ class PlanController extends AbstractController {
 	/**
 	 * @Route("/{id}/strip", requirements={"id" = "\d+"}, name="core_plan_strip")
 	 */
-	public function stripAction(Request $request, $id) {
+	public function stripAction(Request $request, $id, ImagineController $imagineController, StripableUtils $stripableUtils) {
 		$om = $this->getDoctrine()->getManager();
 
 		$id = intval($id);
@@ -713,7 +681,6 @@ class PlanController extends AbstractController {
 
 		$strip = $plan->getStrip();
 		if (is_null($strip)) {
-			$stripableUtils = $this->get(StripableUtils::NAME);
 			$strip = $stripableUtils->generateStrip($plan);
 			if (!is_null($strip)) {
 				$om->flush();
@@ -724,7 +691,7 @@ class PlanController extends AbstractController {
 
 		if (!is_null($strip)) {
 
-			$response = $this->get('liip_imagine.controller')->filterAction($request, $strip->getWebPath(), '564w');
+			$response = $imagineController->filterAction($request, $strip->getWebPath(), '564w');
 			return $response;
 
 		} else {
@@ -763,8 +730,7 @@ class PlanController extends AbstractController {
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_plan_list_page")
 	 * @Template("LadbCoreBundle:Wonder/Plan:list.html.twig")
 	 */
-	public function listAction(Request $request, $page = 0) {
-		$searchUtils = $this->get(SearchUtils::NAME);
+	public function listAction(Request $request, EventDispatcherInterface $dispatcher, ResourceUtils $resourceUtils, SearchUtils $searchUtils, TranslatorInterface $translator, $page = 0) {
 
 		// Elasticsearch paginiation limit
 		if ($page > 624) {
@@ -781,14 +747,14 @@ class PlanController extends AbstractController {
 		$searchParameters = $searchUtils->searchPaginedEntities(
 			$request,
 			$page,
-			function($facet, &$filters, &$sort, &$noGlobalFilters, &$couldUseDefaultSort) use ($searchUtils) {
+			function($facet, &$filters, &$sort, &$noGlobalFilters, &$couldUseDefaultSort) use ($searchUtils, $resourceUtils) {
 				switch ($facet->name) {
 
 					// Filters /////
 
 					case 'mine':
 
-						if ($this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
+						if ($this->isGranted('ROLE_USER')) {
 
 							if (isset($facet->value) && $facet->value == 'draft') {
 
@@ -849,7 +815,6 @@ class PlanController extends AbstractController {
 
 					case 'kind':
 
-						$resourceUtils = $this->get(ResourceUtils::NAME);
 						$kind = $resourceUtils->getKindFromStrippedName($facet->value);
 						$filter = new \Elastica\Query\Term(['kinds' => ['value' => $kind, 'boost' => 1.0]]);
 						$filters[] = $filter;
@@ -976,7 +941,6 @@ class PlanController extends AbstractController {
 		);
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATIONS_LISTED, new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()));
 
 		$parameters = array_merge($searchParameters, array(
@@ -997,13 +961,13 @@ class PlanController extends AbstractController {
 			return $this->render('LadbCoreBundle:Wonder/Plan:list-choice.html.twig', $parameters);
 		}
 
-		if ($this->get('security.authorization_checker')->isGranted('ROLE_USER') && $this->getUser()->getMeta()->getPrivatePlanCount() > 0) {
+		if ($this->isGranted('ROLE_USER') && $this->getUser()->getMeta()->getPrivatePlanCount() > 0) {
 
 			$draftPath = $this->generateUrl('core_plan_list', array( 'q' => '@mine:draft' ));
 			$draftCount = $this->getUser()->getMeta()->getPrivatePlanCount();
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('info', '<i class="ladb-icon-warning"></i> '.$this->get('translator')->transchoice('wonder.plan.choice.draft_alert', $draftCount, array( '%count%' => $draftCount )).' <small><a href="'.$draftPath.'" class="alert-link">('.$this->get('translator')->trans('default.show_my_drafts').')</a></small>');
+			$this->addFlash('info', '<i class="ladb-icon-warning"></i> '.$translator->transchoice('wonder.plan.choice.draft_alert', $draftCount, array( '%count%' => $draftCount )).' <small><a href="'.$draftPath.'" class="alert-link">('.$translator->trans('default.show_my_drafts').')</a></small>');
 
 		}
 
@@ -1014,10 +978,9 @@ class PlanController extends AbstractController {
 	 * @Route("/{id}.html", name="core_plan_show")
 	 * @Template("LadbCoreBundle:Wonder/Plan:show.html.twig")
 	 */
-	public function showAction(Request $request, $id) {
+	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, EmbeddableUtils $embaddableUtils, ExplorableUtils $explorableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, SearchUtils $searchUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();
 		$planRepository = $om->getRepository(Plan::CLASS_NAME);
-		$witnessManager = $this->get(WitnessManager::NAME);
 
 		$id = intval($id);
 
@@ -1030,27 +993,17 @@ class PlanController extends AbstractController {
 		}
 		$this->assertShowable($plan);
 
-		$embaddableUtils = $this->get(EmbeddableUtils::NAME);
 		$referral = $embaddableUtils->processReferer($plan, $request);
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($plan));
 
-		$searchUtils = $this->get(SearchUtils::NAME);
 		$searchableSoftwareCount = $searchUtils->searchEntitiesCount(array(
 			new \Elastica\Query\MatchQuery('supportedFiles', implode(',', $plan->getResourceFileExtensions()))
 		), 'fos_elastica.index.ladb.knowledge_software');
 
-		$explorableUtils = $this->get(ExplorableUtils::NAME);
 		$userPlans = $explorableUtils->getPreviousAndNextPublishedUserExplorables($plan, $planRepository, $plan->getUser()->getMeta()->getPublicPlanCount());
 		$similarPlans = $explorableUtils->getSimilarExplorables($plan, 'fos_elastica.index.ladb.wonder_plan', Plan::CLASS_NAME, $userPlans);
-
-		$likableUtils = $this->get(LikableUtils::NAME);
-		$watchableUtils = $this->get(WatchableUtils::NAME);
-		$commentableUtils = $this->get(CommentableUtils::NAME);
-		$collectionnableUtils = $this->get(CollectionnableUtils::NAME);
-		$followerUtils = $this->get(FollowerUtils::NAME);
 
 		return array(
 			'plan'                    => $plan,
