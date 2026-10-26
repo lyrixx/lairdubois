@@ -32,6 +32,8 @@ use Ladb\CoreBundle\Event\PublicationEvent;
 use Ladb\CoreBundle\Event\PublicationListener;
 use Ladb\CoreBundle\Event\KnowledgeEvent;
 use Ladb\CoreBundle\Event\KnowledgeListener;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @Route("/xylotheque")
@@ -44,14 +46,12 @@ class WoodController extends AbstractController {
 	 * @Route("/new", name="core_wood_new")
 	 * @Template("LadbCoreBundle:Knowledge/Wood:new.html.twig")
 	 */
-	public function newAction() {
+	public function newAction(KnowledgeUtils $knowledgeUtils) {
 
 		// Exclude if user is not email confirmed
 		if (!$this->getUser()->getEmailConfirmed()) {
 			throw $this->createNotFoundException('Not allowed - User email not confirmed (core_wood_new)');
 		}
-
-		$knowledgeUtils = $this->get(KnowledgeUtils::NAME);
 
 		$newWood = new NewWood();
 		$form = $this->createForm(NewWoodType::class, $newWood);
@@ -66,7 +66,7 @@ class WoodController extends AbstractController {
 	 * @Route("/create", methods={"POST"}, name="core_wood_create")
 	 * @Template("LadbCoreBundle:Knowledge/Wood:new.html.twig")
 	 */
-	public function createAction(Request $request) {
+	public function createAction(Request $request, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, TranslatorInterface $translator) {
 
 		// Exclude if user is not email confirmed
 		if (!$this->getUser()->getEmailConfirmed()) {
@@ -76,7 +76,6 @@ class WoodController extends AbstractController {
 		$this->createLock('core_wood_create', false, self::LOCK_TTL_CREATE_ACTION, false);
 
 		$om = $this->getDoctrine()->getManager();
-		$dispatcher = $this->get('event_dispatcher');
 
 		$newWood = new NewWood();
 		$form = $this->createForm(NewWoodType::class, $newWood);
@@ -118,7 +117,6 @@ class WoodController extends AbstractController {
 			$user->getMeta()->incrementProposalCount(2);	// Name and Grain of this new wood
 
 			// Create activity
-			$activityUtils = $this->get(ActivityUtils::NAME);
 			$activityUtils->createContributeActivity($nameValue, false);
 			$activityUtils->createContributeActivity($grainValue, false);
 
@@ -134,7 +132,7 @@ class WoodController extends AbstractController {
 		}
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
+		$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 		return array(
 			'newWood'     => $newWood,
@@ -147,17 +145,16 @@ class WoodController extends AbstractController {
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_wood_delete")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_wood_delete)")
 	 */
-	public function deleteAction($id) {
+	public function deleteAction($id, TranslatorInterface $translator, WoodManager $woodMananger) {
 
 		$wood = $this->retrievePublication($id, Wood::CLASS_NAME);
 		$this->assertDeletable($wood);
 
 		// Delete
-		$woodMananger = $this->get(WoodManager::NAME);
 		$woodMananger->delete($wood);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('knowledge.wood.form.alert.delete_success', array( '%title%' => $wood->getTitle() )));
+		$this->addFlash('success', $translator->trans('knowledge.wood.form.alert.delete_success', array( '%title%' => $wood->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_wood_list'));
 	}
@@ -168,9 +165,8 @@ class WoodController extends AbstractController {
 	 * @Route("/{id}/textures/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_wood_texture_list_filter_page")
 	 * @Template("LadbCoreBundle:Knowledge/Wood:texture-list.html.twig")
 	 */
-	public function textureListAction(Request $request, $id, $page = 0, $filter = 'all') {
+	public function textureListAction(Request $request, $id, PaginatorUtils $paginatorUtils, $page = 0, $filter = 'all') {
 		$om = $this->getDoctrine()->getManager();
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$wood = $this->retrievePublication($id, Wood::CLASS_NAME);
 		$this->assertShowable($wood);
@@ -200,7 +196,7 @@ class WoodController extends AbstractController {
 	/**
 	 * @Route("/textures/{id}/download", requirements={"id" = "\d+"}, name="core_wood_texture_download")
 	 */
-	public function textureDownloadAction($id) {
+	public function textureDownloadAction($id, TextureUtils $textureUtils) {
 		$om = $this->getDoctrine()->getManager();
 		$textureRepository = $om->getRepository(Wood\Texture::CLASS_NAME);
 
@@ -209,7 +205,6 @@ class WoodController extends AbstractController {
 			throw $this->createNotFoundException('Unable to find Texture entity (id='.$id.').');
 		}
 
-		$textureUtils = $this->get(TextureUtils::NAME);
 		$zipAbsolutePath = $textureUtils->getZipAbsolutePath($texture);
 		if (!file_exists($zipAbsolutePath)) {
 			if (!$textureUtils->createZipArchive($texture)) {
@@ -281,8 +276,7 @@ class WoodController extends AbstractController {
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_wood_list_page")
 	 * @Template("LadbCoreBundle:Knowledge/Wood:list.html.twig")
 	 */
-	public function listAction(Request $request, $page = 0) {
-		$searchUtils = $this->get(SearchUtils::NAME);
+	public function listAction(Request $request, EventDispatcherInterface $dispatcher, ElasticaQueryUtils $elasticaQueryUtils, SearchUtils $searchUtils, $page = 0) {
 
 		// Elasticsearch paginiation limit
 		if ($page > 624) {
@@ -292,14 +286,13 @@ class WoodController extends AbstractController {
 		$searchParameters = $searchUtils->searchPaginedEntities(
 			$request,
 			$page,
-			function($facet, &$filters, &$sort, &$noGlobalFilters, &$couldUseDefaultSort) use ($searchUtils) {
+			function($facet, &$filters, &$sort, &$noGlobalFilters, &$couldUseDefaultSort) use ($searchUtils, $elasticaQueryUtils) {
 				switch ($facet->name) {
 
 					// Filters /////
 
 					case 'name':
 
-						$elasticaQueryUtils = $this->get(ElasticaQueryUtils::NAME);
 						$filters[] = $elasticaQueryUtils->createShouldMatchPhraseQuery('name', $facet->value);
 
 						break;
@@ -382,7 +375,7 @@ class WoodController extends AbstractController {
 			},
 			function(&$filters, &$sort) {
 
-				if ($this->get('security.authorization_checker')->isGranted('ROLE_USER') && $this->getUser()->getMeta()->getUnlistedKnowledgeWoodCount() > 0) {
+				if ($this->isGranted('ROLE_USER') && $this->getUser()->getMeta()->getUnlistedKnowledgeWoodCount() > 0) {
 					$sort = array('changedAt' => array('order' => 'desc'));
 				} else {
 					$sort = array('completion100' => array('order' => 'desc'));
@@ -401,7 +394,6 @@ class WoodController extends AbstractController {
 		);
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATIONS_LISTED, new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()));
 
 		$parameters = array_merge($searchParameters, array(
@@ -419,10 +411,9 @@ class WoodController extends AbstractController {
 	 * @Route("/{id}.html", name="core_wood_show")
 	 * @Template("LadbCoreBundle:Knowledge/Wood:show.html.twig")
 	 */
-	public function showAction(Request $request, $id) {
+	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ElasticaQueryUtils $elasticaQueryUtils, LikableUtils $likableUtils, SearchUtils $searchUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();
 		$woodRepository = $om->getRepository(Wood::CLASS_NAME);
-		$witnessManager = $this->get(WitnessManager::NAME);
 
 		$id = intval($id);
 
@@ -435,18 +426,10 @@ class WoodController extends AbstractController {
 		}
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($wood));
 
-		$searchUtils = $this->get(SearchUtils::NAME);
-		$elasticaQueryUtils = $this->get(ElasticaQueryUtils::NAME);
 		$searchableCreationCount = $searchUtils->searchEntitiesCount(array( $elasticaQueryUtils->createShouldMatchPhraseQuery('woods.label', $wood->getName()) ), 'fos_elastica.index.ladb.wonder_creation');
 		$searchableProviderCount = $searchUtils->searchEntitiesCount(array( $elasticaQueryUtils->createShouldMatchPhraseQuery('woodsWorkaround', $wood->getName()) ), 'fos_elastica.index.ladb.knowledge_provider');
-
-		$likableUtils = $this->get(LikableUtils::NAME);
-		$watchableUtils = $this->get(WatchableUtils::NAME);
-		$commentableUtils = $this->get(CommentableUtils::NAME);
-		$collectionnableUtils = $this->get(CollectionnableUtils::NAME);
 
 		return array(
 			'wood'                    => $wood,
