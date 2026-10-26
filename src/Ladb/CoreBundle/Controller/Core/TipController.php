@@ -20,6 +20,8 @@ use Ladb\CoreBundle\Utils\FieldPreprocessorUtils;
 use Ladb\CoreBundle\Event\PublicationEvent;
 use Ladb\CoreBundle\Event\PublicationListener;
 use Ladb\CoreBundle\Event\PublicationsEvent;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @Route("/astuces")
@@ -46,7 +48,7 @@ class TipController extends AbstractController {
 	 * @Template("LadbCoreBundle:Core/Tip:new.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_TIP')", statusCode=404, message="Not allowed (core_tip_create)")
 	 */
-	public function createAction(Request $request) {
+	public function createAction(Request $request, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TranslatorInterface $translator) {
 
 		$this->createLock('core_tip_create', false, self::LOCK_TTL_CREATE_ACTION, false);
 
@@ -58,14 +60,12 @@ class TipController extends AbstractController {
 
 		if ($form->isValid()) {
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($tip);
 
 			$om->persist($tip);
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($tip));
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_PUBLISHED, new PublicationEvent($tip));
 
@@ -73,7 +73,7 @@ class TipController extends AbstractController {
 		}
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
+		$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 		return array(
 			'tip'         => $tip,
@@ -109,7 +109,7 @@ class TipController extends AbstractController {
 	 * @Template("LadbCoreBundle:Core/Tip:edit.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_TIP')", statusCode=404, message="Not allowed (core_tip_update)")
 	 */
-	public function updateAction(Request $request, $id) {
+	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TranslatorInterface $translator) {
 		$om = $this->getDoctrine()->getManager();
 		$tipRepository = $om->getRepository(Tip::CLASS_NAME);
 
@@ -123,17 +123,15 @@ class TipController extends AbstractController {
 
 		if ($form->isValid()) {
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($tip);
 
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_UPDATED, new PublicationEvent($tip));
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('core.tip.form.alert.update_success', array( '%title%' => $tip->getTitle() )));
+			$this->addFlash('success', $translator->trans('core.tip.form.alert.update_success', array( '%title%' => $tip->getTitle() )));
 
 			// Regenerate the form
 			$form = $this->createForm(TipType::class, $tip);
@@ -141,7 +139,7 @@ class TipController extends AbstractController {
 		} else {
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
+			$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 		}
 
@@ -155,7 +153,7 @@ class TipController extends AbstractController {
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_tip_delete")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_TIP')", statusCode=404, message="Not allowed (core_tip_delete)")
 	 */
-	public function deleteAction($id) {
+	public function deleteAction($id, TipManager $tipManager, TranslatorInterface $translator) {
 		$om = $this->getDoctrine()->getManager();
 		$tipRepository = $om->getRepository(Tip::CLASS_NAME);
 
@@ -165,11 +163,10 @@ class TipController extends AbstractController {
 		}
 
 		// Delete
-		$tipManager = $this->get(TipManager::NAME);
 		$tipManager->delete($tip);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('core.tip.form.alert.delete_success', array( '%title%' => $tip->getTitle() )));
+		$this->addFlash('success', $translator->trans('core.tip.form.alert.delete_success', array( '%title%' => $tip->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_tip_list'));
 	}
@@ -179,8 +176,7 @@ class TipController extends AbstractController {
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_tip_list_page")
 	 * @Template("LadbCoreBundle:Core/Tip:list.html.twig")
 	 */
-	public function listAction(Request $request, $page = 0) {
-		$searchUtils = $this->get(SearchUtils::NAME);
+	public function listAction(Request $request, EventDispatcherInterface $dispatcher, SearchUtils $searchUtils, $page = 0) {
 
 		// Elasticsearch paginiation limit
 		if ($page > 624) {
@@ -236,7 +232,6 @@ class TipController extends AbstractController {
 		);
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATIONS_LISTED, new PublicationsEvent($searchParameters['entities'], false));
 
 		$parameters = array_merge($searchParameters, array(
@@ -254,10 +249,9 @@ class TipController extends AbstractController {
 	 * @Route("/{id}.html", name="core_tip_show")
 	 * @Template("LadbCoreBundle:Core/Tip:show.html.twig")
 	 */
-	public function showAction(Request $request, $id) {
+	public function showAction(Request $request, $id, EventDispatcherInterface $dispatcher, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();
 		$tipRepository = $om->getRepository(Tip::CLASS_NAME);
-		$witnessManager = $this->get(WitnessManager::NAME);
 
 		$id = intval($id);
 
@@ -270,7 +264,6 @@ class TipController extends AbstractController {
 		}
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($tip));
 
 		return $this->redirect($tip->getUrl());

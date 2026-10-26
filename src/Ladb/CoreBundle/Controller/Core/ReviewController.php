@@ -20,14 +20,15 @@ use Ladb\CoreBundle\Event\PublicationListener;
 use Ladb\CoreBundle\Entity\Core\Review;
 use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Utils\ReviewableUtils;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @Route("/reviews")
  */
 class ReviewController extends AbstractController {
 
-	private function _retrieveRelatedEntity($entityType, $entityId) {
-		$typableUtils = $this->get(TypableUtils::NAME);
+	private function _retrieveRelatedEntity($entityType, $entityId, TypableUtils $typableUtils) {
 		try {
 			$entity = $typableUtils->findTypable($entityType, $entityId);
 		} catch (\Exception $e) {
@@ -45,7 +46,7 @@ class ReviewController extends AbstractController {
 	 * @Route("/{entityType}/{entityId}/new", requirements={"entityType" = "\d+", "entityId" = "\d+"}, name="core_review_new")
 	 * @Template("LadbCoreBundle:Core/Review:new-xhr.html.twig")
 	 */
-	public function newAction(Request $request, $entityType, $entityId) {
+	public function newAction(Request $request, $entityType, $entityId, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_review_new)');
 		}
@@ -54,7 +55,7 @@ class ReviewController extends AbstractController {
             throw $this->createNotFoundException('User must be more than 7 days old to publish review (core_review_new)');
         }
 
-		$entity = $this->_retrieveRelatedEntity($entityType, $entityId);
+		$entity = $this->_retrieveRelatedEntity($entityType, $entityId, $typableUtils);
 		if ($entity instanceof HiddableInterface && $entity->getIsPrivate()) {
 			throw $this->createNotFoundException('Hidden entity could not be reviewed.');
 		}
@@ -72,7 +73,7 @@ class ReviewController extends AbstractController {
 	 * @Route("/{entityType}/{entityId}/create",requirements={"entityType" = "\d+", "entityId" = "\d+"}, methods={"POST"}, name="core_review_create")
 	 * @Template("LadbCoreBundle:Core/Review:new-xhr.html.twig")
 	 */
-	public function createAction(Request $request, $entityType, $entityId) {
+	public function createAction(Request $request, $entityType, $entityId, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, ReviewableUtils $reviewableUtils, TypableUtils $typableUtils, WatchableUtils $watchableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_review_create)');
 		}
@@ -86,7 +87,7 @@ class ReviewController extends AbstractController {
 
 		// Retrieve related entity
 
-		$entity = $this->_retrieveRelatedEntity($entityType, $entityId);
+		$entity = $this->_retrieveRelatedEntity($entityType, $entityId, $typableUtils);
 		if ($entity instanceof HiddableInterface && $entity->getIsPrivate()) {
 			throw $this->createNotFoundException('Hidden entity could not be reviewed.');
 		}
@@ -107,7 +108,6 @@ class ReviewController extends AbstractController {
 
 		if ($form->isValid()) {
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($review);
 
 			$entity->setChangedAt(new \DateTime());
@@ -120,19 +120,15 @@ class ReviewController extends AbstractController {
 			$om->flush();	// Need to flush before computing average rating
 
 			// Average rating
-			$reviewableUtils = $this->get(ReviewableUtils::NAME);
 			$reviewableUtils->computeAverageRating($entity);
 
 			// Create activity
-			$activityUtils = $this->get(ActivityUtils::NAME);
 			$activityUtils->createReviewActivity($review, false);
 
 			// Dispatch publication event (on entity)
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_CHANGED, new PublicationEvent($entity));
 
 			// Auto watch
-			$watchableUtils = $this->container->get(WatchableUtils::NAME);
 			$watchableUtils->autoCreateWatch($entity, $this->getUser());
 
 			$om->flush();
@@ -153,7 +149,7 @@ class ReviewController extends AbstractController {
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_review_edit")
 	 * @Template("LadbCoreBundle:Core/Review:edit-xhr.html.twig")
 	 */
-	public function editAction(Request $request, $id) {
+	public function editAction(Request $request, $id, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_review_edit)');
 		}
@@ -165,12 +161,12 @@ class ReviewController extends AbstractController {
 		if (is_null($review)) {
 			throw $this->createNotFoundException('Unable to find Review entity (id='.$id.').');
 		}
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && $review->getUser()->getId() != $this->getUser()->getId()) {
+		if (!$this->isGranted('ROLE_ADMIN') && $review->getUser()->getId() != $this->getUser()->getId()) {
 			throw $this->createNotFoundException('Not allowed (core_core_review_edit)');
 		}
 
 		// Retrieve related entity
-		$entity = $this->_retrieveRelatedEntity($review->getEntityType(), $review->getEntityId());
+		$entity = $this->_retrieveRelatedEntity($review->getEntityType(), $review->getEntityId(), $typableUtils);
 
 		$form = $this->createForm(ReviewType::class, $review);
 
@@ -185,7 +181,7 @@ class ReviewController extends AbstractController {
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_review_update")
 	 * @Template("LadbCoreBundle:Core/Review:edit-xhr.html.twig")
 	 */
-	public function updateAction(Request $request, $id) {
+	public function updateAction(Request $request, $id, FieldPreprocessorUtils $fieldPreprocessorUtils, ReviewableUtils $reviewableUtils, SearchUtils $searchUtils, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_review_update)');
 		}
@@ -197,19 +193,18 @@ class ReviewController extends AbstractController {
 		if (is_null($review)) {
 			throw $this->createNotFoundException('Unable to find Review entity (id='.$id.').');
 		}
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && $review->getUser()->getId() != $this->getUser()->getId()) {
+		if (!$this->isGranted('ROLE_ADMIN') && $review->getUser()->getId() != $this->getUser()->getId()) {
 			throw $this->createNotFoundException('Not allowed (core_knowledge_book_review_update)');
 		}
 
 		// Retrieve related entity
-		$entity = $this->_retrieveRelatedEntity($review->getEntityType(), $review->getEntityId());
+		$entity = $this->_retrieveRelatedEntity($review->getEntityType(), $review->getEntityId(), $typableUtils);
 
 		$form = $this->createForm(ReviewType::class, $review);
 		$form->handleRequest($request);
 
 		if ($form->isValid()) {
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($review);
 
 			if ($review->getUser()->getId() == $this->getUser()->getId()) {
@@ -217,13 +212,11 @@ class ReviewController extends AbstractController {
 			}
 
 			// Average rating
-			$reviewableUtils = $this->get(ReviewableUtils::NAME);
 			$reviewableUtils->computeAverageRating($entity);
 
 			$om->flush();
 
 			// Search index update
-			$searchUtils = $this->container->get(SearchUtils::NAME);
 			$searchUtils->replaceEntityInIndex($entity);
 
 			return $this->render('LadbCoreBundle:Core/Review:update-xhr.html.twig', array(
@@ -242,24 +235,21 @@ class ReviewController extends AbstractController {
 	/**
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_review_delete")
 	 */
-	public function deleteAction($id) {
+	public function deleteAction($id, ActivityUtils $activityUtils, ReviewableUtils $reviewableUtils, SearchUtils $searchUtils, TranslatorInterface $translator, TypableUtils $typableUtils) {
 		$om = $this->getDoctrine()->getManager();
 		$reviewRepository = $om->getRepository(Review::CLASS_NAME);
-		$activityUtils = $this->get(ActivityUtils::NAME);
-		$reviewableUtils = $this->get(ReviewableUtils::NAME);
-		$typableUtils = $this->get(TypableUtils::NAME);
 
 		$review = $reviewRepository->findOneById($id);
 		if (is_null($review)) {
 			throw $this->createNotFoundException('Unable to find Review entity (id='.$id.').');
 		}
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && $review->getUser()->getId() != $this->getUser()->getId()) {
+		if (!$this->isGranted('ROLE_ADMIN') && $review->getUser()->getId() != $this->getUser()->getId()) {
 			throw $this->createNotFoundException('Not allowed (core_knowledge_book_review_delete)');
 		}
 
 		// Retrieve related entity
 
-		$entity = $this->_retrieveRelatedEntity($review->getEntityType(), $review->getEntityId());
+		$entity = $this->_retrieveRelatedEntity($review->getEntityType(), $review->getEntityId(), $typableUtils);
 
 		// Delete comment
 
@@ -268,17 +258,15 @@ class ReviewController extends AbstractController {
 		$om->flush();	// Need to flush before computing average rating
 
 		// Average rating
-		$reviewableUtils = $this->get(ReviewableUtils::NAME);
 		$reviewableUtils->computeAverageRating($entity);
 
 		$om->flush();
 
 		// Search index update
-		$searchUtils = $this->get(SearchUtils::NAME);
 		$searchUtils->replaceEntityInIndex($entity);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('review.'.$typableUtils->getStrippedNameByType($entity->getType()).'.alert.delete_success'));
+		$this->addFlash('success', $translator->trans('review.'.$typableUtils->getStrippedNameByType($entity->getType()).'.alert.delete_success'));
 
 		return $this->redirect($typableUtils->getUrlAction($entity));
 	}
@@ -286,17 +274,16 @@ class ReviewController extends AbstractController {
 	/**
 	 * @Route("/{id}", requirements={"id" = "\d+"}, name="core_review_show")
 	 */
-	public function showAction(Request $request, $id) {
+	public function showAction(Request $request, $id, TypableUtils $typableUtils) {
 		$om = $this->getDoctrine()->getManager();
 		$reviewRepository = $om->getRepository(Review::CLASS_NAME);
-		$typableUtils = $this->get(TypableUtils::NAME);
 
 		$review = $reviewRepository->findOneById($id);
 		if (is_null($review)) {
 			throw $this->createNotFoundException('Unable to find Review entity (id='.$id.').');
 		}
 
-		$entity = $this->_retrieveRelatedEntity($review->getEntityType(), $review->getEntityId());
+		$entity = $this->_retrieveRelatedEntity($review->getEntityType(), $review->getEntityId(), $typableUtils);
 
 		return $this->redirect($typableUtils->getUrlAction($entity).'#_review_'.$review->getId());
 	}

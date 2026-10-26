@@ -68,14 +68,13 @@ class MemberController extends AbstractController {
 	/**
 	 * @Route("/{teamId}/invitation/create", requirements={"teamId" = "\d+"}, name="core_member_invitation_create")
 	 */
-	public function createInvitationAction(Request $request, $teamId) {
+	public function createInvitationAction(Request $request, $teamId, MemberInvitationManager $memberInvitationManager, UserManager $userManager, WebpushNotificationUtils $webpushNotificationUtils) {
 
 		$team = $this->_retrieveTeam($teamId);
 
 		$this->createLock('core_member_invitation_create', false, self::LOCK_TTL_CREATE_ACTION, false);
 
 		$om = $this->getDoctrine()->getManager();
-		$userManager = $this->get(UserManager::NAME);
 		$memberInvitationRepository = $om->getRepository(MemberInvitation::CLASS_NAME);
 		$memberRequestRepository = $om->getRepository(MemberRequest::CLASS_NAME);
 		$memberRepository = $om->getRepository(Member::CLASS_NAME);
@@ -96,31 +95,29 @@ class MemberController extends AbstractController {
 			$recipient = $userManager->findUserByUsername($username);
 			// Check if recipient exists or is enabled or is team
 			if (is_null($recipient) || !$recipient->isEnabled() || $recipient->getIsTeam()) {
-				$this->get('session')->getFlashBag()->add('error', '<i class="ladb-icon-warning"></i> '.$recipient.' est invalide.');
+				$this->addFlash('error', '<i class="ladb-icon-warning"></i> '.$recipient.' est invalide.');
 				continue;
 			}
 			// Check if recipient already invited
 			if ($memberInvitationRepository->existsByTeamAndRecipient($team, $recipient)) {
-				$this->get('session')->getFlashBag()->add('error', '<i class="ladb-icon-warning"></i> '.$recipient.' est déjà invité.');
+				$this->addFlash('error', '<i class="ladb-icon-warning"></i> '.$recipient.' est déjà invité.');
 				continue;
 			}
 			// Check if recipient already requested
 			if ($memberRequestRepository->existsByTeamAndSender($team, $recipient)) {
-				$this->get('session')->getFlashBag()->add('error', '<i class="ladb-icon-warning"></i> '.$recipient.' a déjà envoyé une demande.');
+				$this->addFlash('error', '<i class="ladb-icon-warning"></i> '.$recipient.' a déjà envoyé une demande.');
 				continue;
 			}
 			// Check if recipient already member
 			if ($memberRepository->existsByTeamAndUser($team, $recipient)) {
-				$this->get('session')->getFlashBag()->add('error', '<i class="ladb-icon-warning"></i> '.$recipient.' est déjà membre.');
+				$this->addFlash('error', '<i class="ladb-icon-warning"></i> '.$recipient.' est déjà membre.');
 				continue;
 			}
 
 			// Create invitation
-			$memberInvitationManager = $this->get(MemberInvitationManager::NAME);
 			$memberInvitation = $memberInvitationManager->create($team, $this->getUser(), $recipient, false);
 
 			// Publish a webpush notification in queue
-			$webpushNotificationUtils = $this->get(WebpushNotificationUtils::class);
 			$webpushNotificationUtils->enqueueNewMemberInvitationNotification($memberInvitation);
 
 			$invitationCount++;
@@ -129,7 +126,7 @@ class MemberController extends AbstractController {
 		$om->flush();
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add($invitationCount > 0 ? 'success' : 'error', $invitationCount.' invitation envoyée');	// TODO
+		$this->addFlash($invitationCount > 0 ? 'success' : 'error', $invitationCount.' invitation envoyée');	// TODO
 
 		return $this->redirect($this->generateUrl($invitationCount > 0 ? 'core_user_show_invitations' : 'core_user_show', array( 'username' => $team->getUsernameCanonical() )));
 	}
@@ -137,7 +134,7 @@ class MemberController extends AbstractController {
 	/**
 	 * @Route("/invitation/{id}/accept", requirements={"id" = "\d+"}, name="core_member_invitation_accept")
 	 */
-	public function acceptInvitationAction($id) {
+	public function acceptInvitationAction($id, FollowerUtils $followerUtils, MemberInvitationManager $memberInvitationManager, MemberManager $memberManager, SearchUtils $searchUtils) {
 		$om = $this->getDoctrine()->getManager();
 		$memberInvitationRepository = $om->getRepository(MemberInvitation::CLASS_NAME);
 
@@ -145,21 +142,20 @@ class MemberController extends AbstractController {
 		if (is_null($memberInvitation)) {
 			throw $this->createNotFoundException('Invitation entity not found (id='.$id.')');
 		}
-		if ($memberInvitation->getRecipient() != $this->getUser() && !$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+		if ($memberInvitation->getRecipient() != $this->getUser() && !$this->isGranted('ROLE_ADMIN')) {
 			throw $this->createNotFoundException('Not allowed (core_member_invitation_accept)');
 		}
 
 		// Delete invitation
-		$memberInvitationManager = $this->get(MemberInvitationManager::NAME);
 		$memberInvitationManager->delete($memberInvitation);
 
-		return $this->createAction($memberInvitation->getTeam(), $memberInvitation->getRecipient());
+		return $this->createAction($memberInvitation->getTeam(), $memberInvitation->getRecipient(), $followerUtils, $memberManager, $searchUtils);
 	}
 
 	/**
 	 * @Route("/invitation/{id}/delete", requirements={"id" = "\d+"}, name="core_member_invitation_delete")
 	 */
-	public function deleteInvitationAction(Request $request, $id) {
+	public function deleteInvitationAction(Request $request, $id, MemberInvitationManager $memberInvitationManager) {
 		$om = $this->getDoctrine()->getManager();
 		$memberInvitationRepository = $om->getRepository(MemberInvitation::CLASS_NAME);
 		$memberRepository = $om->getRepository(Member::CLASS_NAME);
@@ -168,16 +164,15 @@ class MemberController extends AbstractController {
 		if (is_null($memberInvitation)) {
 			throw $this->createNotFoundException('Invitation entity not found (id='.$id.')');
 		}
-		if ($memberInvitation->getRecipient() != $this->getUser() && !$memberRepository->existsByTeamAndUser($memberInvitation->getTeam(), $this->getUser()) && !$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+		if ($memberInvitation->getRecipient() != $this->getUser() && !$memberRepository->existsByTeamAndUser($memberInvitation->getTeam(), $this->getUser()) && !$this->isGranted('ROLE_ADMIN')) {
 			throw $this->createNotFoundException('Not allowed (core_member_invitation_delete)');
 		}
 
 		// Delete invitation
-		$memberInvitationManager = $this->get(MemberInvitationManager::NAME);
 		$memberInvitationManager->delete($memberInvitation);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', 'Invitation supprimée.');
+		$this->addFlash('success', 'Invitation supprimée.');
 
 		// Return to
 		$returnToUrl = $request->get('rtu');
@@ -219,7 +214,7 @@ class MemberController extends AbstractController {
 	/**
 	 * @Route("/{teamId}/request/create", requirements={"teamId" = "\d+"}, name="core_member_request_create")
 	 */
-	public function createRequestAction(Request $request, $teamId) {
+	public function createRequestAction(Request $request, $teamId, MemberRequestManager $memberRequestManager) {
 
 		$team = $this->_retrieveTeam($teamId);
 		if (!$team->getMeta()->getRequestEnabled()) {
@@ -244,7 +239,6 @@ class MemberController extends AbstractController {
 		}
 
 		// Create request
-		$memberRequestManager = $this->get(MemberRequestManager::NAME);
 		$memberRequestManager->create($team, $this->getUser(), false);
 
 		$om->flush();
@@ -255,7 +249,7 @@ class MemberController extends AbstractController {
 	/**
 	 * @Route("/request/{id}/accept", requirements={"id" = "\d+"}, name="core_member_request_accept")
 	 */
-	public function acceptRequestAction($id) {
+	public function acceptRequestAction($id, FollowerUtils $followerUtils, MemberManager $memberManager, MemberRequestManager $memberRequestManager, SearchUtils $searchUtils) {
 		$om = $this->getDoctrine()->getManager();
 		$memberRequestRepository = $om->getRepository(MemberRequest::CLASS_NAME);
 		$memberRepository = $om->getRepository(Member::CLASS_NAME);
@@ -264,21 +258,20 @@ class MemberController extends AbstractController {
 		if (is_null($memberRequest)) {
 			throw $this->createNotFoundException('Request entity not found (id='.$id.')');
 		}
-		if ($memberRequest->getSender() != $this->getUser() && !$memberRepository->existsByTeamAndUser($memberRequest->getTeam(), $this->getUser()) && !$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+		if ($memberRequest->getSender() != $this->getUser() && !$memberRepository->existsByTeamAndUser($memberRequest->getTeam(), $this->getUser()) && !$this->isGranted('ROLE_ADMIN')) {
 			throw $this->createNotFoundException('Not allowed (core_member_request_accept)');
 		}
 
 		// Delete request
-		$memberRequestManager = $this->get(MemberRequestManager::NAME);
 		$memberRequestManager->delete($memberRequest);
 
-		return $this->createAction($memberRequest->getTeam(), $memberRequest->getSender());
+		return $this->createAction($memberRequest->getTeam(), $memberRequest->getSender(), $followerUtils, $memberManager, $searchUtils);
 	}
 
 	/**
 	 * @Route("/request/{id}/delete", requirements={"id" = "\d+"}, name="core_member_request_delete")
 	 */
-	public function deleteRequestAction(Request $request, $id) {
+	public function deleteRequestAction(Request $request, $id, MemberRequestManager $memberRequestManager) {
 		$om = $this->getDoctrine()->getManager();
 		$memberRequestRepository = $om->getRepository(MemberRequest::CLASS_NAME);
 		$memberRepository = $om->getRepository(Member::CLASS_NAME);
@@ -287,16 +280,15 @@ class MemberController extends AbstractController {
 		if (is_null($memberRequest)) {
 			throw $this->createNotFoundException('Request entity not found (id='.$id.')');
 		}
-		if ($memberRequest->getSender() != $this->getUser() && !$memberRepository->existsByTeamAndUser($memberRequest->getTeam(), $this->getUser()) && !$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+		if ($memberRequest->getSender() != $this->getUser() && !$memberRepository->existsByTeamAndUser($memberRequest->getTeam(), $this->getUser()) && !$this->isGranted('ROLE_ADMIN')) {
 			throw $this->createNotFoundException('Not allowed (core_member_request_delete)');
 		}
 
 		// Delete request
-		$memberRequestManager = $this->get(MemberRequestManager::NAME);
 		$memberRequestManager->delete($memberRequest);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', 'Demande supprimée.');
+		$this->addFlash('success', 'Demande supprimée.');
 
 		// Return to
 		$returnToUrl = $request->get('rtu');
@@ -312,30 +304,27 @@ class MemberController extends AbstractController {
 
 	/////
 
-	private function createAction(User $team, User $user) {
+	private function createAction(User $team, User $user, FollowerUtils $followerUtils, MemberManager $memberManager, SearchUtils $searchUtils) {
 
 		$this->createLock('core_member_create', false, self::LOCK_TTL_CREATE_ACTION, false);
 
 		// Follow management /////
 
 		// Remove new member from team followers
-		$followerUtils = $this->get(FollowerUtils::NAME);
 		$followerUtils->deleteByFollowingUserAndUser($team, $user);
 
 		// Member management /////
 
-		$memberManager = $this->get(MemberManager::NAME);
 		$member = $memberManager->create($team, $user);
 
 		// Search index update
-		$searchUtils = $this->container->get(SearchUtils::NAME);
 		$searchUtils->replaceEntityInIndex($member->getTeam());
 
 		// Flashbag
 		if ($user == $this->getUser()) {
-			$this->get('session')->getFlashBag()->add('success', 'Bienvenue dans le collectif <strong>'.$team->getDisplayName().'</strong>.');
+			$this->addFlash('success', 'Bienvenue dans le collectif <strong>'.$team->getDisplayName().'</strong>.');
 		} else {
-			$this->get('session')->getFlashBag()->add('success', '<strong>'.$user->getDisplayName().'</strong> a rejoint le collectif <strong>'.$team->getDisplayName().'</strong>.');
+			$this->addFlash('success', '<strong>'.$user->getDisplayName().'</strong> a rejoint le collectif <strong>'.$team->getDisplayName().'</strong>.');
 		}
 
 		return $this->redirect($this->generateUrl('core_user_show', array( 'username' => $team->getUsernameCanonical() )));
@@ -344,7 +333,7 @@ class MemberController extends AbstractController {
 	/**
 	 * @Route("/{teamId}/delete", requirements={"teamId" = "\d+"}, name="core_member_delete")
 	 */
-	public function deleteAction(Request $request, $teamId) {
+	public function deleteAction(Request $request, $teamId, MemberManager $memberManager, SearchUtils $searchUtils) {
 
 		$team = $this->_retrieveTeam($teamId);
 		if ($team->getMeta()->getMemberCount() <= 1 ) {
@@ -358,17 +347,15 @@ class MemberController extends AbstractController {
 		if (!is_null($member)) {
 
 			// Delete member
-			$memberManager = $this->get(MemberManager::NAME);
 			$memberManager->delete($member);
 
 			// Search index update
-			$searchUtils = $this->container->get(SearchUtils::NAME);
 			$searchUtils->replaceEntityInIndex($member->getTeam());
 
 		}
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', 'Vous avez quitté le collectif <strong>'.$team->getDisplayName().'</strong>.');
+		$this->addFlash('success', 'Vous avez quitté le collectif <strong>'.$team->getDisplayName().'</strong>.');
 
 		return $this->redirect($this->generateUrl('core_user_show', array( 'username' => $team->getUsernameCanonical() )));
 	}
@@ -378,7 +365,7 @@ class MemberController extends AbstractController {
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_member_list_session_teams_page")
 	 * @Template("LadbCoreBundle:Core/Member:list-session-teams-xhr.html.twig")
 	 */
-	public function listSessionTeamsAction(Request $request, $page = 0) {
+	public function listSessionTeamsAction(Request $request, PaginatorUtils $paginatorUtils, $page = 0) {
 
 		$titleTransKey = $request->get('title-trans-key');
 		$route = $request->get('route');
@@ -394,7 +381,6 @@ class MemberController extends AbstractController {
 
 		$om = $this->getDoctrine()->getManager();
 		$memberRepository = $om->getRepository(Member::class);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);

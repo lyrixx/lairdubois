@@ -24,7 +24,7 @@ class PictureController extends AbstractController {
 
 	private function assertEditableGranted(Picture $picture, $context = '') {
 
-		if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+		if ($this->isGranted('ROLE_ADMIN')) {
 			$allowed = true;
 		} else if ($picture->getUser()->getIsTeam() && !is_null($this->getUser())) {
 
@@ -49,11 +49,10 @@ class PictureController extends AbstractController {
 	/**
 	 * @Route("/{quality}/{postProcessor}/upload", requirements={"quality" = "ld|sd|hd", "postProcessor" = "none|square"}, name="core_picture_upload")
 	 */
-	public function uploadAction(Request $request, $quality, $postProcessor) {
+	public function uploadAction(Request $request, $quality, $postProcessor, PictureUploadHandler $uploadHandler) {
 
 		$owner = $this->retrieveOwner($request);
 
-		$uploadHandler = $this->get(PictureUploadHandler::NAME);
 		$uploadHandler->handle($quality, $postProcessor, $owner);
 		exit(0);
 	}

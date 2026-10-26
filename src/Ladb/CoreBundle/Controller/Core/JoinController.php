@@ -21,14 +21,14 @@ use Ladb\CoreBundle\Utils\JoinableUtils;
 use Ladb\CoreBundle\Utils\PaginatorUtils;
 use Ladb\CoreBundle\Utils\ActivityUtils;
 use Ladb\CoreBundle\Utils\TypableUtils;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * @Route("/joins")
  */
 class JoinController extends AbstractController {
 
-	private function _retrieveRelatedEntity($entityType, $entityId) {
-		$typableUtils = $this->get(TypableUtils::NAME);
+	private function _retrieveRelatedEntity($entityType, $entityId, TypableUtils $typableUtils) {
 		try {
 			$entity = $typableUtils->findTypable($entityType, $entityId);
 		} catch (\Exception $e) {
@@ -46,13 +46,13 @@ class JoinController extends AbstractController {
 	 * @Route("/{entityType}/{entityId}/create", requirements={"entityType" = "\d+", "entityId" = "\d+"}, name="core_join_create")
 	 * @Template("LadbCoreBundle:Core/Join:create-xhr.html.twig")
 	 */
-	public function createAction(Request $request, $entityType, $entityId) {
+	public function createAction(Request $request, $entityType, $entityId, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, JoinableUtils $joinableUtils, TypableUtils $typableUtils, WatchableUtils $watchableUtils) {
 
 		$this->createLock('core_join_create', false, self::LOCK_TTL_CREATE_ACTION, false);
 
 		// Retrieve related entity
 
-		$entity = $this->_retrieveRelatedEntity($entityType, $entityId);
+		$entity = $this->_retrieveRelatedEntity($entityType, $entityId, $typableUtils);
 		if (!($entity instanceof JoinableInterface)) {
 			throw $this->createNotFoundException('Entity need to implements JoinableInterface.');
 		} else if (!$entity->getIsJoinable()) {
@@ -79,7 +79,6 @@ class JoinController extends AbstractController {
 			$om->persist($join);
 
 			// Create activity
-			$activityUtils = $this->get(ActivityUtils::NAME);
 			$activityUtils->createJoinActivity($join, false);
 
 			if ($entity instanceof PublicationInterface) {
@@ -88,14 +87,12 @@ class JoinController extends AbstractController {
 				$entity->setChangedAt(new \DateTime());
 
 				// Dispatch publication event
-				$dispatcher = $this->get('event_dispatcher');
 				$dispatcher->dispatch(PublicationListener::PUBLICATION_CHANGED, new PublicationEvent($entity));
 
 			}
 
 			// Auto watch
 			if ($entity instanceof WatchableInterface) {
-				$watchableUtils = $this->get(WatchableUtils::NAME);
 				$watchableUtils->autoCreateWatch($entity, $this->getUser());
 			}
 
@@ -114,8 +111,6 @@ class JoinController extends AbstractController {
 			return $this->redirect($returnToUrl);
 		}
 
-		$joinableUtils = $this->get(JoinableUtils::NAME);
-
 		return array(
 			'joinContext' => $joinableUtils->getJoinContext($entity, $this->getUser()),
 		);
@@ -125,7 +120,7 @@ class JoinController extends AbstractController {
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_join_delete")
 	 * @Template("LadbCoreBundle:Core/Join:delete-xhr.html.twig")
 	 */
-	public function deleteAction(Request $request, $id) {
+	public function deleteAction(Request $request, $id, ActivityUtils $activityUtils, JoinableUtils $joinableUtils, SearchUtils $searchUtils, TypableUtils $typableUtils) {
 		$om = $this->getDoctrine()->getManager();
 		$joinRepository = $om->getRepository(Join::CLASS_NAME);
 
@@ -139,7 +134,7 @@ class JoinController extends AbstractController {
 
 		// Retrieve related entity
 
-		$entity = $this->_retrieveRelatedEntity($join->getEntityType(), $join->getEntityId());
+		$entity = $this->_retrieveRelatedEntity($join->getEntityType(), $join->getEntityId(), $typableUtils);
 		if ($entity instanceof HiddableInterface && !$entity->getIsPublic()) {
 			throw $this->createNotFoundException('Hidden entity could not be unjoind.');
 		}
@@ -148,7 +143,6 @@ class JoinController extends AbstractController {
 		$entity->incrementJoinCount(-1);
 
 		// Delete activities
-		$activityUtils = $this->get(ActivityUtils::NAME);
 		$activityUtils->deleteActivitiesByJoin($join, false);
 
 		// Delete join
@@ -157,7 +151,6 @@ class JoinController extends AbstractController {
 
 		// Update index
 		if ($entity instanceof IndexableInterface) {
-			$searchUtils = $this->get(SearchUtils::NAME);
 			$searchUtils->replaceEntityInIndex($entity);
 		}
 
@@ -169,8 +162,6 @@ class JoinController extends AbstractController {
 			return $this->redirect($returnToUrl);
 		}
 
-		$joinableUtils = $this->get(JoinableUtils::NAME);
-
 		return array(
 			'joinContext' => $joinableUtils->getJoinContext($entity, $this->getUser()),
 		);
@@ -181,14 +172,13 @@ class JoinController extends AbstractController {
 	 * @Route("/{entityType}/{entityId}/{page}", requirements={"entityType" = "\d+", "entityId" = "\d+", "page" = "\d+"}, name="core_join_list_byentity_page")
 	 * @Template("LadbCoreBundle:Core/Join:list-byentity.html.twig")
 	 */
-	public function listByEntityAction(Request $request, $entityType, $entityId, $page = 0) {
+	public function listByEntityAction(Request $request, $entityType, $entityId, PaginatorUtils $paginatorUtils, TypableUtils $typableUtils, $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 		$joinRepository = $om->getRepository(Join::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		// Retrieve related entity
 
-		$entity = $this->_retrieveRelatedEntity($entityType, $entityId);
+		$entity = $this->_retrieveRelatedEntity($entityType, $entityId, $typableUtils);
 
 		// Retrive joins
 

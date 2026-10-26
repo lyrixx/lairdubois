@@ -14,8 +14,7 @@ class ResourceController extends AbstractController {
 	/**
 	 * @Route("/upload", name="core_resource_upload")
 	 */
-	public function uploadAction() {
-		$uploadHandler = $this->get(ResourceUploadHandler::NAME);
+	public function uploadAction(ResourceUploadHandler $uploadHandler) {
 		$uploadHandler->handle();
 		exit(0);
 	}

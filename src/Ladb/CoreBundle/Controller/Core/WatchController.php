@@ -12,14 +12,14 @@ use Ladb\CoreBundle\Utils\TypableUtils;
 use Ladb\CoreBundle\Utils\PaginatorUtils;
 use Ladb\CoreBundle\Model\WatchableInterface;
 use Ladb\CoreBundle\Entity\Core\Watch;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @Route("/watches")
  */
 class WatchController extends AbstractController {
 
-	private function _retrieveRelatedEntity($entityType, $entityId) {
-		$typableUtils = $this->get(TypableUtils::NAME);
+	private function _retrieveRelatedEntity($entityType, $entityId, TypableUtils $typableUtils) {
 		try {
 			$entity = $typableUtils->findTypable($entityType, $entityId);
 		} catch (\Exception $e) {
@@ -37,21 +37,20 @@ class WatchController extends AbstractController {
 	 * @Route("/{entityType}/{entityId}/create", requirements={"entityType" = "\d+", "entityId" = "\d+"}, name="core_watch_create")
 	 * @Template("LadbCoreBundle:Core/Watch:create-xhr.html.twig")
 	 */
-	public function createAction(Request $request, $entityType, $entityId) {
+	public function createAction(Request $request, $entityType, $entityId, TranslatorInterface $translator, TypableUtils $typableUtils, WatchableUtils $watchableUtils) {
 
 		$this->createLock('core_watch_create', false, self::LOCK_TTL_CREATE_ACTION, false);
 
 		// Retrieve related entity
 
-		$entity = $this->_retrieveRelatedEntity($entityType, $entityId);
+		$entity = $this->_retrieveRelatedEntity($entityType, $entityId, $typableUtils);
 
 		// Create the watch
-		$watchableUtils = $this->get(WatchableUtils::NAME);
 		$watchableUtils->createWatch($entity, $this->getUser());
 
 		// Flashbag
 		if (!$this->getUser()->getEmailConfirmed() && $this->getUser()->getMeta()->getNewWatchActivityEmailNotificationEnabled()) {
-			$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.alert.email_not_confirmed_error'));
+			$this->addFlash('error', $translator->trans('default.alert.email_not_confirmed_error'));
 		}
 
 		if (!$request->isXmlHttpRequest()) {
@@ -74,7 +73,7 @@ class WatchController extends AbstractController {
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_watch_delete")
 	 * @Template("LadbCoreBundle:Core/Watch:delete-xhr.html.twig")
 	 */
-	public function deleteAction(Request $request, $id) {
+	public function deleteAction(Request $request, $id, TypableUtils $typableUtils, WatchableUtils $watchableUtils) {
 		$om = $this->getDoctrine()->getManager();
 		$watchRepository = $om->getRepository(Watch::CLASS_NAME);
 
@@ -87,7 +86,7 @@ class WatchController extends AbstractController {
 		}
 
 		// Retrieve related entity
-		$entity = $this->_retrieveRelatedEntity($watch->getEntityType(), $watch->getEntityId());
+		$entity = $this->_retrieveRelatedEntity($watch->getEntityType(), $watch->getEntityId(), $typableUtils);
 
 		// Update related entity
 
@@ -105,8 +104,6 @@ class WatchController extends AbstractController {
 			return $this->redirect($returnToUrl);
 		}
 
-		$watchableUtils = $this->get(WatchableUtils::NAME);
-
 		return array(
 			'watchContext' => $watchableUtils->getWatchContext($entity, $this->getUser()),
 		);
@@ -117,14 +114,13 @@ class WatchController extends AbstractController {
 	 * @Route("/{entityType}/{entityId}/{page}", requirements={"entityType" = "\d+", "entityId" = "\d+", "page" = "\d+"}, name="core_watch_list_byentity_page")
 	 * @Template("LadbCoreBundle:Core/Watch:list-byentity.html.twig")
 	 */
-	public function listByEntityAction(Request $request, $entityType, $entityId, $page = 0) {
+	public function listByEntityAction(Request $request, $entityType, $entityId, PaginatorUtils $paginatorUtils, TypableUtils $typableUtils, $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 		$watchRepository = $om->getRepository(Watch::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		// Retrieve related entity
 
-		$entity = $this->_retrieveRelatedEntity($entityType, $entityId);
+		$entity = $this->_retrieveRelatedEntity($entityType, $entityId, $typableUtils);
 
 		// Retrive watchs
 

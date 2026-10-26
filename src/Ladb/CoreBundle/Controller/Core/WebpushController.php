@@ -20,14 +20,13 @@ class WebpushController extends AbstractController {
 	 *
 	 * @Route("/", methods={"POST", "DELETE"}, name="bentools_webpush.subscription")
 	 */
-	public function subscriptionAction(Request $request) {
+	public function subscriptionAction(Request $request, UserSubscriptionManager $userSubscriptionManager) {
 		$subscription = json_decode($request->getContent(), true);
 		if (!isset($subscription['endpoint'])) {
 			throw new BadRequestHttpException('Invalid subscription object.');
 		}
 
 		$user = $this->getUser();
-		$userSubscriptionManager = $this->get(UserSubscriptionManager::class);
 		$subscriptionHash = $userSubscriptionManager->hash($subscription['endpoint'], $user);
 		$userSubscription = $userSubscriptionManager->getUserSubscription($user, $subscriptionHash);
 

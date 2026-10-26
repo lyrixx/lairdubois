@@ -10,6 +10,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Ladb\CoreBundle\Entity\Core\Report;
 use Ladb\CoreBundle\Utils\MailerUtils;
 use Ladb\CoreBundle\Utils\TypableUtils;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @Route("/reports")
@@ -19,7 +20,7 @@ class ReportController extends AbstractController {
 	/**
 	 * @Route("/create", name="core_report_create")
 	 */
-	public function createAction(Request $request) {
+	public function createAction(Request $request, MailerUtils $mailerUtils, TranslatorInterface $translator, TypableUtils $typableUtils) {
 
 		$this->createLock('core_report_create', false, self::LOCK_TTL_CREATE_ACTION, false);
 
@@ -40,7 +41,6 @@ class ReportController extends AbstractController {
 
 		// Retrieve related entity
 
-		$typableUtils = $this->get(TypableUtils::NAME);
 		try {
 			$entity = $typableUtils->findTypable($entityType, $entityId);
 		} catch (\Exception $e) {
@@ -59,11 +59,10 @@ class ReportController extends AbstractController {
 		$om->flush();
 
 		// Email notification
-		$mailerUtils = $this->get(MailerUtils::NAME);
 		$mailerUtils->sendReportNotificationEmailMessage($this->getUser(), $report, $entity);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('report.created'));
+		$this->addFlash('success', $translator->trans('report.created'));
 
 		// Return to
 		$returnToUrl = $request->get('rtu');

@@ -69,6 +69,7 @@ final class ControllerGetToActionArgumentRector extends AbstractRector
         'event_dispatcher' => ['Symfony\\Component\\EventDispatcher\\EventDispatcherInterface', 'dispatcher'],
         'form.factory' => ['Symfony\\Component\\Form\\FormFactoryInterface', 'formFactory'],
         'fos_user.util.token_generator' => ['FOS\\UserBundle\\Util\\TokenGeneratorInterface', 'tokenGenerator'],
+        'fos_user.util.user_manipulator' => ['FOS\\UserBundle\\Util\\UserManipulator', 'userManipulator'],
         'liip_imagine.cache.manager' => ['Liip\\ImagineBundle\\Imagine\\Cache\\CacheManager', 'cacheManager'],
         'liip_imagine.controller' => ['Liip\\ImagineBundle\\Controller\\ImagineController', 'imagineController'],
         'templating' => ['Symfony\\Bundle\\FrameworkBundle\\Templating\\EngineInterface', 'templating'],

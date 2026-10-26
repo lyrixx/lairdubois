@@ -22,7 +22,7 @@ class FollowerController extends AbstractController {
 	 * @Route("/{followingUserId}/create", requirements={"followingUserId" = "\d+"}, name="core_follower_create")
 	 * @Template("LadbCoreBundle:Core/Follower:create-xhr.html.twig")
 	 */
-	public function createAction(Request $request, $followingUserId) {
+	public function createAction(Request $request, $followingUserId, ActivityUtils $activityUtils, FollowerUtils $followerUtils) {
 
 		$this->createLock('core_follower_create', false, self::LOCK_TTL_CREATE_ACTION, false);
 
@@ -55,7 +55,6 @@ class FollowerController extends AbstractController {
 			$followingUser->getMeta()->incrementFollowerCount();
 
 			// Create activity
-			$activityUtils = $this->get(ActivityUtils::NAME);
 			$activityUtils->createFollowActivity($follower, false);
 
 			$om->flush();
@@ -73,8 +72,6 @@ class FollowerController extends AbstractController {
 			return $this->redirect($returnToUrl);
 		}
 
-		$followerUtils = $this->get(FollowerUtils::NAME);
-
 		return array(
 			'followerContext' => $followerUtils->getFollowerContext($followingUser, $followerUser),
 		);
@@ -84,7 +81,7 @@ class FollowerController extends AbstractController {
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_follower_delete")
 	 * @Template("LadbCoreBundle:Core/Follower:delete-xhr.html.twig")
 	 */
-	public function deleteAction(Request $request, $id) {
+	public function deleteAction(Request $request, $id, ActivityUtils $activityUtils, FollowerUtils $followerUtils) {
 		$om = $this->getDoctrine()->getManager();
 		$followerRepository = $om->getRepository(Follower::CLASS_NAME);
 
@@ -104,7 +101,6 @@ class FollowerController extends AbstractController {
 		$followingUser->getMeta()->incrementFollowerCount(-1);
 
 		// Delete activities
-		$activityUtils = $this->get(ActivityUtils::NAME);
 		$activityUtils->deleteActivitiesByFollower($follower, false);
 
 		// Delete follower
@@ -118,8 +114,6 @@ class FollowerController extends AbstractController {
 
 			return $this->redirect($returnToUrl);
 		}
-
-		$followerUtils = $this->get(FollowerUtils::NAME);
 
 		return array(
 			'followerContext' => $followerUtils->getFollowerContext($followingUser, $followerUser),
