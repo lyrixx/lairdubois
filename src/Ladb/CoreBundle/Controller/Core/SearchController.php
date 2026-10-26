@@ -29,8 +29,7 @@ class SearchController extends AbstractController {
 	 * @Route("/typeahead/users.json", defaults={"_format" = "json"}, name="core_search_typeahead_users_json")
 	 * @Template("LadbCoreBundle:Core/Search:searchTypeaheadUsers.json.twig")
 	 */
-	public function searchTypeaheadUsersAction(Request $request, $page = 0) {
-		$searchUtils = $this->get(SearchUtils::NAME);
+	public function searchTypeaheadUsersAction(Request $request, SearchUtils $searchUtils, $page = 0) {
 
 		$family = $request->get('family');
 
@@ -76,8 +75,7 @@ class SearchController extends AbstractController {
 	 * @Route("/typeahead/tags.json", defaults={"_format" = "json"}, name="core_search_typeahead_tags_json")
 	 * @Template("LadbCoreBundle:Core/Search:searchTypeaheadTags.json.twig")
 	 */
-	public function searchTypeaheadTagsAction(Request $request, $page = 0) {
-		$searchUtils = $this->get(SearchUtils::NAME);
+	public function searchTypeaheadTagsAction(Request $request, SearchUtils $searchUtils, $page = 0) {
 
 		$searchParameters = $searchUtils->searchPaginedEntities(
 			$request,
@@ -102,8 +100,7 @@ class SearchController extends AbstractController {
 	 * @Route("/typeahead/input-skills.json", defaults={"_format" = "json"}, name="core_search_typeahead_input_skills_json")
 	 * @Template("LadbCoreBundle:Core/Search:searchTypeaheadInputSkills.json.twig")
 	 */
-	public function searchTypeaheadInputSkillsAction(Request $request, $page = 0) {
-		$searchUtils = $this->get(SearchUtils::NAME);
+	public function searchTypeaheadInputSkillsAction(Request $request, SearchUtils $searchUtils, $page = 0) {
 
 		$searchParameters = $searchUtils->searchPaginedEntities(
 			$request,
@@ -128,8 +125,7 @@ class SearchController extends AbstractController {
 	 * @Route("/typeahead/input-woods.json", defaults={"_format" = "json"}, name="core_search_typeahead_input_woods_json")
 	 * @Template("LadbCoreBundle:Core/Search:searchTypeaheadInputWoods.json.twig")
 	 */
-	public function searchTypeaheadInputWoodsAction(Request $request, $page = 0) {
-		$searchUtils = $this->get(SearchUtils::NAME);
+	public function searchTypeaheadInputWoodsAction(Request $request, SearchUtils $searchUtils, $page = 0) {
 
 		$searchParameters = $searchUtils->searchPaginedEntities(
 			$request,
@@ -154,8 +150,7 @@ class SearchController extends AbstractController {
 	 * @Route("/typeahead/input-tools.json", defaults={"_format" = "json"}, name="core_search_typeahead_input_tools_json")
 	 * @Template("LadbCoreBundle:Core/Search:searchTypeaheadInputTools.json.twig")
 	 */
-	public function searchTypeaheadInputToolsAction(Request $request, $page = 0) {
-		$searchUtils = $this->get(SearchUtils::NAME);
+	public function searchTypeaheadInputToolsAction(Request $request, SearchUtils $searchUtils, $page = 0) {
 
 		$searchParameters = $searchUtils->searchPaginedEntities(
 			$request,
@@ -180,8 +175,7 @@ class SearchController extends AbstractController {
 	 * @Route("/typeahead/input-finishes.json", defaults={"_format" = "json"}, name="core_search_typeahead_input_finishes_json")
 	 * @Template("LadbCoreBundle:Core/Search:searchTypeaheadInputFinishes.json.twig")
 	 */
-	public function searchTypeaheadInputFinishesAction(Request $request, $page = 0) {
-		$searchUtils = $this->get(SearchUtils::NAME);
+	public function searchTypeaheadInputFinishesAction(Request $request, SearchUtils $searchUtils, $page = 0) {
 
 		$searchParameters = $searchUtils->searchPaginedEntities(
 			$request,
@@ -206,8 +200,7 @@ class SearchController extends AbstractController {
 	 * @Route("/typeahead/input-hardwares.json", defaults={"_format" = "json"}, name="core_search_typeahead_input_hardwares_json")
 	 * @Template("LadbCoreBundle:Core/Search:searchTypeaheadInputHardwares.json.twig")
 	 */
-	public function searchTypeaheadInputHardwaresAction(Request $request, $page = 0) {
-		$searchUtils = $this->get(SearchUtils::NAME);
+	public function searchTypeaheadInputHardwaresAction(Request $request, SearchUtils $searchUtils, $page = 0) {
 
 		$searchParameters = $searchUtils->searchPaginedEntities(
 			$request,
@@ -232,8 +225,7 @@ class SearchController extends AbstractController {
 	 * @Route("/typeahead/softwares.json", defaults={"_format" = "json"}, name="core_search_typeahead_softwares_json")
 	 * @Template("LadbCoreBundle:Core/Search:searchTypeaheadSoftwares.json.twig")
 	 */
-	public function searchTypeaheadSoftwareAction(Request $request, $page = 0) {
-		$searchUtils = $this->get(SearchUtils::NAME);
+	public function searchTypeaheadSoftwareAction(Request $request, SearchUtils $searchUtils, $page = 0) {
 
 
 		$searchParameters = $searchUtils->searchPaginedEntities(

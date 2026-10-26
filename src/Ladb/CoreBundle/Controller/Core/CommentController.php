@@ -23,14 +23,15 @@ use Ladb\CoreBundle\Utils\CommentableUtils;
 use Ladb\CoreBundle\Utils\FieldPreprocessorUtils;
 use Ladb\CoreBundle\Utils\TypableUtils;
 use Ladb\CoreBundle\Utils\MentionUtils;
+use Symfony\Component\Form\FormFactoryInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @Route("/commentaires")
  */
 class CommentController extends AbstractController {
 
-	private function _retrieveRelatedEntity($entityType, $entityId) {
-		$typableUtils = $this->get(TypableUtils::NAME);
+	private function _retrieveRelatedEntity($entityType, $entityId, TypableUtils $typableUtils) {
 		try {
 			$entity = $typableUtils->findTypable($entityType, $entityId);
 		} catch (\Exception $e) {
@@ -48,7 +49,7 @@ class CommentController extends AbstractController {
 	 * @Route("/{entityType}/{entityId}/{parentId}/new", requirements={"entityType" = "\d+", "entityId" = "\d+", "parentId" = "\d+"}, name="core_comment_new")
 	 * @Template("LadbCoreBundle:Core/Comment:new-xhr.html.twig")
 	 */
-	public function newAction(Request $request, $entityType, $entityId, $parentId = 0) {
+	public function newAction(Request $request, $entityType, $entityId, CommentableUtils $commentUtils, FormFactoryInterface $formFactory, TypableUtils $typableUtils, $parentId = 0) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_comment_new)');
 		}
@@ -57,15 +58,14 @@ class CommentController extends AbstractController {
 
 		// Retrieve related entity
 
-		$entity = $this->_retrieveRelatedEntity($entityType, $entityId);
+		$entity = $this->_retrieveRelatedEntity($entityType, $entityId, $typableUtils);
 		if ($entity instanceof HiddableInterface && $entity->getIsPrivate()) {
 			throw $this->createNotFoundException('Hidden entity could not be commented.');
 		}
 
 		$comment = new Comment();
-		$form = $this->get('form.factory')->createNamed(CommentType::DEFAULT_BLOCK_PREFIX.'_'.$entityType.'_'.$entityId.'_'.$parentId, CommentType::class, $comment);
+		$form = $formFactory->createNamed(CommentType::DEFAULT_BLOCK_PREFIX.'_'.$entityType.'_'.$entityId.'_'.$parentId, CommentType::class, $comment);
 
-		$commentUtils = $this->get(CommentableUtils::NAME);
 		$mentionStrategy = $commentUtils->getMentionStrategy($entity);
 
 		return array(
@@ -83,7 +83,7 @@ class CommentController extends AbstractController {
 	 * @Route("/{entityType}/{entityId}/{parentId}/create", requirements={"entityType" = "\d+", "entityId" = "\d+", "parentId" = "\d+"}, methods={"POST"}, name="core_comment_create")
 	 * @Template("LadbCoreBundle:Core/Comment:new-xhr.html.twig")
 	 */
-	public function createAction(Request $request, $entityType, $entityId, $parentId = 0) {
+	public function createAction(Request $request, $entityType, $entityId, CommentableUtils $commentUtils, CommentableUtils $commentableUtils, FormFactoryInterface $formFactory, TypableUtils $typableUtils, $parentId = 0) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_comment_create)');
 		}
@@ -92,7 +92,7 @@ class CommentController extends AbstractController {
 
 		// Retrieve related entity
 
-		$entity = $this->_retrieveRelatedEntity($entityType, $entityId);
+		$entity = $this->_retrieveRelatedEntity($entityType, $entityId, $typableUtils);
 		if ($entity instanceof HiddableInterface && $entity->getIsPrivate()) {
 			throw $this->createNotFoundException('Hidden entity could not be commented.');
 		}
@@ -101,7 +101,7 @@ class CommentController extends AbstractController {
 		$commentRepository = $om->getRepository(Comment::CLASS_NAME);
 
 		$comment = new Comment();
-		$form = $this->get('form.factory')->createNamed(CommentType::DEFAULT_BLOCK_PREFIX.'_'.$entityType.'_'.$entityId.'_'.$parentId, CommentType::class, $comment);
+		$form = $formFactory->createNamed(CommentType::DEFAULT_BLOCK_PREFIX.'_'.$entityType.'_'.$entityId.'_'.$parentId, CommentType::class, $comment);
 		$form->handleRequest($request);
 
 		if ($form->isValid()) {
@@ -131,13 +131,11 @@ class CommentController extends AbstractController {
 
 			}
 
-			$commentableUtils = $this->get(CommentableUtils::NAME);
 			$commentableUtils->finalizeNewComment($comment, $entity);
 
 			return $this->render('LadbCoreBundle:Core/Comment:create-xhr.html.twig', array( 'comment' => $comment ));
 		}
 
-		$commentUtils = $this->get(CommentableUtils::NAME);
 		$mentionStrategy = $commentUtils->getMentionStrategy($entity);
 
 		return array(
@@ -153,7 +151,7 @@ class CommentController extends AbstractController {
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_comment_edit")
 	 * @Template("LadbCoreBundle:Core/Comment:edit-xhr.html.twig")
 	 */
-	public function editAction(Request $request, $id) {
+	public function editAction(Request $request, $id, CommentableUtils $commentUtils, FormFactoryInterface $formFactory, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_comment_edit)');
 		}
@@ -166,13 +164,12 @@ class CommentController extends AbstractController {
 			throw $this->createNotFoundException('Unable to find Comment entity (id='.$id.').');
 		}
 
-		$form = $this->get('form.factory')->createNamed(CommentType::DEFAULT_BLOCK_PREFIX.'_'.$comment->getEntityType().'_'.$comment->getEntityId(), CommentType::class, $comment);
+		$form = $formFactory->createNamed(CommentType::DEFAULT_BLOCK_PREFIX.'_'.$comment->getEntityType().'_'.$comment->getEntityId(), CommentType::class, $comment);
 
 		// Retrieve related entity
 
-		$entity = $this->_retrieveRelatedEntity($comment->getEntityType(), $comment->getEntityId());
+		$entity = $this->_retrieveRelatedEntity($comment->getEntityType(), $comment->getEntityId(), $typableUtils);
 
-		$commentUtils = $this->get(CommentableUtils::NAME);
 		$mentionStrategy = $commentUtils->getMentionStrategy($entity);
 
 		return array(
@@ -186,7 +183,7 @@ class CommentController extends AbstractController {
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_comment_update")
 	 * @Template("LadbCoreBundle:Core/Comment:edit-xhr.html.twig")
 	 */
-	public function updateAction(Request $request, $id) {
+	public function updateAction(Request $request, $id, CommentableUtils $commentUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, FormFactoryInterface $formFactory, MentionUtils $mentionUtils, PicturedUtils $picturedUtils, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_comment_update)');
 		}
@@ -198,14 +195,13 @@ class CommentController extends AbstractController {
 		if (is_null($comment)) {
 			throw $this->createNotFoundException('Unable to find Comment entity (id='.$id.').');
 		}
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && $comment->getUser()->getId() != $this->getUser()->getId()) {
+		if (!$this->isGranted('ROLE_ADMIN') && $comment->getUser()->getId() != $this->getUser()->getId()) {
 			throw $this->createNotFoundException('Not allowed (core_comment_update)');
 		}
 
-		$picturedUtils = $this->get(PicturedUtils::NAME);
 		$picturedUtils->resetPictures($comment); // Reset pictures array to consider form pictures order
 
-		$form = $this->get('form.factory')->createNamed(CommentType::DEFAULT_BLOCK_PREFIX.'_'.$comment->getEntityType().'_'.$comment->getEntityId(), CommentType::class, $comment);
+		$form = $formFactory->createNamed(CommentType::DEFAULT_BLOCK_PREFIX.'_'.$comment->getEntityType().'_'.$comment->getEntityId(), CommentType::class, $comment);
 		$form->handleRequest($request);
 
 		if ($form->isValid()) {
@@ -216,13 +212,11 @@ class CommentController extends AbstractController {
                 $comment->setBody('😘');
             }
 
-            $fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($comment);
 
 			$om->flush();
 
 			// Process mentions
-			$mentionUtils = $this->get(MentionUtils::NAME);
 			$mentionUtils->processMentions($comment);
 
 			return $this->render('LadbCoreBundle:Core/Comment:update-xhr.html.twig', array( 'comment' => $comment ));
@@ -230,9 +224,8 @@ class CommentController extends AbstractController {
 
 		// Retrieve related entity
 
-		$entity = $this->_retrieveRelatedEntity($comment->getEntityType(), $comment->getEntityId());
+		$entity = $this->_retrieveRelatedEntity($comment->getEntityType(), $comment->getEntityId(), $typableUtils);
 
-		$commentUtils = $this->get(CommentableUtils::NAME);
 		$mentionStrategy = $commentUtils->getMentionStrategy($entity);
 
 		return array(
@@ -246,22 +239,21 @@ class CommentController extends AbstractController {
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_comment_delete")
 	 * @Template("LadbCoreBundle:Core/Comment:delete-xhr.html.twig")
 	 */
-	public function deleteAction($id) {
+	public function deleteAction($id, CommentableUtils $commentableUtils, SearchUtils $searchUtils, TypableUtils $typableUtils) {
 		$om = $this->getDoctrine()->getManager();
 		$commentRepository = $om->getRepository(Comment::CLASS_NAME);
-		$commentableUtils = $this->get(CommentableUtils::NAME);
 
 		$comment = $commentRepository->findOneById($id);
 		if (is_null($comment)) {
 			throw $this->createNotFoundException('Unable to find Comment entity (id='.$id.').');
 		}
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && ($comment->getUser()->getId() != $this->getUser()->getId() || $comment->getChildCount() > 0)) {
+		if (!$this->isGranted('ROLE_ADMIN') && ($comment->getUser()->getId() != $this->getUser()->getId() || $comment->getChildCount() > 0)) {
 			throw $this->createNotFoundException('Not allowed (core_comment_delete)');
 		}
 
 		// Retrieve related entity
 
-		$entity = $this->_retrieveRelatedEntity($comment->getEntityType(), $comment->getEntityId());
+		$entity = $this->_retrieveRelatedEntity($comment->getEntityType(), $comment->getEntityId(), $typableUtils);
 
 		// Delete comment
 
@@ -271,7 +263,6 @@ class CommentController extends AbstractController {
 
 		// Update index
 		if (isset($entity) && $entity instanceof IndexableInterface) {
-			$searchUtils = $this->get(SearchUtils::NAME);
 			$searchUtils->replaceEntityInIndex($entity);
 		}
 
@@ -281,10 +272,9 @@ class CommentController extends AbstractController {
 	/**
 	 * @Route("/{id}", requirements={"id" = "\d+"}, name="core_comment_show")
 	 */
-	public function showAction($id) {
+	public function showAction($id, TypableUtils $typableUtils) {
 		$om = $this->getDoctrine()->getManager();
 		$commentRepository = $om->getRepository(Comment::CLASS_NAME);
-		$typableUtils = $this->get(TypableUtils::NAME);
 
 		$comment = $commentRepository->findOneById($id);
 		if (is_null($comment)) {
@@ -293,7 +283,7 @@ class CommentController extends AbstractController {
 
 		// Retrieve related entity
 
-		$entity = $this->_retrieveRelatedEntity($comment->getEntityType(), $comment->getEntityId());
+		$entity = $this->_retrieveRelatedEntity($comment->getEntityType(), $comment->getEntityId(), $typableUtils);
 		if ($entity instanceof WatchableChildInterface && !($entity instanceof BaseValue)) {
 			$entity = $typableUtils->findTypable($entity->getParentEntityType(), $entity->getParentEntityId());
 		}
@@ -332,7 +322,7 @@ class CommentController extends AbstractController {
 	 * @Route("/{id}/{questionId}/admin/converttoanswer", requirements={"id" = "\d+", "questionId" = "\d+"}, name="core_comment_admin_converttoanswer")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_comment_admin_converttoanswer)")
 	 */
-	public function adminConvertToAnswerAction($id, $questionId) {
+	public function adminConvertToAnswerAction($id, $questionId, CommentManager $commentManager, TranslatorInterface $translator) {
 		$om = $this->getDoctrine()->getManager();
 		$commentRepository = $om->getRepository(Comment::CLASS_NAME);
 		$questionRepository = $om->getRepository(Question::CLASS_NAME);
@@ -347,11 +337,10 @@ class CommentController extends AbstractController {
 		}
 
 		// Convert
-		$commentManager = $this->get(CommentManager::NAME);
 		$answer = $commentManager->convertToAnswer($comment, $question);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('comment.admin.alert.converttoanswer_success'));
+		$this->addFlash('success', $translator->trans('comment.admin.alert.converttoanswer_success'));
 
 		return $this->redirect($this->generateUrl('core_qa_answer_show', array( 'id' => $answer->getId() )));
 	}

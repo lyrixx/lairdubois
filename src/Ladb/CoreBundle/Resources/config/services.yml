@@ -32,6 +32,9 @@ services:
     public: true
     arguments: ['@fos_user.util.password_updater', '@ladb_core.fos.canonical_fields_updater', '@doctrine.orm.entity_manager', '%fos_user.model.user.class%']
   Ladb\CoreBundle\Fos\UserManager: '@ladb_core.fos.user_manager'
+  # FOSUserBundle has no alias by type for it, nor an interface (UserController::adminActivateAction()):
+  # an alias of the id, by its class
+  FOS\UserBundle\Util\UserManipulator: '@fos_user.util.user_manipulator'
 
   # Utils (public until #16)
   ladb_core.global_utils:
@@ -110,7 +113,6 @@ services:
   Ladb\CoreBundle\Utils\ReportableUtils: '@ladb_core.reportable_utils'
   ladb_core.localisable_utils:
     class: Ladb\CoreBundle\Utils\LocalisableUtils
-    public: true
     arguments: ['@service_container', '@ladb_core.geocoding_http_client']
   Ladb\CoreBundle\Utils\LocalisableUtils: '@ladb_core.localisable_utils'
   # Geocoding API of Google
@@ -124,7 +126,6 @@ services:
   Ladb\CoreBundle\Utils\TypableUtils: '@ladb_core.typable_utils'
   ladb_core.follower_utils:
     class: Ladb\CoreBundle\Utils\FollowerUtils
-    public: true
     arguments: ['@service_container']
   Ladb\CoreBundle\Utils\FollowerUtils: '@ladb_core.follower_utils'
   ladb_core.mailer_utils:
@@ -160,7 +161,6 @@ services:
   Ladb\CoreBundle\Utils\ExplorableUtils: '@ladb_core.explorable_utils'
   ladb_core.pictured_utils:
     class: Ladb\CoreBundle\Utils\PicturedUtils
-    public: true
     arguments: ['@service_container']
   Ladb\CoreBundle\Utils\PicturedUtils: '@ladb_core.pictured_utils'
   ladb_core.tag_utils:
@@ -231,7 +231,6 @@ services:
     class: Ladb\CoreBundle\Utils\ResourceUtils
   Ladb\CoreBundle\Utils\ResourceUtils: '@ladb_core.resource_utils'
   Ladb\CoreBundle\Utils\WebpushNotificationUtils:
-    public: true
     arguments: ['@service_container']
   ladb_core.link_utils:
     class: Ladb\CoreBundle\Utils\LinkUtils
@@ -273,17 +272,14 @@ services:
   Ladb\CoreBundle\Manager\Core\WitnessManager: '@ladb_core.core_witness_manager'
   ladb_core.core_member_manager:
     class: Ladb\CoreBundle\Manager\Core\MemberManager
-    public: true
     arguments: ['@service_container']
   Ladb\CoreBundle\Manager\Core\MemberManager: '@ladb_core.core_member_manager'
   ladb_core.core_member_invitation_manager:
     class: Ladb\CoreBundle\Manager\Core\MemberInvitationManager
-    public: true
     arguments: ['@service_container']
   Ladb\CoreBundle\Manager\Core\MemberInvitationManager: '@ladb_core.core_member_invitation_manager'
   ladb_core.core_member_request_manager:
     class: Ladb\CoreBundle\Manager\Core\MemberRequestManager
-    public: true
     arguments: ['@service_container']
   Ladb\CoreBundle\Manager\Core\MemberRequestManager: '@ladb_core.core_member_request_manager'
   ladb_core.wonder_creation_manager:
@@ -595,19 +591,17 @@ services:
   ladb_core.return_to_url_listener:
     class: Ladb\CoreBundle\Event\ReturnToUrlListener
 
-  # Handlers (public until #16)
+  # Handlers
   ladb_core.authentification_handler:
     class: Ladb\CoreBundle\Handler\AuthenticationHandler
     arguments: ['@router']
   Ladb\CoreBundle\Handler\AuthenticationHandler: '@ladb_core.authentification_handler'
   ladb_core.picture_upload_handler:
     class: Ladb\CoreBundle\Handler\PictureUploadHandler
-    public: true
     arguments: ['@doctrine.orm.entity_manager', '@security.token_storage', '@ladb_core.core_picture_manager']
   Ladb\CoreBundle\Handler\PictureUploadHandler: '@ladb_core.picture_upload_handler'
   ladb_core.resource_upload_handler:
     class: Ladb\CoreBundle\Handler\ResourceUploadHandler
-    public: true
     arguments: ['@doctrine.orm.entity_manager', '@security.token_storage', '@ladb_core.core_picture_manager']
   Ladb\CoreBundle\Handler\ResourceUploadHandler: '@ladb_core.resource_upload_handler'
 
@@ -771,7 +765,6 @@ services:
 
   # WebPush
   Ladb\CoreBundle\Manager\Webpush\UserSubscriptionManager:
-    public: true  # Read from the container by the WebpushController
     arguments: ['@doctrine']
   # The sender of bentools/webpush-bundle, with the TTL (4 weeks) and the timeout of minishlink/web-push 2.0:
   # the bundle has a TTL of 0 (dropped if the browser is offline) and a Guzzle client without timeout

@@ -26,8 +26,7 @@ use Ladb\CoreBundle\Utils\TypableUtils;
  */
 class LikeController extends AbstractController {
 
-	private function _retrieveRelatedEntity($entityType, $entityId) {
-		$typableUtils = $this->get(TypableUtils::NAME);
+	private function _retrieveRelatedEntity($entityType, $entityId, TypableUtils $typableUtils) {
 		try {
 			$entity = $typableUtils->findTypable($entityType, $entityId);
 		} catch (\Exception $e) {
@@ -45,7 +44,7 @@ class LikeController extends AbstractController {
 	 * @Route("/{entityType}/{entityId}/create", requirements={"entityType" = "\d+", "entityId" = "\d+"}, name="core_like_create")
 	 * @Template("LadbCoreBundle:Core/Like:create-xhr.html.twig")
 	 */
-	public function createAction(Request $request, $entityType, $entityId) {
+	public function createAction(Request $request, $entityType, $entityId, ActivityUtils $activityUtils, LikableUtils $likableUtils, SearchUtils $searchUtils, TypableUtils $typableUtils, WatchableUtils $watchableUtils, WebpushNotificationUtils $webpushNotificationUtils) {
 
 		$this->createLock('core_like_create', false, self::LOCK_TTL_CREATE_ACTION, false);
 
@@ -56,7 +55,7 @@ class LikeController extends AbstractController {
 
 		// Retrieve related entity
 
-		$entity = $this->_retrieveRelatedEntity($entityType, $entityId);
+		$entity = $this->_retrieveRelatedEntity($entityType, $entityId, $typableUtils);
 		if ($entity instanceof HiddableInterface && !$entity->getIsPublic()) {
 			throw $this->createNotFoundException('Hidden entity could not be liked.');
 		}
@@ -88,23 +87,19 @@ class LikeController extends AbstractController {
 
 				// Update index
 				if ($entity instanceof IndexableInterface) {
-					$searchUtils = $this->get(SearchUtils::NAME);
 					$searchUtils->replaceEntityInIndex($entity);
 				}
 
 				// Create activity
-				$activityUtils = $this->get(ActivityUtils::NAME);
 				$activityUtils->createLikeActivity($like, false);
 
 				// Auto watch
 				if ($entity instanceof WatchableInterface) {
-					$watchableUtils = $this->get(WatchableUtils::NAME);
 					$watchableUtils->autoCreateWatch($entity, $this->getUser());
 				}
 
 				// Publish a webpush notification in queue
 				if ($entity instanceof AuthoredInterface) {
-					$webpushNotificationUtils = $this->get(WebpushNotificationUtils::class);
 					$webpushNotificationUtils->enqueueNewLikeNotification($like, $entity);
 				}
 
@@ -125,8 +120,6 @@ class LikeController extends AbstractController {
 			return $this->redirect($returnToUrl);
 		}
 
-		$likableUtils = $this->get(LikableUtils::NAME);
-
 		return array(
 			'likeContext'    => $likableUtils->getLikeContext($entity, $this->getUser()),
 			'noTextOnMobile' => $request->get('noTextOnMobile', false),
@@ -137,7 +130,7 @@ class LikeController extends AbstractController {
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_like_delete")
 	 * @Template("LadbCoreBundle:Core/Like:delete-xhr.html.twig")
 	 */
-	public function deleteAction(Request $request, $id) {
+	public function deleteAction(Request $request, $id, ActivityUtils $activityUtils, LikableUtils $likableUtils, SearchUtils $searchUtils, TypableUtils $typableUtils) {
 		$om = $this->getDoctrine()->getManager();
 		$likeRepository = $om->getRepository(Like::CLASS_NAME);
 
@@ -151,7 +144,7 @@ class LikeController extends AbstractController {
 
 		// Retrieve related entity
 
-		$entity = $this->_retrieveRelatedEntity($like->getEntityType(), $like->getEntityId());
+		$entity = $this->_retrieveRelatedEntity($like->getEntityType(), $like->getEntityId(), $typableUtils);
 		if ($entity instanceof HiddableInterface && !$entity->getIsPublic()) {
 			throw $this->createNotFoundException('Hidden entity could not be unliked.');
 		}
@@ -168,7 +161,6 @@ class LikeController extends AbstractController {
 		$like->getUser()->getMeta()->incrementSentLikeCount(-1);
 
 		// Delete activities
-		$activityUtils = $this->get(ActivityUtils::NAME);
 		$activityUtils->deleteActivitiesByLike($like, false);
 
 		// Delete like
@@ -177,7 +169,6 @@ class LikeController extends AbstractController {
 
 		// Update index
 		if ($entity instanceof IndexableInterface) {
-			$searchUtils = $this->get(SearchUtils::NAME);
 			$searchUtils->replaceEntityInIndex($entity);
 		}
 
@@ -188,8 +179,6 @@ class LikeController extends AbstractController {
 
 			return $this->redirect($returnToUrl);
 		}
-
-		$likableUtils = $this->get(LikableUtils::NAME);
 
 		return array(
 			'likeContext'    => $likableUtils->getLikeContext($entity, $this->getUser()),
@@ -202,14 +191,13 @@ class LikeController extends AbstractController {
 	 * @Route("/{entityType}/{entityId}/{page}", requirements={"entityType" = "\d+", "entityId" = "\d+", "page" = "\d+"}, name="core_like_list_byentity_page")
 	 * @Template("LadbCoreBundle:Core/Like:list-byentity.html.twig")
 	 */
-	public function listByEntityAction(Request $request, $entityType, $entityId, $page = 0) {
+	public function listByEntityAction(Request $request, $entityType, $entityId, PaginatorUtils $paginatorUtils, TypableUtils $typableUtils, $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 		$likeRepository = $om->getRepository(Like::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		// Retrieve related entity
 
-		$entity = $this->_retrieveRelatedEntity($entityType, $entityId);
+		$entity = $this->_retrieveRelatedEntity($entityType, $entityId, $typableUtils);
 
 		// Retrive likes
 

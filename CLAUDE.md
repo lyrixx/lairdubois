@@ -494,9 +494,11 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
 - Les mots de passe sont hashés en sha512 par FOSUserBundle : les comptes existants doivent continuer
   à se connecter sans reset, d'un bout à l'autre de la migration.
 - Controllers : services autowirés (prototype `Ladb\CoreBundle\Controller\`), une action reçoit ses
-  services en arguments, un trait ou un controller abstrait par un setter `@required`. En 3.4, un
-  `bind` ne s'applique à un argument d'action que s'il désigne un service, pas une valeur
-  (`%param%`) : les paramètres restent lus par `$this->getParameter()`.
+  services en arguments, un helper de la classe de l'action qui l'appelle (en dernier argument),
+  un trait ou un controller abstrait par un setter `@required`. En 3.4, un `bind` ne s'applique à
+  un argument d'action que s'il désigne un service, pas une valeur (`%param%`) : les paramètres
+  restent lus par `$this->getParameter()`. Un service de bundle sans alias par type reçoit un alias
+  de son id dans `services.yml` (`PusherInterface` de Gos, `UserManipulator` de FOSUserBundle).
 - PHPStan lit la version de PHP dans `composer.json` (`>=7.3`) : la syntaxe PHP 8 (propriétés
   promues, `readonly`, virgule finale dans une signature) y est une erreur, même si tout tourne en
   8.5.

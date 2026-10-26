@@ -21,15 +21,15 @@ use Ladb\CoreBundle\Utils\TypableUtils;
 use Ladb\CoreBundle\Entity\Core\Vote;
 use Ladb\CoreBundle\Event\VotableEvent;
 use Ladb\CoreBundle\Event\VotableListener;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 /**
  * @Route("/votes")
  */
 class VoteController extends AbstractController {
 
-	private function _retriveRelatedEntityRepository($entityType) {
+	private function _retriveRelatedEntityRepository($entityType, TypableUtils $typableUtils) {
 
-		$typableUtils = $this->get(TypableUtils::NAME);
 		try {
 			$entityRepository = $typableUtils->getRepositoryByType($entityType);
 		} catch (\Exception $e) {
@@ -55,9 +55,8 @@ class VoteController extends AbstractController {
 		return $entity;
 	}
 
-	private function _retrieveRelatedParentEntityRepository($entity) {
+	private function _retrieveRelatedParentEntityRepository($entity, TypableUtils $typableUtils) {
 
-		$typableUtils = $this->get(TypableUtils::NAME);
 		try {
 			$parentEntityRepository = $typableUtils->getRepositoryByType($entity->getParentEntityType());
 		} catch (\Exception $e) {
@@ -86,7 +85,7 @@ class VoteController extends AbstractController {
 	 * @Route("/{entityType}/{entityId}/{way}/new", requirements={"entityType" = "\d+", "entityId" = "\d+", "way" = "up|down"}, name="core_vote_new")
 	 * @Template("LadbCoreBundle:Core/Vote:new-xhr.html.twig")
 	 */
-	public function newAction(Request $request, $entityType, $entityId, $way) {
+	public function newAction(Request $request, $entityType, $entityId, $way, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_vote_down_new)');
 		}
@@ -98,12 +97,12 @@ class VoteController extends AbstractController {
 
 		// Retrieve related entity
 
-		$entityRepository = $this->_retriveRelatedEntityRepository($entityType);
+		$entityRepository = $this->_retriveRelatedEntityRepository($entityType, $typableUtils);
 		$entity = $this->_retriveRelatedEntity($entityRepository, $entityId);
 
 		// Retrieve related parent entity
 
-		$parentEntityRepository = $this->_retrieveRelatedParentEntityRepository($entity);
+		$parentEntityRepository = $this->_retrieveRelatedParentEntityRepository($entity, $typableUtils);
 		$parentEntity = $this->_retrieveRelatedParentEntity($parentEntityRepository, $entity);
 
 		// Get orientation parameter
@@ -124,7 +123,7 @@ class VoteController extends AbstractController {
 	/**
 	 * @Route("/{entityType}/{entityId}/{way}/create", requirements={"entityType" = "\d+", "entityId" = "\d+", "way" = "up|down"}, name="core_vote_create")
 	 */
-	public function createAction(Request $request, $entityType, $entityId, $way) {
+	public function createAction(Request $request, $entityType, $entityId, $way, ActivityUtils $activityUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, TypableUtils $typableUtils, VotableUtils $votableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_vote_create)');
 		}
@@ -138,12 +137,12 @@ class VoteController extends AbstractController {
 
 		// Retrieve related entity
 
-		$entityRepository = $this->_retriveRelatedEntityRepository($entityType);
+		$entityRepository = $this->_retriveRelatedEntityRepository($entityType, $typableUtils);
 		$entity = $this->_retriveRelatedEntity($entityRepository, $entityId);
 
 		// Retrieve related parent entity
 
-		$parentEntityRepository = $this->_retrieveRelatedParentEntityRepository($entity);
+		$parentEntityRepository = $this->_retrieveRelatedParentEntityRepository($entity, $typableUtils);
 		$parentEntity = $this->_retrieveRelatedParentEntity($parentEntityRepository, $entity);
 
 		// Get orientation parameter
@@ -153,7 +152,7 @@ class VoteController extends AbstractController {
 		$score = $way == 'down' ? -1 : 1;
 
 		// Declare form validation function
-		$validateFormFn = function() use ($request, $orientation, $way, $entity, $parentEntity) {
+		$validateFormFn = function() use ($request, $orientation, $way, $entity, $parentEntity, $commentableUtils) {
 
 			// Check form if it exists
 			if ($request->isMethod('post')) {
@@ -185,7 +184,6 @@ class VoteController extends AbstractController {
 					$comment->setEntityId($entity->getId());
 					$comment->setUser($this->getUser());
 
-					$commentableUtils = $this->get(CommentableUtils::NAME);
 					$commentableUtils->finalizeNewComment($comment, $entity);
 
 					return $comment;
@@ -290,7 +288,6 @@ class VoteController extends AbstractController {
 				}
 
 				// Delete activities
-				$activityUtils = $this->get(ActivityUtils::NAME);
 				$activityUtils->deleteActivitiesByVote($vote, false);
 
 			} else {
@@ -300,18 +297,14 @@ class VoteController extends AbstractController {
 		}
 
 		// Dispatch votable parent event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(VotableListener::VOTE_UPDATED, new VotableEvent($entity, $parentEntity));
 
 		// Create activity
-		$activityUtils = $this->get(ActivityUtils::NAME);
 		$activityUtils->createVoteActivity($vote, false);
 
 		$om->flush();
 
 		if ($request->isXmlHttpRequest()) {
-
-			$votableUtils = $this->get(VotableUtils::NAME);
 
 			return $this->render('LadbCoreBundle:Core/Vote:create-xhr.html.twig', array(
 				'orientation' => $orientation,
@@ -332,7 +325,7 @@ class VoteController extends AbstractController {
 	/**
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_vote_delete")
 	 */
-	public function deleteAction(Request $request, $id) {
+	public function deleteAction(Request $request, $id, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, TypableUtils $typableUtils, VotableUtils $votableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_vote_delete)');
 		}
@@ -360,12 +353,12 @@ class VoteController extends AbstractController {
 
 		// Retrieve related entity
 
-		$entityRepository = $this->_retriveRelatedEntityRepository($vote->getEntityType());
+		$entityRepository = $this->_retriveRelatedEntityRepository($vote->getEntityType(), $typableUtils);
 		$entity = $this->_retriveRelatedEntity($entityRepository, $vote->getEntityId());
 
 		// Retrieve related parent entity
 
-		$parentEntityRepository = $this->_retrieveRelatedParentEntityRepository($entity);
+		$parentEntityRepository = $this->_retrieveRelatedParentEntityRepository($entity, $typableUtils);
 		$parentEntity = $this->_retrieveRelatedParentEntity($parentEntityRepository, $entity);
 
 		// Update related entity
@@ -384,18 +377,14 @@ class VoteController extends AbstractController {
 		$parentEntity->incrementVoteCount(-1);
 
 		// Delete activities
-		$activityUtils = $this->get(ActivityUtils::NAME);
 		$activityUtils->deleteActivitiesByVote($vote, false);
 
 		// Dispatch votable parent event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(VotableListener::VOTE_UPDATED, new VotableEvent($entity, $parentEntity));
 
 		$om->flush();
 
 		if ($request->isXmlHttpRequest()) {
-
-			$votableUtils = $this->get(VotableUtils::NAME);
 
 			return $this->render('LadbCoreBundle:Core/Vote:delete-xhr.html.twig', array(
 				'orientation' => $orientation,
@@ -416,11 +405,11 @@ class VoteController extends AbstractController {
 	 * @Route("/p/{entityType}/{entityId}/{filter}/{page}", requirements={"entityType" = "\d+", "entityId" = "\d+", "filter" = "positive|negative", "page" = "\d+"}, name="core_vote_list_parent_entity_filter_page")
 	 * @Template("LadbCoreBundle:Core/Vote:list-byparent.html.twig")
 	 */
-	public function showParentVotesAction(Request $request, $entityType, $entityId, $filter = 'positive', $page = 0) {
+	public function showParentVotesAction(Request $request, $entityType, $entityId, PaginatorUtils $paginatorUtils, TypableUtils $typableUtils, $filter = 'positive', $page = 0) {
 
 		// Retrieve related parent entity
 
-		$entityRepository = $this->_retriveRelatedEntityRepository($entityType);
+		$entityRepository = $this->_retriveRelatedEntityRepository($entityType, $typableUtils);
 		$entity = $entityRepository->findOneById($entityId);
 		if (is_null($entity)) {
 			throw $this->createNotFoundException('Unknow Parent Entity Id (entityId='.$entityId.').');
@@ -431,7 +420,6 @@ class VoteController extends AbstractController {
 
 		$om = $this->getDoctrine()->getManager();
 		$voteRepository = $om->getRepository(Vote::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);

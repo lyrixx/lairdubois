@@ -44,14 +44,14 @@ use Ladb\CoreBundle\Entity\Wonder\Plan;
 use Ladb\CoreBundle\Entity\Wonder\Creation;
 use Ladb\CoreBundle\Entity\Core\View;
 use Ladb\CoreBundle\Entity\Find\Find;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @Route("/spotlights")
  */
 class SpotlightController extends AbstractController {
 
-	private function _retrieveRelatedEntity($entityType, $entityId) {
-		$typableUtils = $this->get(TypableUtils::NAME);
+	private function _retrieveRelatedEntity($entityType, $entityId, TypableUtils $typableUtils) {
 		try {
 			$entity = $typableUtils->findTypable($entityType, $entityId);
 		} catch (\Exception $e) {
@@ -65,11 +65,9 @@ class SpotlightController extends AbstractController {
 	/**
 	 * @Route("/feed.xml", name="core_spotlight_feed")
 	 */
-	public function feedAction() {
+	public function feedAction(TranslatorInterface $translator, TypableUtils $typableUtils) {
 		$om = $this->getDoctrine()->getManager();
 		$spotlightRepository = $om->getRepository(Spotlight::CLASS_NAME);
-		$translator = $this->get('translator');
-		$typableUtils = $this->get(TypableUtils::NAME);
 
 		$feed = new \Suin\RSSWriter\Feed();
 
@@ -87,7 +85,7 @@ class SpotlightController extends AbstractController {
 		$spotlights = $spotlightRepository->findPagined(0, 15);
 		foreach ($spotlights as $spotlight) {
 
-			$entity = $this->_retrieveRelatedEntity($spotlight->getEntityType(), $spotlight->getEntityId());
+			$entity = $this->_retrieveRelatedEntity($spotlight->getEntityType(), $spotlight->getEntityId(), $typableUtils);
 
 			$entityShowPath = $typableUtils->getUrlAction($entity);
 			$entityStripPath = $typableUtils->getUrlAction($entity, 'strip', true, false);

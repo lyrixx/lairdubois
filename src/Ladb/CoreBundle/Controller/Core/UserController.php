@@ -54,6 +54,9 @@ use Ladb\CoreBundle\Utils\SearchUtils;
 use Ladb\CoreBundle\Utils\FieldPreprocessorUtils;
 use Ladb\CoreBundle\Utils\LikableUtils;
 use Ladb\CoreBundle\Utils\UserUtils;
+use FOS\UserBundle\Util\TokenGeneratorInterface;
+use FOS\UserBundle\Util\UserManipulator;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @Route("/")
@@ -63,7 +66,7 @@ class UserController extends AbstractController {
 	use UserControllerTrait;
 
 	private function _isGrantedOwner(User $user) {
-		if ($user->getIsTeam() && $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
+		if ($user->getIsTeam() && $this->isGranted('ROLE_USER')) {
 
 			$om = $this->getDoctrine()->getManager();
 			$memberRepository = $om->getRepository(Member::CLASS_NAME);
@@ -74,7 +77,7 @@ class UserController extends AbstractController {
 	}
 
 	private function _getInvitation(User $user) {
-		if ($user->getIsTeam() && $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
+		if ($user->getIsTeam() && $this->isGranted('ROLE_USER')) {
 
 			$om = $this->getDoctrine()->getManager();
 			$memberInvitationRepository = $om->getRepository(MemberInvitation::CLASS_NAME);
@@ -85,7 +88,7 @@ class UserController extends AbstractController {
 	}
 
 	private function _getRequest(User $user) {
-		if ($user->getIsTeam() && $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
+		if ($user->getIsTeam() && $this->isGranted('ROLE_USER')) {
 
 			$om = $this->getDoctrine()->getManager();
 			$memberRequestRepository = $om->getRepository(MemberRequest::CLASS_NAME);
@@ -95,15 +98,15 @@ class UserController extends AbstractController {
 		return null;
 	}
 
-	private function _fillCommonShowParameters(User $user, $parameters, $isGrantedOwner = null) {
+	private function _fillCommonShowParameters(User $user, $parameters, FollowerUtils $followerUtils, $isGrantedOwner = null) {
 
-		if ($this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
+		if ($this->isGranted('ROLE_USER')) {
 
 			$memberInvitation = $this->_getInvitation($user, $this->getUser());
 			if (!is_null($memberInvitation)) {
 
 				// Flashbag
-				$this->get('session')->getFlashBag()->add('info', $this->get('templating')->render('LadbCoreBundle:Core/Member:_invitation-alert.part.html.twig', array(
+				$this->addFlash('info', $this->renderView('LadbCoreBundle:Core/Member:_invitation-alert.part.html.twig', array(
 					'invitation' => $memberInvitation,
 				)));
 
@@ -113,15 +116,13 @@ class UserController extends AbstractController {
 			if (!is_null($memberRequest)) {
 
 				// Flashbag
-				$this->get('session')->getFlashBag()->add('info', $this->get('templating')->render('LadbCoreBundle:Core/Member:_request-alert.part.html.twig', array(
+				$this->addFlash('info', $this->renderView('LadbCoreBundle:Core/Member:_request-alert.part.html.twig', array(
 					'request' => $memberRequest,
 				)));
 
 			}
 
 		}
-
-		$followerUtils = $this->get(FollowerUtils::NAME);
 
 		return array_merge($parameters, array(
 			'user'            => $user,
@@ -138,9 +139,7 @@ class UserController extends AbstractController {
 	 * @Route("/email/check", name="core_user_email_check")
 	 * @Template("LadbCoreBundle:Core/User:emailCheck.html.twig")
 	 */
-	public function emailCheckAction() {
-		$userManager = $this->get(UserManager::NAME);
-		$tokenGenerator = $this->get('fos_user.util.token_generator');
+	public function emailCheckAction(MailerUtils $mailerUtils, TokenGeneratorInterface $tokenGenerator, UserManager $userManager) {
 
 		$user = $this->getUser();
 
@@ -151,7 +150,6 @@ class UserController extends AbstractController {
 		$userManager->updateUser($user);
 
 		// Email
-		$mailerUtils = $this->get(MailerUtils::NAME);
 		$mailerUtils->sendConfirmationEmailMessage($user);
 
 		return array(
@@ -163,8 +161,7 @@ class UserController extends AbstractController {
 	 * @Route("/email/confirm/{token}", name="core_user_email_confirm")
 	 * @Template("LadbCoreBundle:Core/User:emailConfirm.html.twig")
 	 */
-	public function emailConfirmAction($token) {
-		$userManager = $this->container->get(UserManager::NAME);
+	public function emailConfirmAction($token, TranslatorInterface $translator, UserManager $userManager) {
 
 		$invalidToken = false;
 		$invalidUser = false;
@@ -184,7 +181,7 @@ class UserController extends AbstractController {
 			$userManager->updateUser($user);
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('user.email_confirmation.confirm.success', array( '%email%' => $user->getEmail() )));
+			$this->addFlash('success', $translator->trans('user.email_confirmation.confirm.success', array( '%email%' => $user->getEmail() )));
 
 			return $this->redirect($this->generateUrl('core_welcome'));
 		}
@@ -199,12 +196,11 @@ class UserController extends AbstractController {
 	 * @Route("/email/unsubscribe/{list}/{encryptedEmail}", requirements={"list" = "notifications|weeknews"}, name="core_user_email_unsubscribe")
 	 * @Template("LadbCoreBundle:Core/User:emailUnsubscribe.html.twig")
 	 */
-	public function emailUnsubscribeAction($list, $encryptedEmail) {
-		$userManager = $this->container->get(UserManager::NAME);
+	public function emailUnsubscribeAction($list, $encryptedEmail, CryptoUtils $cryptoUtils, UserManager $userManager) {
 
 		$invalidEmail = false;
 
-		$email = $this->get(CryptoUtils::NAME)->decryptString($encryptedEmail);
+		$email = $cryptoUtils->decryptString($encryptedEmail);
 		$user = $userManager->findUserByEmail($email);
 		if (null === $user) {
 			$invalidEmail = true;
@@ -258,13 +254,12 @@ class UserController extends AbstractController {
 	 * @Route("/collectifs.geojson", defaults={"_format" = "json", "page"=-1, "layout"="geojson", "family"="team"}, name="core_user_team_list_geojson")
 	 * @Template("LadbCoreBundle:Core/User:list.html.twig")
 	 */
-	public function listAction(Request $request, $page = 0, $layout = 'view', $family = 'user') {
-		$searchUtils = $this->get(SearchUtils::NAME);
+	public function listAction(Request $request, LocalisableUtils $localisableUtils, SearchUtils $searchUtils, $page = 0, $layout = 'view', $family = 'user') {
 
 		$searchParameters = $searchUtils->searchPaginedEntities(
 			$request,
 			$page,
-			function($facet, &$filters, &$sort, &$noGlobalFilters, &$couldUseDefaultSort) use ($searchUtils) {
+			function($facet, &$filters, &$sort, &$noGlobalFilters, &$couldUseDefaultSort) use ($searchUtils, $localisableUtils) {
 				switch ($facet->name) {
 
 					// Filters /////
@@ -302,7 +297,6 @@ class UserController extends AbstractController {
 
 					case 'location':
 
-						$localisableUtils = $this->get(LocalisableUtils::NAME);
 						$boundsAndLocation = $localisableUtils->getBoundsAndLocation($facet->value);
 
 						if (!is_null($boundsAndLocation)) {
@@ -427,11 +421,11 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/parametres", name="core_user_settings")
 	 * @Template("LadbCoreBundle:Core/User:settings.html.twig")
 	 */
-	public function settingsAction(Request $request, $username) {
+	public function settingsAction(Request $request, $username, FieldPreprocessorUtils $fieldPreprocessorUtils, LocalisableUtils $localisableUtils, SearchUtils $searchUtils, TranslatorInterface $translator, UserManager $userManager, UserUtils $userUtils) {
 		$om = $this->getDoctrine()->getManager();
 
 		$user = $this->retrieveUserByUsername($username);
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+		if (!$this->isGranted('ROLE_ADMIN')) {
 			if ($user->getIsTeam()) {
 				$memberRepository = $om->getRepository(Member::class);
 				if (!$memberRepository->existsByTeamAndUser($user, $this->getUser())) {
@@ -469,35 +463,30 @@ class UserController extends AbstractController {
 
 				}
 
-				$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 				$fieldPreprocessorUtils->preprocessFields($user->getMeta()->getBiography());
 
 				// Geocode location
-				$localisableUtils = $this->get(LocalisableUtils::NAME);
 				$localisableUtils->geocodeLocation($user);
 
 				// Default avatar
 				if (is_null($user->getAvatar())) {
-					$userUtils = $this->get(UserUtils::NAME);
 					$userUtils->createDefaultAvatar($user);
 				}
 
 				// Final update of user entity
-				$userManager = $this->get(UserManager::NAME);
 				$userManager->updateUser($user, true);
 
 				// Search index update
-				$searchUtils = $this->get(SearchUtils::NAME);
 				$searchUtils->replaceEntityInIndex($user);
 
 				// Flashbag
-				$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('user.form.alert.settings_success'));
+				$this->addFlash('success', $translator->trans('user.form.alert.settings_success'));
 
 				return $this->redirect($this->generateUrl('core_user_show', array('username' => $user->getUsernameCanonical())));
 			}
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
+			$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 		}
 
@@ -511,7 +500,7 @@ class UserController extends AbstractController {
 	 * @Route("/@me/counters.json", name="core_user_counters_me", defaults={"_format" = "json"})
 	 * @Template("LadbCoreBundle:Core/User:counters-xhr.json.twig")
 	 */
-	public function countersAction(Request $request) {
+	public function countersAction(Request $request, PropertyUtils $propertyUtils, TypableUtils $typableUtils, UserUtils $userUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_user_counters_me)');
 		}
@@ -529,11 +518,9 @@ class UserController extends AbstractController {
 		$listedEntityType = $request->get('listed_entity_type', false);
 		if ($listedEntityType) {
 
-			$typableUtils = $this->get(TypableUtils::NAME);
 			$listedEntityStrippedName = $typableUtils->getStrippedNameByType($listedEntityType);
 
 			$propertyPath = 'unlisted_'.$listedEntityStrippedName.'_count';
-			$propertyUtils = $this->get(PropertyUtils::NAME);
 
 			try {
 
@@ -546,7 +533,6 @@ class UserController extends AbstractController {
 		}
 
 		// Compute unlisted counters
-		$userUtils = $this->container->get(UserUtils::NAME);
 		$userUtils->computeUnlistedCounters($user, $listedEntityType);
 
 		$counters = array(
@@ -638,7 +624,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/a-propos", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_show_about")
 	 * @Template("LadbCoreBundle:Core/User:showAbout.html.twig")
 	 */
-	public function showAboutAction($username) {
+	public function showAboutAction($username, FollowerUtils $followerUtils) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
 			return $this->redirect($this->generateUrl('core_user_show_about', array( 'username' => $user->getUsernameCanonical() )));
@@ -653,7 +639,7 @@ class UserController extends AbstractController {
 			'tab'             => 'about',
 			'hasMap'          => !is_null($user->getLatitude()) && !is_null($user->getLongitude()),
 			'testimonials'    => $testimonials,
-		));
+		), $followerUtils);
 	}
 
 	/**
@@ -669,7 +655,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/coups-de-coeur/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_likes_filter_page")
 	 * @Template("LadbCoreBundle:Core/User:showLikes.html.twig")
 	 */
-	public function showLikesAction(Request $request, $username, $filter = "sent", $page = 0) {
+	public function showLikesAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = "sent", $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
 			return $this->redirect($this->generateUrl('core_user_show_likes', array( 'username' => $user->getUsernameCanonical() )));
@@ -677,7 +663,6 @@ class UserController extends AbstractController {
 
 		$om = $this->getDoctrine()->getManager();
 		$likeRepository = $om->getRepository(Like::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -697,7 +682,7 @@ class UserController extends AbstractController {
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
 			'tab' => 'likes',
-		)));
+		)), $followerUtils);
 	}
 
 	/**
@@ -712,7 +697,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/commentaires/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "page" = "\d+"}, name="core_user_show_comments_page")
 	 * @Template("LadbCoreBundle:Core/User:showComments.html.twig")
 	 */
-	public function showCommentsAction(Request $request, $username, $page = 0) {
+	public function showCommentsAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
 			return $this->redirect($this->generateUrl('core_user_show_comments', array( 'username' => $user->getUsernameCanonical() )));
@@ -720,7 +705,6 @@ class UserController extends AbstractController {
 
 		$om = $this->getDoctrine()->getManager();
 		$commentRepository = $om->getRepository(Comment::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -739,7 +723,7 @@ class UserController extends AbstractController {
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
 			'tab' => 'comments',
-		)));
+		)), $followerUtils);
 	}
 
 	/**
@@ -755,7 +739,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/votes/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "positive|negative", "page" = "\d+"}, name="core_user_show_votes_filter_page")
 	 * @Template("LadbCoreBundle:Core/User:showVotes.html.twig")
 	 */
-	public function showVotesAction(Request $request, $username, $filter = 'positive', $page = 0) {
+	public function showVotesAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = 'positive', $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
 			return $this->redirect($this->generateUrl('core_user_show_votes', array( 'username' => $user->getUsernameCanonical() )));
@@ -763,7 +747,6 @@ class UserController extends AbstractController {
 
 		$om = $this->getDoctrine()->getManager();
 		$voteRepository = $om->getRepository(Vote::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -783,7 +766,7 @@ class UserController extends AbstractController {
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
 			'tab' => 'votes',
-		)));
+		)), $followerUtils);
 	}
 
 	/**
@@ -799,7 +782,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/reviews/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_reviews_filter_page")
 	 * @Template("LadbCoreBundle:Core/User:showReviews.html.twig")
 	 */
-	public function showReviewsAction(Request $request, $username, $filter = 'recent', $page = 0) {
+	public function showReviewsAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = 'recent', $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
 			return $this->redirect($this->generateUrl('core_user_show_reviews', array( 'username' => $user->getUsernameCanonical() )));
@@ -807,7 +790,6 @@ class UserController extends AbstractController {
 
 		$om = $this->getDoctrine()->getManager();
 		$reviewRepository = $om->getRepository(Review::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -827,7 +809,7 @@ class UserController extends AbstractController {
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
 			'tab' => 'reviews',
-		)));
+		)), $followerUtils);
 	}
 
 	/**
@@ -843,7 +825,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/feedbacks/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_feedbacks_filter_page")
 	 * @Template("LadbCoreBundle:Core/User:showFeedbacks.html.twig")
 	 */
-	public function showFeedbacksAction(Request $request, $username, $filter = "recent", $page = 0) {
+	public function showFeedbacksAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
 			return $this->redirect($this->generateUrl('core_user_show_feedbacks', array( 'username' => $user->getUsernameCanonical() )));
@@ -851,7 +833,6 @@ class UserController extends AbstractController {
 
 		$om = $this->getDoctrine()->getManager();
 		$feedbackRepository = $om->getRepository(Feedback::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -869,11 +850,9 @@ class UserController extends AbstractController {
 			return $this->render('LadbCoreBundle:Core/Feedback:list-byuser-xhr.html.twig', $parameters);
 		}
 
-		$followerUtils = $this->get(FollowerUtils::NAME);
-
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
 			'tab' => 'feedbacks',
-		)));
+		)), $followerUtils);
 	}
 
 	/**
@@ -889,7 +868,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/creations/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_creations_filter_page")
 	 * @Template("LadbCoreBundle:Core/User:showCreations.html.twig")
 	 */
-	public function showCreationsAction(Request $request, $username, $filter = null, $page = 0) {
+	public function showCreationsAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = null, $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
 			return $this->redirect($this->generateUrl('core_user_show_creations', array( 'username' => $user->getUsernameCanonical() )));
@@ -911,11 +890,10 @@ class UserController extends AbstractController {
 
 		$om = $this->getDoctrine()->getManager();
 		$creationRepository = $om->getRepository(Creation::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
-		$paginator = $creationRepository->findPaginedByUser($user, $offset, $limit, $filter, $this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') || $isGrantedOwner);
+		$paginator = $creationRepository->findPaginedByUser($user, $offset, $limit, $filter, $this->isGranted('ROLE_ADMIN') || $isGrantedOwner);
 		$pageUrls = $paginatorUtils->generatePrevAndNextPageUrl('core_user_show_creations_filter_page', array( 'username' => $user->getUsernameCanonical(), 'filter' => $filter ), $page, $paginator->count());
 
 		$parameters = array(
@@ -931,7 +909,7 @@ class UserController extends AbstractController {
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
 			'tab' => 'creations',
-		)), $isGrantedOwner);
+		)), $followerUtils, $isGrantedOwner);
 	}
 
 	/**
@@ -947,7 +925,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/ateliers/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_workshops_filter_page")
 	 * @Template("LadbCoreBundle:Core/User:showWorkshops.html.twig")
 	 */
-	public function showWorkshopsAction(Request $request, $username, $filter = null, $page = 0) {
+	public function showWorkshopsAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = null, $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
 			return $this->redirect($this->generateUrl('core_user_show_workshops', array( 'username' => $user->getUsernameCanonical() )));
@@ -969,11 +947,10 @@ class UserController extends AbstractController {
 
 		$om = $this->getDoctrine()->getManager();
 		$workshopRepository = $om->getRepository(Workshop::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
-		$paginator = $workshopRepository->findPaginedByUser($user, $offset, $limit, $filter, $this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') || $isGrantedOwner);
+		$paginator = $workshopRepository->findPaginedByUser($user, $offset, $limit, $filter, $this->isGranted('ROLE_ADMIN') || $isGrantedOwner);
 		$pageUrls = $paginatorUtils->generatePrevAndNextPageUrl('core_user_show_workshops_filter_page', array( 'username' => $user->getUsernameCanonical(), 'filter' => $filter ), $page, $paginator->count());
 
 		$parameters = array(
@@ -987,11 +964,9 @@ class UserController extends AbstractController {
 			return $this->render('LadbCoreBundle:Wonder/Workshop:list-xhr.html.twig', $parameters);
 		}
 
-		$followerUtils = $this->get(FollowerUtils::NAME);
-
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
 			'tab' => 'workshops',
-		)), $isGrantedOwner);
+		)), $followerUtils, $isGrantedOwner);
 	}
 
 	/**
@@ -1007,7 +982,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/plans/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_plans_filter_page")
 	 * @Template("LadbCoreBundle:Core/User:showPlans.html.twig")
 	 */
-	public function showPlansAction(Request $request, $username, $filter = null, $page = 0) {
+	public function showPlansAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = null, $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
 			return $this->redirect($this->generateUrl('core_user_show_plans', array( 'username' => $user->getUsernameCanonical() )));
@@ -1029,11 +1004,10 @@ class UserController extends AbstractController {
 
 		$om = $this->getDoctrine()->getManager();
 		$planRepository = $om->getRepository(Plan::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
-		$paginator = $planRepository->findPaginedByUser($user, $offset, $limit, $filter, $this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') || $isGrantedOwner);
+		$paginator = $planRepository->findPaginedByUser($user, $offset, $limit, $filter, $this->isGranted('ROLE_ADMIN') || $isGrantedOwner);
 		$pageUrls = $paginatorUtils->generatePrevAndNextPageUrl('core_user_show_plans_filter_page', array( 'username' => $user->getUsernameCanonical(), 'filter' => $filter ), $page, $paginator->count());
 
 		$parameters = array(
@@ -1049,7 +1023,7 @@ class UserController extends AbstractController {
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
 			'tab' => 'plans',
-		)), $isGrantedOwner);
+		)), $followerUtils, $isGrantedOwner);
 	}
 
 	/**
@@ -1065,7 +1039,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/pas-a-pas/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_howtos_filter_page")
 	 * @Template("LadbCoreBundle:Core/User:showHowtos.html.twig")
 	 */
-	public function showHowtosAction(Request $request, $username, $filter = null, $page = 0) {
+	public function showHowtosAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = null, $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
 			return $this->redirect($this->generateUrl('core_user_show_howtos', array( 'username' => $user->getUsernameCanonical() )));
@@ -1087,11 +1061,10 @@ class UserController extends AbstractController {
 
 		$om = $this->getDoctrine()->getManager();
 		$howtoRepository = $om->getRepository(Howto::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
-		$paginator = $howtoRepository->findPaginedByUser($user, $offset, $limit, $filter, $this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') || $isGrantedOwner);
+		$paginator = $howtoRepository->findPaginedByUser($user, $offset, $limit, $filter, $this->isGranted('ROLE_ADMIN') || $isGrantedOwner);
 		$pageUrls = $paginatorUtils->generatePrevAndNextPageUrl('core_user_show_howtos_filter_page', array( 'username' => $user->getUsernameCanonical(), 'filter' => $filter ), $page, $paginator->count());
 
 		$parameters = array(
@@ -1107,7 +1080,7 @@ class UserController extends AbstractController {
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
 			'tab' => 'howtos',
-		)), $isGrantedOwner);
+		)), $followerUtils, $isGrantedOwner);
 	}
 
 	/**
@@ -1123,7 +1096,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/trouvailles/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_finds_filter_page")
 	 * @Template("LadbCoreBundle:Core/User:showFinds.html.twig")
 	 */
-	public function showFindsAction(Request $request, $username, $filter = null, $page = 0) {
+	public function showFindsAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = null, $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
 			return $this->redirect($this->generateUrl('core_user_show_finds', array( 'username' => $user->getUsernameCanonical() )));
@@ -1145,11 +1118,10 @@ class UserController extends AbstractController {
 
 		$om = $this->getDoctrine()->getManager();
 		$findRepository = $om->getRepository(Find::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
-		$paginator = $findRepository->findPaginedByUser($user, $offset, $limit, $filter, $this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') || $isGrantedOwner);
+		$paginator = $findRepository->findPaginedByUser($user, $offset, $limit, $filter, $this->isGranted('ROLE_ADMIN') || $isGrantedOwner);
 		$pageUrls = $paginatorUtils->generatePrevAndNextPageUrl('core_user_show_finds_filter_page', array( 'username' => $user->getUsernameCanonical(), 'filter' => $filter ), $page, $paginator->count());
 
 		$parameters = array(
@@ -1165,7 +1137,7 @@ class UserController extends AbstractController {
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
 			'tab' => 'finds',
-		)), $isGrantedOwner);
+		)), $followerUtils, $isGrantedOwner);
 	}
 
 	/**
@@ -1181,7 +1153,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/questions/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_questions_filter_page")
 	 * @Template("LadbCoreBundle:Core/User:showQuestions.html.twig")
 	 */
-	public function showQuestionsAction(Request $request, $username, $filter = null, $page = 0) {
+	public function showQuestionsAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = null, $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
 			return $this->redirect($this->generateUrl('core_user_show_questions', array( 'username' => $user->getUsernameCanonical() )));
@@ -1203,11 +1175,10 @@ class UserController extends AbstractController {
 
 		$om = $this->getDoctrine()->getManager();
 		$questionRepository = $om->getRepository(Question::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
-		$paginator = $questionRepository->findPaginedByUser($user, $offset, $limit, $filter, $this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') || $isGrantedOwner);
+		$paginator = $questionRepository->findPaginedByUser($user, $offset, $limit, $filter, $this->isGranted('ROLE_ADMIN') || $isGrantedOwner);
 		$pageUrls = $paginatorUtils->generatePrevAndNextPageUrl('core_user_show_questions_filter_page', array( 'username' => $user->getUsernameCanonical(), 'filter' => $filter ), $page, $paginator->count());
 
 		$parameters = array(
@@ -1223,7 +1194,7 @@ class UserController extends AbstractController {
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
 			'tab' => 'questions',
-		)), $isGrantedOwner);
+		)), $followerUtils, $isGrantedOwner);
 	}
 
 	/**
@@ -1239,7 +1210,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/reponses/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_answers_filter_page")
 	 * @Template("LadbCoreBundle:Core/User:showAnswers.html.twig")
 	 */
-	public function showAnswersAction(Request $request, $username, $filter = "recent", $page = 0) {
+	public function showAnswersAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
 			return $this->redirect($this->generateUrl('core_user_show_answers', array( 'username' => $user->getUsernameCanonical() )));
@@ -1247,7 +1218,6 @@ class UserController extends AbstractController {
 
 		$om = $this->getDoctrine()->getManager();
 		$answerRepository = $om->getRepository(Answer::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -1265,11 +1235,9 @@ class UserController extends AbstractController {
 			return $this->render('LadbCoreBundle:Qa/Answer:list-byuser-xhr.html.twig', $parameters);
 		}
 
-		$followerUtils = $this->get(FollowerUtils::NAME);
-
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
 			'tab' => 'answers',
-		)));
+		)), $followerUtils);
 	}
 
 	/**
@@ -1285,7 +1253,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/graphismes/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_graphics_filter_page")
 	 * @Template("LadbCoreBundle:Core/User:showGraphics.html.twig")
 	 */
-	public function showGraphicsAction(Request $request, $username, $filter = null, $page = 0) {
+	public function showGraphicsAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = null, $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
 			return $this->redirect($this->generateUrl('core_user_show_graphics', array( 'username' => $user->getUsernameCanonical() )));
@@ -1307,11 +1275,10 @@ class UserController extends AbstractController {
 
 		$om = $this->getDoctrine()->getManager();
 		$graphicRepository = $om->getRepository(Graphic::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
-		$paginator = $graphicRepository->findPaginedByUser($user, $offset, $limit, $filter, $this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') || $isGrantedOwner);
+		$paginator = $graphicRepository->findPaginedByUser($user, $offset, $limit, $filter, $this->isGranted('ROLE_ADMIN') || $isGrantedOwner);
 		$pageUrls = $paginatorUtils->generatePrevAndNextPageUrl('core_user_show_graphics_filter_page', array( 'username' => $user->getUsernameCanonical(), 'filter' => $filter ), $page, $paginator->count());
 
 		$parameters = array(
@@ -1327,7 +1294,7 @@ class UserController extends AbstractController {
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
 			'tab' => 'graphics',
-		)), $isGrantedOwner);
+		)), $followerUtils, $isGrantedOwner);
 	}
 
 	/**
@@ -1343,7 +1310,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/processus/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_workflows_filter_page")
 	 * @Template("LadbCoreBundle:Core/User:showWorkflows.html.twig")
 	 */
-	public function showWorkflowsAction(Request $request, $username, $filter = null, $page = 0) {
+	public function showWorkflowsAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = null, $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
 			return $this->redirect($this->generateUrl('core_user_show_workflows', array( 'username' => $user->getUsernameCanonical() )));
@@ -1365,11 +1332,10 @@ class UserController extends AbstractController {
 
 		$om = $this->getDoctrine()->getManager();
 		$workflowRepository = $om->getRepository(Workflow::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
-		$paginator = $workflowRepository->findPaginedByUser($user, $offset, $limit, $filter, $this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') || $isGrantedOwner);
+		$paginator = $workflowRepository->findPaginedByUser($user, $offset, $limit, $filter, $this->isGranted('ROLE_ADMIN') || $isGrantedOwner);
 		$pageUrls = $paginatorUtils->generatePrevAndNextPageUrl('core_user_show_workflows_filter_page', array( 'username' => $user->getUsernameCanonical(), 'filter' => $filter ), $page, $paginator->count());
 
 		$parameters = array(
@@ -1383,11 +1349,9 @@ class UserController extends AbstractController {
 			return $this->render('LadbCoreBundle:Workflow:list-xhr.html.twig', $parameters);
 		}
 
-		$followerUtils = $this->get(FollowerUtils::NAME);
-
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
 			'tab' => 'workflows',
-		)), $isGrantedOwner);
+		)), $followerUtils, $isGrantedOwner);
 	}
 
 	/**
@@ -1403,7 +1367,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/annonces/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_offers_filter_page")
 	 * @Template("LadbCoreBundle:Core/User:showOffers.html.twig")
 	 */
-	public function showOffersAction(Request $request, $username, $filter = null, $page = 0) {
+	public function showOffersAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = null, $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
 			return $this->redirect($this->generateUrl('core_user_show_offers', array( 'username' => $user->getUsernameCanonical() )));
@@ -1425,11 +1389,10 @@ class UserController extends AbstractController {
 
 		$om = $this->getDoctrine()->getManager();
 		$offerRepository = $om->getRepository(Offer::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
-		$paginator = $offerRepository->findPaginedByUser($user, $offset, $limit, $filter, $this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') || $isGrantedOwner);
+		$paginator = $offerRepository->findPaginedByUser($user, $offset, $limit, $filter, $this->isGranted('ROLE_ADMIN') || $isGrantedOwner);
 		$pageUrls = $paginatorUtils->generatePrevAndNextPageUrl('core_user_show_offers_filter_page', array( 'username' => $user->getUsernameCanonical(), 'filter' => $filter ), $page, $paginator->count());
 
 		$parameters = array(
@@ -1445,7 +1408,7 @@ class UserController extends AbstractController {
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
 			'tab' => 'offers',
-		)), $isGrantedOwner);
+		)), $followerUtils, $isGrantedOwner);
 	}
 
 	/**
@@ -1461,7 +1424,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/abonnements/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_following_filter_page")
 	 * @Template("LadbCoreBundle:Core/User:showFollowing.html.twig")
 	 */
-	public function showFollowingAction(Request $request, $username, $filter = "popular-followers", $page = 0) {
+	public function showFollowingAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = "popular-followers", $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
 			return $this->redirect($this->generateUrl('core_user_show_following', array( 'username' => $user->getUsernameCanonical() )));
@@ -1471,7 +1434,6 @@ class UserController extends AbstractController {
 
 		$om = $this->getDoctrine()->getManager();
 		$followerRepository = $om->getRepository(Follower::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -1489,11 +1451,9 @@ class UserController extends AbstractController {
 			return $this->render('LadbCoreBundle:Core/Follower:following-list-xhr.html.twig', $parameters);
 		}
 
-		$followerUtils = $this->get(FollowerUtils::NAME);
-
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
 			'tab' => 'following',
-		)));
+		)), $followerUtils);
 	}
 
 	/**
@@ -1509,7 +1469,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/abonnes/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_followers_filter_page")
 	 * @Template("LadbCoreBundle:Core/User:showFollowers.html.twig")
 	 */
-	public function showFollowersAction(Request $request, $username, $filter = "popular-followers", $page = 0) {
+	public function showFollowersAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = "popular-followers", $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
 			return $this->redirect($this->generateUrl('core_user_show_followers', array( 'username' => $user->getUsernameCanonical() )));
@@ -1519,7 +1479,6 @@ class UserController extends AbstractController {
 
 		$om = $this->getDoctrine()->getManager();
 		$followerRepository = $om->getRepository(Follower::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -1537,12 +1496,10 @@ class UserController extends AbstractController {
 			return $this->render('LadbCoreBundle:Core/Follower:followers-list-xhr.html.twig', $parameters);
 		}
 
-		$followerUtils = $this->get(FollowerUtils::NAME);
-
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
 			'followers'       => $paginator,
 			'tab'             => 'followers',
-		)));
+		)), $followerUtils);
 	}
 
 	/**
@@ -1551,7 +1508,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/membres/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_members_filter_page")
 	 * @Template("LadbCoreBundle:Core/User:showMembers.html.twig")
 	 */
-	public function showMembersAction(Request $request, $username, $filter = "popular-followers", $page = 0) {
+	public function showMembersAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = "popular-followers", $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
 			return $this->redirect($this->generateUrl('core_user_show_members', array( 'username' => $user->getUsernameCanonical() )));
@@ -1561,7 +1518,6 @@ class UserController extends AbstractController {
 
 		$om = $this->getDoctrine()->getManager();
 		$memberRepository = $om->getRepository(Member::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -1581,7 +1537,7 @@ class UserController extends AbstractController {
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
 			'tab' => 'members',
-		)));
+		)), $followerUtils);
 	}
 
 	/**
@@ -1590,14 +1546,14 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/invitations/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_invitations_filter_page")
 	 * @Template("LadbCoreBundle:Core/User:showInvitations.html.twig")
 	 */
-	public function showInvitationsAction(Request $request, $username, $filter = "popular-followers", $page = 0) {
+	public function showInvitationsAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = "popular-followers", $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
 			return $this->redirect($this->generateUrl('core_user_show_invitations', array( 'username' => $user->getUsernameCanonical() )));
 		}
 
 		$isGrantedOwner = $this->_isGrantedOwner($user);
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && !$isGrantedOwner) {
+		if (!$this->isGranted('ROLE_ADMIN') && !$isGrantedOwner) {
 			return $this->redirect($this->generateUrl('core_user_show', array( 'username' => $user->getUsernameCanonical() )));
 		}
 
@@ -1605,7 +1561,6 @@ class UserController extends AbstractController {
 
 		$om = $this->getDoctrine()->getManager();
 		$memberInvitationRepository = $om->getRepository(MemberInvitation::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -1629,7 +1584,7 @@ class UserController extends AbstractController {
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
 			'tab' => 'invitations',
-		)), $isGrantedOwner);
+		)), $followerUtils, $isGrantedOwner);
 	}
 
 	/**
@@ -1638,14 +1593,14 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/demandes/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_requests_filter_page")
 	 * @Template("LadbCoreBundle:Core/User:showRequests.html.twig")
 	 */
-	public function showRequestsAction(Request $request, $username, $filter = "popular-followers", $page = 0) {
+	public function showRequestsAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = "popular-followers", $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
 			return $this->redirect($this->generateUrl('core_user_show_requests', array( 'username' => $user->getUsernameCanonical() )));
 		}
 
 		$isGrantedOwner = $this->_isGrantedOwner($user);
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && !$isGrantedOwner) {
+		if (!$this->isGranted('ROLE_ADMIN') && !$isGrantedOwner) {
 			return $this->redirect($this->generateUrl('core_user_show', array( 'username' => $user->getUsernameCanonical() )));
 		}
 
@@ -1653,7 +1608,6 @@ class UserController extends AbstractController {
 
 		$om = $this->getDoctrine()->getManager();
 		$memberRequestRepository = $om->getRepository(MemberRequest::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -1677,7 +1631,7 @@ class UserController extends AbstractController {
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
 			'tab' => 'requests',
-		)), $isGrantedOwner);
+		)), $followerUtils, $isGrantedOwner);
 	}
 
 	/**
@@ -1686,7 +1640,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/collectifs/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_teams_filter_page")
 	 * @Template("LadbCoreBundle:Core/User:showTeams.html.twig")
 	 */
-	public function showTeamsAction(Request $request, $username, $filter = "popular-followers", $page = 0) {
+	public function showTeamsAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = "popular-followers", $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
 			return $this->redirect($this->generateUrl('core_user_show_teams', array( 'username' => $user->getUsernameCanonical() )));
@@ -1696,7 +1650,6 @@ class UserController extends AbstractController {
 
 		$om = $this->getDoctrine()->getManager();
 		$memberRepository = $om->getRepository(Member::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -1716,7 +1669,7 @@ class UserController extends AbstractController {
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
 			'tab' => 'teams',
-		)));
+		)), $followerUtils);
 	}
 
 	/**
@@ -1763,7 +1716,7 @@ class UserController extends AbstractController {
 			$forwardController = 'LadbCoreBundle:Core/User:showAbout';
 		}
 
-		if ($user->getIsTeam() && $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
+		if ($user->getIsTeam() && $this->isGranted('ROLE_USER')) {
 
 			$om = $this->getDoctrine()->getManager();
 			$memberRepository = $om->getRepository(Member::CLASS_NAME);
@@ -1786,12 +1739,10 @@ class UserController extends AbstractController {
 	 * @Route("/collectifs/new", name="core_user_team_new")
 	 * @Template("LadbCoreBundle:Core/User/Team:new.html.twig")
 	 */
-	public function teamNewAction() {
+	public function teamNewAction(UserManager $userManager) {
 		if (!$this->getUser()->getEmailConfirmed()) {
 			throw $this->createNotFoundException('Not allowed (core_user_team_new)');
 		}
-
-		$userManager = $this->get(UserManager::NAME);
 
 		$team = $userManager->createUser();
 		$form = $this->createForm(UserTeamType::class, $team);
@@ -1805,7 +1756,7 @@ class UserController extends AbstractController {
 	 * @Route("/collectifs/create", methods={"POST"}, name="core_user_team_create")
 	 * @Template("LadbCoreBundle:Core/User/Team:new.html.twig")
 	 */
-	public function teamCreateAction(Request $request) {
+	public function teamCreateAction(Request $request, MailerUtils $mailerUtils, MemberManager $memberManager, SearchUtils $searchUtils, TranslatorInterface $translator, UserManager $userManager, UserUtils $userUtils) {
 		if (!$this->getUser()->getEmailConfirmed()) {
 			throw $this->createNotFoundException('Not allowed (core_user_team_create)');
 		}
@@ -1813,7 +1764,6 @@ class UserController extends AbstractController {
 		$this->createLock('core_user_team_create', false, self::LOCK_TTL_CREATE_ACTION, false);
 
 		$om = $this->getDoctrine()->getManager();
-		$userManager = $this->get(UserManager::NAME);
 
 		$team = $userManager->createUser();
 		$team->setEnabled(true);
@@ -1826,7 +1776,6 @@ class UserController extends AbstractController {
 
 			// Default avatar
 			if (is_null($team->getAvatar())) {
-				$userUtils = $this->get(UserUtils::NAME);
 				$userUtils->createDefaultAvatar($team);
 			}
 
@@ -1837,17 +1786,15 @@ class UserController extends AbstractController {
 			$userManager->updateUser($team);
 
 			// Add team's creator as first member
-			$memberManager = $this->get(MemberManager::NAME);
 			$memberManager->create($team, $this->getUser());
 
 			$om->flush();
 
 			// Search index update
-			$searchUtils = $this->get(SearchUtils::NAME);
 			$searchUtils->insertEntityToIndex($team);
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('user.form.alert.team_success', array( '%displayname%' => $team->getDisplayname() )));
+			$this->addFlash('success', $translator->trans('user.form.alert.team_success', array( '%displayname%' => $team->getDisplayname() )));
 
 			/////
 
@@ -1861,14 +1808,13 @@ class UserController extends AbstractController {
 			$om->flush();
 
 			// Send admin email notification
-			$mailerUtils = $this->container->get(MailerUtils::NAME);
 			$mailerUtils->sendNewTeamNotificationEmailMessage($this->getUser(), $team);
 
 			return $this->redirect($this->generateUrl('core_user_show', array( 'username' => $team->getUsernameCanonical()) ));
 		}
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
+		$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 		return array(
 			'user' => $team,
@@ -1882,12 +1828,10 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/admin", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_show_admin")
 	 * @Template("LadbCoreBundle:Core/User:showAdmin.html.twig")
 	 */
-	public function showAdminAction($username) {
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+	public function showAdminAction($username, FollowerUtils $followerUtils, UserManager $userManager) {
+		if (!$this->isGranted('ROLE_ADMIN')) {
 			throw $this->createNotFoundException('Access denied');
 		}
-
-		$userManager = $this->get(UserManager::NAME);
 
 		$user = $userManager->findUserByUsername($username);
 		if (is_null($user)) {
@@ -1901,19 +1845,18 @@ class UserController extends AbstractController {
 		return $this->_fillCommonShowParameters($user, array(
 			'registration' => $registration,
 			'tab'          => 'admin',
-		));
+		), $followerUtils);
 	}
 
 	/**
 	 * @Route("/@{username}/admin/converttoteam", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_admin_converttoteam")
 	 */
-	public function adminConvertToTeamAction($username) {
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+	public function adminConvertToTeamAction($username, MemberInvitationManager $memberInvitationManager, MemberManager $memberManager, MemberRequestManager $memberRequestManager, SearchUtils $searchUtils, TranslatorInterface $translator, UserManager $userManager) {
+		if (!$this->isGranted('ROLE_ADMIN')) {
 			throw $this->createNotFoundException('Access denied');
 		}
 
 		$om = $this->getDoctrine()->getManager();
-		$userManager = $this->get(UserManager::NAME);
 
 		$user = $userManager->findUserByUsername($username);
 		if (is_null($user)) {
@@ -1921,7 +1864,6 @@ class UserController extends AbstractController {
 		}
 
 		// Remove all pending invitations
-		$memberInvitationManager = $this->get(MemberInvitationManager::NAME);
 		$memberInvitationRepository = $om->getRepository(MemberInvitation::CLASS_NAME);
 		$memberInvitations = $memberInvitationRepository->findPaginedByRecipient($user);
 		foreach ($memberInvitations as $memberInvitation) {
@@ -1929,7 +1871,6 @@ class UserController extends AbstractController {
 		}
 
 		// Remove all pending requests
-		$memberRequestManager = $this->get(MemberRequestManager::NAME);
 		$memberRequestRepository = $om->getRepository(MemberRequest::CLASS_NAME);
 		$memberRequests = $memberRequestRepository->findPaginedBySender($user);
 		foreach ($memberRequests as $memberRequest) {
@@ -1937,7 +1878,6 @@ class UserController extends AbstractController {
 		}
 
 		// Remove all members
-		$memberManager = $this->get(MemberManager::NAME);
 		$memberRepository = $om->getRepository(Member::CLASS_NAME);
 		$members = $memberRepository->findPaginedByUser($user);
 		foreach ($members as $member) {
@@ -1956,11 +1896,10 @@ class UserController extends AbstractController {
 		$om->flush();
 
 		// Search index update
-		$searchUtils = $this->get(SearchUtils::NAME);
 		$searchUtils->insertEntityToIndex($user);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('user.admin.alert.converttoteam_success', array( '%displayname%' => $user->getDisplayname() )));
+		$this->addFlash('success', $translator->trans('user.admin.alert.converttoteam_success', array( '%displayname%' => $user->getDisplayname() )));
 
 		return $this->redirect($this->generateUrl('core_user_show_admin', array( 'username' => $username )));
 	}
@@ -1968,13 +1907,10 @@ class UserController extends AbstractController {
 	/**
 	 * @Route("/@{username}/admin/activate", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_admin_activate")
 	 */
-	public function adminActivateAction($username) {
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+	public function adminActivateAction($username, UserManipulator $manipulator, SearchUtils $searchUtils, TranslatorInterface $translator, UserManager $userManager) {
+		if (!$this->isGranted('ROLE_ADMIN')) {
 			throw $this->createNotFoundException('Access denied');
 		}
-
-		$userManager = $this->get(UserManager::NAME);
-		$manipulator = $this->get('fos_user.util.user_manipulator');
 
 		$user = $userManager->findUserByUsername($username);
 		if (is_null($user)) {
@@ -1984,11 +1920,10 @@ class UserController extends AbstractController {
 		$manipulator->activate($username);
 
 		// Search index update
-		$searchUtils = $this->get(SearchUtils::NAME);
 		$searchUtils->insertEntityToIndex($user);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('user.admin.alert.activate_success', array( '%displayname%' => $user->getDisplayname() )));
+		$this->addFlash('success', $translator->trans('user.admin.alert.activate_success', array( '%displayname%' => $user->getDisplayname() )));
 
 		return $this->redirect($this->generateUrl('core_user_show_admin', array( 'username' => $username )));
 	}
@@ -1996,13 +1931,10 @@ class UserController extends AbstractController {
 	/**
 	 * @Route("/@{username}/admin/deactivate", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_admin_deactivate")
 	 */
-	public function adminDeactivateAction($username) {
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+	public function adminDeactivateAction($username, UserManipulator $manipulator, SearchUtils $searchUtils, TranslatorInterface $translator, UserManager $userManager) {
+		if (!$this->isGranted('ROLE_ADMIN')) {
 			throw $this->createNotFoundException('Access denied');
 		}
-
-		$userManager = $this->get(UserManager::NAME);
-		$manipulator = $this->get('fos_user.util.user_manipulator');
 
 		$user = $userManager->findUserByUsername($username);
 		if (is_null($user)) {
@@ -2012,11 +1944,10 @@ class UserController extends AbstractController {
 		$manipulator->deactivate($username);
 
 		// Search index update
-		$searchUtils = $this->get(SearchUtils::NAME);
 		$searchUtils->deleteEntityFromIndex($user);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('user.admin.alert.deactivate_success', array( '%displayname%' => $user->getDisplayname() )));
+		$this->addFlash('success', $translator->trans('user.admin.alert.deactivate_success', array( '%displayname%' => $user->getDisplayname() )));
 
 		return $this->redirect($this->generateUrl('core_user_show_admin', array( 'username' => $username )));
 	}
@@ -2024,13 +1955,12 @@ class UserController extends AbstractController {
 	/**
 	 * @Route("/@{username}/admin/empty", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_admin_empty")
 	 */
-	public function adminEmptyAction($username) {
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+	public function adminEmptyAction($username, FollowerUtils $followerUtils, LikableUtils $likableUtils, SearchUtils $searchUtils, TranslatorInterface $translator, UserManager $userManager) {
+		if (!$this->isGranted('ROLE_ADMIN')) {
 			throw $this->createNotFoundException('Access denied');
 		}
 
 		$om = $this->getDoctrine()->getManager();
-		$userManager = $this->get(UserManager::NAME);
 
 		$user = $userManager->findUserByUsername($username);
 		if (is_null($user)) {
@@ -2038,11 +1968,9 @@ class UserController extends AbstractController {
 		}
 
 		// Remove likes
-		$likableUtils = $this->get(LikableUtils::NAME);
 		$likableUtils->deleteLikesByUser($user, false);
 
 		// Remove followers / followings
-		$followerUtils = $this->get(FollowerUtils::NAME);
 		$followerUtils->deleteFollowersByUser($user, false);
 		$followerUtils->deleteFollowingsByUser($user, false);
 
@@ -2051,11 +1979,10 @@ class UserController extends AbstractController {
 		$om->flush();
 
 		// Search index update
-		$searchUtils = $this->get(SearchUtils::NAME);
 		$searchUtils->replaceEntityInIndex($user);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('user.admin.alert.empty_success', array( '%displayname%' => $user->getDisplayname() )));
+		$this->addFlash('success', $translator->trans('user.admin.alert.empty_success', array( '%displayname%' => $user->getDisplayname() )));
 
 		return $this->redirect($this->generateUrl('core_user_show_admin', array( 'username' => $username )));
 	}
@@ -2063,13 +1990,12 @@ class UserController extends AbstractController {
 	/**
 	 * @Route("/@{username}/admin/delete", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_admin_delete")
 	 */
-	public function adminDeleteAction($username) {
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+	public function adminDeleteAction($username, SearchUtils $searchUtils, TranslatorInterface $translator, UserManager $userManager) {
+		if (!$this->isGranted('ROLE_ADMIN')) {
 			throw $this->createNotFoundException('Access denied');
 		}
 
 		$om = $this->getDoctrine()->getManager();
-		$userManager = $this->get(UserManager::NAME);
 
 		$user = $userManager->findUserByUsername($username);
 		if (is_null($user)) {
@@ -2084,7 +2010,7 @@ class UserController extends AbstractController {
 		if ($userRepository->existsReferences($user, array_filter(array( $avatar, $banner )))) {
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('user.admin.alert.delete_error', array( '%displayname%' => $user->getDisplayname() )));
+			$this->addFlash('error', $translator->trans('user.admin.alert.delete_error', array( '%displayname%' => $user->getDisplayname() )));
 
 			return $this->redirect($this->generateUrl('core_user_show_admin', array( 'username' => $username )));
 		}
@@ -2112,11 +2038,10 @@ class UserController extends AbstractController {
 		$om->flush();
 
 		// Search index update
-		$searchUtils = $this->get(SearchUtils::NAME);
 		$searchUtils->deleteEntityFromIndex($user);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('user.admin.alert.delete_success', array( '%displayname%' => $user->getDisplayname() )));
+		$this->addFlash('success', $translator->trans('user.admin.alert.delete_success', array( '%displayname%' => $user->getDisplayname() )));
 
 		return $this->redirect($this->generateUrl('core_welcome'));
 	}

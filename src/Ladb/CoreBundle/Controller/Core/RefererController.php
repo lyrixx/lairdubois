@@ -8,6 +8,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Ladb\CoreBundle\Entity\Core\Referer\Referral;
 use Ladb\CoreBundle\Utils\TypableUtils;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @Route("/referer")
@@ -17,16 +18,15 @@ class RefererController extends AbstractController {
 	/**
 	 * @Route("/referral/{id}/delete", requirements={"id" = "\d+"}, name="core_referer_referral_delete")
 	 */
-	public function referralDeleteAction($id) {
+	public function referralDeleteAction($id, TranslatorInterface $translator, TypableUtils $typableUtils) {
 		$om = $this->getDoctrine()->getManager();
 		$referralRepository = $om->getRepository(Referral::CLASS_NAME);
-		$typableUtils = $this->get(TypableUtils::NAME);
 
 		$referral = $referralRepository->findOneById($id);
 		if (is_null($referral)) {
 			throw $this->createNotFoundException('Unable to find Referral entity (id='.$id.').');
 		}
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+		if (!$this->isGranted('ROLE_ADMIN')) {
 			throw $this->createNotFoundException('Not allowed (core_referer_referral_delete)');
 		}
 
@@ -38,7 +38,7 @@ class RefererController extends AbstractController {
 		$om->flush();
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('referer.referral.alert.delete_success', array( '%title%' => $referral->getTitle() )));
+		$this->addFlash('success', $translator->trans('referer.referral.alert.delete_success', array( '%title%' => $referral->getTitle() )));
 
 		return $this->redirect($typableUtils->getUrlAction($entity));
 	}

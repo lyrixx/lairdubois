@@ -20,14 +20,15 @@ use Ladb\CoreBundle\Event\PublicationListener;
 use Ladb\CoreBundle\Entity\Core\Feedback;
 use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Utils\FeedbackableUtils;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @Route("/feedbacks")
  */
 class FeedbackController extends AbstractController {
 
-	private function _retrieveRelatedEntity($entityType, $entityId) {
-		$typableUtils = $this->get(TypableUtils::NAME);
+	private function _retrieveRelatedEntity($entityType, $entityId, TypableUtils $typableUtils) {
 		try {
 			$entity = $typableUtils->findTypable($entityType, $entityId);
 		} catch (\Exception $e) {
@@ -45,12 +46,12 @@ class FeedbackController extends AbstractController {
 	 * @Route("/{entityType}/{entityId}/new", requirements={"entityType" = "\d+", "entityId" = "\d+"}, name="core_feedback_new")
 	 * @Template("LadbCoreBundle:Core/Feedback:new-xhr.html.twig")
 	 */
-	public function newAction(Request $request, $entityType, $entityId) {
+	public function newAction(Request $request, $entityType, $entityId, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_feedback_new)');
 		}
 
-		$entity = $this->_retrieveRelatedEntity($entityType, $entityId);
+		$entity = $this->_retrieveRelatedEntity($entityType, $entityId, $typableUtils);
 		if ($entity instanceof HiddableInterface && $entity->getIsPrivate()) {
 			throw $this->createNotFoundException('Hidden entity could not be feedbacked.');
 		}
@@ -69,7 +70,7 @@ class FeedbackController extends AbstractController {
 	 * @Route("/{entityType}/{entityId}/create",requirements={"entityType" = "\d+", "entityId" = "\d+"}, methods={"POST"}, name="core_feedback_create")
 	 * @Template("LadbCoreBundle:Core/Feedback:new-xhr.html.twig")
 	 */
-	public function createAction(Request $request, $entityType, $entityId) {
+	public function createAction(Request $request, $entityType, $entityId, ActivityUtils $activityUtils, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FeedbackableUtils $feedbackableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, MentionUtils $mentionUtils, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_feedback_create)');
 		}
@@ -80,12 +81,11 @@ class FeedbackController extends AbstractController {
 
 		// Retrieve related entity
 
-		$entity = $this->_retrieveRelatedEntity($entityType, $entityId);
+		$entity = $this->_retrieveRelatedEntity($entityType, $entityId, $typableUtils);
 		if ($entity instanceof HiddableInterface && $entity->getIsPrivate()) {
 			throw $this->createNotFoundException('Hidden entity could not be feedbacked.');
 		}
 
-		$feedbackableUtils = $this->get(FeedbackableUtils::NAME);
 		if (!$feedbackableUtils->getIsFeedbackable($entity, $this->getUser())) {
 			throw $this->createNotFoundException('Feedback are not allowed on this entity by this user.');
 		}
@@ -99,10 +99,8 @@ class FeedbackController extends AbstractController {
 
 		if ($form->isValid()) {
 
-			$blockUtils = $this->get(BlockBodiedUtils::NAME);
 			$blockUtils->preprocessBlocks($feedback);
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($feedback);
 
 			$entity->setChangedAt(new \DateTime());
@@ -115,20 +113,15 @@ class FeedbackController extends AbstractController {
 			$om->flush();
 
 			// Process mentions
-			$mentionUtils = $this->get(MentionUtils::NAME);
 			$mentionUtils->processMentions($feedback);
 
 			// Create activity
-			$activityUtils = $this->get(ActivityUtils::NAME);
 			$activityUtils->createFeedbackActivity($feedback, false);
 
 			// Dispatch publication event (on entity)
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_CHANGED, new PublicationEvent($entity));
 
 			$om->flush();
-
-			$feedbackableUtils = $this->get(FeedbackableUtils::NAME);
 
 			return $this->render('LadbCoreBundle:Core/Feedback:create-xhr.html.twig', array(
 				'entity'          => $entity,
@@ -159,7 +152,7 @@ class FeedbackController extends AbstractController {
 		if (is_null($feedback)) {
 			throw $this->createNotFoundException('Unable to find Feedback entity (id='.$id.').');
 		}
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && $feedback->getUser()->getId() != $this->getUser()->getId()) {
+		if (!$this->isGranted('ROLE_ADMIN') && $feedback->getUser()->getId() != $this->getUser()->getId()) {
 			throw $this->createNotFoundException('Not allowed (core_core_feedback_edit)');
 		}
 
@@ -175,7 +168,7 @@ class FeedbackController extends AbstractController {
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_feedback_update")
 	 * @Template("LadbCoreBundle:Core/Feedback:edit-xhr.html.twig")
 	 */
-	public function updateAction(Request $request, $id) {
+	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, FeedbackableUtils $feedbackableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, MentionUtils $mentionUtils, SearchUtils $searchUtils, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_feedback_update)');
 		}
@@ -187,7 +180,7 @@ class FeedbackController extends AbstractController {
 		if (is_null($feedback)) {
 			throw $this->createNotFoundException('Unable to find Feedback entity (id='.$id.').');
 		}
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && $feedback->getUser()->getId() != $this->getUser()->getId()) {
+		if (!$this->isGranted('ROLE_ADMIN') && $feedback->getUser()->getId() != $this->getUser()->getId()) {
 			throw $this->createNotFoundException('Not allowed (core_knowledge_book_feedback_update)');
 		}
 
@@ -197,12 +190,10 @@ class FeedbackController extends AbstractController {
 		if ($form->isValid()) {
 
 			// Retrieve related entity
-			$entity = $this->_retrieveRelatedEntity($feedback->getEntityType(), $feedback->getEntityId());
+			$entity = $this->_retrieveRelatedEntity($feedback->getEntityType(), $feedback->getEntityId(), $typableUtils);
 
-			$blockUtils = $this->get(BlockBodiedUtils::NAME);
 			$blockUtils->preprocessBlocks($feedback);
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($feedback);
 
 			if ($feedback->getUser()->getId() == $this->getUser()->getId()) {
@@ -212,14 +203,10 @@ class FeedbackController extends AbstractController {
 			$om->flush();
 
 			// Process mentions
-			$mentionUtils = $this->get(MentionUtils::NAME);
 			$mentionUtils->processMentions($feedback);
 
 			// Search index update
-			$searchUtils = $this->container->get(SearchUtils::NAME);
 			$searchUtils->replaceEntityInIndex($entity);
-
-			$feedbackableUtils = $this->get(FeedbackableUtils::NAME);
 
 			return $this->render('LadbCoreBundle:Core/Feedback:update-xhr.html.twig', array(
 				'entity'          => $entity,
@@ -237,24 +224,21 @@ class FeedbackController extends AbstractController {
 	/**
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_feedback_delete")
 	 */
-	public function deleteAction($id) {
+	public function deleteAction($id, ActivityUtils $activityUtils, FeedbackableUtils $feedbackableUtils, SearchUtils $searchUtils, TranslatorInterface $translator, TypableUtils $typableUtils) {
 		$om = $this->getDoctrine()->getManager();
 		$feedbackRepository = $om->getRepository(Feedback::CLASS_NAME);
-		$activityUtils = $this->get(ActivityUtils::NAME);
-		$feedbackableUtils = $this->get(FeedbackableUtils::NAME);
-		$typableUtils = $this->get(TypableUtils::NAME);
 
 		$feedback = $feedbackRepository->findOneById($id);
 		if (is_null($feedback)) {
 			throw $this->createNotFoundException('Unable to find Feedback entity (id='.$id.').');
 		}
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && $feedback->getUser()->getId() != $this->getUser()->getId()) {
+		if (!$this->isGranted('ROLE_ADMIN') && $feedback->getUser()->getId() != $this->getUser()->getId()) {
 			throw $this->createNotFoundException('Not allowed (core_knowledge_book_feedback_delete)');
 		}
 
 		// Retrieve related entity
 
-		$entity = $this->_retrieveRelatedEntity($feedback->getEntityType(), $feedback->getEntityId());
+		$entity = $this->_retrieveRelatedEntity($feedback->getEntityType(), $feedback->getEntityId(), $typableUtils);
 
 		// Delete comment
 
@@ -263,11 +247,10 @@ class FeedbackController extends AbstractController {
 		$om->flush();
 
 		// Search index update
-		$searchUtils = $this->get(SearchUtils::NAME);
 		$searchUtils->replaceEntityInIndex($entity);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('feedback.default.alert.delete_success'));
+		$this->addFlash('success', $translator->trans('feedback.default.alert.delete_success'));
 
 		return $this->redirect($typableUtils->getUrlAction($entity));
 	}
@@ -275,17 +258,16 @@ class FeedbackController extends AbstractController {
 	/**
 	 * @Route("/{id}", requirements={"id" = "\d+"}, name="core_feedback_show")
 	 */
-	public function showAction(Request $request, $id) {
+	public function showAction(Request $request, $id, TypableUtils $typableUtils) {
 		$om = $this->getDoctrine()->getManager();
 		$feedbackRepository = $om->getRepository(Feedback::CLASS_NAME);
-		$typableUtils = $this->get(TypableUtils::NAME);
 
 		$feedback = $feedbackRepository->findOneById($id);
 		if (is_null($feedback)) {
 			throw $this->createNotFoundException('Unable to find Feedback entity (id='.$id.').');
 		}
 
-		$entity = $this->_retrieveRelatedEntity($feedback->getEntityType(), $feedback->getEntityId());
+		$entity = $this->_retrieveRelatedEntity($feedback->getEntityType(), $feedback->getEntityId(), $typableUtils);
 
 		return $this->redirect($typableUtils->getUrlAction($entity).'#_feedback_'.$feedback->getId());
 	}
