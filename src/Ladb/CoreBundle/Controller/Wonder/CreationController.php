@@ -50,6 +50,10 @@ use Ladb\CoreBundle\Entity\Core\Spotlight;
 use Ladb\CoreBundle\Entity\Wonder\Plan;
 use Ladb\CoreBundle\Entity\Wonder\Creation;
 use Ladb\CoreBundle\Entity\Core\View;
+use Liip\ImagineBundle\Controller\ImagineController;
+use Liip\ImagineBundle\Imagine\Cache\CacheManager;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @Route("/creations")
@@ -62,13 +66,11 @@ class CreationController extends AbstractController {
 	 * @Route("/new", name="core_creation_new")
 	 * @Template("LadbCoreBundle:Wonder/Creation:new.html.twig")
 	 */
-	public function newAction(Request $request) {
+	public function newAction(Request $request, TagUtils $tagUtils) {
 
 		$creation = new Creation();
 		$creation->addBodyBlock(new \Ladb\CoreBundle\Entity\Core\Block\Text());	// Add a default Text body block
 		$form = $this->createForm(CreationType::class, $creation);
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'form'         => $form->createView(),
@@ -81,7 +83,7 @@ class CreationController extends AbstractController {
 	 * @Route("/create", methods={"POST"}, name="core_creation_create")
 	 * @Template("LadbCoreBundle:Wonder/Creation:new.html.twig")
 	 */
-	public function createAction(Request $request) {
+	public function createAction(Request $request, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$owner = $this->retrieveOwner($request);
 
@@ -95,10 +97,8 @@ class CreationController extends AbstractController {
 
 		if ($form->isValid()) {
 
-			$blockUtils = $this->get(BlockBodiedUtils::NAME);
 			$blockUtils->preprocessBlocks($creation);
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($creation);
 
 			$creation->setUser($owner);
@@ -109,16 +109,13 @@ class CreationController extends AbstractController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($creation));
 
 			return $this->redirect($this->generateUrl('core_creation_show', array( 'id' => $creation->getSluggedId() )));
 		}
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
-
-		$tagUtils = $this->get(TagUtils::NAME);
+		$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 		return array(
 			'creation'     => $creation,
@@ -133,13 +130,12 @@ class CreationController extends AbstractController {
 	 * @Route("/{id}/lock", requirements={"id" = "\d+"}, defaults={"lock" = true}, name="core_creation_lock")
 	 * @Route("/{id}/unlock", requirements={"id" = "\d+"}, defaults={"lock" = false}, name="core_creation_unlock")
 	 */
-	public function lockUnlockAction($id, $lock) {
+	public function lockUnlockAction($id, $lock, CreationManager $creationManager, TranslatorInterface $translator) {
 
 		$creation = $this->retrievePublication($id, Creation::CLASS_NAME);
 		$this->assertLockUnlockable($creation, $lock);
 
 		// Lock or Unlock
-		$creationManager = $this->get(CreationManager::NAME);
 		if ($lock) {
 			$creationManager->lock($creation);
 		} else {
@@ -147,7 +143,7 @@ class CreationController extends AbstractController {
 		}
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('wonder.creation.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $creation->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.creation.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $creation->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_creation_show', array( 'id' => $creation->getSluggedId() )));
 	}
@@ -155,17 +151,16 @@ class CreationController extends AbstractController {
 	/**
 	 * @Route("/{id}/publish", requirements={"id" = "\d+"}, name="core_creation_publish")
 	 */
-	public function publishAction($id) {
+	public function publishAction($id, CreationManager $creationManager, TranslatorInterface $translator) {
 
 		$creation = $this->retrievePublication($id, Creation::CLASS_NAME);
 		$this->assertPublishable($creation);
 
 		// Publish
-		$creationManager = $this->get(CreationManager::NAME);
 		$creationManager->publish($creation);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('wonder.creation.form.alert.publish_success', array( '%title%' => $creation->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.creation.form.alert.publish_success', array( '%title%' => $creation->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_creation_show', array( 'id' => $creation->getSluggedId() )));
 	}
@@ -173,17 +168,16 @@ class CreationController extends AbstractController {
 	/**
 	 * @Route("/{id}/unpublish", requirements={"id" = "\d+"}, name="core_creation_unpublish")
 	 */
-	public function unpublishAction(Request $request, $id) {
+	public function unpublishAction(Request $request, $id, CreationManager $creationManager, TranslatorInterface $translator) {
 
 		$creation = $this->retrievePublication($id, Creation::CLASS_NAME);
 		$this->assertUnpublishable($creation);
 
 		// Unpublish
-		$creationManager = $this->get(CreationManager::NAME);
 		$creationManager->unpublish($creation);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('wonder.creation.form.alert.unpublish_success', array( '%title%' => $creation->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.creation.form.alert.unpublish_success', array( '%title%' => $creation->getTitle() )));
 
 		// Return to
 		$returnToUrl = $request->get('rtu');
@@ -198,14 +192,12 @@ class CreationController extends AbstractController {
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_creation_edit")
 	 * @Template("LadbCoreBundle:Wonder/Creation:edit.html.twig")
 	 */
-	public function editAction($id) {
+	public function editAction($id, TagUtils $tagUtils) {
 
 		$creation = $this->retrievePublication($id, Creation::CLASS_NAME);
 		$this->assertEditabable($creation);
 
 		$form = $this->createForm(CreationType::class, $creation);
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'creation'     => $creation,
@@ -218,9 +210,9 @@ class CreationController extends AbstractController {
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_creation_update")
 	 * @Template("LadbCoreBundle:Wonder/Creation:edit.html.twig")
 	 */
-	public function updateAction(Request $request, $id) {
+	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, EmbeddableUtils $embeddableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, PicturedUtils $picturedUtils, StripableUtils $stripableUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
-		$doUp = $request->get('ladb_do_up', false) && $this->get('security.authorization_checker')->isGranted('ROLE_ADMIN');
+		$doUp = $request->get('ladb_do_up', false) && $this->isGranted('ROLE_ADMIN');
 
 		$creation = $this->retrievePublication($id, Creation::CLASS_NAME);
 		$this->assertEditabable($creation);
@@ -228,7 +220,6 @@ class CreationController extends AbstractController {
 		$originalBodyBlocks = $creation->getBodyBlocks()->toArray();	// Need to be an array to copy values
 		$previouslyUsedTags = $creation->getTags()->toArray();	// Need to be an array to copy values
 
-		$picturedUtils = $this->get(PicturedUtils::NAME);
 		$picturedUtils->resetPictures($creation); // Reset pictures array to consider form pictures order
 
 		$creation->resetBodyBlocks(); // Reset bodyBlocks array to consider form bodyBlocks order
@@ -238,16 +229,12 @@ class CreationController extends AbstractController {
 
 		if ($form->isValid()) {
 
-			$blockUtils = $this->get(BlockBodiedUtils::NAME);
 			$blockUtils->preprocessBlocks($creation, $originalBodyBlocks);
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($creation);
 
-			$embeddableUtils = $this->get(EmbeddableUtils::NAME);
 			$embeddableUtils->resetSticker($creation);
 
-			$stripableUtils = $this->get(StripableUtils::NAME);
 			$stripableUtils->resetStrip($creation);
 
 			$creation->setMainPicture($creation->getPictures()->first());
@@ -262,14 +249,13 @@ class CreationController extends AbstractController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher = $this->get('event_dispatcher');
 			if ($doUp) {
 				$dispatcher->dispatch(PublicationListener::PUBLICATION_CHANGED, new PublicationEvent($creation));
 			}
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_UPDATED, new PublicationEvent($creation, array( 'previouslyUsedTags' => $previouslyUsedTags )));
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('wonder.creation.form.alert.update_success', array( '%title%' => $creation->getTitle() )));
+			$this->addFlash('success', $translator->trans('wonder.creation.form.alert.update_success', array( '%title%' => $creation->getTitle() )));
 
 			// Regenerate the form
 			$form = $this->createForm(CreationType::class, $creation);
@@ -277,11 +263,9 @@ class CreationController extends AbstractController {
 		} else {
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
+			$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 		}
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'creation'     => $creation,
@@ -293,17 +277,16 @@ class CreationController extends AbstractController {
 	/**
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_creation_delete")
 	 */
-	public function deleteAction($id) {
+	public function deleteAction($id, CreationManager $creationManager, TranslatorInterface $translator) {
 
 		$creation = $this->retrievePublication($id, Creation::CLASS_NAME);
 		$this->assertDeletable($creation);
 
 		// Delete
-		$creationManager = $this->get(CreationManager::NAME);
 		$creationManager->delete($creation);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('wonder.creation.form.alert.delete_success', array( '%title%' => $creation->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.creation.form.alert.delete_success', array( '%title%' => $creation->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_creation_list'));
 	}
@@ -311,7 +294,7 @@ class CreationController extends AbstractController {
 	/**
 	 * @Route("/{id}/chown", requirements={"id" = "\d+"}, name="core_creation_chown")
 	 */
-	public function chownAction(Request $request, $id) {
+	public function chownAction(Request $request, $id, CreationManager $creationManager, TranslatorInterface $translator) {
 
 		$creation = $this->retrievePublication($id, Creation::CLASS_NAME);
 		$this->assertChownable($creation);
@@ -319,11 +302,10 @@ class CreationController extends AbstractController {
 		$targetUser = $this->retrieveOwner($request);
 
 		// Change owner
-		$creationManager = $this->get(CreationManager::NAME);
 		$creationManager->changeOwner($creation, $targetUser);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('wonder.creation.form.alert.chown_success', array( '%title%' => $creation->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.creation.form.alert.chown_success', array( '%title%' => $creation->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_creation_show', array( 'id' => $creation->getSluggedId() )));
 	}
@@ -334,7 +316,7 @@ class CreationController extends AbstractController {
 	 * @Route("/{id}/questions/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_creation_questions_filter_page")
 	 * @Template("LadbCoreBundle:Wonder/Creation:questions.html.twig")
 	 */
-	public function questionsAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function questionsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 
 		$creation = $this->retrievePublication($id, Creation::CLASS_NAME);
@@ -343,7 +325,6 @@ class CreationController extends AbstractController {
 		// Questions
 
 		$questionRepository = $om->getRepository(Question::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -372,7 +353,7 @@ class CreationController extends AbstractController {
 	 * @Route("/{id}/plans/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_creation_plans_filter_page")
 	 * @Template("LadbCoreBundle:Wonder/Creation:plans.html.twig")
 	 */
-	public function plansAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function plansAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 
 		$creation = $this->retrievePublication($id, Creation::CLASS_NAME);
@@ -381,7 +362,6 @@ class CreationController extends AbstractController {
 		// Plans
 
 		$planRepository = $om->getRepository(Plan::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -417,7 +397,7 @@ class CreationController extends AbstractController {
 	 * @Route("/{id}/pas-a-pas/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_creation_howtos_filter_page")
 	 * @Template("LadbCoreBundle:Wonder/Creation:howtos.html.twig")
 	 */
-	public function howtosAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function howtosAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 
 		$creation = $this->retrievePublication($id, Creation::CLASS_NAME);
@@ -426,7 +406,6 @@ class CreationController extends AbstractController {
 		// Howtos
 
 		$howtoRepository = $om->getRepository(Howto::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -455,7 +434,7 @@ class CreationController extends AbstractController {
 	 * @Route("/{id}/processus/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_creation_workflows_filter_page")
 	 * @Template("LadbCoreBundle:Wonder/Creation:workflows.html.twig")
 	 */
-	public function workflowsAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function workflowsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 
 		$creation = $this->retrievePublication($id, Creation::CLASS_NAME);
@@ -464,7 +443,6 @@ class CreationController extends AbstractController {
 		// Workflows
 
 		$workflowRepository = $om->getRepository(Workflow::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -493,7 +471,7 @@ class CreationController extends AbstractController {
 	 * @Route("/{id}/fournisseurs/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_creation_providers_filter_page")
 	 * @Template("LadbCoreBundle:Wonder/Creation:providers.html.twig")
 	 */
-	public function providersAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function providersAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 
 		$creation = $this->retrievePublication($id, Creation::CLASS_NAME);
@@ -502,7 +480,6 @@ class CreationController extends AbstractController {
 		// Providers
 
 		$providerRepository = $om->getRepository(Provider::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -531,7 +508,7 @@ class CreationController extends AbstractController {
 	 * @Route("/{id}/ecoles/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_creation_schools_filter_page")
 	 * @Template("LadbCoreBundle:Wonder/Creation:schools.html.twig")
 	 */
-	public function schoolsAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function schoolsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 
 		$creation = $this->retrievePublication($id, Creation::CLASS_NAME);
@@ -540,7 +517,6 @@ class CreationController extends AbstractController {
 		// Schools
 
 		$schoolRepository = $om->getRepository(School::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -569,7 +545,7 @@ class CreationController extends AbstractController {
 	 * @Route("/{id}/inspirations/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_creation_inspirations_filter_page")
 	 * @Template("LadbCoreBundle:Wonder/Creation:inspirations.html.twig")
 	 */
-	public function inspirationsAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function inspirationsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 		$creationRepository = $om->getRepository(Creation::CLASS_NAME);
 
@@ -577,8 +553,6 @@ class CreationController extends AbstractController {
 		$this->assertShowable($creation);
 
 		// Inspirations
-
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -607,7 +581,7 @@ class CreationController extends AbstractController {
 	 * @Route("/{id}/rebonds/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_creation_rebounds_filter_page")
 	 * @Template("LadbCoreBundle:Wonder/Creation:rebounds.html.twig")
 	 */
-	public function reboundsAction(Request $request, $id, $filter = "recent", $page = 0) {
+	public function reboundsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 		$creationRepository = $om->getRepository(Creation::CLASS_NAME);
 
@@ -615,8 +589,6 @@ class CreationController extends AbstractController {
 		$this->assertShowable($creation);
 
 		// Rebounds
-
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);
 		$limit = $paginatorUtils->computePaginatorLimit($page);
@@ -649,7 +621,7 @@ class CreationController extends AbstractController {
 	/**
 	 * @Route("/{id}/sticker", requirements={"id" = "\d+"}, name="core_creation_sticker")
 	 */
-	public function stickerAction(Request $request, $id) {
+	public function stickerAction(Request $request, $id, EmbeddableUtils $embeddableUtils, ImagineController $imagineController) {
 		$om = $this->getDoctrine()->getManager();
 
 		$creation = $this->retrievePublication($id, Creation::CLASS_NAME);
@@ -657,7 +629,6 @@ class CreationController extends AbstractController {
 
 		$sticker = $creation->getSticker();
 		if (is_null($sticker)) {
-			$embeddableUtils = $this->get(EmbeddableUtils::NAME);
 			$sticker = $embeddableUtils->generateSticker($creation);
 			if (!is_null($sticker)) {
 				$om->flush();
@@ -668,7 +639,7 @@ class CreationController extends AbstractController {
 
 		if (!is_null($sticker)) {
 
-			$response = $this->get('liip_imagine.controller')->filterAction($request, $sticker->getWebPath(), '598w');
+			$response = $imagineController->filterAction($request, $sticker->getWebPath(), '598w');
 			return $response;
 
 		} else {
@@ -680,7 +651,7 @@ class CreationController extends AbstractController {
 	/**
 	 * @Route("/{id}/strip", requirements={"id" = "\d+"}, name="core_creation_strip")
 	 */
-	public function stripAction(Request $request, $id) {
+	public function stripAction(Request $request, $id, ImagineController $imagineController, StripableUtils $stripableUtils) {
 		$om = $this->getDoctrine()->getManager();
 
 		$creation = $this->retrievePublication($id, Creation::CLASS_NAME);
@@ -688,7 +659,6 @@ class CreationController extends AbstractController {
 
 		$strip = $creation->getStrip();
 		if (is_null($strip)) {
-			$stripableUtils = $this->get(StripableUtils::NAME);
 			$strip = $stripableUtils->generateStrip($creation);
 			if (!is_null($strip)) {
 				$om->flush();
@@ -699,7 +669,7 @@ class CreationController extends AbstractController {
 
 		if (!is_null($strip)) {
 
-			$response = $this->get('liip_imagine.controller')->filterAction($request, $strip->getWebPath(), '564w');
+			$response = $imagineController->filterAction($request, $strip->getWebPath(), '564w');
 			return $response;
 
 		} else {
@@ -735,8 +705,7 @@ class CreationController extends AbstractController {
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_creation_list_page")
 	 * @Template("LadbCoreBundle:Wonder/Creation:list.html.twig")
 	 */
-	public function listAction(Request $request, $page = 0) {
-		$searchUtils = $this->get(SearchUtils::NAME);
+	public function listAction(Request $request, EventDispatcherInterface $dispatcher, ElasticaQueryUtils $elasticaQueryUtils, MaybeUtils $maybeUtils, SearchUtils $searchUtils, TranslatorInterface $translator, TypableUtils $typableUtils, $page = 0) {
 
 		// Elasticsearch paginiation limit
 		if ($page > 624) {
@@ -763,7 +732,6 @@ class CreationController extends AbstractController {
 				$spotlight = $spotlightRepository->findOneLast();
 
 				if (!is_null($spotlight) && $page == 0) {
-					$typableUtils = $this->get(TypableUtils::NAME);
 					try {
 						$spotlightEntity = $typableUtils->findTypable($spotlight->getEntityType(), $spotlight->getEntityId());
 					} catch (\Exception $e) {
@@ -792,7 +760,6 @@ class CreationController extends AbstractController {
 			// Tip & Offer highlight
 			if ((!isset($highlightedCollection) || is_null($highlightedCollection)) && (!isset($runningEvents) || empty($runningEvents))) {
 
-				$maybeUtils = $this->get(MaybeUtils::NAME);
 				if ($maybeUtils->canDoIt(0, 10, 'tip')) {
 					$tipRepository = $om->getRepository(Tip::CLASS_NAME);
 					$highlightedTip = $tipRepository->findOneRandomByUser($this->getUser());
@@ -805,10 +772,10 @@ class CreationController extends AbstractController {
 
 			// PostHighlight
 			$postRepository = $om->getRepository(Post::CLASS_NAME);
-			$highlightedPost = $postRepository->findOneLastOnHighlightLevel($this->get('security.authorization_checker')->isGranted('ROLE_USER') ? Post::HIGHLIGHT_LEVEL_USER_ONLY : Post::HIGHLIGHT_LEVEL_ALL);
+			$highlightedPost = $postRepository->findOneLastOnHighlightLevel($this->isGranted('ROLE_USER') ? Post::HIGHLIGHT_LEVEL_USER_ONLY : Post::HIGHLIGHT_LEVEL_ALL);
 
 			// Check if post is already viewed
-			if (!is_null($highlightedPost) && $this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
+			if (!is_null($highlightedPost) && $this->isGranted('ROLE_USER')) {
 				$viewRepository = $om->getRepository(View::CLASS_NAME);
 				if ($viewRepository->existsByEntityTypeAndEntityIdAndUserAndKind($highlightedPost->getType(), $highlightedPost->getId(), $this->getUser(), View::KIND_SHOWN)) {
 					$highlightedPost = null;
@@ -822,14 +789,14 @@ class CreationController extends AbstractController {
 		$searchParameters = $searchUtils->searchPaginedEntities(
 			$request,
 			$page,
-			function($facet, &$filters, &$sort, &$noGlobalFilters, &$couldUseDefaultSort) use ($searchUtils) {
+			function($facet, &$filters, &$sort, &$noGlobalFilters, &$couldUseDefaultSort) use ($searchUtils, $elasticaQueryUtils) {
 				switch ($facet->name) {
 
 					// Filters /////
 
 					case 'mine':
 
-						if ($this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
+						if ($this->isGranted('ROLE_USER')) {
 
 							if (isset($facet->value) && $facet->value == 'draft') {
 
@@ -876,7 +843,6 @@ class CreationController extends AbstractController {
 
 					case 'woods':
 
-						$elasticaQueryUtils = $this->get(ElasticaQueryUtils::NAME);
 						$filters[] = $elasticaQueryUtils->createShouldMatchPhraseQuery('woods.label', $facet->value);
 
 						break;
@@ -1052,7 +1018,6 @@ class CreationController extends AbstractController {
 		);
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATIONS_LISTED, new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()));
 
 		$parameters = array_merge($searchParameters, array(
@@ -1084,13 +1049,13 @@ class CreationController extends AbstractController {
 			'highlightedOffer'      => isset($highlightedOffer) ? $highlightedOffer : null,
 		));
 
-		if ($this->get('security.authorization_checker')->isGranted('ROLE_USER') && $this->getUser()->getMeta()->getPrivateCreationCount() > 0) {
+		if ($this->isGranted('ROLE_USER') && $this->getUser()->getMeta()->getPrivateCreationCount() > 0) {
 
 			$draftPath = $this->generateUrl('core_creation_list', array( 'q' => '@mine:draft' ));
 			$draftCount = $this->getUser()->getMeta()->getPrivateCreationCount();
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('info', '<i class="ladb-icon-warning"></i> '.$this->get('translator')->transchoice('wonder.creation.choice.draft_alert', $draftCount, array( '%count%' => $draftCount )).' <small><a href="'.$draftPath.'" class="alert-link">('.$this->get('translator')->trans('default.show_my_drafts').')</a></small>');
+			$this->addFlash('info', '<i class="ladb-icon-warning"></i> '.$translator->transchoice('wonder.creation.choice.draft_alert', $draftCount, array( '%count%' => $draftCount )).' <small><a href="'.$draftPath.'" class="alert-link">('.$translator->trans('default.show_my_drafts').')</a></small>');
 
 		}
 
@@ -1100,10 +1065,9 @@ class CreationController extends AbstractController {
 	/**
 	 * @Route("/feed.xml", name="core_creation_feed")
 	 */
-	public function feedAction() {
+	public function feedAction(CacheManager $cacheManager, TranslatorInterface $translator) {
 		$om = $this->getDoctrine()->getManager();
 		$creationRepository = $om->getRepository(Creation::CLASS_NAME);
-		$translator = $this->get('translator');
 
 		$feed = new \Suin\RSSWriter\Feed();
 
@@ -1130,7 +1094,7 @@ class CreationController extends AbstractController {
 				->author($creation->getUser()->getDisplayName())
 				->pubDate($creation->getChangedAt()->getTimestamp())
 				->guid($this->generateUrl('core_creation_show', array('id' => $creation->getId()), \Symfony\Component\Routing\Generator\UrlGeneratorInterface::ABSOLUTE_URL), true)
-				->enclosure($this->get('liip_imagine.cache.manager')->getBrowserPath($creation->getMainPicture()->getWebPath(), '594x294o'), 0, image_type_to_mime_type(exif_imagetype($creation->getMainPicture()->getAbsoluteMasterPath())))
+				->enclosure($cacheManager->getBrowserPath($creation->getMainPicture()->getWebPath(), '594x294o'), 0, image_type_to_mime_type(exif_imagetype($creation->getMainPicture()->getAbsoluteMasterPath())))
 			;
 
 			foreach ($creation->getTags() as $tag) {
@@ -1152,10 +1116,9 @@ class CreationController extends AbstractController {
 	 * @Route("/{id}.html", name="core_creation_show")
 	 * @Template("LadbCoreBundle:Wonder/Creation:show.html.twig")
 	 */
-	public function showAction(Request $request, $id) {
+	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ElasticaQueryUtils $elasticaQueryUtils, EmbeddableUtils $embaddableUtils, ExplorableUtils $explorableUtils, FeedbackableUtils $feedbackableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, SearchUtils $searchUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();
 		$creationRepository = $om->getRepository(Creation::CLASS_NAME);
-		$witnessManager = $this->get(WitnessManager::NAME);
 
 		$id = intval($id);
 
@@ -1168,14 +1131,11 @@ class CreationController extends AbstractController {
 		}
 		$this->assertShowable($creation);
 
-		$embaddableUtils = $this->get(EmbeddableUtils::NAME);
 		$referral = $embaddableUtils->processReferer($creation, $request);
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($creation));
 
-		$explorableUtils = $this->get(ExplorableUtils::NAME);
 		$userCreations = $explorableUtils->getPreviousAndNextPublishedUserExplorables($creation, $creationRepository, $creation->getUser()->getMeta()->getPublicCreationCount());
 		$similarCreations = $explorableUtils->getSimilarExplorables($creation, 'fos_elastica.index.ladb.wonder_creation', Creation::CLASS_NAME, $userCreations);
 
@@ -1190,17 +1150,8 @@ class CreationController extends AbstractController {
 		}
 		$toolsString = implode(',', $toolsLabels);
 
-		$searchUtils = $this->get(SearchUtils::NAME);
-		$elasticaQueryUtils = $this->get(ElasticaQueryUtils::NAME);
 		$searchableWoodCount = $searchUtils->searchEntitiesCount(array( $elasticaQueryUtils->createShouldMatchPhraseQuery('name', $woodsString) ), 'fos_elastica.index.ladb.knowledge_wood');
 		$searchableToolCount = $searchUtils->searchEntitiesCount(array( $elasticaQueryUtils->createShouldMatchPhraseQuery('name', $toolsString) ), 'fos_elastica.index.ladb.knowledge_tool');
-
-		$likableUtils = $this->get(LikableUtils::NAME);
-		$watchableUtils = $this->get(WatchableUtils::NAME);
-		$feedbackableUtils = $this->get(FeedbackableUtils::NAME);
-		$commentableUtils = $this->get(CommentableUtils::NAME);
-		$collectionnableUtils = $this->get(CollectionnableUtils::NAME);
-		$followerUtils = $this->get(FollowerUtils::NAME);
 
 		return array(
 			'creation'            => $creation,
@@ -1225,7 +1176,7 @@ class CreationController extends AbstractController {
 	 * @Route("/{id}/admin/converttoworkshop", requirements={"id" = "\d+"}, name="core_creation_admin_converttoworkshop")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_creation_admin_converttoworkshop)")
 	 */
-	public function adminConvertToWorkshopAction($id) {
+	public function adminConvertToWorkshopAction($id, CreationManager $creationManager, TranslatorInterface $translator) {
 		$om = $this->getDoctrine()->getManager();
 		$creationRepository = $om->getRepository(Creation::CLASS_NAME);
 
@@ -1235,11 +1186,10 @@ class CreationController extends AbstractController {
 		}
 
 		// Convert
-		$creationManager = $this->get(CreationManager::NAME);
 		$workshop = $creationManager->convertToWorkshop($creation);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('wonder.creation.admin.alert.converttoworkshop_success', array( '%title%' => $creation->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.creation.admin.alert.converttoworkshop_success', array( '%title%' => $creation->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_workshop_show', array( 'id' => $workshop->getSluggedId() )));
 	}
@@ -1248,7 +1198,7 @@ class CreationController extends AbstractController {
 	 * @Route("/{id}/admin/converttohowto", requirements={"id" = "\d+"}, name="core_creation_admin_converttohowto")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_creation_admin_converttohowto)")
 	 */
-	public function adminConvertToHowtoAction($id) {
+	public function adminConvertToHowtoAction($id, CreationManager $creationManager, TranslatorInterface $translator) {
 		$om = $this->getDoctrine()->getManager();
 		$creationRepository = $om->getRepository(Creation::CLASS_NAME);
 
@@ -1258,11 +1208,10 @@ class CreationController extends AbstractController {
 		}
 
 		// Convert
-		$creationManager = $this->get(CreationManager::NAME);
 		$howto = $creationManager->convertToHowto($creation);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('wonder.creation.admin.alert.converttohowto_success', array( '%title%' => $creation->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.creation.admin.alert.converttohowto_success', array( '%title%' => $creation->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_howto_show', array( 'id' => $howto->getSluggedId() )));
 	}
@@ -1271,7 +1220,7 @@ class CreationController extends AbstractController {
 	 * @Route("/{id}/admin/converttofind", requirements={"id" = "\d+"}, name="core_creation_admin_converttofind")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_creation_admin_converttofind)")
 	 */
-	public function adminConvertToFindAction($id) {
+	public function adminConvertToFindAction($id, CreationManager $creationManager, TranslatorInterface $translator) {
 		$om = $this->getDoctrine()->getManager();
 		$creationRepository = $om->getRepository(Creation::CLASS_NAME);
 
@@ -1281,11 +1230,10 @@ class CreationController extends AbstractController {
 		}
 
 		// Convert
-		$creationManager = $this->get(CreationManager::NAME);
 		$find = $creationManager->convertToFind($creation);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('wonder.creation.admin.alert.converttofind_success', array( '%title%' => $creation->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.creation.admin.alert.converttofind_success', array( '%title%' => $creation->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_find_show', array( 'id' => $find->getSluggedId() )));
 	}
@@ -1294,7 +1242,7 @@ class CreationController extends AbstractController {
 	 * @Route("/{id}/admin/converttoquestion", requirements={"id" = "\d+"}, name="core_creation_admin_converttoquestion")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_creation_admin_converttoquestion)")
 	 */
-	public function adminConvertToQuestionAction($id) {
+	public function adminConvertToQuestionAction($id, CreationManager $creationManager, TranslatorInterface $translator) {
 		$om = $this->getDoctrine()->getManager();
 		$creationRepository = $om->getRepository(Creation::CLASS_NAME);
 
@@ -1304,11 +1252,10 @@ class CreationController extends AbstractController {
 		}
 
 		// Convert
-		$creationManager = $this->get(CreationManager::NAME);
 		$question = $creationManager->convertToQuestion($creation);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('wonder.creation.admin.alert.converttoquestion_success', array( '%title%' => $creation->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.creation.admin.alert.converttoquestion_success', array( '%title%' => $creation->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_qa_question_show', array( 'id' => $question->getSluggedId() )));
 	}
@@ -1317,7 +1264,7 @@ class CreationController extends AbstractController {
 	 * @Route("/{id}/admin/converttooffer", requirements={"id" = "\d+"}, name="core_creation_admin_converttooffer")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_creation_admin_converttooffer)")
 	 */
-	public function adminConvertToOfferAction($id) {
+	public function adminConvertToOfferAction($id, CreationManager $creationManager, TranslatorInterface $translator) {
 		$om = $this->getDoctrine()->getManager();
 		$creationRepository = $om->getRepository(Creation::CLASS_NAME);
 
@@ -1327,11 +1274,10 @@ class CreationController extends AbstractController {
 		}
 
 		// Convert
-		$creationManager = $this->get(CreationManager::NAME);
 		$offer = $creationManager->convertToOffer($creation);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('wonder.creation.admin.alert.converttooffer_success', array( '%title%' => $offer->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.creation.admin.alert.converttooffer_success', array( '%title%' => $offer->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_offer_show', array( 'id' => $offer->getSluggedId() )));
 	}
