@@ -186,6 +186,10 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() des ac
   `void` via `ForwardCompatTestTrait`) et avec `symfony/phpunit-bridge` 3.4 (`TestListener` et
   `ErrorHandler` de PHPUnit, supprimés en 10). Le `simple-phpunit` du bridge 3.4 ne sait pas
   installer PHPUnit 9.6 (il garde le `composer.lock` du paquet et n'installe pas le bridge).
+- `qa:phpunit` lance PHP avec OPcache (`opcache.enable_cli=1`, `file_update_protection=0`, #113) :
+  chaque requête d'un test démarre un nouveau container, qui recharge ses fichiers de services, et
+  sans OPcache la compilation de celui d'`argument_resolver.service` (une closure par action) garde
+  143 Ko jusqu'à la fin du process. La suite monte alors à plus de 700 Mo, contre 107 Mo.
 - Tests dans `tests/` (namespace `Tests\`, `autoload-dev`), configuration `phpunit.xml.dist` à la
   racine, `KERNEL_CLASS=AppKernel`. PHPStan n'analyse pas `tests/` (il n'y trouverait pas
   PHPUnit).
