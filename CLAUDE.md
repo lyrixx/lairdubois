@@ -170,6 +170,7 @@ castor qa:phpunit [-- --filter …]
 castor qa:deprecations       # var/deprecations/report.md, et le résumé du job en CI
 castor qa:install            # outils de tools/ (PHPStan, PHPUnit), installés à la volée sinon
 castor qa:e2e [-- --grep …]  # tests E2E (Playwright) : recharge la base du dev, hors qa:all, job E2E en CI
+castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() des actions → arguments (#16)
 ```
 
 - PHPUnit 9.6, dans `tools/phpunit` et pas dans le `composer.json` de l'application : c'est la
@@ -194,6 +195,10 @@ castor qa:e2e [-- --grep …]  # tests E2E (Playwright) : recharge la base du de
   `lint:twig` exige des chemins.
 - Cache GitHub Actions : couches Docker (`type=gha`, un scope par cible du Dockerfile, via un
   `docker-compose.override.yml` écrit par le workflow) et cache Composer (`.home/.cache/composer`).
+- Rector 2 dans `tools/rector`, hors `qa:install` (la CI n'en a pas besoin), avec les règles du
+  projet (`tools/rector/src/`). `ControllerGetToActionArgumentRector` laisse
+  `__RECTOR_REMOVED_LINE__;` à la place des lignes qu'il supprime, que `qa:rector` retire ensuite :
+  php-parser réimprimerait les commentaires d'avant sans leur indentation.
 
 ## Fixtures
 
@@ -451,6 +456,10 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `TypeError`) sort du kernel au lieu de donner une 500.
 - Les mots de passe sont hashés en sha512 par FOSUserBundle : les comptes existants doivent continuer
   à se connecter sans reset, d'un bout à l'autre de la migration.
+- Controllers : services autowirés (prototype `Ladb\CoreBundle\Controller\`), une action reçoit ses
+  services en arguments, un trait ou un controller abstrait par un setter `@required`. En 3.4, un
+  `bind` ne s'applique à un argument d'action que s'il désigne un service, pas une valeur
+  (`%param%`) : les paramètres restent lus par `$this->getParameter()`.
 - PHPStan lit la version de PHP dans `composer.json` (`>=7.3`) : la syntaxe PHP 8 (propriétés
   promues, `readonly`, virgule finale dans une signature) y est une erreur, même si tout tourne en
   8.5.

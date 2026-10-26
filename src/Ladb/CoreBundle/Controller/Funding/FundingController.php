@@ -31,7 +31,7 @@ class FundingController extends AbstractController {
 	 * @Route("/{year}/{month}", requirements={"year" = "\d+", "month" = "\d+"}, name="core_funding_dashboard_year_month")
 	 * @Template("LadbCoreBundle:Funding:dashboard.html.twig")
 	 */
-	public function dashboardAction(Request $request, $year = null, $month = null) {
+	public function dashboardAction(Request $request, FundingManager $fundingManager, $year = null, $month = null) {
 		$om = $this->getDoctrine()->getManager();
 		$fundingRepository = $om->getRepository(Funding::CLASS_NAME);
 		$userRepository = $om->getRepository(User::CLASS_NAME);
@@ -41,7 +41,6 @@ class FundingController extends AbstractController {
 		$autoShow = $request->get('auto_show', false);
 
 		if (is_null($year) || is_null($month)) {
-			$fundingManager = $this->get(FundingManager::NAME);
 			$funding = $fundingManager->getOrCreateCurrent();
 		} else {
 			$funding = $fundingRepository->findOneByYearAndMonth($year, $month);
@@ -53,8 +52,8 @@ class FundingController extends AbstractController {
 		$prevDate = $funding->getId() == 1 ? null : new \DateTime($funding->getYear().'-'.$funding->getMonth().'-01 first day of previous month');
 		$nextDate = $funding->getIsCurrent() ? null : new \DateTime($funding->getYear().'-'.$funding->getMonth().'-01 first day of next month');
 
-		$prevPageUrl = $prevDate ? $this->get('router')->generate('core_funding_dashboard_year_month', array( 'month' => $prevDate->format('m'), 'year' => $prevDate->format('Y') )) : null;
-		$nextPageUrl = $nextDate ? $this->get('router')->generate('core_funding_dashboard_year_month', array( 'month' => $nextDate->format('m'), 'year' => $nextDate->format('Y') )) : null;
+		$prevPageUrl = $prevDate ? $this->generateUrl('core_funding_dashboard_year_month', array( 'month' => $prevDate->format('m'), 'year' => $prevDate->format('Y') )) : null;
+		$nextPageUrl = $nextDate ? $this->generateUrl('core_funding_dashboard_year_month', array( 'month' => $nextDate->format('m'), 'year' => $nextDate->format('Y') )) : null;
 
 		$parameters = array(
 			'funding'     => $funding,
@@ -76,7 +75,7 @@ class FundingController extends AbstractController {
 	 * @Route("/{year}/{month}/infos/{panel}.xhr", requirements={"year" = "\d+", "month" = "\d+", "panel"="[a-z-]+"}, name="core_funding_infos")
 	 * @Template("LadbCoreBundle:Funding:infos-charge-balance.html.twig")
 	 */
-	public function infosAction(Request $request, $year = null, $month = null, $panel = null) {
+	public function infosAction(Request $request, FundingManager $fundingManager, $year = null, $month = null, $panel = null) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_funding_infos)');
 		}
@@ -85,7 +84,6 @@ class FundingController extends AbstractController {
 		$fundingRepository = $om->getRepository(Funding::CLASS_NAME);
 
 		if (is_null($year) || is_null($month)) {
-			$fundingManager = $this->get(FundingManager::NAME);
 			$funding = $fundingManager->getOrCreateCurrent();
 		} else {
 			$funding = $fundingRepository->findOneByYearAndMonth($year, $month);
@@ -144,7 +142,7 @@ class FundingController extends AbstractController {
 	 * @Template("LadbCoreBundle:Funding:charge-new-xhr.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_funding_admin_charge_create)")
 	 */
-	public function chargeCreateAction(Request $request, $year = null, $month = null) {
+	public function chargeCreateAction(Request $request, FundingManager $fundingManager, $year = null, $month = null) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_funding_admin_charge_create)');
 		}
@@ -168,7 +166,6 @@ class FundingController extends AbstractController {
 			$funding->incrementChargeBalance($charge->getAmount());
 
 			// Compute carriedForwardBalance to all next fundings
-			$fundingManager = $this->get(FundingManager::NAME);
 			$fundingManager->updateCarriedForwardBalancesFrom($funding, false);
 
 			$om->flush();
@@ -215,7 +212,7 @@ class FundingController extends AbstractController {
 	 * @Template("LadbCoreBundle:Funding:charge-update-xhr.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_funding_admin_charge_update)")
 	 */
-	public function chargeUpdateAction(Request $request, $id) {
+	public function chargeUpdateAction(Request $request, $id, FundingManager $fundingManager) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_funding_admin_charge_update)');
 		}
@@ -240,7 +237,6 @@ class FundingController extends AbstractController {
 			$funding->incrementChargeBalance($charge->getAmount() - $previousChargeAmount);
 
 			// Compute carriedForwardBalance to all next fundings
-			$fundingManager = $this->get(FundingManager::NAME);
 			$fundingManager->updateCarriedForwardBalancesFrom($funding, false);
 
 			$om->flush();
@@ -261,7 +257,7 @@ class FundingController extends AbstractController {
 	 * @Template("LadbCoreBundle:Funding:charge-delete-xhr.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_funding_admin_charge_delete)")
 	 */
-	public function chargeDeleteAction(Request $request, $id) {
+	public function chargeDeleteAction(Request $request, $id, FundingManager $fundingManager) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_funding_admin_charge_delete)');
 		}
@@ -280,7 +276,6 @@ class FundingController extends AbstractController {
 		$funding->removeCharge($charge);
 
 		// Compute carriedForwardBalance to all next fundings
-		$fundingManager = $this->get(FundingManager::NAME);
 		$fundingManager->updateCarriedForwardBalancesFrom($funding, false);
 
 		$om->remove($charge);
@@ -375,7 +370,7 @@ class FundingController extends AbstractController {
 
 		return new JsonResponse(array(
 			'success' => true,
-			'content' => $this->get('templating')->render('LadbCoreBundle:Funding:donation-confirmed.html.twig', array(
+			'content' => $this->renderView('LadbCoreBundle:Funding:donation-confirmed.html.twig', array(
 				'amountEur' => $amount / 100,
 			)),
 		));
@@ -384,7 +379,7 @@ class FundingController extends AbstractController {
 	/**
 	 * @Route("/donation/webhook", name="core_funding_donation_webhook")
 	 */
-	public function donationWebhookAction(Request $request) {
+	public function donationWebhookAction(Request $request, FundingManager $fundingManager, MailerUtils $mailerUtils) {
 
 		// Setup Stripe API
 		\Stripe\Stripe::setApiKey($this->getParameter('stripe_secret_key'));
@@ -457,7 +452,6 @@ class FundingController extends AbstractController {
 				$om->persist($donation);
 
 				// Update current Funding
-				$fundingManager = $this->get(FundingManager::NAME);
 				$funding = $fundingManager->getOrCreateCurrent();
 				$funding->incrementDonationFeeBalance($donation->getFee());
 				$funding->incrementDonationBalance($donation->getAmount());
@@ -477,7 +471,6 @@ class FundingController extends AbstractController {
 				$om->flush();
 
 				// Email confirmation (after persist to have a donation id)
-				$mailerUtils = $this->get(MailerUtils::NAME);
 				$mailerUtils->sendFundingPaymentReceiptEmailMessage($user, $donation);
 
 				// Email notification (to admin)
@@ -500,10 +493,9 @@ class FundingController extends AbstractController {
 	 * @Route("/donateurs/{page}", requirements={"filter" = "\w+", "page" = "\d+"}, name="core_funding_donors_page")
 	 * @Template("LadbCoreBundle:Funding:donors.html.twig")
 	 */
-	public function donorsAction(Request $request, $page = 0) {
+	public function donorsAction(Request $request, PaginatorUtils $paginatorUtils, $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 		$userRepository = $om->getRepository(User::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page, 20, 20);
 		$limit = $paginatorUtils->computePaginatorLimit($page, 20, 20);
@@ -530,11 +522,10 @@ class FundingController extends AbstractController {
 	 * @Route("/mes-dons/{filter}/{page}", requirements={"filter" = "\w+", "page" = "\d+"}, name="core_funding_user_donation_list_filter_page")
 	 * @Template("LadbCoreBundle:Funding:user-donation-list.html.twig")
 	 */
-	public function userDonationListAction(Request $request, $filter = 'recent', $page = 0) {
+	public function userDonationListAction(Request $request, PaginatorUtils $paginatorUtils, $filter = 'recent', $page = 0) {
 		$om = $this->getDoctrine()->getManager();
 		$donationRepository = $om->getRepository(Donation::CLASS_NAME);
 		$userRepository = $om->getRepository(User::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page, 20, 20);
 		$limit = $paginatorUtils->computePaginatorLimit($page, 20, 20);
@@ -563,15 +554,14 @@ class FundingController extends AbstractController {
 	 * @Route("/admin/dons/{filter}/{page}", requirements={"filter" = "\w+", "page" = "\d+"}, name="core_funding_admin_donation_list_filter_page")
 	 * @Template("LadbCoreBundle:Funding:donation-list.html.twig")
 	 */
-	public function donationListAction(Request $request, $filter = 'recent', $page = 0) {
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+	public function donationListAction(Request $request, PaginatorUtils $paginatorUtils, $filter = 'recent', $page = 0) {
+		if (!$this->isGranted('ROLE_ADMIN')) {
 			throw $this->createNotFoundException('Access denied');
 		}
 
 		$om = $this->getDoctrine()->getManager();
 		$donationRepository = $om->getRepository(Donation::CLASS_NAME);
 		$userRepository = $om->getRepository(User::CLASS_NAME);
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page, 20, 20);
 		$limit = $paginatorUtils->computePaginatorLimit($page, 20, 20);

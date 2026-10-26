@@ -27,6 +27,8 @@ use Ladb\CoreBundle\Event\PublicationListener;
 use Ladb\CoreBundle\Event\PublicationsEvent;
 use Ladb\CoreBundle\Manager\Blog\PostManager;
 use Ladb\CoreBundle\Manager\Core\WitnessManager;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @Route("/blog")
@@ -40,13 +42,11 @@ class PostController extends AbstractController {
 	 * @Template("LadbCoreBundle:Blog/Post:new.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_BLOG')", statusCode=404, message="Not allowed (core_blog_post_new)")
 	 */
-	public function newAction() {
+	public function newAction(TagUtils $tagUtils) {
 
 		$post = new Post();
 		$post->addBodyBlock(new \Ladb\CoreBundle\Entity\Core\Block\Text());	// Add a default Text body block
 		$form = $this->createForm(PostType::class, $post);
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'form'         => $form->createView(),
@@ -59,7 +59,7 @@ class PostController extends AbstractController {
 	 * @Template("LadbCoreBundle:Blog/Post:new.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_BLOG')", statusCode=404, message="Not allowed (core_blog_post_create)")
 	 */
-	public function createAction(Request $request) {
+	public function createAction(Request $request, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$this->createLock('core_blog_post_create', false, self::LOCK_TTL_CREATE_ACTION, false);
 
@@ -71,10 +71,8 @@ class PostController extends AbstractController {
 
 		if ($form->isValid()) {
 
-			$blockUtils = $this->get(BlockBodiedUtils::NAME);
 			$blockUtils->preprocessBlocks($post);
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($post);
 
 			$post->setUser($this->getUser());
@@ -83,16 +81,13 @@ class PostController extends AbstractController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($post));
 
 			return $this->redirect($this->generateUrl('core_blog_post_show', array( 'id' => $post->getSluggedId() )));
 		}
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
-
-		$tagUtils = $this->get(TagUtils::NAME);
+		$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 
 
@@ -107,13 +102,12 @@ class PostController extends AbstractController {
 	 * @Route("/{id}/lock", requirements={"id" = "\d+"}, defaults={"lock" = true}, name="core_blog_post_lock")
 	 * @Route("/{id}/unlock", requirements={"id" = "\d+"}, defaults={"lock" = false}, name="core_blog_post_unlock")
 	 */
-	public function lockUnlockAction($id, $lock) {
+	public function lockUnlockAction($id, $lock, PostManager $postManager, TranslatorInterface $translator) {
 
 		$post = $this->retrievePublication($id, Post::CLASS_NAME);
 		$this->assertLockUnlockable($post, $lock);
 
 		// Lock or Unlock
-		$postManager = $this->get(PostManager::NAME);
 		if ($lock) {
 			$postManager->lock($post);
 		} else {
@@ -121,7 +115,7 @@ class PostController extends AbstractController {
 		}
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('wonder.creation.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $post->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.creation.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $post->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_blog_post_show', array( 'id' => $post->getSluggedId() )));
 	}
@@ -130,17 +124,16 @@ class PostController extends AbstractController {
 	 * @Route("/{id}/publish", requirements={"id" = "\d+"}, name="core_blog_post_publish")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_BLOG')", statusCode=404, message="Not allowed (core_blog_post_publish)")
 	 */
-	public function publishAction($id) {
+	public function publishAction($id, PostManager $postManager, TranslatorInterface $translator) {
 
 		$post = $this->retrievePublication($id, Post::CLASS_NAME);
 		$this->assertPublishable($post);
 
 		// Publish
-		$postManager = $this->get(PostManager::NAME);
 		$postManager->publish($post);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('blog.post.form.alert.publish_success', array( '%title%' => $post->getTitle() )));
+		$this->addFlash('success', $translator->trans('blog.post.form.alert.publish_success', array( '%title%' => $post->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_blog_post_show', array( 'id' => $post->getSluggedId() )));
 	}
@@ -148,17 +141,16 @@ class PostController extends AbstractController {
 	/**
 	 * @Route("/{id}/unpublish", requirements={"id" = "\d+"}, name="core_blog_post_unpublish")
 	 */
-	public function unpublishAction(Request $request, $id) {
+	public function unpublishAction(Request $request, $id, PostManager $postManager, TranslatorInterface $translator) {
 
 		$post = $this->retrievePublication($id, Post::CLASS_NAME);
 		$this->assertUnpublishable($post);
 
 		// Unpublish
-		$postManager = $this->get(PostManager::NAME);
 		$postManager->unpublish($post);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('blog.post.form.alert.unpublish_success', array( '%title%' => $post->getTitle() )));
+		$this->addFlash('success', $translator->trans('blog.post.form.alert.unpublish_success', array( '%title%' => $post->getTitle() )));
 
 		// Return to
 		$returnToUrl = $request->get('rtu');
@@ -174,14 +166,12 @@ class PostController extends AbstractController {
 	 * @Template("LadbCoreBundle:Blog/Post:edit.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_BLOG')", statusCode=404, message="Not allowed (core_blog_post_edit)")
 	 */
-	public function editAction($id) {
+	public function editAction($id, TagUtils $tagUtils) {
 
 		$post = $this->retrievePublication($id, Post::CLASS_NAME);
 		$this->assertEditabable($post);
 
 		$form = $this->createForm(PostType::class, $post);
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'post'         => $post,
@@ -195,7 +185,7 @@ class PostController extends AbstractController {
 	 * @Template("LadbCoreBundle:Blog/Post:edit.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_BLOG')", statusCode=404, message="Not allowed (core_blog_post_update)")
 	 */
-	public function updateAction(Request $request, $id) {
+	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$doUp = $request->get('ladb_do_up', false);
 
@@ -212,10 +202,8 @@ class PostController extends AbstractController {
 
 		if ($form->isValid()) {
 
-			$blockUtils = $this->get(BlockBodiedUtils::NAME);
 			$blockUtils->preprocessBlocks($post, $originalBodyBlocks);
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($post);
 
 			if ($doUp) {
@@ -227,14 +215,13 @@ class PostController extends AbstractController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher = $this->get('event_dispatcher');
 			if ($doUp) {
 				$dispatcher->dispatch(PublicationListener::PUBLICATION_CHANGED, new PublicationEvent($post, array( 'previouslyUsedTags' => $previouslyUsedTags )));
 			}
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_UPDATED, new PublicationEvent($post, array( 'previouslyUsedTags' => $previouslyUsedTags )));
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('blog.post.form.alert.update_success', array( '%title%' => $post->getTitle() )));
+			$this->addFlash('success', $translator->trans('blog.post.form.alert.update_success', array( '%title%' => $post->getTitle() )));
 
 			// Regenerate the form
 			$form = $this->createForm(PostType::class, $post);
@@ -242,11 +229,9 @@ class PostController extends AbstractController {
 		} else {
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
+			$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 		}
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'post'     => $post,
@@ -258,17 +243,16 @@ class PostController extends AbstractController {
 	/**
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_blog_post_delete")
 	 */
-	public function deleteAction($id) {
+	public function deleteAction($id, PostManager $postManager, TranslatorInterface $translator) {
 
 		$post = $this->retrievePublication($id, Post::CLASS_NAME);
 		$this->assertDeletable($post);
 
 		// Delete
-		$postManager = $this->get(PostManager::NAME);
 		$postManager->delete($post);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('blog.post.form.alert.delete_success', array( '%title%' => $post->getTitle() )));
+		$this->addFlash('success', $translator->trans('blog.post.form.alert.delete_success', array( '%title%' => $post->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_blog_post_list'));
 	}
@@ -300,8 +284,7 @@ class PostController extends AbstractController {
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_blog_post_list_page")
 	 * @Template("LadbCoreBundle:Blog/Post:list.html.twig")
 	 */
-	public function listAction(Request $request, $page = 0) {
-		$searchUtils = $this->get(SearchUtils::NAME);
+	public function listAction(Request $request, EventDispatcherInterface $dispatcher, SearchUtils $searchUtils, $page = 0) {
 
 		// Elasticsearch paginiation limit
 		if ($page > 624) {
@@ -317,7 +300,7 @@ class PostController extends AbstractController {
 					// Filters /////
 
 					case 'admin-all':
-						if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+						if ($this->isGranted('ROLE_ADMIN')) {
 
 							$filters[] = new \Elastica\Query\MatchAll();
 
@@ -329,7 +312,7 @@ class PostController extends AbstractController {
 
 					case 'mine':
 
-						if ($this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
+						if ($this->isGranted('ROLE_USER')) {
 
 							if (isset($facet->value) && $facet->value == 'draft') {
 
@@ -424,7 +407,6 @@ class PostController extends AbstractController {
 		);
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATIONS_LISTED, new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()));
 
 		$parameters = array_merge($searchParameters, array(
@@ -442,10 +424,9 @@ class PostController extends AbstractController {
 	 * @Route("/{id}.html", name="core_blog_post_show")
 	 * @Template("LadbCoreBundle:Blog/Post:show.html.twig")
 	 */
-	public function showAction(Request $request, $id) {
+	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();
 		$postRepository = $om->getRepository(\Ladb\CoreBundle\Entity\Blog\Post::CLASS_NAME);
-		$witnessManager = $this->get(WitnessManager::NAME);
 
 		$id = intval($id);
 
@@ -458,18 +439,10 @@ class PostController extends AbstractController {
 		}
 		$this->assertShowable($post);
 
-		$explorableUtils = $this->get(ExplorableUtils::NAME);
 		$similarPosts = $explorableUtils->getSimilarExplorables($post, 'fos_elastica.index.ladb.blog_post', Post::CLASS_NAME);
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($post));
-
-		$likableUtils = $this->get(LikableUtils::NAME);
-		$watchableUtils = $this->get(WatchableUtils::NAME);
-		$commentableUtils = $this->get(CommentableUtils::NAME);
-		$collectionnableUtils = $this->get(CollectionnableUtils::NAME);
-		$followerUtils = $this->get(FollowerUtils::NAME);
 
 		return array(
 			'post'              => $post,

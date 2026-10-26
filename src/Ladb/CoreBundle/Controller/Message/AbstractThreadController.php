@@ -12,6 +12,23 @@ use Ladb\CoreBundle\Utils\WebpushNotificationUtils;
 
 abstract class AbstractThreadController extends AbstractController {
 
+	private $mailerUtils;
+	private $webpushNotificationUtils;
+
+	/**
+	 * @required
+	 */
+	public function setMailerUtils(MailerUtils $mailerUtils) {
+		$this->mailerUtils = $mailerUtils;
+	}
+
+	/**
+	 * @required
+	 */
+	public function setWebpushNotificationUtils(WebpushNotificationUtils $webpushNotificationUtils) {
+		$this->webpushNotificationUtils = $webpushNotificationUtils;
+	}
+
 	protected function retrieveThread($id) {
 		$om = $this->getDoctrine()->getManager();
 		$threadRepository = $om->getRepository(Thread::CLASS_NAME);
@@ -55,8 +72,6 @@ abstract class AbstractThreadController extends AbstractController {
 
 		$om = $this->getDoctrine()->getManager();
 		$memberRepository = $om->getRepository(Member::CLASS_NAME);
-		$mailerUtils = $this->get(MailerUtils::NAME);
-		$webpushNotificationUtils = $this->get(WebpushNotificationUtils::class);
 		$notifiedRecipients = array();
 		foreach ($recipients as $recipient) {
 
@@ -69,10 +84,10 @@ abstract class AbstractThreadController extends AbstractController {
 					}
 
 					// Email notification
-					$mailerUtils->sendIncomingMessageNotificationEmailMessage($recipient, $member->getUser(), $sender, $thread, $message);
+					$this->mailerUtils->sendIncomingMessageNotificationEmailMessage($recipient, $member->getUser(), $sender, $thread, $message);
 
 					// Webpush notification
-					$webpushNotificationUtils->enqueueIncomingMessageNotification($member->getUser(), $sender, $thread);
+					$this->webpushNotificationUtils->enqueueIncomingMessageNotification($member->getUser(), $sender, $thread);
 
 					// Increment unread message count
 					$member->getUser()->getMeta()->incrementUnreadMessageCount();
@@ -86,10 +101,10 @@ abstract class AbstractThreadController extends AbstractController {
 				}
 
 				// Email notification
-				$mailerUtils->sendIncomingMessageNotificationEmailMessage($recipient, $recipient, $sender, $thread, $thread->getMessages()->last());
+				$this->mailerUtils->sendIncomingMessageNotificationEmailMessage($recipient, $recipient, $sender, $thread, $thread->getMessages()->last());
 
 				// Webpush notification
-				$webpushNotificationUtils->enqueueIncomingMessageNotification($recipient, $sender, $thread);
+				$this->webpushNotificationUtils->enqueueIncomingMessageNotification($recipient, $sender, $thread);
 
 				// Increment unread message count
 				$recipient->getMeta()->incrementUnreadMessageCount();

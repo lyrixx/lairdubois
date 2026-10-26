@@ -18,12 +18,21 @@ trait PublicationControllerTrait {
 
 	use UserControllerTrait;
 
+	private $witnessManager;
+
+	/**
+	 * @required
+	 */
+	public function setWitnessManager(WitnessManager $witnessManager) {
+		$this->witnessManager = $witnessManager;
+	}
+
 	// Permissions /////
 
 	protected function getPermissionContext(PublicationInterface $publication) {
 
-		$isGrantedUser = $this->get('security.authorization_checker')->isGranted('ROLE_USER');
-		$isGrantedAdmin = $this->get('security.authorization_checker')->isGranted('ROLE_ADMIN');
+		$isGrantedUser = $this->isGranted('ROLE_USER');
+		$isGrantedAdmin = $this->isGranted('ROLE_ADMIN');
 		$isOwner = $publication instanceof AuthoredInterface && $publication->getUser() == $this->getUser();
 		$isOwnerMember = $isGrantedUser && $publication instanceof AuthoredInterface && $this->getDoctrine()->getManager()->getRepository(Member::class)->existsByTeamAndUser($publication->getUser(), $this->getUser());
 		$isGrantedOwner = $isOwner || $isOwnerMember;
@@ -53,7 +62,7 @@ trait PublicationControllerTrait {
 		$username = $request->get('owner');
 		if (!is_null($username)) {
 			$user = $this->retrieveUserByUsername($username);
-			if (!is_null($user) && !$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+			if (!is_null($user) && !$this->isGranted('ROLE_ADMIN')) {
 
 				if ($user->getIsTeam()) {
 
@@ -89,14 +98,14 @@ trait PublicationControllerTrait {
 	// Asserts /////
 
 	protected function assertAdminGranted($context = '') {
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+		if (!$this->isGranted('ROLE_ADMIN')) {
 			throw $this->createNotFoundException('Not allowed ('.$context.')');
 		}
 	}
 
 	protected function assertWriteAccessGranted(PublicationInterface $publication, $context = '', $checkWitness = false) {
 
-		if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+		if ($this->isGranted('ROLE_ADMIN')) {
 			$allowed = true;
 		} else if ($publication->getUser()->getIsTeam() && !is_null($this->getUser())) {
 
@@ -111,8 +120,7 @@ trait PublicationControllerTrait {
 
 		if (!$allowed) {
 			if ($checkWitness) {
-				$witnessManager = $this->get(WitnessManager::NAME);
-				if ($response = $witnessManager->checkResponse($publication->getType(), $publication->getId())) {
+				if ($response = $this->witnessManager->checkResponse($publication->getType(), $publication->getId())) {
 					return $response;	// TODO
 				}
 			}
@@ -174,9 +182,9 @@ trait PublicationControllerTrait {
 	}
 
 	protected function assertDeletable(PublicationInterface $publication, $ownerAllowed = false, $context = '') {
-		if (!$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+		if (!$this->isGranted('ROLE_ADMIN')) {
 
-			$isGrantedUser = $this->get('security.authorization_checker')->isGranted('ROLE_USER');
+			$isGrantedUser = $this->isGranted('ROLE_USER');
 			$isOwner = $publication instanceof AuthoredInterface && $publication->getUser() == $this->getUser();
 			$isOwnerMember = $isGrantedUser && $publication instanceof AuthoredInterface && $this->getDoctrine()->getManager()->getRepository(Member::class)->existsByTeamAndUser($publication->getUser(), $this->getUser());
 			$isGrantedOwner = $isOwner || $isOwnerMember;

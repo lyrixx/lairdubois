@@ -141,12 +141,10 @@ services:
   Ladb\CoreBundle\Utils\PlanUtils: '@ladb_core.plan_utils'
   ladb_core.graphic_utils:
     class: Ladb\CoreBundle\Utils\GraphicUtils
-    public: true
     arguments: ['@service_container']
   Ladb\CoreBundle\Utils\GraphicUtils: '@ladb_core.graphic_utils'
   ladb_core.find_utils:
     class: Ladb\CoreBundle\Utils\FindUtils
-    public: true
     arguments: ['@service_container']
   Ladb\CoreBundle\Utils\FindUtils: '@ladb_core.find_utils'
   ladb_core.search_utils:
@@ -383,7 +381,6 @@ services:
   Ladb\CoreBundle\Manager\Collection\CollectionManager: '@ladb_core.collection_collection_manager'
   ladb_core.funding_funding_manager:
     class: Ladb\CoreBundle\Manager\Funding\FundingManager
-    public: true
     arguments: ['@service_container']
   Ladb\CoreBundle\Manager\Funding\FundingManager: '@ladb_core.funding_funding_manager'
   ladb_core.qa_question_manager:
@@ -408,7 +405,6 @@ services:
   Ladb\CoreBundle\Manager\Offer\OfferManager: '@ladb_core.offer_offer_manager'
   ladb_core.took_manager:
     class: Ladb\CoreBundle\Manager\Youtook\TookManager
-    public: true
     arguments: ['@service_container']
   Ladb\CoreBundle\Manager\Youtook\TookManager: '@ladb_core.took_manager'
 
@@ -746,6 +742,11 @@ services:
   Ladb\CoreBundle\Consumer\ViewConsumer:
     arguments: ['@service_container']
   Ladb\CoreBundle\Consumer\WebpushNotificationConsumer: ~
+
+  # Controllers: tagged controller.service_arguments by autoconfigure, which makes them public (the
+  # resolver reads them from the container) and resolves the services of an action from its arguments
+  Ladb\CoreBundle\Controller\:
+    resource: '../../Controller'
 
   # Commands: tagged console.command by autoconfigure, loaded lazily by their $defaultName
   Ladb\CoreBundle\Command\:

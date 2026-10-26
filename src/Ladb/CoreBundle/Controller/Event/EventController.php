@@ -35,6 +35,8 @@ use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Utils\BlockBodiedUtils;
 use Ladb\CoreBundle\Utils\EventUtils;
 use Ladb\CoreBundle\Utils\JoinableUtils;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
 /**
  * @Route("/evenements")
@@ -47,13 +49,11 @@ class EventController extends AbstractController {
 	 * @Route("/new", name="core_event_new")
 	 * @Template("LadbCoreBundle:Event/Event:new.html.twig")
 	 */
-	public function newAction(Request $request) {
+	public function newAction(Request $request, TagUtils $tagUtils) {
 
 		$event = new Event();
 		$event->addBodyBlock(new \Ladb\CoreBundle\Entity\Core\Block\Text());	// Add a default Text body block
 		$form = $this->createForm(EventType::class, $event);
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'form'         => $form->createView(),
@@ -66,7 +66,7 @@ class EventController extends AbstractController {
 	 * @Route("/create", methods={"POST"}, name="core_event_create")
 	 * @Template("LadbCoreBundle:Event/Event:new.html.twig")
 	 */
-	public function createAction(Request $request) {
+	public function createAction(Request $request, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$owner = $this->retrieveOwner($request);
 
@@ -80,10 +80,8 @@ class EventController extends AbstractController {
 
 		if ($form->isValid()) {
 
-			$blockUtils = $this->get(BlockBodiedUtils::NAME);
 			$blockUtils->preprocessBlocks($event);
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($event);
 
 			$event->setUser($owner);
@@ -94,16 +92,13 @@ class EventController extends AbstractController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($event));
 
 			return $this->redirect($this->generateUrl('core_event_show', array('id' => $event->getSluggedId())));
 		}
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
-
-		$tagUtils = $this->get(TagUtils::NAME);
+		$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 		return array(
 			'event'        => $event,
@@ -118,13 +113,12 @@ class EventController extends AbstractController {
 	 * @Route("/{id}/lock", requirements={"id" = "\d+"}, defaults={"lock" = true}, name="core_event_lock")
 	 * @Route("/{id}/unlock", requirements={"id" = "\d+"}, defaults={"lock" = false}, name="core_event_unlock")
 	 */
-	public function lockUnlockAction($id, $lock) {
+	public function lockUnlockAction($id, $lock, EventManager $eventManager, TranslatorInterface $translator) {
 
 		$event = $this->retrievePublication($id, Event::CLASS_NAME);
 		$this->assertLockUnlockable($event, $lock);
 
 		// Lock or Unlock
-		$eventManager = $this->get(EventManager::NAME);
 		if ($lock) {
 			$eventManager->lock($event);
 		} else {
@@ -132,7 +126,7 @@ class EventController extends AbstractController {
 		}
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('event.event.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $event->getTitle() )));
+		$this->addFlash('success', $translator->trans('event.event.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $event->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_event_show', array( 'id' => $event->getSluggedId() )));
 	}
@@ -140,17 +134,16 @@ class EventController extends AbstractController {
 	/**
 	 * @Route("/{id}/publish", requirements={"id" = "\d+"}, name="core_event_publish")
 	 */
-	public function publishAction($id) {
+	public function publishAction($id, EventManager $eventManager, TranslatorInterface $translator) {
 
 		$event = $this->retrievePublication($id, Event::CLASS_NAME);
 		$this->assertPublishable($event);
 
 		// Publish
-		$eventManager = $this->get(EventManager::NAME);
 		$eventManager->publish($event);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('event.event.form.alert.publish_success', array( '%title%' => $event->getTitle() )));
+		$this->addFlash('success', $translator->trans('event.event.form.alert.publish_success', array( '%title%' => $event->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_event_show', array( 'id' => $event->getSluggedId() )));
 	}
@@ -158,17 +151,16 @@ class EventController extends AbstractController {
 	/**
 	 * @Route("/{id}/unpublish", requirements={"id" = "\d+"}, name="core_event_unpublish")
 	 */
-	public function unpublishAction(Request $request, $id) {
+	public function unpublishAction(Request $request, $id, EventManager $eventManager, TranslatorInterface $translator) {
 
 		$event = $this->retrievePublication($id, Event::CLASS_NAME);
 		$this->assertUnpublishable($event);
 
 		// Unpublish
-		$eventManager = $this->get(EventManager::NAME);
 		$eventManager->unpublish($event);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('event.event.form.alert.unpublish_success', array( '%title%' => $event->getTitle() )));
+		$this->addFlash('success', $translator->trans('event.event.form.alert.unpublish_success', array( '%title%' => $event->getTitle() )));
 
 		// Return to
 		$returnToUrl = $request->get('rtu');
@@ -183,14 +175,12 @@ class EventController extends AbstractController {
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_event_edit")
 	 * @Template("LadbCoreBundle:Event/Event:edit.html.twig")
 	 */
-	public function editAction($id) {
+	public function editAction($id, TagUtils $tagUtils) {
 
 		$event = $this->retrievePublication($id, Event::CLASS_NAME);
 		$this->assertEditabable($event);
 
 		$form = $this->createForm(EventType::class, $event);
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'event'         => $event,
@@ -203,7 +193,7 @@ class EventController extends AbstractController {
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_event_update")
 	 * @Template("LadbCoreBundle:Event/Event:edit.html.twig")
 	 */
-	public function updateAction(Request $request, $id) {
+	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$event = $this->retrievePublication($id, Event::CLASS_NAME);
 		$this->assertEditabable($event);
@@ -216,10 +206,8 @@ class EventController extends AbstractController {
 
 		if ($form->isValid()) {
 
-			$blockUtils = $this->get(BlockBodiedUtils::NAME);
 			$blockUtils->preprocessBlocks($event, $originalBodyBlocks);
 
-			$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
 			$fieldPreprocessorUtils->preprocessFields($event);
 
 			$event->setMainPicture($mainPicture = $event->getPictures()->first() ? $mainPicture = $event->getPictures()->first() : null);
@@ -231,11 +219,10 @@ class EventController extends AbstractController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher = $this->get('event_dispatcher');
 			$dispatcher->dispatch(PublicationListener::PUBLICATION_UPDATED, new PublicationEvent($event, array( 'previouslyUsedTags' => $previouslyUsedTags )));
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('event.event.form.alert.update_success', array( '%title%' => $event->getTitle() )));
+			$this->addFlash('success', $translator->trans('event.event.form.alert.update_success', array( '%title%' => $event->getTitle() )));
 
 			// Regenerate the form
 			$form = $this->createForm(EventType::class, $event);
@@ -243,11 +230,9 @@ class EventController extends AbstractController {
 		} else {
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('error', $this->get('translator')->trans('default.form.alert.error'));
+			$this->addFlash('error', $translator->trans('default.form.alert.error'));
 
 		}
-
-		$tagUtils = $this->get(TagUtils::NAME);
 
 		return array(
 			'event'         => $event,
@@ -259,17 +244,16 @@ class EventController extends AbstractController {
 	/**
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_event_delete")
 	 */
-	public function deleteAction($id) {
+	public function deleteAction($id, EventManager $eventManager, TranslatorInterface $translator) {
 
 		$event = $this->retrievePublication($id, Event::CLASS_NAME);
 		$this->assertDeletable($event);
 
 		// Delete
-		$eventManager = $this->get(EventManager::NAME);
 		$eventManager->delete($event);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('event.event.form.alert.delete_success', array( '%title%' => $event->getTitle() )));
+		$this->addFlash('success', $translator->trans('event.event.form.alert.delete_success', array( '%title%' => $event->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_event_list'));
 	}
@@ -277,7 +261,7 @@ class EventController extends AbstractController {
 	/**
 	 * @Route("/{id}/chown", requirements={"id" = "\d+"}, name="core_event_chown")
 	 */
-	public function chownAction(Request $request, $id) {
+	public function chownAction(Request $request, $id, EventManager $eventManager, TranslatorInterface $translator) {
 
 		$event = $this->retrievePublication($id, Event::CLASS_NAME);
 		$this->assertChownable($event);
@@ -285,11 +269,10 @@ class EventController extends AbstractController {
 		$targetUser = $this->retrieveOwner($request);
 
 		// Change owner
-		$eventManager = $this->get(EventManager::NAME);
 		$eventManager->changeOwner($event, $targetUser);
 
 		// Flashbag
-		$this->get('session')->getFlashBag()->add('success', $this->get('translator')->trans('event.event.form.alert.chown_success', array( '%title%' => $event->getTitle() )));
+		$this->addFlash('success', $translator->trans('event.event.form.alert.chown_success', array( '%title%' => $event->getTitle() )));
 
 		return $this->redirect($this->generateUrl('core_event_show', array( 'id' => $event->getSluggedId() )));
 	}
@@ -358,8 +341,7 @@ class EventController extends AbstractController {
 	 * @Route(".geojson", defaults={"_format" = "json", "page"=-1, "layout"="geojson"}, name="core_event_list_geojson")
 	 * @Template("LadbCoreBundle:Event/Event:list.html.twig")
 	 */
-	public function listAction(Request $request, $page = 0, $layout = 'view') {
-		$searchUtils = $this->get(SearchUtils::NAME);
+	public function listAction(Request $request, EventDispatcherInterface $dispatcher, LocalisableUtils $localisableUtils, SearchUtils $searchUtils, TranslatorInterface $translator, $page = 0, $layout = 'view') {
 
 		// Elasticsearch paginiation limit
 		if ($page > 624) {
@@ -369,14 +351,14 @@ class EventController extends AbstractController {
 		$searchParameters = $searchUtils->searchPaginedEntities(
 			$request,
 			$page,
-			function($facet, &$filters, &$sort, &$noGlobalFilters, &$couldUseDefaultSort) use ($searchUtils) {
+			function($facet, &$filters, &$sort, &$noGlobalFilters, &$couldUseDefaultSort) use ($searchUtils, $localisableUtils) {
 				switch ($facet->name) {
 
 					// Filters /////
 
 					case 'mine':
 
-						if ($this->get('security.authorization_checker')->isGranted('ROLE_USER')) {
+						if ($this->isGranted('ROLE_USER')) {
 
 							if (isset($facet->value) && $facet->value == 'draft') {
 
@@ -476,7 +458,6 @@ class EventController extends AbstractController {
 
 					case 'location':
 
-						$localisableUtils = $this->get(LocalisableUtils::NAME);
 						$boundsAndLocation = $localisableUtils->getBoundsAndLocation($facet->value);
 
 						if (!is_null($boundsAndLocation)) {
@@ -548,7 +529,7 @@ class EventController extends AbstractController {
 			},
 			function(&$filters, &$sort) {
 
-				if ($this->get('security.authorization_checker')->isGranted('ROLE_USER') && $this->getUser()->getMeta()->getUnlistedEventEventCount() > 0) {
+				if ($this->isGranted('ROLE_USER') && $this->getUser()->getMeta()->getUnlistedEventEventCount() > 0) {
 					$sort = array('changedAt' => array('order' => 'desc'));
 				} else {
 
@@ -612,20 +593,19 @@ class EventController extends AbstractController {
 		}
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATIONS_LISTED, new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()));
 
 		if ($request->isXmlHttpRequest()) {
 			return $this->render('LadbCoreBundle:Event/Event:list-xhr.html.twig', $parameters);
 		}
 
-		if ($this->get('security.authorization_checker')->isGranted('ROLE_USER') && $this->getUser()->getMeta()->getPrivateEventCount() > 0) {
+		if ($this->isGranted('ROLE_USER') && $this->getUser()->getMeta()->getPrivateEventCount() > 0) {
 
 			$draftPath = $this->generateUrl('core_event_list', array( 'q' => '@mine:draft' ));
 			$draftCount = $this->getUser()->getMeta()->getPrivateEventCount();
 
 			// Flashbag
-			$this->get('session')->getFlashBag()->add('info', '<i class="ladb-icon-warning"></i> '.$this->get('translator')->transchoice('event.event.choice.draft_alert', $draftCount, array( '%count%' => $draftCount )).' <small><a href="'.$draftPath.'" class="alert-link">('.$this->get('translator')->trans('default.show_my_drafts').')</a></small>');
+			$this->addFlash('info', '<i class="ladb-icon-warning"></i> '.$translator->transchoice('event.event.choice.draft_alert', $draftCount, array( '%count%' => $draftCount )).' <small><a href="'.$draftPath.'" class="alert-link">('.$translator->trans('default.show_my_drafts').')</a></small>');
 
 		}
 
@@ -636,10 +616,9 @@ class EventController extends AbstractController {
 	 * @Route("/{id}.html", name="core_event_show")
 	 * @Template("LadbCoreBundle:Event/Event:show.html.twig")
 	 */
-	public function showAction(Request $request, $id) {
+	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FeedbackableUtils $feedbackableUtils, FollowerUtils $followerUtils, JoinableUtils $joinableUtils, LikableUtils $likableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();
 		$eventRepository = $om->getRepository(Event::CLASS_NAME);
-		$witnessManager = $this->get(WitnessManager::NAME);
 
 		$id = intval($id);
 
@@ -653,20 +632,10 @@ class EventController extends AbstractController {
 		$this->assertShowable($event);
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
 		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($event));
 
-		$explorableUtils = $this->get(ExplorableUtils::NAME);
 		$userEvents = $explorableUtils->getPreviousAndNextPublishedUserExplorables($event, $eventRepository, $event->getUser()->getMeta()->getPublicEventCount());
 		$similarEvents = $explorableUtils->getSimilarExplorables($event, 'fos_elastica.index.ladb.event_event', Event::CLASS_NAME, $userEvents);
-
-		$likableUtils = $this->get(LikableUtils::NAME);
-		$watchableUtils = $this->get(WatchableUtils::NAME);
-		$feedbackableUtils = $this->get(FeedbackableUtils::NAME);
-		$commentableUtils = $this->get(CommentableUtils::NAME);
-		$collectionnableUtils = $this->get(CollectionnableUtils::NAME);
-		$followerUtils = $this->get(FollowerUtils::NAME);
-		$joinableUtils = $this->get(JoinableUtils::NAME);
 
 		if ($event instanceof LocalisableInterface) {
 			$hasMap = !is_null($event->getLatitude()) && !is_null($event->getLongitude());
