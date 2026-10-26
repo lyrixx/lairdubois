@@ -745,8 +745,7 @@ services:
   # Consumer
   Ladb\CoreBundle\Consumer\ViewConsumer:
     arguments: ['@service_container']
-  Ladb\CoreBundle\Consumer\WebpushNotificationConsumer:
-    arguments: ['@service_container']
+  Ladb\CoreBundle\Consumer\WebpushNotificationConsumer: ~
 
   # Commands: tagged console.command by autoconfigure, loaded lazily by their $defaultName
   Ladb\CoreBundle\Command\:
@@ -771,5 +770,18 @@ services:
 
   # WebPush
   Ladb\CoreBundle\Manager\Webpush\UserSubscriptionManager:
-    public: true  # Read from the container by the WebPushManagerRegistry of bentools/webpush-bundle
+    public: true  # Read from the container by the WebpushController
     arguments: ['@doctrine']
+  # The sender of bentools/webpush-bundle, with the TTL (4 weeks) and the timeout of minishlink/web-push 2.0:
+  # the bundle has a TTL of 0 (dropped if the browser is offline) and a Guzzle client without timeout
+  BenTools\WebPushBundle\Sender\PushMessageSender:
+    arguments:
+      - VAPID:
+          subject: '%bentools_webpush.vapid_subject%'
+          publicKey: '%bentools_webpush.vapid_public_key%'
+          privateKey: '%bentools_webpush.vapid_private_key%'
+      - TTL: 2419200
+      - '@ladb_core.webpush_http_client'
+  ladb_core.webpush_http_client:
+    class: GuzzleHttp\Client
+    arguments: [{ timeout: 30 }]

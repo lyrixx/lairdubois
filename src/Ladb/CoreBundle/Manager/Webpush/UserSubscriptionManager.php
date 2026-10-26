@@ -16,11 +16,11 @@ class UserSubscriptionManager implements UserSubscriptionManagerInterface  {
 		$this->doctrine = $doctrine;
 	}
 
-	public function factory(UserInterface $user, string $subscriptionHash, array $subscription): UserSubscriptionInterface {
+	public function factory(UserInterface $user, string $subscriptionHash, array $subscription, array $options = []): UserSubscriptionInterface {
 		return new UserSubscription($user, $subscriptionHash, $subscription);
 	}
 
-	public function hash(string $endpoint): string {
+	public function hash(string $endpoint, UserInterface $user): string {
 		return md5($endpoint); // Encode it as you like
 	}
 
