@@ -71,7 +71,7 @@ class HowtoController extends AbstractHowtoBasedController {
 		$form = $this->createForm(HowtoType::class, $howto);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$fieldPreprocessorUtils->preprocessFields($howto);
 
@@ -197,7 +197,7 @@ class HowtoController extends AbstractHowtoBasedController {
 		$form = $this->createForm(HowtoType::class, $howto);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$fieldPreprocessorUtils->preprocessFields($howto);
 

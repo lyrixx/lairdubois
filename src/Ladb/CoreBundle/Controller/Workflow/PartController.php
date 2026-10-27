@@ -51,7 +51,7 @@ class PartController extends AbstractWorkflowBasedController {
 		$form = $this->createForm(PartType::class, $part);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$workflow->addPart($part);
 
@@ -107,7 +107,7 @@ class PartController extends AbstractWorkflowBasedController {
 		$form = $this->createForm(PartType::class, $part);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$om->flush();
 

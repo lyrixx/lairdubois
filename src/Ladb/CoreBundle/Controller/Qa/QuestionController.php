@@ -80,7 +80,7 @@ class QuestionController extends AbstractController {
 		$form = $this->createForm(QuestionType::class, $question);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$blockBodiedUtils->preprocessBlocks($question);
 
@@ -212,7 +212,7 @@ class QuestionController extends AbstractController {
 		$form = $this->createForm(QuestionType::class, $question);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$blockBodiedUtils->preprocessBlocks($question, $originalBodyBlocks);
 

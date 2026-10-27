@@ -106,7 +106,7 @@ class ReviewController extends AbstractController {
 		$form = $this->createForm(ReviewType::class, $review);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$fieldPreprocessorUtils->preprocessFields($review);
 
@@ -203,7 +203,7 @@ class ReviewController extends AbstractController {
 		$form = $this->createForm(ReviewType::class, $review);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$fieldPreprocessorUtils->preprocessFields($review);
 

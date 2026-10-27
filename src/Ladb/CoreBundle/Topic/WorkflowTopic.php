@@ -4,12 +4,23 @@ namespace Ladb\CoreBundle\Topic;
 
 use Gos\Bundle\WebSocketBundle\Router\WampRequest;
 use Ladb\CoreBundle\Entity\User;
+use Psr\Log\LoggerInterface;
 use Ratchet\ConnectionInterface;
 use Ratchet\Wamp\Topic;
 use Ladb\CoreBundle\Entity\Workflow\Workflow;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class WorkflowTopic extends AbstractContainerAwareTopic {
+
+	private $logger;
+
+	public function __construct(ContainerInterface $container, LoggerInterface $logger) {
+		parent::__construct($container);
+		$this->logger = $logger;
+	}
+
+	/////
 
 	private function _retrieveWorkflow(ConnectionInterface $connection, WampRequest $request, $user) {
 		$om = $this->getDoctrine()->getManager();
@@ -19,12 +30,12 @@ class WorkflowTopic extends AbstractContainerAwareTopic {
 
 		$workflow = $workflowRepository->findOneById($id);
 		if (is_null($workflow)) {
-			$this->get('logger')->error('Unable to find Workflow entity (id='.$id.').');
+			$this->logger->error('Unable to find Workflow entity (id='.$id.').');
 			$connection->close();
 			return null;
 		}
 		if (!$user instanceof UserInterface || !$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN') && $workflow->getUser() != $user) {
-			$this->get('logger')->error('Not allowed');
+			$this->logger->error('Not allowed');
 			$connection->close();
 			return null;
 		}

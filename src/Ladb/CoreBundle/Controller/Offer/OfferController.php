@@ -77,7 +77,7 @@ class OfferController extends AbstractController {
 		$form = $this->createForm(OfferType::class, $offer);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$blockUtils->preprocessBlocks($offer);
 
@@ -205,7 +205,7 @@ class OfferController extends AbstractController {
 		$form = $this->createForm(OfferType::class, $offer);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$blockUtils->preprocessBlocks($offer, $originalBodyBlocks);
 

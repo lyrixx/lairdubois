@@ -79,7 +79,7 @@ class BookController extends AbstractController {
 		$form = $this->createForm(NewBookType::class, $newBook);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$identityValue = $newBook->getIdentityValue();
 			$coverValue = $newBook->getCoverValue();

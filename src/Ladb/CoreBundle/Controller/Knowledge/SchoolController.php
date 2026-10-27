@@ -82,7 +82,7 @@ class SchoolController extends AbstractController {
 		$form = $this->createForm(NewSchoolType::class, $newSchool);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$nameValue = $newSchool->getNameValue();
 			$logoValue = $newSchool->getLogoValue();

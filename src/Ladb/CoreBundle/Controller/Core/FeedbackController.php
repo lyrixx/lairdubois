@@ -97,7 +97,7 @@ class FeedbackController extends AbstractController {
 		$form = $this->createForm(FeedbackType::class, $feedback);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$blockUtils->preprocessBlocks($feedback);
 
@@ -187,7 +187,7 @@ class FeedbackController extends AbstractController {
 		$form = $this->createForm(FeedbackType::class, $feedback);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			// Retrieve related entity
 			$entity = $this->_retrieveRelatedEntity($feedback->getEntityType(), $feedback->getEntityId(), $typableUtils);

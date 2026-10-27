@@ -81,7 +81,7 @@ class WoodController extends AbstractController {
 		$form = $this->createForm(NewWoodType::class, $newWood);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$nameValue = $newWood->getNameValue();
 			$grainValue = $newWood->getGrainValue();

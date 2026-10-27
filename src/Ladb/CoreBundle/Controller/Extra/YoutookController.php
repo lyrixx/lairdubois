@@ -38,7 +38,7 @@ class YoutookController extends AbstractController {
 		$form = $this->createForm(NewTookType::class, $took);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			// Check if took exists
 			$tookRepository = $om->getRepository(Took::CLASS_NAME);
@@ -119,7 +119,7 @@ class YoutookController extends AbstractController {
 		$form = $this->createForm(EditTookType::class, $took);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$fieldPreprocessorUtils->preprocessFields($took);
 

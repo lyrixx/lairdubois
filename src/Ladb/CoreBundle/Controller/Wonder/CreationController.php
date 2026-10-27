@@ -95,7 +95,7 @@ class CreationController extends AbstractController {
 		$form = $this->createForm(CreationType::class, $creation);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$blockUtils->preprocessBlocks($creation);
 
@@ -227,7 +227,7 @@ class CreationController extends AbstractController {
 		$form = $this->createForm(CreationType::class, $creation);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$blockUtils->preprocessBlocks($creation, $originalBodyBlocks);
 

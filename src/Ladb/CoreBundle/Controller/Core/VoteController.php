@@ -163,7 +163,7 @@ class VoteController extends AbstractController {
 				));
 				$form->handleRequest($request);
 
-				if (!$form->isValid()) {
+				if (!$form->isSubmitted() || !$form->isValid()) {
 
 					return $this->render('LadbCoreBundle:Core/Vote:new-xhr.html.twig', array(
 						'orientation'  => $orientation,

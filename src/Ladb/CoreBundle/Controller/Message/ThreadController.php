@@ -74,7 +74,7 @@ class ThreadController extends AbstractThreadController {
 		$form = $this->createForm(NewThreadMessageType::class, $newThreadMessage);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$sender = $this->getUser();
 			$recipients = $newThreadMessage->getRecipients()->toArray();

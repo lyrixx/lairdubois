@@ -34,7 +34,7 @@ class SearchUtils extends AbstractContainerAwareUtils {
 		}
 
 		$globalUtils = $this->get(GlobalUtils::NAME);
-		$om = $this->getDoctrine()->getEntityManager();
+		$om = $this->getDoctrine()->getManager();
 
 		// Retrieve search session identifier
 		$session = $globalUtils->getSession();

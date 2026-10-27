@@ -58,7 +58,7 @@ class TipController extends AbstractController {
 		$form = $this->createForm(TipType::class, $tip);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$fieldPreprocessorUtils->preprocessFields($tip);
 
@@ -121,7 +121,7 @@ class TipController extends AbstractController {
 		$form = $this->createForm(TipType::class, $tip);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$fieldPreprocessorUtils->preprocessFields($tip);
 

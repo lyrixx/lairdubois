@@ -65,7 +65,7 @@ class MessageController extends AbstractThreadController {
 		$form = $this->createForm(ReplyMessageType::class, $message);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$om = $this->getDoctrine()->getManager();
 
@@ -166,7 +166,7 @@ class MessageController extends AbstractThreadController {
 		$form = $this->createForm(ReplyMessageType::class, $message);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$om = $this->getDoctrine()->getManager();
 

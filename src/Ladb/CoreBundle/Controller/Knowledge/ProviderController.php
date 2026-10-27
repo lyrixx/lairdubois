@@ -83,7 +83,7 @@ class ProviderController extends AbstractController {
 		$form = $this->createForm(NewProviderType::class, $newProvider);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$signValue = $newProvider->getSignValue();
 			$logoValue = $newProvider->getLogoValue();

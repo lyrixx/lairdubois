@@ -52,7 +52,7 @@ class LabelController extends AbstractWorkflowBasedController {
 		$form = $this->createForm(LabelType::class, $label);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$workflow->addLabel($label);
 
@@ -108,7 +108,7 @@ class LabelController extends AbstractWorkflowBasedController {
 		$form = $this->createForm(LabelType::class, $label);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$om->flush();
 

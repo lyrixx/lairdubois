@@ -159,7 +159,7 @@ class TaskController extends AbstractWorkflowBasedController {
 		$form = $this->createForm(TaskType::class, $task, array( 'label_choices' => $this->_computeLabelChoices($workflow) ));
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$task->setStatus(Task::STATUS_WORKABLE);
 			$workflow->addTask($task);
@@ -281,7 +281,7 @@ class TaskController extends AbstractWorkflowBasedController {
 		$form = $this->createForm(TaskType::class, $task, array( 'label_choices' => $this->_computeLabelChoices($workflow) ));
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			// Flag workflow as updated
 			$workflow->setUpdatedAt(new \DateTime());
