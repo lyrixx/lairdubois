@@ -48,9 +48,7 @@ function lint(): int
 {
     $commands = [
         ['bin/console', 'lint:twig', 'app/Resources', 'src'],
-        // lint:yaml only takes one path in Symfony 3.4
-        ['bin/console', 'lint:yaml', 'app/config'],
-        ['bin/console', 'lint:yaml', 'src'],
+        ['bin/console', 'lint:yaml', 'app/config', 'src'],
         // Needs the database and its schema (castor app:db:schema)
         ['bin/console', 'doctrine:schema:validate'],
         ['bin/console', 'cache:warmup', '--env=prod'],

@@ -4,7 +4,7 @@ namespace Ladb\CoreBundle\Handler;
 
 use Doctrine\Common\Persistence\ObjectManager;
 use Ladb\CoreBundle\Manager\Core\PictureManager;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Ladb\CoreBundle\Entity\Core\Picture;
 use Ladb\CoreBundle\Entity\Core\Resource;
 
@@ -18,7 +18,7 @@ class ResourceUploadHandler extends \UploadHandler {
 	private $tokenStorage;
 	private $pictureManager;
 
-	function __construct(ObjectManager $om, TokenStorage $tokenStorage, PictureManager $pictureManager) {
+	function __construct(ObjectManager $om, TokenStorageInterface $tokenStorage, PictureManager $pictureManager) {
 		$this->om = $om;
 		$this->tokenStorage = $tokenStorage;
 		$this->pictureManager = $pictureManager;

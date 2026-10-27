@@ -4,7 +4,6 @@ namespace Ladb\CoreBundle\Form\Type\Event;
 
 use Ladb\CoreBundle\Form\DataTransformer\PicturesToIdsTransformer;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\DataTransformer\DateTimeToLocalizedStringTransformer;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
@@ -69,14 +68,6 @@ class EventType extends AbstractType {
 				->addModelTransformer(new TagsToLabelsTransformer($this->om))
 			)
 		;
-
-		// The DateTimeToStringTransformer of TimeType fails on PHP 8.2+ in Symfony 3.4 (DateTime::getLastErrors() returns false without error)
-		foreach (array( 'startTime', 'endTime' ) as $field) {
-			$builder->get($field)
-				->resetViewTransformers()
-				->addViewTransformer(new DateTimeToLocalizedStringTransformer(null, null, null, null, \IntlDateFormatter::GREGORIAN, 'HH:mm'))
-			;
-		}
 
 		$builder->addEventListener(
 			FormEvents::SUBMIT,

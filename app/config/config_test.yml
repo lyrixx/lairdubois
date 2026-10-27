@@ -120,11 +120,3 @@ services:
     tests.fixture_factory:
         alias: Ladb\CoreBundle\DataFixtures\FixtureFactory
         public: true
-
-    # A crawler which reads UTF-8 (issue #6): see Tests\Utf8Client
-    tests.client:
-        class: Tests\Utf8Client
-        decorates: test.client
-        arguments: ['@kernel', '%test.client.parameters%', '@test.client.history', '@test.client.cookiejar']
-        shared: false
-        public: true

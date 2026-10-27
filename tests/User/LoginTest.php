@@ -71,8 +71,9 @@ final class LoginTest extends WebTestCase
 
         $client = $this->login($client, UserFixtures::USER, UserFixtures::USER);
 
+        // As a wrong password: the fix of CVE-2021-21424 (account enumeration) hides the reason
         $crawler = $client->followRedirect();
-        self::assertStringContainsString('Le compte est désactivé.', $crawler->filter('.alert-danger')->text());
+        self::assertStringContainsString('Identifiants invalides.', $crawler->filter('.alert-danger')->text());
         self::assertNotLoggedIn($client);
     }
 

@@ -64,4 +64,27 @@ class AppKernel extends Kernel
 	{
 		$loader->load($this->getRootDir().'/config/config_'.$this->getEnvironment().'.yml');
 	}
+
+	protected function initializeContainer()
+	{
+		// While it includes the cached container, the kernel of Symfony 4.4 reports every error but
+		// E_WARNING (error_reporting(E_ALL ^ E_WARNING)), before any handler of Symfony: PHP 8.4+
+		// would display the deprecations of the files it loads then (implicitly nullable parameters),
+		// at the top of the first page, and in the output of each command. What the level of the
+		// caller (php.ini, bin/console) hides stays hidden. To check again with Symfony 5.4 (#18).
+		$errorReporting = error_reporting();
+		$previousHandler = set_error_handler(static function ($type, $message, $file, $line) use ($errorReporting, &$previousHandler) {
+			if (0 === ($errorReporting & $type)) {
+				return true;
+			}
+
+			return $previousHandler ? $previousHandler($type, $message, $file, $line) : false;
+		});
+
+		try {
+			parent::initializeContainer();
+		} finally {
+			restore_error_handler();
+		}
+	}
 }

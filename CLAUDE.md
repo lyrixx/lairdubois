@@ -186,10 +186,12 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() des ac
 ```
 
 - PHPUnit 9.6, dans `tools/phpunit` et pas dans le `composer.json` de l'application : c'est la
-  dernière version qui marche à la fois avec le `WebTestCase` de Symfony 3.4 (setUp/tearDown
-  `void` via `ForwardCompatTestTrait`) et avec `symfony/phpunit-bridge` 3.4 (`TestListener` et
-  `ErrorHandler` de PHPUnit, supprimés en 10). Le `simple-phpunit` du bridge 3.4 ne sait pas
-  installer PHPUnit 9.6 (il garde le `composer.lock` du paquet et n'installe pas le bridge).
+  dernière version qui marche à la fois avec le `WebTestCase` de Symfony 4.4 (setUp/tearDown
+  `void` via `ForwardCompatTestTrait`) et avec `symfony/phpunit-bridge` (`TestListener` et
+  `ErrorHandler` de PHPUnit, supprimés en 10). Le bridge reste en 3.4, que `symfony/symfony` ne
+  remplace pas : `Tests\DeprecationCollector` appelle son `getPhpUnitErrorHandler()`, privé en
+  4.4. Le `simple-phpunit` du bridge 3.4 ne sait pas installer PHPUnit 9.6 (il garde le
+  `composer.lock` du paquet et n'installe pas le bridge).
 - `qa:phpunit` lance PHP avec OPcache (`opcache.enable_cli=1`, `file_update_protection=0`, #113) :
   chaque requête d'un test démarre un nouveau container, qui recharge ses fichiers de services, et
   sans OPcache la compilation de celui d'`argument_resolver.service` (une closure par action) garde
@@ -207,8 +209,8 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() des ac
   `phpunit.xml.dist`) sont comptées, pas listées. Le rapport ne fait jamais échouer la CI.
 - Les dépréciations d'un template Twig ne sortent qu'à sa compilation : `qa:deprecations` vide le
   cache de test sans les warmers optionnels, pour que le `qa:phpunit` suivant les voie.
-- En 3.4, `lint:yaml` ne prend qu'un chemin et compte les dépréciations comme des erreurs ;
-  `lint:twig` exige des chemins.
+- `lint:yaml` compte les dépréciations comme des erreurs. Sans chemin, `lint:twig` lit tous les
+  namespaces de Twig, bundles de `vendor/` compris : `qa:lint` lui donne les nôtres.
 - Cache GitHub Actions : couches Docker (`type=gha`, un scope par cible du Dockerfile, via un
   `docker-compose.override.yml` écrit par le workflow), cache Composer (`.home/.cache/composer`)
   et cache npm (`.home/.npm`).
@@ -334,8 +336,8 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   celles de PHP (comme `ClockMock` du bridge). Il connaît le compteur de partages de
   `OfflineFacebookGraph::URL`, répond une erreur pour `ERROR_URL` et pour toute autre requête, et
   rend les URL appelées (`popRequests()`).
-- Une `\Error` PHP sort du kernel en 3.4 : elle remonte de `$client->request()` au lieu de donner
-  une 500. Un warning PHP devient une exception (gestionnaire d'erreurs de PHPUnit) : 500.
+- Une `\Error` PHP sort du kernel (3.4 et 4.4) : elle remonte de `$client->request()` au lieu de
+  donner une 500. Un warning PHP devient une exception (gestionnaire d'erreurs de PHPUnit) : 500.
 - Smoke test (`tests/Smoke/RouteSmokeTest.php`) : chaque route GET en anonyme, `user` et `admin`,
   rien en 5xx ni en `\Error`. Une action qui refuse
   une requête hors XHR (« Only XML request allowed ») est rappelée en XHR. Paramètres des routes :
@@ -356,8 +358,9 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
 - `Tests\EditorialTestCase` : la même chose pour le blog et la FAQ, que seuls les admins écrivent,
   publient et suppriment (contenu d'id 1 d'`admin`, `user` est l'autre compte) ; ni compteurs ni
   collectifs.
-- Requêtes du JS du site (`Tests\XhrTrait`) : `static::xhr($client, $method, $uri, $parameters)`, le
-  client de 3.4 n'a pas `xmlHttpRequest()` ; `static::generatePath($route, $parameters)`.
+- Requêtes du JS du site (`Tests\XhrTrait`) : `static::xhr($client, $method, $uri, $parameters)`,
+  écrit quand le client (3.4) n'avait pas encore `xmlHttpRequest()` ;
+  `static::generatePath($route, $parameters)`.
 - Connaissances (`tests/Knowledge/`) : ni auteur, ni brouillon, ni formulaire d'édition. Une
   sous-classe de `KnowledgeTestCase` donne ses valeurs de création et une valeur à proposer ; le
   mécanisme commun (proposer, modifier, retirer, déplacer une valeur, voter) est dans `ValueTest`,
@@ -374,9 +377,6 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
 - Une entité lue avant la première requête d'un client est celle que la requête modifie (même
   entity manager) : lire avant la requête les valeurs à comparer ; une entité supprimée n'a plus
   d'id.
-- Le `DomCrawler` de Symfony 3.4 lit l'UTF-8 comme de l'ISO-8859-1 depuis PHP 8.2 (`chÃªne`), et
-  un formulaire relu par le crawler renverrait ses valeurs accentuées ainsi : le client de test
-  (`Tests\Utf8Client`, qui décore `test.client`) lui passe la page en entités HTML.
 - Logs de test au niveau `notice` (`var/logs/test.log`) : le niveau `debug` du dev écrit 200 Mo
   par passage du smoke test.
 - Comptes et profils (`tests/User/`) : connexion par le vrai formulaire (`form[action$="/login_check"]`),
@@ -505,17 +505,39 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   Twig (`gos_web_socket.twig.extension` redéfini sans son tag dans `services.yml`).
 - `bin/console` lit `SYMFONY_ENV`, pas `APP_ENV`.
 - Les sessions sont en base (`PdoSessionHandler`) : `doctrine:schema:create` ne crée pas la table
-  `sessions`.
-- En 3.4, `HttpKernel` n'attrape que les `\Exception` : une `\Error` PHP (appel sur `null`,
+  `sessions`. Depuis Symfony 4.4, `sess_lifetime` porte la date d'expiration, trop grande pour
+  l'ancien `MEDIUMINT` (500 sur toute page qui écrit la session) :
+  `docs/database/schema-sessions.sql` passe aussi une table plus ancienne en `INTEGER UNSIGNED`, et
+  `castor app:db:schema` le rejoue.
+- Le Routing de 4.4 fait taire l'erreur de `preg_match()` « lookbehind assertion is not fixed
+  length » en compilant les routes, mais PCRE2 10.43 et plus (celui de PHP 8.5) l'appelle « length
+  of lookbehind assertion is not limited » : chaque construction du cache du routeur donne
+  quelque 350 warnings PHP. Sans effet sur les routes ; corrigé en 5.4. En CLI (`cache:clear`,
+  `cache:warmup`), ils s'affichent. Une requête web le construit aussi, en dev, après un
+  `cache:clear --no-warmup` (`composer install`) ou la modification d'un controller : affichés
+  avant les en-têtes, ils casseraient la page (500, la session ne démarre plus), d'où
+  `display_errors = Off` dans le FPM (`app-fpm.ini`), comme en prod. Les erreurs natives de PHP
+  d'une requête sont dans les logs du frontend (`castor logs --service=frontend`) ; après le boot,
+  celles de Symfony ont leurs pages d'erreur. En prod, `cache:warmup` construit ce cache avant la
+  première requête.
+- Le kernel de 4.4 passe `error_reporting` à `E_ALL ^ E_WARNING` pendant qu'il inclut le container
+  en cache, avant tout gestionnaire d'erreurs de Symfony : PHP 8.4+ afficherait les dépréciations
+  de compilation des fichiers chargés à ce moment (paramètres implicitement nullables de Symfony
+  4.4) en tête de la première page après un démarrage de FPM, et à chaque commande en prod.
+  `AppKernel::initializeContainer()` ignore alors ce que le niveau de l'appelant cache (php.ini,
+  `bin/console`) et passe le reste au gestionnaire précédent : sous PHPUnit (`error_reporting=-1`),
+  `Tests\DeprecationCollector` les compte toujours. À revoir au saut en 5.4.
+- En 3.4 et 4.4, `HttpKernel` n'attrape que les `\Exception` : une `\Error` PHP (appel sur `null`,
   `TypeError`) sort du kernel au lieu de donner une 500.
 - Les mots de passe sont hashés en sha512 par FOSUserBundle : les comptes existants doivent continuer
   à se connecter sans reset, d'un bout à l'autre de la migration.
 - Controllers : services autowirés (prototype `Ladb\CoreBundle\Controller\`), une action reçoit ses
   services en arguments, un helper de la classe de l'action qui l'appelle (en dernier argument),
-  un trait ou un controller abstrait par un setter `@required`. En 3.4, un `bind` ne s'applique à
-  un argument d'action que s'il désigne un service, pas une valeur (`%param%`) : les paramètres
-  restent lus par `$this->getParameter()`. Un service de bundle sans alias par type reçoit un alias
-  de son id dans `services.yml` (`PusherInterface` de Gos, `UserManipulator` de FOSUserBundle).
+  un trait ou un controller abstrait par un setter `@required`. Les paramètres sont lus par
+  `$this->getParameter()` : en 3.4, un `bind` ne s'appliquait à un argument d'action que s'il
+  désignait un service ; en 4.4, il s'applique aussi à une valeur (`%param%`). Un service de
+  bundle sans alias par type reçoit un alias de son id dans `services.yml` (`PusherInterface` de
+  Gos, `UserManipulator` de FOSUserBundle).
 - `TypableUtils::getManagerByType()` (`ladb:change:owner`) lit les managers dans un service locator
   (`ladb_core.typable_utils.manager_locator` de `services.yml`), par le nom que donne
   `getStrippedNameByType()` : un manager n'a pas à être public pour lui. `Tests\Command\ManagerByTypeTest`
