@@ -503,6 +503,10 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   un argument d'action que s'il désigne un service, pas une valeur (`%param%`) : les paramètres
   restent lus par `$this->getParameter()`. Un service de bundle sans alias par type reçoit un alias
   de son id dans `services.yml` (`PusherInterface` de Gos, `UserManipulator` de FOSUserBundle).
+- `TypableUtils::getManagerByType()` (`ladb:change:owner`) lit les managers dans un service locator
+  (`ladb_core.typable_utils.manager_locator` de `services.yml`), par le nom que donne
+  `getStrippedNameByType()` : un manager n'a pas à être public pour lui. `Tests\Command\ManagerByTypeTest`
+  vérifie le manager de chaque type.
 - PHPStan lit la version de PHP dans `composer.json` (`>=7.3`) : la syntaxe PHP 8 (propriétés
   promues, `readonly`, virgule finale dans une signature) y est une erreur, même si tout tourne en
   8.5.
