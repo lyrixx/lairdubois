@@ -46,7 +46,8 @@ final class RouteSmokeTest extends WebTestCase
      * @var array<string, string>
      */
     private const UNTESTED = [
-        '_profiler' => 'Web profiler (dev tool), not a page of the site.',
+        '_preview_error' => 'Preview of the error pages (dev tool), not a page of the site.',
+        '_profiler' =>'Web profiler (dev tool), not a page of the site.',
         '_profiler_exception' => 'Web profiler (dev tool), not a page of the site.',
         '_profiler_exception_css' => 'Web profiler (dev tool), not a page of the site.',
         '_profiler_home' => 'Web profiler (dev tool), not a page of the site.',
@@ -56,7 +57,6 @@ final class RouteSmokeTest extends WebTestCase
         '_profiler_search' => 'Web profiler (dev tool), not a page of the site.',
         '_profiler_search_bar' => 'Web profiler (dev tool), not a page of the site.',
         '_profiler_search_results' => 'Web profiler (dev tool), not a page of the site.',
-        '_twig_error_test' => 'Preview of the error pages (dev tool), not a page of the site.',
         '_wdt' => 'Web debug toolbar (dev tool), not a page of the site.',
         'core_picture_upload' => 'The action ends with exit(0), which would stop PHPUnit.',
         'core_resource_upload' => 'The action ends with exit(0), which would stop PHPUnit.',
