@@ -2076,16 +2076,7 @@ parameters:
 				since Symfony 4\.2, use Symfony\\Contracts\\Translation\\TranslatorInterface instead$#
 			'''
 			identifier: method.deprecatedInterface
-			count: 9
-			path: src/Ladb/CoreBundle/Controller/Event/EventController.php
-
-		-
-			message: '''
-				#^Call to method transChoice\(\) of deprecated interface Symfony\\Component\\Translation\\TranslatorInterface\:
-				since Symfony 4\.2, use Symfony\\Contracts\\Translation\\TranslatorInterface instead$#
-			'''
-			identifier: method.deprecatedInterface
-			count: 1
+			count: 10
 			path: src/Ladb/CoreBundle/Controller/Event/EventController.php
 
 		-
@@ -2508,16 +2499,7 @@ parameters:
 				since Symfony 4\.2, use Symfony\\Contracts\\Translation\\TranslatorInterface instead$#
 			'''
 			identifier: method.deprecatedInterface
-			count: 9
-			path: src/Ladb/CoreBundle/Controller/Find/FindController.php
-
-		-
-			message: '''
-				#^Call to method transChoice\(\) of deprecated interface Symfony\\Component\\Translation\\TranslatorInterface\:
-				since Symfony 4\.2, use Symfony\\Contracts\\Translation\\TranslatorInterface instead$#
-			'''
-			identifier: method.deprecatedInterface
-			count: 1
+			count: 10
 			path: src/Ladb/CoreBundle/Controller/Find/FindController.php
 
 		-
@@ -2931,16 +2913,7 @@ parameters:
 				since Symfony 4\.2, use Symfony\\Contracts\\Translation\\TranslatorInterface instead$#
 			'''
 			identifier: method.deprecatedInterface
-			count: 9
-			path: src/Ladb/CoreBundle/Controller/Howto/HowtoController.php
-
-		-
-			message: '''
-				#^Call to method transChoice\(\) of deprecated interface Symfony\\Component\\Translation\\TranslatorInterface\:
-				since Symfony 4\.2, use Symfony\\Contracts\\Translation\\TranslatorInterface instead$#
-			'''
-			identifier: method.deprecatedInterface
-			count: 1
+			count: 10
 			path: src/Ladb/CoreBundle/Controller/Howto/HowtoController.php
 
 		-
@@ -4119,16 +4092,7 @@ parameters:
 				since Symfony 4\.2, use Symfony\\Contracts\\Translation\\TranslatorInterface instead$#
 			'''
 			identifier: method.deprecatedInterface
-			count: 12
-			path: src/Ladb/CoreBundle/Controller/Offer/OfferController.php
-
-		-
-			message: '''
-				#^Call to method transChoice\(\) of deprecated interface Symfony\\Component\\Translation\\TranslatorInterface\:
-				since Symfony 4\.2, use Symfony\\Contracts\\Translation\\TranslatorInterface instead$#
-			'''
-			identifier: method.deprecatedInterface
-			count: 1
+			count: 13
 			path: src/Ladb/CoreBundle/Controller/Offer/OfferController.php
 
 		-
@@ -4335,16 +4299,7 @@ parameters:
 				since Symfony 4\.2, use Symfony\\Contracts\\Translation\\TranslatorInterface instead$#
 			'''
 			identifier: method.deprecatedInterface
-			count: 9
-			path: src/Ladb/CoreBundle/Controller/Promotion/GraphicController.php
-
-		-
-			message: '''
-				#^Call to method transChoice\(\) of deprecated interface Symfony\\Component\\Translation\\TranslatorInterface\:
-				since Symfony 4\.2, use Symfony\\Contracts\\Translation\\TranslatorInterface instead$#
-			'''
-			identifier: method.deprecatedInterface
-			count: 1
+			count: 10
 			path: src/Ladb/CoreBundle/Controller/Promotion/GraphicController.php
 
 		-
@@ -4614,16 +4569,7 @@ parameters:
 				since Symfony 4\.2, use Symfony\\Contracts\\Translation\\TranslatorInterface instead$#
 			'''
 			identifier: method.deprecatedInterface
-			count: 10
-			path: src/Ladb/CoreBundle/Controller/Qa/QuestionController.php
-
-		-
-			message: '''
-				#^Call to method transChoice\(\) of deprecated interface Symfony\\Component\\Translation\\TranslatorInterface\:
-				since Symfony 4\.2, use Symfony\\Contracts\\Translation\\TranslatorInterface instead$#
-			'''
-			identifier: method.deprecatedInterface
-			count: 1
+			count: 11
 			path: src/Ladb/CoreBundle/Controller/Qa/QuestionController.php
 
 		-
@@ -4794,16 +4740,7 @@ parameters:
 				since Symfony 4\.2, use Symfony\\Contracts\\Translation\\TranslatorInterface instead$#
 			'''
 			identifier: method.deprecatedInterface
-			count: 16
-			path: src/Ladb/CoreBundle/Controller/Wonder/CreationController.php
-
-		-
-			message: '''
-				#^Call to method transChoice\(\) of deprecated interface Symfony\\Component\\Translation\\TranslatorInterface\:
-				since Symfony 4\.2, use Symfony\\Contracts\\Translation\\TranslatorInterface instead$#
-			'''
-			identifier: method.deprecatedInterface
-			count: 1
+			count: 17
 			path: src/Ladb/CoreBundle/Controller/Wonder/CreationController.php
 
 		-
@@ -5019,16 +4956,7 @@ parameters:
 				since Symfony 4\.2, use Symfony\\Contracts\\Translation\\TranslatorInterface instead$#
 			'''
 			identifier: method.deprecatedInterface
-			count: 9
-			path: src/Ladb/CoreBundle/Controller/Wonder/PlanController.php
-
-		-
-			message: '''
-				#^Call to method transChoice\(\) of deprecated interface Symfony\\Component\\Translation\\TranslatorInterface\:
-				since Symfony 4\.2, use Symfony\\Contracts\\Translation\\TranslatorInterface instead$#
-			'''
-			identifier: method.deprecatedInterface
-			count: 1
+			count: 10
 			path: src/Ladb/CoreBundle/Controller/Wonder/PlanController.php
 
 		-
@@ -5190,16 +5118,7 @@ parameters:
 				since Symfony 4\.2, use Symfony\\Contracts\\Translation\\TranslatorInterface instead$#
 			'''
 			identifier: method.deprecatedInterface
-			count: 11
-			path: src/Ladb/CoreBundle/Controller/Wonder/WorkshopController.php
-
-		-
-			message: '''
-				#^Call to method transChoice\(\) of deprecated interface Symfony\\Component\\Translation\\TranslatorInterface\:
-				since Symfony 4\.2, use Symfony\\Contracts\\Translation\\TranslatorInterface instead$#
-			'''
-			identifier: method.deprecatedInterface
-			count: 1
+			count: 12
 			path: src/Ladb/CoreBundle/Controller/Wonder/WorkshopController.php
 
 		-
@@ -6137,15 +6056,6 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: src/Ladb/CoreBundle/Repository/Qa/AnswerRepository.php
-
-		-
-			message: '''
-				#^Parameter \$translator of method Ladb\\CoreBundle\\Twig\\LadbExtension\:\:__construct\(\) has typehint with deprecated interface Symfony\\Component\\Translation\\TranslatorInterface\:
-				since Symfony 4\.2, use Symfony\\Contracts\\Translation\\TranslatorInterface instead$#
-			'''
-			identifier: parameter.deprecatedInterface
-			count: 1
-			path: src/Ladb/CoreBundle/Twig/LadbExtension.php
 
 		-
 			message: '#^Deprecated in PHP 8\.4\: Parameter \#4 \$publisherUser \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'

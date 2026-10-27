@@ -6,5 +6,5 @@
 <div class="ladb-meta">
     <i class="ladb-icon-eye ladb-icon-fixed-center"></i>
     <strong{% if not noMicrodata %} itemprop="interactionCount"{% endif %}>{{ entity.viewCount|number_format(0, ',', ' ') }}</strong>
-    <small>{{ 'default.choice.views'|transchoice(entity.viewCount) }}</small>
+    <small>{{ 'default.choice.views'|trans({ '%count%':entity.viewCount }) }}</small>
 </div>

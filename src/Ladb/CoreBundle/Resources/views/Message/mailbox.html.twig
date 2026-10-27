@@ -27,7 +27,7 @@
             'sent': { 'label':'Envoyées', 'path':path('core_message_mailbox_filter', { 'filter':'sent' }) },
         } %}
         {% block filterbarRightContent%}
-            <span class="ladb-heading">{{ threadCount }} {% transchoice threadCount %}[0,1]conversation|]1,Inf]conversations{% endtranschoice %}</span>
+            <span class="ladb-heading">{{ threadCount }} {% trans count threadCount %}[0,1]conversation|]1,Inf]conversations{% endtrans %}</span>
         {% endblock %}
     {% endembed %}
     {{ block('autopagerContainer') }}

@@ -17,9 +17,9 @@
         {% block filterbarRightContent%}
             <span class="ladb-heading">
                 {% if positiveFilter %}
-                    {{ entity.positiveVoteCount }} {{ 'vote.choice.positive_votes'|transchoice(entity.positiveVoteCount) }}
+                    {{ entity.positiveVoteCount }} {{ 'vote.choice.positive_votes'|trans({ '%count%':entity.positiveVoteCount }) }}
                 {% else %}
-                    {{ entity.negativeVoteCount }} {{ 'vote.choice.negative_votes'|transchoice(entity.negativeVoteCount) }}
+                    {{ entity.negativeVoteCount }} {{ 'vote.choice.negative_votes'|trans({ '%count%':entity.negativeVoteCount }) }}
                 {% endif %}
             </span>
         {% endblock %}

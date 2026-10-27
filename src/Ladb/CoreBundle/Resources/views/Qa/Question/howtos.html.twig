@@ -28,7 +28,7 @@
             {% set filterPath = 'core_qa_question_howtos_filter' %}
             {% set filterPathParameters = { 'id':question.id } %}
             {% block filterbarRightContent%}
-                <span class="ladb-heading">{{ question.howtos.count }} {{ 'howto.howto.choice.entities'|transchoice(question.howtos.count) }}</span>
+                <span class="ladb-heading">{{ question.howtos.count }} {{ 'howto.howto.choice.entities'|trans({ '%count%':question.howtos.count }) }}</span>
             {% endblock %}
         {% endembed %}
     {% endif %}

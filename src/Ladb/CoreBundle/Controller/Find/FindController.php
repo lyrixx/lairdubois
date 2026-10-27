@@ -564,7 +564,7 @@ class FindController extends AbstractController {
 			$draftCount = $this->getUser()->getMeta()->getPrivateFindCount();
 
 			// Flashbag
-			$this->addFlash('info', '<i class="ladb-icon-warning"></i> '.$translator->transchoice('find.find.choice.draft_alert', $draftCount, array( '%count%' => $draftCount )).' <small><a href="'.$draftPath.'" class="alert-link">('.$translator->trans('default.show_my_drafts').')</a></small>');
+			$this->addFlash('info', '<i class="ladb-icon-warning"></i> '.$translator->trans('find.find.choice.draft_alert', array( '%count%' => $draftCount )).' <small><a href="'.$draftPath.'" class="alert-link">('.$translator->trans('default.show_my_drafts').')</a></small>');
 
 		}
 

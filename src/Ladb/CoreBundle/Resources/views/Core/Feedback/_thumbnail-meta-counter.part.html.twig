@@ -4,6 +4,6 @@
 
 {% if entity.feedbackCount > 0 %}
     <li class="ladb-counter">
-        <span class="ladb-horizontal-separator-right" style="color: #888;"><i class="ladb-icon-feedback"></i> {{ entity.feedbackCount|number_format(0, ',', ' ') }} {{ ('feedback.'~i18nPrefix~'.choice.entities')|transchoice(entity.feedbackCount) }}</span>
+        <span class="ladb-horizontal-separator-right" style="color: #888;"><i class="ladb-icon-feedback"></i> {{ entity.feedbackCount|number_format(0, ',', ' ') }} {{ ('feedback.'~i18nPrefix~'.choice.entities')|trans({ '%count%':entity.feedbackCount }) }}</span>
     </li>
 {% endif %}

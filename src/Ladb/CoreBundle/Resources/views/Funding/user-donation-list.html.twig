@@ -39,7 +39,7 @@
                             'generous':     { 'label':'Généreux', 'path':path('core_funding_user_donation_list_filter', { 'filter':'generous' }) },
                         } %}
                         {% block filterbarRightContent%}
-                            <span class="ladb-heading">{{ donationCount }} {% transchoice donationCount %}[0,1]don|]1,Inf]dons{% endtranschoice %}</span>
+                            <span class="ladb-heading">{{ donationCount }} {% trans count donationCount %}[0,1]don|]1,Inf]dons{% endtrans %}</span>
                         {% endblock %}
                     {% endembed %}
                 {{ block('autopagerContainer') }}

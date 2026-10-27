@@ -24,7 +24,7 @@
             {% set filterPath = 'core_workflow_rebounds_filter' %}
             {% set filterPathParameters = { 'id':workflow.id } %}
             {% block filterbarRightContent%}
-                <span class="ladb-heading">{{ workflow.reboundCount }} {{ 'default.choice.rebounds'|transchoice(workflow.reboundCount) }}</span>
+                <span class="ladb-heading">{{ workflow.reboundCount }} {{ 'default.choice.rebounds'|trans({ '%count%':workflow.reboundCount }) }}</span>
             {% endblock %}
         {% endembed %}
     {% endif %}

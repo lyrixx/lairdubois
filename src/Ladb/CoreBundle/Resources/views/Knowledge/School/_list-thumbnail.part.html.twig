@@ -27,18 +27,18 @@
 
 {% block entityMetas %}
     {% if school.creationCount > 0 %}
-        <li class="ladb-linkto"><a href="{{ path('core_school_creations', { 'id':school.id }) }}" data-tooltip="tooltip" title="{{ 'knowledge.school.linked_to'|trans() }} {{ school.creationCount }} {{ 'wonder.creation.choice.entities'|transchoice(school.creationCount) }}"><i class="ladb-icon-creation"></i></a></li>
+        <li class="ladb-linkto"><a href="{{ path('core_school_creations', { 'id':school.id }) }}" data-tooltip="tooltip" title="{{ 'knowledge.school.linked_to'|trans() }} {{ school.creationCount }} {{ 'wonder.creation.choice.entities'|trans({ '%count%':school.creationCount }) }}"><i class="ladb-icon-creation"></i></a></li>
     {% endif %}
     {% if school.planCount > 0 %}
-        <li class="ladb-linkto"><a href="{{ path('core_school_plans', { 'id':school.id }) }}" data-tooltip="tooltip" title="{{ 'knowledge.school.linked_to'|trans() }} {{ school.planCount }} {{ 'wonder.plan.choice.entities'|transchoice(school.planCount) }}"><i class="ladb-icon-plan"></i></a></li>
+        <li class="ladb-linkto"><a href="{{ path('core_school_plans', { 'id':school.id }) }}" data-tooltip="tooltip" title="{{ 'knowledge.school.linked_to'|trans() }} {{ school.planCount }} {{ 'wonder.plan.choice.entities'|trans({ '%count%':school.planCount }) }}"><i class="ladb-icon-plan"></i></a></li>
     {% endif %}
     {% if school.howtoCount > 0 %}
-        <li class="ladb-linkto"><a href="{{ path('core_school_howtos', { 'id':school.id }) }}" data-tooltip="tooltip" title="{{ 'knowledge.school.linked_to'|trans() }} {{ school.howtoCount }} {{ 'howto.howto.choice.entities'|transchoice(school.howtoCount) }}"><i class="ladb-icon-howto"></i></a></li>
+        <li class="ladb-linkto"><a href="{{ path('core_school_howtos', { 'id':school.id }) }}" data-tooltip="tooltip" title="{{ 'knowledge.school.linked_to'|trans() }} {{ school.howtoCount }} {{ 'howto.howto.choice.entities'|trans({ '%count%':school.howtoCount }) }}"><i class="ladb-icon-howto"></i></a></li>
     {% endif %}
     {{ parent() }}
     {% if school.testimonialCount > 0 %}
         <li class="ladb-counter">
-            <span class="ladb-horizontal-separator-right" style="color: #888;"><i class="ladb-icon-student"></i> {{ school.testimonialCount|number_format(0, ',', ' ') }} {{ 'knowledge.school.choice.testimonials'|transchoice(school.testimonialCount) }}</span>
+            <span class="ladb-horizontal-separator-right" style="color: #888;"><i class="ladb-icon-student"></i> {{ school.testimonialCount|number_format(0, ',', ' ') }} {{ 'knowledge.school.choice.testimonials'|trans({ '%count%':school.testimonialCount }) }}</span>
         </li>
     {% endif %}
 {% endblock %}

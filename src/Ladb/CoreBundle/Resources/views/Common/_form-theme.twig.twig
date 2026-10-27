@@ -6,7 +6,7 @@
                     <li>{{
                     error.messagePluralization is null
                     ? error.messageTemplate|trans(error.messageParameters, 'validators')
-                    : error.messageTemplate|transchoice(error.messagePluralization, error.messageParameters, 'validators')
+                    : error.messageTemplate|trans({ '%count%':error.messagePluralization }|merge(error.messageParameters), 'validators')
                     }}</li>
                 {% endfor %}
             </ul>

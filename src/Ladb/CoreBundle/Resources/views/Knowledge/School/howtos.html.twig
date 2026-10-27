@@ -29,7 +29,7 @@
             {% set filterPath = 'core_school_howtos_filter' %}
             {% set filterPathParameters = { 'id':school.id } %}
             {% block filterbarRightContent%}
-                <span class="ladb-heading">{{ school.howtos.count }} {{ 'howto.howto.choice.entities'|transchoice(school.howtos.count) }}</span>
+                <span class="ladb-heading">{{ school.howtos.count }} {{ 'howto.howto.choice.entities'|trans({ '%count%':school.howtos.count }) }}</span>
             {% endblock %}
         {% endembed %}
     {% endif %}

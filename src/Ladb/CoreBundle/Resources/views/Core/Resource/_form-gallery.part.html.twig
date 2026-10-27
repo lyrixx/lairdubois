@@ -15,7 +15,7 @@
 {% if help is defined %}<p class="help-block"><i>{{ help|raw }}</i></p>{% endif %}
 <p class="help-block"><i>Taille maximale par fichier : <strong>{{  constant('\\Ladb\\CoreBundle\\Entity\\Core\\Resource::DEFAULT_MAX_FILE_SIZE')|ladb_file_size_format }}</strong></i></p>
 {% if mandatory and maxResourceCount > 1 %}
-    <p class="help-block"><i>{{ 'resource.form.choice.mandatory'|transchoice(maxResourceCount) }}</i></p>
+    <p class="help-block"><i>{{ 'resource.form.choice.mandatory'|trans({ '%count%':maxResourceCount }) }}</i></p>
 {% endif %}
 {{ form_errors(formResources) }}
 {{ form_widget(formResources) }}

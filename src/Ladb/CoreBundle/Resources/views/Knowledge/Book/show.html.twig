@@ -82,7 +82,7 @@
         {% if searchableVolumeCount > 1 %}
             <div class="ladb-metas">
                 <div class="ladb-meta">
-                    <span class="ladb-key"><i class="ladb-icon-info"></i> Cet ouvrage compte <a href="{{ path('core_book_list', { 'q':'@work:"'~book.work~'"'}) }}" rel="nofollow"><strong>{{ searchableVolumeCount }}</strong> {{ 'knowledge.book.choice.volumes'|transchoice(searchableVolumeCount) }}</a> référencés.</span>
+                    <span class="ladb-key"><i class="ladb-icon-info"></i> Cet ouvrage compte <a href="{{ path('core_book_list', { 'q':'@work:"'~book.work~'"'}) }}" rel="nofollow"><strong>{{ searchableVolumeCount }}</strong> {{ 'knowledge.book.choice.volumes'|trans({ '%count%':searchableVolumeCount }) }}</a> référencés.</span>
                 </div>
             </div>
         {% endif %}
@@ -134,7 +134,7 @@
                 <a href="{{ path('core_knowledge_contributors', { 'entityType':book.type, 'entityId':book.id }) }}">
             {% endif %}
                 <strong>{{ book.contributorCount|number_format(0, ',', ' ') }}</strong>
-                <small>{{ 'user.choice.contributors'|transchoice(book.contributorCount) }}</small>
+                <small>{{ 'user.choice.contributors'|trans({ '%count%':book.contributorCount }) }}</small>
             {% if book.contributorCount > 0 %}
                 </a>
             {% endif %}

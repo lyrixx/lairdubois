@@ -967,7 +967,7 @@ class PlanController extends AbstractController {
 			$draftCount = $this->getUser()->getMeta()->getPrivatePlanCount();
 
 			// Flashbag
-			$this->addFlash('info', '<i class="ladb-icon-warning"></i> '.$translator->transchoice('wonder.plan.choice.draft_alert', $draftCount, array( '%count%' => $draftCount )).' <small><a href="'.$draftPath.'" class="alert-link">('.$translator->trans('default.show_my_drafts').')</a></small>');
+			$this->addFlash('info', '<i class="ladb-icon-warning"></i> '.$translator->trans('wonder.plan.choice.draft_alert', array( '%count%' => $draftCount )).' <small><a href="'.$draftPath.'" class="alert-link">('.$translator->trans('default.show_my_drafts').')</a></small>');
 
 		}
 

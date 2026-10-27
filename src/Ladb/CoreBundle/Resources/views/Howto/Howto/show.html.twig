@@ -130,7 +130,7 @@
                     <li>
                         <a href="#{{ article.sluggedId }}">{{ article.title }}</a>
                         {% if article.bodyBlockVideoCount > 0 %}<i class="ladb-icon-video"></i>{% endif %}
-                        {% if article.isDraft %}<small class="ladb-translucent">({{ 'default.choice.draft'|transchoice(1) }})</small>{% endif %}
+                        {% if article.isDraft %}<small class="ladb-translucent">({{ 'default.choice.draft'|trans({ '%count%':1 }) }})</small>{% endif %}
                     </li>
                 {% endif %}{% endfor %}
             </ul>
@@ -269,7 +269,7 @@
                             'path':howto.questionCount == 1 ? path('core_qa_question_show', { 'id':howto.questions[0].sluggedId }) : path('core_howto_questions', { 'id':howto.id }),
                             'picture':howto.questions[0].mainPicture,
                             'icon':'ladb-icon-question',
-                            'caption': howto.questionCount~' '~('qa.question.choice.entities'|transchoice(howto.questionCount)),
+                            'caption': howto.questionCount~' '~('qa.question.choice.entities'|trans({ '%count%':howto.questionCount })),
                             'emptyWebPath': 'empty_question.png'
                         } %}
                     {% endif %}
@@ -278,7 +278,7 @@
                             'path':howto.planCount == 1 ? path('core_plan_show', { 'id':howto.plans[0].sluggedId }) : path('core_howto_plans', { 'id':howto.id }),
                             'picture':howto.plans[0].mainPicture,
                             'icon':'ladb-icon-plan',
-                            'caption': howto.planCount~' '~('wonder.plan.choice.entities'|transchoice(howto.planCount))
+                            'caption': howto.planCount~' '~('wonder.plan.choice.entities'|trans({ '%count%':howto.planCount }))
                         } %}
                     {% endif %}
                     {% if howto.creationCount > 0 %}
@@ -286,7 +286,7 @@
                             'path':howto.creationCount == 1 ? path('core_creation_show', { 'id':howto.creations[0].sluggedId }) : path('core_howto_creations', { 'id':howto.id }),
                             'picture':howto.creations[0].mainPicture,
                             'icon':'ladb-icon-creation',
-                            'caption': howto.creationCount~' '~('wonder.creation.choice.entities'|transchoice(howto.creationCount))
+                            'caption': howto.creationCount~' '~('wonder.creation.choice.entities'|trans({ '%count%':howto.creationCount }))
                         } %}
                     {% endif %}
                     {% if howto.workflowCount > 0 %}
@@ -294,7 +294,7 @@
                             'path':howto.workflowCount == 1 ? path('core_workflow_show', { 'id':howto.workflows[0].sluggedId }) : path('core_howto_workflows', { 'id':howto.id }),
                             'picture':howto.workflows[0].mainPicture,
                             'icon':'ladb-icon-workflow',
-                            'caption': howto.workflowCount~' '~('workflow.workflow.choice.entities'|transchoice(howto.workflowCount)),
+                            'caption': howto.workflowCount~' '~('workflow.workflow.choice.entities'|trans({ '%count%':howto.workflowCount })),
                             'emptyWebPath': 'empty_workflow.png'
                         } %}
                     {% endif %}
@@ -303,7 +303,7 @@
                             'path':howto.workshopCount == 1 ? path('core_workshop_show', { 'id':howto.workshops[0].sluggedId }) : path('core_howto_workshops', { 'id':howto.id }),
                             'picture':howto.workshops[0].mainPicture,
                             'icon':'ladb-icon-workshop',
-                            'caption': howto.workshopCount~' '~('wonder.workshop.choice.entities'|transchoice(howto.workshopCount))
+                            'caption': howto.workshopCount~' '~('wonder.workshop.choice.entities'|trans({ '%count%':howto.workshopCount }))
                         } %}
                     {% endif %}
                     {% if howto.providerCount > 0 %}
@@ -311,7 +311,7 @@
                             'path':howto.providerCount == 1 ? path('core_provider_show', { 'id':howto.providers[0].sluggedId }) : path('core_howto_providers', { 'id':howto.id }),
                             'picture':howto.providers[0].mainPicture,
                             'icon':'ladb-icon-provider',
-                            'caption': howto.providerCount~' '~('knowledge.provider.choice.entities'|transchoice(howto.providerCount))
+                            'caption': howto.providerCount~' '~('knowledge.provider.choice.entities'|trans({ '%count%':howto.providerCount }))
                         } %}
                     {% endif %}
                     {% if howto.schoolCount > 0 %}
@@ -319,7 +319,7 @@
                             'path':howto.schoolCount == 1 ? path('core_school_show', { 'id':howto.schools[0].sluggedId }) : path('core_howto_schools', { 'id':howto.id }),
                             'picture':howto.schools[0].mainPicture,
                             'icon':'ladb-icon-school',
-                            'caption': howto.schoolCount~' '~('knowledge.school.choice.entities'|transchoice(howto.schoolCount))
+                            'caption': howto.schoolCount~' '~('knowledge.school.choice.entities'|trans({ '%count%':howto.schoolCount }))
                         } %}
                     {% endif %}
                 {% endblock %}
@@ -349,7 +349,7 @@
                 <a href="#" class="ladb-scrollto-btn" onclick="$('#ladb_referer_widget').ladbScrollTo(event);"><i class="ladb-icon-arrow-down"></i></a>
                 <i class="ladb-icon-referral ladb-icon-fixed-center"></i>
                 <strong>{{ howto.referralCount|number_format(0, ',', ' ') }}</strong>
-                <small>{{ 'referer.choice.referrals'|transchoice(howto.referralCount) }}</small>
+                <small>{{ 'referer.choice.referrals'|trans({ '%count%':howto.referralCount }) }}</small>
             </div>
         {% endif %}
     </div>
@@ -362,7 +362,7 @@
                 <a href="{{ howto.questionCount == 1 ? path('core_qa_question_show', { 'id':howto.questions[0].sluggedId }) : path('core_howto_questions', { 'id':howto.id }) }}">
             {% endif %}
             <strong>{{ howto.questionCount }}</strong>
-            <small>{{ 'qa.question.choice.entities'|transchoice(howto.questionCount) }}</small>
+            <small>{{ 'qa.question.choice.entities'|trans({ '%count%':howto.questionCount }) }}</small>
             {% if howto.questionCount > 0 %}
                 </a>
             {% endif %}
@@ -373,7 +373,7 @@
                 <a href="{{ howto.planCount == 1 ? path('core_plan_show', { 'id':howto.plans[0].sluggedId }) : path('core_howto_plans', { 'id':howto.id }) }}">
             {% endif %}
             <strong>{{ howto.planCount }}</strong>
-            <small>{{ 'wonder.plan.choice.entities'|transchoice(howto.planCount) }}</small>
+            <small>{{ 'wonder.plan.choice.entities'|trans({ '%count%':howto.planCount }) }}</small>
             {% if howto.planCount > 0 %}
                 </a>
             {% endif %}
@@ -383,7 +383,7 @@
                 <i class="ladb-icon-creation"></i>
                 <a href="{{ howto.creationCount == 1 ? path('core_creation_show', { 'id':howto.creations[0].sluggedId }) : path('core_howto_creations', { 'id':howto.id }) }}">
                     <strong>{{ howto.creationCount }}</strong>
-                    <small>{{ 'wonder.creation.choice.entities'|transchoice(howto.creationCount) }}</small>
+                    <small>{{ 'wonder.creation.choice.entities'|trans({ '%count%':howto.creationCount }) }}</small>
                 </a>
             </div>
         {% endif %}
@@ -392,7 +392,7 @@
                 <i class="ladb-icon-workshop"></i>
                 <a href="{{ howto.workshopCount == 1 ? path('core_workshop_show', { 'id':howto.workshops[0].sluggedId }) : path('core_howto_workshops', { 'id':howto.id }) }}">
                     <strong>{{ howto.workshopCount }}</strong>
-                    <small>{{ 'wonder.workshop.choice.entities'|transchoice(howto.workshopCount) }}</small>
+                    <small>{{ 'wonder.workshop.choice.entities'|trans({ '%count%':howto.workshopCount }) }}</small>
                 </a>
             </div>
         {% endif %}
@@ -402,7 +402,7 @@
                 <a href="{{ howto.workflowCount == 1 ? path('core_workflow_show', { 'id':howto.workflows[0].sluggedId }) : path('core_howto_workflows', { 'id':howto.id }) }}">
             {% endif %}
             <strong>{{ howto.workflowCount }}</strong>
-            <small>{{ 'workflow.workflow.choice.entities'|transchoice(howto.workflowCount) }}</small>
+            <small>{{ 'workflow.workflow.choice.entities'|trans({ '%count%':howto.workflowCount }) }}</small>
             {% if howto.workflowCount > 0 %}
                 </a>
             {% endif %}
@@ -413,7 +413,7 @@
                 <a href="{{ howto.providerCount == 1 ? path('core_provider_show', { 'id':howto.providers[0].sluggedId }) : path('core_howto_providers', { 'id':howto.id }) }}">
             {% endif %}
             <strong>{{ howto.providerCount }}</strong>
-            <small>{{ 'knowledge.provider.choice.entities'|transchoice(howto.providerCount) }}</small>
+            <small>{{ 'knowledge.provider.choice.entities'|trans({ '%count%':howto.providerCount }) }}</small>
             {% if howto.providerCount > 0 %}
                 </a>
             {% endif %}
@@ -424,7 +424,7 @@
                 <a href="{{ howto.schoolCount == 1 ? path('core_school_show', { 'id':howto.schools[0].sluggedId }) : path('core_howto_schools', { 'id':howto.id }) }}">
             {% endif %}
             <strong>{{ howto.schoolCount }}</strong>
-            <small>{{ 'knowledge.school.choice.entities'|transchoice(howto.schoolCount) }}</small>
+            <small>{{ 'knowledge.school.choice.entities'|trans({ '%count%':howto.schoolCount }) }}</small>
             {% if howto.schoolCount > 0 %}
                 </a>
             {% endif %}

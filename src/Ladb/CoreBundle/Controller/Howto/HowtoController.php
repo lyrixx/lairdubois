@@ -601,7 +601,7 @@ class HowtoController extends AbstractHowtoBasedController {
 			$draftCount = $this->getUser()->getMeta()->getPrivateHowtoCount();
 
 			// Flashbag
-			$this->addFlash('info', '<i class="ladb-icon-warning"></i> '.$translator->transchoice('howto.howto.choice.draft_alert', $draftCount, array( '%count%' => $draftCount )).' <small><a href="'.$draftPath.'" class="alert-link">('.$translator->trans('default.show_my_drafts').')</a></small>');
+			$this->addFlash('info', '<i class="ladb-icon-warning"></i> '.$translator->trans('howto.howto.choice.draft_alert', array( '%count%' => $draftCount )).' <small><a href="'.$draftPath.'" class="alert-link">('.$translator->trans('default.show_my_drafts').')</a></small>');
 
 		}
 

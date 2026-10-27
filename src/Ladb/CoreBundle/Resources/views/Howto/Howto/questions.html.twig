@@ -24,7 +24,7 @@
             {% set filterPath = 'core_howto_questions_filter' %}
             {% set filterPathParameters = { 'id':howto.id } %}
             {% block filterbarRightContent%}
-                <span class="ladb-heading">{{ howto.questionCount }} {{ 'qa.question.choice.entities'|transchoice(howto.questionCount) }}</span>
+                <span class="ladb-heading">{{ howto.questionCount }} {{ 'qa.question.choice.entities'|trans({ '%count%':howto.questionCount }) }}</span>
             {% endblock %}
         {% endembed %}
     {% endif %}

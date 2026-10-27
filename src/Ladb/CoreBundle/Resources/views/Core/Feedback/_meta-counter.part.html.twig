@@ -8,7 +8,7 @@
         <i class="ladb-icon-feedback ladb-icon-fixed-center"></i>
         <a href="#" onclick="$('#ladb_feedback_widget').ladbScrollTo(event, { onAfterHighlight: true });">
             <strong>{{ entity.feedbackCount|number_format(0, ',', ' ') }}</strong>
-            <small>{{ ('feedback.default.choice.entities')|transchoice(entity.feedbackCount) }}</small>
+            <small>{{ ('feedback.default.choice.entities')|trans({ '%count%':entity.feedbackCount }) }}</small>
         </a>
     </div>
 {% endif %}

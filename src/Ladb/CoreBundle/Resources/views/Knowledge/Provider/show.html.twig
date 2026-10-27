@@ -115,7 +115,7 @@
         {% if searchableStoreCount > 1 %}
             <div class="ladb-metas">
                 <div class="ladb-meta">
-                    <span class="ladb-key"><i class="ladb-icon-info"></i> Ce fournisseur est répertorié avec <a href="{{ path('core_provider_list', { 'q':'@brand:"'~provider.brand~'"'}) }}" rel="nofollow"><strong>{{ searchableStoreCount }}</strong> {{ 'knowledge.provider.choice.stores'|transchoice(searchableStoreCount) }}</a>.</span>
+                    <span class="ladb-key"><i class="ladb-icon-info"></i> Ce fournisseur est répertorié avec <a href="{{ path('core_provider_list', { 'q':'@brand:"'~provider.brand~'"'}) }}" rel="nofollow"><strong>{{ searchableStoreCount }}</strong> {{ 'knowledge.provider.choice.stores'|trans({ '%count%':searchableStoreCount }) }}</a>.</span>
                 </div>
             </div>
         {% endif %}
@@ -171,7 +171,7 @@
                 <a href="{{ path('core_knowledge_contributors', { 'entityType':provider.type, 'entityId':provider.id }) }}">
             {% endif %}
                 <strong>{{ provider.contributorCount|number_format(0, ',', ' ') }}</strong>
-                <small>{{ 'user.choice.contributors'|transchoice(provider.contributorCount) }}</small>
+                <small>{{ 'user.choice.contributors'|trans({ '%count%':provider.contributorCount }) }}</small>
             {% if provider.contributorCount > 0 %}
                 </a>
             {% endif %}
@@ -190,7 +190,7 @@
                 <a href="{{ path('core_wood_list', { 'q':'@name:"'~provider.woods~'"'}) }}" rel="nofollow">
                     {% endif %}
                     <strong>{{ searchableWoodCount }}</strong>
-                    <small>{{ 'knowledge.wood.choice.entities'|transchoice(searchableWoodCount) }}</small>
+                    <small>{{ 'knowledge.wood.choice.entities'|trans({ '%count%':searchableWoodCount }) }}</small>
                     {% if searchableWoodCount > 0 %}
                 </a>
                 {% endif %}
@@ -201,7 +201,7 @@
                 <i class="ladb-icon-creation"></i>
                 <a href="{{ provider.creationCount == 1 ? path('core_creation_show', { 'id':provider.creations[0].sluggedId }) : path('core_provider_creations', { 'id':provider.id }) }}">
                     <strong>{{ provider.creationCount }}</strong>
-                    <small>{{ 'wonder.creation.choice.entities'|transchoice(provider.creationCount) }}</small>
+                    <small>{{ 'wonder.creation.choice.entities'|trans({ '%count%':provider.creationCount }) }}</small>
                 </a>
             </div>
         {% endif %}
@@ -210,7 +210,7 @@
                 <i class="ladb-icon-howto"></i>
                 <a href="{{ provider.howtoCount == 1 ? path('core_howto_show', { 'id':provider.howtos[0].sluggedId }) : path('core_provider_howtos', { 'id':provider.id }) }}">
                     <strong>{{ provider.howtoCount }}</strong>
-                    <small>{{ 'howto.howto.choice.entities'|transchoice(provider.howtoCount) }}</small>
+                    <small>{{ 'howto.howto.choice.entities'|trans({ '%count%':provider.howtoCount }) }}</small>
                 </a>
             </div>
         {% endif %}

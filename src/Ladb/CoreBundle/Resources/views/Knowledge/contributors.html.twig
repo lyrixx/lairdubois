@@ -8,7 +8,7 @@
 
 {% block bodyContainerContent %}
     <div class="ladb-filterbar ladb-filterbar-line">
-        <span class="ladb-heading pull-right">{{ entity.contributorCount }} {{ 'user.choice.contributors'|transchoice(entity.contributorCount) }}</span>
+        <span class="ladb-heading pull-right">{{ entity.contributorCount }} {{ 'user.choice.contributors'|trans({ '%count%':entity.contributorCount }) }}</span>
     </div>
     {{ parent() }}
 {% endblock %}

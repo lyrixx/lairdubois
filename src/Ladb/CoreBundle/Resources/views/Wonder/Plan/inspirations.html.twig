@@ -30,7 +30,7 @@
                             },
             } %}
             {% block filterbarRightContent%}
-                <span class="ladb-heading">{{ plan.inspirationCount }} {{ 'default.choice.inspirations'|transchoice(plan.inspirationCount) }}</span>
+                <span class="ladb-heading">{{ plan.inspirationCount }} {{ 'default.choice.inspirations'|trans({ '%count%':plan.inspirationCount }) }}</span>
             {% endblock %}
         {% endembed %}
     {% endif %}

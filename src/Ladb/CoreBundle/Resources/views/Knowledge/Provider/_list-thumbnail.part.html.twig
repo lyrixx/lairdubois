@@ -23,10 +23,10 @@
 
 {% block entityMetas %}
     {% if provider.creationCount > 0 %}
-        <li class="ladb-linkto"><a href="{{ path('core_provider_creations', { 'id':provider.id }) }}" data-tooltip="tooltip" title="{{ 'knowledge.provider.linked_to'|trans() }} {{ provider.creationCount }} {{ 'wonder.creation.choice.entities'|transchoice(provider.creationCount) }}"><i class="ladb-icon-creation"></i></a></li>
+        <li class="ladb-linkto"><a href="{{ path('core_provider_creations', { 'id':provider.id }) }}" data-tooltip="tooltip" title="{{ 'knowledge.provider.linked_to'|trans() }} {{ provider.creationCount }} {{ 'wonder.creation.choice.entities'|trans({ '%count%':provider.creationCount }) }}"><i class="ladb-icon-creation"></i></a></li>
     {% endif %}
     {% if provider.howtoCount > 0 %}
-        <li class="ladb-linkto"><a href="{{ path('core_provider_howtos', { 'id':provider.id }) }}" data-tooltip="tooltip" title="{{ 'knowledge.provider.linked_to'|trans() }} {{ provider.howtoCount }} {{ 'howto.howto.choice.entities'|transchoice(provider.howtoCount) }}"><i class="ladb-icon-howto"></i></a></li>
+        <li class="ladb-linkto"><a href="{{ path('core_provider_howtos', { 'id':provider.id }) }}" data-tooltip="tooltip" title="{{ 'knowledge.provider.linked_to'|trans() }} {{ provider.howtoCount }} {{ 'howto.howto.choice.entities'|trans({ '%count%':provider.howtoCount }) }}"><i class="ladb-icon-howto"></i></a></li>
     {% endif %}
     {{ parent() }}
     {% include 'LadbCoreBundle:Core/Review:_thumbnail-meta-counter.part.html.twig' %}

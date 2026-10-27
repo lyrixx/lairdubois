@@ -24,7 +24,7 @@
             {% set filterPath = 'core_workflow_inspirations_filter' %}
             {% set filterPathParameters = { 'id':workflow.id } %}
             {% block filterbarRightContent%}
-                <span class="ladb-heading">{{ workflow.inspirationCount }} {{ 'default.choice.inspirations'|transchoice(workflow.inspirationCount) }}</span>
+                <span class="ladb-heading">{{ workflow.inspirationCount }} {{ 'default.choice.inspirations'|trans({ '%count%':workflow.inspirationCount }) }}</span>
             {% endblock %}
         {% endembed %}
     {% endif %}

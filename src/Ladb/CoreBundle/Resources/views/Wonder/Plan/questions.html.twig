@@ -29,7 +29,7 @@
             {% set filterPath = 'core_plan_questions_filter' %}
             {% set filterPathParameters = { 'id':plan.id } %}
             {% block filterbarRightContent%}
-                <span class="ladb-heading">{{ plan.questionCount }} {{ 'qa.question.choice.entities'|transchoice(plan.questionCount) }}</span>
+                <span class="ladb-heading">{{ plan.questionCount }} {{ 'qa.question.choice.entities'|trans({ '%count%':plan.questionCount }) }}</span>
             {% endblock %}
         {% endembed %}
     {% endif %}

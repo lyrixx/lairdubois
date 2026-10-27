@@ -14,7 +14,7 @@
             {% set filterPath = 'core_user_show_teams_filter' %}
             {% set filterPathParameters = { 'username':user.usernameCanonical } %}
             {% block filterbarRightContent%}
-                <span class="ladb-heading">{{ user.meta.teamCount }} {{ 'team.choice.entities'|transchoice(user.meta.teamCount) }}</span>
+                <span class="ladb-heading">{{ user.meta.teamCount }} {{ 'team.choice.entities'|trans({ '%count%':user.meta.teamCount }) }}</span>
             {% endblock %}
         {% endembed %}
     {% endif %}

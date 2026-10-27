@@ -29,7 +29,7 @@
             {% set filterPath = 'core_plan_schools_filter' %}
             {% set filterPathParameters = { 'id':plan.id } %}
             {% block filterbarRightContent%}
-                <span class="ladb-heading">{{ plan.schoolCount }} {{ 'knowledge.school.choice.entities'|transchoice(plan.schoolCount) }}</span>
+                <span class="ladb-heading">{{ plan.schoolCount }} {{ 'knowledge.school.choice.entities'|trans({ '%count%':plan.schoolCount }) }}</span>
             {% endblock %}
         {% endembed %}
     {% endif %}

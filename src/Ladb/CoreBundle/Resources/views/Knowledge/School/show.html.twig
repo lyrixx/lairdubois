@@ -144,7 +144,7 @@
                 <a href="{{ path('core_knowledge_contributors', { 'entityType':school.type, 'entityId':school.id }) }}">
             {% endif %}
                 <strong>{{ school.contributorCount|number_format(0, ',', ' ') }}</strong>
-                <small>{{ 'user.choice.contributors'|transchoice(school.contributorCount) }}</small>
+                <small>{{ 'user.choice.contributors'|trans({ '%count%':school.contributorCount }) }}</small>
             {% if school.contributorCount > 0 %}
                 </a>
             {% endif %}
@@ -155,7 +155,7 @@
             <i class="ladb-icon-student ladb-icon-fixed-center"></i>
             <a href="#" onclick="$('#ladb_testimonial_list').ladbScrollTo(event);">
                 <strong>{{ school.testimonialCount|number_format(0, ',', ' ') }}</strong>
-                <small>{{ 'knowledge.school.choice.testimonials'|transchoice(entity.testimonialCount) }}</small>
+                <small>{{ 'knowledge.school.choice.testimonials'|trans({ '%count%':entity.testimonialCount }) }}</small>
             </a>
         </div>
     </div>
@@ -167,7 +167,7 @@
                 <i class="ladb-icon-creation"></i>
                 <a href="{{ school.creationCount == 1 ? path('core_creation_show', { 'id':school.creations[0].sluggedId }) : path('core_school_creations', { 'id':school.id }) }}">
                     <strong>{{ school.creationCount }}</strong>
-                    <small>{{ 'wonder.creation.choice.entities'|transchoice(school.creationCount) }}</small>
+                    <small>{{ 'wonder.creation.choice.entities'|trans({ '%count%':school.creationCount }) }}</small>
                 </a>
             </div>
         {% endif %}
@@ -176,7 +176,7 @@
                 <i class="ladb-icon-howto"></i>
                 <a href="{{ school.howtoCount == 1 ? path('core_howto_show', { 'id':school.howtos[0].sluggedId }) : path('core_school_howtos', { 'id':school.id }) }}">
                     <strong>{{ school.howtoCount }}</strong>
-                    <small>{{ 'howto.howto.choice.entities'|transchoice(school.howtoCount) }}</small>
+                    <small>{{ 'howto.howto.choice.entities'|trans({ '%count%':school.howtoCount }) }}</small>
                 </a>
             </div>
         {% endif %}

@@ -97,7 +97,7 @@
                 <a href="{{ path('core_knowledge_contributors', { 'entityType':wood.type, 'entityId':wood.id }) }}">
             {% endif %}
                 <strong>{{ wood.contributorCount|number_format(0, ',', ' ') }}</strong>
-                <small>{{ 'user.choice.contributors'|transchoice(wood.contributorCount) }}</small>
+                <small>{{ 'user.choice.contributors'|trans({ '%count%':wood.contributorCount }) }}</small>
             {% if wood.contributorCount > 0 %}
                 </a>
             {% endif %}
@@ -109,7 +109,7 @@
                 <a href="{{ path('core_wood_texture_list', { 'id':wood.id }) }}">
             {% endif %}
                 <strong>{{ wood.textureCount|number_format(0, ',', ' ') }}</strong>
-                <small>{{ 'knowledge.wood.texture.choice.textures'|transchoice(wood.textureCount) }}</small>
+                <small>{{ 'knowledge.wood.texture.choice.textures'|trans({ '%count%':wood.textureCount }) }}</small>
             {% if wood.textureCount > 0 %}
                 </a>
             {% endif %}
@@ -129,7 +129,7 @@
                 <a href="{{ path('core_creation_list', { 'q':'@woods:"'~wood.name~'"'}) }}" rel="nofollow">
             {% endif %}
                 <strong>{{ searchableCreationCount }}</strong>
-                <small>{{ 'wonder.creation.choice.entities'|transchoice(searchableCreationCount) }}</small>
+                <small>{{ 'wonder.creation.choice.entities'|trans({ '%count%':searchableCreationCount }) }}</small>
             {% if searchableCreationCount > 0 %}
                 </a>
             {% endif %}
@@ -140,7 +140,7 @@
                 <a href="{{ path('core_provider_list', { 'q':'@woods:"'~wood.name~'"'}) }}" rel="nofollow">
             {% endif %}
                 <strong>{{ searchableProviderCount }}</strong>
-                <small>{{ 'knowledge.provider.choice.entities'|transchoice(searchableProviderCount) }}</small>
+                <small>{{ 'knowledge.provider.choice.entities'|trans({ '%count%':searchableProviderCount }) }}</small>
             {% if searchableProviderCount > 0 %}
                 </a>
             {% endif %}
