@@ -1,1 +1,2 @@
-{"suggestions":[{% if users is empty %}""{% else %}{% for user in users %}{"username":"{{ user.usernameCanonical }}","displayname":"{{ user.displayname }}","avatar":"{{ user.avatar.webPath|imagine_filter('32x32o') }}"}{% if loop.last == false %},{% endif %}{% endfor %}{% endif %}]}
+{% autoescape 'html' %}{# For HTML, as with Twig 2 (Twig 3 escapes .json for JS): the JS inserts these values in the page #}
+{"suggestions":[{% if users is empty %}""{% else %}{% for user in users %}{"username":"{{ user.usernameCanonical }}","displayname":"{{ user.displayname }}","avatar":"{{ user.avatar.webPath|imagine_filter('32x32o') }}"}{% if loop.last == false %},{% endif %}{% endfor %}{% endif %}]}{% endautoescape %}

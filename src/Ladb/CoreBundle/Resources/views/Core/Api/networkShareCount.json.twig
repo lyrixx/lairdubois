@@ -1,1 +1,2 @@
-{"url":"{{ url }}","network":"{{ network }}","count":{{ count }}}
+{% autoescape 'html' %}{# For HTML, as with Twig 2 (Twig 3 escapes .json for JS): the JS inserts these values in the page #}
+{"url":"{{ url }}","network":"{{ network }}","count":{{ count }}}{% endautoescape %}
