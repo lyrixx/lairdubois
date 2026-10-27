@@ -28,7 +28,7 @@ class AboutController extends AbstractController {
 
 	/**
 	 * @Route("/mentions-legales.html", name="core_about_legals")
-	 * @Template("LadbCoreBundle:Core/About:legals.html.twig")
+	 * @Template("@LadbCore/Core/About/legals.html.twig")
 	 */
 	public function legalsAction() {
 		return array();
@@ -43,7 +43,7 @@ class AboutController extends AbstractController {
 
 	/**
 	 * @Route("/credits.html", name="core_about_credits")
-	 * @Template("LadbCoreBundle:Core/About:credits.html.twig")
+	 * @Template("@LadbCore/Core/About/credits.html.twig")
 	 */
 	public function creditsAction() {
 		$credits = array(

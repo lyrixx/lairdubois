@@ -29,7 +29,7 @@
     <ul id="{{ formSection }}_thumbnails" class="ladb-form-thumbnails">
         {% apply spaceless %}
         {% for picture in pictures %}
-            {% include 'LadbCoreBundle:Core/Picture:_form-thumbnail.part.html.twig' %}
+            {% include '@LadbCore/Core/Picture/_form-thumbnail.part.html.twig' %}
         {% endfor %}
         {% endapply %}
     </ul>

@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Funding:_layout.html.twig' %}
+{% extends '@LadbCore/Funding/_layout.html.twig' %}
 
 {% set tab = 'dashboard' %}
 
@@ -44,7 +44,7 @@
     </div>
     <div class="row">
         <div class="col-md-7 col-xs-12">
-            {% include 'LadbCoreBundle:Funding:_dashboard.part.html.twig' %}
+            {% include '@LadbCore/Funding/_dashboard.part.html.twig' %}
         </div>
         <div class="col-md-5 col-xs-12">
             <div class="panel panel-default">
@@ -70,7 +70,7 @@
                                 <button id="ladb_donate_btn" class="btn btn-primary btn-lg">Faire un don</button>
                             </form>
                             {% if is_granted("ROLE_USER") %}
-                                {% embed 'LadbCoreBundle:Common/Modal:_modal.part.html.twig' with { 'id':'new_modal', 'title':('funding.donate'|trans()) } %}
+                                {% embed '@LadbCore/Common/Modal/_modal.part.html.twig' with { 'id':'new_modal', 'title':('funding.donate'|trans()) } %}
                                     {% block bodyInner %}
                                         {{ 'default.loading'|trans() }}
                                     {% endblock %}

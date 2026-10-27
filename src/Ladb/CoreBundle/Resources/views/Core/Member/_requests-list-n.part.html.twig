@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:_list-n.part.html.twig' %}
+{% extends '@LadbCore/Common/_list-n.part.html.twig' %}
 
 {# set user (the context user) #}
 {# set requests #}
@@ -6,7 +6,7 @@
 
 {% block items %}
     {% for request in requests %}
-        {% embed 'LadbCoreBundle:Core/User:_list-row.part.html.twig' with { 'user':user.isTeam ? request.sender : request.team } %}
+        {% embed '@LadbCore/Core/User/_list-row.part.html.twig' with { 'user':user.isTeam ? request.sender : request.team } %}
             {% block counters %}
                 <div class="ladb-row-metas">
                     {% if not user.isTeam %}<a href="{{ path('core_member_request_accept', { 'id':request.id }) }}" class="btn btn-primary btn-sm">Accepter</a>{% endif %}

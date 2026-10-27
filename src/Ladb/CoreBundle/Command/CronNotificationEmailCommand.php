@@ -295,8 +295,8 @@ EOT
 			);
 
 			$subject = $translator->trans('notification.choice.'.$activityStrippedName, array( '%count%' => count($notifications) ));
-			$body = $templating->render('LadbCoreBundle:Core/Notification:email-'.$activityStrippedName.'.txt.twig', $parameters);
-			$htmlBody = $templating->render('LadbCoreBundle:Core/Notification:email-'.$activityStrippedName.'.html.twig', $parameters);
+			$body = $templating->render('@LadbCore/Core/Notification/email-'.$activityStrippedName.'.txt.twig', $parameters);
+			$htmlBody = $templating->render('@LadbCore/Core/Notification/email-'.$activityStrippedName.'.html.twig', $parameters);
 
 			if ($verbose) {
 				$output->write('<info>--> Sending email to <fg=white>@'.$recipientUser->getDisplayname().'</fg=white> <fg=yellow>('.count($rows).' '.$activityStrippedName.')</fg=yellow>...</info>');

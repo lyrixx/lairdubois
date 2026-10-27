@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:_form-section.part.html.twig' %}
+{% extends '@LadbCore/Common/_form-section.part.html.twig' %}
 
 {# set formPictures #}
 {# set pictures #}
@@ -18,5 +18,5 @@
 {% set sortable = sortable is defined ? sortable : false %}
 
 {% block body %}
-    {% include 'LadbCoreBundle:Core/Picture:_form-gallery.part.html.twig' %}
+    {% include '@LadbCore/Core/Picture/_form-gallery.part.html.twig' %}
 {% endblock %}

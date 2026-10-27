@@ -29,7 +29,7 @@ class GraphicUtils {
 		if ($zip->open($zipAbsolutePath, \ZipArchive::CREATE)) {
 
 			$zip->addFile($graphic->getResource()->getAbsolutePath(), $graphic->getResource()->getFilename());
-			$zip->addFromString('LisezMoi.txt', $this->templating->render('LadbCoreBundle:Promotion/Graphic:readme.txt.twig', array( 'graphic' => $graphic )));
+			$zip->addFromString('LisezMoi.txt', $this->templating->render('@LadbCore/Promotion/Graphic/readme.txt.twig', array( 'graphic' => $graphic )));
 			$zip->close();
 			$graphic->setZipArchiveSize(filesize($zipAbsolutePath));
 

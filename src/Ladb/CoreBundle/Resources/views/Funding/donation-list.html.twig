@@ -1,6 +1,6 @@
-{% extends 'LadbCoreBundle:Funding:_layout.html.twig' %}
+{% extends '@LadbCore/Funding/_layout.html.twig' %}
 
-{% use 'LadbCoreBundle:Common/Blocks:list-autopager.blocks.html.twig' %}
+{% use '@LadbCore/Common/Blocks/list-autopager.blocks.html.twig' %}
 
 {% set tab = 'donation-list' %}
 
@@ -16,10 +16,10 @@
 {% block bodyContainerContent %}
     <div class="row">
         <div class="col-sm-5 col-sm-push-7 col-xs-12">
-            {% include 'LadbCoreBundle:Funding:_list-stats.part.html.twig' %}
+            {% include '@LadbCore/Funding/_list-stats.part.html.twig' %}
         </div>
         <div class="col-sm-7 col-sm-pull-5 col-xs-12">
-            {% embed 'LadbCoreBundle:Common:_list-filterbar.part.html.twig' with { 'classes':'ladb-filterbar-line' } %}
+            {% embed '@LadbCore/Common/_list-filterbar.part.html.twig' with { 'classes':'ladb-filterbar-line' } %}
                 {% set filterDefs = {
                     'recent':       { 'label':'Récents', 'path':path('core_funding_admin_donation_list_filter', { 'filter':'recent' }) },
                     'generous':     { 'label':'Généreux', 'path':path('core_funding_admin_donation_list_filter', { 'filter':'generous' }) },
@@ -34,5 +34,5 @@
 {% endblock %}
 
 {% block autopagerContainerInner %}
-    {% include 'LadbCoreBundle:Funding:_donation-list-n.part.html.twig' %}
+    {% include '@LadbCore/Funding/_donation-list-n.part.html.twig' %}
 {% endblock %}

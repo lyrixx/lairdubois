@@ -70,13 +70,13 @@ abstract class AbstractWorkflowBasedController extends AbstractController {
 				$taskInfo['sortIndex'] = $task->getPositionTop();
 			}
 			if (($fieldsStrategy & self::TASKINFO_ROW) == self::TASKINFO_ROW) {
-				$taskInfo['row'] = $this->renderView('LadbCoreBundle:Workflow:Task/_row.part.html.twig', array( 'task' => $task, 'readOnly' => $readOnly, 'durationsHidden' => $durationsHidden ));
+				$taskInfo['row'] = $this->renderView('@LadbCore/Workflow/Task/_row.part.html.twig', array( 'task' => $task, 'readOnly' => $readOnly, 'durationsHidden' => $durationsHidden ));
 			}
 			if (($fieldsStrategy & self::TASKINFO_WIDGET) == self::TASKINFO_WIDGET) {
-				$taskInfo['widget'] = $this->renderView('LadbCoreBundle:Workflow:Task/_widget.part.html.twig', array( 'task' => $task, 'readOnly' => $readOnly, 'durationsHidden' => $durationsHidden ));
+				$taskInfo['widget'] = $this->renderView('@LadbCore/Workflow/Task/_widget.part.html.twig', array( 'task' => $task, 'readOnly' => $readOnly, 'durationsHidden' => $durationsHidden ));
 			}
 			if (($fieldsStrategy & self::TASKINFO_BOX) == self::TASKINFO_BOX) {
-				$taskInfo['box'] = $this->renderView('LadbCoreBundle:Workflow:Task/_box.part.html.twig', array( 'task' => $task, 'readOnly' => $readOnly, 'durationsHidden' => $durationsHidden ));
+				$taskInfo['box'] = $this->renderView('@LadbCore/Workflow/Task/_box.part.html.twig', array( 'task' => $task, 'readOnly' => $readOnly, 'durationsHidden' => $durationsHidden ));
 			}
 			$taskInfos[] = $taskInfo;
 		}
@@ -85,7 +85,7 @@ abstract class AbstractWorkflowBasedController extends AbstractController {
 
 	protected function _generateWorkflowInfos($workflow) {
 		return array(
-			'statusPanel' => $this->renderView('LadbCoreBundle:Workflow:Workflow/_workflow-status.part.html.twig', array( 'workflow' => $workflow )),
+			'statusPanel' => $this->renderView('@LadbCore/Workflow/Workflow/_workflow-status.part.html.twig', array( 'workflow' => $workflow )),
 		);
 	}
 

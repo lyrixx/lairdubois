@@ -28,7 +28,7 @@ class FundingController extends AbstractController {
 	/**
 	 * @Route("/", name="core_funding_dashboard")
 	 * @Route("/{year}/{month}", requirements={"year" = "\d+", "month" = "\d+"}, name="core_funding_dashboard_year_month")
-	 * @Template("LadbCoreBundle:Funding:dashboard.html.twig")
+	 * @Template("@LadbCore/Funding/dashboard.html.twig")
 	 */
 	public function dashboardAction(Request $request, FundingManager $fundingManager, $year = null, $month = null) {
 		$om = $this->getDoctrine()->getManager();
@@ -64,7 +64,7 @@ class FundingController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Funding:dashboard-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Funding/dashboard-xhr.html.twig', $parameters);
 		}
 
 		return $parameters;
@@ -72,7 +72,7 @@ class FundingController extends AbstractController {
 
 	/**
 	 * @Route("/{year}/{month}/infos/{panel}.xhr", requirements={"year" = "\d+", "month" = "\d+", "panel"="[a-z-]+"}, name="core_funding_infos")
-	 * @Template("LadbCoreBundle:Funding:infos-charge-balance.html.twig")
+	 * @Template("@LadbCore/Funding/infos-charge-balance.html.twig")
 	 */
 	public function infosAction(Request $request, FundingManager $fundingManager, $year = null, $month = null, $panel = null) {
 		if (!$request->isXmlHttpRequest()) {
@@ -97,13 +97,13 @@ class FundingController extends AbstractController {
 
 		switch ($panel) {
 			case 'charge-balance':
-				return $this->render('LadbCoreBundle:Funding:infos-charge-balance-xhr.html.twig', $parameters);
+				return $this->render('@LadbCore/Funding/infos-charge-balance-xhr.html.twig', $parameters);
 			case 'donation-fee-balance':
-				return $this->render('LadbCoreBundle:Funding:infos-donation-fee-balance-xhr.html.twig', $parameters);
+				return $this->render('@LadbCore/Funding/infos-donation-fee-balance-xhr.html.twig', $parameters);
 			case 'carried-forward-balance':
-				return $this->render('LadbCoreBundle:Funding:infos-carried-forward-balance-xhr.html.twig', $parameters);
+				return $this->render('@LadbCore/Funding/infos-carried-forward-balance-xhr.html.twig', $parameters);
 			case 'donation-balance':
-				return $this->render('LadbCoreBundle:Funding:infos-donation-balance-xhr.html.twig', $parameters);
+				return $this->render('@LadbCore/Funding/infos-donation-balance-xhr.html.twig', $parameters);
 		}
 
 		throw $this->createNotFoundException('Unknow infos panel (panel='.$panel.').');
@@ -111,7 +111,7 @@ class FundingController extends AbstractController {
 
 	/**
 	 * @Route("/{year}/{month}/admin/charge/new", requirements={"year" = "\d+", "month" = "\d+"}, name="core_funding_admin_charge_new")
-	 * @Template("LadbCoreBundle:Funding:charge-new-xhr.html.twig")
+	 * @Template("@LadbCore/Funding/charge-new-xhr.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_funding_admin_charge_new)")
 	 */
 	public function chargeNewAction(Request $request, $year = null, $month = null) {
@@ -138,7 +138,7 @@ class FundingController extends AbstractController {
 
 	/**
 	 * @Route("/{year}/{month}/admin/charge/create", requirements={"year" = "\d+", "month" = "\d+"}, methods={"POST"}, name="core_funding_admin_charge_create")
-	 * @Template("LadbCoreBundle:Funding:charge-new-xhr.html.twig")
+	 * @Template("@LadbCore/Funding/charge-new-xhr.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_funding_admin_charge_create)")
 	 */
 	public function chargeCreateAction(Request $request, FundingManager $fundingManager, $year = null, $month = null) {
@@ -169,7 +169,7 @@ class FundingController extends AbstractController {
 
 			$om->flush();
 
-			return $this->render('LadbCoreBundle:Funding:charge-create-xhr.html.twig', array(
+			return $this->render('@LadbCore/Funding/charge-create-xhr.html.twig', array(
 				'charge' => $charge,
 			));
 		}
@@ -182,7 +182,7 @@ class FundingController extends AbstractController {
 
 	/**
 	 * @Route("/admin/charge/{id}/edit", requirements={"id" = "\d+"}, name="core_funding_admin_charge_edit")
-	 * @Template("LadbCoreBundle:Funding:charge-edit-xhr.html.twig")
+	 * @Template("@LadbCore/Funding/charge-edit-xhr.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_funding_admin_charge_edit)")
 	 */
 	public function chargeEditAction(Request $request, $id) {
@@ -208,7 +208,7 @@ class FundingController extends AbstractController {
 
 	/**
 	 * @Route("/admin/charge/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_funding_admin_charge_update")
-	 * @Template("LadbCoreBundle:Funding:charge-update-xhr.html.twig")
+	 * @Template("@LadbCore/Funding/charge-update-xhr.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_funding_admin_charge_update)")
 	 */
 	public function chargeUpdateAction(Request $request, $id, FundingManager $fundingManager) {
@@ -240,7 +240,7 @@ class FundingController extends AbstractController {
 
 			$om->flush();
 
-			return $this->render('LadbCoreBundle:Funding:charge-update-xhr.html.twig', array(
+			return $this->render('@LadbCore/Funding/charge-update-xhr.html.twig', array(
 				'charge' => $charge,
 			));
 		}
@@ -253,7 +253,7 @@ class FundingController extends AbstractController {
 
 	/**
 	 * @Route("/admin/charge/{id}/delete", requirements={"id" = "\d+"}, name="core_funding_admin_charge_delete")
-	 * @Template("LadbCoreBundle:Funding:charge-delete-xhr.html.twig")
+	 * @Template("@LadbCore/Funding/charge-delete-xhr.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_funding_admin_charge_delete)")
 	 */
 	public function chargeDeleteAction(Request $request, $id, FundingManager $fundingManager) {
@@ -285,7 +285,7 @@ class FundingController extends AbstractController {
 
 	/**
 	 * @Route("/donation/new", name="core_funding_donation_new")
-	 * @Template("LadbCoreBundle:Funding:donation-new.html.twig")
+	 * @Template("@LadbCore/Funding/donation-new.html.twig")
 	 */
 	public function donationNewAction(Request $request) {
 
@@ -369,7 +369,7 @@ class FundingController extends AbstractController {
 
 		return new JsonResponse(array(
 			'success' => true,
-			'content' => $this->renderView('LadbCoreBundle:Funding:donation-confirmed.html.twig', array(
+			'content' => $this->renderView('@LadbCore/Funding/donation-confirmed.html.twig', array(
 				'amountEur' => $amount / 100,
 			)),
 		));
@@ -490,7 +490,7 @@ class FundingController extends AbstractController {
 	/**
 	 * @Route("/donateurs", name="core_funding_donors")
 	 * @Route("/donateurs/{page}", requirements={"filter" = "\w+", "page" = "\d+"}, name="core_funding_donors_page")
-	 * @Template("LadbCoreBundle:Funding:donors.html.twig")
+	 * @Template("@LadbCore/Funding/donors.html.twig")
 	 */
 	public function donorsAction(Request $request, PaginatorUtils $paginatorUtils, $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -509,7 +509,7 @@ class FundingController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Funding:donors-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Funding/donors-xhr.html.twig', $parameters);
 		}
 		return $parameters;
 
@@ -519,7 +519,7 @@ class FundingController extends AbstractController {
 	 * @Route("/mes-dons", name="core_funding_user_donation_list")
 	 * @Route("/mes-dons/{filter}", requirements={"filter" = "\w+"}, name="core_funding_user_donation_list_filter")
 	 * @Route("/mes-dons/{filter}/{page}", requirements={"filter" = "\w+", "page" = "\d+"}, name="core_funding_user_donation_list_filter_page")
-	 * @Template("LadbCoreBundle:Funding:user-donation-list.html.twig")
+	 * @Template("@LadbCore/Funding/user-donation-list.html.twig")
 	 */
 	public function userDonationListAction(Request $request, PaginatorUtils $paginatorUtils, $filter = 'recent', $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -541,7 +541,7 @@ class FundingController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Funding:user-donation-list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Funding/user-donation-list-xhr.html.twig', $parameters);
 		}
 		return $parameters;
 
@@ -551,7 +551,7 @@ class FundingController extends AbstractController {
 	 * @Route("/admin/dons", name="core_funding_admin_donation_list")
 	 * @Route("/admin/dons/{filter}", requirements={"filter" = "\w+"}, name="core_funding_admin_donation_list_filter")
 	 * @Route("/admin/dons/{filter}/{page}", requirements={"filter" = "\w+", "page" = "\d+"}, name="core_funding_admin_donation_list_filter_page")
-	 * @Template("LadbCoreBundle:Funding:donation-list.html.twig")
+	 * @Template("@LadbCore/Funding/donation-list.html.twig")
 	 */
 	public function donationListAction(Request $request, PaginatorUtils $paginatorUtils, $filter = 'recent', $page = 0) {
 		if (!$this->isGranted('ROLE_ADMIN')) {
@@ -582,7 +582,7 @@ class FundingController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Funding:donation-list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Funding/donation-list-xhr.html.twig', $parameters);
 		}
 		return $parameters;
 

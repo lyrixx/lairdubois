@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Knowledge/School/Testimonial:_form.html.twig' %}
+{% extends '@LadbCore/Knowledge/School/Testimonial/_form.html.twig' %}
 
 {% set formAction = path('core_knowledge_school_testimonial_create', { 'id':school.id }) %}
 
@@ -19,5 +19,5 @@
         </div>
     </div>
     {{ parent() }}
-    {% include 'LadbCoreBundle:Common:_form-btn-loading.part.html.twig' with { 'text':('default.publish'|trans()), 'classes':'btn-primary' } %}
+    {% include '@LadbCore/Common/_form-btn-loading.part.html.twig' with { 'text':('default.publish'|trans()), 'classes':'btn-primary' } %}
 {% endblock %}

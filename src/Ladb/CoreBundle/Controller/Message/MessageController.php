@@ -20,7 +20,7 @@ class MessageController extends AbstractThreadController {
 
 	/**
 	 * @Route("/thread/{threadId}/new", requirements={"threadId" = "\d+"}, name="core_message_new")
-	 * @Template("LadbCoreBundle:Message:new-xhr.html.twig")
+	 * @Template("@LadbCore/Message/new-xhr.html.twig")
 	 */
 	public function newAction(Request $request, $threadId) {
 		if (!$request->isXmlHttpRequest()) {
@@ -45,7 +45,7 @@ class MessageController extends AbstractThreadController {
 
 	/**
 	 * @Route("/thread/{threadId}/create", requirements={"threadId" = "\d+"}, name="core_message_create")
-	 * @Template("LadbCoreBundle:Message:new-xhr.html.twig")
+	 * @Template("@LadbCore/Message/new-xhr.html.twig")
 	 */
 	public function createAction(Request $request, $threadId, FieldPreprocessorUtils $fieldPreprocessorUtils, TranslatorInterface $translator) {
 		if (!$request->isXmlHttpRequest()) {
@@ -105,7 +105,7 @@ class MessageController extends AbstractThreadController {
 
 			$om->flush();
 
-			return $this->render('LadbCoreBundle:Message:create-xhr.html.twig', array( 'message' => $message ));
+			return $this->render('@LadbCore/Message/create-xhr.html.twig', array( 'message' => $message ));
 		}
 
 		return array(
@@ -116,7 +116,7 @@ class MessageController extends AbstractThreadController {
 
 	/**
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_message_edit")
-	 * @Template("LadbCoreBundle:Message:edit-xhr.html.twig")
+	 * @Template("@LadbCore/Message/edit-xhr.html.twig")
 	 */
 	public function editAction(Request $request, $id) {
 		if (!$request->isXmlHttpRequest()) {
@@ -144,7 +144,7 @@ class MessageController extends AbstractThreadController {
 
 	/**
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, name="core_message_update")
-	 * @Template("LadbCoreBundle:Message:edit-xhr.html.twig")
+	 * @Template("@LadbCore/Message/edit-xhr.html.twig")
 	 */
 	public function updateAction(Request $request, $id, FieldPreprocessorUtils $fieldPreprocessorUtils) {
 		if (!$request->isXmlHttpRequest()) {
@@ -173,7 +173,7 @@ class MessageController extends AbstractThreadController {
 
 			$om->flush();
 
-			return $this->render('LadbCoreBundle:Message:update-xhr.html.twig', array('message' => $message));
+			return $this->render('@LadbCore/Message/update-xhr.html.twig', array('message' => $message));
 		}
 
 		return array(

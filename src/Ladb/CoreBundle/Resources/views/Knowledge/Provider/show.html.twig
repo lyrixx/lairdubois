@@ -1,6 +1,6 @@
-{% extends 'LadbCoreBundle:Knowledge:_show.html.twig' %}
+{% extends '@LadbCore/Knowledge/_show.html.twig' %}
 
-{% use 'LadbCoreBundle:Common/Blocks:map.blocks.html.twig' %}
+{% use '@LadbCore/Common/Blocks/map.blocks.html.twig' %}
 
 {% set entity = provider %}
 
@@ -87,7 +87,7 @@
 {% endblock %}
 
 {% block bodyHeaderContainerContent %}
-    {% embed 'LadbCoreBundle:Common/Header:_entity-show-header.part.html.twig' %}
+    {% embed '@LadbCore/Common/Header/_entity-show-header.part.html.twig' %}
         {% set headingClasses = provider.signRejected ? 'ladb-strikethrough' : null %}
         {% block headingInner %}
             {{ parent() }}{% if provider.store is not empty %}&nbsp;<small>({{ provider.store }})</small>{% endif %}
@@ -105,11 +105,11 @@
             <i class="ladb-icon-warning"></i> {{ ('knowledge.provider.state_alert_'~provider.state)|trans() }}
         </a>
     {% else %}
-        {% include 'LadbCoreBundle:Knowledge:_completion-panel.part.html.twig' %}
+        {% include '@LadbCore/Knowledge/_completion-panel.part.html.twig' %}
     {% endif %}
     <div class="ladb-knowledge-showcase row">
-        {% include 'LadbCoreBundle:Knowledge:_field-show-showcase-picture.part.html.twig' with { 'wide':true, 'field':constant('FIELD_LOGO', provider), 'picture':provider.logo, 'values':provider.logoValues, 'itemprop':'logo', 'pictureBoxClasses':(provider.logoRejected ? 'ladb-box-barred' : null) } %}
-        {% include 'LadbCoreBundle:Knowledge:_field-show-showcase-picture.part.html.twig' with { 'wide':true, 'field':constant('FIELD_PHOTO', provider), 'picture':provider.photo, 'values':provider.photoValues, 'itemprop':'photo' } %}
+        {% include '@LadbCore/Knowledge/_field-show-showcase-picture.part.html.twig' with { 'wide':true, 'field':constant('FIELD_LOGO', provider), 'picture':provider.logo, 'values':provider.logoValues, 'itemprop':'logo', 'pictureBoxClasses':(provider.logoRejected ? 'ladb-box-barred' : null) } %}
+        {% include '@LadbCore/Knowledge/_field-show-showcase-picture.part.html.twig' with { 'wide':true, 'field':constant('FIELD_PHOTO', provider), 'picture':provider.photo, 'values':provider.photoValues, 'itemprop':'photo' } %}
     </div>
     <div>
         {% if searchableStoreCount > 1 %}
@@ -121,50 +121,50 @@
         {% endif %}
         <div class="ladb-metas">
             <h4 class="ladb-heading">Services et Produits</h4>
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'field':constant('FIELD_SERVICES', provider), 'data':provider.services, 'values':provider.servicesValues } %}
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'field':constant('FIELD_PRODUCTS', provider), 'data':provider.products, 'values':provider.productsValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'field':constant('FIELD_SERVICES', provider), 'data':provider.services, 'values':provider.servicesValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'field':constant('FIELD_PRODUCTS', provider), 'data':provider.products, 'values':provider.productsValues } %}
             {% if provider.woodsValues is not empty or 'Bois massifs' in provider.products %}
-                {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'field':constant('FIELD_WOODS', provider), 'data':provider.woods, 'values':provider.woodsValues, 'disabled':(not ('Bois massif' in provider.products)), 'indented':true } %}
+                {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'field':constant('FIELD_WOODS', provider), 'data':provider.woods, 'values':provider.woodsValues, 'disabled':(not ('Bois massif' in provider.products)), 'indented':true } %}
             {% endif %}
         </div>
         <div class="ladb-metas">
             <h4 class="ladb-heading">Point de vente</h4>
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'field':constant('FIELD_IN_STORE_SELLING', provider), 'data':provider.inStoreSelling, 'values':provider.inStoreSellingValues } %}
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'field':constant('FIELD_MAIL_ORDER_SELLING', provider), 'data':provider.mailOrderSelling, 'values':provider.mailOrderSellingValues } %}
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'field':constant('FIELD_SALE_TO_INDIVIDUALS', provider), 'data':provider.saleToIndividuals, 'values':provider.saleToIndividualsValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'field':constant('FIELD_IN_STORE_SELLING', provider), 'data':provider.inStoreSelling, 'values':provider.inStoreSellingValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'field':constant('FIELD_MAIL_ORDER_SELLING', provider), 'data':provider.mailOrderSelling, 'values':provider.mailOrderSellingValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'field':constant('FIELD_SALE_TO_INDIVIDUALS', provider), 'data':provider.saleToIndividuals, 'values':provider.saleToIndividualsValues } %}
         </div>
         <div class="ladb-metas">
             <h4 class="ladb-heading">Contacts</h4>
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'field':constant('FIELD_SIGN', provider), 'data':provider.sign, 'values':provider.signValues } %}
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'field':constant('FIELD_WEBSITE', provider), 'data':provider.website, 'values':provider.websiteValues } %}
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'field':constant('FIELD_ADDRESS', provider), 'data':provider.address, 'values':provider.addressValues } %}
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'field':constant('FIELD_PHONE', provider), 'data':provider.phone, 'values':provider.phoneValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'field':constant('FIELD_SIGN', provider), 'data':provider.sign, 'values':provider.signValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'field':constant('FIELD_WEBSITE', provider), 'data':provider.website, 'values':provider.websiteValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'field':constant('FIELD_ADDRESS', provider), 'data':provider.address, 'values':provider.addressValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'field':constant('FIELD_PHONE', provider), 'data':provider.phone, 'values':provider.phoneValues } %}
         </div>
         <div class="ladb-metas">
             <h4 class="ladb-heading">Informations</h4>
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'field':constant('FIELD_DESCRIPTION', provider), 'data':provider.description, 'values':provider.descriptionValues } %}
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'field':constant('FIELD_VIDEO', provider), 'data':provider.video, 'values':provider.videoValues } %}
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'field':constant('FIELD_BRANCHES', provider), 'data':provider.branches, 'values':provider.branchesValues } %}
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'field':constant('FIELD_STATE', provider), 'data':provider.state, 'values':provider.stateValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'field':constant('FIELD_DESCRIPTION', provider), 'data':provider.description, 'values':provider.descriptionValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'field':constant('FIELD_VIDEO', provider), 'data':provider.video, 'values':provider.videoValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'field':constant('FIELD_BRANCHES', provider), 'data':provider.branches, 'values':provider.branchesValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'field':constant('FIELD_STATE', provider), 'data':provider.state, 'values':provider.stateValues } %}
         </div>
-        {% include 'LadbCoreBundle:Knowledge:_disclaimer-panel.part.html.twig' %}
+        {% include '@LadbCore/Knowledge/_disclaimer-panel.part.html.twig' %}
         {% if provider.updatedAt > provider.createdAt %}
-            {% include 'LadbCoreBundle:Common:_updated-age.part.html.twig' %}
+            {% include '@LadbCore/Common/_updated-age.part.html.twig' %}
         {% endif %}
         <div style="padding: 10px; text-align: center;">
-            {% include 'LadbCoreBundle:Core/Like:_widget.part.html.twig' with { 'likeContext':likeContext } %}
+            {% include '@LadbCore/Core/Like/_widget.part.html.twig' with { 'likeContext':likeContext } %}
         </div>
-        {% include 'LadbCoreBundle:Core/Review:_widget.part.html.twig' %}
-        {% include 'LadbCoreBundle:Core/Comment:_widget.part.html.twig' with { 'noMicrodata':true, 'activitiesHidden':(not is_granted('ROLE_USER')), 'alertTransKey':'knowledge.provider.comment_alert' } %}
+        {% include '@LadbCore/Core/Review/_widget.part.html.twig' %}
+        {% include '@LadbCore/Core/Comment/_widget.part.html.twig' with { 'noMicrodata':true, 'activitiesHidden':(not is_granted('ROLE_USER')), 'alertTransKey':'knowledge.provider.comment_alert' } %}
     </div>
     {{ parent() }}
 {% endblock %}
 
 {% block contentMetasPanel %}
     <div class="ladb-metas">
-        {% include 'LadbCoreBundle:Core/Like:_meta-counter.part.html.twig' with { 'noMicrodata':true } %}
-        {% include 'LadbCoreBundle:Core/View:_meta-counter.part.html.twig' with { 'noMicrodata':true } %}
-        {% include 'LadbCoreBundle:Core/Comment:_meta-counter.part.html.twig' with { 'noMicrodata':true }  %}
+        {% include '@LadbCore/Core/Like/_meta-counter.part.html.twig' with { 'noMicrodata':true } %}
+        {% include '@LadbCore/Core/View/_meta-counter.part.html.twig' with { 'noMicrodata':true } %}
+        {% include '@LadbCore/Core/Comment/_meta-counter.part.html.twig' with { 'noMicrodata':true }  %}
         <div class="ladb-meta">
             <i class="ladb-icon-contributor ladb-icon-fixed-center"></i>
             {% if provider.contributorCount > 0 %}
@@ -176,13 +176,13 @@
                 </a>
             {% endif %}
         </div>
-        {% include 'LadbCoreBundle:Core/Vote:_meta-counter.part.html.twig' with { 'entity':provider } %}
-        {% include 'LadbCoreBundle:Core/Review:_meta-counter.part.html.twig' with { 'entity':provider } %}
+        {% include '@LadbCore/Core/Vote/_meta-counter.part.html.twig' with { 'entity':provider } %}
+        {% include '@LadbCore/Core/Review/_meta-counter.part.html.twig' with { 'entity':provider } %}
     </div>
     {% set hasWoods = provider.woodsValues is not empty or 'Bois massif' in provider.products %}
     <div class="ladb-metas">
         <h4 class="ladb-heading">{{ 'default.links'|trans() }}</h4>
-        {% include 'LadbCoreBundle:Collection/Collection:_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Collection/Collection/_meta-counter.part.html.twig' %}
         {% if hasWoods %}
             <div class="ladb-meta{% if searchableWoodCount == 0 %} text-muted{% endif %}">
                 <i class="ladb-icon-wood ladb-icon-fixed-center"></i>
@@ -218,7 +218,7 @@
     {% if hasMap %}
         <div class="ladb-metas">
             <div class="ladb-meta">
-                {% include 'LadbCoreBundle:Common:_map-area.part.html.twig' with { 'autoInit':true, 'mapHeight':'225px', 'markersUrl':path('core_provider_location', { 'id':provider.id }), 'classes':'ladb-map-thumbnail ladb-margin-top' } %}
+                {% include '@LadbCore/Common/_map-area.part.html.twig' with { 'autoInit':true, 'mapHeight':'225px', 'markersUrl':path('core_provider_location', { 'id':provider.id }), 'classes':'ladb-map-thumbnail ladb-margin-top' } %}
             </div>
         </div>
     {% endif %}

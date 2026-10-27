@@ -43,7 +43,7 @@ class FeedbackController extends AbstractController {
 
 	/**
 	 * @Route("/{entityType}/{entityId}/new", requirements={"entityType" = "\d+", "entityId" = "\d+"}, name="core_feedback_new")
-	 * @Template("LadbCoreBundle:Core/Feedback:new-xhr.html.twig")
+	 * @Template("@LadbCore/Core/Feedback/new-xhr.html.twig")
 	 */
 	public function newAction(Request $request, $entityType, $entityId, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
@@ -67,7 +67,7 @@ class FeedbackController extends AbstractController {
 
 	/**
 	 * @Route("/{entityType}/{entityId}/create",requirements={"entityType" = "\d+", "entityId" = "\d+"}, methods={"POST"}, name="core_feedback_create")
-	 * @Template("LadbCoreBundle:Core/Feedback:new-xhr.html.twig")
+	 * @Template("@LadbCore/Core/Feedback/new-xhr.html.twig")
 	 */
 	public function createAction(Request $request, $entityType, $entityId, ActivityUtils $activityUtils, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FeedbackableUtils $feedbackableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, MentionUtils $mentionUtils, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
@@ -122,7 +122,7 @@ class FeedbackController extends AbstractController {
 
 			$om->flush();
 
-			return $this->render('LadbCoreBundle:Core/Feedback:create-xhr.html.twig', array(
+			return $this->render('@LadbCore/Core/Feedback/create-xhr.html.twig', array(
 				'entity'          => $entity,
 				'feedback'        => $feedback,
 				'feedbackContext' => $feedbackableUtils->getFeedbackContext($entity, false),
@@ -137,7 +137,7 @@ class FeedbackController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_feedback_edit")
-	 * @Template("LadbCoreBundle:Core/Feedback:edit-xhr.html.twig")
+	 * @Template("@LadbCore/Core/Feedback/edit-xhr.html.twig")
 	 */
 	public function editAction(Request $request, $id) {
 		if (!$request->isXmlHttpRequest()) {
@@ -165,7 +165,7 @@ class FeedbackController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_feedback_update")
-	 * @Template("LadbCoreBundle:Core/Feedback:edit-xhr.html.twig")
+	 * @Template("@LadbCore/Core/Feedback/edit-xhr.html.twig")
 	 */
 	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, FeedbackableUtils $feedbackableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, MentionUtils $mentionUtils, SearchUtils $searchUtils, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
@@ -207,7 +207,7 @@ class FeedbackController extends AbstractController {
 			// Search index update
 			$searchUtils->replaceEntityInIndex($entity);
 
-			return $this->render('LadbCoreBundle:Core/Feedback:update-xhr.html.twig', array(
+			return $this->render('@LadbCore/Core/Feedback/update-xhr.html.twig', array(
 				'entity'          => $entity,
 				'feedback'        => $feedback,
 				'feedbackContext' => $feedbackableUtils->getFeedbackContext($entity, false),

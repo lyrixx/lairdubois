@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Knowledge:_show.html.twig' %}
+{% extends '@LadbCore/Knowledge/_show.html.twig' %}
 
 {% set entity = software %}
 
@@ -48,7 +48,7 @@
 {% endblock %}
 
 {% block bodyHeaderContainerContent %}
-    {% embed 'LadbCoreBundle:Common/Header:_entity-show-header.part.html.twig' %}
+    {% embed '@LadbCore/Common/Header/_entity-show-header.part.html.twig' %}
         {% set headingClasses = software.identityRejected ? 'ladb-strikethrough' : null %}
         {% block subheadingInner %}
             {% if software.isAddOn %}
@@ -61,10 +61,10 @@
 {% endblock %}
 
 {% block contentBody %}
-    {% include 'LadbCoreBundle:Knowledge:_completion-panel.part.html.twig' %}
+    {% include '@LadbCore/Knowledge/_completion-panel.part.html.twig' %}
     <div class="ladb-knowledge-showcase row">
-        {% include 'LadbCoreBundle:Knowledge:_field-show-showcase-picture.part.html.twig' with { 'knowledge':software, 'wide':true, 'field':constant('FIELD_ICON', software), 'picture':software.icon, 'values':software.iconValues, 'pictureBoxClasses':(software.iconRejected ? 'ladb-box-barred' : null), 'itemprop':'image' } %}
-        {% include 'LadbCoreBundle:Knowledge:_field-show-showcase-picture.part.html.twig' with { 'knowledge':software, 'wide':true, 'field':constant('FIELD_SCREENSHOT', software), 'picture':software.screenshot, 'values':software.screenshotValues, 'itemprop':'screenshot' } %}
+        {% include '@LadbCore/Knowledge/_field-show-showcase-picture.part.html.twig' with { 'knowledge':software, 'wide':true, 'field':constant('FIELD_ICON', software), 'picture':software.icon, 'values':software.iconValues, 'pictureBoxClasses':(software.iconRejected ? 'ladb-box-barred' : null), 'itemprop':'image' } %}
+        {% include '@LadbCore/Knowledge/_field-show-showcase-picture.part.html.twig' with { 'knowledge':software, 'wide':true, 'field':constant('FIELD_SCREENSHOT', software), 'picture':software.screenshot, 'values':software.screenshotValues, 'itemprop':'screenshot' } %}
     </div>
     <div>
         {% if hostSoftware %}
@@ -82,48 +82,48 @@
         {% endif %}
         <div class="ladb-metas">
             <h4 class="ladb-heading">Distribution</h4>
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':software, 'field':constant('FIELD_WEBSITE', software), 'data':software.website, 'values':software.websiteValues, 'itemprop':'url' } %}
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':software, 'field':constant('FIELD_PRICINGS', software), 'data':software.pricings, 'values':software.pricingsValues } %}
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':software, 'field':constant('FIELD_LICENSE_TYPE', software), 'data':software.licenseType, 'values':software.licenseTypeValues, 'itemprop':'license' } %}
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':software, 'field':constant('FIELD_OPEN_SOURCE', software), 'data':software.openSource, 'values':software.openSourceValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':software, 'field':constant('FIELD_WEBSITE', software), 'data':software.website, 'values':software.websiteValues, 'itemprop':'url' } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':software, 'field':constant('FIELD_PRICINGS', software), 'data':software.pricings, 'values':software.pricingsValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':software, 'field':constant('FIELD_LICENSE_TYPE', software), 'data':software.licenseType, 'values':software.licenseTypeValues, 'itemprop':'license' } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':software, 'field':constant('FIELD_OPEN_SOURCE', software), 'data':software.openSource, 'values':software.openSourceValues } %}
             {% if software.sourceCodeRepositoryValues is not empty or software.opensource %}
-                {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':software, 'field':constant('FIELD_SOURCE_CODE_REPOSITORY', software), 'data':software.sourceCodeRepository, 'values':software.sourceCodeRepositoryValues, 'disabled':(not software.opensource), 'indented':true } %}
+                {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':software, 'field':constant('FIELD_SOURCE_CODE_REPOSITORY', software), 'data':software.sourceCodeRepository, 'values':software.sourceCodeRepositoryValues, 'disabled':(not software.opensource), 'indented':true } %}
             {% endif %}
         </div>
         <div class="ladb-metas">
             <h4 class="ladb-heading">Ressources</h4>
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':software, 'field':constant('FIELD_DOCS', software), 'data':software.docs, 'values':software.docsValues } %}
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':software, 'field':constant('FIELD_VIDEO', software), 'data':software.video, 'values':software.videoValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':software, 'field':constant('FIELD_DOCS', software), 'data':software.docs, 'values':software.docsValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':software, 'field':constant('FIELD_VIDEO', software), 'data':software.video, 'values':software.videoValues } %}
         </div>
         <div class="ladb-metas">
             <h4 class="ladb-heading">Caractéristiques</h4>
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':software, 'field':constant('FIELD_IDENTITY', software), 'data':software.identity, 'values':software.identityValues, 'itemprop':'name' } %}
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':software, 'field':constant('FIELD_AUTHORS', software), 'data':software.authors, 'values':software.authorsValues } %}
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':software, 'field':constant('FIELD_PUBLISHER', software), 'data':software.publisher, 'values':software.publisherValues } %}
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':software, 'field':constant('FIELD_DESCRIPTION', software), 'data':software.description, 'values':software.descriptionValues } %}
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':software, 'field':constant('FIELD_OPERATING_SYSTEMS', software), 'data':software.operatingSystems, 'values':software.operatingSystemsValues, 'itemprop':'operatingSystem' } %}
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':software, 'field':constant('FIELD_LANGUAGES', software), 'data':software.languages, 'values':software.languagesValues } %}
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':software, 'field':constant('FIELD_FEATURES', software), 'data':software.features, 'values':software.featuresValues, 'itemprop':'featureList' } %}
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':software, 'field':constant('FIELD_SUPPORTED_FILES', software), 'data':software.supportedFiles, 'values':software.supportedFilesValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':software, 'field':constant('FIELD_IDENTITY', software), 'data':software.identity, 'values':software.identityValues, 'itemprop':'name' } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':software, 'field':constant('FIELD_AUTHORS', software), 'data':software.authors, 'values':software.authorsValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':software, 'field':constant('FIELD_PUBLISHER', software), 'data':software.publisher, 'values':software.publisherValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':software, 'field':constant('FIELD_DESCRIPTION', software), 'data':software.description, 'values':software.descriptionValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':software, 'field':constant('FIELD_OPERATING_SYSTEMS', software), 'data':software.operatingSystems, 'values':software.operatingSystemsValues, 'itemprop':'operatingSystem' } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':software, 'field':constant('FIELD_LANGUAGES', software), 'data':software.languages, 'values':software.languagesValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':software, 'field':constant('FIELD_FEATURES', software), 'data':software.features, 'values':software.featuresValues, 'itemprop':'featureList' } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':software, 'field':constant('FIELD_SUPPORTED_FILES', software), 'data':software.supportedFiles, 'values':software.supportedFilesValues } %}
         </div>
-        {% include 'LadbCoreBundle:Knowledge:_disclaimer-panel.part.html.twig' %}
+        {% include '@LadbCore/Knowledge/_disclaimer-panel.part.html.twig' %}
         {% if software.updatedAt > software.createdAt %}
-            {% include 'LadbCoreBundle:Common:_updated-age.part.html.twig' %}
+            {% include '@LadbCore/Common/_updated-age.part.html.twig' %}
         {% endif %}
         <div style="padding: 10px; text-align: center;">
-            {% include 'LadbCoreBundle:Core/Like:_widget.part.html.twig' with { 'likeContext':likeContext } %}
+            {% include '@LadbCore/Core/Like/_widget.part.html.twig' with { 'likeContext':likeContext } %}
         </div>
-        {% include 'LadbCoreBundle:Core/Review:_widget.part.html.twig' %}
-        {% include 'LadbCoreBundle:Core/Comment:_widget.part.html.twig' with { 'noMicrodata':true, 'activitiesHidden':(not is_granted('ROLE_USER')), 'alertTransKey':'knowledge.software.comment_alert' } %}
+        {% include '@LadbCore/Core/Review/_widget.part.html.twig' %}
+        {% include '@LadbCore/Core/Comment/_widget.part.html.twig' with { 'noMicrodata':true, 'activitiesHidden':(not is_granted('ROLE_USER')), 'alertTransKey':'knowledge.software.comment_alert' } %}
     </div>
     {{ parent() }}
 {% endblock %}
 
 {% block contentMetasPanel %}
     <div class="ladb-metas">
-        {% include 'LadbCoreBundle:Core/Like:_meta-counter.part.html.twig' %}
-        {% include 'LadbCoreBundle:Core/View:_meta-counter.part.html.twig' %}
-        {% include 'LadbCoreBundle:Core/Comment:_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/Like/_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/View/_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/Comment/_meta-counter.part.html.twig' %}
         <div class="ladb-meta">
             <i class="ladb-icon-contributor ladb-icon-fixed-center"></i>
             {% if software.contributorCount > 0 %}
@@ -135,8 +135,8 @@
                 </a>
             {% endif %}
         </div>
-        {% include 'LadbCoreBundle:Core/Vote:_meta-counter.part.html.twig' with { 'entity':software } %}
-        {% include 'LadbCoreBundle:Core/Review:_meta-counter.part.html.twig' with { 'entity':software } %}
+        {% include '@LadbCore/Core/Vote/_meta-counter.part.html.twig' with { 'entity':software } %}
+        {% include '@LadbCore/Core/Review/_meta-counter.part.html.twig' with { 'entity':software } %}
         {% if software.website %}
             <div class="ladb-btn">
                 <a href="{{ software.website }}" target="_blank" rel="noreferrer noopener" class="btn btn-primary btn-expand btn-lg"><i class="ladb-icon-globe"></i> {{ 'knowledge.software.field.website'|trans() }}</a>
@@ -160,7 +160,7 @@
     </div>
     <div class="ladb-metas">
         <h4 class="ladb-heading">{{ 'default.links'|trans() }}</h4>
-        {% include 'LadbCoreBundle:Collection/Collection:_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Collection/Collection/_meta-counter.part.html.twig' %}
         {% if hostSoftware %}
             <div class="ladb-meta">
                 <i class="ladb-icon-software ladb-icon-fixed-center"></i>

@@ -43,7 +43,7 @@ class WoodController extends AbstractController {
 
 	/**
 	 * @Route("/new", name="core_wood_new")
-	 * @Template("LadbCoreBundle:Knowledge/Wood:new.html.twig")
+	 * @Template("@LadbCore/Knowledge/Wood/new.html.twig")
 	 */
 	public function newAction(KnowledgeUtils $knowledgeUtils) {
 
@@ -63,7 +63,7 @@ class WoodController extends AbstractController {
 
 	/**
 	 * @Route("/create", methods={"POST"}, name="core_wood_create")
-	 * @Template("LadbCoreBundle:Knowledge/Wood:new.html.twig")
+	 * @Template("@LadbCore/Knowledge/Wood/new.html.twig")
 	 */
 	public function createAction(Request $request, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, TranslatorInterface $translator) {
 
@@ -162,7 +162,7 @@ class WoodController extends AbstractController {
 	 * @Route("/{id}/textures", requirements={"id" = "\d+"}, name="core_wood_texture_list")
 	 * @Route("/{id}/textures/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_wood_texture_list_filter")
 	 * @Route("/{id}/textures/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_wood_texture_list_filter_page")
-	 * @Template("LadbCoreBundle:Knowledge/Wood:texture-list.html.twig")
+	 * @Template("@LadbCore/Knowledge/Wood/texture-list.html.twig")
 	 */
 	public function textureListAction(Request $request, $id, PaginatorUtils $paginatorUtils, $page = 0, $filter = 'all') {
 		$om = $this->getDoctrine()->getManager();
@@ -186,7 +186,7 @@ class WoodController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Knowledge/Wood:texture-list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Knowledge/Wood/texture-list-xhr.html.twig', $parameters);
 		}
 
 		return $parameters;
@@ -232,7 +232,7 @@ class WoodController extends AbstractController {
 
 	/**
 	 * @Route("/textures/{id}", requirements={"id" = "\d+"}, name="core_wood_texture_show")
-	 * @Template("LadbCoreBundle:Knowledge/Wood:texture-show-xhr.html.twig")
+	 * @Template("@LadbCore/Knowledge/Wood/texture-show-xhr.html.twig")
 	 */
 	public function textureShowAction(Request $request, $id) {
 		$om = $this->getDoctrine()->getManager();
@@ -250,7 +250,7 @@ class WoodController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/widget", requirements={"id" = "\d+"}, name="core_wood_widget")
-	 * @Template("LadbCoreBundle:Knowledge/Wood:widget-xhr.html.twig")
+	 * @Template("@LadbCore/Knowledge/Wood/widget-xhr.html.twig")
 	 */
 	public function widgetAction(Request $request, $id) {
 
@@ -273,7 +273,7 @@ class WoodController extends AbstractController {
 	/**
 	 * @Route("/", name="core_wood_list")
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_wood_list_page")
-	 * @Template("LadbCoreBundle:Knowledge/Wood:list.html.twig")
+	 * @Template("@LadbCore/Knowledge/Wood/list.html.twig")
 	 */
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, ElasticaQueryUtils $elasticaQueryUtils, SearchUtils $searchUtils, $page = 0) {
 
@@ -400,7 +400,7 @@ class WoodController extends AbstractController {
 		));
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Knowledge/Wood:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Knowledge/Wood/list-xhr.html.twig', $parameters);
 		}
 
 		return $parameters;
@@ -408,7 +408,7 @@ class WoodController extends AbstractController {
 
 	/**
 	 * @Route("/{id}.html", name="core_wood_show")
-	 * @Template("LadbCoreBundle:Knowledge/Wood:show.html.twig")
+	 * @Template("@LadbCore/Knowledge/Wood/show.html.twig")
 	 */
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ElasticaQueryUtils $elasticaQueryUtils, LikableUtils $likableUtils, SearchUtils $searchUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();

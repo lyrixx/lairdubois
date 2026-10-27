@@ -23,7 +23,7 @@ class NotificationController extends AbstractController {
 	 * @Route("/", name="core_notification_list")
 	 * @Route("/{filter}", requirements={"filter" = "[a-z-]+"}, name="core_notification_list_filter")
 	 * @Route("/{filter}/{page}", requirements={"filter" = "[a-z-]+", "page" = "\d+"}, name="core_notification_list_filter_page")
-	 * @Template("LadbCoreBundle:Core/Notification:list-xhr.html.twig")
+	 * @Template("@LadbCore/Core/Notification/list-xhr.html.twig")
 	 */
 	public function listAction(Request $request, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -69,7 +69,7 @@ class NotificationController extends AbstractController {
 		);
 
 		if ($page > 0) {
-			return $this->render('LadbCoreBundle:Core/Notification:list-n-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Core/Notification/list-n-xhr.html.twig', $parameters);
 		}
 
 		return $parameters;

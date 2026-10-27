@@ -68,7 +68,7 @@ class UserListener implements EventSubscriberInterface {
 		if (!is_null($sender)) {
 			// Unread message count: composeThread() leaves it to the caller
 			$user->getMeta()->incrementUnreadMessageCount();
-			$this->messageUtils->composeThread($sender, array( $user ), 'Bienvenue !', $this->templating->render('LadbCoreBundle:Core/User:message-welcome.md.twig', array( 'recipientUser' => $user )), null, true);
+			$this->messageUtils->composeThread($sender, array( $user ), 'Bienvenue !', $this->templating->render('@LadbCore/Core/User/message-welcome.md.twig', array( 'recipientUser' => $user )), null, true);
 		}
 
 		// Send admin email notification

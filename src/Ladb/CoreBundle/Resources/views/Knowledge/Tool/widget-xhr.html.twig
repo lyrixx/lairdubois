@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:_entity-widget.html.twig' %}
+{% extends '@LadbCore/Common/_entity-widget.html.twig' %}
 
 {% set entity = tool %}
 
@@ -8,5 +8,5 @@
 
 {% block entityMetas %}
     {{ parent() }}
-    {% include 'LadbCoreBundle:Core/Review:_thumbnail-meta-counter.part.html.twig' %}
+    {% include '@LadbCore/Core/Review/_thumbnail-meta-counter.part.html.twig' %}
 {% endblock %}

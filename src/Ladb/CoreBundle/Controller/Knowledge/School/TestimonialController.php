@@ -25,7 +25,7 @@ class TestimonialController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/temoignages/new", requirements={"id" = "\d+"}, name="core_knowledge_school_testimonial_new")
-	 * @Template("LadbCoreBundle:Knowledge/School/Testimonial:new-xhr.html.twig")
+	 * @Template("@LadbCore/Knowledge/School/Testimonial/new-xhr.html.twig")
 	 */
 	public function newAction(Request $request, $id) {
 		if (!$request->isXmlHttpRequest()) {
@@ -51,7 +51,7 @@ class TestimonialController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/temoignages/create", requirements={"id" = "\d+"}, methods={"POST"}, name="core_knowledge_school_testimonial_create")
-	 * @Template("LadbCoreBundle:Knowledge/School/Testimonial:new-xhr.html.twig")
+	 * @Template("@LadbCore/Knowledge/School/Testimonial/new-xhr.html.twig")
 	 */
 	public function createAction(Request $request, $id, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, WatchableUtils $watchableUtils) {
 		if (!$request->isXmlHttpRequest()) {
@@ -107,7 +107,7 @@ class TestimonialController extends AbstractController {
 
 			$om->flush();
 
-			return $this->render('LadbCoreBundle:Knowledge/School/Testimonial:create-xhr.html.twig', array(
+			return $this->render('@LadbCore/Knowledge/School/Testimonial/create-xhr.html.twig', array(
 				'school'      => $school,
 				'testimonial' => $testimonial,
 			));
@@ -121,7 +121,7 @@ class TestimonialController extends AbstractController {
 
 	/**
 	 * @Route("/temoignages/{id}/edit", requirements={"id" = "\d+"}, name="core_knowledge_school_testimonial_edit")
-	 * @Template("LadbCoreBundle:Knowledge/School/Testimonial:edit-xhr.html.twig")
+	 * @Template("@LadbCore/Knowledge/School/Testimonial/edit-xhr.html.twig")
 	 */
 	public function editAction(Request $request, $id) {
 		$om = $this->getDoctrine()->getManager();
@@ -145,7 +145,7 @@ class TestimonialController extends AbstractController {
 
 	/**
 	 * @Route("/temoignages/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_knowledge_school_testimonial_update")
-	 * @Template("LadbCoreBundle:Knowledge/School/Testimonial:edit-xhr.html.twig")
+	 * @Template("@LadbCore/Knowledge/School/Testimonial/edit-xhr.html.twig")
 	 */
 	public function updateAction(Request $request, $id, FieldPreprocessorUtils $fieldPreprocessorUtils) {
 		$om = $this->getDoctrine()->getManager();
@@ -172,7 +172,7 @@ class TestimonialController extends AbstractController {
 
 			$om->flush();
 
-			return $this->render('LadbCoreBundle:Knowledge/School/Testimonial:update-xhr.html.twig', array(
+			return $this->render('@LadbCore/Knowledge/School/Testimonial/update-xhr.html.twig', array(
 				'school'      => $testimonial->getSchool(),
 				'testimonial' => $testimonial,
 			));

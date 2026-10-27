@@ -46,7 +46,7 @@ class MemberController extends AbstractController {
 
 	/**
 	 * @Route("/{teamId}/invitation/new", requirements={"teamId" = "\d+"}, name="core_member_invitation_new")
-	 * @Template("LadbCoreBundle:Core/Member:invitation-new.html.twig")
+	 * @Template("@LadbCore/Core/Member/invitation-new.html.twig")
 	 */
 	public function newInvitationAction($teamId) {
 
@@ -189,7 +189,7 @@ class MemberController extends AbstractController {
 
 	/**
 	 * @Route("/{teamId}/request/new", requirements={"teamId" = "\d+"}, name="core_member_request_new")
-	 * @Template("LadbCoreBundle:Core/Member:request-new.html.twig")
+	 * @Template("@LadbCore/Core/Member/request-new.html.twig")
 	 */
 	public function newRequestAction($teamId) {
 
@@ -362,7 +362,7 @@ class MemberController extends AbstractController {
 	/**
 	 * @Route("/", name="core_member_list_session_teams")
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_member_list_session_teams_page")
-	 * @Template("LadbCoreBundle:Core/Member:list-session-teams-xhr.html.twig")
+	 * @Template("@LadbCore/Core/Member/list-session-teams-xhr.html.twig")
 	 */
 	public function listSessionTeamsAction(Request $request, PaginatorUtils $paginatorUtils, $page = 0) {
 
@@ -395,7 +395,7 @@ class MemberController extends AbstractController {
 		);
 
 		if ($page > 0) {
-			return $this->render('LadbCoreBundle:Core/Member:list-session-teams-n-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Core/Member/list-session-teams-n-xhr.html.twig', $parameters);
 		}
 
 		return $parameters;

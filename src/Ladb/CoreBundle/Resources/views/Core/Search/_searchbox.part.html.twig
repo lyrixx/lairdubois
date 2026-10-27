@@ -66,7 +66,7 @@
             query: '{{ q is defined ? q|raw|escape('js') : '' }}',
             searchPath: '{{ searchPath|raw }}',
             noAjax: {{ noAjax|default(false) ? 'true' : 'false' }},
-            loadingHtml: '{{ include('LadbCoreBundle:Common:_loading.part.html.twig', { 'float':true, 'noHidden':true })|escape('js') }}',
+            loadingHtml: '{{ include('@LadbCore/Common/_loading.part.html.twig', { 'float':true, 'noHidden':true })|escape('js') }}',
             masonry: {{ masonry|default(false) ? 'true' : 'false' }},
             masonryWide: {{ masonryWide|default(false) ? 'true' : 'false' }},
             mapSearchPath: {{ mapSearchPath is defined ? ("'"~mapSearchPath~"'")|raw : 'null' }},

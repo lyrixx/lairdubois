@@ -1,6 +1,6 @@
-{% extends 'LadbCoreBundle:Common/Modal:_modal-content.part.html.twig' %}
+{% extends '@LadbCore/Common/Modal/_modal-content.part.html.twig' %}
 
-{% form_theme form 'LadbCoreBundle:Common:_form-theme.twig.twig' 'LadbCoreBundle:Core/Block:_form-theme.html.twig' %}
+{% form_theme form '@LadbCore/Common/_form-theme.twig.twig' '@LadbCore/Core/Block/_form-theme.html.twig' %}
 
 {# set formAction #}
 
@@ -30,7 +30,7 @@
             {{ form_widget(form.labels) }}
             <select class="ladb-workflow-label-fake-select form-control" data-ladb-mapped-input="#{{ form.labels.vars.id }}" multiple>
                 {% for label in workflow.labels %}
-                    <option data-content="{% apply spaceless %}{% apply escape %}{% include 'LadbCoreBundle:Workflow:Label/_span.part.html.twig' %}{% endapply %}{% endapply %}" value="{{ label.id }}">{{ label.name }}</option>
+                    <option data-content="{% apply spaceless %}{% apply escape %}{% include '@LadbCore/Workflow/Label/_span.part.html.twig' %}{% endapply %}{% endapply %}" value="{{ label.id }}">{{ label.name }}</option>
                 {% endfor %}
             </select>
         </div>
@@ -40,7 +40,7 @@
             {{ form_widget(form.parts) }}
             <select class="ladb-workflow-part-fake-select form-control" data-ladb-mapped-input="#{{ form.parts.vars.id }}" multiple>
                 {% for part in workflow.parts %}
-                    <option data-content="{% apply spaceless %}{% apply escape %}{% include 'LadbCoreBundle:Workflow:Part/_span.part.html.twig' %}{% endapply %}{% endapply %}" value="{{ part.id }}">{{ part.name }}</option>
+                    <option data-content="{% apply spaceless %}{% apply escape %}{% include '@LadbCore/Workflow/Part/_span.part.html.twig' %}{% endapply %}{% endapply %}" value="{{ part.id }}">{{ part.name }}</option>
                 {% endfor %}
             </select>
         </div>

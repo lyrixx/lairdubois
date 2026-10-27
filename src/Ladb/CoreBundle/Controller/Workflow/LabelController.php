@@ -16,7 +16,7 @@ class LabelController extends AbstractWorkflowBasedController {
 
 	/**
 	 * @Route("/{id}/label/new", requirements={"id" = "\d+"}, name="core_workflow_label_new")
-	 * @Template("LadbCoreBundle:Workflow:Label/new-xhr.html.twig")
+	 * @Template("@LadbCore/Workflow/Label/new-xhr.html.twig")
 	 */
 	public function newAction(Request $request, $id) {
 
@@ -36,7 +36,7 @@ class LabelController extends AbstractWorkflowBasedController {
 
 	/**
 	 * @Route("/{id}/label/create", requirements={"id" = "\d+"}, methods={"POST"}, name="core_workflow_label_create")
-	 * @Template("LadbCoreBundle:Workflow:Label/new-xhr.html.twig")
+	 * @Template("@LadbCore/Workflow/Label/new-xhr.html.twig")
 	 */
 	public function createAction(Request $request, $id) {
 
@@ -58,7 +58,7 @@ class LabelController extends AbstractWorkflowBasedController {
 
 			$om->flush();
 
-			return $this->render('LadbCoreBundle:Workflow:Label/create-xhr.html.twig', array(
+			return $this->render('@LadbCore/Workflow/Label/create-xhr.html.twig', array(
 				'label' => $label,
 			));
 		}
@@ -71,7 +71,7 @@ class LabelController extends AbstractWorkflowBasedController {
 
 	/**
 	 * @Route("/label/{id}/edit", requirements={"id" = "\d+"}, name="core_workflow_label_edit")
-	 * @Template("LadbCoreBundle:Workflow:Label/edit-xhr.html.twig")
+	 * @Template("@LadbCore/Workflow/Label/edit-xhr.html.twig")
 	 */
 	public function editAction(Request $request, $id) {
 		$om = $this->getDoctrine()->getManager();
@@ -93,7 +93,7 @@ class LabelController extends AbstractWorkflowBasedController {
 
 	/**
 	 * @Route("/label/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_workflow_label_update")
-	 * @Template("LadbCoreBundle:Workflow:Label/edit-xhr.html.twig")
+	 * @Template("@LadbCore/Workflow/Label/edit-xhr.html.twig")
 	 */
 	public function updateAction(Request $request, $id) {
 		$om = $this->getDoctrine()->getManager();
@@ -123,7 +123,7 @@ class LabelController extends AbstractWorkflowBasedController {
 				));
 			}
 
-			return $this->render('LadbCoreBundle:Workflow:Label/update-xhr.html.twig', array(
+			return $this->render('@LadbCore/Workflow/Label/update-xhr.html.twig', array(
 				'label' => $label,
 			));
 		}
@@ -136,7 +136,7 @@ class LabelController extends AbstractWorkflowBasedController {
 
 	/**
 	 * @Route("/label/{id}/delete", requirements={"id" = "\d+"}, name="core_workflow_label_delete")
-	 * @Template("LadbCoreBundle:Workflow:Label/delete-xhr.html.twig")
+	 * @Template("@LadbCore/Workflow/Label/delete-xhr.html.twig")
 	 */
 	public function deleteAction(Request $request, $id) {
 		$om = $this->getDoctrine()->getManager();
@@ -171,7 +171,7 @@ class LabelController extends AbstractWorkflowBasedController {
 
 	/**
 	 * @Route("/{id}/labels", requirements={"id" = "\d+"}, name="core_workflow_label_list")
-	 * @Template("LadbCoreBundle:Workflow:Label/list-xhr.html.twig")
+	 * @Template("@LadbCore/Workflow/Label/list-xhr.html.twig")
 	 */
 	public function listAction(Request $request, $id) {
 

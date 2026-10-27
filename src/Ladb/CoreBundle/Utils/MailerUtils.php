@@ -89,8 +89,8 @@ class MailerUtils {
 			$this->sendEmailMessage(
 				$recipientUser->getEmail(),
 				'Confirmation de votre adresse e-mail',
-				$this->_renderTemplate('LadbCoreBundle:Core/User:email-confirmation.txt.twig', $parameters),
-				$this->_renderTemplate('LadbCoreBundle:Core/User:email-confirmation.html.twig', $parameters)
+				$this->_renderTemplate('@LadbCore/Core/User/email-confirmation.txt.twig', $parameters),
+				$this->_renderTemplate('@LadbCore/Core/User/email-confirmation.html.twig', $parameters)
 			);
 		}
 	}
@@ -108,8 +108,8 @@ class MailerUtils {
 			$this->sendEmailMessage(
 				$recipientUser->getEmail(),
 				'Notification de nouveau message de '.$actorUser->getDisplayname(),
-				$this->_renderTemplate('LadbCoreBundle:Message:email-notification.txt.twig', $parameters),
-				$this->_renderTemplate('LadbCoreBundle:Message:email-notification.html.twig', $parameters),
+				$this->_renderTemplate('@LadbCore/Message/email-notification.txt.twig', $parameters),
+				$this->_renderTemplate('@LadbCore/Message/email-notification.html.twig', $parameters),
 				$parameters['listUnsubscribeLink']
 			);
 		}
@@ -119,7 +119,7 @@ class MailerUtils {
 		$this->sendEmailMessage(
 			'contact@lairdubois.fr',
 			'Notification de détection de SPAM',
-			$this->_renderTemplate('LadbCoreBundle:Message:spam-email-notification.txt.twig', array( 'sender' => $sender, 'recipients' => $recipients, 'subject' => $subject, 'body' => $body ))
+			$this->_renderTemplate('@LadbCore/Message/spam-email-notification.txt.twig', array( 'sender' => $sender, 'recipients' => $recipients, 'subject' => $subject, 'body' => $body ))
 		);
 	}
 
@@ -136,8 +136,8 @@ class MailerUtils {
 			$this->sendEmailMessage(
 				$recipientUser->getEmail(),
 				'Notification de nouveau coup de projecteur',
-				$this->_renderTemplate('LadbCoreBundle:Command:spotlight-email-notification.txt.twig', $parameters),
-				$this->_renderTemplate('LadbCoreBundle:Command:spotlight-email-notification.html.twig', $parameters),
+				$this->_renderTemplate('@LadbCore/Command/spotlight-email-notification.txt.twig', $parameters),
+				$this->_renderTemplate('@LadbCore/Command/spotlight-email-notification.html.twig', $parameters),
 				$parameters['listUnsubscribeLink']
 			);
 		}
@@ -147,7 +147,7 @@ class MailerUtils {
 		$this->sendEmailMessage(
 			'contact@lairdubois.fr',
 			'Notification de rapport d\'abus',
-			$this->_renderTemplate('LadbCoreBundle:Core/Report:email-notification.txt.twig', array( 'actorUser' => $actorUser, 'report' => $report, 'entity' => $entity ))
+			$this->_renderTemplate('@LadbCore/Core/Report/email-notification.txt.twig', array( 'actorUser' => $actorUser, 'report' => $report, 'entity' => $entity ))
 		);
 	}
 
@@ -155,7 +155,7 @@ class MailerUtils {
 		$this->sendEmailMessage(
 			'contact@lairdubois.fr',
 			'Notification de nouvel utilisateur',
-			$this->_renderTemplate('LadbCoreBundle:Core/User:register-email-notification.txt.twig', array( 'actorUser' => $actorUser ))
+			$this->_renderTemplate('@LadbCore/Core/User/register-email-notification.txt.twig', array( 'actorUser' => $actorUser ))
 		);
 	}
 
@@ -163,7 +163,7 @@ class MailerUtils {
 		$this->sendEmailMessage(
 			'contact@lairdubois.fr',
 			'Notification de nouveau collectif',
-			$this->_renderTemplate('LadbCoreBundle:Core/User/Team:new-email-notification.txt.twig', array( 'actorUser' => $actorUser, 'team' => $team ))
+			$this->_renderTemplate('@LadbCore/Core/User/Team/new-email-notification.txt.twig', array( 'actorUser' => $actorUser, 'team' => $team ))
 		);
 	}
 
@@ -171,7 +171,7 @@ class MailerUtils {
 		$this->sendEmailMessage(
 			'contact@lairdubois.fr',
 			'Notification de nouveau don',
-			$this->_renderTemplate('LadbCoreBundle:Funding:donation-email-notification.txt.twig', array( 'actorUser' => $actorUser, 'donation' => $donation ))
+			$this->_renderTemplate('@LadbCore/Funding/donation-email-notification.txt.twig', array( 'actorUser' => $actorUser, 'donation' => $donation ))
 		);
 	}
 
@@ -183,8 +183,8 @@ class MailerUtils {
 		$this->sendEmailMessage(
 			$recipientUser->getEmail(),
 			'Confirmation du paiement de votre don',
-			$this->_renderTemplate('LadbCoreBundle:Funding:payment-receipt-email.txt.twig', $parameters),
-			$this->_renderTemplate('LadbCoreBundle:Funding:payment-receipt-email.html.twig', $parameters)
+			$this->_renderTemplate('@LadbCore/Funding/payment-receipt-email.txt.twig', $parameters),
+			$this->_renderTemplate('@LadbCore/Funding/payment-receipt-email.html.twig', $parameters)
 		);
 		unset($parameters);
 	}
@@ -197,8 +197,8 @@ class MailerUtils {
 		$this->sendEmailMessage(
 			$recipientUser->getEmail(),
 			'Votre annonce a expiré',
-			$this->_renderTemplate('LadbCoreBundle:Offer/Offer:expired-email.txt.twig', $parameters),
-			$this->_renderTemplate('LadbCoreBundle:Offer/Offer:expired-email.html.twig', $parameters)
+			$this->_renderTemplate('@LadbCore/Offer/Offer/expired-email.txt.twig', $parameters),
+			$this->_renderTemplate('@LadbCore/Offer/Offer/expired-email.html.twig', $parameters)
 		);
 		unset($parameters);
 	}
@@ -225,8 +225,8 @@ class MailerUtils {
 			$this->sendEmailMessage(
 				$recipientUser->getEmail(),
 				'Nouveautés l\'Air du Bois de la semaine',
-				$this->_renderTemplate('LadbCoreBundle:Command:mailing-weeknews-email.txt.twig', $parameters),
-				$this->_renderTemplate('LadbCoreBundle:Command:mailing-weeknews-email.html.twig', $parameters),
+				$this->_renderTemplate('@LadbCore/Command/mailing-weeknews-email.txt.twig', $parameters),
+				$this->_renderTemplate('@LadbCore/Command/mailing-weeknews-email.html.twig', $parameters),
 				$parameters['listUnsubscribeLink']
 			);
 			unset($parameters);

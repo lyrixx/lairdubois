@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:_masonry-list-thumbnail-wide.part.html.twig' %}
+{% extends '@LadbCore/Common/_masonry-list-thumbnail-wide.part.html.twig' %}
 
 {# set provider #}
 
@@ -29,16 +29,16 @@
         <li class="ladb-linkto"><a href="{{ path('core_provider_howtos', { 'id':provider.id }) }}" data-tooltip="tooltip" title="{{ 'knowledge.provider.linked_to'|trans() }} {{ provider.howtoCount }} {{ 'howto.howto.choice.entities'|trans({ '%count%':provider.howtoCount }) }}"><i class="ladb-icon-howto"></i></a></li>
     {% endif %}
     {{ parent() }}
-    {% include 'LadbCoreBundle:Core/Review:_thumbnail-meta-counter.part.html.twig' %}
+    {% include '@LadbCore/Core/Review/_thumbnail-meta-counter.part.html.twig' %}
 {% endblock %}
 
 {% block body %}
     {% if provider.state > 0 %}
         <div class="label label-danger" style="display: block; font-size: 100%; margin-bottom: 5px;"><i class="ladb-icon-warning"></i> {{ ('knowledge.provider.state_alert_'~provider.state)|trans() }}</div>
     {% endif %}
-    {% include 'LadbCoreBundle:Knowledge/Provider:_compact-infos.part.html.twig' %}
+    {% include '@LadbCore/Knowledge/Provider/_compact-infos.part.html.twig' %}
 {% endblock %}
 
 {% block footer %}
-    {% include 'LadbCoreBundle:Knowledge:_list-thumbnail-footer.part.html.twig' %}
+    {% include '@LadbCore/Knowledge/_list-thumbnail-footer.part.html.twig' %}
 {% endblock %}

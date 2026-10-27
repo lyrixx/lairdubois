@@ -41,7 +41,7 @@ class HowtoController extends AbstractHowtoBasedController {
 
 	/**
 	 * @Route("/new", name="core_howto_new")
-	 * @Template("LadbCoreBundle:Howto/Howto:new.html.twig")
+	 * @Template("@LadbCore/Howto/Howto/new.html.twig")
 	 */
 	public function newAction(Request $request, TagUtils $tagUtils) {
 
@@ -57,7 +57,7 @@ class HowtoController extends AbstractHowtoBasedController {
 
 	/**
 	 * @Route("/create", methods={"POST"}, name="core_howto_create")
-	 * @Template("LadbCoreBundle:Howto/Howto:new.html.twig")
+	 * @Template("@LadbCore/Howto/Howto/new.html.twig")
 	 */
 	public function createAction(Request $request, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
@@ -165,7 +165,7 @@ class HowtoController extends AbstractHowtoBasedController {
 
 	/**
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_howto_edit")
-	 * @Template("LadbCoreBundle:Howto/Howto:edit.html.twig")
+	 * @Template("@LadbCore/Howto/Howto/edit.html.twig")
 	 */
 	public function editAction($id, TagUtils $tagUtils) {
 
@@ -183,7 +183,7 @@ class HowtoController extends AbstractHowtoBasedController {
 
 	/**
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_howto_update")
-	 * @Template("LadbCoreBundle:Howto/Howto:edit.html.twig")
+	 * @Template("@LadbCore/Howto/Howto/edit.html.twig")
 	 */
 	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, EmbeddableUtils $embaddableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
@@ -336,7 +336,7 @@ class HowtoController extends AbstractHowtoBasedController {
 
 	/**
 	 * @Route("/{id}/widget", requirements={"id" = "\d+"}, name="core_howto_widget")
-	 * @Template("LadbCoreBundle:Howto/Howto:widget-xhr.html.twig")
+	 * @Template("@LadbCore/Howto/Howto/widget-xhr.html.twig")
 	 */
 	public function widgetAction(Request $request, $id) {
 
@@ -361,7 +361,7 @@ class HowtoController extends AbstractHowtoBasedController {
 	/**
 	 * @Route("/", name="core_howto_list")
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_howto_list_page")
-	 * @Template("LadbCoreBundle:Howto/Howto:list.html.twig")
+	 * @Template("@LadbCore/Howto/Howto/list.html.twig")
 	 */
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, SearchUtils $searchUtils, TranslatorInterface $translator, $page = 0) {
 
@@ -585,14 +585,14 @@ class HowtoController extends AbstractHowtoBasedController {
 
 		if ($request->isXmlHttpRequest()) {
 			if ($layout == 'choice') {
-				return $this->render('LadbCoreBundle:Howto/Howto:list-choice-xhr.html.twig', $parameters);
+				return $this->render('@LadbCore/Howto/Howto/list-choice-xhr.html.twig', $parameters);
 			} else {
-				return $this->render('LadbCoreBundle:Howto/Howto:list-xhr.html.twig', $parameters);
+				return $this->render('@LadbCore/Howto/Howto/list-xhr.html.twig', $parameters);
 			}
 		}
 
 		if ($layout == 'choice') {
-			return $this->render('LadbCoreBundle:Howto/Howto:list-choice.html.twig', $parameters);
+			return $this->render('@LadbCore/Howto/Howto/list-choice.html.twig', $parameters);
 		}
 
 		if ($this->isGranted('ROLE_USER') && $this->getUser()->getMeta()->getPrivateHowtoCount() > 0) {
@@ -612,7 +612,7 @@ class HowtoController extends AbstractHowtoBasedController {
 	 * @Route("/{id}/creations", requirements={"id" = "\d+"}, name="core_howto_creations")
 	 * @Route("/{id}/creations/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_howto_creations_filter")
 	 * @Route("/{id}/creations/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_howto_creations_filter_page")
-	 * @Template("LadbCoreBundle:Howto/Howto:creations.html.twig")
+	 * @Template("@LadbCore/Howto/Howto/creations.html.twig")
 	 */
 	public function creationsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -637,7 +637,7 @@ class HowtoController extends AbstractHowtoBasedController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Wonder/Creation:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Wonder/Creation/list-xhr.html.twig', $parameters);
 		}
 
 		return array_merge($parameters, array(
@@ -649,7 +649,7 @@ class HowtoController extends AbstractHowtoBasedController {
 	 * @Route("/{id}/ateliers", requirements={"id" = "\d+"}, name="core_howto_workshops")
 	 * @Route("/{id}/ateliers/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_howto_workshops_filter")
 	 * @Route("/{id}/ateliers/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_howto_workshops_filter_page")
-	 * @Template("LadbCoreBundle:Howto/Howto:workshops.html.twig")
+	 * @Template("@LadbCore/Howto/Howto/workshops.html.twig")
 	 */
 	public function workshopsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -674,7 +674,7 @@ class HowtoController extends AbstractHowtoBasedController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Wonder/Workshop:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Wonder/Workshop/list-xhr.html.twig', $parameters);
 		}
 
 		return array_merge($parameters, array(
@@ -686,7 +686,7 @@ class HowtoController extends AbstractHowtoBasedController {
 	 * @Route("/{id}/plans", requirements={"id" = "\d+"}, name="core_howto_plans")
 	 * @Route("/{id}/plans/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_howto_plans_filter")
 	 * @Route("/{id}/plans/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_howto_plans_filter_page")
-	 * @Template("LadbCoreBundle:Howto/Howto:plans.html.twig")
+	 * @Template("@LadbCore/Howto/Howto/plans.html.twig")
 	 */
 	public function plansAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -711,7 +711,7 @@ class HowtoController extends AbstractHowtoBasedController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Wonder/Plan:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Wonder/Plan/list-xhr.html.twig', $parameters);
 		}
 
 		return array_merge($parameters, array(
@@ -723,7 +723,7 @@ class HowtoController extends AbstractHowtoBasedController {
 	 * @Route("/{id}/questions", requirements={"id" = "\d+"}, name="core_howto_questions")
 	 * @Route("/{id}/questions/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_howto_questions_filter")
 	 * @Route("/{id}/questions/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_howto_questions_filter_page")
-	 * @Template("LadbCoreBundle:Howto/Howto:questions.html.twig")
+	 * @Template("@LadbCore/Howto/Howto/questions.html.twig")
 	 */
 	public function questionsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -748,7 +748,7 @@ class HowtoController extends AbstractHowtoBasedController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Wonder/Plan:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Wonder/Plan/list-xhr.html.twig', $parameters);
 		}
 
 		return array_merge($parameters, array(
@@ -760,7 +760,7 @@ class HowtoController extends AbstractHowtoBasedController {
 	 * @Route("/{id}/processus", requirements={"id" = "\d+"}, name="core_howto_workflows")
 	 * @Route("/{id}/processus/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_howto_workflows_filter")
 	 * @Route("/{id}/processus/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_howto_workflows_filter_page")
-	 * @Template("LadbCoreBundle:Howto/Howto:workflows.html.twig")
+	 * @Template("@LadbCore/Howto/Howto/workflows.html.twig")
 	 */
 	public function workflowsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -785,7 +785,7 @@ class HowtoController extends AbstractHowtoBasedController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Howto/Howto:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Howto/Howto/list-xhr.html.twig', $parameters);
 		}
 
 		return array_merge($parameters, array(
@@ -797,7 +797,7 @@ class HowtoController extends AbstractHowtoBasedController {
 	 * @Route("/{id}/fournisseurs", requirements={"id" = "\d+"}, name="core_howto_providers")
 	 * @Route("/{id}/fournisseurs/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_howto_providers_filter")
 	 * @Route("/{id}/fournisseurs/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_howto_providers_filter_page")
-	 * @Template("LadbCoreBundle:Howto/Howto:providers.html.twig")
+	 * @Template("@LadbCore/Howto/Howto/providers.html.twig")
 	 */
 	public function providersAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -822,7 +822,7 @@ class HowtoController extends AbstractHowtoBasedController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Howto/Howto:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Howto/Howto/list-xhr.html.twig', $parameters);
 		}
 
 		return array_merge($parameters, array(
@@ -834,7 +834,7 @@ class HowtoController extends AbstractHowtoBasedController {
 	 * @Route("/{id}/ecoles", requirements={"id" = "\d+"}, name="core_howto_schools")
 	 * @Route("/{id}/ecoles/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_howto_schools_filter")
 	 * @Route("/{id}/ecoles/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_howto_schools_filter_page")
-	 * @Template("LadbCoreBundle:Howto/Howto:schools.html.twig")
+	 * @Template("@LadbCore/Howto/Howto/schools.html.twig")
 	 */
 	public function schoolsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -859,7 +859,7 @@ class HowtoController extends AbstractHowtoBasedController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Howto/Howto:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Howto/Howto/list-xhr.html.twig', $parameters);
 		}
 
 		return array_merge($parameters, array(
@@ -869,7 +869,7 @@ class HowtoController extends AbstractHowtoBasedController {
 
 	/**
 	 * @Route("/{id}.html", name="core_howto_show")
-	 * @Template("LadbCoreBundle:Howto/Howto:show.html.twig")
+	 * @Template("@LadbCore/Howto/Howto/show.html.twig")
 	 */
 	public function showAction(Request $request, $id, EventDispatcherInterface $dispatcher, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();

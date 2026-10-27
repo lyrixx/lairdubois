@@ -52,7 +52,7 @@ class PlanController extends AbstractController {
 
 	/**
 	 * @Route("/new", name="core_plan_new")
-	 * @Template("LadbCoreBundle:Wonder/Plan:new.html.twig")
+	 * @Template("@LadbCore/Wonder/Plan/new.html.twig")
 	 */
 	public function newAction(Request $request, TagUtils $tagUtils) {
 
@@ -68,7 +68,7 @@ class PlanController extends AbstractController {
 
 	/**
 	 * @Route("/create", methods={"POST"}, name="core_plan_create")
-	 * @Template("LadbCoreBundle:Wonder/Plan:new.html.twig")
+	 * @Template("@LadbCore/Wonder/Plan/new.html.twig")
 	 */
 	public function createAction(Request $request, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, PlanUtils $planUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
@@ -184,7 +184,7 @@ class PlanController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_plan_edit")
-	 * @Template("LadbCoreBundle:Wonder/Plan:edit.html.twig")
+	 * @Template("@LadbCore/Wonder/Plan/edit.html.twig")
 	 */
 	public function editAction($id, TagUtils $tagUtils) {
 
@@ -202,7 +202,7 @@ class PlanController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_plan_update")
-	 * @Template("LadbCoreBundle:Wonder/Plan:edit.html.twig")
+	 * @Template("@LadbCore/Wonder/Plan/edit.html.twig")
 	 */
 	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, EmbeddableUtils $embaddableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, PicturedUtils $picturedUtils, PlanUtils $planUtils, StripableUtils $stripableUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
@@ -338,7 +338,7 @@ class PlanController extends AbstractController {
 	 * @Route("/{id}/questions", requirements={"id" = "\d+"}, name="core_plan_questions")
 	 * @Route("/{id}/questions/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_plan_questions_filter")
 	 * @Route("/{id}/questions/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_plan_questions_filter_page")
-	 * @Template("LadbCoreBundle:Wonder/Plan:questions.html.twig")
+	 * @Template("@LadbCore/Wonder/Plan/questions.html.twig")
 	 */
 	public function questionsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -363,7 +363,7 @@ class PlanController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Qa/Question:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Qa/Question/list-xhr.html.twig', $parameters);
 		}
 
 		return array_merge($parameters, array(
@@ -375,7 +375,7 @@ class PlanController extends AbstractController {
 	 * @Route("/{id}/pas-a-pas", requirements={"id" = "\d+"}, name="core_plan_howtos")
 	 * @Route("/{id}/pas-a-pas/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_plan_howtos_filter")
 	 * @Route("/{id}/pas-a-pas/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_plan_howtos_filter_page")
-	 * @Template("LadbCoreBundle:Wonder/Plan:howtos.html.twig")
+	 * @Template("@LadbCore/Wonder/Plan/howtos.html.twig")
 	 */
 	public function howtosAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -400,7 +400,7 @@ class PlanController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Howto/Howto:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Howto/Howto/list-xhr.html.twig', $parameters);
 		}
 
 		return array_merge($parameters, array(
@@ -412,7 +412,7 @@ class PlanController extends AbstractController {
 	 * @Route("/{id}/creations", requirements={"id" = "\d+"}, name="core_plan_creations")
 	 * @Route("/{id}/creations/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_plan_creations_filter")
 	 * @Route("/{id}/creations/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_plan_creations_filter_page")
-	 * @Template("LadbCoreBundle:Wonder/Plan:creations.html.twig")
+	 * @Template("@LadbCore/Wonder/Plan/creations.html.twig")
 	 */
 	public function creationsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -437,7 +437,7 @@ class PlanController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Wonder/Creation:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Wonder/Creation/list-xhr.html.twig', $parameters);
 		}
 
 		return array_merge($parameters, array(
@@ -449,7 +449,7 @@ class PlanController extends AbstractController {
 	 * @Route("/{id}/processus", requirements={"id" = "\d+"}, name="core_plan_workflows")
 	 * @Route("/{id}/processus/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_plan_workflows_filter")
 	 * @Route("/{id}/processus/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_plan_workflows_filter_page")
-	 * @Template("LadbCoreBundle:Wonder/Plan:workflows.html.twig")
+	 * @Template("@LadbCore/Wonder/Plan/workflows.html.twig")
 	 */
 	public function workflowsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -474,7 +474,7 @@ class PlanController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Howto/Howto:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Howto/Howto/list-xhr.html.twig', $parameters);
 		}
 
 		return array_merge($parameters, array(
@@ -486,7 +486,7 @@ class PlanController extends AbstractController {
 	 * @Route("/{id}/ateliers", requirements={"id" = "\d+"}, name="core_plan_workshops")
 	 * @Route("/{id}/ateliers/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_plan_workshops_filter")
 	 * @Route("/{id}/ateliers/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_plan_workshops_filter_page")
-	 * @Template("LadbCoreBundle:Wonder/Plan:workshops.html.twig")
+	 * @Template("@LadbCore/Wonder/Plan/workshops.html.twig")
 	 */
 	public function workshopsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -511,7 +511,7 @@ class PlanController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Wonder/Workshop:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Wonder/Workshop/list-xhr.html.twig', $parameters);
 		}
 
 		return array_merge($parameters, array(
@@ -523,7 +523,7 @@ class PlanController extends AbstractController {
 	 * @Route("/{id}/ecoles", requirements={"id" = "\d+"}, name="core_plan_schools")
 	 * @Route("/{id}/ecoles/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_plan_schools_filter")
 	 * @Route("/{id}/ecoles/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_plan_schools_filter_page")
-	 * @Template("LadbCoreBundle:Wonder/Plan:schools.html.twig")
+	 * @Template("@LadbCore/Wonder/Plan/schools.html.twig")
 	 */
 	public function schoolsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -548,7 +548,7 @@ class PlanController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Knowledge/School:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Knowledge/School/list-xhr.html.twig', $parameters);
 		}
 
 		return array_merge($parameters, array(
@@ -560,7 +560,7 @@ class PlanController extends AbstractController {
 	 * @Route("/{id}/inspirations", requirements={"id" = "\d+"}, name="core_plan_inspirations")
 	 * @Route("/{id}/inspirations/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_plan_inspirations_filter")
 	 * @Route("/{id}/inspirations/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_plan_inspirations_filter_page")
-	 * @Template("LadbCoreBundle:Wonder/Plan:inspirations.html.twig")
+	 * @Template("@LadbCore/Wonder/Plan/inspirations.html.twig")
 	 */
 	public function inspirationsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -584,7 +584,7 @@ class PlanController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Wonder/Plan:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Wonder/Plan/list-xhr.html.twig', $parameters);
 		}
 
 		return array_merge($parameters, array(
@@ -596,7 +596,7 @@ class PlanController extends AbstractController {
 	 * @Route("/{id}/rebonds", requirements={"id" = "\d+"}, name="core_plan_rebounds")
 	 * @Route("/{id}/rebonds/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_plan_rebounds_filter")
 	 * @Route("/{id}/rebonds/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_plan_rebounds_filter_page")
-	 * @Template("LadbCoreBundle:Wonder/Plan:rebounds.html.twig")
+	 * @Template("@LadbCore/Wonder/Plan/rebounds.html.twig")
 	 */
 	public function reboundsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -620,7 +620,7 @@ class PlanController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Wonder/Plan:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Wonder/Plan/list-xhr.html.twig', $parameters);
 		}
 
 		return array_merge($parameters, array(
@@ -701,7 +701,7 @@ class PlanController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/widget", requirements={"id" = "\d+"}, name="core_plan_widget")
-	 * @Template("LadbCoreBundle:Wonder/Plan:widget-xhr.html.twig")
+	 * @Template("@LadbCore/Wonder/Plan/widget-xhr.html.twig")
 	 */
 	public function widgetAction(Request $request, $id) {
 		$om = $this->getDoctrine()->getManager();
@@ -727,7 +727,7 @@ class PlanController extends AbstractController {
 	/**
 	 * @Route("/", name="core_plan_list")
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_plan_list_page")
-	 * @Template("LadbCoreBundle:Wonder/Plan:list.html.twig")
+	 * @Template("@LadbCore/Wonder/Plan/list.html.twig")
 	 */
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, ResourceUtils $resourceUtils, SearchUtils $searchUtils, TranslatorInterface $translator, $page = 0) {
 
@@ -950,14 +950,14 @@ class PlanController extends AbstractController {
 
 		if ($request->isXmlHttpRequest()) {
 			if ($layout == 'choice') {
-				return $this->render('LadbCoreBundle:Wonder/Plan:list-choice-xhr.html.twig', $parameters);
+				return $this->render('@LadbCore/Wonder/Plan/list-choice-xhr.html.twig', $parameters);
 			} else {
-				return $this->render('LadbCoreBundle:Wonder/Plan:list-xhr.html.twig', $parameters);
+				return $this->render('@LadbCore/Wonder/Plan/list-xhr.html.twig', $parameters);
 			}
 		}
 
 		if ($layout == 'choice') {
-			return $this->render('LadbCoreBundle:Wonder/Plan:list-choice.html.twig', $parameters);
+			return $this->render('@LadbCore/Wonder/Plan/list-choice.html.twig', $parameters);
 		}
 
 		if ($this->isGranted('ROLE_USER') && $this->getUser()->getMeta()->getPrivatePlanCount() > 0) {
@@ -975,7 +975,7 @@ class PlanController extends AbstractController {
 
 	/**
 	 * @Route("/{id}.html", name="core_plan_show")
-	 * @Template("LadbCoreBundle:Wonder/Plan:show.html.twig")
+	 * @Template("@LadbCore/Wonder/Plan/show.html.twig")
 	 */
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, EmbeddableUtils $embaddableUtils, ExplorableUtils $explorableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, SearchUtils $searchUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();

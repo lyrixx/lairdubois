@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:_list-n.part.html.twig' %}
+{% extends '@LadbCore/Common/_list-n.part.html.twig' %}
 
 {# set posts #}
 {# set nextPageUrl #}
@@ -7,7 +7,7 @@
 
 {% block items %}
     {% for post in posts %}
-        {% include 'LadbCoreBundle:Blog/Post:_list-thumbnail.part.html.twig' %}
+        {% include '@LadbCore/Blog/Post/_list-thumbnail.part.html.twig' %}
     {% endfor %}
 {% endblock %}
 

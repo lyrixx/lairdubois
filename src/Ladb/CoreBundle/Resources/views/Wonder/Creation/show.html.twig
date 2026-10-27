@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Wonder:_wonder-show.html.twig' %}
+{% extends '@LadbCore/Wonder/_wonder-show.html.twig' %}
 
 {% set wonderType = 'creation' %}
 {% set wonder = creation %}
@@ -64,18 +64,18 @@
 {% endblock %}
 
 {% block contentBody %}
-    {% include 'LadbCoreBundle:Core/Feedback:_contains-panel.part.html.twig' %}
+    {% include '@LadbCore/Core/Feedback/_contains-panel.part.html.twig' %}
     {{ parent() }}
 {% endblock %}
 
 {% block contentMetasPanel %}
-    {% include 'LadbCoreBundle:Core/Spotlight:_spotlight-meta.part.html.twig' %}
+    {% include '@LadbCore/Core/Spotlight/_spotlight-meta.part.html.twig' %}
     {{ parent() }}
 {% endblock %}
 
 {% block baseMetas %}
     {{ parent() }}
-    {% include 'LadbCoreBundle:Core/Feedback:_meta-counter.part.html.twig' %}
+    {% include '@LadbCore/Core/Feedback/_meta-counter.part.html.twig' %}
 {% endblock %}
 
 {% block characteristicsMetas %}
@@ -219,10 +219,10 @@
 
 {% block contentLinkedTo %}
     {% if creation.inspirationCount > 0 or creation.questionCount > 0 or creation.planCount > 0 or creation.howtoCount > 0 or creation.workflowCount > 0 or creation.providerCount > 0 or creation.schoolCount > 0 or creation.reboundCount > 0 %}
-        {% embed 'LadbCoreBundle:Common:_linkedto-widget.part.html.twig' %}
+        {% embed '@LadbCore/Common/_linkedto-widget.part.html.twig' %}
             {% block body %}
                 {% if creation.inspirationCount > 0 %}
-                    {% include 'LadbCoreBundle:Common:_linkedto-widget-item.part.html.twig' with {
+                    {% include '@LadbCore/Common/_linkedto-widget-item.part.html.twig' with {
                         'path':creation.inspirationCount == 1 ? path('core_creation_show', { 'id':creation.inspirations[0].sluggedId }) : path('core_creation_inspirations', { 'id':creation.id }),
                         'picture':creation.inspirations[0].mainPicture,
                         'icon':'ladb-icon-inspiration',
@@ -230,7 +230,7 @@
                     } %}
                 {% endif %}
                 {% if creation.questionCount > 0 %}
-                    {% include 'LadbCoreBundle:Common:_linkedto-widget-item.part.html.twig' with {
+                    {% include '@LadbCore/Common/_linkedto-widget-item.part.html.twig' with {
                         'path':creation.questionCount == 1 ? path('core_qa_question_show', { 'id':creation.questions[0].sluggedId }) : path('core_creation_questions', { 'id':creation.id }),
                         'picture':creation.questions[0].mainPicture,
                         'icon':'ladb-icon-question',
@@ -239,7 +239,7 @@
                     } %}
                 {% endif %}
                 {% if creation.planCount > 0 %}
-                    {% include 'LadbCoreBundle:Common:_linkedto-widget-item.part.html.twig' with {
+                    {% include '@LadbCore/Common/_linkedto-widget-item.part.html.twig' with {
                         'path':creation.planCount == 1 ? path('core_plan_show', { 'id':creation.plans[0].sluggedId }) : path('core_creation_plans', { 'id':creation.id }),
                         'picture':creation.plans[0].mainPicture,
                         'icon':'ladb-icon-plan',
@@ -247,7 +247,7 @@
                     } %}
                 {% endif %}
                 {% if creation.howtoCount > 0 %}
-                    {% include 'LadbCoreBundle:Common:_linkedto-widget-item.part.html.twig' with {
+                    {% include '@LadbCore/Common/_linkedto-widget-item.part.html.twig' with {
                         'path':creation.howtoCount == 1 ? path('core_howto_show', { 'id':creation.howtos[0].sluggedId }) : path('core_creation_howtos', { 'id':creation.id }),
                         'picture':creation.howtos[0].mainPicture,
                         'icon':'ladb-icon-howto',
@@ -255,7 +255,7 @@
                     } %}
                 {% endif %}
                 {% if creation.workflowCount > 0 %}
-                    {% include 'LadbCoreBundle:Common:_linkedto-widget-item.part.html.twig' with {
+                    {% include '@LadbCore/Common/_linkedto-widget-item.part.html.twig' with {
                         'path':creation.workflowCount == 1 ? path('core_workflow_show', { 'id':creation.workflows[0].sluggedId }) : path('core_creation_workflows', { 'id':creation.id }),
                         'picture':creation.workflows[0].mainPicture,
                         'icon':'ladb-icon-workflow',
@@ -264,7 +264,7 @@
                     } %}
                 {% endif %}
                 {% if creation.providerCount > 0 %}
-                    {% include 'LadbCoreBundle:Common:_linkedto-widget-item.part.html.twig' with {
+                    {% include '@LadbCore/Common/_linkedto-widget-item.part.html.twig' with {
                         'path':creation.providerCount == 1 ? path('core_provider_show', { 'id':creation.providers[0].sluggedId }) : path('core_creation_providers', { 'id':creation.id }),
                         'picture':creation.providers[0].mainPicture,
                         'icon':'ladb-icon-provider',
@@ -272,7 +272,7 @@
                     } %}
                 {% endif %}
                 {% if creation.schoolCount > 0 %}
-                    {% include 'LadbCoreBundle:Common:_linkedto-widget-item.part.html.twig' with {
+                    {% include '@LadbCore/Common/_linkedto-widget-item.part.html.twig' with {
                         'path':creation.schoolCount == 1 ? path('core_school_show', { 'id':creation.schools[0].sluggedId }) : path('core_creation_schools', { 'id':creation.id }),
                         'picture':creation.schools[0].mainPicture,
                         'icon':'ladb-icon-school',
@@ -280,7 +280,7 @@
                     } %}
                 {% endif %}
                 {% if creation.reboundCount > 0 %}
-                    {% include 'LadbCoreBundle:Common:_linkedto-widget-item.part.html.twig' with {
+                    {% include '@LadbCore/Common/_linkedto-widget-item.part.html.twig' with {
                         'path':creation.reboundCount == 1 ? path('core_creation_show', { 'id':creation.rebounds[0].sluggedId }) : path('core_creation_rebounds', { 'id':creation.id }),
                         'picture':creation.rebounds[0].mainPicture,
                         'icon':'ladb-icon-rebound',
@@ -293,5 +293,5 @@
 {% endblock %}
 
 {% block contentFeedbacks %}
-    {% include 'LadbCoreBundle:Core/Feedback:_widget.part.html.twig' %}
+    {% include '@LadbCore/Core/Feedback/_widget.part.html.twig' %}
 {% endblock %}

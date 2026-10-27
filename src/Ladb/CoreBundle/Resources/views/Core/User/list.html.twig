@@ -1,6 +1,6 @@
-{% extends 'LadbCoreBundle:Common:Layout/_list.html.twig' %}
+{% extends '@LadbCore/Common/Layout/_list.html.twig' %}
 
-{% use 'LadbCoreBundle:Common/Blocks:map.blocks.html.twig' %}
+{% use '@LadbCore/Common/Blocks/map.blocks.html.twig' %}
 
 {% set pageTitle = (family == 'team' ? 'team.list' : 'user.list')|trans() %}
 {% set pageDescription = (family == 'team' ? 'team.description' : 'user.description')|trans() %}
@@ -22,12 +22,12 @@
 {% endblock %}
 
 {% block bodyHeaderContainer %}
-    {% include 'LadbCoreBundle:Common:_map-area.part.html.twig' with { 'classes':'ladb-map-banner'} %}
+    {% include '@LadbCore/Common/_map-area.part.html.twig' with { 'classes':'ladb-map-banner'} %}
     {{ parent() }}
 {% endblock %}
 
 {% block bodyHeaderContainerContent %}
-    {% include 'LadbCoreBundle:Core/User:_list-topbar.part.html.twig' %}
+    {% include '@LadbCore/Core/User/_list-topbar.part.html.twig' %}
 {% endblock %}
 
 {% block bodyContainerContent %}
@@ -42,5 +42,5 @@
 {% endblock %}
 
 {% block autopagerContainerInner %}
-    {% include 'LadbCoreBundle:Core/User:_list-n.part.html.twig' %}
+    {% include '@LadbCore/Core/User/_list-n.part.html.twig' %}
 {% endblock %}

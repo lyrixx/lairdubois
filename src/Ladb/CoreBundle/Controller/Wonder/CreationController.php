@@ -63,7 +63,7 @@ class CreationController extends AbstractController {
 
 	/**
 	 * @Route("/new", name="core_creation_new")
-	 * @Template("LadbCoreBundle:Wonder/Creation:new.html.twig")
+	 * @Template("@LadbCore/Wonder/Creation/new.html.twig")
 	 */
 	public function newAction(Request $request, TagUtils $tagUtils) {
 
@@ -80,7 +80,7 @@ class CreationController extends AbstractController {
 
 	/**
 	 * @Route("/create", methods={"POST"}, name="core_creation_create")
-	 * @Template("LadbCoreBundle:Wonder/Creation:new.html.twig")
+	 * @Template("@LadbCore/Wonder/Creation/new.html.twig")
 	 */
 	public function createAction(Request $request, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
@@ -189,7 +189,7 @@ class CreationController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_creation_edit")
-	 * @Template("LadbCoreBundle:Wonder/Creation:edit.html.twig")
+	 * @Template("@LadbCore/Wonder/Creation/edit.html.twig")
 	 */
 	public function editAction($id, TagUtils $tagUtils) {
 
@@ -207,7 +207,7 @@ class CreationController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_creation_update")
-	 * @Template("LadbCoreBundle:Wonder/Creation:edit.html.twig")
+	 * @Template("@LadbCore/Wonder/Creation/edit.html.twig")
 	 */
 	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, EmbeddableUtils $embeddableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, PicturedUtils $picturedUtils, StripableUtils $stripableUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
@@ -313,7 +313,7 @@ class CreationController extends AbstractController {
 	 * @Route("/{id}/questions", requirements={"id" = "\d+"}, name="core_creation_questions")
 	 * @Route("/{id}/questions/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_creation_questions_filter")
 	 * @Route("/{id}/questions/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_creation_questions_filter_page")
-	 * @Template("LadbCoreBundle:Wonder/Creation:questions.html.twig")
+	 * @Template("@LadbCore/Wonder/Creation/questions.html.twig")
 	 */
 	public function questionsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -338,7 +338,7 @@ class CreationController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Qa/Question:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Qa/Question/list-xhr.html.twig', $parameters);
 		}
 
 		return array_merge($parameters, array(
@@ -350,7 +350,7 @@ class CreationController extends AbstractController {
 	 * @Route("/{id}/plans", requirements={"id" = "\d+"}, name="core_creation_plans")
 	 * @Route("/{id}/plans/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_creation_plans_filter")
 	 * @Route("/{id}/plans/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_creation_plans_filter_page")
-	 * @Template("LadbCoreBundle:Wonder/Creation:plans.html.twig")
+	 * @Template("@LadbCore/Wonder/Creation/plans.html.twig")
 	 */
 	public function plansAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -375,7 +375,7 @@ class CreationController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Wonder/Plan:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Wonder/Plan/list-xhr.html.twig', $parameters);
 		}
 
 		return array_merge($parameters, array(
@@ -394,7 +394,7 @@ class CreationController extends AbstractController {
 	 * @Route("/{id}/pas-a-pas", requirements={"id" = "\d+"}, name="core_creation_howtos")
 	 * @Route("/{id}/pas-a-pas/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_creation_howtos_filter")
 	 * @Route("/{id}/pas-a-pas/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_creation_howtos_filter_page")
-	 * @Template("LadbCoreBundle:Wonder/Creation:howtos.html.twig")
+	 * @Template("@LadbCore/Wonder/Creation/howtos.html.twig")
 	 */
 	public function howtosAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -419,7 +419,7 @@ class CreationController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Howto/Howto:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Howto/Howto/list-xhr.html.twig', $parameters);
 		}
 
 		return array_merge($parameters, array(
@@ -431,7 +431,7 @@ class CreationController extends AbstractController {
 	 * @Route("/{id}/processus", requirements={"id" = "\d+"}, name="core_creation_workflows")
 	 * @Route("/{id}/processus/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_creation_workflows_filter")
 	 * @Route("/{id}/processus/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_creation_workflows_filter_page")
-	 * @Template("LadbCoreBundle:Wonder/Creation:workflows.html.twig")
+	 * @Template("@LadbCore/Wonder/Creation/workflows.html.twig")
 	 */
 	public function workflowsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -456,7 +456,7 @@ class CreationController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Workflow/Workflow:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Workflow/Workflow/list-xhr.html.twig', $parameters);
 		}
 
 		return array_merge($parameters, array(
@@ -468,7 +468,7 @@ class CreationController extends AbstractController {
 	 * @Route("/{id}/fournisseurs", requirements={"id" = "\d+"}, name="core_creation_providers")
 	 * @Route("/{id}/fournisseurs/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_creation_providers_filter")
 	 * @Route("/{id}/fournisseurs/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_creation_providers_filter_page")
-	 * @Template("LadbCoreBundle:Wonder/Creation:providers.html.twig")
+	 * @Template("@LadbCore/Wonder/Creation/providers.html.twig")
 	 */
 	public function providersAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -493,7 +493,7 @@ class CreationController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Knowledge/Provider:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Knowledge/Provider/list-xhr.html.twig', $parameters);
 		}
 
 		return array_merge($parameters, array(
@@ -505,7 +505,7 @@ class CreationController extends AbstractController {
 	 * @Route("/{id}/ecoles", requirements={"id" = "\d+"}, name="core_creation_schools")
 	 * @Route("/{id}/ecoles/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_creation_schools_filter")
 	 * @Route("/{id}/ecoles/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_creation_schools_filter_page")
-	 * @Template("LadbCoreBundle:Wonder/Creation:schools.html.twig")
+	 * @Template("@LadbCore/Wonder/Creation/schools.html.twig")
 	 */
 	public function schoolsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -530,7 +530,7 @@ class CreationController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Knowledge/School:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Knowledge/School/list-xhr.html.twig', $parameters);
 		}
 
 		return array_merge($parameters, array(
@@ -542,7 +542,7 @@ class CreationController extends AbstractController {
 	 * @Route("/{id}/inspirations", requirements={"id" = "\d+"}, name="core_creation_inspirations")
 	 * @Route("/{id}/inspirations/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_creation_inspirations_filter")
 	 * @Route("/{id}/inspirations/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_creation_inspirations_filter_page")
-	 * @Template("LadbCoreBundle:Wonder/Creation:inspirations.html.twig")
+	 * @Template("@LadbCore/Wonder/Creation/inspirations.html.twig")
 	 */
 	public function inspirationsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -566,7 +566,7 @@ class CreationController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Wonder/Creation:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Wonder/Creation/list-xhr.html.twig', $parameters);
 		}
 
 		return array_merge($parameters, array(
@@ -578,7 +578,7 @@ class CreationController extends AbstractController {
 	 * @Route("/{id}/rebonds", requirements={"id" = "\d+"}, name="core_creation_rebounds")
 	 * @Route("/{id}/rebonds/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_creation_rebounds_filter")
 	 * @Route("/{id}/rebonds/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_creation_rebounds_filter_page")
-	 * @Template("LadbCoreBundle:Wonder/Creation:rebounds.html.twig")
+	 * @Template("@LadbCore/Wonder/Creation/rebounds.html.twig")
 	 */
 	public function reboundsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -602,7 +602,7 @@ class CreationController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Wonder/Creation:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Wonder/Creation/list-xhr.html.twig', $parameters);
 		}
 
 		return array_merge($parameters, array(
@@ -679,7 +679,7 @@ class CreationController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/widget", requirements={"id" = "\d+"}, name="core_creation_widget")
-	 * @Template("LadbCoreBundle:Wonder/Creation:widget-xhr.html.twig")
+	 * @Template("@LadbCore/Wonder/Creation/widget-xhr.html.twig")
 	 */
 	public function widgetAction($id) {
 
@@ -702,7 +702,7 @@ class CreationController extends AbstractController {
 	/**
 	 * @Route("/", name="core_creation_list")
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_creation_list_page")
-	 * @Template("LadbCoreBundle:Wonder/Creation:list.html.twig")
+	 * @Template("@LadbCore/Wonder/Creation/list.html.twig")
 	 */
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, ElasticaQueryUtils $elasticaQueryUtils, MaybeUtils $maybeUtils, SearchUtils $searchUtils, TranslatorInterface $translator, TypableUtils $typableUtils, $page = 0) {
 
@@ -1028,14 +1028,14 @@ class CreationController extends AbstractController {
 
 		if ($request->isXmlHttpRequest()) {
 			if ($layout == 'choice') {
-				return $this->render('LadbCoreBundle:Wonder/Creation:list-choice-xhr.html.twig', $parameters);
+				return $this->render('@LadbCore/Wonder/Creation/list-choice-xhr.html.twig', $parameters);
 			} else {
-				return $this->render('LadbCoreBundle:Wonder/Creation:list-xhr.html.twig', $parameters);
+				return $this->render('@LadbCore/Wonder/Creation/list-xhr.html.twig', $parameters);
 			}
 		}
 
 		if ($layout == 'choice') {
-			return $this->render('LadbCoreBundle:Wonder/Creation:list-choice.html.twig', $parameters);
+			return $this->render('@LadbCore/Wonder/Creation/list-choice.html.twig', $parameters);
 		}
 
 		$parameters = array_merge($parameters, array(
@@ -1113,7 +1113,7 @@ class CreationController extends AbstractController {
 
 	/**
 	 * @Route("/{id}.html", name="core_creation_show")
-	 * @Template("LadbCoreBundle:Wonder/Creation:show.html.twig")
+	 * @Template("@LadbCore/Wonder/Creation/show.html.twig")
 	 */
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ElasticaQueryUtils $elasticaQueryUtils, EmbeddableUtils $embaddableUtils, ExplorableUtils $explorableUtils, FeedbackableUtils $feedbackableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, SearchUtils $searchUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();

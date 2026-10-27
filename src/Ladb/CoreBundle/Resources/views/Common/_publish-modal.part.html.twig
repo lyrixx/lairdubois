@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common/Modal:_modal.part.html.twig' %}
+{% extends '@LadbCore/Common/Modal/_modal.part.html.twig' %}
 
 {# entity #}
 {# licenseEntity (facultative) #}
@@ -24,7 +24,7 @@
             <hr>
             <p>{% block whatItIs %}{% endblock %}</p>
             {% if license is not null %}
-                <blockquote>{% include 'LadbCoreBundle:Core/License:_publish-modal.part.html.twig' %}</blockquote>
+                <blockquote>{% include '@LadbCore/Core/License/_publish-modal.part.html.twig' %}</blockquote>
             {% endif %}
             {% if not noFinalDisclaimer %}
                 <p><strong><i class="ladb-icon-warning"></i> Cette action est définitive.</strong></p>

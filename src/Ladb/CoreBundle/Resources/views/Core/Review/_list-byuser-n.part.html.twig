@@ -1,11 +1,11 @@
-{% extends 'LadbCoreBundle:Core/User:_list-items-byuser-n.part.html.twig' %}
+{% extends '@LadbCore/Core/User/_list-items-byuser-n.part.html.twig' %}
 
 {# set items #}
 {# set nextPageUrl #}
 
 {% block subitems %}
     {% for review in item.reviews %}
-        {% embed 'LadbCoreBundle:Core/Review:_row.part.html.twig' with { 'classes':'ladb-user-groupby-item', 'noMinitools':true, 'noMicrodata':true, 'noContactBtn':true } %}
+        {% embed '@LadbCore/Core/Review/_row.part.html.twig' with { 'classes':'ladb-user-groupby-item', 'noMinitools':true, 'noMicrodata':true, 'noContactBtn':true } %}
             {% block minitools %}{% endblock %}
         {% endembed %}
     {% endfor %}

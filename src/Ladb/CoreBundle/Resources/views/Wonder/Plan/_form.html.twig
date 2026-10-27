@@ -1,29 +1,29 @@
-{% extends 'LadbCoreBundle:Wonder:_wonder-form.html.twig' %}
+{% extends '@LadbCore/Wonder/_wonder-form.html.twig' %}
 
 {% set navSection = 'plans' %}
 
 {% block bodyJavascripts %}
     {{ parent() }}
-    {% include 'LadbCoreBundle:Core/Resource:_form-gallery-script.part.html.twig' with { 'fieldId':form.resources.vars.id, 'maxResourceCount':form.vars.data.maxResourceCount, 'formSection':'resources' } %}
-    {% include 'LadbCoreBundle:Wonder/Plan:_form-gallery-script.part.html.twig' with { 'fieldId':form.inspirations.vars.id, 'maxPlanCount':4, 'excludedId':(plan is defined ? plan.id : null) } %}
-    {% include 'LadbCoreBundle:Qa/Question:_form-gallery-script.part.html.twig' with { 'fieldId':form.questions.vars.id, 'maxQuestionCount':4 } %}
-    {% include 'LadbCoreBundle:Knowledge/School:_form-gallery-script.part.html.twig' with { 'fieldId':form.schools.vars.id, 'maxSchoolCount':4 } %}
-    {% include 'LadbCoreBundle:Common:_form-token-script.part.html.twig' with { 'fieldId':form.tags.vars.id, 'proposals':tagProposals, 'proposalsHelp':('tag.token.proposals.help'|trans()), 'help':('tag.token.help'|trans()), 'typeaheadSourcePath':(path('core_search_typeahead_tags_json')|raw) } %}
+    {% include '@LadbCore/Core/Resource/_form-gallery-script.part.html.twig' with { 'fieldId':form.resources.vars.id, 'maxResourceCount':form.vars.data.maxResourceCount, 'formSection':'resources' } %}
+    {% include '@LadbCore/Wonder/Plan/_form-gallery-script.part.html.twig' with { 'fieldId':form.inspirations.vars.id, 'maxPlanCount':4, 'excludedId':(plan is defined ? plan.id : null) } %}
+    {% include '@LadbCore/Qa/Question/_form-gallery-script.part.html.twig' with { 'fieldId':form.questions.vars.id, 'maxQuestionCount':4 } %}
+    {% include '@LadbCore/Knowledge/School/_form-gallery-script.part.html.twig' with { 'fieldId':form.schools.vars.id, 'maxSchoolCount':4 } %}
+    {% include '@LadbCore/Common/_form-token-script.part.html.twig' with { 'fieldId':form.tags.vars.id, 'proposals':tagProposals, 'proposalsHelp':('tag.token.proposals.help'|trans()), 'help':('tag.token.help'|trans()), 'typeaheadSourcePath':(path('core_search_typeahead_tags_json')|raw) } %}
 {% endblock %}
 
 {% block sidenav %}
     {{ parent() }}
-    {% include 'LadbCoreBundle:Common:_form-sidenav-title.part.html.twig' %}
-    {% include 'LadbCoreBundle:Core/Resource:_form-sidenav-gallery.part.html.twig' with { 'title':('default.choice.files'|trans({ '%count%':2 })|capitalize) } %}
-    {% include 'LadbCoreBundle:Core/Picture:_form-sidenav-gallery.part.html.twig' with { 'title':('default.showcase'|trans) } %}
+    {% include '@LadbCore/Common/_form-sidenav-title.part.html.twig' %}
+    {% include '@LadbCore/Core/Resource/_form-sidenav-gallery.part.html.twig' with { 'title':('default.choice.files'|trans({ '%count%':2 })|capitalize) } %}
+    {% include '@LadbCore/Core/Picture/_form-sidenav-gallery.part.html.twig' with { 'title':('default.showcase'|trans) } %}
     <li><a href="#3dwarehouse"><i class="ladb-icon-3d"></i> 3D Warehouse</a></li>
     <li><a href="#fusion360"><i class="ladb-icon-3d"></i> Fusion 360</a></li>
-    {% include 'LadbCoreBundle:Common:_form-sidenav-body.part.html.twig' %}
-    {% include 'LadbCoreBundle:Core/Tag:_form-sidenav.part.html.twig' %}
-    {% include 'LadbCoreBundle:Wonder/Plan:_form-sidenav-gallery.part.html.twig' with { 'title':('default.choice.inspirations'|trans({ '%count%':2 })|capitalize), 'icon':'ladb-icon-inspiration' } %}
-    {% include 'LadbCoreBundle:Qa/Question:_form-sidenav-gallery.part.html.twig' %}
-    {% include 'LadbCoreBundle:Knowledge/School:_form-sidenav-gallery.part.html.twig' %}
-    {% include 'LadbCoreBundle:Core/License:_form-sidenav.part.html.twig' %}
+    {% include '@LadbCore/Common/_form-sidenav-body.part.html.twig' %}
+    {% include '@LadbCore/Core/Tag/_form-sidenav.part.html.twig' %}
+    {% include '@LadbCore/Wonder/Plan/_form-sidenav-gallery.part.html.twig' with { 'title':('default.choice.inspirations'|trans({ '%count%':2 })|capitalize), 'icon':'ladb-icon-inspiration' } %}
+    {% include '@LadbCore/Qa/Question/_form-sidenav-gallery.part.html.twig' %}
+    {% include '@LadbCore/Knowledge/School/_form-sidenav-gallery.part.html.twig' %}
+    {% include '@LadbCore/Core/License/_form-sidenav.part.html.twig' %}
 {% endblock %}
 
 {% block sections %}
@@ -34,9 +34,9 @@
         </div>
     </div>
     {{ parent() }}
-    {% include 'LadbCoreBundle:Common:_form-section-title.part.html.twig' with { 'mandatory':true, 'help':('wonder.plan.form.help.title'|trans()) } %}
-    {% include 'LadbCoreBundle:Core/Resource:_form-section-gallery.part.html.twig' with { 'mandatory':true, 'formResources':form.resources, 'resources':form.vars.data.resources, 'maxResourceCount':form.vars.data.maxResourceCount, 'formSection':'resources', 'title':('default.choice.files'|trans({ '%count%':2 })|capitalize), 'help':('wonder.plan.form.help.resource'|trans()) } %}
-    {% embed 'LadbCoreBundle:Core/Picture:_form-section-gallery.part.html.twig' with { 'mandatory':true, 'sortable':true, 'title':('default.showcase'|trans), 'help':('wonder.plan.form.help.showcase'|trans()), 'hideTextOverlayWarning':true } %}
+    {% include '@LadbCore/Common/_form-section-title.part.html.twig' with { 'mandatory':true, 'help':('wonder.plan.form.help.title'|trans()) } %}
+    {% include '@LadbCore/Core/Resource/_form-section-gallery.part.html.twig' with { 'mandatory':true, 'formResources':form.resources, 'resources':form.vars.data.resources, 'maxResourceCount':form.vars.data.maxResourceCount, 'formSection':'resources', 'title':('default.choice.files'|trans({ '%count%':2 })|capitalize), 'help':('wonder.plan.form.help.resource'|trans()) } %}
+    {% embed '@LadbCore/Core/Picture/_form-section-gallery.part.html.twig' with { 'mandatory':true, 'sortable':true, 'title':('default.showcase'|trans), 'help':('wonder.plan.form.help.showcase'|trans()), 'hideTextOverlayWarning':true } %}
         {% block body %}
             {{ parent() }}
             <hr>
@@ -44,7 +44,7 @@
             <p class="help-block"><i class="ladb-icon-help"></i> <a href="{{ path('core_faq_question_show', { 'id':'comment-associer-un-plan-a-une-creation' }) }}">Comment associer un Plan à une Création ?</a> </p>
         {% endblock %}
     {% endembed %}
-    {% embed 'LadbCoreBundle:Common:_form-section.part.html.twig' with { 'icon':'3d', 'title':'3D Warehouse', 'formSection':'3dwarehouse' } %}
+    {% embed '@LadbCore/Common/_form-section.part.html.twig' with { 'icon':'3d', 'title':'3D Warehouse', 'formSection':'3dwarehouse' } %}
         {% block body %}
             <div class="media ladb-margin-remove ladb-margin-bottom">
                 <div class="media-left"><img src="{{ asset('bundles/ladbcore/ladb/images/logo-3dwarehouse.png') }}"></div>
@@ -59,7 +59,7 @@
             </div>
         {% endblock %}
     {% endembed %}
-    {% embed 'LadbCoreBundle:Common:_form-section.part.html.twig' with { 'icon':'3d', 'title':'Fusion 360', 'formSection':'fusion360' } %}
+    {% embed '@LadbCore/Common/_form-section.part.html.twig' with { 'icon':'3d', 'title':'Fusion 360', 'formSection':'fusion360' } %}
         {% block body %}
             <div class="media ladb-margin-remove ladb-margin-bottom">
                 <div class="media-left"><img src="{{ asset('bundles/ladbcore/ladb/images/logo-fusion360.png') }}"></div>
@@ -74,10 +74,10 @@
             </div>
         {% endblock %}
     {% endembed %}
-    {% include 'LadbCoreBundle:Common:_form-section-body.part.html.twig' with { 'mandatory':true, 'help':('wonder.plan.form.help.body'|trans()) } %}
-    {% include 'LadbCoreBundle:Core/Tag:_form-section.part.html.twig' with { 'help':'Indiquez les tags définissant votre plan.' } %}
-    {% include 'LadbCoreBundle:Wonder/Plan:_form-section-gallery.part.html.twig' with { 'maxPlanCount':4, 'title':('default.choice.inspirations'|trans({ '%count%':2 })|capitalize), 'help':('wonder.plan.form.help.inspirations'|trans()), 'icon':'ladb-icon-inspiration', 'addButtonHidden':true, 'formPlans':form.inspirations, 'plans':form.vars.data.inspirations, 'showInspirationWarning':true } %}
-    {% include 'LadbCoreBundle:Qa/Question:_form-section-gallery.part.html.twig' with { 'maxQuestionCount':4, 'help':('wonder.plan.form.help.questions'|trans()) } %}
-    {% include 'LadbCoreBundle:Knowledge/School:_form-section-gallery.part.html.twig' with { 'maxSchoolCount':4, 'help':('wonder.plan.form.help.schools'|trans()) } %}
-    {% include 'LadbCoreBundle:Core/License:_form-section.part.html.twig' with { 'form':form.license } %}
+    {% include '@LadbCore/Common/_form-section-body.part.html.twig' with { 'mandatory':true, 'help':('wonder.plan.form.help.body'|trans()) } %}
+    {% include '@LadbCore/Core/Tag/_form-section.part.html.twig' with { 'help':'Indiquez les tags définissant votre plan.' } %}
+    {% include '@LadbCore/Wonder/Plan/_form-section-gallery.part.html.twig' with { 'maxPlanCount':4, 'title':('default.choice.inspirations'|trans({ '%count%':2 })|capitalize), 'help':('wonder.plan.form.help.inspirations'|trans()), 'icon':'ladb-icon-inspiration', 'addButtonHidden':true, 'formPlans':form.inspirations, 'plans':form.vars.data.inspirations, 'showInspirationWarning':true } %}
+    {% include '@LadbCore/Qa/Question/_form-section-gallery.part.html.twig' with { 'maxQuestionCount':4, 'help':('wonder.plan.form.help.questions'|trans()) } %}
+    {% include '@LadbCore/Knowledge/School/_form-section-gallery.part.html.twig' with { 'maxSchoolCount':4, 'help':('wonder.plan.form.help.schools'|trans()) } %}
+    {% include '@LadbCore/Core/License/_form-section.part.html.twig' with { 'form':form.license } %}
 {% endblock %}

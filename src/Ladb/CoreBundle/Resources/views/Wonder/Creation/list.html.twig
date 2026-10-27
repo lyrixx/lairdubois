@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:Layout/_list.html.twig' %}
+{% extends '@LadbCore/Common/Layout/_list.html.twig' %}
 
 {% if homepage %}
     {% set pageTitle = ('default.ladb'|trans())~' - '~('default.slogan'|trans()) %}
@@ -68,19 +68,19 @@
 
 {% block bodyHeaderContainerContent %}
     {% if not homepage or spotlightEntity is not defined or spotlightEntity is null %}
-        {% include 'LadbCoreBundle:Wonder/Creation:_list-topbar.part.html.twig' %}
+        {% include '@LadbCore/Wonder/Creation/_list-topbar.part.html.twig' %}
     {% endif %}
 {% endblock %}
 
 {% block bodyContainerContent %}
     {% if homepage and spotlightEntity is defined and spotlightEntity is not null %}
         <div class="ladb-fake-header">
-            {% include 'LadbCoreBundle:Wonder/Creation:_list-topbar.part.html.twig' %}
+            {% include '@LadbCore/Wonder/Creation/_list-topbar.part.html.twig' %}
         </div>
     {% endif %}
     {{ parent() }}
     {%  if highlightedPost is defined and highlightedPost is not null %}
-        {% include 'LadbCoreBundle:Blog/Post:_corner-slider-thumbnail.part.html.twig' with { 'post':highlightedPost } %}
+        {% include '@LadbCore/Blog/Post/_corner-slider-thumbnail.part.html.twig' with { 'post':highlightedPost } %}
     {% endif %}
 {% endblock %}
 
@@ -105,13 +105,13 @@
         </div>
     {% endif %}
     {% if highlightedCollection is defined and highlightedCollection %}
-        {% include 'LadbCoreBundle:Collection/Collection:_list-thumbnail-highlighted.part.html.twig' with { 'collection':highlightedCollection } %}
+        {% include '@LadbCore/Collection/Collection/_list-thumbnail-highlighted.part.html.twig' with { 'collection':highlightedCollection } %}
     {% endif %}
     {% if highlightedTip is defined and highlightedTip %}
-        {% include 'LadbCoreBundle:Core/Tip:_list-thumbnail-highlighted.part.html.twig' with { 'tip':highlightedTip, 'tiny':true } %}
+        {% include '@LadbCore/Core/Tip/_list-thumbnail-highlighted.part.html.twig' with { 'tip':highlightedTip, 'tiny':true } %}
     {% endif %}
     {% if highlightedOffer is defined and highlightedOffer %}
-        {% include 'LadbCoreBundle:Offer/Offer:_list-thumbnail-highlighted.part.html.twig' with { 'offer':highlightedOffer } %}
+        {% include '@LadbCore/Offer/Offer/_list-thumbnail-highlighted.part.html.twig' with { 'offer':highlightedOffer } %}
     {% endif %}
-    {% include 'LadbCoreBundle:Wonder/Creation:_list-n.part.html.twig' %}
+    {% include '@LadbCore/Wonder/Creation/_list-n.part.html.twig' %}
 {% endblock %}

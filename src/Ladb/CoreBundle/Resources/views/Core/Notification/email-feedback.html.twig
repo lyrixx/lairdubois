@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Core/Notification:_email.html.twig' %}
+{% extends '@LadbCore/Core/Notification/_email.html.twig' %}
 
 {# set row #}
 
@@ -8,7 +8,7 @@
     </p>
     <table cellspacing="10" cellpadding="0">
         <tbody>
-        {% include 'LadbCoreBundle:Common:_entity-email-row.part.html.twig' with { 'entity':row.entity } %}
+        {% include '@LadbCore/Common/_entity-email-row.part.html.twig' with { 'entity':row.entity } %}
         </tbody>
     </table>
     <p style="margin: 5px 0 5px 0;">
@@ -23,7 +23,7 @@
                     <p style="margin: 5px 0 0 0; padding: 0;">
                         <strong>{{ row.feedback.title|raw }}</strong>
                         {% for block in row.feedback.bodyBlocks %}
-                            {% include 'LadbCoreBundle:Core/Block:_email-'~block.strippedName~'.part.html.twig' %}
+                            {% include '@LadbCore/Core/Block/_email-'~block.strippedName~'.part.html.twig' %}
                         {% endfor %}
                     </p>
                 </td>

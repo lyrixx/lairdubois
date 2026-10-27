@@ -49,7 +49,7 @@ class WorkshopController extends AbstractController {
 
 	/**
 	 * @Route("/new", name="core_workshop_new")
-	 * @Template("LadbCoreBundle:Wonder/Workshop:new.html.twig")
+	 * @Template("@LadbCore/Wonder/Workshop/new.html.twig")
 	 */
 	public function newAction(Request $request, TagUtils $tagUtils) {
 
@@ -66,7 +66,7 @@ class WorkshopController extends AbstractController {
 
 	/**
 	 * @Route("/create", methods={"POST"}, name="core_workshop_create")
-	 * @Template("LadbCoreBundle:Wonder/Workshop:new.html.twig")
+	 * @Template("@LadbCore/Wonder/Workshop/new.html.twig")
 	 */
 	public function createAction(Request $request, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
@@ -175,7 +175,7 @@ class WorkshopController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_workshop_edit")
-	 * @Template("LadbCoreBundle:Wonder/Workshop:edit.html.twig")
+	 * @Template("@LadbCore/Wonder/Workshop/edit.html.twig")
 	 */
 	public function editAction($id, TagUtils $tagUtils) {
 
@@ -193,7 +193,7 @@ class WorkshopController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_workshop_update")
-	 * @Template("LadbCoreBundle:Wonder/Workshop:edit.html.twig")
+	 * @Template("@LadbCore/Wonder/Workshop/edit.html.twig")
 	 */
 	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, EmbeddableUtils $embaddableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, PicturedUtils $picturedUtils, StripableUtils $stripableUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
@@ -291,7 +291,7 @@ class WorkshopController extends AbstractController {
 	 * @Route("/{id}/plans", requirements={"id" = "\d+"}, name="core_workshop_plans")
 	 * @Route("/{id}/plans/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_workshop_plans_filter")
 	 * @Route("/{id}/plans/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_workshop_plans_filter_page")
-	 * @Template("LadbCoreBundle:Wonder/Workshop:plans.html.twig")
+	 * @Template("@LadbCore/Wonder/Workshop/plans.html.twig")
 	 */
 	public function plansAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -316,7 +316,7 @@ class WorkshopController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Wonder/Plan:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Wonder/Plan/list-xhr.html.twig', $parameters);
 		}
 
 		return array_merge($parameters, array(
@@ -335,7 +335,7 @@ class WorkshopController extends AbstractController {
 	 * @Route("/{id}/pas-a-pas", requirements={"id" = "\d+"}, name="core_workshop_howtos")
 	 * @Route("/{id}/pas-a-pas/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_workshop_howtos_filter")
 	 * @Route("/{id}/pas-a-pas/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_workshop_howtos_filter_page")
-	 * @Template("LadbCoreBundle:Wonder/Workshop:howtos.html.twig")
+	 * @Template("@LadbCore/Wonder/Workshop/howtos.html.twig")
 	 */
 	public function howtosAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -360,7 +360,7 @@ class WorkshopController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Wonder/Plan:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Wonder/Plan/list-xhr.html.twig', $parameters);
 		}
 
 		return array_merge($parameters, array(
@@ -372,7 +372,7 @@ class WorkshopController extends AbstractController {
 	 * @Route("/{id}/processus", requirements={"id" = "\d+"}, name="core_workshop_workflows")
 	 * @Route("/{id}/processus/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_workshop_workflows_filter")
 	 * @Route("/{id}/processus/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_workshop_workflows_filter_page")
-	 * @Template("LadbCoreBundle:Wonder/Workshop:workflows.html.twig")
+	 * @Template("@LadbCore/Wonder/Workshop/workflows.html.twig")
 	 */
 	public function workflowsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -397,7 +397,7 @@ class WorkshopController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Wonder/Plan:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Wonder/Plan/list-xhr.html.twig', $parameters);
 		}
 
 		return array_merge($parameters, array(
@@ -474,7 +474,7 @@ class WorkshopController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/widget", requirements={"id" = "\d+"}, name="core_workshop_widget")
-	 * @Template("LadbCoreBundle:Wonder/Workshop:widget-xhr.html.twig")
+	 * @Template("@LadbCore/Wonder/Workshop/widget-xhr.html.twig")
 	 */
 	public function widgetAction($id) {
 
@@ -488,7 +488,7 @@ class WorkshopController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/location.geojson", name="core_workshop_location", defaults={"_format" = "json"})
-	 * @Template("LadbCoreBundle:Wonder/Workshop:location.geojson.twig")
+	 * @Template("@LadbCore/Wonder/Workshop/location.geojson.twig")
 	 */
 	public function locationAction($id) {
 
@@ -515,7 +515,7 @@ class WorkshopController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/card.xhr", name="core_workshop_card")
-	 * @Template("LadbCoreBundle:Wonder/Workshop:card-xhr.html.twig")
+	 * @Template("@LadbCore/Wonder/Workshop/card-xhr.html.twig")
 	 */
 	public function cardAction(Request $request, $id) {
 		if (!$request->isXmlHttpRequest()) {
@@ -542,7 +542,7 @@ class WorkshopController extends AbstractController {
 	 * @Route("/", name="core_workshop_list")
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_workshop_list_page")
 	 * @Route(".geojson", defaults={"_format" = "json", "page"=-1, "layout"="geojson"}, name="core_workshop_list_geojson")
-	 * @Template("LadbCoreBundle:Wonder/Workshop:list.html.twig")
+	 * @Template("@LadbCore/Wonder/Workshop/list.html.twig")
 	 */
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, LocalisableUtils $localisableUtils, SearchUtils $searchUtils, TranslatorInterface $translator, $page = 0, $layout = 'view') {
 
@@ -784,14 +784,14 @@ class WorkshopController extends AbstractController {
 				'collection' => $collection,
 			));
 
-			return $this->render('LadbCoreBundle:Wonder/Workshop:list-xhr.geojson.twig', $parameters);
+			return $this->render('@LadbCore/Wonder/Workshop/list-xhr.geojson.twig', $parameters);
 		}
 
 		// Dispatch publication event
 		$dispatcher->dispatch(new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()), PublicationListener::PUBLICATIONS_LISTED);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Wonder/Workshop:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Wonder/Workshop/list-xhr.html.twig', $parameters);
 		}
 
 		if ($this->isGranted('ROLE_USER') && $this->getUser()->getMeta()->getPrivateWorkshopCount() > 0) {
@@ -809,7 +809,7 @@ class WorkshopController extends AbstractController {
 
 	/**
 	 * @Route("/{id}.html", name="core_workshop_show")
-	 * @Template("LadbCoreBundle:Wonder/Workshop:show.html.twig")
+	 * @Template("@LadbCore/Wonder/Workshop/show.html.twig")
 	 */
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, EmbeddableUtils $embaddableUtils, ExplorableUtils $explorableUtils, FeedbackableUtils $feedbackableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();

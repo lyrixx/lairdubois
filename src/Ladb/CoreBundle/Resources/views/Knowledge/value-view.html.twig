@@ -1,4 +1,4 @@
-{% extends '::base.html.twig' %}
+{% extends 'base.html.twig' %}
 
 {% set fieldLabel = knowledge is defined ? (('knowledge.'~knowledge.strippedName~'.field.'~field)|trans()) : '' %}
 {% set pageTitle = fieldLabel~' - '~knowledge.title %}
@@ -26,7 +26,7 @@
 {% endblock %}
 
 {% block body %}
-    {% embed '::_topbar.part.html.twig' %}
+    {% embed '_topbar.part.html.twig' %}
         {% block topbarLeftContent %}{% endblock %}
         {% block topbarRightContent %}
             <li><a href="{{ path('core_knowledge_value_show', { 'id':value.id }) }}"><i class="ladb-icon-remove"></i></a></li>

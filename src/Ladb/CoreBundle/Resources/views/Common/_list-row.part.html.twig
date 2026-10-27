@@ -11,7 +11,7 @@
 <div class="ladb-list-row{% if classes is defined %} {{ classes }}{% endif %}">
     {% block rowInner %}
         {% if picture %}
-            {% include 'LadbCoreBundle:Common:_avatar-link.part.html.twig' with { 'size':64, 'linkClasses':'ladb-avatar' } %}
+            {% include '@LadbCore/Common/_avatar-link.part.html.twig' with { 'size':64, 'linkClasses':'ladb-avatar' } %}
         {% endif %}
         <div class="ladb-body">
             {% block heading %}<h3 class="ladb-heading">{% block headingInner %}<a href="{{ showPath }}">{{ title }}</a>{% endblock %}</h3>{% endblock %}

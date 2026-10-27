@@ -38,7 +38,7 @@ class QuestionController extends AbstractController {
 
 	/**
 	 * @Route("/new", name="core_faq_question_new")
-	 * @Template("LadbCoreBundle:Faq/Question:new.html.twig")
+	 * @Template("@LadbCore/Faq/Question/new.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_FAQ')", statusCode=404, message="Not allowed (core_faq_question_new)")
 	 */
 	public function newAction(Request $request, TagUtils $tagUtils) {
@@ -55,7 +55,7 @@ class QuestionController extends AbstractController {
 
 	/**
 	 * @Route("/create", methods={"POST"}, name="core_faq_question_create")
-	 * @Template("LadbCoreBundle:Faq/Question:new.html.twig")
+	 * @Template("@LadbCore/Faq/Question/new.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_FAQ')", statusCode=404, message="Not allowed (core_faq_question_create)")
 	 */
 	public function createAction(Request $request, BlockBodiedUtils $blockBodiedUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
@@ -164,7 +164,7 @@ class QuestionController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_faq_question_edit")
-	 * @Template("LadbCoreBundle:Faq/Question:edit.html.twig")
+	 * @Template("@LadbCore/Faq/Question/edit.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_FAQ')", statusCode=404, message="Not allowed (core_faq_question_edit)")
 	 */
 	public function editAction($id, TagUtils $tagUtils) {
@@ -183,7 +183,7 @@ class QuestionController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_faq_question_update")
-	 * @Template("LadbCoreBundle:Faq/Question:edit.html.twig")
+	 * @Template("@LadbCore/Faq/Question/edit.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_FAQ')", statusCode=404, message="Not allowed (core_faq_question_update)")
 	 */
 	public function updateAction(Request $request, $id, BlockBodiedUtils $blockBodiedUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
@@ -258,7 +258,7 @@ class QuestionController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/widget", requirements={"id" = "\d+"}, name="core_faq_question_widget")
-	 * @Template("LadbCoreBundle:Faq/Question:widget-xhr.html.twig")
+	 * @Template("@LadbCore/Faq/Question/widget-xhr.html.twig")
 	 */
 	public function widgetAction($id) {
 
@@ -281,7 +281,7 @@ class QuestionController extends AbstractController {
 	/**
 	 * @Route("/", name="core_faq_question_list")
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_faq_question_list_page")
-	 * @Template("LadbCoreBundle:Faq/Question:list.html.twig")
+	 * @Template("@LadbCore/Faq/Question/list.html.twig")
 	 */
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, SearchUtils $searchUtils, $page = 0) {
 
@@ -421,7 +421,7 @@ class QuestionController extends AbstractController {
 		));
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Faq/Question:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Faq/Question/list-xhr.html.twig', $parameters);
 		}
 
 		return $parameters;
@@ -429,7 +429,7 @@ class QuestionController extends AbstractController {
 
 	/**
 	 * @Route("/{id}.html", requirements={"slug" = "[a-z-]+"}, name="core_faq_question_show")
-	 * @Template("LadbCoreBundle:Faq/Question:show.html.twig")
+	 * @Template("@LadbCore/Faq/Question/show.html.twig")
 	 */
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();

@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Core/User:_show-list.html.twig' %}
+{% extends '@LadbCore/Core/User/_show-list.html.twig' %}
 
 {% block headStylesheets %}
     {{ parent() }}
@@ -15,7 +15,7 @@
             {% endif %}
         </div>
     {% else %}
-        {% embed 'LadbCoreBundle:Common:_list-filterbar.part.html.twig' with { 'classes':'ladb-margin-bottom' } %}
+        {% embed '@LadbCore/Common/_list-filterbar.part.html.twig' with { 'classes':'ladb-margin-bottom' } %}
             {% set filterDefs = {} %}
             {% block filterbarRightContent%}
                 <span class="ladb-heading">{{ user.meta.answerCount }} {{ 'qa.answer.choice.entities'|trans({ '%count%':user.meta.answerCount }) }}</span>
@@ -26,5 +26,5 @@
 {% endblock %}
 
 {% block autopagerContainerInner %}
-    {% include 'LadbCoreBundle:Qa/Answer:_list-byuser-n.part.html.twig' %}
+    {% include '@LadbCore/Qa/Answer/_list-byuser-n.part.html.twig' %}
 {% endblock %}

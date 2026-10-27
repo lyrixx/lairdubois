@@ -1,19 +1,19 @@
-{% extends 'LadbCoreBundle:Common:Layout/_form.html.twig' %}
+{% extends '@LadbCore/Common/Layout/_form.html.twig' %}
 
 {% set navSection = 'events' %}
 
 {% block bodyJavascripts %}
     {{ parent() }}
-    {% include 'LadbCoreBundle:Core/Picture:_form-gallery-script.part.html.twig' with { 'fieldId':form.pictures.vars.id, 'maxPictureCount':5, 'sortable':true } %}
-    {% include 'LadbCoreBundle:Common:_form-token-script.part.html.twig' with { 'fieldId':form.tags.vars.id, 'proposals':tagProposals, 'proposalsHelp':('tag.token.proposals.help'|trans()), 'help':('tag.token.help'|trans()), 'typeaheadSourcePath':(path('core_search_typeahead_tags_json')|raw) } %}
+    {% include '@LadbCore/Core/Picture/_form-gallery-script.part.html.twig' with { 'fieldId':form.pictures.vars.id, 'maxPictureCount':5, 'sortable':true } %}
+    {% include '@LadbCore/Common/_form-token-script.part.html.twig' with { 'fieldId':form.tags.vars.id, 'proposals':tagProposals, 'proposalsHelp':('tag.token.proposals.help'|trans()), 'help':('tag.token.help'|trans()), 'typeaheadSourcePath':(path('core_search_typeahead_tags_json')|raw) } %}
 {% endblock %}
 
 {% block sidenav %}
-    {% include 'LadbCoreBundle:Common:_form-sidenav-title.part.html.twig' %}
-    {% include 'LadbCoreBundle:Core/Picture:_form-sidenav-gallery.part.html.twig' with { 'title':('default.showcase'|trans) } %}
+    {% include '@LadbCore/Common/_form-sidenav-title.part.html.twig' %}
+    {% include '@LadbCore/Core/Picture/_form-sidenav-gallery.part.html.twig' with { 'title':('default.showcase'|trans) } %}
     <li><a href="#content"><i class="ladb-icon-calendar-month"></i> Détails</a></li>
-    {% include 'LadbCoreBundle:Core/Block:_form-sidenav-body.part.html.twig' with { 'title':('default.descriptive'|trans) } %}
-    {% include 'LadbCoreBundle:Core/Tag:_form-sidenav.part.html.twig' %}
+    {% include '@LadbCore/Core/Block/_form-sidenav-body.part.html.twig' with { 'title':('default.descriptive'|trans) } %}
+    {% include '@LadbCore/Core/Tag/_form-sidenav.part.html.twig' %}
 {% endblock %}
 
 {% block sections %}
@@ -24,9 +24,9 @@
         </div>
     </div>
     {{ parent() }}
-    {% include 'LadbCoreBundle:Common:_form-section-title.part.html.twig' with { 'mandatory':true, 'help':('event.event.form.help.title'|trans()) } %}
-    {% include 'LadbCoreBundle:Core/Picture:_form-section-gallery.part.html.twig' with { 'maxPictureCount':5, 'mandatory':true, 'sortable':true, 'title':('default.showcase'|trans), 'help':('event.event.form.help.showcase'|trans()), 'hideTextOverlayWarning':true } %}
-    {% embed 'LadbCoreBundle:Common:_form-section.part.html.twig' with { 'mandatory':true, 'icon':'calendar-month', 'title':'Détails', 'formSection':'content' } %}
+    {% include '@LadbCore/Common/_form-section-title.part.html.twig' with { 'mandatory':true, 'help':('event.event.form.help.title'|trans()) } %}
+    {% include '@LadbCore/Core/Picture/_form-section-gallery.part.html.twig' with { 'maxPictureCount':5, 'mandatory':true, 'sortable':true, 'title':('default.showcase'|trans), 'help':('event.event.form.help.showcase'|trans()), 'hideTextOverlayWarning':true } %}
+    {% embed '@LadbCore/Common/_form-section.part.html.twig' with { 'mandatory':true, 'icon':'calendar-month', 'title':'Détails', 'formSection':'content' } %}
         {% block body %}
             <div>
                 <div class="form-group row">
@@ -182,6 +182,6 @@
             </div>
         {% endblock %}
     {% endembed %}
-    {% include 'LadbCoreBundle:Core/Block:_form-section-body.part.html.twig' with { 'mandatory':true, 'title':('default.descriptive'|trans()), 'help':('event.event.form.help.body'|trans()) } %}
-    {% include 'LadbCoreBundle:Core/Tag:_form-section.part.html.twig' with { 'help':('event.event.form.help.tags'|trans()) } %}
+    {% include '@LadbCore/Core/Block/_form-section-body.part.html.twig' with { 'mandatory':true, 'title':('default.descriptive'|trans()), 'help':('event.event.form.help.body'|trans()) } %}
+    {% include '@LadbCore/Core/Tag/_form-section.part.html.twig' with { 'help':('event.event.form.help.tags'|trans()) } %}
 {% endblock %}

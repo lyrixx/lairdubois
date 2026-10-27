@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Core/Search:_searchbox.part.html.twig' %}
+{% extends '@LadbCore/Core/Search/_searchbox.part.html.twig' %}
 
 {% set placeholder = ('search.in.'~family~'s')|trans() %}
 {% set searchPath = path(family == 'team' ? 'core_user_team_list' : 'core_user_list') %}

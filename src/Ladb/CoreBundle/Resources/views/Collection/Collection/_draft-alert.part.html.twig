@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:_draft-alert.part.html.twig' %}
+{% extends '@LadbCore/Common/_draft-alert.part.html.twig' %}
 
 {% set entity = collection %}
 {% set alertMessage = 'Cette collection est privée. Vous seul pouvez la consulter.<br>Pour la rendre visible de tous, vous devez la publier.<br><br>En rendant visible à tous votre collection, vous faites profiter chaque visiteur de votre vision d\'un classement particulier. Un bel effort collectif !' %}
@@ -9,7 +9,7 @@
     {% if collection.body is not empty and collection.tags|length >= 2 and collection.entryCount > 0 %}
         {{ parent() }}
     {% else %}
-        {% embed 'LadbCoreBundle:Common/Modal:_modal.part.html.twig' with { 'id':'publish_modal', 'title':('default.publishing'|trans()) } %}
+        {% embed '@LadbCore/Common/Modal/_modal.part.html.twig' with { 'id':'publish_modal', 'title':('default.publishing'|trans()) } %}
             {% block bodyInner %}
                 <div class="media">
                     <div class="media-left"><i class="ladb-icon-warning ladb-icon-xl"></i></div>

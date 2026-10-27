@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle::email-layout.html.twig' %}
+{% extends '@LadbCore/email-layout.html.twig' %}
 
 {% block content %}
     <p style="margin: 5px 0 5px 0;">
@@ -9,7 +9,7 @@
     </p>
     <table cellspacing="10" cellpadding="0">
         <tbody>
-        {% include 'LadbCoreBundle:Common:_entity-email-row.part.html.twig' %}
+        {% include '@LadbCore/Common/_entity-email-row.part.html.twig' %}
         </tbody>
     </table>
 {% endblock %}

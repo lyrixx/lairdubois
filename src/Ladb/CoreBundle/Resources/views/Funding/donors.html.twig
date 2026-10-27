@@ -1,6 +1,6 @@
-{% extends 'LadbCoreBundle:Funding:_layout.html.twig' %}
+{% extends '@LadbCore/Funding/_layout.html.twig' %}
 
-{% use 'LadbCoreBundle:Common/Blocks:list-autopager.blocks.html.twig' %}
+{% use '@LadbCore/Common/Blocks/list-autopager.blocks.html.twig' %}
 
 {% set tab = 'donors' %}
 
@@ -14,7 +14,7 @@
 {% endblock %}
 
 {% block bodyContainerContent %}
-    {% embed 'LadbCoreBundle:Common:_list-filterbar.part.html.twig' with { 'classes':'ladb-filterbar-line' } %}
+    {% embed '@LadbCore/Common/_list-filterbar.part.html.twig' with { 'classes':'ladb-filterbar-line' } %}
         {% set filterDefs = {} %}
         {% block filterbarRightContent%}
             <span class="ladb-heading">{{ donorCount }} {{ 'funding.choice.donors'|trans({ '%count%':donorCount }) }}</span>
@@ -24,5 +24,5 @@
 {% endblock %}
 
 {% block autopagerContainerInner %}
-    {% include 'LadbCoreBundle:Core/User:_list-n.part.html.twig' with { users:donors } %}
+    {% include '@LadbCore/Core/User/_list-n.part.html.twig' with { users:donors } %}
 {% endblock %}

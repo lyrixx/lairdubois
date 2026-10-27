@@ -1,10 +1,10 @@
-{% extends "FOSUserBundle::layout.html.twig" %}
+{% extends "@FOSUser/layout.html.twig" %}
 
 {% set pageTitle = 'registration.heading'|trans() %}
 
 {% block subtitle %}{{ 'registration.heading'|trans() }}{% endblock %}
 
-{% form_theme form 'LadbCoreBundle:Common:_form-theme.twig.twig' %}
+{% form_theme form '@LadbCore/Common/_form-theme.twig.twig' %}
 
 {% block fos_user_content %}
     <div class="row">

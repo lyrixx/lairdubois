@@ -204,7 +204,7 @@ class TextureUtils {
 
 			$zip->addFile($texture->getSinglePicture()->getAbsolutePath(), $singleFilename);
 			$zip->addFile($texture->getMosaicPicture()->getAbsolutePath(), $mosaicFilename);
-			$zip->addFromString('LisezMoi.txt', $this->templating->render('LadbCoreBundle:Knowledge/Wood:texture-readme.txt.twig', array( 'texture' => $texture, 'files' => array( $singleFilename, $mosaicFilename ) )));
+			$zip->addFromString('LisezMoi.txt', $this->templating->render('@LadbCore/Knowledge/Wood/texture-readme.txt.twig', array( 'texture' => $texture, 'files' => array( $singleFilename, $mosaicFilename ) )));
 			$zip->close();
 
 			return true;

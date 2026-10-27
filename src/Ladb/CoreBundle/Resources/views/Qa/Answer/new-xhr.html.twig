@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Qa/Answer:_form.html.twig' %}
+{% extends '@LadbCore/Qa/Answer/_form.html.twig' %}
 
 {% set noLazyLoad = true %}
 {% set formAction = path('core_qa_answer_create', { 'id':question.id }) %}
@@ -26,5 +26,5 @@
         </div>
     </div>
     {{ parent() }}
-    {% include 'LadbCoreBundle:Common:_form-btn-loading.part.html.twig' with { 'text':('default.publish'|trans()), 'classes':'btn-primary' } %}
+    {% include '@LadbCore/Common/_form-btn-loading.part.html.twig' with { 'text':('default.publish'|trans()), 'classes':'btn-primary' } %}
 {% endblock %}

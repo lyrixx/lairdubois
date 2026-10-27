@@ -3,7 +3,7 @@
 
 {% set noInteraction = noInteraction|default(false) %}
 
-{% include 'LadbCoreBundle:Core/User:_avatar-link.part.html.twig' with { 'user':answer.user, 'linkClasses':'ladb-avatar', 'noMicrodata':true } %}
+{% include '@LadbCore/Core/User/_avatar-link.part.html.twig' with { 'user':answer.user, 'linkClasses':'ladb-avatar', 'noMicrodata':true } %}
 <div class="ladb-heading">
     <div class="ladb-minitools">
         {% if is_granted("ROLE_ADMIN") %}
@@ -22,7 +22,7 @@
         {% endif %}
         {% if is_granted("ROLE_ADMIN") %}
             <a href="#delete_answer_{{ answer.id }}_modal" data-toggle="modal" data-tooltip="tooltip" title="{{ 'default.delete'|trans() }}" class="ladb-btn-delete"><i class="ladb-icon-delete"></i></a>
-            {% embed 'LadbCoreBundle:Common/Modal:_modal.part.html.twig' with { 'id':'delete_answer_'~answer.id~'_modal', 'title':('default.deletion'|trans()), 'appendTo':'body' } %}
+            {% embed '@LadbCore/Common/Modal/_modal.part.html.twig' with { 'id':'delete_answer_'~answer.id~'_modal', 'title':('default.deletion'|trans()), 'appendTo':'body' } %}
                 {% block bodyInner %}
                     <p>La suppression de cette réponse entrainera la perte de toutes les informations qui lui sont relatives.</p>
                     <p>Confirmez l'action pour continuer.</p>
@@ -34,10 +34,10 @@
             {% endembed %}
         {% endif %}
         {% if answer.user != app.user %}
-            {% include 'LadbCoreBundle:Core/Report:_widget-mini.part.html.twig' with { 'entityType':answer.type, 'entityId':answer.id } %}
+            {% include '@LadbCore/Core/Report/_widget-mini.part.html.twig' with { 'entityType':answer.type, 'entityId':answer.id } %}
         {% endif %}
     </div>
-    {% include 'LadbCoreBundle:Common:_author.part.html.twig' with { 'entity':answer, 'hideBy':true } %}{% include 'LadbCoreBundle:Common:_age.part.html.twig' with { 'entity':answer, 'showEdited':true } %}
+    {% include '@LadbCore/Common/_author.part.html.twig' with { 'entity':answer, 'hideBy':true } %}{% include '@LadbCore/Common/_age.part.html.twig' with { 'entity':answer, 'showEdited':true } %}
 </div>
 {% if answer.isBestAnswer %}
     <div class="ladb-best ladb-color-best-answer" data-tooltip="tooltip" title="{{ 'qa.answer.best_tooltip'|trans() }}"><i class="ladb-icon-favorite"></i><span class="ladb-visible-mobile"> {{ 'qa.answer.best'|trans() }}</span></div>
@@ -45,11 +45,11 @@
 <div class="ladb-content">
     <div itemprop="text">
         {% for block in answer.bodyBlocks %}
-            {% include 'LadbCoreBundle:Core/Block:_show-'~block.strippedName~'.part.html.twig' %}
+            {% include '@LadbCore/Core/Block/_show-'~block.strippedName~'.part.html.twig' %}
         {% endfor %}
     </div>
     {% if answer.updatedAt > answer.createdAt %}
-        {% include 'LadbCoreBundle:Common:_updated-age.part.html.twig' with { 'entity':answer } %}
+        {% include '@LadbCore/Common/_updated-age.part.html.twig' with { 'entity':answer } %}
     {% endif %}
     {% if not noInteraction and is_granted("ROLE_ADMIN") and answer.isBestAnswer or is_granted("ROLE_USER") and answer.question.user == app.user %}
         <div class="ladb-margin-top">

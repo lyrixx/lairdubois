@@ -6,7 +6,7 @@
     <div class="ladb-box ladb-highlightable">
         <div class="ladb-box-inner">
             <div class="ladb-content-box">
-                {% include 'LadbCoreBundle:Core/User:_avatar-link.part.html.twig' with { 'user':review.user, 'linkClasses':'ladb-avatar', 'noMicrodata':true } %}
+                {% include '@LadbCore/Core/User/_avatar-link.part.html.twig' with { 'user':review.user, 'linkClasses':'ladb-avatar', 'noMicrodata':true } %}
                 <div class="ladb-heading">
                     {% if not noMinitools %}
                         <div class="ladb-minitools">
@@ -16,7 +16,7 @@
                             {% if is_granted("ROLE_ADMIN") or review.user == app.user %}
                                 <a href="{{ path('core_review_edit', { 'id':review.id }) }}" data-tooltip="tooltip" title="{{ 'default.edit'|trans() }}" class="ladb-btn-edit" data-loading-text="<i class='ladb-icon-spinner'></i>"><i class="ladb-icon-edit"></i></a>
                                 <a href="#delete_review_{{ review.id }}_modal" data-toggle="modal" data-tooltip="tooltip" title="{{ 'default.delete'|trans() }}" class="ladb-btn-delete ladb-minitool-danger"><i class="ladb-icon-delete"></i></a>
-                                {% embed 'LadbCoreBundle:Common/Modal:_modal.part.html.twig' with { 'id':'delete_review_'~review.id~'_modal', 'title':('default.deletion'|trans()), 'appendTo':'body' } %}
+                                {% embed '@LadbCore/Common/Modal/_modal.part.html.twig' with { 'id':'delete_review_'~review.id~'_modal', 'title':('default.deletion'|trans()), 'appendTo':'body' } %}
                                     {% block bodyInner %}
                                         <p>La suppression de cet avis entrainera la perte de toutes les informations qui lui sont relatives.</p>
                                         <p>Confirmez l'action pour continuer.</p>
@@ -28,16 +28,16 @@
                                 {% endembed %}
                             {% endif %}
                             {% if review.user != app.user %}
-                                {% include 'LadbCoreBundle:Core/Report:_widget-mini.part.html.twig' with { 'entityType':review.type, 'entityId':review.id } %}
+                                {% include '@LadbCore/Core/Report/_widget-mini.part.html.twig' with { 'entityType':review.type, 'entityId':review.id } %}
                             {% endif %}
                         </div>
                     {% endif %}
-                    {% include 'LadbCoreBundle:Common:_author.part.html.twig' with { 'entity':review, 'hideBy':true } %}{% include 'LadbCoreBundle:Common:_age.part.html.twig' with { 'entity':review, 'showEdited':true } %}
+                    {% include '@LadbCore/Common/_author.part.html.twig' with { 'entity':review, 'hideBy':true } %}{% include '@LadbCore/Common/_age.part.html.twig' with { 'entity':review, 'showEdited':true } %}
                 </div>
                 <div class="ladb-content">
                     <div class="ladb-title">{{ review.title }}</div>
                     {% if review.rating > 0 %}
-                        {% include 'LadbCoreBundle:Common:_rating-stars.part.html.twig' with { 'rating':review.rating, 'classes':'ladb-icon-lg', 'hideValue':true, 'itemtype':'Rating', 'itemprop':'reviewRating' } %}
+                        {% include '@LadbCore/Common/_rating-stars.part.html.twig' with { 'rating':review.rating, 'classes':'ladb-icon-lg', 'hideValue':true, 'itemtype':'Rating', 'itemprop':'reviewRating' } %}
                     {% endif %}
                     <div{% if not noMicrodata %} itemprop="reviewBody"{% endif %}>
                         {{ review.htmlBody|raw }}

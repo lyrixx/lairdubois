@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:Layout/_list.html.twig' %}
+{% extends '@LadbCore/Common/Layout/_list.html.twig' %}
 
 {% set pageUrl = url('core_plan_inspirations', { 'id':plan.id }) %}
 {% set pageTitle = 'Inspirations de '~plan.title %}
@@ -10,7 +10,7 @@
 {% set hideHeaderContainer = false %}
 
 {% block bodyHeaderContainerContent %}
-    {% include 'LadbCoreBundle:Common/Header:_entity-header.part.html.twig' with { 'entity':plan } %}
+    {% include '@LadbCore/Common/Header/_entity-header.part.html.twig' with { 'entity':plan } %}
 {% endblock %}
 
 {% block bodyContainerContent %}
@@ -19,7 +19,7 @@
             Ce plan n'a aucune inspiration
         </div>
     {% else %}
-        {% embed 'LadbCoreBundle:Common:_list-filterbar.part.html.twig' %}
+        {% embed '@LadbCore/Common/_list-filterbar.part.html.twig' %}
             {% set filterDefs = {
                 'recent':   { 'label':'Récents', 'path':path('core_plan_inspirations_filter', { 'id':plan.id, 'filter':'recent' }) },
                 'popular':  { 'label':'Populaires', 'path':null,
@@ -38,5 +38,5 @@
 {% endblock %}
 
 {% block autopagerContainerInner %}
-    {% include 'LadbCoreBundle:Wonder/Plan:_list-n.part.html.twig' %}
+    {% include '@LadbCore/Wonder/Plan/_list-n.part.html.twig' %}
 {% endblock %}

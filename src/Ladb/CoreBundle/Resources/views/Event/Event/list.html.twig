@@ -1,6 +1,6 @@
-{% extends 'LadbCoreBundle:Common:Layout/_list.html.twig' %}
+{% extends '@LadbCore/Common/Layout/_list.html.twig' %}
 
-{% use 'LadbCoreBundle:Common/Blocks:map.blocks.html.twig' %}
+{% use '@LadbCore/Common/Blocks/map.blocks.html.twig' %}
 
 {% set pageTitle = 'event.event.list'|trans() %}
 {% set pageDescription = 'event.event.description'|trans() %}
@@ -71,12 +71,12 @@
 {% endblock %}
 
 {% block bodyHeaderContainer %}
-    {% include 'LadbCoreBundle:Common:_map-area.part.html.twig' with { 'classes':'ladb-map-banner' } %}
+    {% include '@LadbCore/Common/_map-area.part.html.twig' with { 'classes':'ladb-map-banner' } %}
     {{ parent() }}
 {% endblock %}
 
 {% block bodyHeaderContainerContent %}
-    {% include 'LadbCoreBundle:Event/Event:_list-topbar.part.html.twig' %}
+    {% include '@LadbCore/Event/Event/_list-topbar.part.html.twig' %}
 {% endblock %}
 
 {% block autopagerContainerInner %}
@@ -85,5 +85,5 @@
             <div id="ladb_calendar" class="ladb-clndr"></div>
         </div>
     </div>
-    {% include 'LadbCoreBundle:Event/Event:_list-n.part.html.twig' %}
+    {% include '@LadbCore/Event/Event/_list-n.part.html.twig' %}
 {% endblock %}

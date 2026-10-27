@@ -68,7 +68,7 @@
                     <small class="ladb-color-negative"><i class="ladb-icon-warning"></i> Mois <strong>{% if funding.earningsBalanceEur == 0 %}non{% else %}partiellement{% endif %} financé</strong>. Il manque <strong>{{ (funding.outgoingsBalanceEur - funding.earningsBalanceEur)|number_format(2, ',', ' ') }}€</strong> :(</small>
                 {% endif %}
             </div>
-            {% include 'LadbCoreBundle:Common:_loading-panel.part.html.twig' %}
+            {% include '@LadbCore/Common/_loading-panel.part.html.twig' %}
             <div class="col-xs-12">
                 <hr>
                 <div class="media">
@@ -84,7 +84,7 @@
             </div>
         </div>
     </div>
-    {% embed 'LadbCoreBundle:Common/Modal:_modal.part.html.twig' with { 'id':'infos_modal' } %}
+    {% embed '@LadbCore/Common/Modal/_modal.part.html.twig' with { 'id':'infos_modal' } %}
         {% block header %}{% endblock %}
         {% block bodyInner %}
             {{ 'default.loading'|trans() }}

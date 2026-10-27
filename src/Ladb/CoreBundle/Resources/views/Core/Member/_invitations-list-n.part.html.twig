@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:_list-n.part.html.twig' %}
+{% extends '@LadbCore/Common/_list-n.part.html.twig' %}
 
 {# set user (the context user) #}
 {# set invitations #}
@@ -6,7 +6,7 @@
 
 {% block items %}
     {% for invitation in invitations %}
-        {% embed 'LadbCoreBundle:Core/User:_list-row.part.html.twig' with { 'user':user.isTeam ? invitation.recipient : invitation.team } %}
+        {% embed '@LadbCore/Core/User/_list-row.part.html.twig' with { 'user':user.isTeam ? invitation.recipient : invitation.team } %}
             {% block rowInner %}
                 {{ parent() }}
                 <div class="ladb-row-metas">

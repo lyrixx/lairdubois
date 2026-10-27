@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:Layout/_list.html.twig' %}
+{% extends '@LadbCore/Common/Layout/_list.html.twig' %}
 
 {% set pageTitle = 'knowledge.book.list'|trans() %}
 {% set pageDescription = 'knowledge.book.description'|trans() %}
@@ -12,7 +12,7 @@
 {% set countableEntityList = true %}
 
 {% block bodyHeaderContainerContent %}
-    {% include 'LadbCoreBundle:Knowledge/Book:_list-topbar.part.html.twig' %}
+    {% include '@LadbCore/Knowledge/Book/_list-topbar.part.html.twig' %}
 {% endblock %}
 
 {% block bodyContainerContent %}
@@ -25,5 +25,5 @@
 {% endblock %}
 
 {% block autopagerContainerInner %}
-    {% include 'LadbCoreBundle:Knowledge/Book:_list-n.part.html.twig' %}
+    {% include '@LadbCore/Knowledge/Book/_list-n.part.html.twig' %}
 {% endblock %}

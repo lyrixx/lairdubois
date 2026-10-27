@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:Layout/_show.html.twig' %}
+{% extends '@LadbCore/Common/Layout/_show.html.twig' %}
 
 {% set entity = workflow %}
 
@@ -45,16 +45,16 @@
 {% endblock %}
 
 {% block bodyHeaderContainerContent %}
-    {% embed 'LadbCoreBundle:Common/Header:_entity-show-header.part.html.twig' %}
+    {% embed '@LadbCore/Common/Header/_entity-show-header.part.html.twig' %}
         {% block headerToolsButtons %}
             {{ parent() }}
             <a href="#copy_workflow_modal" class="btn btn-default" data-toggle="modal"><i class="ladb-icon-duplicate"></i><span class="ladb-visible-desktop">  {{ ownerUser ? 'default.duplicate'|trans() : 'default.copy'|trans() }}...</span></a>
         {% endblock %}
         {% block headerInner %}
             {{ parent() }}
-            {% include 'LadbCoreBundle:Workflow:Workflow/_copy-modal.part.html.twig' with { 'id':'copy_workflow_modal' } %}
+            {% include '@LadbCore/Workflow/Workflow/_copy-modal.part.html.twig' with { 'id':'copy_workflow_modal' } %}
         {% endblock %}
-        {% block subheading %}{{ parent() }}{% include 'LadbCoreBundle:Workflow:Workflow/_visibility-badge.part.html.twig' with { 'classes':'ladb-hidden-mobile ladb-margin-left' } %}{% endblock %}
+        {% block subheading %}{{ parent() }}{% include '@LadbCore/Workflow/Workflow/_visibility-badge.part.html.twig' with { 'classes':'ladb-hidden-mobile ladb-margin-left' } %}{% endblock %}
     {% endembed %}
 {% endblock %}
 
@@ -63,16 +63,16 @@
         <div class="panel panel-default">
             <div class="panel-body text-center">
                 {% set inspiration = workflow.inspirations.first %}
-                <i class="ladb-icon-inspiration ladb-color-inspiration ladb-icon-lg"></i>&nbsp;&nbsp;Inpiré de <a href="{{ ladb_entity_url_action(inspiration) }}" style="font-weight: bold;">{{ inspiration.title }}</a> {% include 'LadbCoreBundle:Common:_author.part.html.twig' with { 'entity':inspiration, 'noMicrodata':true } %}
+                <i class="ladb-icon-inspiration ladb-color-inspiration ladb-icon-lg"></i>&nbsp;&nbsp;Inpiré de <a href="{{ ladb_entity_url_action(inspiration) }}" style="font-weight: bold;">{{ inspiration.title }}</a> {% include '@LadbCore/Common/_author.part.html.twig' with { 'entity':inspiration, 'noMicrodata':true } %}
             </div>
         </div>
     {% endif %}
     {% if not workflow.isPublic %}
-        {% include 'LadbCoreBundle:Workflow:Workflow/_draft-alert.part.html.twig' %}
+        {% include '@LadbCore/Workflow/Workflow/_draft-alert.part.html.twig' %}
     {% endif %}
     <div class="ladb-workflow">
         <a href="{{ path('core_workflow_show', { 'id':workflow.sluggedId, 'layout':'workspace' }) }}" class="thumbnail ladb-cursor-preview">
-            {% include 'LadbCoreBundle:Core/Picture:_img.part.html.twig' with { 'picture':workflow.mainPicture, 'width':'600', 'height':'450', 'filterMode':'c', 'alt':workflow.title, 'attributes':'data-pin-nopin="true"', 'aClasses':'ladb-margin-top', 'emptyWebPath':'empty_workflow.png' } %}
+            {% include '@LadbCore/Core/Picture/_img.part.html.twig' with { 'picture':workflow.mainPicture, 'width':'600', 'height':'450', 'filterMode':'c', 'alt':workflow.title, 'attributes':'data-pin-nopin="true"', 'aClasses':'ladb-margin-top', 'emptyWebPath':'empty_workflow.png' } %}
         </a>
         <hr>
         <div class="ladb-body">
@@ -80,16 +80,16 @@
         </div>
     </div>
     {% if workflow.updatedAt > workflow.createdAt %}
-        {% include 'LadbCoreBundle:Common:_updated-age.part.html.twig' with { 'entity':workflow } %}
+        {% include '@LadbCore/Common/_updated-age.part.html.twig' with { 'entity':workflow } %}
     {% endif %}
     {% if not permissionContext.isOwner %}
-        {% include 'LadbCoreBundle:Common:_like-and-follow.part.html.twig' %}
+        {% include '@LadbCore/Common/_like-and-follow.part.html.twig' %}
     {% endif %}
     {% if workflow.planCount > 0 or workflow.creationCount > 0 or workflow.howtoCount > 0 or workflow.workshopCount > 0 %}
-        {% embed 'LadbCoreBundle:Common:_linkedto-widget.part.html.twig' %}
+        {% embed '@LadbCore/Common/_linkedto-widget.part.html.twig' %}
             {% block body %}
                 {% if workflow.planCount > 0 %}
-                    {% include 'LadbCoreBundle:Common:_linkedto-widget-item.part.html.twig' with {
+                    {% include '@LadbCore/Common/_linkedto-widget-item.part.html.twig' with {
                         'path':workflow.planCount == 1 ? path('core_plan_show', { 'id':workflow.plans[0].sluggedId }) : path('core_workflow_plans', { 'id':workflow.id }),
                         'picture':workflow.plans[0].mainPicture,
                         'icon':'ladb-icon-plan',
@@ -97,7 +97,7 @@
                         } %}
                 {% endif %}
                 {% if workflow.creationCount > 0 %}
-                    {% include 'LadbCoreBundle:Common:_linkedto-widget-item.part.html.twig' with {
+                    {% include '@LadbCore/Common/_linkedto-widget-item.part.html.twig' with {
                         'path':workflow.creationCount == 1 ? path('core_creation_show', { 'id':workflow.creations[0].sluggedId }) : path('core_workflow_creations', { 'id':workflow.id }),
                         'picture':workflow.creations[0].mainPicture,
                         'icon':'ladb-icon-creation',
@@ -105,7 +105,7 @@
                         } %}
                 {% endif %}
                 {% if workflow.howtoCount > 0 %}
-                    {% include 'LadbCoreBundle:Common:_linkedto-widget-item.part.html.twig' with {
+                    {% include '@LadbCore/Common/_linkedto-widget-item.part.html.twig' with {
                         'path':workflow.howtoCount == 1 ? path('core_howto_show', { 'id':workflow.howtos[0].sluggedId }) : path('core_workflow_howtos', { 'id':workflow.id }),
                         'picture':workflow.howtos[0].mainPicture,
                         'icon':'ladb-icon-howto',
@@ -113,7 +113,7 @@
                         } %}
                 {% endif %}
                 {% if workflow.workshopCount > 0 %}
-                    {% include 'LadbCoreBundle:Common:_linkedto-widget-item.part.html.twig' with {
+                    {% include '@LadbCore/Common/_linkedto-widget-item.part.html.twig' with {
                         'path':workflow.workshopCount == 1 ? path('core_workshop_show', { 'id':workflow.workshops[0].sluggedId }) : path('core_workflow_workshops', { 'id':workflow.id }),
                         'picture':workflow.workshops[0].mainPicture,
                         'icon':'ladb-icon-workshop',
@@ -123,14 +123,14 @@
             {% endblock %}
         {% endembed %}
     {% endif %}
-    {% include 'LadbCoreBundle:Core/Comment:_widget.part.html.twig' %}
+    {% include '@LadbCore/Core/Comment/_widget.part.html.twig' %}
 {% endblock %}
 
 {% block contentMetasPanel %}
     <div class="ladb-metas">
-        {% include 'LadbCoreBundle:Core/Like:_meta-counter.part.html.twig' %}
-        {% include 'LadbCoreBundle:Core/View:_meta-counter.part.html.twig' %}
-        {% include 'LadbCoreBundle:Core/Comment:_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/Like/_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/View/_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/Comment/_meta-counter.part.html.twig' %}
         <div class="ladb-meta{% if workflow.copyCount == 0 %} text-muted{% endif %}">
             <i class="ladb-icon-duplicate ladb-icon-fixed-center"></i>
             <strong>{{ workflow.copyCount|number_format(0, ',', ' ') }}</strong>
@@ -148,7 +148,7 @@
     </div>
     <div class="ladb-metas">
         <h4 class="ladb-heading">{{ 'default.links'|trans() }}</h4>
-        {% include 'LadbCoreBundle:Collection/Collection:_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Collection/Collection/_meta-counter.part.html.twig' %}
         {% if workflow.inspirationCount > 0 %}
             <div class="ladb-meta">
                 <i class="ladb-icon-inspiration ladb-icon-fixed-center"></i>
@@ -206,16 +206,16 @@
             </div>
         {% endif %}
     </div>
-    {% include 'LadbCoreBundle:Core/Tag:_metas.part.html.twig' with { 'tags':workflow.tags, 'type':'workflows' } %}
-    {% include 'LadbCoreBundle:Core/License:_metas.part.html.twig' with { 'license':workflow.license } %}
+    {% include '@LadbCore/Core/Tag/_metas.part.html.twig' with { 'tags':workflow.tags, 'type':'workflows' } %}
+    {% include '@LadbCore/Core/License/_metas.part.html.twig' with { 'license':workflow.license } %}
 {% endblock %}
 
 {% block contentLinkedTo %}
     {% if workflow.inspirationCount > 0 or workflow.reboundCount > 0 or workflow.planCount > 0 or workflow.howtoCount > 0 or workflow.creationCount > 0 %}
-        {% embed 'LadbCoreBundle:Common:_linkedto-widget.part.html.twig' %}
+        {% embed '@LadbCore/Common/_linkedto-widget.part.html.twig' %}
             {% block body %}
                 {% if workflow.inspirationCount > 0 %}
-                    {% include 'LadbCoreBundle:Common:_linkedto-widget-item.part.html.twig' with {
+                    {% include '@LadbCore/Common/_linkedto-widget-item.part.html.twig' with {
                         'path':workflow.inspirationCount == 1 ? path('core_workflow_show', { 'id':workflow.inspirations[0].sluggedId }) : path('core_workflow_inspirations', { 'id':workflow.id }),
                         'picture':workflow.inspirations[0].mainPicture,
                         'icon':'ladb-icon-inspiration',
@@ -223,7 +223,7 @@
                         } %}
                 {% endif %}
                 {% if workflow.planCount > 0 %}
-                    {% include 'LadbCoreBundle:Common:_linkedto-widget-item.part.html.twig' with {
+                    {% include '@LadbCore/Common/_linkedto-widget-item.part.html.twig' with {
                         'path':workflow.planCount == 1 ? path('core_plan_show', { 'id':workflow.plans[0].sluggedId }) : path('core_creation_plans', { 'id':workflow.id }),
                         'picture':workflow.plans[0].mainPicture,
                         'icon':'ladb-icon-plan',
@@ -231,7 +231,7 @@
                         } %}
                 {% endif %}
                 {% if workflow.howtoCount > 0 %}
-                    {% include 'LadbCoreBundle:Common:_linkedto-widget-item.part.html.twig' with {
+                    {% include '@LadbCore/Common/_linkedto-widget-item.part.html.twig' with {
                         'path':workflow.howtoCount == 1 ? path('core_howto_show', { 'id':workflow.howtos[0].sluggedId }) : path('core_creation_howtos', { 'id':workflow.id }),
                         'picture':workflow.howtos[0].mainPicture,
                         'icon':'ladb-icon-howto',
@@ -239,7 +239,7 @@
                         } %}
                 {% endif %}
                 {% if workflow.creationCount > 0 %}
-                    {% include 'LadbCoreBundle:Common:_linkedto-widget-item.part.html.twig' with {
+                    {% include '@LadbCore/Common/_linkedto-widget-item.part.html.twig' with {
                         'path':workflow.creationCount == 1 ? path('core_creation_show', { 'id':workflow.creations[0].sluggedId }) : path('core_workflow_creations', { 'id':workflow.id }),
                         'picture':workflow.creations[0].mainPicture,
                         'icon':'ladb-icon-creation',
@@ -247,7 +247,7 @@
                         } %}
                 {% endif %}
                 {% if workflow.workshopCount > 0 %}
-                    {% include 'LadbCoreBundle:Common:_linkedto-widget-item.part.html.twig' with {
+                    {% include '@LadbCore/Common/_linkedto-widget-item.part.html.twig' with {
                         'path':workflow.workshopCount == 1 ? path('core_workshop_show', { 'id':workflow.workshop[0].sluggedId }) : path('core_workflow_workshops', { 'id':workflow.id }),
                         'picture':workflow.workshops[0].mainPicture,
                         'icon':'ladb-icon-workshop',
@@ -255,7 +255,7 @@
                         } %}
                 {% endif %}
                 {% if workflow.reboundCount > 0 %}
-                    {% include 'LadbCoreBundle:Common:_linkedto-widget-item.part.html.twig' with {
+                    {% include '@LadbCore/Common/_linkedto-widget-item.part.html.twig' with {
                         'path':workflow.reboundCount == 1 ? path('core_creation_show', { 'id':workflow.rebounds[0].sluggedId }) : path('core_creation_rebounds', { 'id':workflow.id }),
                         'picture':workflow.rebounds[0].mainPicture,
                         'icon':'ladb-icon-rebound',

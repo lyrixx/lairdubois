@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:_masonry-list-thumbnail.part.html.twig' %}
+{% extends '@LadbCore/Common/_masonry-list-thumbnail.part.html.twig' %}
 
 {# set event #}
 
@@ -15,10 +15,10 @@
 {% endblock %}
 
 {% block image %}
-    {% include 'LadbCoreBundle:Event/Event:_status-label.part.html.twig' %}
+    {% include '@LadbCore/Event/Event/_status-label.part.html.twig' %}
     <div style="position: relative;">
         {{ parent() }}
-        {% include 'LadbCoreBundle:Event/Event:_event-calendar.part.html.twig' with { 'topRight':false } %}
+        {% include '@LadbCore/Event/Event/_event-calendar.part.html.twig' with { 'topRight':false } %}
     </div>
 {% endblock %}
 

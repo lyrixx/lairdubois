@@ -1,11 +1,11 @@
-{% extends 'LadbCoreBundle:Common:_list-topbar.part.html.twig' %}
+{% extends '@LadbCore/Common/_list-topbar.part.html.twig' %}
 
 {% set heading = 'howto.howto.list'|trans() %}
 
 {% block listTopbarMiddleInner %}
-    {% include 'LadbCoreBundle:Howto/Howto:_searchbox.part.html.twig' %}
+    {% include '@LadbCore/Howto/Howto/_searchbox.part.html.twig' %}
 {% endblock %}
 
 {% block listTopbarRightInner %}
-    {% include 'LadbCoreBundle:Core/Member:_widget.part.html.twig' with { 'titleTransKey':'howto.howto.new', 'route':'core_howto_new' } %}
+    {% include '@LadbCore/Core/Member/_widget.part.html.twig' with { 'titleTransKey':'howto.howto.new', 'route':'core_howto_new' } %}
 {% endblock %}

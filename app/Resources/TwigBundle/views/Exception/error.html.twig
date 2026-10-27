@@ -1,4 +1,4 @@
-{% extends '::base.html.twig' %}
+{% extends 'base.html.twig' %}
 
 {% set bodyClass = 'ladb-topbar-enabled ladb-bottombar-enabled' %}
 {% set bodyContainerClasses = 'ladb-margin-top' %}
@@ -8,8 +8,8 @@
 {% block bodyJavascripts %}{% endblock %}
 
 {% block body %}
-    {% include '::_topbar.part.html.twig' %}
-    {% include '::_bottombar.part.html.twig' %}
+    {% include '_topbar.part.html.twig' %}
+    {% include '_bottombar.part.html.twig' %}
     {{ parent() }}
 {% endblock %}
 

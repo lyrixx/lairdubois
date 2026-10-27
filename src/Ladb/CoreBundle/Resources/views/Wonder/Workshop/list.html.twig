@@ -1,6 +1,6 @@
-{% extends 'LadbCoreBundle:Common:Layout/_list.html.twig' %}
+{% extends '@LadbCore/Common/Layout/_list.html.twig' %}
 
-{% use 'LadbCoreBundle:Common/Blocks:map.blocks.html.twig' %}
+{% use '@LadbCore/Common/Blocks/map.blocks.html.twig' %}
 
 {% set pageTitle = 'wonder.workshop.list'|trans() %}
 {% set pageDescription = 'wonder.workshop.description'|trans() %}
@@ -34,14 +34,14 @@
 {% endblock %}
 
 {% block bodyHeaderContainer %}
-    {% include 'LadbCoreBundle:Common:_map-area.part.html.twig' with { 'classes':'ladb-map-banner'} %}
+    {% include '@LadbCore/Common/_map-area.part.html.twig' with { 'classes':'ladb-map-banner'} %}
     {{ parent() }}
 {% endblock %}
 
 {% block bodyHeaderContainerContent %}
-    {% include 'LadbCoreBundle:Wonder/Workshop:_list-topbar.part.html.twig' %}
+    {% include '@LadbCore/Wonder/Workshop/_list-topbar.part.html.twig' %}
 {% endblock %}
 
 {% block autopagerContainerInner %}
-    {% include 'LadbCoreBundle:Wonder/Workshop:_list-n.part.html.twig' %}
+    {% include '@LadbCore/Wonder/Workshop/_list-n.part.html.twig' %}
 {% endblock %}

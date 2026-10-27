@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common/Modal:_modal-content.part.html.twig' %}
+{% extends '@LadbCore/Common/Modal/_modal-content.part.html.twig' %}
 
 {% set id = 'ladb_label_list_modal' %}
 {% set title = 'workflow.label.list'|trans() %}
@@ -10,7 +10,7 @@
     <table class="table table-bordered ladb-label-table" style="background-color: white;{% if workflow.labels|length == 0 %} display: none;{% endif %}">
         <tbody>
         {% for label in workflow.labels %}
-            {% include 'LadbCoreBundle:Workflow:Label/_row.part.html.twig' %}
+            {% include '@LadbCore/Workflow/Label/_row.part.html.twig' %}
         {% endfor %}
         </tbody>
     </table>

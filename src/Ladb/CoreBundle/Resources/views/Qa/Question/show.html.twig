@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:Layout/_show.html.twig' %}
+{% extends '@LadbCore/Common/Layout/_show.html.twig' %}
 
 {% set entity = question %}
 
@@ -38,7 +38,7 @@
 {% endblock %}
 
 {% block bodyHeaderContainerContent %}
-    {% embed 'LadbCoreBundle:Common/Header:_entity-show-header.part.html.twig' %}
+    {% embed '@LadbCore/Common/Header/_entity-show-header.part.html.twig' %}
         {% block adminItems %}
             {{ parent() }}
             <li role="separator" class="divider"></li>
@@ -46,7 +46,7 @@
         {% endblock %}
         {% block adminModals %}
             {{ parent() }}
-            {% embed 'LadbCoreBundle:Common/Modal:_modal.part.html.twig' with { 'id':'admin_converttooffer_question_modal', 'title':('qa.question.converttooffer'|trans()) } %}
+            {% embed '@LadbCore/Common/Modal/_modal.part.html.twig' with { 'id':'admin_converttooffer_question_modal', 'title':('qa.question.converttooffer'|trans()) } %}
                 {% block bodyInner %}
                     <p>La convertion transformera la question <strong>{{ question.title }}</strong> de <strong>{{ question.user.displayname }}</strong> en offre.</p>
                     <p>Confirmez l'action pour continuer.</p>
@@ -62,19 +62,19 @@
 
 {% block contentBody %}
     {% if question.isDraft %}
-        {% include 'LadbCoreBundle:Qa/Question:_draft-alert.part.html.twig' %}
+        {% include '@LadbCore/Qa/Question/_draft-alert.part.html.twig' %}
     {% endif %}
     <div class="ladb-qa-question">
         <div class="ladb-box">
             <div class="ladb-box-inner row">
                 <div class="ladb-content-box col-sm-11 col-xs-12" itemprop="text">
                     {% for block in question.bodyBlocks %}
-                        {% include 'LadbCoreBundle:Core/Block:_show-'~block.strippedName~'.part.html.twig' %}
+                        {% include '@LadbCore/Core/Block/_show-'~block.strippedName~'.part.html.twig' %}
                     {% endfor %}
                     {% if question.updatedAt > question.createdAt %}
-                        {% include 'LadbCoreBundle:Common:_updated-age.part.html.twig' with { 'entity':question } %}
+                        {% include '@LadbCore/Common/_updated-age.part.html.twig' with { 'entity':question } %}
                     {% endif %}
-                    {% include 'LadbCoreBundle:Core/Comment:_widget.part.html.twig' with { 'collapsible':true, 'alertTransKey':(ownerUser ? '' : 'qa.question.comment_alert'), 'adminTools':[ { 'path':'core_comment_admin_converttoanswer', 'pathParams':{ 'questionId':question.id }, 'icon':'arrow-right', 'label':'Convertir en réponse' } ] } %}
+                    {% include '@LadbCore/Core/Comment/_widget.part.html.twig' with { 'collapsible':true, 'alertTransKey':(ownerUser ? '' : 'qa.question.comment_alert'), 'adminTools':[ { 'path':'core_comment_admin_converttoanswer', 'pathParams':{ 'questionId':question.id }, 'icon':'arrow-right', 'label':'Convertir en réponse' } ] } %}
                 </div>
                 <div class="col-sm-1 col-xs-12 ladb-hidden-mobile">
                     <div class="ladb-full-height">?</div>
@@ -83,28 +83,28 @@
         </div>
     </div>
     <div class="ladb-show-content-section">
-        {% include 'LadbCoreBundle:Qa/Question:_answers-header.part.html.twig' %}
-        {% include 'LadbCoreBundle:Qa/Answer:_list.part.html.twig' %}
-        {% include 'LadbCoreBundle:Qa/Question:_answers-footer.part.html.twig' %}
+        {% include '@LadbCore/Qa/Question/_answers-header.part.html.twig' %}
+        {% include '@LadbCore/Qa/Answer/_list.part.html.twig' %}
+        {% include '@LadbCore/Qa/Question/_answers-footer.part.html.twig' %}
     </div>
-    {% include 'LadbCoreBundle:Core/Vote:_modals.part.html.twig' %}
+    {% include '@LadbCore/Core/Vote/_modals.part.html.twig' %}
 {% endblock %}
 
 {% block contentMetasPanel %}
     <div class="ladb-metas">
-        {% include 'LadbCoreBundle:Core/Like:_meta-counter.part.html.twig' %}
-        {% include 'LadbCoreBundle:Core/View:_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/Like/_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/View/_meta-counter.part.html.twig' %}
         <div class="ladb-meta">
             <a href="#" class="ladb-scrollto-btn" onclick="$('.ladb-qa-question-answers').ladbScrollTo(event);"><i class="ladb-icon-arrow-down"></i></a>
             <i class="ladb-icon-answer ladb-icon-fixed-center"></i>
             <strong itemprop="answerCount">{{ question.answerCount|number_format(0, ',', ' ') }}</strong>
             <small>{{ 'qa.answer.choice.entities'|trans({ '%count%':question.answerCount }) }}</small>
         </div>
-        {% include 'LadbCoreBundle:Core/Vote:_meta-counter.part.html.twig' with { 'entity':question } %}
+        {% include '@LadbCore/Core/Vote/_meta-counter.part.html.twig' with { 'entity':question } %}
     </div>
     <div class="ladb-metas">
         <h4 class="ladb-heading">{{ 'default.links'|trans() }}</h4>
-        {% include 'LadbCoreBundle:Collection/Collection:_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Collection/Collection/_meta-counter.part.html.twig' %}
         {% if question.creationCount > 0 %}
             <div class="ladb-meta">
                 <i class="ladb-icon-creation"></i>
@@ -133,19 +133,19 @@
             </div>
         {% endif %}
     </div>
-    {% include 'LadbCoreBundle:Core/Tag:_metas.part.html.twig' with { 'tags':question.tags, 'type':'questions' } %}
-    {% include 'LadbCoreBundle:Core/License:_metas.part.html.twig' with { 'license':question.license } %}
+    {% include '@LadbCore/Core/Tag/_metas.part.html.twig' with { 'tags':question.tags, 'type':'questions' } %}
+    {% include '@LadbCore/Core/License/_metas.part.html.twig' with { 'license':question.license } %}
 {% endblock %}
 
 {% block contentSuggests %}
     {% if userQuestions is not empty %}
         <div class="panel panel-default">
             <div class="panel-heading">
-                {{ ('qa.question.other_from')|trans() }} {% include 'LadbCoreBundle:Core/User:_displayname-link.part.html.twig' with { 'user':question.user, 'noMicrodata':true } %}
+                {{ ('qa.question.other_from')|trans() }} {% include '@LadbCore/Core/User/_displayname-link.part.html.twig' with { 'user':question.user, 'noMicrodata':true } %}
             </div>
             <div class="panel-body">
                 {% for userQuestion in userQuestions %}
-                    {% include 'LadbCoreBundle:Qa/Question:_thumbnail-link.part.html.twig' with { 'question':userQuestion, 'noAuthor':true } %}
+                    {% include '@LadbCore/Qa/Question/_thumbnail-link.part.html.twig' with { 'question':userQuestion, 'noAuthor':true } %}
                 {% endfor %}
                 {% if question.user.meta.publicQuestionCount > 2 %}
                     <div class="ladb-margin-top">
@@ -162,11 +162,11 @@
             </div>
             <div class="panel-body">
                 {% for similarQuestion in similarQuestions %}
-                    {% include 'LadbCoreBundle:Qa/Question:_thumbnail-link.part.html.twig' with { 'question':similarQuestion, 'classes':(loop.last ? null : 'ladb-margin-bottom') } %}
+                    {% include '@LadbCore/Qa/Question/_thumbnail-link.part.html.twig' with { 'question':similarQuestion, 'classes':(loop.last ? null : 'ladb-margin-bottom') } %}
                 {% endfor %}
             </div>
         </div>
     {% endif %}
-    {% include 'LadbCoreBundle:Qa/Answer:_nav-panel.part.html.twig' %}
+    {% include '@LadbCore/Qa/Answer/_nav-panel.part.html.twig' %}
 {% endblock %}
 

@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle::email-layout.txt.twig' %}
+{% extends '@LadbCore/email-layout.txt.twig' %}
 
 {% block content %}
     Un nouveau collectif vient d'être créé par {{ actorUser.displayname|raw }} : {{ team.displayname|raw }}.

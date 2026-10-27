@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:_list-n.part.html.twig' %}
+{% extends '@LadbCore/Common/_list-n.part.html.twig' %}
 
 {# set graphics #}
 {# set nextPageUrl #}
@@ -7,7 +7,7 @@
 
 {% block items %}
     {% for graphic in graphics %}
-        {% include 'LadbCoreBundle:Promotion/Graphic:_list-thumbnail.part.html.twig' %}
+        {% include '@LadbCore/Promotion/Graphic/_list-thumbnail.part.html.twig' %}
     {% endfor %}
 {% endblock %}
 

@@ -2,7 +2,7 @@
 {% set noLazyLoad = true %}
 
 <div class="ladb-success">
-{% include 'LadbCoreBundle:Qa/Question:_answers-header.part.html.twig' %}
-{% include 'LadbCoreBundle:Qa/Answer:_row.part.html.twig' %}
-{% include 'LadbCoreBundle:Qa/Question:_answers-footer.part.html.twig' with { 'userAnswer':answer } %}
+{% include '@LadbCore/Qa/Question/_answers-header.part.html.twig' %}
+{% include '@LadbCore/Qa/Answer/_row.part.html.twig' %}
+{% include '@LadbCore/Qa/Question/_answers-footer.part.html.twig' with { 'userAnswer':answer } %}
 </div>

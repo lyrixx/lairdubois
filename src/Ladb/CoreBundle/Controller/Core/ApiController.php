@@ -14,7 +14,7 @@ class ApiController extends AbstractController {
 
 	/**
 	 * @Route("/{network}/share.count.json", defaults={"_format" = "json"}, name="core_api_network_share_count")
-	 * @Template("LadbCoreBundle:Core/Api:networkShareCount.json.twig")
+	 * @Template("@LadbCore/Core/Api/networkShareCount.json.twig")
 	 */
 	public function networkShareCountAction(Request $request, $network) {
 

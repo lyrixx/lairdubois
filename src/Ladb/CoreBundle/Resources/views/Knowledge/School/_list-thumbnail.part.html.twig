@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:_masonry-list-thumbnail-wide.part.html.twig' %}
+{% extends '@LadbCore/Common/_masonry-list-thumbnail-wide.part.html.twig' %}
 
 {# set school #}
 
@@ -22,7 +22,7 @@
 {% endblock %}
 
 {% block body %}
-    {% include 'LadbCoreBundle:Knowledge/School:_compact-infos.part.html.twig' %}
+    {% include '@LadbCore/Knowledge/School/_compact-infos.part.html.twig' %}
 {% endblock %}
 
 {% block entityMetas %}
@@ -44,5 +44,5 @@
 {% endblock %}
 
 {% block footer %}
-    {% include 'LadbCoreBundle:Knowledge:_list-thumbnail-footer.part.html.twig' %}
+    {% include '@LadbCore/Knowledge/_list-thumbnail-footer.part.html.twig' %}
 {% endblock %}

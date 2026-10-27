@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:_card-thumbnail.html.twig' %}
+{% extends '@LadbCore/Common/_card-thumbnail.html.twig' %}
 
 {% set entity = user %}
 {% set picture = user.avatar %}
@@ -9,5 +9,5 @@
 {% endblock %}
 
 {% block subheadingInner %}
-    {% include 'LadbCoreBundle:Core/User:_location-and-social.part.html.twig' %}
+    {% include '@LadbCore/Core/User/_location-and-social.part.html.twig' %}
 {% endblock %}

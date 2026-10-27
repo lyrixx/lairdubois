@@ -46,7 +46,7 @@ class OfferController extends AbstractController {
 
 	/**
 	 * @Route("/new", name="core_offer_new")
-	 * @Template("LadbCoreBundle:Offer/Offer:new.html.twig")
+	 * @Template("@LadbCore/Offer/Offer/new.html.twig")
 	 */
 	public function newAction(Request $request, TagUtils $tagUtils) {
 
@@ -63,7 +63,7 @@ class OfferController extends AbstractController {
 
 	/**
 	 * @Route("/create", methods={"POST"}, name="core_offer_create")
-	 * @Template("LadbCoreBundle:Offer/Offer:new.html.twig")
+	 * @Template("@LadbCore/Offer/Offer/new.html.twig")
 	 */
 	public function createAction(Request $request, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
@@ -172,7 +172,7 @@ class OfferController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_offer_edit")
-	 * @Template("LadbCoreBundle:Offer/Offer:edit.html.twig")
+	 * @Template("@LadbCore/Offer/Offer/edit.html.twig")
 	 */
 	public function editAction($id, TagUtils $tagUtils) {
 
@@ -190,7 +190,7 @@ class OfferController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_offer_update")
-	 * @Template("LadbCoreBundle:Offer/Offer:edit.html.twig")
+	 * @Template("@LadbCore/Offer/Offer/edit.html.twig")
 	 */
 	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, PicturedUtils $picturedUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
@@ -280,7 +280,7 @@ class OfferController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/widget", requirements={"id" = "\d+"}, name="core_offer_widget")
-	 * @Template("LadbCoreBundle:Offer/Offer:widget-xhr.html.twig")
+	 * @Template("@LadbCore/Offer/Offer/widget-xhr.html.twig")
 	 */
 	public function widgetAction($id) {
 
@@ -294,7 +294,7 @@ class OfferController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/location.geojson", name="core_offer_location", defaults={"_format" = "json"})
-	 * @Template("LadbCoreBundle:Offer/Offer:location.geojson.twig")
+	 * @Template("@LadbCore/Offer/Offer/location.geojson.twig")
 	 */
 	public function locationAction($id) {
 
@@ -321,7 +321,7 @@ class OfferController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/card.xhr", name="core_offer_card")
-	 * @Template("LadbCoreBundle:Offer/Offer:card-xhr.html.twig")
+	 * @Template("@LadbCore/Offer/Offer/card-xhr.html.twig")
 	 */
 	public function cardAction(Request $request, $id) {
 		if (!$request->isXmlHttpRequest()) {
@@ -356,7 +356,7 @@ class OfferController extends AbstractController {
 				'%RECIPIENT%' => $offer->getUser()->getDisplayName(),
 				'%SENDER%'    => $this->getUser()->getDisplayName()
 			)),
-			'alertTemplate'     => 'LadbCoreBundle:Offer/Offer:_alert-new-thread.part.html.twig',
+			'alertTemplate'     => '@LadbCore/Offer/Offer/_alert-new-thread.part.html.twig',
 		));
 	}
 
@@ -364,7 +364,7 @@ class OfferController extends AbstractController {
 	 * @Route("/", name="core_offer_list")
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_offer_list_page")
 	 * @Route(".geojson", defaults={"_format" = "json", "page"=-1, "layout"="geojson"}, name="core_offer_list_geojson")
-	 * @Template("LadbCoreBundle:Offer/Offer:list.html.twig")
+	 * @Template("@LadbCore/Offer/Offer/list.html.twig")
 	 */
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, LocalisableUtils $localisableUtils, SearchUtils $searchUtils, TranslatorInterface $translator, $page = 0, $layout = 'view') {
 
@@ -564,14 +564,14 @@ class OfferController extends AbstractController {
 				'collection' => $collection,
 			));
 
-			return $this->render('LadbCoreBundle:Offer/Offer:list-xhr.geojson.twig', $parameters);
+			return $this->render('@LadbCore/Offer/Offer/list-xhr.geojson.twig', $parameters);
 		}
 
 		// Dispatch publication event
 		$dispatcher->dispatch(new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()), PublicationListener::PUBLICATIONS_LISTED);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Offer/Offer:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Offer/Offer/list-xhr.html.twig', $parameters);
 		}
 
 		if ($this->isGranted('ROLE_USER') && $this->getUser()->getMeta()->getPrivateOfferCount() > 0) {
@@ -589,7 +589,7 @@ class OfferController extends AbstractController {
 
 	/**
 	 * @Route("/{id}.html", name="core_offer_show")
-	 * @Template("LadbCoreBundle:Offer/Offer:show.html.twig")
+	 * @Template("@LadbCore/Offer/Offer/show.html.twig")
 	 */
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();

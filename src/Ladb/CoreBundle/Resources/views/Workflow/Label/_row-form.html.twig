@@ -1,6 +1,6 @@
 {# set actionPath #}
 
-{% form_theme form 'LadbCoreBundle:Common:_form-theme.twig.twig' %}
+{% form_theme form '@LadbCore/Common/_form-theme.twig.twig' %}
 
 <tr class="ladb-workflow-label-row-form">
     <td>
@@ -22,7 +22,7 @@
                 <button class="btn btn-primary ladb-label-save-btn">{{ 'default.save'|trans() }}</button>
             {% endblock %}
         </div>
-        {% include 'LadbCoreBundle:Common:_loading-panel.part.html.twig' %}
+        {% include '@LadbCore/Common/_loading-panel.part.html.twig' %}
     </td>
 </tr>
 

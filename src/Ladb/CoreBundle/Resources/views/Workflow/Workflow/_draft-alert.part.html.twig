@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:_draft-alert.part.html.twig' %}
+{% extends '@LadbCore/Common/_draft-alert.part.html.twig' %}
 
 {% set entity = workflow %}
 {% set alertMessage = 'Ce processus est privé. Vous seul pouvez le consulter.<br>Pour le rendre public, vous devez le publier.' %}
@@ -9,7 +9,7 @@
     {% if workflow.body is not empty %}
         {{ parent() }}
     {% else %}
-        {% embed 'LadbCoreBundle:Common/Modal:_modal.part.html.twig' with { 'id':'publish_modal', 'title':('default.publishing'|trans()) } %}
+        {% embed '@LadbCore/Common/Modal/_modal.part.html.twig' with { 'id':'publish_modal', 'title':('default.publishing'|trans()) } %}
             {% block bodyInner %}
                 <div class="media">
                     <div class="media-left"><i class="ladb-icon-warning ladb-icon-xl"></i></div>

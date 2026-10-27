@@ -42,7 +42,7 @@ class SoftwareController extends AbstractController {
 
 	/**
 	 * @Route("/new", name="core_software_new")
-	 * @Template("LadbCoreBundle:Knowledge/Software:new.html.twig")
+	 * @Template("@LadbCore/Knowledge/Software/new.html.twig")
 	 */
 	public function newAction(KnowledgeUtils $knowledgeUtils) {
 
@@ -62,7 +62,7 @@ class SoftwareController extends AbstractController {
 
 	/**
 	 * @Route("/create", methods={"POST"}, name="core_software_create")
-	 * @Template("LadbCoreBundle:Knowledge/Software:new.html.twig")
+	 * @Template("@LadbCore/Knowledge/Software/new.html.twig")
 	 */
 	public function createAction(Request $request, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, TranslatorInterface $translator) {
 
@@ -159,7 +159,7 @@ class SoftwareController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/widget", requirements={"id" = "\d+"}, name="core_software_widget")
-	 * @Template("LadbCoreBundle:Knowledge/Software:widget-xhr.html.twig")
+	 * @Template("@LadbCore/Knowledge/Software/widget-xhr.html.twig")
 	 */
 	public function widgetAction(Request $request, $id) {
 
@@ -174,7 +174,7 @@ class SoftwareController extends AbstractController {
 	/**
 	 * @Route("/", name="core_software_list")
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_software_list_page")
-	 * @Template("LadbCoreBundle:Knowledge/Software:list.html.twig")
+	 * @Template("@LadbCore/Knowledge/Software/list.html.twig")
 	 */
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, ElasticaQueryUtils $elasticaQueryUtils, SearchUtils $searchUtils, $page = 0) {
 
@@ -343,7 +343,7 @@ class SoftwareController extends AbstractController {
 		));
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Knowledge/Software:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Knowledge/Software/list-xhr.html.twig', $parameters);
 		}
 
 		return $parameters;
@@ -351,7 +351,7 @@ class SoftwareController extends AbstractController {
 
 	/**
 	 * @Route("/{id}.html", name="core_software_show")
-	 * @Template("LadbCoreBundle:Knowledge/Software:show.html.twig")
+	 * @Template("@LadbCore/Knowledge/Software/show.html.twig")
 	 */
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, LikableUtils $likableUtils, ReviewableUtils $reviewableUtils, SearchUtils $searchUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();

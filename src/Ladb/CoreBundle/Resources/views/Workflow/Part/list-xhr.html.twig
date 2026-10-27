@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common/Modal:_modal-content.part.html.twig' %}
+{% extends '@LadbCore/Common/Modal/_modal-content.part.html.twig' %}
 
 {% set id = 'ladb_part_list_modal' %}
 {% set title = 'workflow.part.list'|trans() %}
@@ -10,7 +10,7 @@
     <table class="table table-bordered ladb-part-table" style="background-color: white;{% if workflow.parts|length == 0 %} display: none;{% endif %}">
         <tbody>
         {% for part in workflow.parts %}
-            {% include 'LadbCoreBundle:Workflow:Part/_row.part.html.twig' %}
+            {% include '@LadbCore/Workflow/Part/_row.part.html.twig' %}
         {% endfor %}
         </tbody>
     </table>

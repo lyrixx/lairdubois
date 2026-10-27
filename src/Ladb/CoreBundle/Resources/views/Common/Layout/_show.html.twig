@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle::layout.html.twig' %}
+{% extends '@LadbCore/layout.html.twig' %}
 
 {% if entity is defined %}
     {% set pageUrl = pageUrl|default(ladb_entity_url_action(entity, 'show')) %}
@@ -37,8 +37,8 @@
 {% set bodyContainerClasses = 'ladb-margin-top' %}
 {% set noStickyHeader = true %}
 
-{% use 'LadbCoreBundle:Common/Blocks:blueimp-gallery-widget.blocks.html.twig' %}
-{% use 'LadbCoreBundle:Common/Blocks:sharebuttons-widget.blocks.html.twig' %}
+{% use '@LadbCore/Common/Blocks/blueimp-gallery-widget.blocks.html.twig' %}
+{% use '@LadbCore/Common/Blocks/sharebuttons-widget.blocks.html.twig' %}
 
 {% block headPrefix %}{{ parent() }} article: http://ogp.me/ns/article#{% endblock %}
 
@@ -132,5 +132,5 @@
             </div>
         </div>
     </div>
-    {% include 'LadbCoreBundle:Core/Report:_modal.part.html.twig' %}
+    {% include '@LadbCore/Core/Report/_modal.part.html.twig' %}
 {% endblock %}

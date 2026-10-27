@@ -46,7 +46,7 @@ class EventController extends AbstractController {
 
 	/**
 	 * @Route("/new", name="core_event_new")
-	 * @Template("LadbCoreBundle:Event/Event:new.html.twig")
+	 * @Template("@LadbCore/Event/Event/new.html.twig")
 	 */
 	public function newAction(Request $request, TagUtils $tagUtils) {
 
@@ -63,7 +63,7 @@ class EventController extends AbstractController {
 
 	/**
 	 * @Route("/create", methods={"POST"}, name="core_event_create")
-	 * @Template("LadbCoreBundle:Event/Event:new.html.twig")
+	 * @Template("@LadbCore/Event/Event/new.html.twig")
 	 */
 	public function createAction(Request $request, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
@@ -172,7 +172,7 @@ class EventController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_event_edit")
-	 * @Template("LadbCoreBundle:Event/Event:edit.html.twig")
+	 * @Template("@LadbCore/Event/Event/edit.html.twig")
 	 */
 	public function editAction($id, TagUtils $tagUtils) {
 
@@ -190,7 +190,7 @@ class EventController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_event_update")
-	 * @Template("LadbCoreBundle:Event/Event:edit.html.twig")
+	 * @Template("@LadbCore/Event/Event/edit.html.twig")
 	 */
 	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
@@ -278,7 +278,7 @@ class EventController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/widget", requirements={"id" = "\d+"}, name="core_event_widget")
-	 * @Template("LadbCoreBundle:Event/Event:widget-xhr.html.twig")
+	 * @Template("@LadbCore/Event/Event/widget-xhr.html.twig")
 	 */
 	public function widgetAction($id) {
 
@@ -292,7 +292,7 @@ class EventController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/location.geojson", name="core_event_location", defaults={"_format" = "json"})
-	 * @Template("LadbCoreBundle:Event/Event:location.geojson.twig")
+	 * @Template("@LadbCore/Event/Event/location.geojson.twig")
 	 */
 	public function locationAction($id) {
 
@@ -318,7 +318,7 @@ class EventController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/card.xhr", name="core_event_card")
-	 * @Template("LadbCoreBundle:Event/Event:card-xhr.html.twig")
+	 * @Template("@LadbCore/Event/Event/card-xhr.html.twig")
 	 */
 	public function cardAction(Request $request, $id) {
 		if (!$request->isXmlHttpRequest()) {
@@ -338,7 +338,7 @@ class EventController extends AbstractController {
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_event_list_page")
 	 * @Route(".json", defaults={"_format" = "json", "page"=-1, "layout"="json"}, name="core_event_list_json")
 	 * @Route(".geojson", defaults={"_format" = "json", "page"=-1, "layout"="geojson"}, name="core_event_list_geojson")
-	 * @Template("LadbCoreBundle:Event/Event:list.html.twig")
+	 * @Template("@LadbCore/Event/Event/list.html.twig")
 	 */
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, LocalisableUtils $localisableUtils, SearchUtils $searchUtils, TranslatorInterface $translator, $page = 0, $layout = 'view') {
 
@@ -554,7 +554,7 @@ class EventController extends AbstractController {
 		));
 
 		if ($layout == 'json') {
-			return $this->render('LadbCoreBundle:Event/Event:list-xhr.json.twig', $parameters);
+			return $this->render('@LadbCore/Event/Event/list-xhr.json.twig', $parameters);
 		}
 
 		if ($layout == 'geojson') {
@@ -588,14 +588,14 @@ class EventController extends AbstractController {
 				'collection' => $collection,
 			));
 
-			return $this->render('LadbCoreBundle:Find/Find:list-xhr.geojson.twig', $parameters);
+			return $this->render('@LadbCore/Find/Find/list-xhr.geojson.twig', $parameters);
 		}
 
 		// Dispatch publication event
 		$dispatcher->dispatch(new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()), PublicationListener::PUBLICATIONS_LISTED);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Event/Event:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Event/Event/list-xhr.html.twig', $parameters);
 		}
 
 		if ($this->isGranted('ROLE_USER') && $this->getUser()->getMeta()->getPrivateEventCount() > 0) {
@@ -613,7 +613,7 @@ class EventController extends AbstractController {
 
 	/**
 	 * @Route("/{id}.html", name="core_event_show")
-	 * @Template("LadbCoreBundle:Event/Event:show.html.twig")
+	 * @Template("@LadbCore/Event/Event/show.html.twig")
 	 */
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FeedbackableUtils $feedbackableUtils, FollowerUtils $followerUtils, JoinableUtils $joinableUtils, LikableUtils $likableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();

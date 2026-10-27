@@ -1,6 +1,6 @@
-{% extends 'LadbCoreBundle:Message:_layout.html.twig' %}
+{% extends '@LadbCore/Message/_layout.html.twig' %}
 
-{% use 'LadbCoreBundle:Common/Blocks:blueimp-gallery-widget.blocks.html.twig' %}
+{% use '@LadbCore/Common/Blocks/blueimp-gallery-widget.blocks.html.twig' %}
 
 {% set tab = 'show_thread' %}
 {% set bodyClass = 'ladb-no-footer' %}
@@ -31,9 +31,9 @@
 
 {% block tools %}
     <div class="ladb-header-tools pull-right">
-        {% include 'LadbCoreBundle:Core/Report:_widget-button.part.html.twig' with { 'entityType':thread.type, 'entityId':thread.id } %}
+        {% include '@LadbCore/Core/Report/_widget-button.part.html.twig' with { 'entityType':thread.type, 'entityId':thread.id } %}
         <a href="#delete_thread_modal" class="btn btn-danger" data-toggle="modal"><i class="ladb-icon-delete"></i><span class="ladb-hidden-mobile"> {{ 'default.delete'|trans() }}</span></a>
-        {% embed 'LadbCoreBundle:Common/Modal:_modal.part.html.twig' with { 'id':'delete_thread_modal', 'title':('default.deletion'|trans()) } %}
+        {% embed '@LadbCore/Common/Modal/_modal.part.html.twig' with { 'id':'delete_thread_modal', 'title':('default.deletion'|trans()) } %}
             {% block bodyInner %}
                 <p>La suppression de la conversation "<strong>{{ thread.subject }}</strong>" entrainera l'effacement de tous les messages qu'elle contient.</p>
                 <p>Confirmez l'action pour continuer.</p>
@@ -52,17 +52,17 @@
         <div class="ladb-participants">
             <span><strong>{{ thread.participants|length }}</strong> participants</span>
             {% for participant in thread.participants %}
-                {% include 'LadbCoreBundle:Core/User:_avatar-link.part.html.twig' with { 'user':participant } %}
+                {% include '@LadbCore/Core/User/_avatar-link.part.html.twig' with { 'user':participant } %}
             {% endfor %}
         </div>
         <div class="ladb-messages">
             {% for message in thread.messages %}
-                {% include 'LadbCoreBundle:Message:_row.part.html.twig' %}
+                {% include '@LadbCore/Message/_row.part.html.twig' %}
             {% endfor %}
             {% if not thread.announcement %}
                 <div class="ladb-message-row ladb-message-mine">
                     <div class="ladb-message">
-                        {% include 'LadbCoreBundle:Core/User:_avatar-link.part.html.twig' with { 'user':app.user, 'linkClasses':'pull-left', 'noMicrodata':true } %}
+                        {% include '@LadbCore/Core/User/_avatar-link.part.html.twig' with { 'user':app.user, 'linkClasses':'pull-left', 'noMicrodata':true } %}
                         <div class="ladb-content ladb-fake-new">
                             <button class="btn btn-default btn-block" data-ladb-new-path="{{ path('core_message_new', { 'threadId':thread.id }) }}" data-loading-text="{{ 'default.loading'|trans }}">Votre message...</button>
                         </div>
@@ -71,7 +71,7 @@
             {% endif %}
         </div>
     </div>
-    {% include 'LadbCoreBundle:Core/Report:_modal.part.html.twig' %}
+    {% include '@LadbCore/Core/Report/_modal.part.html.twig' %}
 {% endblock %}
 
 {% block bodyFooter %}{% endblock %}

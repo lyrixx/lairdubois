@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Knowledge:_form-fieldset-value.part.html.twig' %}
+{% extends '@LadbCore/Knowledge/_form-fieldset-value.part.html.twig' %}
 
 {% set fieldDef = knowledge.fieldDefs[field] %}
 {% set fieldSuffix = fieldDef[constant('ATTRIB_SUFFIX', knowledge)] is defined ? fieldDef[constant('ATTRIB_SUFFIX', knowledge)] : null %}

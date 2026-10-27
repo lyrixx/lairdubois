@@ -38,7 +38,7 @@ class PostController extends AbstractController {
 
 	/**
 	 * @Route("/new", name="core_blog_post_new")
-	 * @Template("LadbCoreBundle:Blog/Post:new.html.twig")
+	 * @Template("@LadbCore/Blog/Post/new.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_BLOG')", statusCode=404, message="Not allowed (core_blog_post_new)")
 	 */
 	public function newAction(TagUtils $tagUtils) {
@@ -55,7 +55,7 @@ class PostController extends AbstractController {
 
 	/**
 	 * @Route("/create", methods={"POST"}, name="core_blog_post_create")
-	 * @Template("LadbCoreBundle:Blog/Post:new.html.twig")
+	 * @Template("@LadbCore/Blog/Post/new.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_BLOG')", statusCode=404, message="Not allowed (core_blog_post_create)")
 	 */
 	public function createAction(Request $request, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
@@ -162,7 +162,7 @@ class PostController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_blog_post_edit")
-	 * @Template("LadbCoreBundle:Blog/Post:edit.html.twig")
+	 * @Template("@LadbCore/Blog/Post/edit.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_BLOG')", statusCode=404, message="Not allowed (core_blog_post_edit)")
 	 */
 	public function editAction($id, TagUtils $tagUtils) {
@@ -181,7 +181,7 @@ class PostController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_blog_post_update")
-	 * @Template("LadbCoreBundle:Blog/Post:edit.html.twig")
+	 * @Template("@LadbCore/Blog/Post/edit.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_BLOG')", statusCode=404, message="Not allowed (core_blog_post_update)")
 	 */
 	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
@@ -258,7 +258,7 @@ class PostController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/widget", requirements={"id" = "\d+"}, name="core_blog_post_widget")
-	 * @Template("LadbCoreBundle:Blog/Post:widget-xhr.html.twig")
+	 * @Template("@LadbCore/Blog/Post/widget-xhr.html.twig")
 	 */
 	public function widgetAction($id) {
 
@@ -281,7 +281,7 @@ class PostController extends AbstractController {
 	/**
 	 * @Route("/", name="core_blog_post_list")
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_blog_post_list_page")
-	 * @Template("LadbCoreBundle:Blog/Post:list.html.twig")
+	 * @Template("@LadbCore/Blog/Post/list.html.twig")
 	 */
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, SearchUtils $searchUtils, $page = 0) {
 
@@ -413,7 +413,7 @@ class PostController extends AbstractController {
 		));
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Blog/Post:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Blog/Post/list-xhr.html.twig', $parameters);
 		}
 
 		return $parameters;
@@ -421,7 +421,7 @@ class PostController extends AbstractController {
 
 	/**
 	 * @Route("/{id}.html", name="core_blog_post_show")
-	 * @Template("LadbCoreBundle:Blog/Post:show.html.twig")
+	 * @Template("@LadbCore/Blog/Post/show.html.twig")
 	 */
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();

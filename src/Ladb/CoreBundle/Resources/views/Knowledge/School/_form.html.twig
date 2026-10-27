@@ -1,10 +1,10 @@
-{% extends 'LadbCoreBundle:Knowledge:_form.html.twig' %}
+{% extends '@LadbCore/Knowledge/_form.html.twig' %}
 
 {% set navSection = 'about' %}
 
 {% block bodyJavascripts %}
     {{ parent() }}
-    {% include 'LadbCoreBundle:Core/Picture:_form-gallery-script.part.html.twig' with { 'formSection':'logo', 'fieldId':form.logoValue.data.vars.id, 'maxPictureCount':1 } %}
+    {% include '@LadbCore/Core/Picture/_form-gallery-script.part.html.twig' with { 'formSection':'logo', 'fieldId':form.logoValue.data.vars.id, 'maxPictureCount':1 } %}
 {% endblock %}
 
 {% block sidenav %}
@@ -26,7 +26,7 @@
             <p class="form-section-title"><i class="ladb-icon-school"></i> {{ 'knowledge.school.field.name'|trans() }} <span class="ladb-mandatory">*</span></p>
             <div class="row">
                 <div class="col-sm-7 col-xs-12">
-                    {% include 'LadbCoreBundle:Knowledge:_form-fieldset-value-text.part.html.twig' with { 'form':form.nameValue, 'field':constant('\\Ladb\\CoreBundle\\Entity\\Knowledge\\School::FIELD_NAME'), 'fieldLabel':('knowledge.school.field.name'|trans()), 'isCompact':true } %}
+                    {% include '@LadbCore/Knowledge/_form-fieldset-value-text.part.html.twig' with { 'form':form.nameValue, 'field':constant('\\Ladb\\CoreBundle\\Entity\\Knowledge\\School::FIELD_NAME'), 'fieldLabel':('knowledge.school.field.name'|trans()), 'isCompact':true } %}
                 </div>
                 <div class="col-sm-5 col-xs-12">
                     <div class="panel panel-default">
@@ -45,7 +45,7 @@
             <p class="form-section-title"><i class="ladb-icon-camera"></i> {{ 'knowledge.school.field.logo'|trans() }} <span class="ladb-mandatory">*</span></p>
             <div class="row">
                 <div class="col-sm-7 col-xs-12">
-                    {% include 'LadbCoreBundle:Knowledge:_form-fieldset-value-picture.part.html.twig' with { 'formSection':'logo', 'form':form.logoValue, 'field':constant('\\Ladb\\CoreBundle\\Entity\\Knowledge\\School::FIELD_LOGO'), 'fieldLabel':('knowledge.school.field.logo'|trans()), 'quality':constant('\\Ladb\\CoreBundle\\Entity\\Core\\Picture::QUALITY_LD'), 'postProcessor':constant('\\Ladb\\CoreBundle\\Entity\\Core\\Picture::POST_PROCESSOR_SQUARE') } %}
+                    {% include '@LadbCore/Knowledge/_form-fieldset-value-picture.part.html.twig' with { 'formSection':'logo', 'form':form.logoValue, 'field':constant('\\Ladb\\CoreBundle\\Entity\\Knowledge\\School::FIELD_LOGO'), 'fieldLabel':('knowledge.school.field.logo'|trans()), 'quality':constant('\\Ladb\\CoreBundle\\Entity\\Core\\Picture::QUALITY_LD'), 'postProcessor':constant('\\Ladb\\CoreBundle\\Entity\\Core\\Picture::POST_PROCESSOR_SQUARE') } %}
                 </div>
                 <div class="col-sm-5 col-xs-12">
                     <div class="panel panel-default">

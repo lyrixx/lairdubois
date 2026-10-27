@@ -29,7 +29,7 @@
     {% if context.fieldFilterQuery is not null and not context.disabled %}
         <a href="{{ path('core_'~context.knowledge.strippedName~'_list', { 'q':(context.fieldFilterQuery|replace({ '%q%':context.fieldUseChoicesValue and context.fieldChoices[context.value.data] is defined ? context.fieldChoices[context.value.data] : context.value.data })) }) }}" class="ladb-cursor-filter" rel="nofollow">
     {% endif %}
-        {% include 'LadbCoreBundle:Knowledge:_field-show-meta-'~context.fieldType~'.part.html.twig' with context %}
+        {% include '@LadbCore/Knowledge/_field-show-meta-'~context.fieldType~'.part.html.twig' with context %}
     {% if context.fieldFilterQuery is not null and not context.disabled %}
         </a>
     {% endif %}
@@ -44,24 +44,24 @@
         </div>
         <div class="col-xs-8">
             {% if valueIsUndefined %}
-                <div class="ladb-value">{% include 'LadbCoreBundle:Knowledge:_field-bullet.part.html.twig' with { 'valueIndex':0 } %}<div class="ladb-data{% if disabled %} text-muted{% endif %}">-</div></div>
+                <div class="ladb-value">{% include '@LadbCore/Knowledge/_field-bullet.part.html.twig' with { 'valueIndex':0 } %}<div class="ladb-data{% if disabled %} text-muted{% endif %}">-</div></div>
             {% elseif fieldMultiple %}
                 {% if valueIsRejected and fieldMandatory %}
                     {% set value = values[0] %}
-                    <div class="ladb-value">{% include 'LadbCoreBundle:Knowledge:_field-bullet.part.html.twig' with { 'valueIndex':0 } %}<div class="ladb-data{% if valueIsRejected %} ladb-strikethrough{% endif %}{% if disabled %} text-muted{% endif %}">{{ Self.searchQueryLink(_context) }}{% if fieldSuffix is not null %}<em> {{ fieldSuffix|raw }}</em>{% endif %}</div></div>
+                    <div class="ladb-value">{% include '@LadbCore/Knowledge/_field-bullet.part.html.twig' with { 'valueIndex':0 } %}<div class="ladb-data{% if valueIsRejected %} ladb-strikethrough{% endif %}{% if disabled %} text-muted{% endif %}">{{ Self.searchQueryLink(_context) }}{% if fieldSuffix is not null %}<em> {{ fieldSuffix|raw }}</em>{% endif %}</div></div>
                 {% else %}
                     {% set definedValueCount = 0 %}
                     {% for value in values|filter(value => value.voteScore >= 0) %}
-                        <div class="ladb-value">{% include 'LadbCoreBundle:Knowledge:_field-bullet.part.html.twig' with { 'valueIndex':loop.index0 } %}<div class="ladb-data{% if disabled %} text-muted{% endif %}">{{ Self.searchQueryLink(_context) }}{% if fieldSuffix is not null %}<em> {{ fieldSuffix|raw }}</em>{% endif %}</div></div>
+                        <div class="ladb-value">{% include '@LadbCore/Knowledge/_field-bullet.part.html.twig' with { 'valueIndex':loop.index0 } %}<div class="ladb-data{% if disabled %} text-muted{% endif %}">{{ Self.searchQueryLink(_context) }}{% if fieldSuffix is not null %}<em> {{ fieldSuffix|raw }}</em>{% endif %}</div></div>
                         {%  set definedValueCount = definedValueCount + 1 %}
                     {% endfor %}
                     {% if definedValueCount == 0 %}
-                        <span class="ladb-value">{% include 'LadbCoreBundle:Knowledge:_field-bullet.part.html.twig' with { 'valueIndex':0 } %}<div class="ladb-data{% if disabled %} text-muted{% endif %}">-</div></span>
+                        <span class="ladb-value">{% include '@LadbCore/Knowledge/_field-bullet.part.html.twig' with { 'valueIndex':0 } %}<div class="ladb-data{% if disabled %} text-muted{% endif %}">-</div></span>
                     {% endif %}
                 {% endif %}
             {% else %}
                 {% set value = values[0] %}
-                <div class="ladb-value">{% include 'LadbCoreBundle:Knowledge:_field-bullet.part.html.twig' with { 'valueIndex':0 } %}<div class="ladb-data{% if valueIsRejected %} ladb-strikethrough{% endif %}{% if disabled %} text-muted{% endif %}">{{ Self.searchQueryLink(_context) }}{% if fieldSuffix is not null %}<em> {{ fieldSuffix|raw }}</em>{% endif %}</div></div>
+                <div class="ladb-value">{% include '@LadbCore/Knowledge/_field-bullet.part.html.twig' with { 'valueIndex':0 } %}<div class="ladb-data{% if valueIsRejected %} ladb-strikethrough{% endif %}{% if disabled %} text-muted{% endif %}">{{ Self.searchQueryLink(_context) }}{% if fieldSuffix is not null %}<em> {{ fieldSuffix|raw }}</em>{% endif %}</div></div>
             {% endif %}
         </div>
         <div class="col-xs-1">

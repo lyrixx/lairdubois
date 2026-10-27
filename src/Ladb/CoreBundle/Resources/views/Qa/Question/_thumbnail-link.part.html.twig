@@ -11,8 +11,8 @@
     </div>
     <small>
         {% if not noAuthor %}
-            {% include 'LadbCoreBundle:Common:_author.part.html.twig' with { 'entity':question, 'noMicrodata':true } %}
+            {% include '@LadbCore/Common/_author.part.html.twig' with { 'entity':question, 'noMicrodata':true } %}
         {% endif %}
-        {% include 'LadbCoreBundle:Qa/Question:_answers-counter.part.html.twig' with { 'classes':(noAuthor ? '' : 'ladb-horizontal-separator-left') } %}
+        {% include '@LadbCore/Qa/Question/_answers-counter.part.html.twig' with { 'classes':(noAuthor ? '' : 'ladb-horizontal-separator-left') } %}
     </small>
 </div>

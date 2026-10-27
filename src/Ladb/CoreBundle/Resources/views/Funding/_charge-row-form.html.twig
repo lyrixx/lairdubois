@@ -1,6 +1,6 @@
 {# set actionPath #}
 
-{% form_theme form 'LadbCoreBundle:Common:_form-theme.twig.twig' 'LadbCoreBundle:Core/Block:_form-theme.html.twig' %}
+{% form_theme form '@LadbCore/Common/_form-theme.twig.twig' '@LadbCore/Core/Block/_form-theme.html.twig' %}
 
 <tr class="ladb-charge-row-form">
     <td colspan="4" style="position: relative;">
@@ -23,7 +23,7 @@
                 <button class="btn btn-primary ladb-charge-save-btn">Enregistrer</button>
             {% endblock %}
         </div>
-        {% include 'LadbCoreBundle:Common:_loading-panel.part.html.twig' %}
+        {% include '@LadbCore/Common/_loading-panel.part.html.twig' %}
     </td>
 </tr>
 

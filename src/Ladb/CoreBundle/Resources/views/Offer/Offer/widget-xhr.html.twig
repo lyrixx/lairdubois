@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:_entity-widget.html.twig' %}
+{% extends '@LadbCore/Common/_entity-widget.html.twig' %}
 
 {% set entity = offer %}
 
@@ -6,5 +6,5 @@
 
 {% block entityMetas %}
     {{ parent() }}
-    {% include 'LadbCoreBundle:Offer/Offer:_price.part.html.twig' %}
+    {% include '@LadbCore/Offer/Offer/_price.part.html.twig' %}
 {% endblock %}

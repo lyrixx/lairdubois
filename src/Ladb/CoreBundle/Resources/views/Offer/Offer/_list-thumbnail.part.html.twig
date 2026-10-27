@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:_masonry-list-thumbnail-wide.part.html.twig' %}
+{% extends '@LadbCore/Common/_masonry-list-thumbnail-wide.part.html.twig' %}
 
 {# set offer #}
 
@@ -14,11 +14,11 @@
             {{ parent() }}
         </div>
         <div class="ladb-flex-footer">
-            {% include 'LadbCoreBundle:Offer/Offer:_price.part.html.twig' %}
+            {% include '@LadbCore/Offer/Offer/_price.part.html.twig' %}
             <span style="font-style: italic;{% if offer.category == 2 %} background-color: #cc197c; color: #fff; padding: 2px 10px; border-radius: 4px;{% endif %}">{{ ('offer.offer.category_'~offer.category)|trans }}</span>
             {% if offer.location is defined and offer.location is not null %}
                 <div>
-                    {% include 'LadbCoreBundle:Offer/Offer:_location.part.html.twig' %}
+                    {% include '@LadbCore/Offer/Offer/_location.part.html.twig' %}
                 </div>
             {% endif %}
         </div>

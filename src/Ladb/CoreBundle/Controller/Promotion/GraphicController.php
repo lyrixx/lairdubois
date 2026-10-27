@@ -41,7 +41,7 @@ class GraphicController extends AbstractController {
 
 	/**
 	 * @Route("/new", name="core_promotion_graphic_new")
-	 * @Template("LadbCoreBundle:Promotion/Graphic:new.html.twig")
+	 * @Template("@LadbCore/Promotion/Graphic/new.html.twig")
 	 */
 	public function newAction(Request $request, TagUtils $tagUtils) {
 
@@ -57,7 +57,7 @@ class GraphicController extends AbstractController {
 
 	/**
 	 * @Route("/create", methods={"POST"}, name="core_promotion_graphic_create")
-	 * @Template("LadbCoreBundle:Promotion/Graphic:new.html.twig")
+	 * @Template("@LadbCore/Promotion/Graphic/new.html.twig")
 	 */
 	public function createAction(Request $request, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, GraphicUtils $graphicUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
@@ -169,7 +169,7 @@ class GraphicController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_promotion_graphic_edit")
-	 * @Template("LadbCoreBundle:Promotion/Graphic:edit.html.twig")
+	 * @Template("@LadbCore/Promotion/Graphic/edit.html.twig")
 	 */
 	public function editAction($id, TagUtils $tagUtils) {
 
@@ -187,7 +187,7 @@ class GraphicController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_promotion_graphic_update")
-	 * @Template("LadbCoreBundle:Promotion/Graphic:edit.html.twig")
+	 * @Template("@LadbCore/Promotion/Graphic/edit.html.twig")
 	 */
 	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, GraphicUtils $graphicUtils, PicturedUtils $picturedUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
@@ -276,7 +276,7 @@ class GraphicController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/widget", requirements={"id" = "\d+"}, name="core_promotion_graphic_widget")
-	 * @Template("LadbCoreBundle:Promotion/Graphic:widget-xhr.html.twig")
+	 * @Template("@LadbCore/Promotion/Graphic/widget-xhr.html.twig")
 	 */
 	public function widgetAction($id) {
 
@@ -329,7 +329,7 @@ class GraphicController extends AbstractController {
 	/**
 	 * @Route("/", name="core_promotion_graphic_list")
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_promotion_graphic_list_page")
-	 * @Template("LadbCoreBundle:Promotion/Graphic:list.html.twig")
+	 * @Template("@LadbCore/Promotion/Graphic/list.html.twig")
 	 */
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, SearchUtils $searchUtils, TranslatorInterface $translator, $page = 0) {
 
@@ -481,7 +481,7 @@ class GraphicController extends AbstractController {
 		));
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Promotion/Graphic:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Promotion/Graphic/list-xhr.html.twig', $parameters);
 		}
 
 		if ($this->isGranted('ROLE_USER') && $this->getUser()->getMeta()->getPrivateGraphicCount() > 0) {
@@ -499,7 +499,7 @@ class GraphicController extends AbstractController {
 
 	/**
 	 * @Route("/{id}.html", name="core_promotion_graphic_show")
-	 * @Template("LadbCoreBundle:Promotion/Graphic:show.html.twig")
+	 * @Template("@LadbCore/Promotion/Graphic/show.html.twig")
 	 */
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();

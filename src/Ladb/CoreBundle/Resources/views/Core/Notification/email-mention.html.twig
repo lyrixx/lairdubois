@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Core/Notification:_email.html.twig' %}
+{% extends '@LadbCore/Core/Notification/_email.html.twig' %}
 
 {# set row #}
 
@@ -9,7 +9,7 @@
     </p>
     <table cellspacing="10" cellpadding="0">
         <tbody>
-        {% include 'LadbCoreBundle:Common:_entity-email-row.part.html.twig' with { 'entity':row.entity } %}
+        {% include '@LadbCore/Common/_entity-email-row.part.html.twig' with { 'entity':row.entity } %}
         {% if row.comment is defined %}
             <tr>
                 <td height="30" colspan="2"><a href="{{ ladb_entity_url_action(row.comment) }}" style="border: 1px solid #ddd; background: #f7f7f7; padding: 6px 12px; color: #333; text-decoration: none;">Voir le commentaire</a></td>

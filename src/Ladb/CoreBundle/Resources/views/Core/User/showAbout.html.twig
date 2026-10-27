@@ -1,6 +1,6 @@
-{% extends 'LadbCoreBundle:Core/User:show.html.twig' %}
+{% extends '@LadbCore/Core/User/show.html.twig' %}
 
-{% use 'LadbCoreBundle:Common/Blocks:map.blocks.html.twig' %}
+{% use '@LadbCore/Common/Blocks/map.blocks.html.twig' %}
 
 {% set bodyContainerClasses = 'ladb-margin-top' %}
 {% set isOwner = is_granted("ROLE_USER") and user.id == app.user.id %}
@@ -62,7 +62,7 @@
                     <div>
                         {% if hasMap %}
                             <div style="margin: 4px;">
-                                {% include 'LadbCoreBundle:Common:_map-area.part.html.twig' with { 'autoInit':true, 'mapHeight':'350px', 'caption':user.location, 'markersUrl':path('core_user_location', { 'username':user.username }) } %}
+                                {% include '@LadbCore/Common/_map-area.part.html.twig' with { 'autoInit':true, 'mapHeight':'350px', 'caption':user.location, 'markersUrl':path('core_user_location', { 'username':user.username }) } %}
                             </div>
                         {% elseif isOwner %}
                             <div style="margin: 15px;">
@@ -81,11 +81,11 @@
                         {% for testimonial in testimonials %}
                             <div class="media"{% if not loop.last %} style="border-bottom: 1px solid #eee"{% endif %}>
                                 <div class="media-left">
-                                    {% include 'LadbCoreBundle:Core/Picture:_img.part.html.twig' with { 'picture':testimonial.school.mainPicture, 'width':64, 'height':64, 'alt':testimonial.school.title, 'noSizer':true, 'imgClasses':'img-rounded' } %}
+                                    {% include '@LadbCore/Core/Picture/_img.part.html.twig' with { 'picture':testimonial.school.mainPicture, 'width':64, 'height':64, 'alt':testimonial.school.title, 'noSizer':true, 'imgClasses':'img-rounded' } %}
                                 </div>
                                 <div class="media-body">
                                     <div class="media-heading" style="font-size: 120%; font-weight: bold;">
-                                        {% include 'LadbCoreBundle:Knowledge/School/Testimonial:_period.part.html.twig' %}
+                                        {% include '@LadbCore/Knowledge/School/Testimonial/_period.part.html.twig' %}
                                         <a href="{{ path('core_school_show', { 'id':testimonial.school.sluggedId }) }}" class="ladb-horizontal-separator-left">{{ testimonial.school.title }}</a>
                                     </div>
                                     {% if testimonial.diploma %}

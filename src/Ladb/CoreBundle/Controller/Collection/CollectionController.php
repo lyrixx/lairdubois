@@ -38,7 +38,7 @@ class CollectionController extends AbstractCollectionBasedController {
 
 	/**
 	 * @Route("/new", name="core_collection_new")
-	 * @Template("LadbCoreBundle:Collection:Collection/new.html.twig")
+	 * @Template("@LadbCore/Collection/Collection/new.html.twig")
 	 */
 	public function newAction(Request $request, TagUtils $tagUtils) {
 
@@ -55,7 +55,7 @@ class CollectionController extends AbstractCollectionBasedController {
 
 	/**
 	 * @Route("/create", methods={"POST"}, name="core_collection_create")
-	 * @Template("LadbCoreBundle:Collection:Collection/new.html.twig")
+	 * @Template("@LadbCore/Collection/Collection/new.html.twig")
 	 */
 	public function createAction(Request $request, CollectionnableUtils $collectionnableUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator, TypableUtils $typableUtils) {
 
@@ -184,7 +184,7 @@ class CollectionController extends AbstractCollectionBasedController {
 
 	/**
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_collection_edit")
-	 * @Template("LadbCoreBundle:Collection:Collection/edit.html.twig")
+	 * @Template("@LadbCore/Collection/Collection/edit.html.twig")
 	 */
 	public function editAction($id, TagUtils $tagUtils) {
 
@@ -202,7 +202,7 @@ class CollectionController extends AbstractCollectionBasedController {
 
 	/**
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_collection_update")
-	 * @Template("LadbCoreBundle:Collection:Collection/edit.html.twig")
+	 * @Template("@LadbCore/Collection/Collection/edit.html.twig")
 	 */
 	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 		$om = $this->getDoctrine()->getManager();
@@ -267,7 +267,7 @@ class CollectionController extends AbstractCollectionBasedController {
 
 	/**
 	 * @Route("/{id}/widget", requirements={"id" = "\d+"}, name="core_collection_widget")
-	 * @Template("LadbCoreBundle:Collection/Collection:widget-xhr.html.twig")
+	 * @Template("@LadbCore/Collection/Collection/widget-xhr.html.twig")
 	 */
 	public function widgetAction(Request $request, $id) {
 
@@ -282,7 +282,7 @@ class CollectionController extends AbstractCollectionBasedController {
 	/**
 	 * @Route("/", name="core_collection_list")
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_collection_list_page")
-	 * @Template("LadbCoreBundle:Collection:Collection/list.html.twig")
+	 * @Template("@LadbCore/Collection/Collection/list.html.twig")
 	 */
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, SearchUtils $searchUtils, $page = 0) {
 
@@ -428,7 +428,7 @@ class CollectionController extends AbstractCollectionBasedController {
 		));
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Collection:Collection/list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Collection/Collection/list-xhr.html.twig', $parameters);
 		}
 
 		return $parameters;
@@ -437,7 +437,7 @@ class CollectionController extends AbstractCollectionBasedController {
 	/**
 	 * @Route("/available/{entityType}/{entityId}", requirements={"entityType" = "\d+", "entityId" = "\d+"}, name="core_collection_list_available")
 	 * @Route("/available/{entityType}/{entityId}/{page}", requirements={"entityType" = "\d+", "entityId" = "\d+", "page" = "\d+"}, name="core_collection_list_available_page")
-	 * @Template("LadbCoreBundle:Collection/Collection:list-available-xhr.html.twig")
+	 * @Template("@LadbCore/Collection/Collection/list-available-xhr.html.twig")
 	 */
 	public function listAvailableAction($entityType, $entityId, CollectionnableUtils $collectionnableUtils, PaginatorUtils $paginatorUtils, $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -466,7 +466,7 @@ class CollectionController extends AbstractCollectionBasedController {
 		);
 
 		if ($page > 0) {
-			return $this->render('LadbCoreBundle:Collection/Collection:list-available-n-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Collection/Collection/list-available-n-xhr.html.twig', $parameters);
 		}
 
 		return $parameters;
@@ -475,7 +475,7 @@ class CollectionController extends AbstractCollectionBasedController {
 	/**
 	 * @Route("/{entityType}/{entityId}", requirements={"entityType" = "\d+", "entityId" = "\d+"}, name="core_collection_list_byentity")
 	 * @Route("/{entityType}/{entityId}/{page}", requirements={"entityType" = "\d+", "entityId" = "\d+", "page" = "\d+"}, name="core_collection_list_byentity_page")
-	 * @Template("LadbCoreBundle:Collection/Collection:list-byentity.html.twig")
+	 * @Template("@LadbCore/Collection/Collection/list-byentity.html.twig")
 	 */
 	public function listByEntityAction(Request $request, $entityType, $entityId, PaginatorUtils $paginatorUtils, $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -497,7 +497,7 @@ class CollectionController extends AbstractCollectionBasedController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Collection/Collection:list-byentity-n-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Collection/Collection/list-byentity-n-xhr.html.twig', $parameters);
 		}
 
 		return $parameters;
@@ -507,7 +507,7 @@ class CollectionController extends AbstractCollectionBasedController {
 	 * @Route("/{id}.html", name="core_collection_show")
 	 * @Route("/{id}/tab/{entityType}", requirements={"id" = "\d+", "entityType" = "\d+"}, name="core_collection_show_type")
 	 * @Route("/{id}/tab/{entityType}/{page}", requirements={"id" = "\d+", "entityType" = "\d+", "page" = "\d+"}, name="core_collection_show_type_page")
-	 * @Template("LadbCoreBundle:Collection:Collection/showAbout.html.twig")
+	 * @Template("@LadbCore/Collection/Collection/showAbout.html.twig")
 	 */
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, FollowerUtils $followerUtils, LikableUtils $likableUtils, PaginatorUtils $paginatorUtils, TypableUtils $typableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager, $entityType = 0, $page = 0) {
 
@@ -561,9 +561,9 @@ class CollectionController extends AbstractCollectionBasedController {
 			));
 
 			if ($request->isXmlHttpRequest()) {
-				return $this->render('LadbCoreBundle:Collection:Collection/showEntities-xhr.html.twig', $parameters);
+				return $this->render('@LadbCore/Collection/Collection/showEntities-xhr.html.twig', $parameters);
 			}
-			return $this->render('LadbCoreBundle:Collection:Collection/showEntities.html.twig', $parameters);
+			return $this->render('@LadbCore/Collection/Collection/showEntities.html.twig', $parameters);
 
 		}
 

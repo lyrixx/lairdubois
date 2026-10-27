@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:_list-n.part.html.twig' %}
+{% extends '@LadbCore/Common/_list-n.part.html.twig' %}
 
 {# set offers #}
 {# set nextPageUrl #}
@@ -7,6 +7,6 @@
 
 {% block items %}
     {% for offer in offers %}
-        {% include 'LadbCoreBundle:Offer/Offer:_list-thumbnail.part.html.twig' %}
+        {% include '@LadbCore/Offer/Offer/_list-thumbnail.part.html.twig' %}
     {% endfor %}
 {% endblock %}

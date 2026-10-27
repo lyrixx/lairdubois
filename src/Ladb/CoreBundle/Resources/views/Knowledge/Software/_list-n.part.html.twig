@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:_list-n.part.html.twig' %}
+{% extends '@LadbCore/Common/_list-n.part.html.twig' %}
 
 {# set softwares #}
 {# set nextPageUrl #}
@@ -7,7 +7,7 @@
 
 {% block items %}
     {% for software in softwares %}
-        {% include 'LadbCoreBundle:Knowledge/Software:_list-thumbnail.part.html.twig' %}
+        {% include '@LadbCore/Knowledge/Software/_list-thumbnail.part.html.twig' %}
     {% endfor %}
 {% endblock %}
 

@@ -194,7 +194,7 @@ EOT
 			$sitemaps[] = $this->_getEntitySitemap($def['className'], $def['section']);
 		}
 
-		$data = $templating->render('LadbCoreBundle:Command:_cron-sitemap-index.xml.twig', array(
+		$data = $templating->render('@LadbCore/Command/_cron-sitemap-index.xml.twig', array(
 			'sitemaps' => $sitemaps,
 		));
 
@@ -232,7 +232,7 @@ EOT
 		}
 
 		$urls = $this->_getEntityUrls($entityClassName, $entityName, $forced, $verbose, $output, $slugged);
-		$data = $templating->render('LadbCoreBundle:Command:_cron-sitemap-entities.xml.twig', array(
+		$data = $templating->render('@LadbCore/Command/_cron-sitemap-entities.xml.twig', array(
 			'urls' => $urls,
 		));
 

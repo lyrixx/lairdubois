@@ -6,7 +6,7 @@
     <fieldset>
         {{ form_errors(form.body) }}
         {{ form_widget(form.body, { 'attr':{ 'class':'form-control ladb-autosize' } }) }}
-        {% include 'LadbCoreBundle:Core/Picture:_form-gallery-collapse.part.html.twig' %}
+        {% include '@LadbCore/Core/Picture/_form-gallery-collapse.part.html.twig' %}
         {% block buttons %}{% endblock %}
     </fieldset>
 {{ form_end(form) }}

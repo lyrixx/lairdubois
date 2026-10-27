@@ -1,6 +1,6 @@
-{% extends 'LadbCoreBundle:Common:Layout/_show.html.twig' %}
+{% extends '@LadbCore/Common/Layout/_show.html.twig' %}
 
-{% use 'LadbCoreBundle:Common/Blocks:map.blocks.html.twig' %}
+{% use '@LadbCore/Common/Blocks/map.blocks.html.twig' %}
 
 {% set entity = find %}
 
@@ -35,18 +35,18 @@
 {% endblock %}
 
 {% block bodyHeaderContainerContent %}
-    {% include 'LadbCoreBundle:Common/Header:_entity-show-header.part.html.twig' %}
+    {% include '@LadbCore/Common/Header/_entity-show-header.part.html.twig' %}
 {% endblock %}
 
 {% block contentBody %}
     {% if find.isDraft %}
-        {% include 'LadbCoreBundle:Find/Find:_draft-alert.part.html.twig' %}
+        {% include '@LadbCore/Find/Find/_draft-alert.part.html.twig' %}
     {% endif %}
     <div class="ladb-find">
         {% if find.kind == constant('Ladb\\CoreBundle\\Entity\\Find\\Find::KIND_WEBSITE') %}
             <div class="ladb-thumb">
                 <a href="{{ find.content.url }}" target="_blank" rel="noreferrer noopener" class="thumbnail">
-                    {% include 'LadbCoreBundle:Core/Picture:_img.part.html.twig' with { 'picture':find.mainPicture, 'width':'600', 'height':'600', 'filterMode':'i', 'alt':find.title, 'attribute':'data-pin-nopin="true"', 'emptyWebPath':'empty_find.png' } %}
+                    {% include '@LadbCore/Core/Picture/_img.part.html.twig' with { 'picture':find.mainPicture, 'width':'600', 'height':'600', 'filterMode':'i', 'alt':find.title, 'attribute':'data-pin-nopin="true"', 'emptyWebPath':'empty_find.png' } %}
                     {% if find.content.host %}
                         <div class="ladb-find-thumbnail-caption">
                             <div class="ladb-find-thumbnail-caption-host">{{ find.content.host }}</div>
@@ -61,7 +61,7 @@
             {{ ladb_video_player_frame(find.content.kind, find.content.embedIdentifier, 560, 420, 'ladb-margin-bottom thumbnail', true)|raw }}
         {% endif %}
         {% if find.content.pictures is defined %}
-            {% include 'LadbCoreBundle:Common:_entity-showcase.part.html.twig' with { 'entity':find, 'pictures':find.content.pictures, 'alt':find.title, 'editable':(permissionContext.editable and permissionContext.isGrantedOwner) } %}
+            {% include '@LadbCore/Common/_entity-showcase.part.html.twig' with { 'entity':find, 'pictures':find.content.pictures, 'alt':find.title, 'editable':(permissionContext.editable and permissionContext.isGrantedOwner) } %}
         {% endif %}
         {% if find.content.location is defined and find.content.location is not null %}
             <div class="ladb-link">
@@ -85,15 +85,15 @@
         <hr>
         <div class="ladb-body">
             {% for block in find.bodyBlocks %}
-                {% include 'LadbCoreBundle:Core/Block:_show-'~block.strippedName~'.part.html.twig' %}
+                {% include '@LadbCore/Core/Block/_show-'~block.strippedName~'.part.html.twig' %}
             {% endfor %}
         </div>
     </div>
     {% if find.updatedAt > find.createdAt %}
-        {% include 'LadbCoreBundle:Common:_updated-age.part.html.twig' with { 'entity':find } %}
+        {% include '@LadbCore/Common/_updated-age.part.html.twig' with { 'entity':find } %}
     {% endif %}
     {% if not permissionContext.isOwner %}
-        {% include 'LadbCoreBundle:Common:_like-and-follow.part.html.twig' %}
+        {% include '@LadbCore/Common/_like-and-follow.part.html.twig' %}
     {% endif %}
     {% if find.id == 2975 %}
         <div class="panel panel-default">
@@ -102,36 +102,36 @@
             </div>
         </div>
     {% else %}
-        {% include 'LadbCoreBundle:Core/Comment:_widget.part.html.twig' %}
+        {% include '@LadbCore/Core/Comment/_widget.part.html.twig' %}
     {% endif %}
 {% endblock %}
 
 {% block contentMetasPanel %}
     <div class="ladb-metas">
-        {% include 'LadbCoreBundle:Core/Like:_meta-counter.part.html.twig' %}
-        {% include 'LadbCoreBundle:Core/View:_meta-counter.part.html.twig' %}
-        {% include 'LadbCoreBundle:Core/Comment:_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/Like/_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/View/_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/Comment/_meta-counter.part.html.twig' %}
         {% if hasMap %}
             <div class="ladb-meta">
                 {% if hasMap %}
-                    {% include 'LadbCoreBundle:Common:_map-area.part.html.twig' with { 'autoInit':true, 'mapHeight':'150px', 'markersUrl':path('core_find_location', { 'id':find.id }), 'classes':'ladb-map-thumbnail ladb-margin-top' } %}
+                    {% include '@LadbCore/Common/_map-area.part.html.twig' with { 'autoInit':true, 'mapHeight':'150px', 'markersUrl':path('core_find_location', { 'id':find.id }), 'classes':'ladb-map-thumbnail ladb-margin-top' } %}
                 {% endif %}
             </div>
         {% endif %}
     </div>
-    {% include 'LadbCoreBundle:Core/Tag:_metas.part.html.twig' with { 'tags':find.tags, 'type':'finds' } %}
+    {% include '@LadbCore/Core/Tag/_metas.part.html.twig' with { 'tags':find.tags, 'type':'finds' } %}
 {% endblock %}
 
 {% block contentSuggests %}
     {% if userFinds is not empty %}
         <div class="panel panel-default">
             <div class="panel-heading">
-                {{ ('find.find.other_from')|trans() }} {% include 'LadbCoreBundle:Core/User:_displayname-link.part.html.twig' with { 'user':find.user, 'noMicrodata':true } %}
+                {{ ('find.find.other_from')|trans() }} {% include '@LadbCore/Core/User/_displayname-link.part.html.twig' with { 'user':find.user, 'noMicrodata':true } %}
             </div>
             <div class="panel-body row">
                 {% for userFind in userFinds %}
                     <div class="col-xs-6">
-                        {% include 'LadbCoreBundle:Find/Find:_thumbnail-link.part.html.twig' with { 'find':userFind } %}
+                        {% include '@LadbCore/Find/Find/_thumbnail-link.part.html.twig' with { 'find':userFind } %}
                     </div>
                 {% endfor %}
                 {% if find.user.meta.publicFindCount > 2 %}
@@ -150,7 +150,7 @@
             <div class="panel-body row">
                 {% for similarFind in similarFinds %}
                     <div class="col-xs-6">
-                        {% include 'LadbCoreBundle:Find/Find:_thumbnail-link.part.html.twig' with { 'find':similarFind, 'classes':(loop.last ? null : 'ladb-margin-bottom') } %}
+                        {% include '@LadbCore/Find/Find/_thumbnail-link.part.html.twig' with { 'find':similarFind, 'classes':(loop.last ? null : 'ladb-margin-bottom') } %}
                     </div>
                 {% endfor %}
             </div>

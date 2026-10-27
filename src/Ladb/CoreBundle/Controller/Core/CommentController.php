@@ -46,7 +46,7 @@ class CommentController extends AbstractController {
 
 	/**
 	 * @Route("/{entityType}/{entityId}/{parentId}/new", requirements={"entityType" = "\d+", "entityId" = "\d+", "parentId" = "\d+"}, name="core_comment_new")
-	 * @Template("LadbCoreBundle:Core/Comment:new-xhr.html.twig")
+	 * @Template("@LadbCore/Core/Comment/new-xhr.html.twig")
 	 */
 	public function newAction(Request $request, $entityType, $entityId, CommentableUtils $commentUtils, FormFactoryInterface $formFactory, TypableUtils $typableUtils, $parentId = 0) {
 		if (!$request->isXmlHttpRequest()) {
@@ -80,7 +80,7 @@ class CommentController extends AbstractController {
 
 	/**
 	 * @Route("/{entityType}/{entityId}/{parentId}/create", requirements={"entityType" = "\d+", "entityId" = "\d+", "parentId" = "\d+"}, methods={"POST"}, name="core_comment_create")
-	 * @Template("LadbCoreBundle:Core/Comment:new-xhr.html.twig")
+	 * @Template("@LadbCore/Core/Comment/new-xhr.html.twig")
 	 */
 	public function createAction(Request $request, $entityType, $entityId, CommentableUtils $commentUtils, CommentableUtils $commentableUtils, FormFactoryInterface $formFactory, TypableUtils $typableUtils, $parentId = 0) {
 		if (!$request->isXmlHttpRequest()) {
@@ -132,7 +132,7 @@ class CommentController extends AbstractController {
 
 			$commentableUtils->finalizeNewComment($comment, $entity);
 
-			return $this->render('LadbCoreBundle:Core/Comment:create-xhr.html.twig', array( 'comment' => $comment ));
+			return $this->render('@LadbCore/Core/Comment/create-xhr.html.twig', array( 'comment' => $comment ));
 		}
 
 		$mentionStrategy = $commentUtils->getMentionStrategy($entity);
@@ -148,7 +148,7 @@ class CommentController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_comment_edit")
-	 * @Template("LadbCoreBundle:Core/Comment:edit-xhr.html.twig")
+	 * @Template("@LadbCore/Core/Comment/edit-xhr.html.twig")
 	 */
 	public function editAction(Request $request, $id, CommentableUtils $commentUtils, FormFactoryInterface $formFactory, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
@@ -180,7 +180,7 @@ class CommentController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_comment_update")
-	 * @Template("LadbCoreBundle:Core/Comment:edit-xhr.html.twig")
+	 * @Template("@LadbCore/Core/Comment/edit-xhr.html.twig")
 	 */
 	public function updateAction(Request $request, $id, CommentableUtils $commentUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, FormFactoryInterface $formFactory, MentionUtils $mentionUtils, PicturedUtils $picturedUtils, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
@@ -218,7 +218,7 @@ class CommentController extends AbstractController {
 			// Process mentions
 			$mentionUtils->processMentions($comment);
 
-			return $this->render('LadbCoreBundle:Core/Comment:update-xhr.html.twig', array( 'comment' => $comment ));
+			return $this->render('@LadbCore/Core/Comment/update-xhr.html.twig', array( 'comment' => $comment ));
 		}
 
 		// Retrieve related entity
@@ -236,7 +236,7 @@ class CommentController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_comment_delete")
-	 * @Template("LadbCoreBundle:Core/Comment:delete-xhr.html.twig")
+	 * @Template("@LadbCore/Core/Comment/delete-xhr.html.twig")
 	 */
 	public function deleteAction($id, CommentableUtils $commentableUtils, SearchUtils $searchUtils, TypableUtils $typableUtils) {
 		$om = $this->getDoctrine()->getManager();
@@ -292,7 +292,7 @@ class CommentController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/admin/moveup", requirements={"id" = "\d+"}, name="core_comment_admin_moveup")
-	 * @Template("LadbCoreBundle:Core/Comment:moveup-xhr.html.twig")
+	 * @Template("@LadbCore/Core/Comment/moveup-xhr.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_comment_admin_moveup)")
 	 */
 	public function adminMoveupAction($id) {

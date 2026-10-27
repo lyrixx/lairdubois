@@ -43,7 +43,7 @@ class ReviewController extends AbstractController {
 
 	/**
 	 * @Route("/{entityType}/{entityId}/new", requirements={"entityType" = "\d+", "entityId" = "\d+"}, name="core_review_new")
-	 * @Template("LadbCoreBundle:Core/Review:new-xhr.html.twig")
+	 * @Template("@LadbCore/Core/Review/new-xhr.html.twig")
 	 */
 	public function newAction(Request $request, $entityType, $entityId, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
@@ -70,7 +70,7 @@ class ReviewController extends AbstractController {
 
 	/**
 	 * @Route("/{entityType}/{entityId}/create",requirements={"entityType" = "\d+", "entityId" = "\d+"}, methods={"POST"}, name="core_review_create")
-	 * @Template("LadbCoreBundle:Core/Review:new-xhr.html.twig")
+	 * @Template("@LadbCore/Core/Review/new-xhr.html.twig")
 	 */
 	public function createAction(Request $request, $entityType, $entityId, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, ReviewableUtils $reviewableUtils, TypableUtils $typableUtils, WatchableUtils $watchableUtils) {
 		if (!$request->isXmlHttpRequest()) {
@@ -132,7 +132,7 @@ class ReviewController extends AbstractController {
 
 			$om->flush();
 
-			return $this->render('LadbCoreBundle:Core/Review:create-xhr.html.twig', array(
+			return $this->render('@LadbCore/Core/Review/create-xhr.html.twig', array(
 				'entity' => $entity,
 				'review' => $review,
 			));
@@ -146,7 +146,7 @@ class ReviewController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_review_edit")
-	 * @Template("LadbCoreBundle:Core/Review:edit-xhr.html.twig")
+	 * @Template("@LadbCore/Core/Review/edit-xhr.html.twig")
 	 */
 	public function editAction(Request $request, $id, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
@@ -178,7 +178,7 @@ class ReviewController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_review_update")
-	 * @Template("LadbCoreBundle:Core/Review:edit-xhr.html.twig")
+	 * @Template("@LadbCore/Core/Review/edit-xhr.html.twig")
 	 */
 	public function updateAction(Request $request, $id, FieldPreprocessorUtils $fieldPreprocessorUtils, ReviewableUtils $reviewableUtils, SearchUtils $searchUtils, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
@@ -218,7 +218,7 @@ class ReviewController extends AbstractController {
 			// Search index update
 			$searchUtils->replaceEntityInIndex($entity);
 
-			return $this->render('LadbCoreBundle:Core/Review:update-xhr.html.twig', array(
+			return $this->render('@LadbCore/Core/Review/update-xhr.html.twig', array(
 				'entity' => $entity,
 				'review' => $review,
 			));

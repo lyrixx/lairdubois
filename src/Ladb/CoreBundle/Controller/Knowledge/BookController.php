@@ -41,7 +41,7 @@ class BookController extends AbstractController {
 
 	/**
 	 * @Route("/new", name="core_book_new")
-	 * @Template("LadbCoreBundle:Knowledge/Book:new.html.twig")
+	 * @Template("@LadbCore/Knowledge/Book/new.html.twig")
 	 */
 	public function newAction(KnowledgeUtils $knowledgeUtils) {
 
@@ -61,7 +61,7 @@ class BookController extends AbstractController {
 
 	/**
 	 * @Route("/create", methods={"POST"}, name="core_book_create")
-	 * @Template("LadbCoreBundle:Knowledge/Book:new.html.twig")
+	 * @Template("@LadbCore/Knowledge/Book/new.html.twig")
 	 */
 	public function createAction(Request $request, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, TranslatorInterface $translator) {
 
@@ -158,7 +158,7 @@ class BookController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/widget", requirements={"id" = "\d+"}, name="core_book_widget")
-	 * @Template("LadbCoreBundle:Knowledge/Book:widget-xhr.html.twig")
+	 * @Template("@LadbCore/Knowledge/Book/widget-xhr.html.twig")
 	 */
 	public function widgetAction($id) {
 
@@ -173,7 +173,7 @@ class BookController extends AbstractController {
 	/**
 	 * @Route("/", name="core_book_list")
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_book_list_page")
-	 * @Template("LadbCoreBundle:Knowledge/Book:list.html.twig")
+	 * @Template("@LadbCore/Knowledge/Book/list.html.twig")
 	 */
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, ElasticaQueryUtils $elasticaQueryUtils, SearchUtils $searchUtils, $page = 0) {
 
@@ -329,7 +329,7 @@ class BookController extends AbstractController {
 		));
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Knowledge/Book:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Knowledge/Book/list-xhr.html.twig', $parameters);
 		}
 
 		return $parameters;
@@ -337,7 +337,7 @@ class BookController extends AbstractController {
 
 	/**
 	 * @Route("/{id}.html", name="core_book_show")
-	 * @Template("LadbCoreBundle:Knowledge/Book:show.html.twig")
+	 * @Template("@LadbCore/Knowledge/Book/show.html.twig")
 	 */
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, LikableUtils $likableUtils, ReviewableUtils $reviewableUtils, SearchUtils $searchUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();

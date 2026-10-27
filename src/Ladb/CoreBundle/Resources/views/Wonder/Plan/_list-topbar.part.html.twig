@@ -1,11 +1,11 @@
-{% extends 'LadbCoreBundle:Common:_list-topbar.part.html.twig' %}
+{% extends '@LadbCore/Common/_list-topbar.part.html.twig' %}
 
 {% set heading = 'wonder.plan.list'|trans() %}
 
 {% block listTopbarMiddleInner %}
-    {% include 'LadbCoreBundle:Wonder/Plan:_searchbox.part.html.twig' %}
+    {% include '@LadbCore/Wonder/Plan/_searchbox.part.html.twig' %}
 {% endblock %}
 
 {% block listTopbarRightInner %}
-    {% include 'LadbCoreBundle:Core/Member:_widget.part.html.twig' with { 'titleTransKey':'wonder.plan.new', 'route':'core_plan_new' } %}
+    {% include '@LadbCore/Core/Member/_widget.part.html.twig' with { 'titleTransKey':'wonder.plan.new', 'route':'core_plan_new' } %}
 {% endblock %}

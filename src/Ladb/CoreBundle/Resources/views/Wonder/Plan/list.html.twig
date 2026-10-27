@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:Layout/_list.html.twig' %}
+{% extends '@LadbCore/Common/Layout/_list.html.twig' %}
 
 {% set pageTitle = 'wonder.plan.list'|trans() %}
 {% set pageDescription = 'wonder.plan.description'|trans() %}
@@ -12,9 +12,9 @@
 {% set countableEntityList = true %}
 
 {% block bodyHeaderContainerContent %}
-    {% include 'LadbCoreBundle:Wonder/Plan:_list-topbar.part.html.twig' %}
+    {% include '@LadbCore/Wonder/Plan/_list-topbar.part.html.twig' %}
 {% endblock %}
 
 {% block autopagerContainerInner %}
-    {% include 'LadbCoreBundle:Wonder/Plan:_list-n.part.html.twig' %}
+    {% include '@LadbCore/Wonder/Plan/_list-n.part.html.twig' %}
 {% endblock %}

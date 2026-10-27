@@ -252,7 +252,7 @@ class OpencutlistController extends AbstractController {
     /**
 	 * @Route("/stats", name="core_opencutlist_stats")
 	 * @Route("/stats/{page}", requirements={"page" = "\d+"}, name="core_opencutlist_stats_page")
-	 * @Template("LadbCoreBundle:Opencutlist:stats.html.twig")
+	 * @Template("@LadbCore/Opencutlist/stats.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_OPENCUTLIST')", statusCode=404, message="Not allowed (core_opencutlist_stats)")
 	 */
 	public function statsAction(Request $request, PaginatorUtils $paginatorUtils, $page = 0) {
@@ -366,7 +366,7 @@ class OpencutlistController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Opencutlist:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Opencutlist/list-xhr.html.twig', $parameters);
 		}
 
 		return $parameters;
