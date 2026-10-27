@@ -67,7 +67,7 @@
         "jublonet/codebird-php": "2.6.1",
         "emojione/emojione": "4.5.0",
         "eonasdan/bootstrap-datetimepicker": "4.17.47",
-        "ps/image-optimizer": "1.2.0",
+        "ps/image-optimizer": "1.2.1",
         "egulias/email-validator": "^2.1.10",
         "jmikola/geojson": "^1.0",
         "giggsey/libphonenumber-for-php": "^7.2",
@@ -78,7 +78,7 @@
         "biblys/isbn": "2.0.6",
         "jaybizzle/crawler-detect" :"1.*",
         "suin/php-rss-writer": "^1.6",
-        "chrome-php/chrome": "^0.7.0",
+        "chrome-php/chrome": "^1.14.0",
 
         "components/jquery": "3.3.1",
         "components/jqueryui": "1.12.1",
