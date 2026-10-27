@@ -10,6 +10,12 @@ class TestimonialManager extends AbstractManager {
 
 	const NAME = 'ladb_core.knowledge_school_testimonial_manager';
 
+	private $activityUtils;
+
+	public function __construct(ActivityUtils $activityUtils) {
+		$this->activityUtils = $activityUtils;
+	}
+
 	/////
 
 	public function delete(Testimonial $testimonial, $flush = true) {
@@ -23,8 +29,7 @@ class TestimonialManager extends AbstractManager {
 		$school->incrementTestimonialCount(-1);
 
 		// Delete activities
-		$activityUtils = $this->get(ActivityUtils::NAME);
-		$activityUtils->deleteActivitiesByTestimonial($testimonial, false);
+		$this->activityUtils->deleteActivitiesByTestimonial($testimonial, false);
 
 		parent::deleteEntity($testimonial, $flush);
 	}

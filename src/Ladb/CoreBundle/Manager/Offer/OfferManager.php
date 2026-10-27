@@ -7,19 +7,26 @@ use Ladb\CoreBundle\Entity\Offer\Offer;
 use Ladb\CoreBundle\Event\PublicationEvent;
 use Ladb\CoreBundle\Event\PublicationListener;
 use Ladb\CoreBundle\Manager\AbstractAuthoredPublicationManager;
-use Ladb\CoreBundle\Manager\Core\WitnessManager;
 use Ladb\CoreBundle\Utils\ActivityUtils;
 use Ladb\CoreBundle\Utils\BlockBodiedUtils;
-use Ladb\CoreBundle\Utils\CommentableUtils;
 use Ladb\CoreBundle\Utils\FieldPreprocessorUtils;
-use Ladb\CoreBundle\Utils\LikableUtils;
-use Ladb\CoreBundle\Utils\ReportableUtils;
 use Ladb\CoreBundle\Utils\ViewableUtils;
-use Ladb\CoreBundle\Utils\WatchableUtils;
 
 class OfferManager extends AbstractAuthoredPublicationManager {
 
 	const NAME = 'ladb_core.offer_offer_manager';
+
+	private $activityUtils;
+	private $blockBodiedUtils;
+	private $fieldPreprocessorUtils;
+	private $viewableUtils;
+
+	public function __construct(ActivityUtils $activityUtils, BlockBodiedUtils $blockBodiedUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, ViewableUtils $viewableUtils) {
+		$this->activityUtils = $activityUtils;
+		$this->blockBodiedUtils = $blockBodiedUtils;
+		$this->fieldPreprocessorUtils = $fieldPreprocessorUtils;
+		$this->viewableUtils = $viewableUtils;
+	}
 
 	/////
 
@@ -68,7 +75,7 @@ class OfferManager extends AbstractAuthoredPublicationManager {
 	/////
 
 	public function convertToQuestion(Offer $offer, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 
 		// Create a new offer
 
@@ -81,8 +88,7 @@ class OfferManager extends AbstractAuthoredPublicationManager {
 		$question->setTitle($offer->getTitle());
 		$question->setUser($offer->getUser());
 
-		$blockBodiedUtils = $this->get(BlockBodiedUtils::NAME);
-		$blockBodiedUtils->copyBlocksTo($offer, $question);
+		$this->blockBodiedUtils->copyBlocksTo($offer, $question);
 
 		if ($offer->getPictures()->count() > 0) {
 
@@ -105,16 +111,14 @@ class OfferManager extends AbstractAuthoredPublicationManager {
 		}
 
 		// Setup question's htmlBody
-		$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
-		$fieldPreprocessorUtils->preprocessFields($question);
+		$this->fieldPreprocessorUtils->preprocessFields($question);
 
 		// Persist question to generate ID
 		$om->persist($question);
 		$om->flush();
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED_FROM_CONVERT, new PublicationEvent($question));
+		$this->dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED_FROM_CONVERT, new PublicationEvent($question));
 
 		// User counter
 		if ($question->getIsDraft()) {
@@ -124,32 +128,25 @@ class OfferManager extends AbstractAuthoredPublicationManager {
 		}
 
 		// Transfer views
-		$viewableUtils = $this->get(ViewableUtils::NAME);
-		$viewableUtils->transferViews($offer, $question, false);
+		$this->viewableUtils->transferViews($offer, $question, false);
 
 		// Transfer likes
-		$likableUtils = $this->get(LikableUtils::NAME);
-		$likableUtils->transferLikes($offer, $question, false);
+		$this->likableUtils->transferLikes($offer, $question, false);
 
 		// Transfer comments
-		$commentableUtils = $this->get(CommentableUtils::NAME);
-		$commentableUtils->transferComments($offer, $question, false);
+		$this->commentableUtils->transferComments($offer, $question, false);
 
 		// Transfer watches
-		$watchableUtils = $this->get(WatchableUtils::NAME);
-		$watchableUtils->transferWatches($offer, $question, false);
+		$this->watchableUtils->transferWatches($offer, $question, false);
 
 		// transfer reports
-		$reportableUtils = $this->get(ReportableUtils::NAME);
-		$reportableUtils->transferReports($offer, $question, false);
+		$this->reportableUtils->transferReports($offer, $question, false);
 
 		// Transfer publish activities
-		$activityUtils = $this->get(ActivityUtils::NAME);
-		$activityUtils->transferPublishActivities($offer->getType(), $offer->getId(), $question->getType(), $question->getId(), false);
+		$this->activityUtils->transferPublishActivities($offer->getType(), $offer->getId(), $question->getType(), $question->getId(), false);
 
 		// Create the witness
-		$witnessManager = $this->get(WitnessManager::NAME);
-		$witnessManager->createConvertedByPublication($offer, $question, false);
+		$this->witnessManager->createConvertedByPublication($offer, $question, false);
 
 		// Delete the offer
 		$this->delete($offer, false, false);

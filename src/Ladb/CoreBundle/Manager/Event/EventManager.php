@@ -12,6 +12,14 @@ class EventManager extends AbstractAuthoredPublicationManager {
 
 	const NAME = 'ladb_core.event_event_manager';
 
+	private $feedbackableUtils;
+	private $joinableUtils;
+
+	public function __construct(FeedbackableUtils $feedbackableUtils, JoinableUtils $joinableUtils) {
+		$this->feedbackableUtils = $feedbackableUtils;
+		$this->joinableUtils = $joinableUtils;
+	}
+
 	/////
 
 	public function publish(Event $event, $flush = true) {
@@ -40,12 +48,10 @@ class EventManager extends AbstractAuthoredPublicationManager {
 		}
 
 		// Delete joins
-		$joinableUtils = $this->get(JoinableUtils::NAME);
-		$joinableUtils->deleteJoins($event, false);
+		$this->joinableUtils->deleteJoins($event, false);
 
 		// Delete feedbacks
-		$feedbackableUtils = $this->get(FeedbackableUtils::NAME);
-		$feedbackableUtils->deleteFeedbacks($event, false);
+		$this->feedbackableUtils->deleteFeedbacks($event, false);
 
 		parent::deletePublication($event, $withWitness, $flush);
 	}

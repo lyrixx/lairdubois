@@ -14,8 +14,14 @@ class WitnessManager extends AbstractManager {
 
 	const NAME = 'ladb_core.core_witness_manager';
 
+	private $typableUtils;
+
+	public function __construct(TypableUtils $typableUtils) {
+		$this->typableUtils = $typableUtils;
+	}
+
 	public function deleteByPublication(AbstractPublication $publication, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$witnessRepository = $om->getRepository(Witness::CLASS_NAME);
 
 		$witness = $witnessRepository->findOneByEntityTypeAndEntityId($publication->getType(), $publication->getId());
@@ -40,7 +46,7 @@ class WitnessManager extends AbstractManager {
 		$witness->setMeta($reason);
 
 		if ($flush) {
-			$om = $this->getDoctrine()->getManager();
+			$om = $this->doctrine->getManager();
 			$om->flush();
 		}
 
@@ -48,7 +54,7 @@ class WitnessManager extends AbstractManager {
 	}
 
 	public function createByPublication(AbstractPublication $publication, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$witnessRepository = $om->getRepository(Witness::CLASS_NAME);
 
 		// Remove if it exists
@@ -77,7 +83,7 @@ class WitnessManager extends AbstractManager {
 		$witness->setMeta(array( $toPublication->getType(), $toPublication->getId() ));
 
 		if ($flush) {
-			$om = $this->getDoctrine()->getManager();
+			$om = $this->doctrine->getManager();
 			$om->flush();
 		}
 
@@ -91,7 +97,7 @@ class WitnessManager extends AbstractManager {
 		$witness->setMeta($reason);
 
 		if ($flush) {
-			$om = $this->getDoctrine()->getManager();
+			$om = $this->doctrine->getManager();
 			$om->flush();
 		}
 
@@ -101,7 +107,7 @@ class WitnessManager extends AbstractManager {
 	/////
 
 	public function checkResponse($entityType, $entityId) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$witnessRepository = $om->getRepository(Witness::CLASS_NAME);
 
 		$witness = $witnessRepository->findOneByEntityTypeAndEntityId($entityType, $entityId);
@@ -119,12 +125,11 @@ class WitnessManager extends AbstractManager {
 					$meta = $witness->getMeta();
 					$entityType = $meta[0];
 					$entityId = $meta[1];
-					$typableUtils = $this->get(TypableUtils::NAME);
-					$typable = $typableUtils->findTypable($entityType, $entityId);
+					$typable = $this->typableUtils->findTypable($entityType, $entityId);
 					if (is_null($typable)) {
 						throw new NotFoundHttpException('Unable to find entity (type='.$entityType.' id='.$entityId.').');
 					}
-					return new RedirectResponse($typableUtils->getUrlAction($typable), 301);	// 301 = Moved Permanently
+					return new RedirectResponse($this->typableUtils->getUrlAction($typable), 301);	// 301 = Moved Permanently
 
 				case Witness::KIND_DELETED:
 					throw new GoneHttpException('Deleted entity (type='.$entityType.' id='.$entityId.').');

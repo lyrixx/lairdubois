@@ -7,20 +7,29 @@ use Ladb\CoreBundle\Entity\Howto\Article;
 use Ladb\CoreBundle\Entity\Wonder\Creation;
 use Ladb\CoreBundle\Event\PublicationEvent;
 use Ladb\CoreBundle\Event\PublicationListener;
-use Ladb\CoreBundle\Manager\Core\WitnessManager;
 use Ladb\CoreBundle\Utils\ActivityUtils;
 use Ladb\CoreBundle\Utils\BlockBodiedUtils;
-use Ladb\CoreBundle\Utils\CommentableUtils;
 use Ladb\CoreBundle\Utils\FeedbackableUtils;
 use Ladb\CoreBundle\Utils\FieldPreprocessorUtils;
-use Ladb\CoreBundle\Utils\LikableUtils;
-use Ladb\CoreBundle\Utils\ReportableUtils;
 use Ladb\CoreBundle\Utils\ViewableUtils;
-use Ladb\CoreBundle\Utils\WatchableUtils;
 
 class CreationManager extends AbstractWonderManager {
 
 	const NAME = 'ladb_core.wonder_creation_manager';
+
+	private $activityUtils;
+	private $blockBodiedUtils;
+	private $feedbackableUtils;
+	private $fieldPreprocessorUtils;
+	private $viewableUtils;
+
+	public function __construct(ActivityUtils $activityUtils, BlockBodiedUtils $blockBodiedUtils, FeedbackableUtils $feedbackableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, ViewableUtils $viewableUtils) {
+		$this->activityUtils = $activityUtils;
+		$this->blockBodiedUtils = $blockBodiedUtils;
+		$this->feedbackableUtils = $feedbackableUtils;
+		$this->fieldPreprocessorUtils = $fieldPreprocessorUtils;
+		$this->viewableUtils = $viewableUtils;
+	}
 
 	/////
 
@@ -160,8 +169,7 @@ class CreationManager extends AbstractWonderManager {
 		}
 
 		// Delete feedbacks
-		$feedbackableUtils = $this->get(FeedbackableUtils::NAME);
-		$feedbackableUtils->deleteFeedbacks($creation, false);
+		$this->feedbackableUtils->deleteFeedbacks($creation, false);
 
 		parent::deleteWonder($creation, $withWitness, $flush);
 	}
@@ -169,7 +177,7 @@ class CreationManager extends AbstractWonderManager {
 	/////
 
 	public function convertToWorkshop(Creation $creation, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 
 		// Create a new workshop
 
@@ -184,8 +192,7 @@ class CreationManager extends AbstractWonderManager {
 		$workshop->setMainPicture($creation->getMainPicture());
 		$workshop->setLicense(new \Ladb\CoreBundle\Entity\Core\License($creation->getLicense()->getAllowDerivs(), $creation->getLicense()->getShareAlike(), $creation->getLicense()->getAllowCommercial()));
 
-		$blockBodiedUtils = $this->get(BlockBodiedUtils::NAME);
-		$blockBodiedUtils->copyBlocksTo($creation, $workshop);
+		$this->blockBodiedUtils->copyBlocksTo($creation, $workshop);
 
 		foreach ($creation->getPictures() as $picture) {
 			$workshop->addPicture($picture);
@@ -211,16 +218,14 @@ class CreationManager extends AbstractWonderManager {
 		}
 
 		// Setup workshop's htmlBody
-		$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
-		$fieldPreprocessorUtils->preprocessFields($workshop);
+		$this->fieldPreprocessorUtils->preprocessFields($workshop);
 
 		// Persist workshop to generate ID
 		$om->persist($workshop);
 		$om->flush();
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED_FROM_CONVERT, new PublicationEvent($workshop));
+		$this->dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED_FROM_CONVERT, new PublicationEvent($workshop));
 
 		// User counter
 		if ($workshop->getIsDraft()) {
@@ -230,36 +235,28 @@ class CreationManager extends AbstractWonderManager {
 		}
 
 		// Transfer views
-		$viewableUtils = $this->get(ViewableUtils::NAME);
-		$viewableUtils->transferViews($creation, $workshop, false);
+		$this->viewableUtils->transferViews($creation, $workshop, false);
 
 		// Transfer likes
-		$likableUtils = $this->get(LikableUtils::NAME);
-		$likableUtils->transferLikes($creation, $workshop, false);
+		$this->likableUtils->transferLikes($creation, $workshop, false);
 
 		// Transfer comments
-		$commentableUtils = $this->get(CommentableUtils::NAME);
-		$commentableUtils->transferComments($creation, $workshop, false);
+		$this->commentableUtils->transferComments($creation, $workshop, false);
 
 		// Transfer watches
-		$watchableUtils = $this->get(WatchableUtils::NAME);
-		$watchableUtils->transferWatches($creation, $workshop, false);
+		$this->watchableUtils->transferWatches($creation, $workshop, false);
 
 		// transfer reports
-		$reportableUtils = $this->get(ReportableUtils::NAME);
-		$reportableUtils->transferReports($creation, $workshop, false);
+		$this->reportableUtils->transferReports($creation, $workshop, false);
 
 		// Transfer feedbacks
-		$feedbackableUtils = $this->get(FeedbackableUtils::NAME);
-		$feedbackableUtils->transferFeedbacks($creation, $workshop, false);
+		$this->feedbackableUtils->transferFeedbacks($creation, $workshop, false);
 
 		// Transfer publish activities
-		$activityUtils = $this->get(ActivityUtils::NAME);
-		$activityUtils->transferPublishActivities($creation->getType(), $creation->getId(), $workshop->getType(), $workshop->getId(), false);
+		$this->activityUtils->transferPublishActivities($creation->getType(), $creation->getId(), $workshop->getType(), $workshop->getId(), false);
 
 		// Create the witness
-		$witnessManager = $this->get(WitnessManager::NAME);
-		$witnessManager->createConvertedByPublication($creation, $workshop, false);
+		$this->witnessManager->createConvertedByPublication($creation, $workshop, false);
 
 		// Delete the creation
 		$this->delete($creation, false, false);
@@ -272,7 +269,7 @@ class CreationManager extends AbstractWonderManager {
 	}
 
 	public function convertToHowto(Creation $creation, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 
 		// Create a new howto and its article
 
@@ -296,8 +293,7 @@ class CreationManager extends AbstractWonderManager {
 
 		}
 
-		$blockBodiedUtils = $this->get(BlockBodiedUtils::NAME);
-		$blockBodiedUtils->copyBlocksTo($creation, $article);
+		$this->blockBodiedUtils->copyBlocksTo($creation, $article);
 
 		$howto = new \Ladb\CoreBundle\Entity\Howto\Howto();
 		$howto->setCreatedAt($creation->getCreatedAt());
@@ -348,9 +344,8 @@ class CreationManager extends AbstractWonderManager {
 		}
 
 		// Setup howto's and article's htmlBody
-		$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
-		$fieldPreprocessorUtils->preprocessFields($howto);
-		$fieldPreprocessorUtils->preprocessFields($article);
+		$this->fieldPreprocessorUtils->preprocessFields($howto);
+		$this->fieldPreprocessorUtils->preprocessFields($article);
 
 		// Persist howto to generate ID
 		$om->persist($howto);
@@ -358,8 +353,7 @@ class CreationManager extends AbstractWonderManager {
 		$om->flush();
 
 		// Dispatch publications event
-		$dispatcher = $this->get('event_dispatcher');
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED_FROM_CONVERT, new PublicationEvent($howto));
+		$this->dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED_FROM_CONVERT, new PublicationEvent($howto));
 
 		// User counter
 		if ($howto->getIsDraft()) {
@@ -369,32 +363,25 @@ class CreationManager extends AbstractWonderManager {
 		}
 
 		// Transfer views
-		$viewableUtils = $this->get(ViewableUtils::NAME);
-		$viewableUtils->transferViews($creation, $howto, false);
+		$this->viewableUtils->transferViews($creation, $howto, false);
 
 		// Transfer likes
-		$likableUtils = $this->get(LikableUtils::NAME);
-		$likableUtils->transferLikes($creation, $howto, false);
+		$this->likableUtils->transferLikes($creation, $howto, false);
 
 		// Transfer comments
-		$commentableUtils = $this->get(CommentableUtils::NAME);
-		$commentableUtils->transferComments($creation, $howto, false);
+		$this->commentableUtils->transferComments($creation, $howto, false);
 
 		// Transfer watches
-		$watchableUtils = $this->get(WatchableUtils::NAME);
-		$watchableUtils->transferWatches($creation, $howto, false);
+		$this->watchableUtils->transferWatches($creation, $howto, false);
 
 		// transfer reports
-		$reportableUtils = $this->get(ReportableUtils::NAME);
-		$reportableUtils->transferReports($creation, $howto, false);
+		$this->reportableUtils->transferReports($creation, $howto, false);
 
 		// Transfer publish activities
-		$activityUtils = $this->get(ActivityUtils::NAME);
-		$activityUtils->transferPublishActivities($creation->getType(), $creation->getId(), $howto->getType(), $howto->getId(), false);
+		$this->activityUtils->transferPublishActivities($creation->getType(), $creation->getId(), $howto->getType(), $howto->getId(), false);
 
 		// Create the witness
-		$witnessManager = $this->get(WitnessManager::NAME);
-		$witnessManager->createConvertedByPublication($creation, $howto, false);
+		$this->witnessManager->createConvertedByPublication($creation, $howto, false);
 
 		// Delete the creation
 		$this->delete($creation, false, false);
@@ -407,7 +394,7 @@ class CreationManager extends AbstractWonderManager {
 	}
 
 	public function convertToFind(Creation $creation, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 
 		// Create a new find and its content
 
@@ -429,24 +416,21 @@ class CreationManager extends AbstractWonderManager {
 		$find->setContent($findContent);
 		$find->setMainPicture($creation->getMainPicture());
 
-		$blockBodiedUtils = $this->get(BlockBodiedUtils::NAME);
-		$blockBodiedUtils->copyBlocksTo($creation, $find);
+		$this->blockBodiedUtils->copyBlocksTo($creation, $find);
 
 		foreach ($creation->getTags() as $tag) {
 			$find->addTag($tag);
 		}
 
 		// Setup find's htmlBody
-		$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
-		$fieldPreprocessorUtils->preprocessFields($find);
+		$this->fieldPreprocessorUtils->preprocessFields($find);
 
 		// Persist find to generate ID
 		$om->persist($find);
 		$om->flush();
 
 		// Dispatch publications event
-		$dispatcher = $this->get('event_dispatcher');
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED_FROM_CONVERT, new PublicationEvent($find));
+		$this->dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED_FROM_CONVERT, new PublicationEvent($find));
 
 		// User counter
 		if ($find->getIsDraft()) {
@@ -456,32 +440,25 @@ class CreationManager extends AbstractWonderManager {
 		}
 
 		// Transfer views
-		$viewableUtils = $this->get(ViewableUtils::NAME);
-		$viewableUtils->transferViews($creation, $find, false);
+		$this->viewableUtils->transferViews($creation, $find, false);
 
 		// Transfer likes
-		$likableUtils = $this->get(LikableUtils::NAME);
-		$likableUtils->transferLikes($creation, $find, false);
+		$this->likableUtils->transferLikes($creation, $find, false);
 
 		// Transfer comments
-		$commentableUtils = $this->get(CommentableUtils::NAME);
-		$commentableUtils->transferComments($creation, $find, false);
+		$this->commentableUtils->transferComments($creation, $find, false);
 
 		// Transfer watches
-		$watchableUtils = $this->get(WatchableUtils::NAME);
-		$watchableUtils->transferWatches($creation, $find, false);
+		$this->watchableUtils->transferWatches($creation, $find, false);
 
 		// transfer reports
-		$reportableUtils = $this->get(ReportableUtils::NAME);
-		$reportableUtils->transferReports($creation, $find, false);
+		$this->reportableUtils->transferReports($creation, $find, false);
 
 		// Transfer publish activities
-		$activityUtils = $this->get(ActivityUtils::NAME);
-		$activityUtils->transferPublishActivities($creation->getType(), $creation->getId(), $find->getType(), $find->getId(), false);
+		$this->activityUtils->transferPublishActivities($creation->getType(), $creation->getId(), $find->getType(), $find->getId(), false);
 
 		// Create the witness
-		$witnessManager = $this->get(WitnessManager::NAME);
-		$witnessManager->createConvertedByPublication($creation, $find, false);
+		$this->witnessManager->createConvertedByPublication($creation, $find, false);
 
 		// Delete the creation
 		$this->delete($creation, false, false);
@@ -494,7 +471,7 @@ class CreationManager extends AbstractWonderManager {
 	}
 
 	public function convertToQuestion(Creation $creation, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 
 		// Create a new question
 
@@ -507,24 +484,21 @@ class CreationManager extends AbstractWonderManager {
 		$question->setTitle($creation->getTitle());
 		$question->setUser($creation->getUser());
 
-		$blockBodiedUtils = $this->get(BlockBodiedUtils::NAME);
-		$blockBodiedUtils->copyBlocksTo($creation, $question);
+		$this->blockBodiedUtils->copyBlocksTo($creation, $question);
 
 		foreach ($creation->getTags() as $tag) {
 			$question->addTag($tag);
 		}
 
 		// Setup question's htmlBody
-		$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
-		$fieldPreprocessorUtils->preprocessFields($question);
+		$this->fieldPreprocessorUtils->preprocessFields($question);
 
 		// Persist question to generate ID
 		$om->persist($question);
 		$om->flush();
 
 		// Dispatch publications event
-		$dispatcher = $this->get('event_dispatcher');
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED_FROM_CONVERT, new PublicationEvent($question));
+		$this->dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED_FROM_CONVERT, new PublicationEvent($question));
 
 		// User counter
 		if ($question->getIsDraft()) {
@@ -534,32 +508,25 @@ class CreationManager extends AbstractWonderManager {
 		}
 
 		// Transfer views
-		$viewableUtils = $this->get(ViewableUtils::NAME);
-		$viewableUtils->transferViews($creation, $question, false);
+		$this->viewableUtils->transferViews($creation, $question, false);
 
 		// Transfer likes
-		$likableUtils = $this->get(LikableUtils::NAME);
-		$likableUtils->transferLikes($creation, $question, false);
+		$this->likableUtils->transferLikes($creation, $question, false);
 
 		// Transfer comments
-		$commentableUtils = $this->get(CommentableUtils::NAME);
-		$commentableUtils->transferComments($creation, $question, false);
+		$this->commentableUtils->transferComments($creation, $question, false);
 
 		// Transfer watches
-		$watchableUtils = $this->get(WatchableUtils::NAME);
-		$watchableUtils->transferWatches($creation, $question, false);
+		$this->watchableUtils->transferWatches($creation, $question, false);
 
 		// transfer reports
-		$reportableUtils = $this->get(ReportableUtils::NAME);
-		$reportableUtils->transferReports($creation, $question, false);
+		$this->reportableUtils->transferReports($creation, $question, false);
 
 		// Transfer publish activities
-		$activityUtils = $this->get(ActivityUtils::NAME);
-		$activityUtils->transferPublishActivities($creation->getType(), $creation->getId(), $question->getType(), $question->getId(), false);
+		$this->activityUtils->transferPublishActivities($creation->getType(), $creation->getId(), $question->getType(), $question->getId(), false);
 
 		// Create the witness
-		$witnessManager = $this->get(WitnessManager::NAME);
-		$witnessManager->createConvertedByPublication($creation, $question, false);
+		$this->witnessManager->createConvertedByPublication($creation, $question, false);
 
 		// Delete the creation
 		$this->delete($creation, false, false);
@@ -572,7 +539,7 @@ class CreationManager extends AbstractWonderManager {
 	}
 
 	public function convertToOffer(Creation $creation, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 
 		// Create a new offer
 
@@ -590,8 +557,7 @@ class CreationManager extends AbstractWonderManager {
 		$offer->setCategory(\Ladb\CoreBundle\Entity\Offer\Offer::CATEGORY_OTHER);
 		$offer->setPrice('');
 
-		$blockBodiedUtils = $this->get(BlockBodiedUtils::NAME);
-		$blockBodiedUtils->copyBlocksTo($creation, $offer);
+		$this->blockBodiedUtils->copyBlocksTo($creation, $offer);
 
 		foreach ($creation->getPictures() as $picture) {
 			$offer->addPicture($picture);
@@ -602,16 +568,14 @@ class CreationManager extends AbstractWonderManager {
 		}
 
 		// Setup offer's htmlBody
-		$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
-		$fieldPreprocessorUtils->preprocessFields($offer);
+		$this->fieldPreprocessorUtils->preprocessFields($offer);
 
 		// Persist offer to generate ID
 		$om->persist($offer);
 		$om->flush();
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED_FROM_CONVERT, new PublicationEvent($offer));
+		$this->dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED_FROM_CONVERT, new PublicationEvent($offer));
 
 		// User counter
 		if ($offer->getIsDraft()) {
@@ -621,32 +585,25 @@ class CreationManager extends AbstractWonderManager {
 		}
 
 		// Transfer views
-		$viewableUtils = $this->get(ViewableUtils::NAME);
-		$viewableUtils->transferViews($creation, $offer, false);
+		$this->viewableUtils->transferViews($creation, $offer, false);
 
 		// Transfer likes
-		$likableUtils = $this->get(LikableUtils::NAME);
-		$likableUtils->transferLikes($creation, $offer, false);
+		$this->likableUtils->transferLikes($creation, $offer, false);
 
 		// Transfer comments
-		$commentableUtils = $this->get(CommentableUtils::NAME);
-		$commentableUtils->transferComments($creation, $offer, false);
+		$this->commentableUtils->transferComments($creation, $offer, false);
 
 		// Transfer watches
-		$watchableUtils = $this->get(WatchableUtils::NAME);
-		$watchableUtils->transferWatches($creation, $offer, false);
+		$this->watchableUtils->transferWatches($creation, $offer, false);
 
 		// transfer reports
-		$reportableUtils = $this->get(ReportableUtils::NAME);
-		$reportableUtils->transferReports($creation, $offer, false);
+		$this->reportableUtils->transferReports($creation, $offer, false);
 
 		// Transfer publish activities
-		$activityUtils = $this->get(ActivityUtils::NAME);
-		$activityUtils->transferPublishActivities($creation->getType(), $creation->getId(), $offer->getType(), $offer->getId(), false);
+		$this->activityUtils->transferPublishActivities($creation->getType(), $creation->getId(), $offer->getType(), $offer->getId(), false);
 
 		// Create the witness
-		$witnessManager = $this->get(WitnessManager::NAME);
-		$witnessManager->createConvertedByPublication($creation, $offer, false);
+		$this->witnessManager->createConvertedByPublication($creation, $offer, false);
 
 		// Delete the creation
 		$this->delete($creation, false, false);

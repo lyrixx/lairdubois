@@ -5,35 +5,55 @@ namespace Ladb\CoreBundle\Manager\Knowledge;
 use Ladb\CoreBundle\Entity\Knowledge\AbstractKnowledge;
 use Ladb\CoreBundle\Manager\AbstractPublicationManager;
 use Ladb\CoreBundle\Utils\ActivityUtils;
-use Ladb\CoreBundle\Utils\CommentableUtils;
 use Ladb\CoreBundle\Utils\PropertyUtils;
 use Ladb\CoreBundle\Utils\VotableUtils;
 
 abstract class AbstractKnowledgeManager extends AbstractPublicationManager {
 
+	protected $activityUtils;
+	protected $propertyUtils;
+	protected $votableUtils;
+
+	/**
+	 * @required
+	 */
+	public function setActivityUtils(ActivityUtils $activityUtils) {
+		$this->activityUtils = $activityUtils;
+	}
+
+	/**
+	 * @required
+	 */
+	public function setPropertyUtils(PropertyUtils $propertyUtils) {
+		$this->propertyUtils = $propertyUtils;
+	}
+
+	/**
+	 * @required
+	 */
+	public function setVotableUtils(VotableUtils $votableUtils) {
+		$this->votableUtils = $votableUtils;
+	}
+
 	protected function deleteKnowledge(AbstractKnowledge $knowledge, $withWitness = true, $flush = true) {
 
 		// Delete values (votes and proposals count)
-		$commentableUtils = $this->get(CommentableUtils::NAME);
-		$votableUtils = $this->get(VotableUtils::NAME);
-		$activityUtils = $this->get(ActivityUtils::NAME);
-		$propertyUtils = $this->get(PropertyUtils::NAME);
 		$fieldDefs = $knowledge->getFieldDefs();
 		foreach ($fieldDefs as $field => $fieldDef) {
-			$values = $propertyUtils->getValue($knowledge, $field.'_values');
+			$values = $this->propertyUtils->getValue($knowledge, $field.'_values');
 			foreach ($values as $value) {
 
 				// Decrement user proposal count
 				$value->getUser()->getMeta()->incrementProposalCount(-1);
 
 				// Delete comments
-				$commentableUtils->deleteComments($value, false);
+				$this->commentableUtils->deleteComments($value, false);
 
 				// Delete votes
-				$votableUtils->deleteVotes($value, $knowledge, false);
+				$this->votableUtils->deleteVotes($value, $knowledge, false);
 
 				// Delete activities
-				$activityUtils->deleteActivitiesByValue($value, false);
+				$this->activityUtils->deleteActivitiesByValue($value, false);
 
 			}
 		}

@@ -19,6 +19,32 @@ class AnswerManager extends AbstractManager {
 
 	const NAME = 'ladb_core.qa_answer_manager';
 
+	private $activityUtils;
+	private $commentableUtils;
+	private $fieldPreprocessorUtils;
+	private $mentionUtils;
+	private $questionManager;
+	private $searchUtils;
+	private $votableUtils;
+
+	public function __construct(ActivityUtils $activityUtils, CommentableUtils $commentableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, MentionUtils $mentionUtils, SearchUtils $searchUtils, VotableUtils $votableUtils) {
+		$this->activityUtils = $activityUtils;
+		$this->commentableUtils = $commentableUtils;
+		$this->fieldPreprocessorUtils = $fieldPreprocessorUtils;
+		$this->mentionUtils = $mentionUtils;
+		$this->searchUtils = $searchUtils;
+		$this->votableUtils = $votableUtils;
+	}
+
+	/**
+	 * Not in the constructor: QuestionManager receives this manager in its own.
+	 *
+	 * @required
+	 */
+	public function setQuestionManager(QuestionManager $questionManager) {
+		$this->questionManager = $questionManager;
+	}
+
 	/////
 
 	public function delete(Answer $answer, $flush = true) {
@@ -43,24 +69,19 @@ class AnswerManager extends AbstractManager {
 		/////
 
 		// Delete mentions
-		$mentionUtils = $this->get(MentionUtils::NAME);
-		$mentionUtils->deleteMentions($answer, false);
+		$this->mentionUtils->deleteMentions($answer, false);
 
 		// Delete comments
-		$commentableUtils = $this->get(CommentableUtils::NAME);
-		$commentableUtils->deleteComments($answer, false);
+		$this->commentableUtils->deleteComments($answer, false);
 
 		// Delete votes
-		$votableUtils = $this->get(VotableUtils::NAME);
-		$votableUtils->deleteVotes($answer, $question, false);
+		$this->votableUtils->deleteVotes($answer, $question, false);
 
 		// Delete activities
-		$activityUtils = $this->get(ActivityUtils::NAME);
-		$activityUtils->deleteActivitiesByAnswer($answer, false);
+		$this->activityUtils->deleteActivitiesByAnswer($answer, false);
 
 		// Compute answer counters
-		$questionManager = $this->container->get(QuestionManager::NAME);
-		$questionManager->computeAnswerCounters($question);
+		$this->questionManager->computeAnswerCounters($question);
 
 		parent::deleteEntity($answer, $flush);
 	}
@@ -68,7 +89,7 @@ class AnswerManager extends AbstractManager {
 	/////
 
 	public function converttocomment(Answer $answer, Question $question) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 
 		// Create a new comment on the question
 
@@ -92,8 +113,7 @@ class AnswerManager extends AbstractManager {
 			}
 		}
 
-		$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
-		$fieldPreprocessorUtils->preprocessFields($comment);
+		$this->fieldPreprocessorUtils->preprocessFields($comment);
 
 		// Comment counters
 
@@ -103,8 +123,7 @@ class AnswerManager extends AbstractManager {
 		$om->persist($comment);
 
 		// Create activity
-		$activityUtils = $this->get(ActivityUtils::NAME);
-		$activityUtils->createCommentActivity($comment, false);
+		$this->activityUtils->createCommentActivity($comment, false);
 
 		// Remove answer
 
@@ -112,8 +131,7 @@ class AnswerManager extends AbstractManager {
 
 		// Update index
 		if ($question instanceof IndexableInterface) {
-			$searchUtils = $this->get(SearchUtils::NAME);
-			$searchUtils->replaceEntityInIndex($question);
+			$this->searchUtils->replaceEntityInIndex($question);
 		}
 
 	}

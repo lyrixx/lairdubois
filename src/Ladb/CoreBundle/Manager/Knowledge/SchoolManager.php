@@ -9,6 +9,12 @@ class SchoolManager extends AbstractKnowledgeManager {
 
 	const NAME = 'ladb_core.knowledge_school_manager';
 
+	private $testimonialManager;
+
+	public function __construct(TestimonialManager $testimonialManager) {
+		$this->testimonialManager = $testimonialManager;
+	}
+
 	public function delete(School $school, $withWitness = true, $flush = true) {
 
 		// Unlink creations
@@ -27,9 +33,8 @@ class SchoolManager extends AbstractKnowledgeManager {
 		}
 
 		// Delete testimonials
-		$testimonialManager = $this->get(TestimonialManager::NAME);
 		foreach ($school->getTestimonials() as $testimonial) {
-			$testimonialManager->delete($testimonial);
+			$this->testimonialManager->delete($testimonial);
 		}
 
 		parent::deleteKnowledge($school, $withWitness, $flush);

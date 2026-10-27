@@ -98,7 +98,6 @@ services:
     tests.picture_manager:
         class: Tests\Double\OfflinePictureManager
         decorates: ladb_core.core_picture_manager
-        arguments: ['@service_container']
         public: true
     tests.video_hosting_utils:
         class: Tests\Double\OfflineVideoHostingUtils

@@ -9,11 +9,16 @@ class SoftwareManager extends AbstractKnowledgeManager {
 
 	const NAME = 'ladb_core.knowledge_software_manager';
 
+	private $reviewableUtils;
+
+	public function __construct(ReviewableUtils $reviewableUtils) {
+		$this->reviewableUtils = $reviewableUtils;
+	}
+
 	public function delete(Software $software, $withWitness = true, $flush = true) {
 
 		// Delete reviews
-		$reviewableUtils = $this->get(ReviewableUtils::NAME);
-		$reviewableUtils->deleteReviews($software, false);
+		$this->reviewableUtils->deleteReviews($software, false);
 
 		parent::deleteKnowledge($software, $withWitness, $flush);
 	}

@@ -5,7 +5,6 @@ namespace Ladb\CoreBundle\Manager\Howto;
 use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Entity\Howto\Howto;
 use Ladb\CoreBundle\Manager\AbstractAuthoredPublicationManager;
-use Ladb\CoreBundle\Manager\Core\WitnessManager;
 
 class HowtoManager extends AbstractAuthoredPublicationManager {
 
@@ -54,9 +53,8 @@ class HowtoManager extends AbstractAuthoredPublicationManager {
 		}
 
 		// Witness articles
-		$witnessManager = $this->get(WitnessManager::NAME);
 		foreach ($howto->getArticles() as $article) {
-			$witnessManager->deleteByPublication($article, false);
+			$this->witnessManager->deleteByPublication($article, false);
 		}
 
 		parent::publishPublication($howto, $flush);
@@ -103,10 +101,9 @@ class HowtoManager extends AbstractAuthoredPublicationManager {
 		}
 
 		// Witness articles
-		$witnessManager = $this->get(WitnessManager::NAME);
 		foreach ($howto->getArticles() as $article) {
 			if (!$article->getIsDraft()) {
-				$witnessManager->createUnpublishedByPublication($article, false);
+				$this->witnessManager->createUnpublishedByPublication($article, false);
 			}
 		}
 
@@ -158,9 +155,8 @@ class HowtoManager extends AbstractAuthoredPublicationManager {
 		}
 
 		// Witness articles
-		$witnessManager = $this->get(WitnessManager::NAME);
 		foreach ($howto->getArticles() as $article) {
-			$witnessManager->createDeletedByPublication($article, false);
+			$this->witnessManager->createDeletedByPublication($article, false);
 		}
 
 		parent::deletePublication($howto, $withWitness, $flush);

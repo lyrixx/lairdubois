@@ -10,8 +10,14 @@ class MemberRequestManager extends AbstractManager {
 
 	const NAME = 'ladb_core.core_member_request_manager';
 
+	private $activityUtils;
+
+	public function __construct(ActivityUtils $activityUtils) {
+		$this->activityUtils = $activityUtils;
+	}
+
 	public function create(\Ladb\CoreBundle\Entity\Core\User $team, \Ladb\CoreBundle\Entity\Core\User $sender, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 
 		// Create the request
 		$request = new MemberRequest();
@@ -26,8 +32,7 @@ class MemberRequestManager extends AbstractManager {
 		$sender->getMeta()->incrementRequestCount();
 
 		// Create activity
-		$activityUtils = $this->get(ActivityUtils::NAME);
-		$activityUtils->createRequestActivity($request, false);
+		$this->activityUtils->createRequestActivity($request, false);
 
 		if ($flush) {
 			$om->flush();
@@ -39,8 +44,7 @@ class MemberRequestManager extends AbstractManager {
 	public function delete(MemberRequest $request, $flush = true) {
 
 		// Delete request activities
-		$activityUtils = $this->get(ActivityUtils::NAME);
-		$activityUtils->deleteActivitiesByRequest($request);
+		$this->activityUtils->deleteActivitiesByRequest($request);
 
 		// Update counters
 

@@ -17,7 +17,7 @@ class PictureManager extends AbstractManager {
 		$this->_computeMasterPath($picture, $fileExtension);
 
 		if ($persist) {
-			$om = $this->getDoctrine()->getManager();
+			$om = $this->doctrine->getManager();
 			$om->persist($picture);
 		}
 
@@ -41,7 +41,7 @@ class PictureManager extends AbstractManager {
 			if (copy($url, $picture->getAbsolutePath())) {
 				if ($this->computeSizes($picture)) {
 					if ($persist) {
-						$om = $this->getDoctrine()->getManager();
+						$om = $this->doctrine->getManager();
 						$om->persist($picture);
 					}
 					return $picture;
@@ -55,7 +55,7 @@ class PictureManager extends AbstractManager {
 	}
 
 	public function duplicate(Picture $picture) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 
 		$fileExtension = strtolower(pathinfo($picture->getPath(), PATHINFO_EXTENSION));
 

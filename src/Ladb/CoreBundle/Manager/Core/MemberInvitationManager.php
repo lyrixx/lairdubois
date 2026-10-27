@@ -10,8 +10,14 @@ class MemberInvitationManager extends AbstractManager {
 
 	const NAME = 'ladb_core.core_member_invitation_manager';
 
+	private $activityUtils;
+
+	public function __construct(ActivityUtils $activityUtils) {
+		$this->activityUtils = $activityUtils;
+	}
+
 	public function create(\Ladb\CoreBundle\Entity\Core\User $team, \Ladb\CoreBundle\Entity\Core\User $sender, \Ladb\CoreBundle\Entity\Core\User $recipient, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 
 		// Create the invitation
 		$invitation = new MemberInvitation();
@@ -27,8 +33,7 @@ class MemberInvitationManager extends AbstractManager {
 		$recipient->getMeta()->incrementInvitationCount();
 
 		// Create activity
-		$activityUtils = $this->get(ActivityUtils::NAME);
-		$activityUtils->createInviteActivity($invitation, false);
+		$this->activityUtils->createInviteActivity($invitation, false);
 
 		if ($flush) {
 			$om->flush();
@@ -40,8 +45,7 @@ class MemberInvitationManager extends AbstractManager {
 	public function delete(MemberInvitation $invitation, $flush = true) {
 
 		// Delete invitation activities
-		$activityUtils = $this->get(ActivityUtils::NAME);
-		$activityUtils->deleteActivitiesByInvitation($invitation);
+		$this->activityUtils->deleteActivitiesByInvitation($invitation);
 
 		// Update counters
 

@@ -15,6 +15,12 @@ class CollectionManager extends AbstractPublicationManager {
 
 	const NAME = 'ladb_core.collection_collection_manager';
 
+	private $typableUtils;
+
+	public function __construct(TypableUtils $typableUtils) {
+		$this->typableUtils = $typableUtils;
+	}
+
 	/////
 
 	public function publish(Collection $collection, $flush = true) {
@@ -23,10 +29,9 @@ class CollectionManager extends AbstractPublicationManager {
 		$collection->getUser()->getMeta()->incrementPublicCollectionCount();
 
 		// Reset collectionnables collection counters
-		$typableUtils = $this->get(TypableUtils::NAME);
 		foreach ($collection->getEntries() as $entry) {
 
-			$collectionnable = $typableUtils->findTypable($entry->getEntityType(), $entry->getEntityId());
+			$collectionnable = $this->typableUtils->findTypable($entry->getEntityType(), $entry->getEntityId());
 			if (!is_null($entry) && $collectionnable instanceof CollectionnableInterface) {
 
 				// Update collectionnable collection count
@@ -46,10 +51,9 @@ class CollectionManager extends AbstractPublicationManager {
 		$collection->getUser()->getMeta()->incrementPublicCollectionCount(-1);
 
 		// Reset collectionnables collection counters
-		$typableUtils = $this->get(TypableUtils::NAME);
 		foreach ($collection->getEntries() as $entry) {
 
-			$collectionnable = $typableUtils->findTypable($entry->getEntityType(), $entry->getEntityId());
+			$collectionnable = $this->typableUtils->findTypable($entry->getEntityType(), $entry->getEntityId());
 			if (!is_null($entry) && $collectionnable instanceof CollectionnableInterface) {
 
 				// Update collectionnable collection count
@@ -73,10 +77,9 @@ class CollectionManager extends AbstractPublicationManager {
 		}
 
 		// Reset collectionnables collection counters
-		$typableUtils = $this->get(TypableUtils::NAME);
 		foreach ($collection->getEntries() as $entry) {
 
-			$collectionnable = $typableUtils->findTypable($entry->getEntityType(), $entry->getEntityId());
+			$collectionnable = $this->typableUtils->findTypable($entry->getEntityType(), $entry->getEntityId());
 			if (!is_null($entry) && $collectionnable instanceof CollectionnableInterface) {
 
 				// Update collectionnable collection count
