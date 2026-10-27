@@ -9,11 +9,16 @@ class ToolManager extends AbstractKnowledgeManager {
 
 	const NAME = 'ladb_core.knowledge_tool_manager';
 
+	private $reviewableUtils;
+
+	public function __construct(ReviewableUtils $reviewableUtils) {
+		$this->reviewableUtils = $reviewableUtils;
+	}
+
 	public function delete(Tool $tool, $withWitness = true, $flush = true) {
 
 		// Delete reviews
-		$reviewableUtils = $this->get(ReviewableUtils::NAME);
-		$reviewableUtils->deleteReviews($tool, false);
+		$this->reviewableUtils->deleteReviews($tool, false);
 
 		parent::deleteKnowledge($tool, $withWitness, $flush);
 	}

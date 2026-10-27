@@ -12,7 +12,6 @@ use Ladb\CoreBundle\Entity\Workflow\Workflow;
 use Ladb\CoreBundle\Event\PublicationEvent;
 use Ladb\CoreBundle\Event\PublicationListener;
 use Ladb\CoreBundle\Manager\AbstractAuthoredPublicationManager;
-use Ladb\CoreBundle\Utils\SearchUtils;
 
 class WorkflowManager extends AbstractAuthoredPublicationManager {
 
@@ -124,7 +123,7 @@ class WorkflowManager extends AbstractAuthoredPublicationManager {
 	}
 
 	public function copy(Workflow $workflow, User $user, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 
 		$duplicate = $workflow->getUser()->getId() === $user->getId();
 
@@ -254,8 +253,7 @@ class WorkflowManager extends AbstractAuthoredPublicationManager {
 			$workflow->incrementCopyCount();
 
 			// Update index
-			$searchUtils = $this->get(SearchUtils::NAME);
-			$searchUtils->replaceEntityInIndex($workflow);
+			$this->searchUtils->replaceEntityInIndex($workflow);
 
 		}
 
@@ -268,14 +266,13 @@ class WorkflowManager extends AbstractAuthoredPublicationManager {
 		}
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($newWorkflow));
+		$this->dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($newWorkflow));
 
 		return $newWorkflow;
 	}
 
 	public function restart(Workflow $workflow, User $user, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 
 		$totalEstimatedDuration = 0;
 

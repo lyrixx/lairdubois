@@ -33,15 +33,16 @@ use PhpParser\Node\Stmt\Property;
 use PhpParser\Node\Stmt\Use_;
 use PhpParser\Node\UseItem;
 use PhpParser\NodeVisitor;
+use PHPStan\Reflection\ReflectionProvider;
 use Rector\NodeTypeResolver\Node\AttributeKey;
 use Rector\Rector\AbstractRector;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
 
 /**
- * Issue #118: the services and parameters that a subclass of AbstractContainerAwareUtils reads from the container
- * ($this->get(), $this->getParameter(), $this->getDoctrine(), and the same on $this->container) become arguments of
- * its constructor, kept in private properties.
+ * Issue #118: the services and parameters that a subclass of a container aware base class (BASE_CLASSES) reads from
+ * the container ($this->get(), $this->getParameter(), $this->getDoctrine(), and the same on $this->container) become
+ * arguments of its constructor, kept in private properties.
  *
  * - The property of a service is named after its class (FooUtils::NAME => $fooUtils) or after SERVICES, the one of a
  *   parameter after the parameter (google_api_key => $googleApiKey), getDoctrine() gives $doctrine.
@@ -49,19 +50,32 @@ use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
  *   the variable also gets another value or is used by a closure: then only the read is replaced.
  * - The constructor keeps the other arguments of the existing one, without the container. Arguments and properties
  *   are sorted by name.
- * - The class no longer extends AbstractContainerAwareUtils.
+ * - An abstract class gets protected properties, each one set by a @required setter, so that its subclasses keep
+ *   their constructor. A property that a parent class already declares (protected) is not injected again: run the
+ *   rule on the parent classes first, as it reads them as they are on disk.
+ * - The class no longer extends AbstractContainerAwareUtils (#125). AbstractManager stays, with $doctrine.
  *
  * A class is left untouched when one of its reads is not mechanical: an id that is neither a class constant nor in
- * SERVICES, a parameter whose name is not a string, has(), another use of $this->container, a static method, an
- * existing constructor that does more than assign its arguments.
+ * SERVICES, a parameter whose name is not a string or that an abstract class reads, has(), another use of
+ * $this->container, a static method, an existing constructor that does more than assign its arguments or in an
+ * abstract class, a setter that already exists.
  */
-final class UtilsContainerToConstructorRector extends AbstractRector
+final class ContainerToConstructorRector extends AbstractRector
 {
-    private const NAMESPACE_PREFIX = 'Ladb\\CoreBundle\\Utils\\';
-
-    private const PARENT_CLASS = 'Ladb\\CoreBundle\\Utils\\AbstractContainerAwareUtils';
+    /**
+     * Namespace => its container aware base class, and whether its subclasses stop extending it.
+     */
+    private const BASE_CLASSES = [
+        'Ladb\\CoreBundle\\Utils\\' => ['Ladb\\CoreBundle\\Utils\\AbstractContainerAwareUtils', true],
+        'Ladb\\CoreBundle\\Manager\\' => ['Ladb\\CoreBundle\\Manager\\AbstractManager', false],
+    ];
 
     private const CONTAINER_CLASS = 'Symfony\\Component\\DependencyInjection\\ContainerInterface';
+
+    public function __construct(
+        private readonly ReflectionProvider $reflectionProvider,
+    ) {
+    }
 
     /**
      * Left in place of a removed statement, then removed with its line by castor qa:rector.
@@ -89,13 +103,13 @@ final class UtilsContainerToConstructorRector extends AbstractRector
     ];
 
     /**
-     * What AbstractContainerAwareUtils::getDoctrine() returns.
+     * What AbstractContainerAwareUtils::getDoctrine() and AbstractManager::getDoctrine() returned.
      */
     private const DOCTRINE = ['Doctrine\\Persistence\\ManagerRegistry', 'doctrine'];
 
     public function getRuleDefinition(): RuleDefinition
     {
-        return new RuleDefinition('Container reads of a container aware utils to arguments of its constructor', [
+        return new RuleDefinition('Container reads of a subclass of a container aware base class to arguments of its constructor', [
             new CodeSample(
                 <<<'CODE_SAMPLE'
 class FooUtils extends AbstractContainerAwareUtils {
@@ -143,8 +157,10 @@ CODE_SAMPLE
     public function refactor(Node $node): ?Node
     {
         $changed = false;
+        // The container, and the classes of the services read in a parent class
+        $imports = [self::CONTAINER_CLASS];
         foreach ($node->stmts as $stmt) {
-            if ($stmt instanceof Class_ && $this->refactorClass($node, $stmt)) {
+            if ($stmt instanceof Class_ && $this->refactorClass($node, $stmt, $imports)) {
                 $changed = true;
             }
         }
@@ -152,15 +168,30 @@ CODE_SAMPLE
         if (!$changed) {
             return null;
         }
-        $this->removeUnusedContainerImport($node);
+        $this->removeUnusedImports($node, $imports);
 
         return $node;
     }
 
-    private function refactorClass(Namespace_ $namespace, Class_ $class): bool
+    /**
+     * @param list<string> $imports The imports that may no longer be used, completed
+     */
+    private function refactorClass(Namespace_ $namespace, Class_ $class, array &$imports): bool
     {
         $className = $this->getName($class);
-        if (null === $className || !str_starts_with($className, self::NAMESPACE_PREFIX) || null === $class->extends || self::PARENT_CLASS !== $this->getName($class->extends)) {
+        if (null === $className || null === $class->extends || !$this->reflectionProvider->hasClass($className)) {
+            return false;
+        }
+        $baseClass = null;
+        $removesExtends = false;
+        foreach (self::BASE_CLASSES as $prefix => [$base, $removes]) {
+            if (str_starts_with($className, $prefix)) {
+                [$baseClass, $removesExtends] = [$base, $removes];
+            }
+        }
+        $classReflection = $this->reflectionProvider->getClass($className);
+        $parentClasses = $classReflection->getParentClassesNames();
+        if (null === $baseClass || ($removesExtends ? $baseClass !== $this->getName($class->extends) : !\in_array($baseClass, $parentClasses, true))) {
             return false;
         }
 
@@ -201,13 +232,40 @@ CODE_SAMPLE
             return false;
         }
         // Nothing read from the container
-        if ([] === $properties && null === $class->getMethod('__construct')) {
+        if ([] === $properties && null === $class->getMethod('__construct') && $removesExtends) {
             $class->extends = null;
 
             return true;
         }
         if ([] === $properties) {
             return false;
+        }
+
+        // Already declared by a parent class (protected): read there, not injected again
+        $inherited = [];
+        foreach (array_keys($properties) as $name) {
+            foreach ($parentClasses as $parentClass) {
+                $nativeReflection = $this->reflectionProvider->getClass($parentClass)->getNativeReflection();
+                if ($nativeReflection->hasProperty($name) && !$nativeReflection->getProperty($name)->isPrivate()) {
+                    $inherited[$name] = true;
+                }
+            }
+        }
+        $injected = array_diff_key($properties, $inherited);
+        foreach (array_intersect_key($properties, $inherited) as $read) {
+            if ($read['type'] instanceof Name) {
+                $imports[] = $read['key'];
+            }
+        }
+        if ($class->isAbstract()) {
+            if (null !== $class->getMethod('__construct')) {
+                return false;
+            }
+            foreach ($injected as $name => $read) {
+                if (null === $read['type'] || $classReflection->hasNativeMethod('set'.ucfirst($name))) {
+                    return false;
+                }
+            }
         }
 
         // The existing constructor: its arguments, except the container, and its statements, except the call to the parent
@@ -221,7 +279,7 @@ CODE_SAMPLE
                 if (null !== $param->type && self::CONTAINER_CLASS === $this->getName($param->type)) {
                     continue;
                 }
-                if (isset($properties[$name])) {
+                if (isset($injected[$name])) {
                     return false;
                 }
                 $params[$name] = $param;
@@ -250,13 +308,20 @@ CODE_SAMPLE
             }
         }
 
-        // 3. The constructor and the properties, sorted by name
+        // 3. The constructor or the setters, and the properties, sorted by name
+        if ([] === $injected && null === $constructor) {
+            if ($removesExtends) {
+                $class->extends = null;
+            }
+
+            return true;
+        }
         $types = [];
         foreach ($params as $name => $param) {
             $type = $param->type?->getAttribute(AttributeKey::ORIGINAL_NAME) ?? $param->type;
             $types[$name] = null === $type ? null : ($type instanceof FullyQualified ? $type->toCodeString() : $type->toString());
         }
-        foreach ($properties as $name => $read) {
+        foreach ($injected as $name => $read) {
             $type = \is_string($read['type']) ? $this->writeType($namespace, $read['type']) : $read['type'];
             $types[$name] = null === $type ? null : ($type instanceof FullyQualified ? $type->toCodeString() : $type->toString());
         }
@@ -285,18 +350,31 @@ CODE_SAMPLE
         // put the brace of the constructor on its own line
         $code = "\n";
         foreach (array_keys($types) as $name) {
-            $code .= "\t".($visibilities[$name] ?? 'private').' $'.$name.";\n";
+            $code .= "\t".($visibilities[$name] ?? ($class->isAbstract() ? 'protected' : 'private')).' $'.$name.";\n";
         }
-        $signature = [];
-        $assignments = '';
-        foreach ($types as $name => $type) {
-            $signature[] = (null === $type ? '' : $type.' ').'$'.$name;
-            $assignments .= "\t\t\$this->".$name.' = $'.$name.";\n";
+        if ($class->isAbstract()) {
+            foreach ($types as $name => $type) {
+                $code .= "\n\t/**\n\t * @required\n\t */\n\tpublic function set".ucfirst($name).'('.$type.' $'.$name.") {\n\t\t\$this->".$name.' = $'.$name.";\n\t}\n";
+            }
+            $code = rtrim($code, "\n");
+        } else {
+            $signature = [];
+            $assignments = '';
+            foreach ($types as $name => $type) {
+                $signature[] = (null === $type ? '' : $type.' ').'$'.$name;
+                $assignments .= "\t\t\$this->".$name.' = $'.$name.";\n";
+            }
+            $code .= "\n\tpublic function __construct(".implode(', ', $signature).") {\n".$assignments."\t}";
         }
-        $code .= "\n\tpublic function __construct(".implode(', ', $signature).") {\n".$assignments."\t}";
+        // First in the class: after the empty line that follows the brace of the class, and before the next member
+        if (0 === $position) {
+            $code = substr($code, 1)."\n";
+        }
         array_splice($class->stmts, $position, 0, [new ClassConst([new Node\Const_(self::INSERTED_CODE, new String_(base64_encode($code)))])]);
 
-        $class->extends = null;
+        if ($removesExtends) {
+            $class->extends = null;
+        }
 
         return true;
     }
@@ -454,7 +532,7 @@ CODE_SAMPLE
             }
         }
         // A class of the namespace, used without import
-        if (file_exists(__DIR__.'/../../../src/Ladb/CoreBundle/Utils/'.$shortName.'.php')) {
+        if ($this->reflectionProvider->hasClass($this->getName($namespace).'\\'.$shortName)) {
             return new FullyQualified($type);
         }
 
@@ -473,27 +551,25 @@ CODE_SAMPLE
         return new Name($shortName);
     }
 
-    private function removeUnusedContainerImport(Namespace_ $namespace): void
+    /**
+     * @param list<string> $classes
+     */
+    private function removeUnusedImports(Namespace_ $namespace, array $classes): void
     {
-        $used = false;
+        $used = [];
         $this->traverseNodesWithCallable(array_filter($namespace->stmts, fn (Stmt $stmt): bool => !$stmt instanceof Use_), function (Node $node) use (&$used): ?Node {
-            if ($node instanceof Name && self::CONTAINER_CLASS === $this->getName($node)) {
-                $used = true;
+            if ($node instanceof Name) {
+                $used[$this->getName($node)] = true;
             }
 
             return null;
         });
-        if ($used) {
-            return;
-        }
         foreach ($namespace->stmts as $i => $stmt) {
-            if ($stmt instanceof Use_ && 1 === \count($stmt->uses) && self::CONTAINER_CLASS === $stmt->uses[0]->name->toString()) {
+            if ($stmt instanceof Use_ && 1 === \count($stmt->uses) && \in_array($stmt->uses[0]->name->toString(), $classes, true) && !isset($used[$stmt->uses[0]->name->toString()])) {
                 unset($namespace->stmts[$i]);
-                $namespace->stmts = array_values($namespace->stmts);
-
-                return;
             }
         }
+        $namespace->stmts = array_values($namespace->stmts);
     }
 
     private function isThisOrContainer(Expr $expr): bool

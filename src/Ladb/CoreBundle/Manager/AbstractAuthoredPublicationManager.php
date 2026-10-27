@@ -17,8 +17,17 @@ use Ladb\CoreBundle\Utils\SearchUtils;
 
 abstract class AbstractAuthoredPublicationManager extends AbstractPublicationManager {
 
+	protected $searchUtils;
+
+	/**
+	 * @required
+	 */
+	public function setSearchUtils(SearchUtils $searchUtils) {
+		$this->searchUtils = $searchUtils;
+	}
+
 	protected function changeOwnerPublication(AbstractAuthoredPublication $publication, User $targetUser, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 
 		$originUser = $publication->getUser();
 
@@ -90,8 +99,7 @@ abstract class AbstractAuthoredPublicationManager extends AbstractPublicationMan
 		if ($publication instanceof IndexableInterface && $publication->isIndexable()) {
 
 			// Search index update
-			$searchUtils = $this->container->get(SearchUtils::NAME);
-			$searchUtils->replaceEntityInIndex($publication);
+			$this->searchUtils->replaceEntityInIndex($publication);
 
 		}
 

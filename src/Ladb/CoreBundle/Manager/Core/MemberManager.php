@@ -10,7 +10,7 @@ class MemberManager extends AbstractManager {
 	const NAME = 'ladb_core.core_member_manager';
 
 	public function create(\Ladb\CoreBundle\Entity\Core\User $team, \Ladb\CoreBundle\Entity\Core\User $user, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 
 		// Create the invitation
 		$member = new Member();

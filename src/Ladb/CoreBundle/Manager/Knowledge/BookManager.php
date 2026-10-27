@@ -9,11 +9,16 @@ class BookManager extends AbstractKnowledgeManager {
 
 	const NAME = 'ladb_core.knowledge_book_manager';
 
+	private $reviewableUtils;
+
+	public function __construct(ReviewableUtils $reviewableUtils) {
+		$this->reviewableUtils = $reviewableUtils;
+	}
+
 	public function delete(Book $book, $withWitness = true, $flush = true) {
 
 		// Delete reviews
-		$reviewableUtils = $this->get(ReviewableUtils::NAME);
-		$reviewableUtils->deleteReviews($book, false);
+		$this->reviewableUtils->deleteReviews($book, false);
 
 		parent::deleteKnowledge($book, $withWitness, $flush);
 	}

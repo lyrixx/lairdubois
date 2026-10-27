@@ -28,13 +28,79 @@ use Ladb\CoreBundle\Utils\LikableUtils;
 use Ladb\CoreBundle\Utils\MentionUtils;
 use Ladb\CoreBundle\Utils\ReportableUtils;
 use Ladb\CoreBundle\Utils\WatchableUtils;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 abstract class AbstractPublicationManager extends AbstractManager {
+
+	protected $collectionnableUtils;
+	protected $commentableUtils;
+	protected $dispatcher;
+	protected $likableUtils;
+	protected $mentionUtils;
+	protected $reportableUtils;
+	protected $watchableUtils;
+	protected $witnessManager;
+
+	/**
+	 * @required
+	 */
+	public function setCollectionnableUtils(CollectionnableUtils $collectionnableUtils) {
+		$this->collectionnableUtils = $collectionnableUtils;
+	}
+
+	/**
+	 * @required
+	 */
+	public function setCommentableUtils(CommentableUtils $commentableUtils) {
+		$this->commentableUtils = $commentableUtils;
+	}
+
+	/**
+	 * @required
+	 */
+	public function setDispatcher(EventDispatcherInterface $dispatcher) {
+		$this->dispatcher = $dispatcher;
+	}
+
+	/**
+	 * @required
+	 */
+	public function setLikableUtils(LikableUtils $likableUtils) {
+		$this->likableUtils = $likableUtils;
+	}
+
+	/**
+	 * @required
+	 */
+	public function setMentionUtils(MentionUtils $mentionUtils) {
+		$this->mentionUtils = $mentionUtils;
+	}
+
+	/**
+	 * @required
+	 */
+	public function setReportableUtils(ReportableUtils $reportableUtils) {
+		$this->reportableUtils = $reportableUtils;
+	}
+
+	/**
+	 * @required
+	 */
+	public function setWatchableUtils(WatchableUtils $watchableUtils) {
+		$this->watchableUtils = $watchableUtils;
+	}
+
+	/**
+	 * @required
+	 */
+	public function setWitnessManager(WitnessManager $witnessManager) {
+		$this->witnessManager = $witnessManager;
+	}
 
 	/////
 
 	public function lock(AbstractPublication $publication, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 
 		$publication->setIsLocked(true);
 
@@ -43,13 +109,12 @@ abstract class AbstractPublicationManager extends AbstractManager {
 		}
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_LOCKED, new PublicationEvent($publication));
+		$this->dispatcher->dispatch(PublicationListener::PUBLICATION_LOCKED, new PublicationEvent($publication));
 
 	}
 
 	public function unlock(AbstractPublication $publication, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 
 		$publication->setIsLocked(false);
 
@@ -58,15 +123,14 @@ abstract class AbstractPublicationManager extends AbstractManager {
 		}
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_UNLOCKED, new PublicationEvent($publication));
+		$this->dispatcher->dispatch(PublicationListener::PUBLICATION_UNLOCKED, new PublicationEvent($publication));
 
 	}
 	
 	/////
 
 	protected function publishPublication(AbstractPublication $publication, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 
 		if ($publication instanceof RepublishableInterface) {
 			if ($publication->getPublishCount() == 0) {
@@ -87,25 +151,22 @@ abstract class AbstractPublicationManager extends AbstractManager {
 		}
 
 		// Process mentions
-		$mentionUtils = $this->container->get(MentionUtils::NAME);
-		$mentionUtils->processMentions($publication);
+		$this->mentionUtils->processMentions($publication);
 
 		// Delete the witness (if it exists)
-		$witnessManager = $this->get(WitnessManager::NAME);
-		$witnessManager->deleteByPublication($publication);
+		$this->witnessManager->deleteByPublication($publication);
 
 		if ($flush) {
 			$om->flush();
 		}
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_PUBLISHED, new PublicationEvent($publication));
+		$this->dispatcher->dispatch(PublicationListener::PUBLICATION_PUBLISHED, new PublicationEvent($publication));
 
 	}
 
 	protected function unpublishPublication(AbstractPublication $publication, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 
 		if ($publication instanceof HiddableInterface) {
 			$publication->setVisibility(HiddableInterface::VISIBILITY_PRIVATE);
@@ -117,25 +178,21 @@ abstract class AbstractPublicationManager extends AbstractManager {
 
 		if ($publication instanceof CollectionnableInterface) {
 			// Delete collection's entries
-			$collectionnableUtils = $this->get(CollectionnableUtils::NAME);
-			$collectionnableUtils->deleteEntries($publication, false);
+			$this->collectionnableUtils->deleteEntries($publication, false);
 		}
 
 		// Delete mentions
-		$mentionUtils = $this->container->get(MentionUtils::NAME);
-		$mentionUtils->deleteMentions($publication);
+		$this->mentionUtils->deleteMentions($publication);
 
 		// Create the witness
-		$witnessManager = $this->get(WitnessManager::NAME);
-		$witnessManager->createUnpublishedByPublication($publication, false);
+		$this->witnessManager->createUnpublishedByPublication($publication, false);
 
 		if ($flush) {
 			$om->flush();
 		}
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_UNPUBLISHED, new PublicationEvent($publication));
+		$this->dispatcher->dispatch(PublicationListener::PUBLICATION_UNPUBLISHED, new PublicationEvent($publication));
 
 	}
 
@@ -143,49 +200,41 @@ abstract class AbstractPublicationManager extends AbstractManager {
 
 		if ($publication instanceof MentionSourceInterface) {
 			// Delete mentions
-			$mentionUtils = $this->get(MentionUtils::NAME);
-			$mentionUtils->deleteMentions($publication, false);
+			$this->mentionUtils->deleteMentions($publication, false);
 		}
 
 		if ($publication instanceof WatchableInterface) {
 			// Delete watches
-			$watchableUtils = $this->get(WatchableUtils::NAME);
-			$watchableUtils->deleteWatches($publication, false);
+			$this->watchableUtils->deleteWatches($publication, false);
 		}
 
 		if ($publication instanceof LikableInterface) {
 			// Delete likes
-			$likableUtils = $this->get(LikableUtils::NAME);
-			$likableUtils->deleteLikes($publication, false);
+			$this->likableUtils->deleteLikes($publication, false);
 		}
 
 		if ($publication instanceof CommentableInterface) {
 			// Delete comments
-			$commentableUtils = $this->get(CommentableUtils::NAME);
-			$commentableUtils->deleteComments($publication, false);
+			$this->commentableUtils->deleteComments($publication, false);
 		}
 
 		if ($publication instanceof CollectionnableInterface) {
 			// Delete collection's entries
-			$collectionnableUtils = $this->get(CollectionnableUtils::NAME);
-			$collectionnableUtils->deleteEntries($publication, false);
+			$this->collectionnableUtils->deleteEntries($publication, false);
 		}
 
 		if ($publication instanceof ReportableInterface) {
 			// Delete reports
-			$reportableUtils = $this->get(ReportableUtils::NAME);
-			$reportableUtils->deleteReports($publication, false);
+			$this->reportableUtils->deleteReports($publication, false);
 		}
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_DELETED, new PublicationEvent($publication));
+		$this->dispatcher->dispatch(PublicationListener::PUBLICATION_DELETED, new PublicationEvent($publication));
 
 		if ($withWitness) {
 
 			// Create the witness
-			$witnessManager = $this->get(WitnessManager::NAME);
-			$witnessManager->createDeletedByPublication($publication, false);
+			$this->witnessManager->createDeletedByPublication($publication, false);
 
 		}
 

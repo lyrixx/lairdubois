@@ -12,6 +12,12 @@ class ArticleManager extends AbstractPublicationManager {
 
 	const NAME = 'ladb_core.howto_article_manager';
 
+	private $searchUtils;
+
+	public function __construct(SearchUtils $searchUtils) {
+		$this->searchUtils = $searchUtils;
+	}
+
 	/////
 
 	public function publish(Article $article, $flush = true) {
@@ -26,12 +32,10 @@ class ArticleManager extends AbstractPublicationManager {
 		parent::publishPublication($article, $flush);
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_CHANGED, new PublicationEvent($howto));
+		$this->dispatcher->dispatch(PublicationListener::PUBLICATION_CHANGED, new PublicationEvent($howto));
 
 		// Search index update
-		$searchUtils = $this->get(SearchUtils::NAME);
-		$searchUtils->replaceEntityInIndex($howto);
+		$this->searchUtils->replaceEntityInIndex($howto);
 
 	}
 
@@ -46,8 +50,7 @@ class ArticleManager extends AbstractPublicationManager {
 		parent::unpublishPublication($article, $flush);
 
 		// Search index update
-		$searchUtils = $this->get(SearchUtils::NAME);
-		$searchUtils->replaceEntityInIndex($howto);
+		$this->searchUtils->replaceEntityInIndex($howto);
 
 	}
 

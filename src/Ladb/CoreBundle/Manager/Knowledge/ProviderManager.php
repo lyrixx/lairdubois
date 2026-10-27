@@ -9,6 +9,12 @@ class ProviderManager extends AbstractKnowledgeManager {
 
 	const NAME = 'ladb_core.knowledge_provider_manager';
 
+	private $reviewableUtils;
+
+	public function __construct(ReviewableUtils $reviewableUtils) {
+		$this->reviewableUtils = $reviewableUtils;
+	}
+
 	public function delete(Provider $provider, $withWitness = true, $flush = true) {
 
 		// Unlink creations
@@ -22,8 +28,7 @@ class ProviderManager extends AbstractKnowledgeManager {
 		}
 
 		// Delete reviews
-		$reviewableUtils = $this->get(ReviewableUtils::NAME);
-		$reviewableUtils->deleteReviews($provider, false);
+		$this->reviewableUtils->deleteReviews($provider, false);
 
 		parent::deleteKnowledge($provider, $withWitness, $flush);
 	}

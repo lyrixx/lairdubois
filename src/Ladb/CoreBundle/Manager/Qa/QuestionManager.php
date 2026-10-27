@@ -9,20 +9,31 @@ use Ladb\CoreBundle\Event\PublicationEvent;
 use Ladb\CoreBundle\Event\PublicationListener;
 use Ladb\CoreBundle\Manager\AbstractAuthoredPublicationManager;
 use Ladb\CoreBundle\Manager\AbstractPublicationManager;
-use Ladb\CoreBundle\Manager\Core\WitnessManager;
 use Ladb\CoreBundle\Utils\ActivityUtils;
 use Ladb\CoreBundle\Utils\BlockBodiedUtils;
-use Ladb\CoreBundle\Utils\CommentableUtils;
 use Ladb\CoreBundle\Utils\FieldPreprocessorUtils;
-use Ladb\CoreBundle\Utils\LikableUtils;
-use Ladb\CoreBundle\Utils\ReportableUtils;
 use Ladb\CoreBundle\Utils\ViewableUtils;
 use Ladb\CoreBundle\Utils\VotableUtils;
-use Ladb\CoreBundle\Utils\WatchableUtils;
 
 class QuestionManager extends AbstractAuthoredPublicationManager {
 
 	const NAME = 'ladb_core.qa_question_manager';
+
+	private $activityUtils;
+	private $answerManager;
+	private $blockBodiedUtils;
+	private $fieldPreprocessorUtils;
+	private $viewableUtils;
+	private $votableUtils;
+
+	public function __construct(ActivityUtils $activityUtils, AnswerManager $answerManager, BlockBodiedUtils $blockBodiedUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, ViewableUtils $viewableUtils, VotableUtils $votableUtils) {
+		$this->activityUtils = $activityUtils;
+		$this->answerManager = $answerManager;
+		$this->blockBodiedUtils = $blockBodiedUtils;
+		$this->fieldPreprocessorUtils = $fieldPreprocessorUtils;
+		$this->viewableUtils = $viewableUtils;
+		$this->votableUtils = $votableUtils;
+	}
 
 	/////
 
@@ -52,12 +63,10 @@ class QuestionManager extends AbstractAuthoredPublicationManager {
 			$answer->getUser()->getMeta()->incrementAnswerCount(1);
 
 			// Increment users comment counters
-			$commentableUtils = $this->container->get(CommentableUtils::NAME);
-			$commentableUtils->incrementUsersCommentCount($answer, 1);
+			$this->commentableUtils->incrementUsersCommentCount($answer, 1);
 
 			// Increment users vote counters
-			$votableUtils = $this->container->get(VotableUtils::NAME);
-			$votableUtils->incrementUsersVoteCount($answer, 1);
+			$this->votableUtils->incrementUsersVoteCount($answer, 1);
 
 		}
 
@@ -90,12 +99,10 @@ class QuestionManager extends AbstractAuthoredPublicationManager {
 			$answer->getUser()->getMeta()->incrementAnswerCount(-1);
 
 			// Decrement users comment counters
-			$commentableUtils = $this->container->get(CommentableUtils::NAME);
-			$commentableUtils->incrementUsersCommentCount($answer, -1);
+			$this->commentableUtils->incrementUsersCommentCount($answer, -1);
 
 			// Decrement users vote counters
-			$votableUtils = $this->container->get(VotableUtils::NAME);
-			$votableUtils->incrementUsersVoteCount($answer, -1);
+			$this->votableUtils->incrementUsersVoteCount($answer, -1);
 
 		}
 
@@ -126,11 +133,10 @@ class QuestionManager extends AbstractAuthoredPublicationManager {
 			$howto->removeQuestion($question);
 		}
 
-		$answerManager = $this->get(AnswerManager::NAME);
 		foreach ($question->getAnswers() as $answer) {
 
 			// Delete answer
-			$answerManager->delete($answer, false);
+			$this->answerManager->delete($answer, false);
 
 		}
 
@@ -154,7 +160,7 @@ class QuestionManager extends AbstractAuthoredPublicationManager {
 	/////
 
 	public function convertToOffer(Question $question, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 
 		// Create a new offer
 
@@ -169,24 +175,21 @@ class QuestionManager extends AbstractAuthoredPublicationManager {
 		$offer->setKind(Offer::KIND_REQUEST);
 		$offer->setPrice('');
 
-		$blockBodiedUtils = $this->get(BlockBodiedUtils::NAME);
-		$blockBodiedUtils->copyBlocksTo($question, $offer);
+		$this->blockBodiedUtils->copyBlocksTo($question, $offer);
 
 		foreach ($question->getTags() as $tag) {
 			$offer->addTag($tag);
 		}
 
 		// Setup offer's htmlBody
-		$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
-		$fieldPreprocessorUtils->preprocessFields($offer);
+		$this->fieldPreprocessorUtils->preprocessFields($offer);
 
 		// Persist offer to generate ID
 		$om->persist($offer);
 		$om->flush();
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED_FROM_CONVERT, new PublicationEvent($offer));
+		$this->dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED_FROM_CONVERT, new PublicationEvent($offer));
 
 		// User counter
 		if ($offer->getIsDraft()) {
@@ -196,32 +199,25 @@ class QuestionManager extends AbstractAuthoredPublicationManager {
 		}
 
 		// Transfer views
-		$viewableUtils = $this->get(ViewableUtils::NAME);
-		$viewableUtils->transferViews($question, $offer, false);
+		$this->viewableUtils->transferViews($question, $offer, false);
 
 		// Transfer likes
-		$likableUtils = $this->get(LikableUtils::NAME);
-		$likableUtils->transferLikes($question, $offer, false);
+		$this->likableUtils->transferLikes($question, $offer, false);
 
 		// Transfer comments
-		$commentableUtils = $this->get(CommentableUtils::NAME);
-		$commentableUtils->transferComments($question, $offer, false);
+		$this->commentableUtils->transferComments($question, $offer, false);
 
 		// Transfer watches
-		$watchableUtils = $this->get(WatchableUtils::NAME);
-		$watchableUtils->transferWatches($question, $offer, false);
+		$this->watchableUtils->transferWatches($question, $offer, false);
 
 		// transfer reports
-		$reportableUtils = $this->get(ReportableUtils::NAME);
-		$reportableUtils->transferReports($question, $offer, false);
+		$this->reportableUtils->transferReports($question, $offer, false);
 
 		// Transfer publish activities
-		$activityUtils = $this->get(ActivityUtils::NAME);
-		$activityUtils->transferPublishActivities($question->getType(), $question->getId(), $offer->getType(), $offer->getId(), false);
+		$this->activityUtils->transferPublishActivities($question->getType(), $question->getId(), $offer->getType(), $offer->getId(), false);
 
 		// Create the witness
-		$witnessManager = $this->get(WitnessManager::NAME);
-		$witnessManager->createConvertedByPublication($question, $offer, false);
+		$this->witnessManager->createConvertedByPublication($question, $offer, false);
 
 		// Delete the question
 		$this->delete($question, false, false);
