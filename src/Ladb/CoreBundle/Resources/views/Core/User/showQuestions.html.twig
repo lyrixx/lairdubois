@@ -18,16 +18,16 @@
             {% set filterPath = 'core_user_show_questions_filter' %}
             {% set filterPathParameters = { 'username':user.usernameCanonical } %}
             {% set customFilterDefs = {
-                'draft':    { 'label':('default.choice.draft'|transchoice(2)|capitalize), 'path':path('core_user_show_questions_filter', { 'username':user.usernameCanonical, 'filter':'draft' }), 'hidden':(not isDraftVisible) },
+                'draft':    { 'label':('default.choice.draft'|trans({ '%count%':2 })|capitalize), 'path':path('core_user_show_questions_filter', { 'username':user.usernameCanonical, 'filter':'draft' }), 'hidden':(not isDraftVisible) },
             } %}
             {% block filterbarRightContent%}
                 <span class="ladb-heading">
                     {% if filter == 'draft' and isDraftVisible %}
-                        {{ user.meta.privateQuestionCount~' '~('default.choice.draft'|transchoice(user.meta.privateQuestionCount)) }}
+                        {{ user.meta.privateQuestionCount~' '~('default.choice.draft'|trans({ '%count%':user.meta.privateQuestionCount })) }}
                     {% elseif filter|slice(0,4) == 'type' %}
-                        {{ questions.count~' '~('qa.question.choice.entities'|transchoice(questions.count)) }}
+                        {{ questions.count~' '~('qa.question.choice.entities'|trans({ '%count%':questions.count })) }}
                     {% else %}
-                        {{ user.meta.publicQuestionCount }} {{ 'qa.question.choice.entities'|transchoice(user.meta.publicQuestionCount) }}{% if isDraftVisible and user.meta.privateQuestionCount > 0 %} (+{{ user.meta.privateQuestionCount~' '~('default.choice.draft'|transchoice(user.meta.privateQuestionCount)) }}){% endif %}
+                        {{ user.meta.publicQuestionCount }} {{ 'qa.question.choice.entities'|trans({ '%count%':user.meta.publicQuestionCount }) }}{% if isDraftVisible and user.meta.privateQuestionCount > 0 %} (+{{ user.meta.privateQuestionCount~' '~('default.choice.draft'|trans({ '%count%':user.meta.privateQuestionCount })) }}){% endif %}
                     {% endif %}
                 </span>
             {% endblock %}

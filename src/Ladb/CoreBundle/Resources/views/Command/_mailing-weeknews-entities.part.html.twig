@@ -9,7 +9,7 @@
 {% set listSorter = listSorter|default('@sort-popular-likes:desc') %}
 
 <p style="border-top: 1px solid #ddd; padding: 10px 0 0 10px;">
-    <strong>{{ entities|length }} {{ (transPrefix~'.choice.new_'~type~'s')|transchoice((entities|length)) }}</strong>
+    <strong>{{ entities|length }} {{ (transPrefix~'.choice.new_'~type~'s')|trans({ '%count%':(entities|length) }) }}</strong>
     <table cellspacing="10" cellpadding="0">
         <tbody>
         {% for entity in entities|slice(0, maxResults) %}

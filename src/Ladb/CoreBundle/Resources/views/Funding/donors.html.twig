@@ -17,7 +17,7 @@
     {% embed 'LadbCoreBundle:Common:_list-filterbar.part.html.twig' with { 'classes':'ladb-filterbar-line' } %}
         {% set filterDefs = {} %}
         {% block filterbarRightContent%}
-            <span class="ladb-heading">{{ donorCount }} {{ 'funding.choice.donors'|transchoice(donorCount) }}</span>
+            <span class="ladb-heading">{{ donorCount }} {{ 'funding.choice.donors'|trans({ '%count%':donorCount }) }}</span>
         {% endblock %}
     {% endembed %}
     {{ block('autopagerContainer') }}

@@ -18,16 +18,16 @@
             {% set filterPath = 'core_user_show_offers_filter' %}
             {% set filterPathParameters = { 'username':user.usernameCanonical } %}
             {% set customFilterDefs = {
-                'draft':    { 'label':('default.choice.draft'|transchoice(2)|capitalize), 'path':path('core_user_show_offers_filter', { 'username':user.usernameCanonical, 'filter':'draft' }), 'hidden':(not isDraftVisible) },
+                'draft':    { 'label':('default.choice.draft'|trans({ '%count%':2 })|capitalize), 'path':path('core_user_show_offers_filter', { 'username':user.usernameCanonical, 'filter':'draft' }), 'hidden':(not isDraftVisible) },
             } %}
             {% block filterbarRightContent%}
                 <span class="ladb-heading">
                     {% if filter == 'draft' and isDraftVisible %}
-                        {{ user.meta.privateOfferCount~' '~('default.choice.draft'|transchoice(user.meta.privateOfferCount)) }}
+                        {{ user.meta.privateOfferCount~' '~('default.choice.draft'|trans({ '%count%':user.meta.privateOfferCount })) }}
                     {% elseif filter|slice(0,4) == 'type' %}
-                        {{ offers.count~' '~('offer.offer.choice.entities'|transchoice(offers.count)) }}
+                        {{ offers.count~' '~('offer.offer.choice.entities'|trans({ '%count%':offers.count })) }}
                     {% else %}
-                        {{ user.meta.publicOfferCount }} {{ 'offer.offer.choice.entities'|transchoice(user.meta.publicOfferCount) }}{% if isDraftVisible and user.meta.privateOfferCount > 0 %} (+{{ user.meta.privateOfferCount~' '~('default.choice.draft'|transchoice(user.meta.privateOfferCount)) }}){% endif %}
+                        {{ user.meta.publicOfferCount }} {{ 'offer.offer.choice.entities'|trans({ '%count%':user.meta.publicOfferCount }) }}{% if isDraftVisible and user.meta.privateOfferCount > 0 %} (+{{ user.meta.privateOfferCount~' '~('default.choice.draft'|trans({ '%count%':user.meta.privateOfferCount })) }}){% endif %}
                     {% endif %}
                 </span>
             {% endblock %}

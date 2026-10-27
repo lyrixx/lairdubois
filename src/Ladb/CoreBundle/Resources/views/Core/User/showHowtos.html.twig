@@ -20,14 +20,14 @@
             {% set filterPath = 'core_user_show_howtos_filter' %}
             {% set filterPathParameters = { 'username':user.usernameCanonical } %}
             {% set customFilterDefs = {
-                'draft':    { 'label':('default.choice.draft'|transchoice(2)|capitalize), 'path':path('core_user_show_howtos_filter', { 'username':user.usernameCanonical, 'filter':'draft' }), 'hidden':(not isDraftVisible) },
+                'draft':    { 'label':('default.choice.draft'|trans({ '%count%':2 })|capitalize), 'path':path('core_user_show_howtos_filter', { 'username':user.usernameCanonical, 'filter':'draft' }), 'hidden':(not isDraftVisible) },
             } %}
             {% block filterbarRightContent%}
                 <span class="ladb-heading">
                     {% if filter == 'draft' and isDraftVisible %}
-                        {{ user.meta.privateHowtoCount~' '~('default.choice.draft'|transchoice(user.meta.privateHowtoCount)) }}
+                        {{ user.meta.privateHowtoCount~' '~('default.choice.draft'|trans({ '%count%':user.meta.privateHowtoCount })) }}
                     {% else %}
-                        {{ user.meta.publicHowtoCount }} {{ 'howto.howto.choice.entities'|transchoice(user.meta.publicHowtoCount) }}{% if isDraftVisible and user.meta.privateHowtoCount > 0 %} (+{{ user.meta.privateHowtoCount~' '~('default.choice.draft'|transchoice(user.meta.privateHowtoCount)) }}){% endif %}
+                        {{ user.meta.publicHowtoCount }} {{ 'howto.howto.choice.entities'|trans({ '%count%':user.meta.publicHowtoCount }) }}{% if isDraftVisible and user.meta.privateHowtoCount > 0 %} (+{{ user.meta.privateHowtoCount~' '~('default.choice.draft'|trans({ '%count%':user.meta.privateHowtoCount })) }}){% endif %}
                     {% endif %}
                 </span>
             {% endblock %}

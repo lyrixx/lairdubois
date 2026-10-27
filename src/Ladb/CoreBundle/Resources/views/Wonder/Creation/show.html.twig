@@ -85,7 +85,7 @@
             <a href="{{ path('core_wood_list', { 'q':'@name:"'~searchableWoodQuery~'"' }) }}" rel="nofollow">
         {% endif %}
             <strong>{{ creation.woods|length }}</strong>
-            {{ 'knowledge.wood.choice.entities'|transchoice(creation.woods|length) }}
+            {{ 'knowledge.wood.choice.entities'|trans({ '%count%':creation.woods|length }) }}
         {% if searchableWoodCount > 0 %}
             </a>
         {% endif %}
@@ -101,7 +101,7 @@
             <a href="{{ path('core_tool_list', { 'q':'@name:"'~searchableToolQuery~'"' }) }}" rel="nofollow">
         {% endif %}
             <strong>{{ creation.tools.count }}</strong>
-            {{ 'knowledge.tool.choice.entities'|transchoice(creation.tools.count) }}
+            {{ 'knowledge.tool.choice.entities'|trans({ '%count%':creation.tools.count }) }}
         {% if searchableToolCount > 0 %}
             </a>
         {% endif %}
@@ -112,7 +112,7 @@
         </ul>
     </div>
     <div class="ladb-meta{% if creation.finishes.count == 0 %} text-muted{% endif %}">
-        <span><i class="ladb-icon-finish ladb-icon-fixed-center"></i>&nbsp;<strong>{{ creation.finishes.count }}</strong> {{ 'knowledge.finish.choice.entities'|transchoice(creation.finishes.count) }}</span>
+        <span><i class="ladb-icon-finish ladb-icon-fixed-center"></i>&nbsp;<strong>{{ creation.finishes.count }}</strong> {{ 'knowledge.finish.choice.entities'|trans({ '%count%':creation.finishes.count }) }}</span>
         <ul>
             {% for finish in creation.finishes %}
                 <li class="ladb-value"><a href="{{ path('core_creation_list', { 'q':'@finishes:"'~finish.label~'"' }) }}" class="ladb-cursor-filter" rel="nofollow">{{ finish.label }}</a></li>
@@ -120,7 +120,7 @@
         </ul>
     </div>
     <div class="ladb-meta{% if creation.hardwares.count == 0 %} text-muted{% endif %}">
-        <span><i class="ladb-icon-hardware ladb-icon-fixed-center"></i>&nbsp;<strong>{{ creation.hardwares.count }}</strong> {{ 'knowledge.hardware.choice.entities'|transchoice(creation.hardwares.count) }}</span>
+        <span><i class="ladb-icon-hardware ladb-icon-fixed-center"></i>&nbsp;<strong>{{ creation.hardwares.count }}</strong> {{ 'knowledge.hardware.choice.entities'|trans({ '%count%':creation.hardwares.count }) }}</span>
         <ul>
             {% for hardware in creation.hardwares %}
                 <li class="ladb-value"><a href="{{ path('core_creation_list', { 'q':'@hardwares:"'~hardware.label~'"' }) }}" class="ladb-cursor-filter" rel="nofollow">{{ hardware.label }}</a></li>
@@ -136,7 +136,7 @@
             <i class="ladb-icon-inspiration ladb-icon-fixed-center"></i>
             <a href="{{ creation.inspirationCount == 1 ? path('core_creation_show', { 'id':creation.inspirations[0].sluggedId }) : path('core_creation_inspirations', { 'id':creation.id }) }}">
                 <strong>{{ creation.inspirationCount }}</strong>
-                <small>{{ 'default.choice.inspirations'|transchoice(creation.inspirationCount) }}</small>
+                <small>{{ 'default.choice.inspirations'|trans({ '%count%':creation.inspirationCount }) }}</small>
             </a>
         </div>
     {% endif %}
@@ -146,7 +146,7 @@
             <a href="{{ creation.questionCount == 1 ? path('core_qa_question_show', { 'id':creation.questions[0].sluggedId }) : path('core_creation_questions', { 'id':creation.id }) }}">
         {% endif %}
         <strong>{{ creation.questionCount }}</strong>
-        <small>{{ 'qa.question.choice.entities'|transchoice(creation.questionCount) }}</small>
+        <small>{{ 'qa.question.choice.entities'|trans({ '%count%':creation.questionCount }) }}</small>
         {% if creation.questionCount > 0 %}
             </a>
         {% endif %}
@@ -157,7 +157,7 @@
             <a href="{{ creation.planCount == 1 ? path('core_plan_show', { 'id':creation.plans[0].sluggedId }) : path('core_creation_plans', { 'id':creation.id }) }}">
         {% endif %}
         <strong>{{ creation.planCount }}</strong>
-        <small>{{ 'wonder.plan.choice.entities'|transchoice(creation.planCount) }}</small>
+        <small>{{ 'wonder.plan.choice.entities'|trans({ '%count%':creation.planCount }) }}</small>
         {% if creation.planCount > 0 %}
             </a>
         {% endif %}
@@ -168,7 +168,7 @@
             <a href="{{ creation.howtoCount == 1 ? path('core_howto_show', { 'id':creation.howtos[0].sluggedId }) : path('core_creation_howtos', { 'id':creation.id }) }}">
         {% endif %}
         <strong>{{ creation.howtoCount }}</strong>
-        <small>{{ 'howto.howto.choice.entities'|transchoice(creation.howtoCount) }}</small>
+        <small>{{ 'howto.howto.choice.entities'|trans({ '%count%':creation.howtoCount }) }}</small>
         {% if creation.howtoCount > 0 %}
             </a>
         {% endif %}
@@ -179,7 +179,7 @@
             <a href="{{ creation.workflowCount == 1 ? path('core_workflow_show', { 'id':creation.workflows[0].sluggedId }) : path('core_creation_workflows', { 'id':creation.id }) }}">
         {% endif %}
         <strong>{{ creation.workflowCount }}</strong>
-        <small>{{ 'workflow.workflow.choice.entities'|transchoice(creation.workflowCount) }}</small>
+        <small>{{ 'workflow.workflow.choice.entities'|trans({ '%count%':creation.workflowCount }) }}</small>
         {% if creation.workflowCount > 0 %}
             </a>
         {% endif %}
@@ -190,7 +190,7 @@
             <a href="{{ creation.providerCount == 1 ? path('core_provider_show', { 'id':creation.providers[0].sluggedId }) : path('core_creation_providers', { 'id':creation.id }) }}">
         {% endif %}
         <strong>{{ creation.providerCount }}</strong>
-        <small>{{ 'knowledge.provider.choice.entities'|transchoice(creation.providerCount) }}</small>
+        <small>{{ 'knowledge.provider.choice.entities'|trans({ '%count%':creation.providerCount }) }}</small>
         {% if creation.providerCount > 0 %}
             </a>
         {% endif %}
@@ -201,7 +201,7 @@
             <a href="{{ creation.schoolCount == 1 ? path('core_school_show', { 'id':creation.schools[0].sluggedId }) : path('core_creation_schools', { 'id':creation.id }) }}">
         {% endif %}
         <strong>{{ creation.schoolCount }}</strong>
-        <small>{{ 'knowledge.school.choice.entities'|transchoice(creation.schoolCount) }}</small>
+        <small>{{ 'knowledge.school.choice.entities'|trans({ '%count%':creation.schoolCount }) }}</small>
         {% if creation.schoolCount > 0 %}
             </a>
         {% endif %}
@@ -211,7 +211,7 @@
             <i class="ladb-icon-rebound ladb-icon-fixed-center"></i>
             <a href="{{ creation.reboundCount == 1 ? path('core_creation_show', { 'id':creation.rebounds[0].sluggedId }) : path('core_creation_rebounds', { 'id':creation.id }) }}">
                 <strong>{{ creation.reboundCount }}</strong>
-                <small>{{ 'default.choice.rebounds'|transchoice(creation.reboundCount) }}</small>
+                <small>{{ 'default.choice.rebounds'|trans({ '%count%':creation.reboundCount }) }}</small>
             </a>
         </div>
     {% endif %}
@@ -226,7 +226,7 @@
                         'path':creation.inspirationCount == 1 ? path('core_creation_show', { 'id':creation.inspirations[0].sluggedId }) : path('core_creation_inspirations', { 'id':creation.id }),
                         'picture':creation.inspirations[0].mainPicture,
                         'icon':'ladb-icon-inspiration',
-                        'caption': creation.inspirationCount~' '~('default.choice.inspirations'|transchoice(creation.inspirationCount))
+                        'caption': creation.inspirationCount~' '~('default.choice.inspirations'|trans({ '%count%':creation.inspirationCount }))
                     } %}
                 {% endif %}
                 {% if creation.questionCount > 0 %}
@@ -234,7 +234,7 @@
                         'path':creation.questionCount == 1 ? path('core_qa_question_show', { 'id':creation.questions[0].sluggedId }) : path('core_creation_questions', { 'id':creation.id }),
                         'picture':creation.questions[0].mainPicture,
                         'icon':'ladb-icon-question',
-                        'caption': creation.questionCount~' '~('qa.question.choice.entities'|transchoice(creation.questionCount)),
+                        'caption': creation.questionCount~' '~('qa.question.choice.entities'|trans({ '%count%':creation.questionCount })),
                         'emptyWebPath': 'empty_question.png'
                     } %}
                 {% endif %}
@@ -243,7 +243,7 @@
                         'path':creation.planCount == 1 ? path('core_plan_show', { 'id':creation.plans[0].sluggedId }) : path('core_creation_plans', { 'id':creation.id }),
                         'picture':creation.plans[0].mainPicture,
                         'icon':'ladb-icon-plan',
-                        'caption': creation.planCount~' '~('wonder.plan.choice.entities'|transchoice(creation.planCount))
+                        'caption': creation.planCount~' '~('wonder.plan.choice.entities'|trans({ '%count%':creation.planCount }))
                     } %}
                 {% endif %}
                 {% if creation.howtoCount > 0 %}
@@ -251,7 +251,7 @@
                         'path':creation.howtoCount == 1 ? path('core_howto_show', { 'id':creation.howtos[0].sluggedId }) : path('core_creation_howtos', { 'id':creation.id }),
                         'picture':creation.howtos[0].mainPicture,
                         'icon':'ladb-icon-howto',
-                        'caption': creation.howtoCount~' '~('howto.howto.choice.entities'|transchoice(creation.howtoCount))
+                        'caption': creation.howtoCount~' '~('howto.howto.choice.entities'|trans({ '%count%':creation.howtoCount }))
                     } %}
                 {% endif %}
                 {% if creation.workflowCount > 0 %}
@@ -259,7 +259,7 @@
                         'path':creation.workflowCount == 1 ? path('core_workflow_show', { 'id':creation.workflows[0].sluggedId }) : path('core_creation_workflows', { 'id':creation.id }),
                         'picture':creation.workflows[0].mainPicture,
                         'icon':'ladb-icon-workflow',
-                        'caption': creation.workflowCount~' '~('workflow.workflow.choice.entities'|transchoice(creation.workflowCount)),
+                        'caption': creation.workflowCount~' '~('workflow.workflow.choice.entities'|trans({ '%count%':creation.workflowCount })),
                         'emptyWebPath': 'empty_workflow.png'
                     } %}
                 {% endif %}
@@ -268,7 +268,7 @@
                         'path':creation.providerCount == 1 ? path('core_provider_show', { 'id':creation.providers[0].sluggedId }) : path('core_creation_providers', { 'id':creation.id }),
                         'picture':creation.providers[0].mainPicture,
                         'icon':'ladb-icon-provider',
-                        'caption': creation.providerCount~' '~('knowledge.provider.choice.entities'|transchoice(creation.providerCount))
+                        'caption': creation.providerCount~' '~('knowledge.provider.choice.entities'|trans({ '%count%':creation.providerCount }))
                     } %}
                 {% endif %}
                 {% if creation.schoolCount > 0 %}
@@ -276,7 +276,7 @@
                         'path':creation.schoolCount == 1 ? path('core_school_show', { 'id':creation.schools[0].sluggedId }) : path('core_creation_schools', { 'id':creation.id }),
                         'picture':creation.schools[0].mainPicture,
                         'icon':'ladb-icon-school',
-                        'caption': creation.schoolCount~' '~('knowledge.school.choice.entities'|transchoice(creation.schoolCount))
+                        'caption': creation.schoolCount~' '~('knowledge.school.choice.entities'|trans({ '%count%':creation.schoolCount }))
                     } %}
                 {% endif %}
                 {% if creation.reboundCount > 0 %}
@@ -284,7 +284,7 @@
                         'path':creation.reboundCount == 1 ? path('core_creation_show', { 'id':creation.rebounds[0].sluggedId }) : path('core_creation_rebounds', { 'id':creation.id }),
                         'picture':creation.rebounds[0].mainPicture,
                         'icon':'ladb-icon-rebound',
-                        'caption': creation.reboundCount~' '~('default.choice.rebounds'|transchoice(creation.reboundCount))
+                        'caption': creation.reboundCount~' '~('default.choice.rebounds'|trans({ '%count%':creation.reboundCount }))
                     } %}
                 {% endif %}
             {% endblock %}

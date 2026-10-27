@@ -29,7 +29,7 @@
             {% set filterPath = 'core_creation_questions_filter' %}
             {% set filterPathParameters = { 'id':creation.id } %}
             {% block filterbarRightContent%}
-                <span class="ladb-heading">{{ creation.questionCount }} {{ 'qa.question.choice.entities'|transchoice(creation.questionCount) }}</span>
+                <span class="ladb-heading">{{ creation.questionCount }} {{ 'qa.question.choice.entities'|trans({ '%count%':creation.questionCount }) }}</span>
             {% endblock %}
         {% endembed %}
     {% endif %}

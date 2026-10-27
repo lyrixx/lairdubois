@@ -292,7 +292,7 @@ EOT
 				'listUnsubscribeLink' => $mailerUtils->generateListUnsubscribeLink($recipientUser, MailerUtils::LIST_NOTIFICATIONS),
 			);
 
-			$subject = $translator->transChoice('notification.choice.'.$activityStrippedName, count($notifications));
+			$subject = $translator->trans('notification.choice.'.$activityStrippedName, array( '%count%' => count($notifications) ));
 			$body = $templating->render('LadbCoreBundle:Core/Notification:email-'.$activityStrippedName.'.txt.twig', $parameters);
 			$htmlBody = $templating->render('LadbCoreBundle:Core/Notification:email-'.$activityStrippedName.'.html.twig', $parameters);
 

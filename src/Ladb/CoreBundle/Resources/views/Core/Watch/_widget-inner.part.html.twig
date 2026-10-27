@@ -8,5 +8,5 @@
     </a>
 {% endif %}
 {% if watchContext.count > 0 %}
-    <a href="{{ path('core_watch_list_byentity', { 'entityType':watchContext.entityType, 'entityId':watchContext.entityId }) }}" class="btn btn-default" data-tooltip="tooltip" title="{{ watchContext.count }}&nbsp;{{ 'watch.choice.entities'|transchoice(watchContext.count) }}">{{ watchContext.count }}</a>
+    <a href="{{ path('core_watch_list_byentity', { 'entityType':watchContext.entityType, 'entityId':watchContext.entityId }) }}" class="btn btn-default" data-tooltip="tooltip" title="{{ watchContext.count }}&nbsp;{{ 'watch.choice.entities'|trans({ '%count%':watchContext.count }) }}">{{ watchContext.count }}</a>
 {% endif %}

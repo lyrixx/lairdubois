@@ -72,7 +72,7 @@
                         </div>
                         <span class="ladb-sortable-handle"><i class="ladb-icon-move"></i></span>
                         <span>{{ article.title }}</span>
-                        {% if article.isDraft %}<small class="ladb-translucent"> ({{ 'default.choice.draft'|transchoice(1) }})</small>{% endif %}
+                        {% if article.isDraft %}<small class="ladb-translucent"> ({{ 'default.choice.draft'|trans({ '%count%':1 }) }})</small>{% endif %}
                     </div>
                 {% endfor %}
             </div>

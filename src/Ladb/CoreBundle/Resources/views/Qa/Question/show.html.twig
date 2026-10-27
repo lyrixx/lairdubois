@@ -98,7 +98,7 @@
             <a href="#" class="ladb-scrollto-btn" onclick="$('.ladb-qa-question-answers').ladbScrollTo(event);"><i class="ladb-icon-arrow-down"></i></a>
             <i class="ladb-icon-answer ladb-icon-fixed-center"></i>
             <strong itemprop="answerCount">{{ question.answerCount|number_format(0, ',', ' ') }}</strong>
-            <small>{{ 'qa.answer.choice.entities'|transchoice(question.answerCount) }}</small>
+            <small>{{ 'qa.answer.choice.entities'|trans({ '%count%':question.answerCount }) }}</small>
         </div>
         {% include 'LadbCoreBundle:Core/Vote:_meta-counter.part.html.twig' with { 'entity':question } %}
     </div>
@@ -110,7 +110,7 @@
                 <i class="ladb-icon-creation"></i>
                 <a href="{{ question.creationCount == 1 ? path('core_creation_show', { 'id':question.creations[0].sluggedId }) : path('core_qa_question_creations', { 'id':question.id }) }}">
                     <strong>{{ question.creationCount }}</strong>
-                    <small>{{ 'wonder.creation.choice.entities'|transchoice(question.creationCount) }}</small>
+                    <small>{{ 'wonder.creation.choice.entities'|trans({ '%count%':question.creationCount }) }}</small>
                 </a>
             </div>
         {% endif %}
@@ -119,7 +119,7 @@
                 <i class="ladb-icon-plan"></i>
                 <a href="{{ question.planCount == 1 ? path('core_plan_show', { 'id':question.plans[0].sluggedId }) : path('core_qa_question_plans', { 'id':question.id }) }}">
                     <strong>{{ question.planCount }}</strong>
-                    <small>{{ 'wonder.plan.choice.entities'|transchoice(question.planCount) }}</small>
+                    <small>{{ 'wonder.plan.choice.entities'|trans({ '%count%':question.planCount }) }}</small>
                 </a>
             </div>
         {% endif %}
@@ -128,7 +128,7 @@
                 <i class="ladb-icon-howto"></i>
                 <a href="{{ question.howtoCount == 1 ? path('core_howto_show', { 'id':question.howtos[0].sluggedId }) : path('core_qa_question_howtos', { 'id':question.id }) }}">
                     <strong>{{ question.howtoCount }}</strong>
-                    <small>{{ 'howto.howto.choice.entities'|transchoice(question.howtoCount) }}</small>
+                    <small>{{ 'howto.howto.choice.entities'|trans({ '%count%':question.howtoCount }) }}</small>
                 </a>
             </div>
         {% endif %}

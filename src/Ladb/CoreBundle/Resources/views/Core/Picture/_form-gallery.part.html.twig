@@ -22,7 +22,7 @@
     {% if help is defined %}<p class="help-block"><i>{{ help|raw }}</i></p>{% endif %}
     {% if preferedSize is defined %}<p class="help-block"><i>Taille préconisée : {{ preferedSize }}px</i></p>{% endif %}
     {% if mandatory and maxPictureCount > 1 %}
-        <p class="help-block"><i>{{ 'picture.form.choice.mandatory'|transchoice(maxPictureCount) }}</i></p>
+        <p class="help-block"><i>{{ 'picture.form.choice.mandatory'|trans({ '%count%':maxPictureCount }) }}</i></p>
     {% endif %}
     {{ form_errors(formPictures) }}
     {{ form_widget(formPictures) }}

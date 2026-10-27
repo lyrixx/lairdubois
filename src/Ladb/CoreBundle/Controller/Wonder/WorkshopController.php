@@ -801,7 +801,7 @@ class WorkshopController extends AbstractController {
 			$draftCount = $this->getUser()->getMeta()->getPrivateWorkshopCount();
 
 			// Flashbag
-			$this->addFlash('info', '<i class="ladb-icon-warning"></i> '.$translator->transchoice('wonder.workshop.choice.draft_alert', $draftCount, array( '%count%' => $draftCount )).' <small><a href="'.$draftPath.'" class="alert-link">('.$translator->trans('default.show_my_drafts').')</a></small>');
+			$this->addFlash('info', '<i class="ladb-icon-warning"></i> '.$translator->trans('wonder.workshop.choice.draft_alert', array( '%count%' => $draftCount )).' <small><a href="'.$draftPath.'" class="alert-link">('.$translator->trans('default.show_my_drafts').')</a></small>');
 
 		}
 

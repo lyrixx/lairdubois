@@ -76,7 +76,7 @@
         {% elseif searchableAddonCount > 0 %}
             <div class="ladb-metas">
                 <div class="ladb-meta">
-                    <span class="ladb-key"><i class="ladb-icon-info"></i> Ce logiciel compte <a href="{{ path('core_software_list', { 'q':'@addon:"'~software.name~'"'}) }}" rel="nofollow"><strong>{{ searchableAddonCount }}</strong> {{ 'knowledge.software.choice.addons'|transchoice(searchableAddonCount) }}</a> au catalogue.</span>
+                    <span class="ladb-key"><i class="ladb-icon-info"></i> Ce logiciel compte <a href="{{ path('core_software_list', { 'q':'@addon:"'~software.name~'"'}) }}" rel="nofollow"><strong>{{ searchableAddonCount }}</strong> {{ 'knowledge.software.choice.addons'|trans({ '%count%':searchableAddonCount }) }}</a> au catalogue.</span>
                 </div>
             </div>
         {% endif %}
@@ -130,7 +130,7 @@
                 <a href="{{ path('core_knowledge_contributors', { 'entityType':software.type, 'entityId':software.id }) }}">
             {% endif %}
                 <strong>{{ software.contributorCount|number_format(0, ',', ' ') }}</strong>
-                <small>{{ 'user.choice.contributors'|transchoice(software.contributorCount) }}</small>
+                <small>{{ 'user.choice.contributors'|trans({ '%count%':software.contributorCount }) }}</small>
             {% if software.contributorCount > 0 %}
                 </a>
             {% endif %}
@@ -166,7 +166,7 @@
                 <i class="ladb-icon-software ladb-icon-fixed-center"></i>
                 <a href="{{ ladb_entity_url_action(hostSoftware) }}">
                     <strong>1</strong>
-                    <small>{{ 'knowledge.software.choice.entities'|transchoice(1) }}</small>
+                    <small>{{ 'knowledge.software.choice.entities'|trans({ '%count%':1 }) }}</small>
                 </a>
             </div>
         {% elseif searchableAddonCount > 0 %}
@@ -174,7 +174,7 @@
                 <i class="ladb-icon-addon ladb-icon-fixed-center"></i>
                 <a href="{{ path('core_software_list', { 'q':'@addon:"'~software.name~'"'}) }}" rel="nofollow">
                     <strong>{{ searchableAddonCount }}</strong>
-                    <small>{{ 'knowledge.software.choice.addons'|transchoice(searchableAddonCount) }}</small>
+                    <small>{{ 'knowledge.software.choice.addons'|trans({ '%count%':searchableAddonCount }) }}</small>
                 </a>
             </div>
         {% endif %}
@@ -183,7 +183,7 @@
                 <i class="ladb-icon-plan ladb-icon-fixed-center"></i>
                 <a href="{{ path('core_plan_list', { 'q':'@file-extension:"'~software.supportedFiles~'"'}) }}" rel="nofollow">
                     <strong>{{ searchablePlanCount }}</strong>
-                    <small>{{ 'wonder.plan.choice.entities'|transchoice(searchablePlanCount) }}</small>
+                    <small>{{ 'wonder.plan.choice.entities'|trans({ '%count%':searchablePlanCount }) }}</small>
                 </a>
             </div>
         {% endif %}

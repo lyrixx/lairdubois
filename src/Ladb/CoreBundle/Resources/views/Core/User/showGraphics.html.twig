@@ -18,16 +18,16 @@
             {% set filterPath = 'core_user_show_graphics_filter' %}
             {% set filterPathParameters = { 'username':user.usernameCanonical } %}
             {% set customFilterDefs = {
-                'draft':    { 'label':('default.choice.draft'|transchoice(2)|capitalize), 'path':path('core_user_show_graphics_filter', { 'username':user.usernameCanonical, 'filter':'draft' }), 'hidden':(not isDraftVisible) },
+                'draft':    { 'label':('default.choice.draft'|trans({ '%count%':2 })|capitalize), 'path':path('core_user_show_graphics_filter', { 'username':user.usernameCanonical, 'filter':'draft' }), 'hidden':(not isDraftVisible) },
             } %}
             {% block filterbarRightContent%}
                 <span class="ladb-heading">
                     {% if filter == 'draft' and isDraftVisible %}
-                        {{ user.meta.privateGraphicCount~' '~('default.choice.draft'|transchoice(user.meta.privateGraphicCount)) }}
+                        {{ user.meta.privateGraphicCount~' '~('default.choice.draft'|trans({ '%count%':user.meta.privateGraphicCount })) }}
                     {% elseif filter|slice(0,4) == 'type' %}
-                        {{ graphics.count~' '~('promotion.graphic.choice.entities'|transchoice(graphics.count)) }}
+                        {{ graphics.count~' '~('promotion.graphic.choice.entities'|trans({ '%count%':graphics.count })) }}
                     {% else %}
-                        {{ user.meta.publicGraphicCount }} {{ 'promotion.graphic.choice.entities'|transchoice(user.meta.publicGraphicCount) }}{% if isDraftVisible and user.meta.privateGraphicCount > 0 %} (+{{ user.meta.privateGraphicCount~' '~('default.choice.draft'|transchoice(user.meta.privateGraphicCount)) }}){% endif %}
+                        {{ user.meta.publicGraphicCount }} {{ 'promotion.graphic.choice.entities'|trans({ '%count%':user.meta.publicGraphicCount }) }}{% if isDraftVisible and user.meta.privateGraphicCount > 0 %} (+{{ user.meta.privateGraphicCount~' '~('default.choice.draft'|trans({ '%count%':user.meta.privateGraphicCount })) }}){% endif %}
                     {% endif %}
                 </span>
             {% endblock %}

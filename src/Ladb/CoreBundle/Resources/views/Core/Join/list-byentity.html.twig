@@ -8,7 +8,7 @@
 
 {% block bodyContainerContent %}
     <div class="ladb-filterbar ladb-filterbar-line">
-        <span class="ladb-heading pull-right">{{ joins.count }} {{ 'join.choice.entities'|transchoice(joins.count) }}</span>
+        <span class="ladb-heading pull-right">{{ joins.count }} {{ 'join.choice.entities'|trans({ '%count%':joins.count }) }}</span>
     </div>
     {{ parent() }}
 {% endblock %}

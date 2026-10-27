@@ -10,7 +10,7 @@
             {% set filterPath = 'core_user_show_requests_filter' %}
             {% set filterPathParameters = { 'username':user.usernameCanonical } %}
             {% block filterbarRightContent%}
-                <span class="ladb-heading">{{ user.meta.requestCount }} {{ 'team.choice.requests'|transchoice(user.meta.requestCount) }}</span>
+                <span class="ladb-heading">{{ user.meta.requestCount }} {{ 'team.choice.requests'|trans({ '%count%':user.meta.requestCount }) }}</span>
             {% endblock %}
         {% endembed %}
     {% endif %}

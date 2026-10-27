@@ -11,9 +11,9 @@
         {% block filterbarRightContent%}
             <span class="ladb-heading">
                 {% if upFilter %}
-                    {{ user.meta.positiveVoteCount }} {{ 'vote.choice.positive_votes'|transchoice(user.meta.positiveVoteCount) }}
+                    {{ user.meta.positiveVoteCount }} {{ 'vote.choice.positive_votes'|trans({ '%count%':user.meta.positiveVoteCount }) }}
                 {% else %}
-                    {{ user.meta.negativeVoteCount }} {{ 'vote.choice.negative_votes'|transchoice(user.meta.negativeVoteCount) }}
+                    {{ user.meta.negativeVoteCount }} {{ 'vote.choice.negative_votes'|trans({ '%count%':user.meta.negativeVoteCount }) }}
                 {% endif %}
             </span>
         {% endblock %}

@@ -17,16 +17,16 @@
             {% set filterPath = 'core_user_show_finds_filter' %}
             {% set filterPathParameters = { 'username':user.usernameCanonical } %}
             {% set customFilterDefs = {
-                'draft':    { 'label':('default.choice.draft'|transchoice(2)|capitalize), 'path':path('core_user_show_finds_filter', { 'username':user.usernameCanonical, 'filter':'draft' }), 'hidden':(not isDraftVisible) },
+                'draft':    { 'label':('default.choice.draft'|trans({ '%count%':2 })|capitalize), 'path':path('core_user_show_finds_filter', { 'username':user.usernameCanonical, 'filter':'draft' }), 'hidden':(not isDraftVisible) },
             } %}
             {% block filterbarRightContent%}
                 <span class="ladb-heading">
                     {% if filter == 'draft' and isDraftVisible %}
-                        {{ user.meta.privateFindCount~' '~('default.choice.draft'|transchoice(user.meta.privateFindCount)) }}
+                        {{ user.meta.privateFindCount~' '~('default.choice.draft'|trans({ '%count%':user.meta.privateFindCount })) }}
                     {% elseif filter|slice(0,4) == 'type' %}
-                        {{ finds.count~' '~('find.find.choice.entities'|transchoice(finds.count)) }}
+                        {{ finds.count~' '~('find.find.choice.entities'|trans({ '%count%':finds.count })) }}
                     {% else %}
-                        {{ user.meta.publicFindCount }} {{ 'find.find.choice.entities'|transchoice(user.meta.publicFindCount) }}{% if isDraftVisible and user.meta.privateFindCount > 0 %} (+{{ user.meta.privateFindCount~' '~('default.choice.draft'|transchoice(user.meta.privateFindCount)) }}){% endif %}
+                        {{ user.meta.publicFindCount }} {{ 'find.find.choice.entities'|trans({ '%count%':user.meta.publicFindCount }) }}{% if isDraftVisible and user.meta.privateFindCount > 0 %} (+{{ user.meta.privateFindCount~' '~('default.choice.draft'|trans({ '%count%':user.meta.privateFindCount })) }}){% endif %}
                     {% endif %}
                 </span>
             {% endblock %}

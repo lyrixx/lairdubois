@@ -176,7 +176,7 @@
                         <a href="#" class="ladb-scrollto-btn" onclick="$('#ladb_referer_widget').ladbScrollTo(event);"><i class="ladb-icon-arrow-down"></i></a>
                         <i class="ladb-icon-referral ladb-icon-fixed-center"></i>
                         <strong>{{ wonder.referralCount|number_format(0, ',', ' ') }}</strong>
-                        <small>{{ 'referer.choice.referrals'|transchoice(wonder.referralCount) }}</small>
+                        <small>{{ 'referer.choice.referrals'|trans({ '%count%':wonder.referralCount }) }}</small>
                     </div>
                 {% endif %}
             {% endblock %}

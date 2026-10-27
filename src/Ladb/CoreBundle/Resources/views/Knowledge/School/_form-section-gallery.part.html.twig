@@ -8,7 +8,7 @@
 
 {% set formSection = 'schools' %}
 {% set icon = icon|default('school') %}
-{% set title = title|default('knowledge.school.choice.entities'|transchoice(2)|capitalize) %}
+{% set title = title|default('knowledge.school.choice.entities'|trans({ '%count%':2 })|capitalize) %}
 
 {% if formSchools is not defined %}
     {% set formSchools = form.schools %}

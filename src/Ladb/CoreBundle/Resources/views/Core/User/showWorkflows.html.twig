@@ -18,16 +18,16 @@
             {% set filterPath = 'core_user_show_workflows_filter' %}
             {% set filterPathParameters = { 'username':user.usernameCanonical } %}
             {% set customFilterDefs = {
-                'draft':    { 'label':('default.choice.draft'|transchoice(2)|capitalize), 'path':path('core_user_show_workflows_filter', { 'username':user.usernameCanonical, 'filter':'draft' }), 'hidden':(not isDraftVisible) },
+                'draft':    { 'label':('default.choice.draft'|trans({ '%count%':2 })|capitalize), 'path':path('core_user_show_workflows_filter', { 'username':user.usernameCanonical, 'filter':'draft' }), 'hidden':(not isDraftVisible) },
             } %}
             {% block filterbarRightContent%}
                 <span class="ladb-heading">
                     {% if filter == 'draft' and isDraftVisible %}
-                        {{ user.meta.privateWorkflowCount~' '~('default.choice.draft'|transchoice(user.meta.privateWorkflowCount)) }}
+                        {{ user.meta.privateWorkflowCount~' '~('default.choice.draft'|trans({ '%count%':user.meta.privateWorkflowCount })) }}
                     {% elseif filter|slice(0,4) == 'type' %}
-                        {{ workflows.count~' '~('workflow.workflow.choice.entities'|transchoice(workflows.count)) }}
+                        {{ workflows.count~' '~('workflow.workflow.choice.entities'|trans({ '%count%':workflows.count })) }}
                     {% else %}
-                        {{ user.meta.publicWorkflowCount }} {{ 'workflow.workflow.choice.entities'|transchoice(user.meta.publicWorkflowCount) }}{% if isDraftVisible and user.meta.privateWorkflowCount > 0 %} (+{{ user.meta.privateWorkflowCount~' '~('default.choice.draft'|transchoice(user.meta.privateWorkflowCount)) }}){% endif %}
+                        {{ user.meta.publicWorkflowCount }} {{ 'workflow.workflow.choice.entities'|trans({ '%count%':user.meta.publicWorkflowCount }) }}{% if isDraftVisible and user.meta.privateWorkflowCount > 0 %} (+{{ user.meta.privateWorkflowCount~' '~('default.choice.draft'|trans({ '%count%':user.meta.privateWorkflowCount })) }}){% endif %}
                     {% endif %}
                 </span>
             {% endblock %}

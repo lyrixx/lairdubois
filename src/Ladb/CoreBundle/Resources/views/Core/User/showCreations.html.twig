@@ -17,14 +17,14 @@
             {% set filterPath = 'core_user_show_creations_filter' %}
             {% set filterPathParameters = { 'username':user.usernameCanonical } %}
             {% set customFilterDefs = {
-                'draft':    { 'label':('default.choice.draft'|transchoice(2)|capitalize), 'path':path('core_user_show_creations_filter', { 'username':user.usernameCanonical, 'filter':'draft' }), 'hidden':(not isDraftVisible) },
+                'draft':    { 'label':('default.choice.draft'|trans({ '%count%':2 })|capitalize), 'path':path('core_user_show_creations_filter', { 'username':user.usernameCanonical, 'filter':'draft' }), 'hidden':(not isDraftVisible) },
             } %}
             {% block filterbarRightContent%}
                 <span class="ladb-heading">
                     {% if filter == 'draft' and isDraftVisible %}
-                        {{ user.meta.privateCreationCount~' '~('default.choice.draft'|transchoice(user.meta.privateCreationCount)) }}
+                        {{ user.meta.privateCreationCount~' '~('default.choice.draft'|trans({ '%count%':user.meta.privateCreationCount })) }}
                     {% else %}
-                        {{ user.meta.publicCreationCount }} {{ 'wonder.creation.choice.entities'|transchoice(user.meta.publicCreationCount) }}{% if isDraftVisible and user.meta.privateCreationCount > 0 %} (+{{ user.meta.privateCreationCount~' '~('default.choice.draft'|transchoice(user.meta.privateCreationCount)) }}){% endif %}
+                        {{ user.meta.publicCreationCount }} {{ 'wonder.creation.choice.entities'|trans({ '%count%':user.meta.publicCreationCount }) }}{% if isDraftVisible and user.meta.privateCreationCount > 0 %} (+{{ user.meta.privateCreationCount~' '~('default.choice.draft'|trans({ '%count%':user.meta.privateCreationCount })) }}){% endif %}
                     {% endif %}
                 </span>
             {% endblock %}

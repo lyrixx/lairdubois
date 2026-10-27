@@ -23,7 +23,7 @@
             {% set filterPath = 'core_creation_rebounds_filter' %}
             {% set filterPathParameters = { 'id':creation.id } %}
             {% block filterbarRightContent%}
-                <span class="ladb-heading">{{ creation.reboundCount }} {{ 'default.choice.rebounds'|transchoice(creation.reboundCount) }}</span>
+                <span class="ladb-heading">{{ creation.reboundCount }} {{ 'default.choice.rebounds'|trans({ '%count%':creation.reboundCount }) }}</span>
             {% endblock %}
         {% endembed %}
     {% endif %}

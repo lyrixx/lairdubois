@@ -28,9 +28,9 @@
             {% block filterbarRightContent%}
                 <span class="ladb-heading">
                     {% if sentFilter %}
-                        {{ user.meta.sentLikeCount }} {{ 'like.choice.sent_likes'|transchoice(user.meta.sentLikeCount) }}
+                        {{ user.meta.sentLikeCount }} {{ 'like.choice.sent_likes'|trans({ '%count%':user.meta.sentLikeCount }) }}
                     {% else %}
-                        {{ user.meta.recievedLikeCount }} {{ 'like.choice.recieved_likes'|transchoice(user.meta.recievedLikeCount) }}
+                        {{ user.meta.recievedLikeCount }} {{ 'like.choice.recieved_likes'|trans({ '%count%':user.meta.recievedLikeCount }) }}
                     {% endif %}
                 </span>
             {% endblock %}

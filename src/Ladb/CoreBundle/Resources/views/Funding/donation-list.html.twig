@@ -25,7 +25,7 @@
                     'generous':     { 'label':'Généreux', 'path':path('core_funding_admin_donation_list_filter', { 'filter':'generous' }) },
                 } %}
                 {% block filterbarRightContent%}
-                    <span class="ladb-heading">{{ donationCount }} {{ 'funding.choice.donations'|transchoice(donationCount) }}</span>
+                    <span class="ladb-heading">{{ donationCount }} {{ 'funding.choice.donations'|trans({ '%count%':donationCount }) }}</span>
                 {% endblock %}
             {% endembed %}
             {{ block('autopagerContainer') }}

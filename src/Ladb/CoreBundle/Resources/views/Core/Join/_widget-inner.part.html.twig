@@ -9,6 +9,6 @@
         </a>
     {% endif %}
     {% if joinContext.count > 0 %}
-        <a href="{{ path('core_join_list_byentity', { 'entityType':joinContext.entityType, 'entityId':joinContext.entityId }) }}" class="btn btn-default" data-tooltip="tooltip" title="{{ joinContext.count }}&nbsp;{{ 'join.choice.entities'|transchoice(joinContext.count) }}">{{ joinContext.count }}</a>
+        <a href="{{ path('core_join_list_byentity', { 'entityType':joinContext.entityType, 'entityId':joinContext.entityId }) }}" class="btn btn-default" data-tooltip="tooltip" title="{{ joinContext.count }}&nbsp;{{ 'join.choice.entities'|trans({ '%count%':joinContext.count }) }}">{{ joinContext.count }}</a>
     {% endif %}
 {% endif %}
