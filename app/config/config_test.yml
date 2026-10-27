@@ -120,3 +120,8 @@ services:
     tests.fixture_factory:
         alias: Ladb\CoreBundle\DataFixtures\FixtureFactory
         public: true
+
+    # The templates that cache:warmup compiles (Tests\Twig\TemplateCacheWarmerTest)
+    tests.twig_template_iterator:
+        alias: twig.template_iterator
+        public: true

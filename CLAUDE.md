@@ -617,6 +617,14 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
 - Twig 3 échappe les templates `*.json.twig` pour JS (`FileExtensionEscapingStrategy`), Twig 2
   pour HTML : ceux qui affichent des valeurs sont dans un `{% autoescape 'html' %}`, le JS du site
   les insère dans la page.
+- Twig 3 donne à un filtre sans arguments un `EmptyNode`, auquel le
+  `TranslationDefaultDomainNodeVisitor` du TwigBridge de 4.4 ne sait pas ajouter le domaine de
+  `{% trans_default_domain %}` (`'x'|trans` des templates de FOSUserBundle) : le template ne
+  compile pas, et le domaine reste aux templates compilés ensuite par le process, dont ceux de
+  `cache:warmup`, qui affichent alors leurs clés (#138). `TransFilterArgumentsNodeVisitor` (de
+  `LadbExtension`) le remplace avant lui par un `Nodes` vide ; à retirer en 5.4, dont le TwigBridge
+  le fait. `Tests\Twig\TemplateCacheWarmerTest` compile dans un process tous les templates du
+  warmer, puis vérifie une page et leurs erreurs.
 - `friendsofsymfony/user-bundle` est en `~2.2.0` : la 3.x, une version majeure, s'installe aussi
   avec Symfony 4.4 (le container ne compile plus sans `fos_user.service.mailer`, entre autres).
 - SensioFrameworkExtraBundle est en 5.5 : le `TemplateListener` de la 5.4 demande un
