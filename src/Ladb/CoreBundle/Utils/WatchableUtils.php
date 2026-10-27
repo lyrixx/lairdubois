@@ -2,13 +2,20 @@
 
 namespace Ladb\CoreBundle\Utils;
 
+use Doctrine\Persistence\ManagerRegistry;
 use Ladb\CoreBundle\Entity\Core\Watch;
 use Ladb\CoreBundle\Model\WatchableInterface;
 use Ladb\CoreBundle\Entity\Core\User;
 
-class WatchableUtils extends AbstractContainerAwareUtils {
+class WatchableUtils {
 
 	const NAME = 'ladb_core.watchable_utils';
+
+	private $doctrine;
+
+	public function __construct(ManagerRegistry $doctrine) {
+		$this->doctrine = $doctrine;
+	}
 
     public function autoCreateWatch(WatchableInterface $watchable, User $user) {
         if ($user->getMeta()->getAutoWatchEnabled()) {
@@ -18,7 +25,7 @@ class WatchableUtils extends AbstractContainerAwareUtils {
     }
 
     public function createWatch(WatchableInterface $watchable, User $user) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$watchRepository = $om->getRepository(Watch::CLASS_NAME);
 
 		if (!$watchRepository->existsByEntityTypeAndEntityIdAndUser($watchable->getType(), $watchable->getId(), $user)) {
@@ -39,7 +46,7 @@ class WatchableUtils extends AbstractContainerAwareUtils {
     }
 
 	public function deleteWatches(WatchableInterface $watchable, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$watchRepository = $om->getRepository(Watch::CLASS_NAME);
 
 		$watches = $watchRepository->findByEntityTypeAndEntityId($watchable->getType(), $watchable->getId());
@@ -54,7 +61,7 @@ class WatchableUtils extends AbstractContainerAwareUtils {
 	/////
 
 	public function getWatchContext(WatchableInterface $watchable, User $user = null) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$watchRepository = $om->getRepository(Watch::CLASS_NAME);
 		$watch = null;
 
@@ -72,7 +79,7 @@ class WatchableUtils extends AbstractContainerAwareUtils {
 	/////
 
 	public function transferWatches(WatchableInterface $watchableSrc, WatchableInterface $watchableDest, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$watchRepository = $om->getRepository(Watch::CLASS_NAME);
 
 		// Retrieve watches

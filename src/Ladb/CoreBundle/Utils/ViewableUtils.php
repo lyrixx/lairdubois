@@ -5,18 +5,25 @@ namespace Ladb\CoreBundle\Utils;
 use Jaybizzle\CrawlerDetect\CrawlerDetect;
 use Ladb\CoreBundle\Entity\Core\View;
 use Ladb\CoreBundle\Model\HiddableInterface;
+use Doctrine\ORM\EntityManagerInterface;
 use Ladb\CoreBundle\Model\ViewableInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Psr\Container\ContainerInterface as PsrContainerInterface;
+use Psr\Log\LoggerInterface;
 
-class ViewableUtils extends AbstractContainerAwareUtils {
+class ViewableUtils {
 
 	const NAME = 'ladb_core.viewable_utils';
 
+	private $globalUtils;
+	private $logger;
 	private $om;
+	private $producerLocator;
 
-	public function __construct(ContainerInterface $container) {
-		parent::__construct($container);
-		$this->om = $this->getDoctrine()->getManager();
+	public function __construct(GlobalUtils $globalUtils, LoggerInterface $logger, EntityManagerInterface $om, PsrContainerInterface $producerLocator) {
+		$this->globalUtils = $globalUtils;
+		$this->logger = $logger;
+		$this->om = $om;
+		$this->producerLocator = $producerLocator;
 	}
 
 	/////
@@ -37,17 +44,16 @@ class ViewableUtils extends AbstractContainerAwareUtils {
 
 		$CrawlerDetect = new CrawlerDetect();
 		if ($CrawlerDetect->isCrawler()) {
-			$this->container->get('logger')->info('Crawler detected and excluded from processShownView : '.$_SERVER['HTTP_USER_AGENT']);
+			$this->logger->info('Crawler detected and excluded from processShownView : '.$_SERVER['HTTP_USER_AGENT']);
 			return;	// Exclude bots
 		}
 
-		$globalUtils = $this->container->get(GlobalUtils::NAME);
-		$user = $globalUtils->getUser();
+		$user = $this->globalUtils->getUser();
 		if (is_null($user)) {
 
 			// No user -> use sessions
 
-			$session = $globalUtils->getSession();
+			$session = $this->globalUtils->getSession();
 			$key = '_ladb_viewable_'.$viewable->getType();
 			$shownIds = $session->get($key);
 			if (is_null($shownIds)) {
@@ -65,7 +71,7 @@ class ViewableUtils extends AbstractContainerAwareUtils {
 		try {
 
 			// Publish a view in queue
-			$producer = $this->container->get('old_sound_rabbit_mq.view_producer');
+			$producer = $this->producerLocator->get('view');
 			$producer->publish(serialize(array(
 				'kind'       => View::KIND_SHOWN,
 				'entityType' => $viewable->getType(),
@@ -74,15 +80,14 @@ class ViewableUtils extends AbstractContainerAwareUtils {
 			)));
 
 		} catch (\Exception $e) {
-			$this->container->get('logger')->error('Failed to publish shown view process in queue', array ( 'exception' => $e));
+			$this->logger->error('Failed to publish shown view process in queue', array ( 'exception' => $e));
 		}
 
 	}
 
 	public function processListedView($viewables) {
 
-		$globalUtils = $this->get(GlobalUtils::NAME);
-		$user = $globalUtils->getUser();
+		$user = $this->globalUtils->getUser();
 		if (is_null($user)) {
 			return;
 		}
@@ -103,7 +108,7 @@ class ViewableUtils extends AbstractContainerAwareUtils {
 		try {
 
 			// Publish a view in queue
-			$producer = $this->container->get('old_sound_rabbit_mq.view_producer');
+			$producer = $this->producerLocator->get('view');
 			$producer->publish(serialize(array(
 				'kind'       => View::KIND_LISTED,
 				'entityType' => $entityType,
@@ -112,7 +117,7 @@ class ViewableUtils extends AbstractContainerAwareUtils {
 			)));
 
 		} catch (\Exception $e) {
-			$this->container->get('logger')->error('Failed to publish shown view process in queue.');
+			$this->logger->error('Failed to publish shown view process in queue.');
 		}
 
 	}
@@ -120,7 +125,6 @@ class ViewableUtils extends AbstractContainerAwareUtils {
 	// Transfer /////
 
 	public function transferViews(ViewableInterface $viewableSrc, ViewableInterface $viewableDest, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
 		$viewRepository = $this->om->getRepository(View::CLASS_NAME);
 
 		// Retrieve views
@@ -137,7 +141,7 @@ class ViewableUtils extends AbstractContainerAwareUtils {
 		$viewableSrc->setViewCount(0);
 
 		if ($flush) {
-			$om->flush();
+			$this->om->flush();
 		}
 	}
 

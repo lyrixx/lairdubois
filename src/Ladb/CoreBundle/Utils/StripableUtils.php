@@ -18,9 +18,15 @@ use Ladb\CoreBundle\Entity\Core\Picture;
 use Ladb\CoreBundle\Model\MultiPicturedInterface;
 use Ladb\CoreBundle\Model\PicturedInterface;
 
-class StripableUtils extends AbstractContainerAwareUtils {
+class StripableUtils {
 
 	const NAME = 'ladb_core.stripable_utils';
+
+	private $pictureManager;
+
+	public function __construct(PictureManager $pictureManager) {
+		$this->pictureManager = $pictureManager;
+	}
 
 	/////
 
@@ -44,8 +50,7 @@ class StripableUtils extends AbstractContainerAwareUtils {
 		$imagine = new Imagine();
 
 		// Create strip picture
-		$pictureManager = $this->get(PictureManager::NAME);
-		$strip = $pictureManager->createEmpty();
+		$strip = $this->pictureManager->createEmpty();
 
 		$gutter = 5;
 		$width = 564;

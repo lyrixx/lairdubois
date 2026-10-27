@@ -13,7 +13,6 @@ use Ladb\CoreBundle\Utils\LocalisableUtils;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
 use Psr\Log\AbstractLogger;
-use Symfony\Component\DependencyInjection\Container;
 use Tests\Double\OfflineLocalisableUtils;
 
 /**
@@ -236,17 +235,13 @@ final class LocalisableUtilsTest extends TestCase
         };
         $this->logger = $logger;
 
-        $container = new Container();
-        $container->setParameter('google_api_key', self::API_KEY);
-        $container->set('logger', $logger);
-
         // An empty queue fails any request
         $handler = HandlerStack::create(new MockHandler(null === $response ? [] : [$response]));
         $handler->push(Middleware::tap(function (RequestInterface $request) {
             $this->requests[] = $request;
         }));
 
-        return new LocalisableUtils($container, new Client(['handler' => $handler]));
+        return new LocalisableUtils(self::API_KEY, new Client(['handler' => $handler]), $logger);
     }
 
     private function createResponse(string $file): Response

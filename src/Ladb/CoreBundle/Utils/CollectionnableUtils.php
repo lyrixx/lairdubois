@@ -2,6 +2,7 @@
 
 namespace Ladb\CoreBundle\Utils;
 
+use Doctrine\Persistence\ManagerRegistry;
 use Ladb\CoreBundle\Entity\Collection\Collection;
 use Ladb\CoreBundle\Entity\Collection\Entry;
 use Ladb\CoreBundle\Event\PublicationEvent;
@@ -11,16 +12,26 @@ use Ladb\CoreBundle\Manager\Core\PictureManager;
 use Ladb\CoreBundle\Model\CollectionnableInterface;
 use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Model\PicturedInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
-class CollectionnableUtils extends AbstractContainerAwareUtils {
+class CollectionnableUtils {
 
 	const NAME = 'ladb_core.collectionnable_utils';
+
+	private $dispatcher;
+	private $doctrine;
+	private $pictureManager;
+
+	public function __construct(EventDispatcherInterface $dispatcher, ManagerRegistry $doctrine, PictureManager $pictureManager) {
+		$this->dispatcher = $dispatcher;
+		$this->doctrine = $doctrine;
+		$this->pictureManager = $pictureManager;
+	}
 
 	/////
 
 	public function createEntry(CollectionnableInterface $collectionnable, Collection $collection) {
-		$om = $this->getDoctrine()->getManager();
-		$pictureManager = $this->get(PictureManager::NAME);
+		$om = $this->doctrine->getManager();
 
 		if ($collectionnable instanceof HiddableInterface && !$collectionnable->getIsPublic()) {
 			throw new \Exception('Entity must be public (entityType='.$collectionnable->getType().', entityId='.$collectionnable->getId().')');
@@ -43,7 +54,7 @@ class CollectionnableUtils extends AbstractContainerAwareUtils {
 		if (is_null($collection->getMainPicture()) && $collectionnable instanceof PicturedInterface && !is_null($collectionnable->getMainPicture())) {
 
 			// Duplicate the entyt mainPicture
-			$mainPicture = $pictureManager->duplicate($collectionnable->getMainPicture());
+			$mainPicture = $this->pictureManager->duplicate($collectionnable->getMainPicture());
 			$mainPicture->setUser($collection->getUser());
 			$collection->setMainPicture($mainPicture);
 
@@ -60,13 +71,12 @@ class CollectionnableUtils extends AbstractContainerAwareUtils {
 		$om->flush();
 
 		// Dispatch publication event
-		$dispatcher = $this->get('event_dispatcher');
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_CHANGED, new PublicationEvent($collection));
+		$this->dispatcher->dispatch(PublicationListener::PUBLICATION_CHANGED, new PublicationEvent($collection));
 
 	}
 
 	public function deleteEntries(CollectionnableInterface $collectionnable, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$entryRepository = $om->getRepository(Entry::CLASS_NAME);
 
 		$entries = $entryRepository->findByEntityTypeAndEntityId($collectionnable->getType(), $collectionnable->getId());
@@ -114,7 +124,7 @@ class CollectionnableUtils extends AbstractContainerAwareUtils {
 	}
 
 	public function getEntryContext(Collection $collection, CollectionnableInterface $collectionnable) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$entryRepository = $om->getRepository(Entry::CLASS_NAME);
 
 		return array(
@@ -128,7 +138,7 @@ class CollectionnableUtils extends AbstractContainerAwareUtils {
 	/////
 
 	public function transferCollections(CollectionnableInterface $collectionnableSrc, CollectionnableInterface $collectionnableDest, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$entryRepository = $om->getRepository(Entry::CLASS_NAME);
 
 		// Retrieve entries

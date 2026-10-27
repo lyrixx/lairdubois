@@ -257,10 +257,12 @@ function rector(
 }
 
 /**
- * ControllerGetToActionArgumentRector leaves "__RECTOR_REMOVED_LINE__;" in place of the statements
- * it removes (php-parser would reprint the comments before them): removed here with their line,
- * and the empty line after them when it would double the one before, or detach a comment from the
- * next statement.
+ * The rules of tools/rector leave "__RECTOR_REMOVED_LINE__;" in place of the statements they
+ * remove (php-parser would reprint the comments before them): removed here with their line, and
+ * the empty line after them when it would double the one before, or detach a comment from the next
+ * statement. UtilsContainerToConstructorRector writes its new members as a constant
+ * "__RECTOR_INSERTED_CODE__", whose value is their code in base64 (php-parser would indent them
+ * wrong): its line is replaced by the code.
  */
 function rector_remove_lines(string $file): void
 {
@@ -268,6 +270,12 @@ function rector_remove_lines(string $file): void
     $kept = [];
     $removed = false;
     for ($i = 0, $count = \count($lines); $i < $count; ++$i) {
+        if (preg_match("/^\\s*const __RECTOR_INSERTED_CODE__ = '([A-Za-z0-9+\\/=]*)';\\s*$/", $lines[$i], $matches)) {
+            $removed = true;
+            array_push($kept, ...explode("\n", base64_decode($matches[1])));
+
+            continue;
+        }
         if ('__RECTOR_REMOVED_LINE__;' !== trim($lines[$i])) {
             $kept[] = $lines[$i];
 

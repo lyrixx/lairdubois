@@ -5,18 +5,25 @@ namespace Ladb\CoreBundle\Utils;
 use Ladb\CoreBundle\Entity\Knowledge\AbstractKnowledge;
 use Ladb\CoreBundle\Entity\Knowledge\Value\BaseValue;
 
-class KnowledgeUtils extends AbstractContainerAwareUtils {
+class KnowledgeUtils {
 
 	const NAME = 'ladb_core.knowledge_utils';
+
+	private $globalUtils;
+	private $propertyUtils;
+
+	public function __construct(GlobalUtils $globalUtils, PropertyUtils $propertyUtils) {
+		$this->globalUtils = $globalUtils;
+		$this->propertyUtils = $propertyUtils;
+	}
 
 	/////
 
 	public function computeCompletionPercent(AbstractKnowledge $knowledge) {
-		$propertyUtils = $this->get(PropertyUtils::NAME);
 		$fieldDefs = $knowledge->getFieldDefs();
 		$filledFieldCount = 0;
 		foreach ($fieldDefs as $field => $fieldDef) {
-			$value = $propertyUtils->getValue($knowledge, $field);
+			$value = $this->propertyUtils->getValue($knowledge, $field);
 			if (!is_null($value)) {
 				$filledFieldCount++;
 			}
@@ -31,11 +38,10 @@ class KnowledgeUtils extends AbstractContainerAwareUtils {
 	}
 
 	public function updateKnowledgeField(AbstractKnowledge $knowledge, $field) {
-		$propertyUtils = $this->get(PropertyUtils::NAME);
 		$fieldDef = $knowledge->getFieldDefs()[$field];
 		if (!is_null($fieldDef)) {
 
-			$values = $propertyUtils->getValue($knowledge, $field.'_values');
+			$values = $this->propertyUtils->getValue($knowledge, $field.'_values');
 			if (!$values->isEmpty()) {
 
 				// Reorder values
@@ -78,32 +84,32 @@ class KnowledgeUtils extends AbstractContainerAwareUtils {
 					}
 
 					$noValue = $rejectedValue && !$mandatory;
-					$propertyUtils->setValue($knowledge, $field, $noValue ? null : $text);
+					$this->propertyUtils->setValue($knowledge, $field, $noValue ? null : $text);
 
 				} else {
 					$value = $valuesArray[0];
 					$rejectedValue = $value->getVoteScore() < 0;
 
 					$noValue = $rejectedValue && !$mandatory;
-					$propertyUtils->setValue($knowledge, $field, $noValue ? null : $this->_getValueData($value, $choices, $useChoicesValue));
+					$this->propertyUtils->setValue($knowledge, $field, $noValue ? null : $this->_getValueData($value, $choices, $useChoicesValue));
 					if (isset($fieldDef[AbstractKnowledge::ATTRIB_LINKED_FIELDS])) {
 						foreach ($fieldDef[AbstractKnowledge::ATTRIB_LINKED_FIELDS] as $linkedField) {
-							$linkedFieldValue = $noValue ? null : $propertyUtils->getValue($value, $linkedField);
-							$propertyUtils->setValue($knowledge, $linkedField, $linkedFieldValue);
+							$linkedFieldValue = $noValue ? null : $this->propertyUtils->getValue($value, $linkedField);
+							$this->propertyUtils->setValue($knowledge, $linkedField, $linkedFieldValue);
 						}
 					}
 
 				}
 
 				if ($mandatory) {
-					$propertyUtils->setValue($knowledge, $field.'_rejected', $rejectedValue);
+					$this->propertyUtils->setValue($knowledge, $field.'_rejected', $rejectedValue);
 				}
 
 			} else {
-				$propertyUtils->setValue($knowledge, $field, null);
+				$this->propertyUtils->setValue($knowledge, $field, null);
 				if (isset($fieldDef[AbstractKnowledge::ATTRIB_LINKED_FIELDS])) {
 					foreach ($fieldDef[AbstractKnowledge::ATTRIB_LINKED_FIELDS] as $linkedField) {
-						$propertyUtils->setValue($knowledge, $linkedField, null);
+						$this->propertyUtils->setValue($knowledge, $linkedField, null);
 					}
 				}
 			}
@@ -116,10 +122,9 @@ class KnowledgeUtils extends AbstractContainerAwareUtils {
 	const SOURCES_HISTORY_KEY = '_ladb_knowledge_value_sources_history';
 
 	public function pushToSourcesHistory(BaseValue $value) {
-		$globalUtils = $this->get(GlobalUtils::NAME);
 
 		// Extract sources history from user session
-		$session = $globalUtils->getSession();
+		$session = $this->globalUtils->getSession();
 		$history = $session->get(self::SOURCES_HISTORY_KEY);
 
 		if (is_null($history)) {
@@ -145,10 +150,9 @@ class KnowledgeUtils extends AbstractContainerAwareUtils {
 	}
 
 	public function getValueSourcesHistory() {
-		$globalUtils = $this->get(GlobalUtils::NAME);
 
 		// Extract sources history from user session
-		$session = $globalUtils->getSession();
+		$session = $this->globalUtils->getSession();
 		$history = $session->get(self::SOURCES_HISTORY_KEY);
 
 		return $history;

@@ -2,25 +2,35 @@
 
 namespace Ladb\CoreBundle\Utils;
 
+use Doctrine\Persistence\ManagerRegistry;
 use Ladb\CoreBundle\Entity\Core\Review;
 use Ladb\CoreBundle\Model\DraftableInterface;
 use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Model\ReviewableInterface;
 
-class ReviewableUtils extends AbstractContainerAwareUtils {
+class ReviewableUtils {
 
 	const NAME = 'ladb_core.reviewable_utils';
+
+	private $activityUtils;
+	private $doctrine;
+	private $globalUtils;
+
+	public function __construct(ActivityUtils $activityUtils, ManagerRegistry $doctrine, GlobalUtils $globalUtils) {
+		$this->activityUtils = $activityUtils;
+		$this->doctrine = $doctrine;
+		$this->globalUtils = $globalUtils;
+	}
 	
 	/////
 
 	public function deleteReviews(ReviewableInterface $reviewable, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$reviewRepository = $om->getRepository(Review::CLASS_NAME);
-		$activityUtils = $this->get(ActivityUtils::NAME);
 
 		$reviews = $reviewRepository->findByEntityTypeAndEntityId($reviewable->getType(), $reviewable->getId());
 		foreach ($reviews as $review) {
-			$this->deleteReview($review, $reviewable, $activityUtils, $om, false);
+			$this->deleteReview($review, $reviewable, $this->activityUtils, $om, false);
 		}
 		if ($flush) {
 			$om->flush();
@@ -52,7 +62,7 @@ class ReviewableUtils extends AbstractContainerAwareUtils {
 	/////
 
 	public function computeAverageRating(ReviewableInterface $reviewable) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$reviewRepository = $om->getRepository(Review::CLASS_NAME);
 
 		$ratingSum = 0;
@@ -73,16 +83,15 @@ class ReviewableUtils extends AbstractContainerAwareUtils {
 	/////
 
 	public function getReviewContext(ReviewableInterface $reviewable) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$reviewRepository = $om->getRepository(Review::CLASS_NAME);
-		$globalUtils = $this->get(GlobalUtils::NAME);
 
 		// Retrieve reviews
 		$reviews = $reviewRepository->findByEntityTypeAndEntityId($reviewable->getType(), $reviewable->getId());
 
 		// Retrieve current user review
 		$userReview = null;
-		$user = $globalUtils->getUser();
+		$user = $this->globalUtils->getUser();
 		if (!is_null($user)) {
 
 			foreach ($reviews as $review) {

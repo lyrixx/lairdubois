@@ -8,9 +8,15 @@ use Ladb\CoreBundle\Entity\Core\Picture;
 use Ladb\CoreBundle\Model\BlockBodiedInterface;
 use Ladb\CoreBundle\Model\MultiPicturedInterface;
 
-class PicturedUtils extends AbstractContainerAwareUtils {
+class PicturedUtils {
 
 	const NAME = 'ladb_core.pictured_utils';
+
+	private $cacheManager;
+
+	public function __construct(CacheManager $cacheManager) {
+		$this->cacheManager = $cacheManager;
+	}
 
 	/////
 
@@ -32,7 +38,7 @@ class PicturedUtils extends AbstractContainerAwareUtils {
 			return null;
 		}
 		return array(
-			'loc'     => $this->get('liip_imagine.cache.manager')->getBrowserPath($picture->getWebPath(), '1024x1024i'),
+			'loc'     => $this->cacheManager->getBrowserPath($picture->getWebPath(), '1024x1024i'),
 			'caption' => $picture->getLegend(),
 		);
 	}

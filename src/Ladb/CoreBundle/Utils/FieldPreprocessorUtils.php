@@ -8,10 +8,21 @@ use Ladb\CoreBundle\Model\BodiedInterface;
 use Ladb\CoreBundle\Model\HtmlBodiedInterface;
 use Ladb\CoreBundle\Model\TitledInterface;
 use Ladb\CoreBundle\Parser\Markdown\LadbMarkdown;
+use Symfony\Component\Routing\RouterInterface;
 
-class FieldPreprocessorUtils extends AbstractContainerAwareUtils {
+class FieldPreprocessorUtils {
 
 	const NAME = 'ladb_core.field_preprocessor_utils';
+
+	private $router;
+	private $urlUtils;
+	private $userManager;
+
+	public function __construct(RouterInterface $router, UrlUtils $urlUtils, UserManager $userManager) {
+		$this->router = $router;
+		$this->urlUtils = $urlUtils;
+		$this->userManager = $userManager;
+	}
 
 	public function preprocessFields($entity) {
 		if ($entity instanceof TitledInterface) {
@@ -50,7 +61,7 @@ class FieldPreprocessorUtils extends AbstractContainerAwareUtils {
 	public function preprocessHtmlBodyField(HtmlBodiedInterface $bodied) {
 
 		// Render HTML Body
-		$parser = new LadbMarkdown($this->get(UserManager::NAME), $this->get('router'), $this->get(UrlUtils::NAME));
+		$parser = new LadbMarkdown($this->userManager, $this->router, $this->urlUtils);
 		$htmlBody = $parser->parse($bodied->getBody());
 		$bodied->setHtmlBody($htmlBody);
 

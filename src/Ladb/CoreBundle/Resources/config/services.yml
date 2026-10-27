@@ -36,84 +36,81 @@ services:
   # an alias of the id, by its class
   FOS\UserBundle\Util\UserManipulator: '@fos_user.util.user_manipulator'
 
-  # Utils (public until #16)
+  # Utils (public until #118: read by get() in Manager/, Event/, LadbExtension, ViewConsumer and tests/)
   ladb_core.global_utils:
     class: Ladb\CoreBundle\Utils\GlobalUtils
     public: true
-    arguments: ['@service_container']
+    arguments: { $debug: '%kernel.debug%', $environment: '%kernel.environment%' }
   Ladb\CoreBundle\Utils\GlobalUtils: '@ladb_core.global_utils'
   ladb_core.maybe_utils:
     class: Ladb\CoreBundle\Utils\MaybeUtils
-    arguments: ['@service_container']
   Ladb\CoreBundle\Utils\MaybeUtils: '@ladb_core.maybe_utils'
   ladb_core.crypto_utils:
     class: Ladb\CoreBundle\Utils\CryptoUtils
     public: true
-    arguments: ['@service_container']
+    arguments: { $secret: '%secret%' }
   Ladb\CoreBundle\Utils\CryptoUtils: '@ladb_core.crypto_utils'
   ladb_core.paginator_utils:
     class: Ladb\CoreBundle\Utils\PaginatorUtils
-    public: true
-    arguments: ['@service_container']
   Ladb\CoreBundle\Utils\PaginatorUtils: '@ladb_core.paginator_utils'
   ladb_core.video_hosting_utils:
     class: Ladb\CoreBundle\Utils\VideoHostingUtils
     public: true
-    arguments: ['@service_container']
+    arguments: { $googleApiKey: '%google_api_key%' }
   Ladb\CoreBundle\Utils\VideoHostingUtils: '@ladb_core.video_hosting_utils'
   ladb_core.viewable_utils:
     class: Ladb\CoreBundle\Utils\ViewableUtils
     public: true
-    arguments: ['@service_container']
+    arguments: { $producerLocator: '@ladb_core.rabbit_mq_producer_locator' }
   Ladb\CoreBundle\Utils\ViewableUtils: '@ladb_core.viewable_utils'
+  # ViewableUtils and WebpushNotificationUtils: their producer, by its name in config.yml, read when they
+  # publish. Creating it connects to RabbitMQ (lazy: false), and they log the failure instead of throwing it
+  ladb_core.rabbit_mq_producer_locator:
+    class: Symfony\Component\DependencyInjection\ServiceLocator
+    tags: ['container.service_locator']
+    arguments:
+      -
+        view: '@old_sound_rabbit_mq.view_producer'
+        webpush_notification: '@old_sound_rabbit_mq.webpush_notification_producer'
   ladb_core.likable_utils:
     class: Ladb\CoreBundle\Utils\LikableUtils
     public: true
-    arguments: ['@service_container']
   Ladb\CoreBundle\Utils\LikableUtils: '@ladb_core.likable_utils'
   ladb_core.watchable_utils:
     class: Ladb\CoreBundle\Utils\WatchableUtils
     public: true
-    arguments: ['@service_container']
   Ladb\CoreBundle\Utils\WatchableUtils: '@ladb_core.watchable_utils'
   ladb_core.votable_utils:
     class: Ladb\CoreBundle\Utils\VotableUtils
     public: true
-    arguments: ['@service_container']
   Ladb\CoreBundle\Utils\VotableUtils: '@ladb_core.votable_utils'
   ladb_core.joinable_utils:
     class: Ladb\CoreBundle\Utils\JoinableUtils
     public: true
-    arguments: ['@service_container']
   Ladb\CoreBundle\Utils\JoinableUtils: '@ladb_core.joinable_utils'
   ladb_core.commentable_utils:
     class: Ladb\CoreBundle\Utils\CommentableUtils
     public: true
-    arguments: ['@service_container']
   Ladb\CoreBundle\Utils\CommentableUtils: '@ladb_core.commentable_utils'
   ladb_core.collectionnable_utils:
     class: Ladb\CoreBundle\Utils\CollectionnableUtils
     public: true
-    arguments: ['@service_container']
   Ladb\CoreBundle\Utils\CollectionnableUtils: '@ladb_core.collectionnable_utils'
   ladb_core.reviewable_utils:
     class: Ladb\CoreBundle\Utils\ReviewableUtils
     public: true
-    arguments: ['@service_container']
   Ladb\CoreBundle\Utils\ReviewableUtils: '@ladb_core.reviewable_utils'
   ladb_core.feedbackable_utils:
     class: Ladb\CoreBundle\Utils\FeedbackableUtils
     public: true
-    arguments: ['@service_container']
   Ladb\CoreBundle\Utils\FeedbackableUtils: '@ladb_core.feedbackable_utils'
   ladb_core.reportable_utils:
     class: Ladb\CoreBundle\Utils\ReportableUtils
     public: true
-    arguments: ['@service_container']
   Ladb\CoreBundle\Utils\ReportableUtils: '@ladb_core.reportable_utils'
   ladb_core.localisable_utils:
     class: Ladb\CoreBundle\Utils\LocalisableUtils
-    arguments: ['@service_container', '@ladb_core.geocoding_http_client']
+    arguments: { $googleApiKey: '%google_api_key%', $httpClient: '@ladb_core.geocoding_http_client' }
   Ladb\CoreBundle\Utils\LocalisableUtils: '@ladb_core.localisable_utils'
   # Geocoding API of Google
   ladb_core.geocoding_http_client:
@@ -122,7 +119,7 @@ services:
   ladb_core.typable_utils:
     class: Ladb\CoreBundle\Utils\TypableUtils
     public: true
-    arguments: ['@service_container', '@ladb_core.typable_utils.manager_locator']
+    arguments: { $managerLocator: '@ladb_core.typable_utils.manager_locator' }
   Ladb\CoreBundle\Utils\TypableUtils: '@ladb_core.typable_utils'
   # TypableUtils::getManagerByType(): the manager of each type, by TypableUtils::getStrippedNameByType()
   ladb_core.typable_utils.manager_locator:
@@ -156,12 +153,10 @@ services:
         workflow_workflow: '@ladb_core.workflow_workflow_manager'
   ladb_core.follower_utils:
     class: Ladb\CoreBundle\Utils\FollowerUtils
-    arguments: ['@service_container']
   Ladb\CoreBundle\Utils\FollowerUtils: '@ladb_core.follower_utils'
   ladb_core.mailer_utils:
     class: Ladb\CoreBundle\Utils\MailerUtils
     public: true
-    arguments: ['@service_container']
   Ladb\CoreBundle\Utils\MailerUtils: '@ladb_core.mailer_utils'
   ladb_core.message_utils:
     class: Ladb\CoreBundle\Utils\MessageUtils
@@ -174,16 +169,14 @@ services:
   Ladb\CoreBundle\Utils\PlanUtils: '@ladb_core.plan_utils'
   ladb_core.graphic_utils:
     class: Ladb\CoreBundle\Utils\GraphicUtils
-    arguments: ['@service_container']
   Ladb\CoreBundle\Utils\GraphicUtils: '@ladb_core.graphic_utils'
   ladb_core.find_utils:
     class: Ladb\CoreBundle\Utils\FindUtils
-    arguments: ['@service_container']
   Ladb\CoreBundle\Utils\FindUtils: '@ladb_core.find_utils'
   ladb_core.search_utils:
     class: Ladb\CoreBundle\Utils\SearchUtils
     public: true
-    arguments: ['@service_container']
+    arguments: { $index: '@fos_elastica.index.ladb', $persisterRegistry: '@fos_elastica.persister_registry' }
   Ladb\CoreBundle\Utils\SearchUtils: '@ladb_core.search_utils'
   ladb_core.explorable_utils:
     class: Ladb\CoreBundle\Utils\ExplorableUtils
@@ -191,7 +184,6 @@ services:
   Ladb\CoreBundle\Utils\ExplorableUtils: '@ladb_core.explorable_utils'
   ladb_core.pictured_utils:
     class: Ladb\CoreBundle\Utils\PicturedUtils
-    arguments: ['@service_container']
   Ladb\CoreBundle\Utils\PicturedUtils: '@ladb_core.pictured_utils'
   ladb_core.tag_utils:
     class: Ladb\CoreBundle\Utils\TagUtils
@@ -201,7 +193,6 @@ services:
   ladb_core.field_preprocessor_utils:
     class: Ladb\CoreBundle\Utils\FieldPreprocessorUtils
     public: true
-    arguments: ['@service_container']
   Ladb\CoreBundle\Utils\FieldPreprocessorUtils: '@ladb_core.field_preprocessor_utils'
   ladb_core.block_bodied_utils:
     class: Ladb\CoreBundle\Utils\BlockBodiedUtils
@@ -210,26 +201,23 @@ services:
   Ladb\CoreBundle\Utils\BlockBodiedUtils: '@ladb_core.block_bodied_utils'
   ladb_core.embeddable_utils:
     class: Ladb\CoreBundle\Utils\EmbeddableUtils
-    arguments: ['@service_container']
   Ladb\CoreBundle\Utils\EmbeddableUtils: '@ladb_core.embeddable_utils'
   ladb_core.stripable_utils:
     class: Ladb\CoreBundle\Utils\StripableUtils
-    arguments: ['@service_container']
   Ladb\CoreBundle\Utils\StripableUtils: '@ladb_core.stripable_utils'
   ladb_core.web_screenshot_utils:
     class: Ladb\CoreBundle\Utils\WebScreenshotUtils
-    public: true
-    arguments: ['@service_container']
+    arguments: { $chromium: '%chromium%' }
   Ladb\CoreBundle\Utils\WebScreenshotUtils: '@ladb_core.web_screenshot_utils'
   ladb_core.open_graph_utils:
     class: Ladb\CoreBundle\Utils\OpenGraphUtils
     public: true
-    arguments: ['@service_container']
+    arguments: { $facebookAccessToken: '%facebook_access_token%', $facebookAppId: '%facebook_app_id%', $facebookAppSecret: '%facebook_app_secret%' }
   Ladb\CoreBundle\Utils\OpenGraphUtils: '@ladb_core.open_graph_utils'
   ladb_core.user_utils:
     class: Ladb\CoreBundle\Utils\UserUtils
     public: true
-    arguments: ['@service_container']
+    arguments: { $memcachedHost: '%memcached_host%', $memcachedPort: '%memcached_port%' }
   Ladb\CoreBundle\Utils\UserUtils: '@ladb_core.user_utils'
   ladb_core.activity_utils:
     class: Ladb\CoreBundle\Utils\ActivityUtils
@@ -239,12 +227,10 @@ services:
   ladb_core.texture_utils:
     class: Ladb\CoreBundle\Utils\TextureUtils
     public: true
-    arguments: ['@service_container']
   Ladb\CoreBundle\Utils\TextureUtils: '@ladb_core.texture_utils'
   ladb_core.knowledge_utils:
     class: Ladb\CoreBundle\Utils\KnowledgeUtils
     public: true
-    arguments: ['@service_container']
   Ladb\CoreBundle\Utils\KnowledgeUtils: '@ladb_core.knowledge_utils'
   ladb_core.property_utils:
     class: Ladb\CoreBundle\Utils\PropertyUtils
@@ -255,20 +241,18 @@ services:
   Ladb\CoreBundle\Utils\ElasticaQueryUtils: '@ladb_core.elastica_query_utils'
   ladb_core.book_utils:
     class: Ladb\CoreBundle\Utils\BookUtils
-    arguments: ['@service_container']
   Ladb\CoreBundle\Utils\BookUtils: '@ladb_core.book_utils'
   ladb_core.resource_utils:
     class: Ladb\CoreBundle\Utils\ResourceUtils
   Ladb\CoreBundle\Utils\ResourceUtils: '@ladb_core.resource_utils'
   Ladb\CoreBundle\Utils\WebpushNotificationUtils:
-    arguments: ['@service_container']
+    arguments: { $producerLocator: '@ladb_core.rabbit_mq_producer_locator' }
   ladb_core.link_utils:
     class: Ladb\CoreBundle\Utils\LinkUtils
   Ladb\CoreBundle\Utils\LinkUtils: '@ladb_core.link_utils'
   ladb_core.mention_utils:
     class: Ladb\CoreBundle\Utils\MentionUtils
     public: true
-    arguments: ['@service_container']
   Ladb\CoreBundle\Utils\MentionUtils: '@ladb_core.mention_utils'
   ladb_core.url_utils:
     class: Ladb\CoreBundle\Utils\UrlUtils
@@ -276,7 +260,6 @@ services:
   Ladb\CoreBundle\Utils\UrlUtils: '@ladb_core.url_utils'
   ladb_core.member_utils:
     class: Ladb\CoreBundle\Utils\MemberUtils
-    arguments: ['@service_container']
   Ladb\CoreBundle\Utils\MemberUtils: '@ladb_core.member_utils'
 
   # Managers (public until #118)

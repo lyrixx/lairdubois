@@ -2,26 +2,35 @@
 
 namespace Ladb\CoreBundle\Utils;
 
-class OpenGraphUtils extends AbstractContainerAwareUtils {
+use Psr\Log\LoggerInterface;
+class OpenGraphUtils {
 
 	const NAME = 'ladb_core.open_graph_utils';
+
+	private $facebookAccessToken;
+	private $facebookAppId;
+	private $facebookAppSecret;
+	private $logger;
+
+	public function __construct($facebookAccessToken, $facebookAppId, $facebookAppSecret, LoggerInterface $logger) {
+		$this->facebookAccessToken = $facebookAccessToken;
+		$this->facebookAppId = $facebookAppId;
+		$this->facebookAppSecret = $facebookAppSecret;
+		$this->logger = $logger;
+	}
 
 	/////
 
 	public function scrape($openGraphId) {
 
-		$appId = $this->getParameter('facebook_app_id');
-		$appSecret = $this->getParameter('facebook_app_secret');
-		$accessToken = $this->getParameter('facebook_access_token');
-
 		try {
 
 			// Setup Facebook SDK
 			$fb = new \Facebook\Facebook([
-				'app_id' => $appId,
-				'app_secret' => $appSecret,
+				'app_id' => $this->facebookAppId,
+				'app_secret' => $this->facebookAppSecret,
 				'default_graph_version' => 'v5.0',
-				'default_access_token' => $accessToken,
+				'default_access_token' => $this->facebookAccessToken,
 			]);
 
 			$request = $fb->request(
@@ -37,7 +46,7 @@ class OpenGraphUtils extends AbstractContainerAwareUtils {
 
 		} catch (\Facebook\Exceptions\FacebookSDKException $e) {
 			// When validation fails or other local issues
-			$this->get('logger')->addError('OpenGraphUtils failed to scrape. Facebook SDK returned an error: '.$e->getMessage());
+			$this->logger->addError('OpenGraphUtils failed to scrape. Facebook SDK returned an error: '.$e->getMessage());
 		}
 
 	}

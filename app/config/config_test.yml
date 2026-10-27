@@ -86,7 +86,7 @@ services:
     tests.localisable_utils:
         class: Tests\Double\OfflineLocalisableUtils
         decorates: ladb_core.localisable_utils
-        arguments: ['@service_container', '@ladb_core.geocoding_http_client']
+        arguments: { $googleApiKey: '%google_api_key%', $httpClient: '@ladb_core.geocoding_http_client' }
 
     # No outgoing request from the tests (issue #6): the pictures "downloaded" from a URL, the
     # Open Graph metas, the thumbnails and the sitemap data of the video APIs and the Chromium
@@ -94,7 +94,7 @@ services:
     tests.open_graph_utils:
         class: Tests\Double\OfflineOpenGraphUtils
         decorates: ladb_core.open_graph_utils
-        arguments: ['@service_container']
+        arguments: { $facebookAccessToken: '%facebook_access_token%', $facebookAppId: '%facebook_app_id%', $facebookAppSecret: '%facebook_app_secret%' }
     tests.picture_manager:
         class: Tests\Double\OfflinePictureManager
         decorates: ladb_core.core_picture_manager
@@ -103,11 +103,11 @@ services:
     tests.video_hosting_utils:
         class: Tests\Double\OfflineVideoHostingUtils
         decorates: ladb_core.video_hosting_utils
-        arguments: ['@service_container']
+        arguments: { $googleApiKey: '%google_api_key%' }
     tests.web_screenshot_utils:
         class: Tests\Double\OfflineWebScreenshotUtils
         decorates: ladb_core.web_screenshot_utils
-        arguments: ['@service_container']
+        arguments: { $chromium: '%chromium%' }
 
     # No call to the API of Stripe (/financement): FundingController calls its static API, which
     # gets the HTTP client of Tests\Double\OfflineStripeClient at each request

@@ -3,6 +3,7 @@
 namespace Ladb\CoreBundle\Utils;
 
 use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ManagerRegistry;
 use HeadlessChromium\Exception\CommunicationException;
 use HeadlessChromium\Exception\FilesystemException;
 use HeadlessChromium\Exception\NavigationExpired;
@@ -11,10 +12,23 @@ use HeadlessChromium\Exception\OperationTimedOut;
 use HeadlessChromium\Exception\ScreenshotFailed;
 use Ladb\CoreBundle\Entity\Core\Picture;
 use Ladb\CoreBundle\Manager\Core\PictureManager;
+use Psr\Log\LoggerInterface;
 
-class WebScreenshotUtils extends AbstractContainerAwareUtils {
+class WebScreenshotUtils {
 
 	const NAME = 'ladb_core.web_screenshot_utils';
+
+	private $chromium;
+	protected $doctrine;
+	private $logger;
+	protected $pictureManager;
+
+	public function __construct($chromium, ManagerRegistry $doctrine, LoggerInterface $logger, PictureManager $pictureManager) {
+		$this->chromium = $chromium;
+		$this->doctrine = $doctrine;
+		$this->logger = $logger;
+		$this->pictureManager = $pictureManager;
+	}
 
 	/////
 
@@ -46,13 +60,12 @@ class WebScreenshotUtils extends AbstractContainerAwareUtils {
 		$host = $urlComponents['host'];
 
 		// Create picture
-		$pictureManager = $this->get(PictureManager::NAME);
-		$picture = $pictureManager->createEmpty(false);
+		$picture = $this->pictureManager->createEmpty(false);
 		$pictureFile = $picture->getAbsoluteMasterPath();
 
 		// HeadlessChromium Capture /////
 
-		$browserFactory = new \HeadlessChromium\BrowserFactory($this->getParameter('chromium'));
+		$browserFactory = new \HeadlessChromium\BrowserFactory($this->chromium);
 
 		// starts headless chrome
 		$browser = $browserFactory->createBrowser(array(
@@ -78,17 +91,17 @@ class WebScreenshotUtils extends AbstractContainerAwareUtils {
 			$page->screenshot()->saveToFile($pictureFile);
 
 		} catch (CommunicationException $e) {
-			$this->get('logger')->error('HeadlessChromium CommunicationException : '.$e->getMessage());
+			$this->logger->error('HeadlessChromium CommunicationException : '.$e->getMessage());
 		} catch (NoResponseAvailable $e) {
-			$this->get('logger')->error('HeadlessChromium NoResponseAvailable : '.$e->getMessage());
+			$this->logger->error('HeadlessChromium NoResponseAvailable : '.$e->getMessage());
 		} catch (OperationTimedOut $e) {
-			$this->get('logger')->error('HeadlessChromium OperationTimedOut : '.$e->getMessage());
+			$this->logger->error('HeadlessChromium OperationTimedOut : '.$e->getMessage());
 		} catch (NavigationExpired $e) {
-			$this->get('logger')->error('HeadlessChromium NavigationExpired : '.$e->getMessage());
+			$this->logger->error('HeadlessChromium NavigationExpired : '.$e->getMessage());
 		} catch (FilesystemException $e) {
-			$this->get('logger')->error('HeadlessChromium FilesystemException : '.$e->getMessage());
+			$this->logger->error('HeadlessChromium FilesystemException : '.$e->getMessage());
 		} catch (ScreenshotFailed $e) {
-			$this->get('logger')->error('HeadlessChromium ScreenshotFailed : '.$e->getMessage());
+			$this->logger->error('HeadlessChromium ScreenshotFailed : '.$e->getMessage());
 		}
 
 		// bye
@@ -98,9 +111,9 @@ class WebScreenshotUtils extends AbstractContainerAwareUtils {
 
 		if (is_file($pictureFile)) {
 
-			$pictureManager->computeSizes($picture);
+			$this->pictureManager->computeSizes($picture);
 
-			$om = $this->getDoctrine()->getManager();
+			$om = $this->doctrine->getManager();
 			$om->persist($picture);
 			$om->flush();
 

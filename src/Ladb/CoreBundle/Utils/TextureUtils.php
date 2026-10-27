@@ -2,7 +2,8 @@
 
 namespace Ladb\CoreBundle\Utils;
 
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
 use Imagine\Gd\Imagine;
 use Imagine\Image\Box;
 use Imagine\Image\Palette\RGB;
@@ -10,15 +11,26 @@ use Imagine\Image\Point;
 use Ladb\CoreBundle\Entity\Knowledge\Wood;
 use Ladb\CoreBundle\Entity\Knowledge\Wood\Texture;
 use Ladb\CoreBundle\Entity\Knowledge\Value\Picture;
+use Symfony\Component\Translation\TranslatorInterface;
 
-class TextureUtils extends AbstractContainerAwareUtils {
+class TextureUtils {
 
 	const NAME = 'ladb_core.texture_utils';
+
+	private $doctrine;
+	private $templating;
+	private $translator;
+
+	public function __construct(ManagerRegistry $doctrine, EngineInterface $templating, TranslatorInterface $translator) {
+		$this->doctrine = $doctrine;
+		$this->templating = $templating;
+		$this->translator = $translator;
+	}
 
 	/////
 
 	public function createTexture(Wood $wood, Picture $value, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 
 		if ($value->getId() > 0) {		// 0 = new value = no test
 
@@ -117,7 +129,7 @@ class TextureUtils extends AbstractContainerAwareUtils {
 	}
 
 	public function updateTexture(Wood $wood, Picture $value, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 
 		$textureRepository = $om->getRepository(Texture::CLASS_NAME);
 		$texture = $textureRepository->findOneByWoodAndValue($wood, $value);
@@ -154,7 +166,7 @@ class TextureUtils extends AbstractContainerAwareUtils {
 	}
 
 	public function deleteTexture(Wood $wood, Picture $value, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 
 		$textureRepository = $om->getRepository(Texture::CLASS_NAME);
 		$texture = $textureRepository->findOneByWoodAndValue($wood, $value);
@@ -192,7 +204,7 @@ class TextureUtils extends AbstractContainerAwareUtils {
 
 			$zip->addFile($texture->getSinglePicture()->getAbsolutePath(), $singleFilename);
 			$zip->addFile($texture->getMosaicPicture()->getAbsolutePath(), $mosaicFilename);
-			$zip->addFromString('LisezMoi.txt', $this->get('templating')->render('LadbCoreBundle:Knowledge/Wood:texture-readme.txt.twig', array( 'texture' => $texture, 'files' => array( $singleFilename, $mosaicFilename ) )));
+			$zip->addFromString('LisezMoi.txt', $this->templating->render('LadbCoreBundle:Knowledge/Wood:texture-readme.txt.twig', array( 'texture' => $texture, 'files' => array( $singleFilename, $mosaicFilename ) )));
 			$zip->close();
 
 			return true;
@@ -202,8 +214,7 @@ class TextureUtils extends AbstractContainerAwareUtils {
 	}
 
 	public function getBaseFilename($texture) {
-		$translator = $this->get('translator');
-		return $texture->getWood()->getSlug().'_'.\Gedmo\Sluggable\Util\Urlizer::urlize($translator->trans('knowledge.wood.field.'.$texture->getValue()->getParentEntityField()), '_').'_'.$texture->getValue()->getId();
+		return $texture->getWood()->getSlug().'_'.\Gedmo\Sluggable\Util\Urlizer::urlize($this->translator->trans('knowledge.wood.field.'.$texture->getValue()->getParentEntityField()), '_').'_'.$texture->getValue()->getId();
 	}
 	
 

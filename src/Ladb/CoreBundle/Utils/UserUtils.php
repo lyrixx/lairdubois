@@ -2,6 +2,7 @@
 
 namespace Ladb\CoreBundle\Utils;
 
+use Doctrine\Persistence\ManagerRegistry;
 use Imagine\Gd\Font;
 use Imagine\Gd\Imagine;
 use Imagine\Image\Box;
@@ -15,7 +16,7 @@ use Ladb\CoreBundle\Fos\UserManager;
 use Ladb\CoreBundle\Manager\Core\PictureManager;
 use Ladb\CoreBundle\Model\HiddableInterface;
 
-class UserUtils extends AbstractContainerAwareUtils {
+class UserUtils {
 
 	const NAME = 'ladb_core.user_utils';
 
@@ -43,13 +44,31 @@ class UserUtils extends AbstractContainerAwareUtils {
 
 	private $memcached;
 
+	private $doctrine;
+	private $memcachedHost;
+	private $memcachedPort;
+	private $pictureManager;
+	private $propertyUtils;
+	private $typableUtils;
+	private $userManager;
+
+	public function __construct(ManagerRegistry $doctrine, $memcachedHost, $memcachedPort, PictureManager $pictureManager, PropertyUtils $propertyUtils, TypableUtils $typableUtils, UserManager $userManager) {
+		$this->doctrine = $doctrine;
+		$this->memcachedHost = $memcachedHost;
+		$this->memcachedPort = $memcachedPort;
+		$this->pictureManager = $pictureManager;
+		$this->propertyUtils = $propertyUtils;
+		$this->typableUtils = $typableUtils;
+		$this->userManager = $userManager;
+	}
+
 	/////
 
 	// The refresh dates are in Memcached, per user, not in the session: /@me/counters.json would write the session back, and erase what a concurrent request has just put in it (the CSRF token of a form loaded in XHR)
 	private function getMemcached() {
 		if (is_null($this->memcached)) {
 			$this->memcached = new \Memcached();
-			$this->memcached->addServer($this->getParameter('memcached_host'), $this->getParameter('memcached_port'));
+			$this->memcached->addServer($this->memcachedHost, $this->memcachedPort);
 		}
 		return $this->memcached;
 	}
@@ -90,8 +109,7 @@ class UserUtils extends AbstractContainerAwareUtils {
 		}
 
 		if ($updated) {
-			$userManager = $this->get(UserManager::NAME);
-			$userManager->updateUser($user);
+			$this->userManager->updateUser($user);
 		}
 
 	}
@@ -101,21 +119,18 @@ class UserUtils extends AbstractContainerAwareUtils {
 			return false;
 		}
 
-		$typableUtils = $this->get(TypableUtils::NAME);
-		$propertyUtils = $this->get(PropertyUtils::NAME);
-
 		$meta = $user->getMeta();
-		$entityStrippedName = $typableUtils->getStrippedNameByType($entityType);
+		$entityStrippedName = $this->typableUtils->getStrippedNameByType($entityType);
 
 		$badgeEnabledPropertyPath = $entityStrippedName.'s_badge_enabled';
 		$unlistedCountPropertyPath = 'unlisted_'.$entityStrippedName.'_count';
 
 		// Check if badge is enabled for this entity type
-		if (!$propertyUtils->getValue($meta, $badgeEnabledPropertyPath)) {
+		if (!$this->propertyUtils->getValue($meta, $badgeEnabledPropertyPath)) {
 
 			// Reset (if necessary) count to 0 and returns
-			if ($propertyUtils->getValue($meta, $unlistedCountPropertyPath) > 0) {
-				$propertyUtils->setValue($meta, $unlistedCountPropertyPath, 0);
+			if ($this->propertyUtils->getValue($meta, $unlistedCountPropertyPath) > 0) {
+				$this->propertyUtils->setValue($meta, $unlistedCountPropertyPath, 0);
 				return true;
 			}
 
@@ -133,7 +148,7 @@ class UserUtils extends AbstractContainerAwareUtils {
 			$this->incrementUnlistedCounterRefreshTimeByEntityType($user, $entityType, 'PT'.mt_rand(180, 300).'S' /* = between 3 and 5 min */);
 		}
 
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$viewRepository = $om->getRepository(View::CLASS_NAME);
 		$lastView = $viewRepository->findLastCreatedByEntityTypeAndUserAndKindGreaterOrEquals($entityType, $user, View::KIND_LISTED);
 		if (is_null($lastView)) {
@@ -142,11 +157,10 @@ class UserUtils extends AbstractContainerAwareUtils {
 			$lastViewDate = $lastView->getCreatedAt();
 		}
 		if (!is_null($lastViewDate)) {
-			$typableUtils = $this->get(TypableUtils::NAME);
-			$entityRepository = $typableUtils->getRepositoryByType($entityType);
+			$entityRepository = $this->typableUtils->getRepositoryByType($entityType);
 			if (!is_null($entityRepository)) {
 
-				$entityClass = $typableUtils->getClassByType($entityType);
+				$entityClass = $this->typableUtils->getClassByType($entityType);
 				$andWheres = array();
 				$parameters = array();
 				if (is_subclass_of($entityClass, '\Ladb\CoreBundle\Model\HiddableInterface')) {
@@ -163,13 +177,12 @@ class UserUtils extends AbstractContainerAwareUtils {
 				$count = $entityRepository->countNewerByDate($lastViewDate, $andWheres, $parameters);
 
 				// Update count value on user entity
-				if ($count != $propertyUtils->getValue($meta, $unlistedCountPropertyPath)) {
+				if ($count != $this->propertyUtils->getValue($meta, $unlistedCountPropertyPath)) {
 
-					$propertyUtils->setValue($meta, $unlistedCountPropertyPath, $count);
+					$this->propertyUtils->setValue($meta, $unlistedCountPropertyPath, $count);
 
 					if ($flush) {
-						$userManager = $this->get(UserManager::NAME);
-						$userManager->updateUser($user);
+						$this->userManager->updateUser($user);
 					}
 
 					return true;
@@ -199,8 +212,7 @@ class UserUtils extends AbstractContainerAwareUtils {
 		$imagine = new Imagine();
 
 		// Create avatar picture
-		$pictureManager = $this->get(PictureManager::NAME);
-		$avatar = $pictureManager->createEmpty();
+		$avatar = $this->pictureManager->createEmpty();
 		$avatar->setUser($user);
 
 		$width = 512;

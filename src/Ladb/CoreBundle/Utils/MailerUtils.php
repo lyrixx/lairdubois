@@ -8,27 +8,41 @@ use Ladb\CoreBundle\Entity\Core\Spotlight;
 use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Entity\Message\Thread;
 use Ladb\CoreBundle\Entity\Core\Report;
+use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Routing\RouterInterface;
 
-class MailerUtils extends AbstractContainerAwareUtils {
+class MailerUtils {
 
 	const NAME = 'ladb_core.mailer_utils';
 
 	const LIST_NOTIFICATIONS = 'notifications';
 	const LIST_WEEKNEWS = 'weeknews';
 
+	private $cryptoUtils;
+	private $mailer;
+	private $router;
+	private $templating;
+
+	public function __construct(CryptoUtils $cryptoUtils, \Swift_Mailer $mailer, RouterInterface $router, EngineInterface $templating) {
+		$this->cryptoUtils = $cryptoUtils;
+		$this->mailer = $mailer;
+		$this->router = $router;
+		$this->templating = $templating;
+	}
+
 	/////
 
 	private function _renderTemplate($name, array $parameters = array()) {
-		return $this->get('templating')->render($name, $parameters);
+		return $this->templating->render($name, $parameters);
 	}
 
 	/////
 
 	public function generateListUnsubscribeLink(User $user, $list) {
-		return $this->get('router')->generate('core_user_email_unsubscribe', array(
+		return $this->router->generate('core_user_email_unsubscribe', array(
 			'list' => $list,
-			'encryptedEmail' => $this->get(CryptoUtils::NAME)->encryptString($user->getEmailCanonical())
+			'encryptedEmail' => $this->cryptoUtils->encryptString($user->getEmailCanonical())
 		),
 		UrlGeneratorInterface::ABSOLUTE_URL);
 	}
@@ -61,7 +75,7 @@ class MailerUtils extends AbstractContainerAwareUtils {
 		if (!is_null($htmlBody)) {
 			$message->addPart($htmlBody, 'text/html');
 		}
-		$this->get('mailer')->send($message);
+		$this->mailer->send($message);
 	}
 
 	/////

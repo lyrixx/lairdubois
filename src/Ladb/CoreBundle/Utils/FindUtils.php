@@ -3,18 +3,31 @@
 namespace Ladb\CoreBundle\Utils;
 
 use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ManagerRegistry;
 use Ladb\CoreBundle\Entity\Find\Find;
 use Ladb\CoreBundle\Entity\Core\Picture;
 use Ladb\CoreBundle\Manager\Core\PictureManager;
 
-class FindUtils extends AbstractContainerAwareUtils {
+class FindUtils {
 
 	const NAME = 'ladb_core.find_utils';
 
+	private $doctrine;
+	private $openGraphUtils;
+	private $pictureManager;
+	private $videoHostingUtils;
+	private $webScreenshotUtils;
+
+	public function __construct(ManagerRegistry $doctrine, OpenGraphUtils $openGraphUtils, PictureManager $pictureManager, VideoHostingUtils $videoHostingUtils, WebScreenshotUtils $webScreenshotUtils) {
+		$this->doctrine = $doctrine;
+		$this->openGraphUtils = $openGraphUtils;
+		$this->pictureManager = $pictureManager;
+		$this->videoHostingUtils = $videoHostingUtils;
+		$this->webScreenshotUtils = $webScreenshotUtils;
+	}
+
 	public function generateMainPicture(Find $find) {
-		$om = $this->getDoctrine()->getManager();
-		$webScreenshotUtils = $this->get(WebScreenshotUtils::NAME);
-		$videoHostingUtils = $this->get(VideoHostingUtils::NAME);
+		$om = $this->doctrine->getManager();
 
 		switch ($find->getKind()) {
 
@@ -27,13 +40,11 @@ class FindUtils extends AbstractContainerAwareUtils {
 				if (is_null($website->getThumbnail())) {
 
 					// Try to fetch OpenGraph image, title and description
-					$openGraphUtils = $this->get(OpenGraphUtils::NAME);
-					$ogMetas = $openGraphUtils->fetchMetas($website->getUrl());
+					$ogMetas = $this->openGraphUtils->fetchMetas($website->getUrl());
 					if ($ogMetas) {
 
 						if (isset($ogMetas['og:image'])) {
-							$pictureManager = $this->get(PictureManager::NAME);
-							$mainPicture = $pictureManager->createFromUrl($ogMetas['og:image'], false);
+							$mainPicture = $this->pictureManager->createFromUrl($ogMetas['og:image'], false);
 						}
 
 						if (isset($ogMetas['og:title'])) {
@@ -52,8 +63,7 @@ class FindUtils extends AbstractContainerAwareUtils {
 					if (is_null($mainPicture)) {
                         // TODO : Capture no longer works
 						// $mainPicture = $webScreenshotUtils->captureToPicture($website->getUrl(), 1280, 1024, 1280, 1024);
-                        $pictureManager = $this->get(PictureManager::NAME);
-                        $mainPicture = $pictureManager->createEmpty();
+                        $mainPicture = $this->pictureManager->createEmpty();
 					}
 
 					$website->setThumbnail($mainPicture);
@@ -69,12 +79,11 @@ class FindUtils extends AbstractContainerAwareUtils {
 				$video = $find->getContent();
 
 				if (is_null($video->getThumbnail())) {
-					$thumbnailUrl = $videoHostingUtils->getThumbnailUrl($video->getKind(), $video->getEmbedIdentifier());
+					$thumbnailUrl = $this->videoHostingUtils->getThumbnailUrl($video->getKind(), $video->getEmbedIdentifier());
 					if (!is_null($thumbnailUrl)) {
-						$pictureManager = $this->get(PictureManager::NAME);
-						$mainPicture = $pictureManager->createFromUrl($thumbnailUrl, false);
+						$mainPicture = $this->pictureManager->createFromUrl($thumbnailUrl, false);
 					} else {
-						$mainPicture = $webScreenshotUtils->captureToPicture($video->getUrl(), 1280, 1024, 1280, 1024);
+						$mainPicture = $this->webScreenshotUtils->captureToPicture($video->getUrl(), 1280, 1024, 1280, 1024);
 					}
 					$video->setThumbnail($mainPicture);
 				} else {
