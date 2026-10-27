@@ -8,7 +8,7 @@ use Ladb\CoreBundle\Entity\Core\Spotlight;
 use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Entity\Message\Thread;
 use Ladb\CoreBundle\Entity\Core\Report;
-use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
+use Twig\Environment;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 
@@ -22,19 +22,19 @@ class MailerUtils {
 	private $cryptoUtils;
 	private $mailer;
 	private $router;
-	private $templating;
+	private $twig;
 
-	public function __construct(CryptoUtils $cryptoUtils, \Swift_Mailer $mailer, RouterInterface $router, EngineInterface $templating) {
+	public function __construct(CryptoUtils $cryptoUtils, \Swift_Mailer $mailer, RouterInterface $router, Environment $twig) {
 		$this->cryptoUtils = $cryptoUtils;
 		$this->mailer = $mailer;
 		$this->router = $router;
-		$this->templating = $templating;
+		$this->twig = $twig;
 	}
 
 	/////
 
 	private function _renderTemplate($name, array $parameters = array()) {
-		return $this->templating->render($name, $parameters);
+		return $this->twig->render($name, $parameters);
 	}
 
 	/////

@@ -2,7 +2,7 @@
 
 namespace Ladb\CoreBundle\Utils;
 
-use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
+use Twig\Environment;
 
 class VideoHostingUtils {
 
@@ -16,11 +16,11 @@ class VideoHostingUtils {
 	const KIND_FACEBOOK = 5;
 
 	private $googleApiKey;
-	private $templating;
+	private $twig;
 
-	public function __construct($googleApiKey, EngineInterface $templating) {
+	public function __construct($googleApiKey, Environment $twig) {
 		$this->googleApiKey = $googleApiKey;
-		$this->templating = $templating;
+		$this->twig = $twig;
 	}
 
 	/////
@@ -104,7 +104,7 @@ class VideoHostingUtils {
 
 		if (!is_null($playerTemplate)) {
 
-			$player = $this->templating->render($playerTemplate, array(
+			$player = $this->twig->render($playerTemplate, array(
 				'width'    => $width,
 				'height'   => $height,
 				'embedUrl' => $embedUrl,

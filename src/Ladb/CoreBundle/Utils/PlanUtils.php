@@ -6,16 +6,17 @@ use Ladb\CoreBundle\Entity\Core\Resource;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Ladb\CoreBundle\Entity\Wonder\Plan;
+use Twig\Environment;
 
 class PlanUtils {
 
 	const NAME = 'ladb_core.plan_utils';
 
-	protected $templating;
+	protected $twig;
 	protected $router;
 
-	public function __construct($templating, Router $router) {
-		$this->templating = $templating;
+	public function __construct(Environment $twig, Router $router) {
+		$this->twig = $twig;
 		$this->router = $router;
 	}
 
@@ -69,7 +70,7 @@ class PlanUtils {
 			foreach ($plan->getResources() as $resource) {
 				$zip->addFile($resource->getAbsolutePath(), $resource->getFilename());
 			}
-			$zip->addFromString('LisezMoi.txt', $this->templating->render('@LadbCore/Wonder/Plan/readme.txt.twig', array( 'plan' => $plan )));
+			$zip->addFromString('LisezMoi.txt', $this->twig->render('@LadbCore/Wonder/Plan/readme.txt.twig', array( 'plan' => $plan )));
 			$zip->close();
 			$plan->setZipArchiveSize(filesize($zipAbsolutePath));
 

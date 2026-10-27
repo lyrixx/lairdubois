@@ -6,7 +6,7 @@ use Ladb\CoreBundle\Entity\Core\Comment;
 use Ladb\CoreBundle\Entity\Qa\Answer;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
+use Twig\Environment;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -23,20 +23,20 @@ class CronNotificationEmailCommand extends Command {
 
 	private $mailerUtils;
 	private $om;
-	private $templating;
+	private $twig;
 	private $translator;
 	private $typableUtils;
 
 	public function __construct(
 		MailerUtils $mailerUtils,
 		EntityManagerInterface $om,
-		EngineInterface $templating,
+		Environment $twig,
 		TranslatorInterface $translator,
 		TypableUtils $typableUtils
 	) {
 		$this->mailerUtils = $mailerUtils;
 		$this->om = $om;
-		$this->templating = $templating;
+		$this->twig = $twig;
 		$this->translator = $translator;
 		$this->typableUtils = $typableUtils;
 		parent::__construct();
@@ -116,7 +116,7 @@ EOT
 			$typableUtils = $this->typableUtils;
 			$mailerUtils = $this->mailerUtils;
 			$translator = $this->translator;
-			$templating = $this->templating;
+			$twig = $this->twig;
 
 			$rows = array();
 
@@ -295,8 +295,8 @@ EOT
 			);
 
 			$subject = $translator->trans('notification.choice.'.$activityStrippedName, array( '%count%' => count($notifications) ));
-			$body = $templating->render('@LadbCore/Core/Notification/email-'.$activityStrippedName.'.txt.twig', $parameters);
-			$htmlBody = $templating->render('@LadbCore/Core/Notification/email-'.$activityStrippedName.'.html.twig', $parameters);
+			$body = $twig->render('@LadbCore/Core/Notification/email-'.$activityStrippedName.'.txt.twig', $parameters);
+			$htmlBody = $twig->render('@LadbCore/Core/Notification/email-'.$activityStrippedName.'.html.twig', $parameters);
 
 			if ($verbose) {
 				$output->write('<info>--> Sending email to <fg=white>@'.$recipientUser->getDisplayname().'</fg=white> <fg=yellow>('.count($rows).' '.$activityStrippedName.')</fg=yellow>...</info>');

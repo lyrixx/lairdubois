@@ -4,7 +4,7 @@ namespace Ladb\CoreBundle\Command;
 
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
+use Twig\Environment;
 use Symfony\Component\Asset\Packages;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
@@ -27,7 +27,7 @@ class CronSitemapsCommand extends Command {
 	private $packages;
 	private $picturedUtils;
 	private $router;
-	private $templating;
+	private $twig;
 	private $videoHostingUtils;
 
 	public function __construct(
@@ -35,14 +35,14 @@ class CronSitemapsCommand extends Command {
 		Packages $packages,
 		PicturedUtils $picturedUtils,
 		UrlGeneratorInterface $router,
-		EngineInterface $templating,
+		Environment $twig,
 		VideoHostingUtils $videoHostingUtils
 	) {
 		$this->om = $om;
 		$this->packages = $packages;
 		$this->picturedUtils = $picturedUtils;
 		$this->router = $router;
-		$this->templating = $templating;
+		$this->twig = $twig;
 		$this->videoHostingUtils = $videoHostingUtils;
 		parent::__construct();
 	}
@@ -182,7 +182,7 @@ EOT
 
 		/////
 
-		$templating = $this->templating;
+		$twig = $this->twig;
 
 		if ($verbose) {
 			$output->write('<info>Building index sitemap...</info>');
@@ -194,7 +194,7 @@ EOT
 			$sitemaps[] = $this->_getEntitySitemap($def['className'], $def['section']);
 		}
 
-		$data = $templating->render('@LadbCore/Command/_cron-sitemap-index.xml.twig', array(
+		$data = $twig->render('@LadbCore/Command/_cron-sitemap-index.xml.twig', array(
 			'sitemaps' => $sitemaps,
 		));
 
@@ -225,14 +225,14 @@ EOT
 	}
 
 	private function _createSitemapFile($entityClassName, $entityName, $section, $forced, $verbose, OutputInterface $output, $slugged = true) {
-		$templating = $this->templating;
+		$twig = $this->twig;
 
 		if ($verbose) {
 			$output->writeln('<info>Building '.$section.' sitemap...</info>');
 		}
 
 		$urls = $this->_getEntityUrls($entityClassName, $entityName, $forced, $verbose, $output, $slugged);
-		$data = $templating->render('@LadbCore/Command/_cron-sitemap-entities.xml.twig', array(
+		$data = $twig->render('@LadbCore/Command/_cron-sitemap-entities.xml.twig', array(
 			'urls' => $urls,
 		));
 

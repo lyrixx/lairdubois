@@ -10,35 +10,8 @@ parameters:
 			path: app/AppKernel.php
 
 		-
-			message: '''
-				#^Parameter \$templating of method Ladb\\CoreBundle\\Command\\CronNotificationEmailCommand\:\:__construct\(\) has typehint with deprecated interface Symfony\\Bundle\\FrameworkBundle\\Templating\\EngineInterface\:
-				since version 4\.3, to be removed in 5\.0; use Twig instead\.$#
-			'''
-			identifier: parameter.deprecatedInterface
-			count: 1
-			path: src/Ladb/CoreBundle/Command/CronNotificationEmailCommand.php
-
-		-
-			message: '''
-				#^Parameter \$templating of method Ladb\\CoreBundle\\Command\\CronSitemapsCommand\:\:__construct\(\) has typehint with deprecated interface Symfony\\Bundle\\FrameworkBundle\\Templating\\EngineInterface\:
-				since version 4\.3, to be removed in 5\.0; use Twig instead\.$#
-			'''
-			identifier: parameter.deprecatedInterface
-			count: 1
-			path: src/Ladb/CoreBundle/Command/CronSitemapsCommand.php
-
-		-
 			message: '#^Call to deprecated function curl_close\(\)\.$#'
 			identifier: function.deprecated
-			count: 1
-			path: src/Ladb/CoreBundle/Command/CronSpotlightCommand.php
-
-		-
-			message: '''
-				#^Parameter \$templating of method Ladb\\CoreBundle\\Command\\CronSpotlightCommand\:\:__construct\(\) has typehint with deprecated interface Symfony\\Bundle\\FrameworkBundle\\Templating\\EngineInterface\:
-				since version 4\.3, to be removed in 5\.0; use Twig instead\.$#
-			'''
-			identifier: parameter.deprecatedInterface
 			count: 1
 			path: src/Ladb/CoreBundle/Command/CronSpotlightCommand.php
 
@@ -428,15 +401,6 @@ parameters:
 
 		-
 			message: '''
-				#^Parameter \$templating of method Ladb\\CoreBundle\\Event\\UserListener\:\:__construct\(\) has typehint with deprecated interface Symfony\\Bundle\\FrameworkBundle\\Templating\\EngineInterface\:
-				since version 4\.3, to be removed in 5\.0; use Twig instead\.$#
-			'''
-			identifier: parameter.deprecatedInterface
-			count: 1
-			path: src/Ladb/CoreBundle/Event/UserListener.php
-
-		-
-			message: '''
 				#^Call to deprecated method getLanguageBundle\(\) of class Symfony\\Component\\Intl\\Intl\:
 				since Symfony 4\.3, to be removed in 5\.0\. Use \{@see Languages\} or \{@see Scripts\} instead\.$#
 			'''
@@ -535,15 +499,6 @@ parameters:
 			path: src/Ladb/CoreBundle/Utils/FollowerUtils.php
 
 		-
-			message: '''
-				#^Parameter \$templating of method Ladb\\CoreBundle\\Utils\\GraphicUtils\:\:__construct\(\) has typehint with deprecated interface Symfony\\Bundle\\FrameworkBundle\\Templating\\EngineInterface\:
-				since version 4\.3, to be removed in 5\.0; use Twig instead\.$#
-			'''
-			identifier: parameter.deprecatedInterface
-			count: 1
-			path: src/Ladb/CoreBundle/Utils/GraphicUtils.php
-
-		-
 			message: '#^Deprecated in PHP 8\.4\: Parameter \#2 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
 			identifier: parameter.implicitlyNullable
 			count: 1
@@ -556,15 +511,6 @@ parameters:
 			path: src/Ladb/CoreBundle/Utils/LikableUtils.php
 
 		-
-			message: '''
-				#^Parameter \$templating of method Ladb\\CoreBundle\\Utils\\MailerUtils\:\:__construct\(\) has typehint with deprecated interface Symfony\\Bundle\\FrameworkBundle\\Templating\\EngineInterface\:
-				since version 4\.3, to be removed in 5\.0; use Twig instead\.$#
-			'''
-			identifier: parameter.deprecatedInterface
-			count: 1
-			path: src/Ladb/CoreBundle/Utils/MailerUtils.php
-
-		-
 			message: '#^Call to deprecated function curl_close\(\)\.$#'
 			identifier: function.deprecated
 			count: 1
@@ -575,24 +521,6 @@ parameters:
 			identifier: parameter.implicitlyNullable
 			count: 1
 			path: src/Ladb/CoreBundle/Utils/PicturedUtils.php
-
-		-
-			message: '''
-				#^Parameter \$templating of method Ladb\\CoreBundle\\Utils\\TextureUtils\:\:__construct\(\) has typehint with deprecated interface Symfony\\Bundle\\FrameworkBundle\\Templating\\EngineInterface\:
-				since version 4\.3, to be removed in 5\.0; use Twig instead\.$#
-			'''
-			identifier: parameter.deprecatedInterface
-			count: 1
-			path: src/Ladb/CoreBundle/Utils/TextureUtils.php
-
-		-
-			message: '''
-				#^Parameter \$templating of method Ladb\\CoreBundle\\Utils\\VideoHostingUtils\:\:__construct\(\) has typehint with deprecated interface Symfony\\Bundle\\FrameworkBundle\\Templating\\EngineInterface\:
-				since version 4\.3, to be removed in 5\.0; use Twig instead\.$#
-			'''
-			identifier: parameter.deprecatedInterface
-			count: 1
-			path: src/Ladb/CoreBundle/Utils/VideoHostingUtils.php
 
 		-
 			message: '#^Deprecated in PHP 8\.4\: Parameter \#2 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
