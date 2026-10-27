@@ -533,6 +533,10 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `Tests\DeprecationCollector` les compte toujours. À revoir au saut en 5.4.
 - En 3.4 et 4.4, `HttpKernel` n'attrape que les `\Exception` : une `\Error` PHP (appel sur `null`,
   `TypeError`) sort du kernel au lieu de donner une 500.
+- Pages d'erreur : contrôleur d'erreur de FrameworkBundle (`twig.exception_controller: null`).
+  `TwigErrorRenderer` ne rend que le HTML (`@Twig/Exception/error.html.twig`) ; les routes au
+  `_format` json (`.json`, `.geojson`) gardent leur erreur en JSON par `RequestFormatErrorRenderer`
+  (`@Twig/Exception/error.json.twig`). En debug, la page d'exception de Symfony, en HTML.
 - Les mots de passe sont hashés en sha512 par FOSUserBundle : les comptes existants doivent continuer
   à se connecter sans reset, d'un bout à l'autre de la migration.
 - Controllers : services autowirés (prototype `Ladb\CoreBundle\Controller\`), une action reçoit ses

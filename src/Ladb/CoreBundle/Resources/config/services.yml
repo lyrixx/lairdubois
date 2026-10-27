@@ -22,6 +22,19 @@ services:
         ladb_core.typable_utils: '@ladb_core.typable_utils'
         ladb_core.video_hosting_utils: '@ladb_core.video_hosting_utils'
 
+  # Error pages: TwigErrorRenderer (error_renderer.html) only renders HTML
+  ladb_core.request_format_error_renderer:
+    class: Ladb\CoreBundle\ErrorRenderer\RequestFormatErrorRenderer
+    decorates: error_renderer
+    arguments:
+      $errorRenderer: '@ladb_core.request_format_error_renderer.inner'
+      $debug: '@ladb_core.request_format_error_renderer.debug'
+  # As for TwigErrorRenderer: false when the error controller previews a page in debug (showException)
+  ladb_core.request_format_error_renderer.debug:
+    class: Closure
+    factory: [Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer, isDebug]
+    arguments: ['@request_stack', '%kernel.debug%']
+
   # Imagine Post processors
   ladb_imagine.filter.post_processor.imageoptimizer:
     class: Ladb\CoreBundle\Imagine\ImageOptimizerPostProcessor

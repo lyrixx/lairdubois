@@ -69,6 +69,8 @@ sensio_framework_extra:
 twig:
     debug:            "%kernel.debug%"
     strict_variables: "%kernel.debug%"
+    # The error pages are rendered by the error controller of FrameworkBundle (TwigErrorRenderer)
+    exception_controller: null
     globals:
         ga_tracking_id: "%ga_tracking_id%"
         stripe_publishable_key: "%stripe_publishable_key%"
