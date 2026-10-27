@@ -72,7 +72,7 @@ class GraphicController extends AbstractController {
 		$form = $this->createForm(GraphicType::class, $graphic);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$fieldPreprocessorUtils->preprocessFields($graphic);
 
@@ -202,7 +202,7 @@ class GraphicController extends AbstractController {
 		$form = $this->createForm(GraphicType::class, $graphic);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$fieldPreprocessorUtils->preprocessFields($graphic);
 

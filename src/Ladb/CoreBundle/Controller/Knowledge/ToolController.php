@@ -79,7 +79,7 @@ class ToolController extends AbstractController {
 		$form = $this->createForm(NewToolType::class, $newTool);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$nameValue = $newTool->getNameValue();
 			$photoValue = $newTool->getPhotoValue();

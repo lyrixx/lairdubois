@@ -133,14 +133,14 @@ class Offer extends AbstractDraftableAuthoredPublication implements TitledInterf
 	/**
 	 * @ORM\Column(type="smallint")
 	 * @Assert\NotBlank(message="Vous devez définir un type.")
-	 * @Assert\Choice(callback="getKinds", message="Ce type est invalide.")
+	 * @Assert\Choice(callback="getKinds", strict=true, message="Ce type est invalide.")
 	 */
 	private $kind = self::KIND_NONE;
 
 	/**
 	 * @ORM\Column(type="smallint")
 	 * @Assert\NotBlank(message="Vous devez définir une catégorie.")
-	 * @Assert\Choice(callback="getCategories", message="Cette catégorie est invalide.")
+	 * @Assert\Choice(callback="getCategories", strict=true, message="Cette catégorie est invalide.")
 	 */
 	private $category = self::CATEGORY_NONE;
 

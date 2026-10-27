@@ -81,7 +81,7 @@ class WorkshopController extends AbstractController {
 		$form = $this->createForm(WorkshopType::class, $workshop);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$blockUtils->preprocessBlocks($workshop);
 
@@ -211,7 +211,7 @@ class WorkshopController extends AbstractController {
 		$form = $this->createForm(WorkshopType::class, $workshop);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$blockUtils->preprocessBlocks($workshop, $originalBodyBlocks);
 

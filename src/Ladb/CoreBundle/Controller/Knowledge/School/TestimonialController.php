@@ -84,7 +84,7 @@ class TestimonialController extends AbstractController {
 		$form = $this->createForm(TestimonialType::class, $testimonial);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$fieldPreprocessorUtils->preprocessFields($testimonial);
 
@@ -163,7 +163,7 @@ class TestimonialController extends AbstractController {
 		$form = $this->createForm(TestimonialType::class, $testimonial);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$fieldPreprocessorUtils->preprocessFields($testimonial);
 

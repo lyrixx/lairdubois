@@ -69,7 +69,7 @@ class PostController extends AbstractController {
 		$form = $this->createForm(PostType::class, $post);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$blockUtils->preprocessBlocks($post);
 
@@ -200,7 +200,7 @@ class PostController extends AbstractController {
 		$form = $this->createForm(PostType::class, $post);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$blockUtils->preprocessBlocks($post, $originalBodyBlocks);
 

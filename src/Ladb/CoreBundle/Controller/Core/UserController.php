@@ -442,7 +442,7 @@ class UserController extends AbstractController {
 		if ($request->isMethod('post')) {
 			$form->handleRequest($request);
 
-			if ($form->isValid()) {
+			if ($form->isSubmitted() && $form->isValid()) {
 
 				// Check if new username
 				if ($user->getUsernameCanonical() != $oldUsername) {
@@ -1772,7 +1772,7 @@ class UserController extends AbstractController {
 		$form = $this->createForm(UserTeamType::class, $team);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			// Default avatar
 			if (is_null($team->getAvatar())) {

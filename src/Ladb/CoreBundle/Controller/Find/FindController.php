@@ -76,7 +76,7 @@ class FindController extends AbstractController {
 		$form = $this->createForm(FindType::class, $find);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$blockUtils->preprocessBlocks($find);
 
@@ -209,7 +209,7 @@ class FindController extends AbstractController {
 		$form = $this->createForm(FindType::class, $find);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$blockUtils->preprocessBlocks($find, $originalBodyBlocks);
 

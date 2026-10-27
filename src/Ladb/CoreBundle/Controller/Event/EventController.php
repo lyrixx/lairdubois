@@ -78,7 +78,7 @@ class EventController extends AbstractController {
 		$form = $this->createForm(EventType::class, $event);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$blockUtils->preprocessBlocks($event);
 
@@ -204,7 +204,7 @@ class EventController extends AbstractController {
 		$form = $this->createForm(EventType::class, $event);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$blockUtils->preprocessBlocks($event, $originalBodyBlocks);
 

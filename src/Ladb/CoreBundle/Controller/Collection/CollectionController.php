@@ -68,7 +68,7 @@ class CollectionController extends AbstractCollectionBasedController {
 		$form = $this->createForm(CollectionType::class, $collection);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$fieldPreprocessorUtils->preprocessFields($collection);
 
@@ -216,7 +216,7 @@ class CollectionController extends AbstractCollectionBasedController {
 		$form = $this->createForm(CollectionType::class, $collection);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$fieldPreprocessorUtils->preprocessFields($collection);
 

@@ -78,7 +78,7 @@ class ArticleController extends AbstractHowtoBasedController {
 		$form = $this->createForm(HowtoArticleType::class, $article);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$blockUtils->preprocessBlocks($article);
 
@@ -198,7 +198,7 @@ class ArticleController extends AbstractHowtoBasedController {
 		$form = $this->createForm(HowtoArticleType::class, $article);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$blockUtils->preprocessBlocks($article, $originalBodyBlocks);
 

@@ -197,7 +197,7 @@ class KnowledgeController extends AbstractController {
 		$value->setParentEntityField($field);    // Before form validation because it was used for the uniqueness
 		$form = $this->createForm($formTypeFqcn, $value, array('choices' => $fieldChoices, 'dataConstraints' => $fieldDataConstraints, 'constraints' => $fieldConstraints, 'validation_groups' => array( 'Default', 'mandatory' )));
 		$form->handleRequest($request);
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			if ($value->getModerationScore() != 0 && !$this->isGranted('ROLE_ADMIN')) {
 				throw $this->createNotFoundException('Not allowed - moderationScore (core_knowledge_value_create)');
@@ -349,7 +349,7 @@ class KnowledgeController extends AbstractController {
 
 		$form = $formFactory->createNamed($formTypeName, $formTypeFqcn, $value, array('choices' => $fieldChoices, 'dataConstraints' => $fieldDataConstraints, 'constraints' => $fieldConstraints));
 		$form->handleRequest($request);
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			if ($value->getModerationScore() != $previousMederationScore && !$this->isGranted('ROLE_ADMIN')) {
 				throw $this->createNotFoundException('Not allowed - moderationScore (core_knowledge_value_update)');

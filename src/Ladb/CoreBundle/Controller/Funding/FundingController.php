@@ -159,7 +159,7 @@ class FundingController extends AbstractController {
 		$form = $this->createForm(ChargeType::class, $charge);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			// Update funding charge balance
 			$funding->addCharge($charge);
@@ -230,7 +230,7 @@ class FundingController extends AbstractController {
 		$form = $this->createForm(ChargeType::class, $charge);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			// Update funding charge balance
 			$funding = $charge->getFunding();

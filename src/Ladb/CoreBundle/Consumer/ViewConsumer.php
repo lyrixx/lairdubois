@@ -5,6 +5,7 @@ use Ladb\CoreBundle\Model\IndexableInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use OldSound\RabbitMqBundle\RabbitMq\ConsumerInterface;
 use PhpAmqpLib\Message\AMQPMessage;
+use Psr\Log\LoggerInterface;
 use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Entity\Core\View;
 use Ladb\CoreBundle\Model\AuthoredInterface;
@@ -20,9 +21,9 @@ class ViewConsumer implements ConsumerInterface {
 	private $typableUtils;
 	private $searchUtils;
 
-	public function __construct(ContainerInterface $container) {
+	public function __construct(ContainerInterface $container, LoggerInterface $logger) {
 
-		$this->logger = $container->get('logger');
+		$this->logger = $logger;
 
 		$this->om = $container->get('doctrine')->getManager();
 		$this->userRepository = $this->om->getRepository(User::CLASS_NAME);

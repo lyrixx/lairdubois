@@ -115,7 +115,7 @@ class PictureController extends AbstractController {
 		$form = $this->createForm(EditPictureType::class, $editPicture);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			// Legend & SourceUrl
 			$picture->setLegend($editPicture->getLegend());

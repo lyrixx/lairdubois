@@ -83,7 +83,7 @@ class PlanController extends AbstractController {
 		$form = $this->createForm(PlanType::class, $plan);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$fieldPreprocessorUtils->preprocessFields($plan);
 
@@ -217,7 +217,7 @@ class PlanController extends AbstractController {
 		$form = $this->createForm(PlanType::class, $plan);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$fieldPreprocessorUtils->preprocessFields($plan);
 

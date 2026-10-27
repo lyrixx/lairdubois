@@ -104,7 +104,7 @@ class CommentController extends AbstractController {
 		$form = $formFactory->createNamed(CommentType::DEFAULT_BLOCK_PREFIX.'_'.$entityType.'_'.$entityId.'_'.$parentId, CommentType::class, $comment);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			// Create comment
 
@@ -204,7 +204,7 @@ class CommentController extends AbstractController {
 		$form = $formFactory->createNamed(CommentType::DEFAULT_BLOCK_PREFIX.'_'.$comment->getEntityType().'_'.$comment->getEntityId(), CommentType::class, $comment);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
             // Add some LOVE
 

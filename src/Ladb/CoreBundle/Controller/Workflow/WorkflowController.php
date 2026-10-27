@@ -72,7 +72,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		$form = $this->createForm(WorkflowType::class, $workflow);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$fieldPreprocessorUtils->preprocessFields($workflow);
 
@@ -200,7 +200,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		$form = $this->createForm(WorkflowType::class, $workflow);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$fieldPreprocessorUtils->preprocessFields($workflow);
 

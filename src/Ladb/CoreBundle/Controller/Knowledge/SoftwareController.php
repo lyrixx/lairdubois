@@ -80,7 +80,7 @@ class SoftwareController extends AbstractController {
 		$form = $this->createForm(NewSoftwareType::class, $newSoftware);
 		$form->handleRequest($request);
 
-		if ($form->isValid()) {
+		if ($form->isSubmitted() && $form->isValid()) {
 
 			$identityValue = $newSoftware->getIdentityValue();
 			$iconValue = $newSoftware->getIconValue();
