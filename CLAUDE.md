@@ -83,8 +83,9 @@ Ordre :
 2. Ménage, toujours en 3.4 : dépendances mortes, injection de dépendances à la place de
    `$this->get()`, Assetic → Symfony Reprise à rendu identique (voir les pièges).
 3. Sauts de version : 4.4 → 5.4 → 6.4 → 7.4 → 8.2. Avant chaque saut, zéro dépréciation Symfony en CI.
-   - 4.4 : Swiftmailer → Mailer, `transchoice` → `trans`.
-   - 5.4 : FOSUserBundle → sécurité native, Gos WebSocket → Mercure, RabbitMqBundle → Messenger.
+   - 4.4 : `transchoice` → `trans`.
+   - 5.4 : FOSUserBundle → sécurité native, Gos WebSocket → Mercure, RabbitMqBundle → Messenger,
+     Swiftmailer → Mailer (`DkimSigner` de Mime 5.2, spool par Messenger, #19).
    - 6.4 : annotations → attributs, fin de SensioFrameworkExtraBundle.
    - Elasticsearch 5 → version supportée, à part, quand ça arrange (réindexation depuis la base).
 
