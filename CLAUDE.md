@@ -35,10 +35,14 @@ Une session pilote, des agents codent.
   prod. La session principale le met à jour en fin de journée, et poste un commentaire court
   quand une étape (milestone) est terminée : modifier la description ne notifie personne.
 - Point d'avancement toutes les heures : mergé, en cours, bloqué, prochaine étape.
-- Budget de tokens : au plus 50 % de la limite sur 5 h, et 50 % de la limite hebdomadaire ramenée
-  à la journée (7,1 points du compteur hebdomadaire par jour). Les chiffres sont ceux du compte,
-  lus dans la status line (`.claude/tmp/budget/`, hors git). À 85 % de l'un des deux, plus de
-  nouvel agent ; à 100 %, tout s'arrête jusqu'à la nouvelle fenêtre de 5 h ou jusqu'au lendemain.
+- Budget de tokens, pour la migration seule : au plus 50 % de la limite sur 5 h, et 50 % de la
+  limite hebdomadaire réparti sur les 7 jours de la fenêtre : au jour N, au plus N × 7,1 points du
+  compteur hebdomadaire en tout, ce qui n'a pas servi se reporte. La status line ne donne que les
+  chiffres du compte : `.claude/tmp/budget/` (hors git) n'additionne leurs hausses que pendant que
+  la migration tourne (la session principale ou un de ses agents), une autre session ouverte en
+  même temps compte donc aussi. À 85 % de la limite sur 5 h, ou à moins d'un point de la part de
+  la semaine, plus de nouvel agent ; à la limite, tout s'arrête jusqu'à la nouvelle fenêtre de 5 h
+  ou jusqu'à la part du jour suivant (à l'heure où la fenêtre hebdomadaire a commencé).
 - Au plus 3 ou 4 agents en parallèle : au-delà, les conflits (`composer.lock`, fixtures) et la
   relecture deviennent le goulot.
 - Chaque worktree lance sa propre stack Docker, sans conflit de conteneurs ni de ports avec les
