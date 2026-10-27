@@ -72,14 +72,14 @@ const styles = {
 // plugins as globals): concatenated as they are, never bundled as modules
 const scripts = {
     'base': [
-        'components/jquery-ui/jquery-ui.js',
-        'components/jquery-ui/ui/widgets/sortable.js',
-        'components/jquery-ui/ui/effect.js',
-        'components/jquery-ui/ui/effects/effect-highlight.js',
-        'components/masonry/masonry.pkgd.js',
-        'components/moment/moment.js',
-        'components/moment/locale/fr.js',
-        'components/bootstrap-datetimepicker/src/js/bootstrap-datetimepicker.js',
+        'vendor/components/jqueryui/jquery-ui.js',
+        'vendor/components/jqueryui/ui/widgets/sortable.js',
+        'vendor/components/jqueryui/ui/effect.js',
+        'vendor/components/jqueryui/ui/effects/effect-highlight.js',
+        'vendor/components/masonry/masonry.pkgd.js',
+        'vendor/moment/moment/moment.js',
+        'vendor/moment/moment/locale/fr.js',
+        'vendor/eonasdan/bootstrap-datetimepicker/src/js/bootstrap-datetimepicker.js',
         `${ASSETS}/js/modernizr/modernizr-custom.js`,
         `${ASSETS}/js/jquery-form/jquery.form.js`,
         `${ASSETS}/js/jquery-ui-touch-punch/jquery.ui.touch-punch.js`,
@@ -156,11 +156,11 @@ const scripts = {
     ],
     // Internet Explorer 8 and before only
     'ie': [
-        'components/html5shiv/dist/html5shiv.js',
+        'vendor/afarkas/html5shiv/dist/html5shiv.js',
         `${ASSETS}/js/respond/respond.js`,
     ],
     'jquery': [
-        'components/jquery/jquery.js',
+        'vendor/components/jquery/jquery.js',
     ],
     'map': [
         `${ASSETS}/js/leaflet/leaflet-src.js`,

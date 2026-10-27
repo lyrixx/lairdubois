@@ -389,7 +389,7 @@ Execute the SQL script located at [`docs/database/schema-sessions.sql`](database
 
 *⚠️&nbsp;️&nbsp;Note : Be sure that the current directory is the project's root directory. (ie: `/var/www/www.lairdubois.fr` for PROD environment)*
 
-This step will install the Node packages in `node_modules`, then create the `web/build` folder and fill it with the compiled and minimized CSS and JS (Vite, `vite.config.js`), with the `manifest.json` that gives their versioned names to the templates. The sources are in `vendor` and `components`: run it after composer (step 4).
+This step will install the Node packages in `node_modules`, then create the `web/build` folder and fill it with the compiled and minimized CSS and JS (Vite, `vite.config.js`), with the `manifest.json` that gives their versioned names to the templates. The sources are in `vendor`: run it after composer (step 4).
 
 ``` bash
     $ ladb-assets
