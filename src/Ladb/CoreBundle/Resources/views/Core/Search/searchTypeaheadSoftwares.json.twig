@@ -1,1 +1,2 @@
-{"suggestions":[{% if softwares is empty %}""{% else %}{% for software in softwares %}"{{ software.name }}"{% if loop.last == false %},{% endif %}{% endfor %}{% endif %}]}
+{% autoescape 'html' %}{# For HTML, as with Twig 2 (Twig 3 escapes .json for JS): the JS inserts these values in the page #}
+{"suggestions":[{% if softwares is empty %}""{% else %}{% for software in softwares %}"{{ software.name }}"{% if loop.last == false %},{% endif %}{% endfor %}{% endif %}]}{% endautoescape %}

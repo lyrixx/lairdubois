@@ -1,3 +1,4 @@
+{% autoescape 'html' %}{# For HTML, as with Twig 2 (Twig 3 escapes .json for JS): the JS inserts these values in the page #}
 {
     "events": [
         {% for event in events %}
@@ -9,4 +10,4 @@
             }{% if not loop.last %},{% endif %}
         {% endfor %}
     ]
-}
+}{% endautoescape %}

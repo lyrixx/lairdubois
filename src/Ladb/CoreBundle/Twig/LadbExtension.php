@@ -12,6 +12,7 @@ use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Translation\TranslatorInterface;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
+use Twig\Extension\CoreExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 use Twig\TwigTest;
@@ -173,7 +174,7 @@ class LadbExtension extends AbstractExtension {
 
 	// Copy of twig_localized_date_filter() of twig/extensions 1.5
 	public function localizedDateFilter(Environment $env, $date, $dateFormat = 'medium', $timeFormat = 'medium', $locale = null, $timezone = null, $format = null, $calendar = 'gregorian') {
-		$date = twig_date_converter($env, $date, $timezone);
+		$date = $env->getExtension(CoreExtension::class)->convertDate($date, $timezone);
 
 		$formatValues = array(
 			'none' => \IntlDateFormatter::NONE,
@@ -197,8 +198,8 @@ class LadbExtension extends AbstractExtension {
 
 	// Copy of Twig_Extensions_Extension_Date::diff() of twig/extensions 1.5
 	public function timeDiffFilter(Environment $env, $date, $now = null) {
-		$date = twig_date_converter($env, $date);
-		$now = twig_date_converter($env, $now);
+		$date = $env->getExtension(CoreExtension::class)->convertDate($date);
+		$now = $env->getExtension(CoreExtension::class)->convertDate($now);
 
 		$diff = $date->diff($now);
 

@@ -1172,15 +1172,6 @@ parameters:
 
 		-
 			message: '''
-				#^Call to method isEnabled\(\) of deprecated interface Symfony\\Component\\Security\\Core\\User\\AdvancedUserInterface\:
-				since Symfony 4\.1$#
-			'''
-			identifier: method.deprecatedInterface
-			count: 1
-			path: src/Ladb/CoreBundle/Controller/Core/MemberController.php
-
-		-
-			message: '''
 				#^Call to method isGranted\(\) of deprecated class Symfony\\Bundle\\FrameworkBundle\\Controller\\Controller\:
 				since Symfony 4\.2, use "Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController" instead\.$#
 			'''
@@ -6083,6 +6074,12 @@ parameters:
 			identifier: method.deprecatedInterface
 			count: 1
 			path: src/Ladb/CoreBundle/Form/Type/Knowledge/Value/LanguageValueType.php
+
+		-
+			message: '#^Class Ladb\\CoreBundle\\Fos\\CanonicalFieldsUpdater extends @final class FOS\\UserBundle\\Util\\CanonicalFieldsUpdater\.$#'
+			identifier: class.extendsFinalByPhpDoc
+			count: 1
+			path: src/Ladb/CoreBundle/Fos/CanonicalFieldsUpdater.php
 
 		-
 			message: '#^Deprecated in PHP 8\.4\: Parameter \#3 \$owner \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'

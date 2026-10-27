@@ -595,3 +595,13 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   avec un TTL de 0 et sans timeout : `services.yml` le redéfinit avec ceux de web-push 2.0 (4
   semaines, 30 s). Sa route d'abonnement lit `{"subscription": …}`, alors que le JS du site envoie
   la `PushSubscription` telle quelle : `WebpushController` la remplace (même nom, même chemin).
+- Twig reste en 3.27 (`~3.27.1`) : depuis la 3.28 (twigphp/Twig#4292), un template qui en étend
+  un autre affiche les espaces des `{% if %}` qu'il a hors de ses blocs (l'indentation de leurs
+  `{% set %}`), avant le doctype ; Twig 3.27 les retire, comme Twig 2.
+- Twig 3 échappe les templates `*.json.twig` pour JS (`FileExtensionEscapingStrategy`), Twig 2
+  pour HTML : ceux qui affichent des valeurs sont dans un `{% autoescape 'html' %}`, le JS du site
+  les insère dans la page.
+- `friendsofsymfony/user-bundle` est en `~2.2.0` : la 3.x, une version majeure, s'installe aussi
+  avec Symfony 4.4 (le container ne compile plus sans `fos_user.service.mailer`, entre autres).
+- SensioFrameworkExtraBundle est en 5.5 : le `TemplateListener` de la 5.4 demande un
+  `Twig_Environment`, qui n'existe plus en Twig 3 (`TypeError` sur toute action à `@Template`).
