@@ -126,13 +126,13 @@
         {% if howto.articles.count > 1 %}
             <h4>{{ 'howto.article.list'|trans() }}</h4>
             <ul>
-                {% for article in howto.articles if not article.isDraft or article.isDraft and showDraft %}
+                {% for article in howto.articles %}{% if not article.isDraft or article.isDraft and showDraft %}
                     <li>
                         <a href="#{{ article.sluggedId }}">{{ article.title }}</a>
                         {% if article.bodyBlockVideoCount > 0 %}<i class="ladb-icon-video"></i>{% endif %}
                         {% if article.isDraft %}<small class="ladb-translucent">({{ 'default.choice.draft'|transchoice(1) }})</small>{% endif %}
                     </li>
-                {% endfor %}
+                {% endif %}{% endfor %}
             </ul>
         {% endif %}
     </div>
@@ -148,7 +148,7 @@
     {% endblock %}
     <div id="ladb_tocable">
         <div id="ladb_articles">
-            {% for article in howto.articles if not article.isDraft or article.isDraft and showDraft %}
+            {% for article in howto.articles %}{% if not article.isDraft or article.isDraft and showDraft %}
                 <hr>
                 <a id="{{ article.sluggedId }}" class="ladb-offsetted-anchor"></a>
                 <div id="ladb_howto_article_{{ article.id }}" class="ladb-howto-article">
@@ -251,7 +251,7 @@
                         {% endif %}
                     </div>
                 </div>
-            {% endfor %}
+            {% endif %}{% endfor %}
         </div>
         {% if howto.articles|length > 0 %}
             {{ block('manageArticlesShortcutBlock') }}

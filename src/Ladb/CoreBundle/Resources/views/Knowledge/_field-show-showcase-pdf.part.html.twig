@@ -12,9 +12,9 @@
             {% include 'LadbCoreBundle:Core/Picture:_img.part.html.twig' with {  'picture':(resource ? resource.thumbnail : null), 'width':(wide ? '282' : '126'), 'height':(wide ? '280' : '170'), 'alt':knowledge.title, 'emptyWebPath':'empty_add.png', 'autoSizer':false } %}
             {% if values|length %}
                 {% set resourceCount = 0 %}
-                {% for value in values if value.voteScore >= 0 %}
+                {% for value in values %}{% if value.voteScore >= 0 %}
                     {% set resourceCount = resourceCount + 1 %}
-                {% endfor %}
+                {% endif %}{% endfor %}
                 {% if resourceCount > 1 %}
                     <div class="ladb-picture-counter">+ {{ resourceCount - 1 }} <i class="ladb-icon-file"></i></div>
                 {% endif %}

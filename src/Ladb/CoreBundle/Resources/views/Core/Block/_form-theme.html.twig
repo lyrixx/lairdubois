@@ -1,5 +1,5 @@
 {% block ladb_polycollection_widget %}
-    {% spaceless %}
+    {% apply spaceless %}
         {% set attr = attr|merge({ 'data-form-widget':'collection' }) %}
         {% if disabled %}
             {% set attr = attr|merge({ 'data-disabled':1 }) %}
@@ -14,7 +14,7 @@
                 {% endfor %}
             </div>
         {% endif %}
-    {% endspaceless %}
+    {% endapply %}
 {% endblock ladb_polycollection_widget %}
 
 {% block ladb_block_text_row %}

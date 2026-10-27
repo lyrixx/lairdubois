@@ -1,4 +1,4 @@
-{% spaceless %}
+{% apply spaceless %}
 
 {# set embedUrl #}
 
@@ -15,4 +15,4 @@
 </script>
 <div class="fb-video" data-href="{{ embedUrl }}" data-allowfullscreen="true"{% if autoPlay %} data-autoplay="true"{% endif %}></div>
 
-{% endspaceless %}
+{% endapply %}

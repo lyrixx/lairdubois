@@ -1,4 +1,4 @@
-{% spaceless %}
+{% apply spaceless %}
 
 {# set pageItemType (facultative) #}
 {# set pageContentItemprop (facultative) #}
@@ -31,7 +31,7 @@
 {% set titleSuffixHidden = titleSuffixHidden|default(false) %}
 {% set noLazyLoad = noLazyLoad|default(false) %}
 
-{% endspaceless %}
+{% endapply %}
 <!DOCTYPE html>
 <html lang="{{ app.request.locale }}" itemscope itemtype="http://schema.org/{{ pageItemType }}">
     <head prefix="{% block headPrefix %}og: http://ogp.me/ns# fb: http://ogp.me/ns/fb#{% endblock %}">

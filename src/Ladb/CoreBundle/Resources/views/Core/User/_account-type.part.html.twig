@@ -1,4 +1,4 @@
-{% spaceless %}
+{% apply spaceless %}
 
 {# set user #}
 
@@ -9,4 +9,4 @@
 {% elseif user.username == 'Toutenbois' %}&nbsp;<i class="ladb-icon-badge-prof ladb-user-badge" title="{{ user.displayname }} est un prof de Maths qui passe beaucoup de temps dans son atelier" data-tooltip="tooltip"></i>
 {% endif %}
 
-{% endspaceless %}
+{% endapply %}

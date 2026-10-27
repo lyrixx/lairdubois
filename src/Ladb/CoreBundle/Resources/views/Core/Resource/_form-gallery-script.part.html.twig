@@ -11,7 +11,7 @@
 {% set sortable = sortable is defined ? sortable : false %}
 
 <script>
-    var {{ formSection }}ThumnailTemplate = "{% spaceless %}{{ include('LadbCoreBundle:Core/Resource:_form-thumbnail.part.html.twig')|escape('js') }}{% endspaceless %}";
+    var {{ formSection }}ThumnailTemplate = "{% apply spaceless %}{{ include('LadbCoreBundle:Core/Resource:_form-thumbnail.part.html.twig')|escape('js') }}{% endapply %}";
     function {{ formSection }}UpdateForm() {
         var idsValue = "";
         var idsCount = 0;
