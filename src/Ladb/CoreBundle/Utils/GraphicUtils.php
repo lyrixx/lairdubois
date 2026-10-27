@@ -4,10 +4,17 @@ namespace Ladb\CoreBundle\Utils;
 
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Ladb\CoreBundle\Entity\Promotion\Graphic;
+use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
 
-class GraphicUtils extends AbstractContainerAwareUtils {
+class GraphicUtils {
 
 	const NAME = 'ladb_core.graphic_utils';
+
+	private $templating;
+
+	public function __construct(EngineInterface $templating) {
+		$this->templating = $templating;
+	}
 
 	public function createZipArchive(Graphic $graphic) {
 		$zipAbsolutePath = $this->getZipAbsolutePath($graphic);
@@ -22,7 +29,7 @@ class GraphicUtils extends AbstractContainerAwareUtils {
 		if ($zip->open($zipAbsolutePath, \ZipArchive::CREATE)) {
 
 			$zip->addFile($graphic->getResource()->getAbsolutePath(), $graphic->getResource()->getFilename());
-			$zip->addFromString('LisezMoi.txt', $this->get('templating')->render('LadbCoreBundle:Promotion/Graphic:readme.txt.twig', array( 'graphic' => $graphic )));
+			$zip->addFromString('LisezMoi.txt', $this->templating->render('LadbCoreBundle:Promotion/Graphic:readme.txt.twig', array( 'graphic' => $graphic )));
 			$zip->close();
 			$graphic->setZipArchiveSize(filesize($zipAbsolutePath));
 

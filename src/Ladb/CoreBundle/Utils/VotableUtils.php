@@ -3,13 +3,14 @@
 namespace Ladb\CoreBundle\Utils;
 
 use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ManagerRegistry;
 use Ladb\CoreBundle\Model\AuthoredInterface;
 use Ladb\CoreBundle\Model\VotableParentInterface;
 use Ladb\CoreBundle\Model\VotableInterface;
 use Ladb\CoreBundle\Entity\Core\Vote;
 use Ladb\CoreBundle\Entity\Core\User;
 
-class VotableUtils extends AbstractContainerAwareUtils {
+class VotableUtils {
 
 	const NAME = 'ladb_core.votable_utils';
 
@@ -18,10 +19,17 @@ class VotableUtils extends AbstractContainerAwareUtils {
 	const DISABLE_REASON_SELF_VOTING = 2;
 	const DISABLE_REASON_NOT_EMAIL_CONFIRMED = 3;
 
+	private $activityUtils;
+	private $doctrine;
+
+	public function __construct(ActivityUtils $activityUtils, ManagerRegistry $doctrine) {
+		$this->activityUtils = $activityUtils;
+		$this->doctrine = $doctrine;
+	}
+
 	public function deleteVotes(VotableInterface $votable, VotableParentInterface $votableParent, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$voteRepository = $om->getRepository(Vote::CLASS_NAME);
-		$activityUtils = $this->get(ActivityUtils::NAME);
 
 		$votes = $voteRepository->findByEntityTypeAndEntityId($votable->getType(), $votable->getId());
 		foreach ($votes as $vote) {
@@ -33,7 +41,7 @@ class VotableUtils extends AbstractContainerAwareUtils {
 				$vote->getUser()->getMeta()->incrementNegativeVoteCount(-1);
 			}
 			$votableParent->incrementVoteCount(-1);
-			$activityUtils->deleteActivitiesByVote($vote);
+			$this->activityUtils->deleteActivitiesByVote($vote);
 			$votable->incrementVoteCount(-1);
 			$om->remove($vote);
 		}
@@ -43,7 +51,7 @@ class VotableUtils extends AbstractContainerAwareUtils {
 	}
 
 	public function incrementUsersVoteCount(VotableInterface $votable, $by = 1, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$voteRepository = $om->getRepository(Vote::CLASS_NAME);
 
 		$votes = $voteRepository->findByEntityTypeAndEntityId($votable->getType(), $votable->getId());
@@ -70,7 +78,7 @@ class VotableUtils extends AbstractContainerAwareUtils {
 	}
 
 	public function getVoteContext(VotableInterface $votable, User $user = null) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$voteRepository = $om->getRepository(Vote::CLASS_NAME);
 
 		$vote = null;
@@ -97,7 +105,7 @@ class VotableUtils extends AbstractContainerAwareUtils {
 	/////
 
 	public function transferVotes(VotableInterface $votableSrc, VotableInterface $votableDest, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$voteRepository = $om->getRepository(Vote::CLASS_NAME);
 
 		// Retrieve votes

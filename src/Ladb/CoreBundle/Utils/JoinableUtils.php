@@ -2,6 +2,7 @@
 
 namespace Ladb\CoreBundle\Utils;
 
+use Doctrine\Persistence\ManagerRegistry;
 use Ladb\CoreBundle\Entity\Core\Join;
 use Ladb\CoreBundle\Model\DraftableInterface;
 use Ladb\CoreBundle\Model\JoinableInterface;
@@ -9,20 +10,29 @@ use Ladb\CoreBundle\Model\AuthoredInterface;
 use Ladb\CoreBundle\Model\ViewableInterface;
 use Ladb\CoreBundle\Entity\Core\User;
 
-class JoinableUtils extends AbstractContainerAwareUtils {
+class JoinableUtils {
 
 	const NAME = 'ladb_core.joinable_utils';
+
+	private $activityUtils;
+	private $doctrine;
+	private $typableUtils;
+
+	public function __construct(ActivityUtils $activityUtils, ManagerRegistry $doctrine, TypableUtils $typableUtils) {
+		$this->activityUtils = $activityUtils;
+		$this->doctrine = $doctrine;
+		$this->typableUtils = $typableUtils;
+	}
 
 	/////
 
 	public function deleteJoins(JoinableInterface $joinable, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$joinRepository = $om->getRepository(Join::CLASS_NAME);
-		$activityUtils = $this->get(ActivityUtils::NAME);
 
 		$joins = $joinRepository->findByEntityTypeAndEntityId($joinable->getType(), $joinable->getId());
 		foreach ($joins as $join) {
-			$activityUtils->deleteActivitiesByJoin($join);
+			$this->activityUtils->deleteActivitiesByJoin($join);
 			$om->remove($join);
 		}
 		if ($flush) {
@@ -31,18 +41,16 @@ class JoinableUtils extends AbstractContainerAwareUtils {
 	}
 
 	public function deleteJoinsByUser(User $user, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$joinRepository = $om->getRepository(Join::CLASS_NAME);
-		$typableUtils = $this->get(TypableUtils::NAME);
-		$activityUtils = $this->get(ActivityUtils::NAME);
 
 		$joins = $joinRepository->findByUser($user);
 		foreach ($joins as $join) {
-			$joinable = $typableUtils->findTypable($join->getEntityType(), $join->getEntityId());
+			$joinable = $this->typableUtils->findTypable($join->getEntityType(), $join->getEntityId());
 			if (!is_null($joinable) && $joinable instanceof AuthoredInterface) {
 				$joinable->getUser()->getMeta()->incrementJoinCount(-1);
 			}
-			$activityUtils->deleteActivitiesByJoin($join);
+			$this->activityUtils->deleteActivitiesByJoin($join);
 			$om->remove($join);
 		}
 		if ($flush) {
@@ -51,7 +59,7 @@ class JoinableUtils extends AbstractContainerAwareUtils {
 	}
 
 	public function incrementUsersJoinCount(JoinableInterface $joinable, $by = 1, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$joinRepository = $om->getRepository(Join::CLASS_NAME);
 
 		$joins = $joinRepository->findByEntityTypeAndEntityId($joinable->getType(), $joinable->getId());
@@ -66,7 +74,7 @@ class JoinableUtils extends AbstractContainerAwareUtils {
 	/////
 
 	public function getJoinContext(JoinableInterface $joinable, User $user = null) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$joinRepository = $om->getRepository(Join::CLASS_NAME);
 
 		$join = null;
@@ -85,7 +93,7 @@ class JoinableUtils extends AbstractContainerAwareUtils {
 	/////
 
 	public function transferJoins(JoinableInterface $joinableSrc, JoinableInterface $joinableDest, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$joinRepository = $om->getRepository(Join::CLASS_NAME);
 
 		// Retrieve joins

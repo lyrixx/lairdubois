@@ -2,6 +2,7 @@
 
 namespace Ladb\CoreBundle\Utils;
 
+use Doctrine\Persistence\ManagerRegistry;
 use Ladb\CoreBundle\Entity\Core\Like;
 use Ladb\CoreBundle\Model\DraftableInterface;
 use Ladb\CoreBundle\Model\HiddableInterface;
@@ -10,16 +11,25 @@ use Ladb\CoreBundle\Model\AuthoredInterface;
 use Ladb\CoreBundle\Model\ViewableInterface;
 use Ladb\CoreBundle\Entity\Core\User;
 
-class LikableUtils extends AbstractContainerAwareUtils {
+class LikableUtils {
 
 	const NAME = 'ladb_core.likable_utils';
+
+	private $activityUtils;
+	private $doctrine;
+	private $typableUtils;
+
+	public function __construct(ActivityUtils $activityUtils, ManagerRegistry $doctrine, TypableUtils $typableUtils) {
+		$this->activityUtils = $activityUtils;
+		$this->doctrine = $doctrine;
+		$this->typableUtils = $typableUtils;
+	}
 
 	/////
 
 	public function deleteLikes(LikableInterface $likable, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$likeRepository = $om->getRepository(Like::CLASS_NAME);
-		$activityUtils = $this->get(ActivityUtils::NAME);
 
 		$likes = $likeRepository->findByEntityTypeAndEntityId($likable->getType(), $likable->getId());
 		foreach ($likes as $like) {
@@ -29,7 +39,7 @@ class LikableUtils extends AbstractContainerAwareUtils {
 					$likable->getUser()->getMeta()->incrementRecievedLikeCount(-1);
 				}
 			}
-			$activityUtils->deleteActivitiesByLike($like);
+			$this->activityUtils->deleteActivitiesByLike($like);
 			$om->remove($like);
 		}
 		if ($flush) {
@@ -38,19 +48,17 @@ class LikableUtils extends AbstractContainerAwareUtils {
 	}
 
 	public function deleteLikesByUser(User $user, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$likeRepository = $om->getRepository(Like::CLASS_NAME);
-		$typableUtils = $this->get(TypableUtils::NAME);
-		$activityUtils = $this->get(ActivityUtils::NAME);
 
 		$likes = $likeRepository->findByUser($user);
 		foreach ($likes as $like) {
 			$like->getUser()->getMeta()->incrementSentLikeCount(-1);
-			$likable = $typableUtils->findTypable($like->getEntityType(), $like->getEntityId());
+			$likable = $this->typableUtils->findTypable($like->getEntityType(), $like->getEntityId());
 			if (!is_null($likable) && $likable instanceof AuthoredInterface) {
 				$likable->getUser()->getMeta()->incrementRecievedLikeCount(-1);
 			}
-			$activityUtils->deleteActivitiesByLike($like);
+			$this->activityUtils->deleteActivitiesByLike($like);
 			$om->remove($like);
 		}
 		if ($flush) {
@@ -59,7 +67,7 @@ class LikableUtils extends AbstractContainerAwareUtils {
 	}
 
 	public function incrementUsersLikeCount(LikableInterface $likable, $by = 1, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$likeRepository = $om->getRepository(Like::CLASS_NAME);
 
 		$likes = $likeRepository->findByEntityTypeAndEntityId($likable->getType(), $likable->getId());
@@ -77,7 +85,7 @@ class LikableUtils extends AbstractContainerAwareUtils {
 	/////
 
 	public function getLikeContext(LikableInterface $likable, User $user = null) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$likeRepository = $om->getRepository(Like::CLASS_NAME);
 
 		$like = null;
@@ -95,7 +103,7 @@ class LikableUtils extends AbstractContainerAwareUtils {
 	/////
 
 	public function transferLikes(LikableInterface $likableSrc, LikableInterface $likableDest, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$likeRepository = $om->getRepository(Like::CLASS_NAME);
 
 		// Retrieve likes

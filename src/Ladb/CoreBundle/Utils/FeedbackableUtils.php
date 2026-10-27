@@ -2,6 +2,7 @@
 
 namespace Ladb\CoreBundle\Utils;
 
+use Doctrine\Persistence\ManagerRegistry;
 use Ladb\CoreBundle\Entity\Core\Feedback;
 use Ladb\CoreBundle\Entity\Core\Join;
 use Ladb\CoreBundle\Model\AuthoredInterface;
@@ -10,20 +11,29 @@ use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Model\FeedbackableInterface;
 use Ladb\CoreBundle\Model\JoinableInterface;
 
-class FeedbackableUtils extends AbstractContainerAwareUtils {
+class FeedbackableUtils {
 
 	const NAME = 'ladb_core.feedbackable_utils';
+
+	private $activityUtils;
+	private $doctrine;
+	private $globalUtils;
+
+	public function __construct(ActivityUtils $activityUtils, ManagerRegistry $doctrine, GlobalUtils $globalUtils) {
+		$this->activityUtils = $activityUtils;
+		$this->doctrine = $doctrine;
+		$this->globalUtils = $globalUtils;
+	}
 	
 	/////
 
 	public function deleteFeedbacks(FeedbackableInterface $feedbackable, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$feedbackRepository = $om->getRepository(Feedback::CLASS_NAME);
-		$activityUtils = $this->get(ActivityUtils::NAME);
 
 		$feedbacks = $feedbackRepository->findByEntityTypeAndEntityId($feedbackable->getType(), $feedbackable->getId());
 		foreach ($feedbacks as $feedback) {
-			$this->deleteFeedback($feedback, $feedbackable, $activityUtils, $om, false);
+			$this->deleteFeedback($feedback, $feedbackable, $this->activityUtils, $om, false);
 		}
 		if ($flush) {
 			$om->flush();
@@ -53,7 +63,7 @@ class FeedbackableUtils extends AbstractContainerAwareUtils {
 	}
 
 	public function incrementUsersFeedbackCount(FeedbackableInterface $feedbackable, $by = 1, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$feedbackRepository = $om->getRepository(Feedback::CLASS_NAME);
 
 		$feedbacks = $feedbackRepository->findByEntityTypeAndEntityId($feedbackable->getType(), $feedbackable->getId());
@@ -76,7 +86,7 @@ class FeedbackableUtils extends AbstractContainerAwareUtils {
 			return true;
 		}
 		if ($feedbackable instanceof JoinableInterface && !is_null($user)) {
-			$om = $this->getDoctrine()->getManager();
+			$om = $this->doctrine->getManager();
 			$joinRepository = $om->getRepository(Join::CLASS_NAME);
 			return $joinRepository->existsByEntityTypeAndEntityIdAndUser($feedbackable->getType(), $feedbackable->getId(), $user);
 		}
@@ -87,7 +97,7 @@ class FeedbackableUtils extends AbstractContainerAwareUtils {
 	/////
 
 	public function getFeedbackContext(FeedbackableInterface $feedbackable, $withFeedbacks = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 
 		if ($withFeedbacks) {
 
@@ -97,21 +107,19 @@ class FeedbackableUtils extends AbstractContainerAwareUtils {
 
 		}
 
-		$globalUtils = $this->get(GlobalUtils::NAME);
-
 		return array(
 			'entityType'     => $feedbackable->getType(),
 			'entityId'       => $feedbackable->getId(),
 			'feedbackCount'  => $feedbackable->getFeedbackCount(),
 			'feedbacks'      => isset($feedbacks) ? $feedbacks : null,
-			'isFeedbackable' => $this->getIsFeedbackable($feedbackable, $globalUtils->getUser()),
+			'isFeedbackable' => $this->getIsFeedbackable($feedbackable, $this->globalUtils->getUser()),
 		);
 	}
 
 	/////
 
 	public function transferFeedbacks(FeedbackableInterface $feedbackableSrc, FeedbackableInterface $feedbackableDest, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$feedbackRepository = $om->getRepository(Feedback::CLASS_NAME);
 
 		// Retrieve feedbacks

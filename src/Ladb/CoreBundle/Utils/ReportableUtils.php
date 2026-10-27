@@ -3,17 +3,24 @@
 namespace Ladb\CoreBundle\Utils;
 
 use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ManagerRegistry;
 use Ladb\CoreBundle\Entity\Core\Report;
 use Ladb\CoreBundle\Model\ReportableInterface;
 
-class ReportableUtils extends AbstractContainerAwareUtils {
+class ReportableUtils {
 
 	const NAME = 'ladb_core.reportable_utils';
+
+	private $doctrine;
+
+	public function __construct(ManagerRegistry $doctrine) {
+		$this->doctrine = $doctrine;
+	}
 
 	/////
 
 	public function deleteReports(ReportableInterface $likable, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$reportRepository = $om->getRepository(Report::CLASS_NAME);
 		$reports = $reportRepository->findByEntityTypeAndEntityId($likable->getType(), $likable->getId());
 		foreach ($reports as $report) {
@@ -27,7 +34,7 @@ class ReportableUtils extends AbstractContainerAwareUtils {
 	/////
 
 	public function transferReports(ReportableInterface $reportableSrc, ReportableInterface $reportableDest, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$reportRepository = $om->getRepository(Report::CLASS_NAME);
 
 		// Retrieve reports

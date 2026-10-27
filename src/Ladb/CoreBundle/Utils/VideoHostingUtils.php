@@ -4,7 +4,7 @@ namespace Ladb\CoreBundle\Utils;
 
 use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
 
-class VideoHostingUtils extends AbstractContainerAwareUtils {
+class VideoHostingUtils {
 
 	const NAME = 'ladb_core.video_hosting_utils';
 
@@ -14,6 +14,14 @@ class VideoHostingUtils extends AbstractContainerAwareUtils {
 	const KIND_VIMEO = 3;
 	const KIND_YOUTUBEPLAYLIST = 4;
 	const KIND_FACEBOOK = 5;
+
+	private $googleApiKey;
+	private $templating;
+
+	public function __construct($googleApiKey, EngineInterface $templating) {
+		$this->googleApiKey = $googleApiKey;
+		$this->templating = $templating;
+	}
 
 	/////
 
@@ -96,7 +104,7 @@ class VideoHostingUtils extends AbstractContainerAwareUtils {
 
 		if (!is_null($playerTemplate)) {
 
-			$player = $this->get('templating')->render($playerTemplate, array(
+			$player = $this->templating->render($playerTemplate, array(
 				'width'    => $width,
 				'height'   => $height,
 				'embedUrl' => $embedUrl,
@@ -122,8 +130,7 @@ class VideoHostingUtils extends AbstractContainerAwareUtils {
 				return 'http://img.youtube.com/vi/'.$embedIdentifier.'/hqdefault.jpg';
 
 			case VideoHostingUtils::KIND_YOUTUBEPLAYLIST:
-				$googleApiKey = $this->getParameter('google_api_key');
-				$hash = json_decode(file_get_contents('https://www.googleapis.com/youtube/v3/playlists?part=contentDetails%2Csnippet&id='.$embedIdentifier.'&key='.$googleApiKey), true);
+				$hash = json_decode(file_get_contents('https://www.googleapis.com/youtube/v3/playlists?part=contentDetails%2Csnippet&id='.$embedIdentifier.'&key='.$this->googleApiKey), true);
 				if ($hash && isset($hash['items']) && isset($hash['items'][0]) && isset($hash['items'][0]['snippet'])) {
 					$snippet = $hash['items'][0]['snippet'];
 					return $snippet['thumbnails']['high']['url'];
@@ -168,8 +175,7 @@ class VideoHostingUtils extends AbstractContainerAwareUtils {
 		switch ($kind) {
 
 			case VideoHostingUtils::KIND_YOUTUBE:
-				$googleApiKey = $this->getParameter('google_api_key');
-				$hash = json_decode(file_get_contents('https://www.googleapis.com/youtube/v3/videos?part=contentDetails%2Csnippet%2Cstatistics&id='.$embedIdentifier.'&key='.$googleApiKey), true);
+				$hash = json_decode(file_get_contents('https://www.googleapis.com/youtube/v3/videos?part=contentDetails%2Csnippet%2Cstatistics&id='.$embedIdentifier.'&key='.$this->googleApiKey), true);
 				if ($hash && isset($hash['items']) && isset($hash['items'][0]) && isset($hash['items'][0]['snippet']) && isset($hash['items'][0]['contentDetails'])) {
 					$snippet = $hash['items'][0]['snippet'];
 					$contentDetails = $hash['items'][0]['contentDetails'];
@@ -237,10 +243,9 @@ class VideoHostingUtils extends AbstractContainerAwareUtils {
 		switch ($kind) {
 
 			case VideoHostingUtils::KIND_YOUTUBE:
-				$googleApiKey = $this->getParameter('google_api_key');
 
 				// Video data
-				$hash = json_decode(file_get_contents('https://www.googleapis.com/youtube/v3/videos?part=snippet&id='.$embedIdentifier.'&key='.$googleApiKey), true);
+				$hash = json_decode(file_get_contents('https://www.googleapis.com/youtube/v3/videos?part=snippet&id='.$embedIdentifier.'&key='.$this->googleApiKey), true);
 				if ($hash && isset($hash['items']) && isset($hash['items'][0]) && isset($hash['items'][0]['snippet'])) {
 					$snippet = $hash['items'][0]['snippet'];
 					$videoData = array(
@@ -250,7 +255,7 @@ class VideoHostingUtils extends AbstractContainerAwareUtils {
 					);
 
 					// Channel data
-					$hash = json_decode(file_get_contents('https://www.googleapis.com/youtube/v3/channels?part=snippet&&id='.$snippet['channelId'].'&key='.$googleApiKey), true);
+					$hash = json_decode(file_get_contents('https://www.googleapis.com/youtube/v3/channels?part=snippet&&id='.$snippet['channelId'].'&key='.$this->googleApiKey), true);
 					if ($hash && isset($hash['items']) && isset($hash['items'][0]) && isset($hash['items'][0]['snippet'])) {
 						$id = $hash['items'][0]['id'];
 						$snippet = $hash['items'][0]['snippet'];

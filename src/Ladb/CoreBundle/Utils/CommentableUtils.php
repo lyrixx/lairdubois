@@ -2,6 +2,7 @@
 
 namespace Ladb\CoreBundle\Utils;
 
+use Doctrine\Persistence\ManagerRegistry;
 use Ladb\CoreBundle\Entity\AbstractPublication;
 use Ladb\CoreBundle\Entity\Core\Activity\AbstractActivity;
 use Ladb\CoreBundle\Entity\Core\Comment;
@@ -13,18 +14,38 @@ use Ladb\CoreBundle\Model\DraftableInterface;
 use Ladb\CoreBundle\Model\IndexableInterface;
 use Ladb\CoreBundle\Model\WatchableChildInterface;
 use Ladb\CoreBundle\Model\WatchableInterface;
+use Liip\ImagineBundle\Imagine\Cache\CacheManager;
 
-class CommentableUtils extends AbstractContainerAwareUtils {
+class CommentableUtils {
 
 	const NAME = 'ladb_core.commentable_utils';
+
+	private $activityUtils;
+	private $cacheManager;
+	private $doctrine;
+	private $fieldPreprocessorUtils;
+	private $mentionUtils;
+	private $searchUtils;
+	private $typableUtils;
+	private $watchableUtils;
+
+	public function __construct(ActivityUtils $activityUtils, CacheManager $cacheManager, ManagerRegistry $doctrine, FieldPreprocessorUtils $fieldPreprocessorUtils, MentionUtils $mentionUtils, SearchUtils $searchUtils, TypableUtils $typableUtils, WatchableUtils $watchableUtils) {
+		$this->activityUtils = $activityUtils;
+		$this->cacheManager = $cacheManager;
+		$this->doctrine = $doctrine;
+		$this->fieldPreprocessorUtils = $fieldPreprocessorUtils;
+		$this->mentionUtils = $mentionUtils;
+		$this->searchUtils = $searchUtils;
+		$this->typableUtils = $typableUtils;
+		$this->watchableUtils = $watchableUtils;
+	}
 
 	/////
 
 	public function finalizeNewComment(Comment $comment, CommentableInterface $commentable) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 
-		$fieldPreprocessorUtils = $this->get(FieldPreprocessorUtils::NAME);
-		$fieldPreprocessorUtils->preprocessFields($comment);
+		$this->fieldPreprocessorUtils->preprocessFields($comment);
 
 		// Counters
 
@@ -34,35 +55,29 @@ class CommentableUtils extends AbstractContainerAwareUtils {
 		$om->persist($comment);
 
 		// Create activity
-		$activityUtils = $this->get(ActivityUtils::NAME);
-		$activityUtils->createCommentActivity($comment, false);
+		$this->activityUtils->createCommentActivity($comment, false);
 
 		$om->flush();
 
 		// Process mentions
-		$mentionUtils = $this->get(MentionUtils::NAME);
-		$mentionUtils->processMentions($comment);
+		$this->mentionUtils->processMentions($comment);
 
 		// Update index
 		if ($commentable instanceof IndexableInterface) {
-			$searchUtils = $this->get(SearchUtils::NAME);
-			$searchUtils->replaceEntityInIndex($commentable);
+			$this->searchUtils->replaceEntityInIndex($commentable);
 		}
 
 		if ($commentable instanceof WatchableInterface) {
-			$watchableUtils = $this->get(WatchableUtils::NAME);
 
 			// Auto watch
-			$watchableUtils->autoCreateWatch($commentable, $comment->getUser());
+			$this->watchableUtils->autoCreateWatch($commentable, $comment->getUser());
 
 		} else if ($commentable instanceof WatchableChildInterface) {
-			$watchableUtils = $this->get(WatchableUtils::NAME);
 
 			// Retrive related parent entity
 
-			$typableUtils = $this->get(TypableUtils::NAME);
 			try {
-				$parentEntity = $typableUtils->findTypable($commentable->getParentEntityType(), $commentable->getParentEntityId());
+				$parentEntity = $this->typableUtils->findTypable($commentable->getParentEntityType(), $commentable->getParentEntityId());
 			} catch (\Exception $e) {
 				throw $this->createNotFoundException($e->getMessage());
 			}
@@ -71,7 +86,7 @@ class CommentableUtils extends AbstractContainerAwareUtils {
 			}
 
 			// Auto watch
-			$watchableUtils->autoCreateWatch($parentEntity, $comment->getUser());
+			$this->watchableUtils->autoCreateWatch($parentEntity, $comment->getUser());
 
 		}
 
@@ -80,7 +95,7 @@ class CommentableUtils extends AbstractContainerAwareUtils {
 	/////
 
 	public function deleteComments(CommentableInterface $commentable, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$commentRepository = $om->getRepository(Comment::CLASS_NAME);
 
 		$comments = $commentRepository->findByEntityTypeAndEntityId($commentable->getType(), $commentable->getId());
@@ -123,12 +138,10 @@ class CommentableUtils extends AbstractContainerAwareUtils {
 		}
 
 		// Delete mentions
-		$mentionUtils = $this->get(MentionUtils::NAME);
-		$mentionUtils->deleteMentions($comment, false);
+		$this->mentionUtils->deleteMentions($comment, false);
 
 		// Delete relative activities
-		$activityUtils = $this->get(ActivityUtils::NAME);
-		$activityUtils->deleteActivitiesByComment($comment, false);
+		$this->activityUtils->deleteActivitiesByComment($comment, false);
 
 		// Remove Comment from DB
 		$om->remove($comment);
@@ -140,7 +153,7 @@ class CommentableUtils extends AbstractContainerAwareUtils {
 	}
 
 	public function incrementUsersCommentCount(CommentableInterface $commentable, $by = 1, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$commentRepository = $om->getRepository(Comment::CLASS_NAME);
 
 		$comments = $commentRepository->findByEntityTypeAndEntityId($commentable->getType(), $commentable->getId());
@@ -155,7 +168,7 @@ class CommentableUtils extends AbstractContainerAwareUtils {
 	/////
 
 	public function getMentionStrategy(CommentableInterface $commentable) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$commentRepository = $om->getRepository(Comment::CLASS_NAME);
 
 		$comments = $commentRepository->findByEntityTypeAndEntityId($commentable->getType(), $commentable->getId());
@@ -176,12 +189,11 @@ class CommentableUtils extends AbstractContainerAwareUtils {
 	}
 
 	private function _populateMentionStrategyWithUser(&$mentionStrategy, User $user) {
-		$imagineCacheManager = $this->get('liip_imagine.cache.manager');
 		if (!isset($mentionStrategy[$user->getUsername()])) {
 			if (!is_null($user->getAvatar())) {
-				$avatar = $imagineCacheManager->getBrowserPath($user->getAvatar()->getWebPath(), '32x32o');
+				$avatar = $this->cacheManager->getBrowserPath($user->getAvatar()->getWebPath(), '32x32o');
 			} else {
-				$avatar = $imagineCacheManager->getBrowserPath('avatar.png', '32x32o');
+				$avatar = $this->cacheManager->getBrowserPath('avatar.png', '32x32o');
 			}
 			$mentionStrategy[strtolower($user->getUsername())] = array( 'displayname' => $user->getDisplayName(), 'avatar' => $avatar );
 		}
@@ -198,7 +210,7 @@ class CommentableUtils extends AbstractContainerAwareUtils {
 	}
 
 	public function getCommentContext(CommentableInterface $commentable, $includeTimelineActivities = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$commentRepository = $om->getRepository(Comment::CLASS_NAME);
 
 		// Retrieve comments
@@ -224,7 +236,7 @@ class CommentableUtils extends AbstractContainerAwareUtils {
 	/////
 
 	public function transferComments(CommentableInterface $commentableSrc, CommentableInterface $commentableDest, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$commentRepository = $om->getRepository(Comment::CLASS_NAME);
 
 		// Retrieve comments
@@ -246,7 +258,7 @@ class CommentableUtils extends AbstractContainerAwareUtils {
 	}
 
 	public function transferChildrenComments(Comment $comment, CommentableInterface $commentableSrc, CommentableInterface $commentableDest, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 
 		$children = $comment->getChildren()->toArray();
 		$childrenCount = count($children);

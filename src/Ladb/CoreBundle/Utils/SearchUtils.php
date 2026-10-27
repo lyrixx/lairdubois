@@ -2,17 +2,40 @@
 
 namespace Ladb\CoreBundle\Utils;
 
+use Doctrine\Persistence\ManagerRegistry;
 use Elastica\Document;
+use FOS\ElasticaBundle\Elastica\Index;
+use FOS\ElasticaBundle\Persister\PersisterRegistry;
 use Ladb\CoreBundle\Entity\Stats\Search;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PropertyAccess\PropertyPath;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Elastica\Query;
 use Ladb\CoreBundle\Model\IndexableInterface;
 
-class SearchUtils extends AbstractContainerAwareUtils {
+class SearchUtils {
 
 	const NAME = 'ladb_core.search_utils';
+
+	// The callers give a type by the id of its service, that the index creates (getType())
+	const TYPE_SERVICE_ID_PREFIX = 'fos_elastica.index.ladb.';
+
+	private $doctrine;
+	private $globalUtils;
+	private $index;
+	private $logger;
+	private $paginatorUtils;
+	private $persisterRegistry;
+
+	public function __construct(ManagerRegistry $doctrine, GlobalUtils $globalUtils, Index $index, LoggerInterface $logger, PaginatorUtils $paginatorUtils, PersisterRegistry $persisterRegistry) {
+		$this->doctrine = $doctrine;
+		$this->globalUtils = $globalUtils;
+		$this->index = $index;
+		$this->logger = $logger;
+		$this->paginatorUtils = $paginatorUtils;
+		$this->persisterRegistry = $persisterRegistry;
+	}
 
 	/////
 
@@ -21,9 +44,16 @@ class SearchUtils extends AbstractContainerAwareUtils {
 		if (preg_match('@\\\\([\w]+)\\\\([\w]+)$@', $classname, $matches)) {
 			$familyName = $matches[1];
 			$typeName = $matches[2];
-			return $this->get('fos_elastica.object_persister.ladb.'.$familyName.'_'.$typeName);
+			return $this->persisterRegistry->getPersister('ladb', $familyName.'_'.$typeName);
 		}
 		return null;
+	}
+
+	private function _getType($typeName) {
+		if (0 !== strpos($typeName, self::TYPE_SERVICE_ID_PREFIX)) {
+			throw new \LogicException(sprintf('"%s" is not the id of a type of the index.', $typeName));
+		}
+		return $this->index->getType(substr($typeName, strlen(self::TYPE_SERVICE_ID_PREFIX)));
 	}
 
 	private function _logSearch($context, $query, $totalHits) {
@@ -33,11 +63,10 @@ class SearchUtils extends AbstractContainerAwareUtils {
 			return;
 		}
 
-		$globalUtils = $this->get(GlobalUtils::NAME);
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 
 		// Retrieve search session identifier
-		$session = $globalUtils->getSession();
+		$session = $this->globalUtils->getSession();
 		$key = '_ladb_search_session';
 		$sessionIdentifier = $session->get($key);
 		if (is_null($sessionIdentifier)) {
@@ -66,8 +95,7 @@ class SearchUtils extends AbstractContainerAwareUtils {
 				try {
 					$objectPersister->insertOne($entity);
 				} catch (\Exception $e) {
-					$logger = $this->get('logger');
-					$logger->error('SearchUtils/insertEntityToIndex', array( 'exception' => $e ));
+					$this->logger->error('SearchUtils/insertEntityToIndex', array( 'exception' => $e ));
 				}
 			}
 		}
@@ -80,8 +108,7 @@ class SearchUtils extends AbstractContainerAwareUtils {
 				try {
 					$objectPersister->replaceOne($entity);
 				} catch (\Exception $e) {
-					$logger = $this->get('logger');
-					$logger->error('SearchUtils/replaceEntityInIndex', array( 'exception' => $e ));
+					$this->logger->error('SearchUtils/replaceEntityInIndex', array( 'exception' => $e ));
 				}
 			}
 		}
@@ -93,8 +120,7 @@ class SearchUtils extends AbstractContainerAwareUtils {
 			try {
 				$objectPersister->deleteOne($entity);
 			} catch (\Exception $e) {
-				$logger = $this->get('logger');
-				$logger->error('SearchUtils/deleteEntityFromIndex', array( 'exception' => $e ));
+				$this->logger->error('SearchUtils/deleteEntityFromIndex', array( 'exception' => $e ));
 			}
 		}
 	}
@@ -110,7 +136,7 @@ class SearchUtils extends AbstractContainerAwareUtils {
 		}
 
 		// Count
-		$type = $this->get($typeName);
+		$type = $this->_getType($typeName);
 		try {
 			$resultSet = $type->search($elasticaQuery);
 			$count = $resultSet->getTotalHits();
@@ -205,10 +231,8 @@ class SearchUtils extends AbstractContainerAwareUtils {
 		}
 
 		// Setup pagination
-		$paginatorUtils = $this->get(PaginatorUtils::NAME);
-
-		$offset = $paginatorUtils->computePaginatorOffset($page);
-		$limit = $paginatorUtils->computePaginatorLimit($page);
+		$offset = $this->paginatorUtils->computePaginatorOffset($page);
+		$limit = $this->paginatorUtils->computePaginatorLimit($page);
 
 		// Search entities
 		$searchResult = $this->searchEntities($filters, $sort, $typeName, $entityClassName, $offset, $limit, $excludedIds);
@@ -218,7 +242,7 @@ class SearchUtils extends AbstractContainerAwareUtils {
 			$pageUrls->prev = 0;
 			$pageUrls->next = 0;
 		} else {
-			$pageUrls = $paginatorUtils->generatePrevAndNextPageUrl($route, array_merge($parameters, array( 'q' => $q, 'ex' => $ex )), $page, $searchResult->resultSet->getTotalHits());
+			$pageUrls = $this->paginatorUtils->generatePrevAndNextPageUrl($route, array_merge($parameters, array( 'q' => $q, 'ex' => $ex )), $page, $searchResult->resultSet->getTotalHits());
 		}
 
 		$totalHits = $defaults ? -1 : (is_null($searchResult->resultSet) ? 0 : $searchResult->resultSet->getTotalHits());
@@ -312,7 +336,7 @@ class SearchUtils extends AbstractContainerAwareUtils {
 		}
 
 		// Search
-		$type = $this->get($typeName);
+		$type = $this->_getType($typeName);
 		$resultSet = $type->search($elasticaQuery);
 
 		// Extract Ids
@@ -322,7 +346,7 @@ class SearchUtils extends AbstractContainerAwareUtils {
 		}
 
 		// Retrieve entities
-		$entities = count($ids) == 0 ? array() : $this->getDoctrine()->getManager()->getRepository($entityClassName)->findByIds($ids);
+		$entities = count($ids) == 0 ? array() : $this->doctrine->getManager()->getRepository($entityClassName)->findByIds($ids);
 
 		// Reorder entities
 		$identifierPropertyPath = new PropertyPath('id');

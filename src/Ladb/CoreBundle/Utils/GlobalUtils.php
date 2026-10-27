@@ -2,14 +2,27 @@
 
 namespace Ladb\CoreBundle\Utils;
 
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\HttpFoundation\Request;
 
-class GlobalUtils extends AbstractContainerAwareUtils {
+class GlobalUtils {
 
 	const NAME = 'ladb_core.global_utils';
+
+	private $debug;
+	private $environment;
+	private $requestStack;
+	private $tokenStorage;
+
+	public function __construct($debug, $environment, RequestStack $requestStack, TokenStorageInterface $tokenStorage) {
+		$this->debug = $debug;
+		$this->environment = $environment;
+		$this->requestStack = $requestStack;
+		$this->tokenStorage = $tokenStorage;
+	}
 
 	/**
 	 * Returns the security context service.
@@ -17,9 +30,7 @@ class GlobalUtils extends AbstractContainerAwareUtils {
 	 * @return TokenStorage|null The security context
 	 */
 	public function getSecurity() {
-		if ($this->container->has('security.token_storage')) {
-			return $this->container->get('security.token_storage');
-		}
+		return $this->tokenStorage;
 	}
 
 	/**
@@ -52,9 +63,7 @@ class GlobalUtils extends AbstractContainerAwareUtils {
 	 * @return Request|null The HTTP request object
 	 */
 	public function getRequest() {
-		if ($this->container->has('request_stack')) {
-			return $this->container->get('request_stack')->getCurrentRequest();
-		}
+		return $this->requestStack->getCurrentRequest();
 	}
 
 	/**
@@ -74,7 +83,7 @@ class GlobalUtils extends AbstractContainerAwareUtils {
 	 * @return string The current environment string (e.g 'dev')
 	 */
 	public function getEnvironment() {
-		return $this->container->getParameter('kernel.environment');
+		return $this->environment;
 	}
 
 	/**
@@ -83,7 +92,7 @@ class GlobalUtils extends AbstractContainerAwareUtils {
 	 * @return bool    The current debug mode
 	 */
 	public function getDebug() {
-		return (bool)$this->container->getParameter('kernel.debug');
+		return (bool)$this->debug;
 	}
 
 }

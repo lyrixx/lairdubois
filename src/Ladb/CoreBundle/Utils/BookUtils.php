@@ -4,7 +4,7 @@ namespace Ladb\CoreBundle\Utils;
 
 use Ladb\CoreBundle\Entity\Knowledge\Book;
 
-class BookUtils extends AbstractContainerAwareUtils {
+class BookUtils {
 
 	const NAME = 'ladb_core.book_utils';
 

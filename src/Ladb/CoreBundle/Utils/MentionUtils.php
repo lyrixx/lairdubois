@@ -2,20 +2,31 @@
 
 namespace Ladb\CoreBundle\Utils;
 
+use Doctrine\Persistence\ManagerRegistry;
 use Ladb\CoreBundle\Entity\Core\Mention;
 use Ladb\CoreBundle\Fos\UserManager;
 use Ladb\CoreBundle\Model\BodiedInterface;
 use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Model\MentionSourceInterface;
 
-class MentionUtils extends AbstractContainerAwareUtils {
+class MentionUtils {
 
 	const NAME = 'ladb_core.mention_utils';
+
+	private $activityUtils;
+	private $doctrine;
+	private $userManager;
+
+	public function __construct(ActivityUtils $activityUtils, ManagerRegistry $doctrine, UserManager $userManager) {
+		$this->activityUtils = $activityUtils;
+		$this->doctrine = $doctrine;
+		$this->userManager = $userManager;
+	}
 
 	/////
 
 	public function deleteMentions(MentionSourceInterface $entity, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$mentionRepository = $om->getRepository(Mention::CLASS_NAME);
 
 		$mentions = $mentionRepository->findByEntityTypeAndEntityId($entity->getType(), $entity->getId());
@@ -30,8 +41,7 @@ class MentionUtils extends AbstractContainerAwareUtils {
 	public function deleteMention(Mention $mention, $om, $flush = false) {
 
 		// Delete relative activities
-		$activityUtils = $this->get(ActivityUtils::NAME);
-		$activityUtils->deleteActivitiesByMention($mention, false);
+		$this->activityUtils->deleteActivitiesByMention($mention, false);
 
 		// Remove Mention from DB
 		$om->remove($mention);
@@ -66,17 +76,16 @@ class MentionUtils extends AbstractContainerAwareUtils {
 			$mentionedUsernames = array_unique($mentionedUsernames);
 
 			// Retrieve mentioned users
-			$userMananger = $this->get(UserManager::NAME);
 			$mentionedUsers = array();
 			foreach ($mentionedUsernames as $username) {
-				$user = $userMananger->findUserByUsername($username);
+				$user = $this->userManager->findUserByUsername($username);
 				if (!is_null($user) && !in_array($user, $mentionedUsers)) {
 					$mentionedUsers[] = $user;
 				}
 			}
 
 			// Retrieve mentions
-			$mentionRepository = $this->getDoctrine()->getRepository(Mention::CLASS_NAME);
+			$mentionRepository = $this->doctrine->getRepository(Mention::CLASS_NAME);
 			$mentions = $mentionRepository->findByEntityTypeAndEntityId($entity->getType(), $entity->getId());
 
 			$mentionsToRemove = array();
@@ -88,8 +97,7 @@ class MentionUtils extends AbstractContainerAwareUtils {
 				}
 			}
 
-			$om = $this->getDoctrine()->getManager();
-			$activityUtils = $this->get(ActivityUtils::NAME);
+			$om = $this->doctrine->getManager();
 			foreach ($mentionedUsers as $user) {
 				if (!in_array($user, $previouslyMentionedUsers)) {
 
@@ -103,7 +111,7 @@ class MentionUtils extends AbstractContainerAwareUtils {
 					$om->persist($mention);
 
 					// Create activity
-					$activityUtils->createMentionActivity($mention);
+					$this->activityUtils->createMentionActivity($mention);
 
 				}
 

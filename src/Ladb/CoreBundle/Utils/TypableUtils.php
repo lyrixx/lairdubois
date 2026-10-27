@@ -2,21 +2,25 @@
 
 namespace Ladb\CoreBundle\Utils;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Ladb\CoreBundle\Model\TypableInterface;
 use Psr\Container\ContainerInterface as PsrContainerInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyPath;
+use Symfony\Component\Routing\RouterInterface;
 
-class TypableUtils extends AbstractContainerAwareUtils {
+class TypableUtils {
 
 	const NAME = 'ladb_core.typable_utils';
 
 	private $managerLocator;
+	private $om;
+	private $router;
 
-	public function __construct(ContainerInterface $container, PsrContainerInterface $managerLocator) {
-		parent::__construct($container);
+	public function __construct(PsrContainerInterface $managerLocator, EntityManagerInterface $om, RouterInterface $router) {
 		$this->managerLocator = $managerLocator;
+		$this->om = $om;
+		$this->router = $router;
 	}
 
 	/////
@@ -184,8 +188,7 @@ class TypableUtils extends AbstractContainerAwareUtils {
 	public function getRepositoryByType($type) {
 		$className = $this->getClassNameByType($type);
 		if (!is_null($className)) {
-			$om = $this->get('doctrine.orm.entity_manager');
-			$repository = $om->getRepository($className);
+			$repository = $this->om->getRepository($className);
 			return $repository;
 		}
 		return null;
@@ -364,7 +367,6 @@ class TypableUtils extends AbstractContainerAwareUtils {
 	/////
 
 	public function getUrlAction(TypableInterface $typable, $action = 'show', $absoluteUrl = true, $useSluggedId = true, $addionalParams = null) {
-		$router = $this->get('router');
 		$url = '';
 		$referenceType = $absoluteUrl ? \Symfony\Component\Routing\Generator\UrlGeneratorInterface::ABSOLUTE_URL : \Symfony\Component\Routing\Generator\UrlGeneratorInterface::ABSOLUTE_PATH;
 		$useSluggedId = $useSluggedId && method_exists($typable, 'getSluggedId');
@@ -379,23 +381,23 @@ class TypableUtils extends AbstractContainerAwareUtils {
 		switch ($typable->getType()) {
 
 			case \Ladb\CoreBundle\Entity\Core\Comment::TYPE:
-				$url = $router->generate('core_comment_'.$action, $params, $referenceType);
+				$url = $this->router->generate('core_comment_'.$action, $params, $referenceType);
 				break;
 			case \Ladb\CoreBundle\Entity\Message\Thread::TYPE:
-				$url = $router->generate('core_message_thread_'.$action, $params, $referenceType);
+				$url = $this->router->generate('core_message_thread_'.$action, $params, $referenceType);
 				break;
 			case \Ladb\CoreBundle\Entity\Message\Message::TYPE:
 				$params['id'] = $typable->getThread()->getId();
-				$url = $router->generate('core_message_thread_'.$action, $params, $referenceType).'#_message_'.$typable->getId();
+				$url = $this->router->generate('core_message_thread_'.$action, $params, $referenceType).'#_message_'.$typable->getId();
 				break;
 			case \Ladb\CoreBundle\Entity\Core\Review::TYPE:
-				$url = $router->generate('core_review_'.$action, $params, $referenceType);
+				$url = $this->router->generate('core_review_'.$action, $params, $referenceType);
 				break;
 			case \Ladb\CoreBundle\Entity\Core\Tip::TYPE:
-				$url = $router->generate('core_tip_'.$action, $params, $referenceType);
+				$url = $this->router->generate('core_tip_'.$action, $params, $referenceType);
 				break;
 			case \Ladb\CoreBundle\Entity\Core\Feedback::TYPE:
-				$url = $router->generate('core_feedback_'.$action, $params, $referenceType);
+				$url = $this->router->generate('core_feedback_'.$action, $params, $referenceType);
 				break;
 
 			case \Ladb\CoreBundle\Entity\Knowledge\Value\Text::TYPE:
@@ -416,77 +418,77 @@ class TypableUtils extends AbstractContainerAwareUtils {
 			case \Ladb\CoreBundle\Entity\Knowledge\Value\BookIdentity::TYPE:
 			case \Ladb\CoreBundle\Entity\Knowledge\Value\Pdf::TYPE:
 			case \Ladb\CoreBundle\Entity\Knowledge\Value\Decimal::TYPE:
-				$url = $router->generate('core_knowledge_value_'.$action, $params, $referenceType);
+				$url = $this->router->generate('core_knowledge_value_'.$action, $params, $referenceType);
 				break;
 
 			case \Ladb\CoreBundle\Entity\Wonder\Creation::TYPE:
-				$url = $router->generate('core_creation_'.$action, $params, $referenceType);
+				$url = $this->router->generate('core_creation_'.$action, $params, $referenceType);
 				break;
 			case \Ladb\CoreBundle\Entity\Wonder\Workshop::TYPE:
-				$url = $router->generate('core_workshop_'.$action, $params, $referenceType);
+				$url = $this->router->generate('core_workshop_'.$action, $params, $referenceType);
 				break;
 			case \Ladb\CoreBundle\Entity\Find\Find::TYPE:
-				$url = $router->generate('core_find_'.$action, $params, $referenceType);
+				$url = $this->router->generate('core_find_'.$action, $params, $referenceType);
 				break;
 			case \Ladb\CoreBundle\Entity\Wonder\Plan::TYPE:
-				$url = $router->generate('core_plan_'.$action, $params, $referenceType);
+				$url = $this->router->generate('core_plan_'.$action, $params, $referenceType);
 				break;
 			case \Ladb\CoreBundle\Entity\Howto\Howto::TYPE:
-				$url = $router->generate('core_howto_'.$action, $params, $referenceType);
+				$url = $this->router->generate('core_howto_'.$action, $params, $referenceType);
 				break;
 			case \Ladb\CoreBundle\Entity\Howto\Article::TYPE:
-				$url = $router->generate('core_howto_article_'.$action, $params, $referenceType);
+				$url = $this->router->generate('core_howto_article_'.$action, $params, $referenceType);
 				break;
 			case \Ladb\CoreBundle\Entity\Blog\Post::TYPE:
-				$url = $router->generate('core_blog_post_'.$action, $params, $referenceType);
+				$url = $this->router->generate('core_blog_post_'.$action, $params, $referenceType);
 				break;
 			case \Ladb\CoreBundle\Entity\Knowledge\Wood::TYPE:
-				$url = $router->generate('core_wood_'.$action, $params, $referenceType);
+				$url = $this->router->generate('core_wood_'.$action, $params, $referenceType);
 				break;
 			case \Ladb\CoreBundle\Entity\Faq\Question::TYPE:
-				$url = $router->generate('core_faq_question_'.$action, $params, $referenceType);
+				$url = $this->router->generate('core_faq_question_'.$action, $params, $referenceType);
 				break;
 			case \Ladb\CoreBundle\Entity\Knowledge\Provider::TYPE:
-				$url = $router->generate('core_provider_'.$action, $params, $referenceType);
+				$url = $this->router->generate('core_provider_'.$action, $params, $referenceType);
 				break;
 			case \Ladb\CoreBundle\Entity\Youtook\Took::TYPE:
-				$url = $router->generate('core_youtook_'.$action, $params, $referenceType);
+				$url = $this->router->generate('core_youtook_'.$action, $params, $referenceType);
 				break;
 			case \Ladb\CoreBundle\Entity\Qa\Question::TYPE:
-				$url = $router->generate('core_qa_question_'.$action, $params, $referenceType);
+				$url = $this->router->generate('core_qa_question_'.$action, $params, $referenceType);
 				break;
 			case \Ladb\CoreBundle\Entity\Qa\Answer::TYPE:
-				$url = $router->generate('core_qa_answer_'.$action, $params, $referenceType);
+				$url = $this->router->generate('core_qa_answer_'.$action, $params, $referenceType);
 				break;
 			case \Ladb\CoreBundle\Entity\Knowledge\School::TYPE:
-				$url = $router->generate('core_school_'.$action, $params, $referenceType);
+				$url = $this->router->generate('core_school_'.$action, $params, $referenceType);
 				break;
 			case \Ladb\CoreBundle\Entity\Knowledge\School\Testimonial::TYPE:
-				$url = $router->generate('core_knowledge_school_testimonial_'.$action, $params, $referenceType);
+				$url = $this->router->generate('core_knowledge_school_testimonial_'.$action, $params, $referenceType);
 				break;
 			case \Ladb\CoreBundle\Entity\Promotion\Graphic::TYPE:
-				$url = $router->generate('core_promotion_graphic_'.$action, $params, $referenceType);
+				$url = $this->router->generate('core_promotion_graphic_'.$action, $params, $referenceType);
 				break;
 			case \Ladb\CoreBundle\Entity\Workflow\Workflow::TYPE:
-				$url = $router->generate('core_workflow_'.$action, $params, $referenceType);
+				$url = $this->router->generate('core_workflow_'.$action, $params, $referenceType);
 				break;
 			case \Ladb\CoreBundle\Entity\Knowledge\Book::TYPE:
-				$url = $router->generate('core_book_'.$action, $params, $referenceType);
+				$url = $this->router->generate('core_book_'.$action, $params, $referenceType);
 				break;
 			case \Ladb\CoreBundle\Entity\Collection\Collection::TYPE:
-				$url = $router->generate('core_collection_'.$action, $params, $referenceType);
+				$url = $this->router->generate('core_collection_'.$action, $params, $referenceType);
 				break;
 			case \Ladb\CoreBundle\Entity\Knowledge\Software::TYPE:
-				$url = $router->generate('core_software_'.$action, $params, $referenceType);
+				$url = $this->router->generate('core_software_'.$action, $params, $referenceType);
 				break;
 			case \Ladb\CoreBundle\Entity\Offer\Offer::TYPE:
-				$url = $router->generate('core_offer_'.$action, $params, $referenceType);
+				$url = $this->router->generate('core_offer_'.$action, $params, $referenceType);
 				break;
 			case \Ladb\CoreBundle\Entity\Event\Event::TYPE:
-				$url = $router->generate('core_event_'.$action, $params, $referenceType);
+				$url = $this->router->generate('core_event_'.$action, $params, $referenceType);
 				break;
 			case \Ladb\CoreBundle\Entity\Knowledge\Tool::TYPE:
-				$url = $router->generate('core_tool_'.$action, $params, $referenceType);
+				$url = $this->router->generate('core_tool_'.$action, $params, $referenceType);
 				break;
 
 		}

@@ -13,17 +13,20 @@ use GuzzleHttp\Psr7\Request;
 use Ladb\CoreBundle\Model\LocalisableExtendedInterface;
 use Ladb\CoreBundle\Model\LocalisableInterface;
 use Psr\Http\Client\ClientInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Psr\Log\LoggerInterface;
 
-class LocalisableUtils extends AbstractContainerAwareUtils {
+class LocalisableUtils {
 
 	const NAME = 'ladb_core.localisable_utils';
 
+	private $googleApiKey;
 	private $httpClient;
+	private $logger;
 
-	public function __construct(ContainerInterface $container, ClientInterface $httpClient) {
-		parent::__construct($container);
+	public function __construct($googleApiKey, ClientInterface $httpClient, LoggerInterface $logger) {
+		$this->googleApiKey = $googleApiKey;
 		$this->httpClient = $httpClient;
+		$this->logger = $logger;
 	}
 
 	/////
@@ -31,14 +34,13 @@ class LocalisableUtils extends AbstractContainerAwareUtils {
 	public function geocodeLocation(LocalisableInterface $localisable) {
 		if (!is_null($localisable->getLocation())) {
 
-			$googleApiKey = $this->getParameter('google_api_key');
-			$geocoder = new GoogleMaps($this->httpClient, null, $googleApiKey);
+			$geocoder = new GoogleMaps($this->httpClient, null, $this->googleApiKey);
 
 			try {
 				// GeocodeQuery refuses an empty location: logged like an error of the API
 				$response = $geocoder->geocodeQuery(GeocodeQuery::create($localisable->getLocation())->withLocale('fr_FR'));
 			} catch (\Exception $e) {
-				$this->get('logger')->error($e);
+				$this->logger->error($e);
 				return false;
 			}
 
@@ -137,7 +139,7 @@ class LocalisableUtils extends AbstractContainerAwareUtils {
 				return true;
 			}
 
-			$this->get('logger')->warning('No geocoding result for the location.', array( 'location' => $localisable->getLocation() ));
+			$this->logger->warning('No geocoding result for the location.', array( 'location' => $localisable->getLocation() ));
 
 		} else {
 			$localisable->setLatitude(null);
@@ -157,13 +159,12 @@ class LocalisableUtils extends AbstractContainerAwareUtils {
 
 	public function getBoundsAndLocation($address) {
 
-		$googleApiKey = $this->getParameter('google_api_key');
 		try {
 
-			$url = 'https://maps.googleapis.com/maps/api/geocode/json?address='.urlencode($address).'&key='.$googleApiKey.'&language=fr&region=FR';
+			$url = 'https://maps.googleapis.com/maps/api/geocode/json?address='.urlencode($address).'&key='.$this->googleApiKey.'&language=fr&region=FR';
 			$response = $this->httpClient->sendRequest(new Request('GET', $url));
 			if (200 !== $response->getStatusCode()) {
-				$this->get('logger')->warning('The geocoding API answered an HTTP error.', array( 'status' => $response->getStatusCode() ));
+				$this->logger->warning('The geocoding API answered an HTTP error.', array( 'status' => $response->getStatusCode() ));
 				return null;
 			}
 			$hash = json_decode((string) $response->getBody(), true);
@@ -204,7 +205,7 @@ class LocalisableUtils extends AbstractContainerAwareUtils {
 			}
 
 		} catch (\Exception $e) {
-			$this->get('logger')->error($e);
+			$this->logger->error($e);
 		}
 
 		return null;

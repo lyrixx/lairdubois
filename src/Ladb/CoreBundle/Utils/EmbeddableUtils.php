@@ -2,6 +2,7 @@
 
 namespace Ladb\CoreBundle\Utils;
 
+use Doctrine\Persistence\ManagerRegistry;
 use Ladb\CoreBundle\Manager\Core\PictureManager;
 use Symfony\Component\HttpFoundation\Request;
 use Imagine\Filter\Advanced\RelativeResize;
@@ -22,10 +23,23 @@ use Ladb\CoreBundle\Entity\Core\Referer\Referral;
 use Ladb\CoreBundle\Model\BlockBodiedInterface;
 use Ladb\CoreBundle\Model\MultiPicturedInterface;
 use Ladb\CoreBundle\Model\PicturedInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 
-class EmbeddableUtils extends AbstractContainerAwareUtils {
+class EmbeddableUtils {
 
 	const NAME = 'ladb_core.embeddable_utils';
+
+	private $doctrine;
+	private $pictureManager;
+	private $translator;
+	private $typableUtils;
+
+	public function __construct(ManagerRegistry $doctrine, PictureManager $pictureManager, TranslatorInterface $translator, TypableUtils $typableUtils) {
+		$this->doctrine = $doctrine;
+		$this->pictureManager = $pictureManager;
+		$this->translator = $translator;
+		$this->typableUtils = $typableUtils;
+	}
 
 	/////
 
@@ -59,8 +73,7 @@ class EmbeddableUtils extends AbstractContainerAwareUtils {
 		$imagine = new Imagine();
 
 		// Create sticker picture
-		$pictureManager = $this->get(PictureManager::NAME);
-		$sticker = $pictureManager->createEmpty('png');
+		$sticker = $this->pictureManager->createEmpty('png');
 
 		$hasSubtitle = $embeddable instanceof ChildInterface && $embeddable->getParentEntity() instanceof EmbeddableInterface;
 
@@ -228,9 +241,7 @@ class EmbeddableUtils extends AbstractContainerAwareUtils {
 	private function _generateEmbeddableTitle(BasicEmbeddableInterface $embeddable) {
 		$title = $embeddable->getTitle();
 		if (!($embeddable instanceof ChildInterface)) {
-			$translator = $this->get('translator');
-			$typableUtils = $this->get(TypableUtils::NAME);
-			$title = '['.$translator->trans('share.sticker.title_suffix.'.$typableUtils->getStrippedName($embeddable)).'] '.$title;
+			$title = '['.$this->translator->trans('share.sticker.title_suffix.'.$this->typableUtils->getStrippedName($embeddable)).'] '.$title;
 		}
 		return $title;
 	}
@@ -284,7 +295,7 @@ class EmbeddableUtils extends AbstractContainerAwareUtils {
 					$route .= '?'.$query;
 				}
 
-				$om = $this->getDoctrine()->getManager();
+				$om = $this->doctrine->getManager();
 
 				// Check referer
 				$refererRepository = $om->getRepository(Referer::CLASS_NAME);

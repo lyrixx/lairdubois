@@ -3,17 +3,24 @@
 namespace Ladb\CoreBundle\Utils;
 
 use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ManagerRegistry;
 use Ladb\CoreBundle\Entity\Core\Member;
 use Ladb\CoreBundle\Model\TypableInterface;
 use Ladb\CoreBundle\Model\TitledInterface;
 use Ladb\CoreBundle\Entity\Core\User;
 
-class MemberUtils extends AbstractContainerAwareUtils {
+class MemberUtils {
 
 	const NAME = 'ladb_core.member_utils';
 
+	private $doctrine;
+
+	public function __construct(ManagerRegistry $doctrine) {
+		$this->doctrine = $doctrine;
+	}
+
 	public function deleteMembersByTeam(User $team, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$memberRepository = $om->getRepository(Member::CLASS_NAME);
 
 		$members = $memberRepository->findByUser($team);
@@ -28,7 +35,7 @@ class MemberUtils extends AbstractContainerAwareUtils {
 	}
 
 	public function deleteTeamsByUser(User $user, $flush = true) {
-		$om = $this->getDoctrine()->getManager();
+		$om = $this->doctrine->getManager();
 		$memberRepository = $om->getRepository(Member::CLASS_NAME);
 
 		$members = $memberRepository->findByTeam($user);

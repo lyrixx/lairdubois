@@ -2,7 +2,6 @@
 
 namespace Tests\Double;
 
-use Ladb\CoreBundle\Manager\Core\PictureManager;
 use Ladb\CoreBundle\Utils\WebScreenshotUtils;
 
 /**
@@ -13,12 +12,11 @@ final class OfflineWebScreenshotUtils extends WebScreenshotUtils
 {
     public function captureToPicture($url, $width, $height, $clipWidth = 0, $clipHeight = 0, $waitBeforeCapture = 0)
     {
-        $pictureManager = $this->get(PictureManager::NAME);
-        $picture = $pictureManager->createEmpty('jpg', false);
+        $picture = $this->pictureManager->createEmpty('jpg', false);
         copy(OfflinePictureManager::PICTURE, $picture->getAbsoluteMasterPath());
-        $pictureManager->computeSizes($picture);
+        $this->pictureManager->computeSizes($picture);
 
-        $om = $this->getDoctrine()->getManager();
+        $om = $this->doctrine->getManager();
         $om->persist($picture);
         $om->flush();
 

@@ -3,10 +3,17 @@
 namespace Ladb\CoreBundle\Utils;
 
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Routing\RouterInterface;
 
-class PaginatorUtils extends AbstractContainerAwareUtils {
+class PaginatorUtils {
 
 	const NAME = 'ladb_core.paginator_utils';
+
+	private $router;
+
+	public function __construct(RouterInterface $router) {
+		$this->router = $router;
+	}
 
 	/////
 
@@ -60,12 +67,12 @@ class PaginatorUtils extends AbstractContainerAwareUtils {
 			$prevPage = $page - 1;
 			$nextPage = $this->computePaginatorNextPage($page, $totalHits, $countOnFirstPage, $countOnPage);
 			if ($prevPage >= 0) {
-				$pageUrls->prev = $this->get('router')->generate($route, $this->_removeEmptyParameters(array_merge($parameters, array( 'page' => $prevPage ))), $referenceType);
+				$pageUrls->prev = $this->router->generate($route, $this->_removeEmptyParameters(array_merge($parameters, array( 'page' => $prevPage ))), $referenceType);
 			} else {
 				$pageUrls->prev = null;
 			}
 			if ($nextPage > 0) {
-				$pageUrls->next = $this->get('router')->generate($route, $this->_removeEmptyParameters(array_merge($parameters, array( 'page' => $nextPage ))), $referenceType);
+				$pageUrls->next = $this->router->generate($route, $this->_removeEmptyParameters(array_merge($parameters, array( 'page' => $nextPage ))), $referenceType);
 			} else {
 				$pageUrls->next = null;
 			}

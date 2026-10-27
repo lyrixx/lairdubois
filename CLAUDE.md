@@ -182,7 +182,7 @@ castor qa:phpunit [-- --filter …]
 castor qa:deprecations       # var/deprecations/report.md, et le résumé du job en CI
 castor qa:install            # outils de tools/ (PHPStan, PHPUnit), installés à la volée sinon
 castor qa:e2e [-- --grep …]  # tests E2E (Playwright) : recharge la base du dev, hors qa:all, job E2E en CI
-castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() des actions → arguments (#16)
+castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() des actions → arguments (#16), des utils → constructeur (#118)
 ```
 
 - PHPUnit 9.6, dans `tools/phpunit` et pas dans le `composer.json` de l'application : c'est la
@@ -218,6 +218,10 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() des ac
   projet (`tools/rector/src/`). `ControllerGetToActionArgumentRector` laisse
   `__RECTOR_REMOVED_LINE__;` à la place des lignes qu'il supprime, que `qa:rector` retire ensuite :
   php-parser réimprimerait les commentaires d'avant sans leur indentation.
+  `UtilsContainerToConstructorRector` écrit le constructeur et les propriétés qu'il ajoute dans une
+  constante `__RECTOR_INSERTED_CODE__` (le code en base64), que `qa:rector` remplace par le code :
+  php-parser les indenterait mal. Le cache de Rector (`tools/rector/var/`) ignore les modifications
+  d'une règle : le vider après en avoir changé une.
 
 ## Fixtures
 
@@ -507,6 +511,11 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   (`ladb_core.typable_utils.manager_locator` de `services.yml`), par le nom que donne
   `getStrippedNameByType()` : un manager n'a pas à être public pour lui. `Tests\Command\ManagerByTypeTest`
   vérifie le manager de chaque type.
+- Utils : dépendances et paramètres par le constructeur (`Utils/`, sans container). Un producer
+  RabbitMQ se connecte dès sa création (`lazy: false`) : `ViewableUtils` et `WebpushNotificationUtils`
+  le lisent au moment de publier, dans `ladb_core.rabbit_mq_producer_locator`, et journalisent un
+  échec de connexion au lieu de le lever. `SearchUtils` reçoit un type par l'id de son service
+  (`fos_elastica.index.ladb.<type>`) et le demande à l'index.
 - PHPStan lit la version de PHP dans `composer.json` (`>=7.3`) : la syntaxe PHP 8 (propriétés
   promues, `readonly`, virgule finale dans une signature) y est une erreur, même si tout tourne en
   8.5.

@@ -5,8 +5,9 @@ namespace Ladb\CoreBundle\Utils;
 use Ladb\CoreBundle\Entity\Core\MemberInvitation;
 use Ladb\CoreBundle\Entity\Core\MemberRequest;
 use Ladb\CoreBundle\Manager\Webpush\UserSubscriptionManager;
+use Liip\ImagineBundle\Imagine\Cache\CacheManager;
+use Psr\Container\ContainerInterface as PsrContainerInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use BenTools\WebPushBundle\Model\Message\PushMessage;
 use BenTools\WebPushBundle\Sender\PushMessageSender;
@@ -16,18 +17,26 @@ use Ladb\CoreBundle\Entity\Qa\Answer;
 use Ladb\CoreBundle\Entity\Qa\Question;
 use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Model\LikableInterface;
+use Symfony\Component\Routing\RouterInterface;
 
-class WebpushNotificationUtils extends AbstractContainerAwareUtils {
+class WebpushNotificationUtils {
 
-	private $pushMessageSender;
-	private $userSubscriptionManager;
+	private $cacheManager;
 	private $logger;
+	private $producerLocator;
+	private $pushMessageSender;
+	private $router;
+	private $typableUtils;
+	private $userSubscriptionManager;
 
-	public function __construct(ContainerInterface $container, PushMessageSender $pushMessageSender, UserSubscriptionManager $userSubscriptionManager, LoggerInterface $logger) {
-		parent::__construct($container);
-		$this->pushMessageSender = $pushMessageSender;
-		$this->userSubscriptionManager = $userSubscriptionManager;
+	public function __construct(CacheManager $cacheManager, LoggerInterface $logger, PsrContainerInterface $producerLocator, PushMessageSender $pushMessageSender, RouterInterface $router, TypableUtils $typableUtils, UserSubscriptionManager $userSubscriptionManager) {
+		$this->cacheManager = $cacheManager;
 		$this->logger = $logger;
+		$this->producerLocator = $producerLocator;
+		$this->pushMessageSender = $pushMessageSender;
+		$this->router = $router;
+		$this->typableUtils = $typableUtils;
+		$this->userSubscriptionManager = $userSubscriptionManager;
 	}
 
 	/////
@@ -36,8 +45,8 @@ class WebpushNotificationUtils extends AbstractContainerAwareUtils {
 		$this->enqueueNotification(
 			$question->getUser()->getId(),
 			'Nouvelle réponse de '.$answer->getUser()->getDisplayname(),
-			$this->get('liip_imagine.cache.manager')->getBrowserPath($answer->getUser()->getAvatar()->getWebPath(), '128x128o'),
-			$this->get(TypableUtils::NAME)->getUrlAction($answer)
+			$this->cacheManager->getBrowserPath($answer->getUser()->getAvatar()->getWebPath(), '128x128o'),
+			$this->typableUtils->getUrlAction($answer)
 		);
 	}
 
@@ -45,8 +54,8 @@ class WebpushNotificationUtils extends AbstractContainerAwareUtils {
 		$this->enqueueNotification(
 			$like->getEntityUser()->getId(),
 			'Nouveau coup de coeur de '.$like->getUser()->getDisplayname(),
-			$this->get('liip_imagine.cache.manager')->getBrowserPath($like->getUser()->getAvatar()->getWebPath(), '128x128o'),
-			$this->get(TypableUtils::NAME)->getUrlAction($likable)
+			$this->cacheManager->getBrowserPath($like->getUser()->getAvatar()->getWebPath(), '128x128o'),
+			$this->typableUtils->getUrlAction($likable)
 		);
 	}
 
@@ -54,8 +63,8 @@ class WebpushNotificationUtils extends AbstractContainerAwareUtils {
 		$this->enqueueNotification(
 			$memberInvitation->getRecipient(),
 			$memberInvitation->getSender()->getDisplayname().' vous invite à rejoindre le collectif '.$memberInvitation->getTeam()->getDisplayname(),
-			$this->get('liip_imagine.cache.manager')->getBrowserPath($memberInvitation->getTeam()->getAvatar()->getWebPath(), '128x128o'),
-			$this->get('router')->generate('core_user_show', array( 'username' => $memberInvitation->getTeam()->getUsernameCanonical()), UrlGeneratorInterface::ABSOLUTE_URL)
+			$this->cacheManager->getBrowserPath($memberInvitation->getTeam()->getAvatar()->getWebPath(), '128x128o'),
+			$this->router->generate('core_user_show', array( 'username' => $memberInvitation->getTeam()->getUsernameCanonical()), UrlGeneratorInterface::ABSOLUTE_URL)
 		);
 	}
 
@@ -63,14 +72,14 @@ class WebpushNotificationUtils extends AbstractContainerAwareUtils {
 		$this->enqueueNotification(
 			$recipient,
 			'Nouveau message de '.$sender->getDisplayname(),
-			$this->get('liip_imagine.cache.manager')->getBrowserPath($sender->getAvatar()->getWebPath(), '128x128o'),
-			$this->get('router')->generate('core_message_thread_show', array( 'id' => $thread->getId()), UrlGeneratorInterface::ABSOLUTE_URL)
+			$this->cacheManager->getBrowserPath($sender->getAvatar()->getWebPath(), '128x128o'),
+			$this->router->generate('core_message_thread_show', array( 'id' => $thread->getId()), UrlGeneratorInterface::ABSOLUTE_URL)
 		);
 	}
 
 	public function enqueueNotification($userId, $body, $icon, $link) {
 		try {
-			$producer = $this->container->get('old_sound_rabbit_mq.webpush_notification_producer');
+			$producer = $this->producerLocator->get('webpush_notification');
 			$producer->publish(serialize(array(
 				'userId' => $userId,
 				'body'   => $body,
