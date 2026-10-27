@@ -122,8 +122,38 @@ services:
   ladb_core.typable_utils:
     class: Ladb\CoreBundle\Utils\TypableUtils
     public: true
-    arguments: ['@service_container']
+    arguments: ['@service_container', '@ladb_core.typable_utils.manager_locator']
   Ladb\CoreBundle\Utils\TypableUtils: '@ladb_core.typable_utils'
+  # TypableUtils::getManagerByType(): the manager of each type, by TypableUtils::getStrippedNameByType()
+  ladb_core.typable_utils.manager_locator:
+    class: Symfony\Component\DependencyInjection\ServiceLocator
+    tags: ['container.service_locator']
+    arguments:
+      -
+        blog_post: '@ladb_core.blog_post_manager'
+        collection_collection: '@ladb_core.collection_collection_manager'
+        core_comment: '@ladb_core.core_comment_manager'
+        core_tip: '@ladb_core.core_tip_manager'
+        event_event: '@ladb_core.event_event_manager'
+        faq_question: '@ladb_core.faq_question_manager'
+        find_find: '@ladb_core.find_find_manager'
+        howto_article: '@ladb_core.howto_article_manager'
+        howto_howto: '@ladb_core.howto_howto_manager'
+        knowledge_book: '@ladb_core.knowledge_book_manager'
+        knowledge_provider: '@ladb_core.knowledge_provider_manager'
+        knowledge_school: '@ladb_core.knowledge_school_manager'
+        knowledge_software: '@ladb_core.knowledge_software_manager'
+        knowledge_testimonial: '@ladb_core.knowledge_school_testimonial_manager'
+        knowledge_tool: '@ladb_core.knowledge_tool_manager'
+        knowledge_wood: '@ladb_core.knowledge_wood_manager'
+        offer_offer: '@ladb_core.offer_offer_manager'
+        promotion_graphic: '@ladb_core.promotion_graphic_manager'
+        qa_answer: '@ladb_core.qa_answer_manager'
+        qa_question: '@ladb_core.qa_question_manager'
+        wonder_creation: '@ladb_core.wonder_creation_manager'
+        wonder_plan: '@ladb_core.wonder_plan_manager'
+        wonder_workshop: '@ladb_core.wonder_workshop_manager'
+        workflow_workflow: '@ladb_core.workflow_workflow_manager'
   ladb_core.follower_utils:
     class: Ladb\CoreBundle\Utils\FollowerUtils
     arguments: ['@service_container']
@@ -249,7 +279,7 @@ services:
     arguments: ['@service_container']
   Ladb\CoreBundle\Utils\MemberUtils: '@ladb_core.member_utils'
 
-  # Managers (public until #16, TypableUtils::getManagerByType() also builds their ids)
+  # Managers (public until #118)
   ladb_core.core_picture_manager:
     class: Ladb\CoreBundle\Manager\Core\PictureManager
     public: true
@@ -257,12 +287,10 @@ services:
   Ladb\CoreBundle\Manager\Core\PictureManager: '@ladb_core.core_picture_manager'
   ladb_core.core_comment_manager:
     class: Ladb\CoreBundle\Manager\Core\CommentManager
-    public: true
     arguments: ['@service_container']
   Ladb\CoreBundle\Manager\Core\CommentManager: '@ladb_core.core_comment_manager'
   ladb_core.core_tip_manager:
     class: Ladb\CoreBundle\Manager\Core\TipManager
-    public: true
     arguments: ['@service_container']
   Ladb\CoreBundle\Manager\Core\TipManager: '@ladb_core.core_tip_manager'
   ladb_core.core_witness_manager:
@@ -284,57 +312,46 @@ services:
   Ladb\CoreBundle\Manager\Core\MemberRequestManager: '@ladb_core.core_member_request_manager'
   ladb_core.wonder_creation_manager:
     class: Ladb\CoreBundle\Manager\Wonder\CreationManager
-    public: true
     arguments: ['@service_container']
   Ladb\CoreBundle\Manager\Wonder\CreationManager: '@ladb_core.wonder_creation_manager'
   ladb_core.wonder_plan_manager:
     class: Ladb\CoreBundle\Manager\Wonder\PlanManager
-    public: true
     arguments: ['@service_container']
   Ladb\CoreBundle\Manager\Wonder\PlanManager: '@ladb_core.wonder_plan_manager'
   ladb_core.wonder_workshop_manager:
     class: Ladb\CoreBundle\Manager\Wonder\WorkshopManager
-    public: true
     arguments: ['@service_container']
   Ladb\CoreBundle\Manager\Wonder\WorkshopManager: '@ladb_core.wonder_workshop_manager'
   ladb_core.blog_post_manager:
     class: Ladb\CoreBundle\Manager\Blog\PostManager
-    public: true
     arguments: ['@service_container']
   Ladb\CoreBundle\Manager\Blog\PostManager: '@ladb_core.blog_post_manager'
   ladb_core.faq_question_manager:
     class: Ladb\CoreBundle\Manager\Faq\QuestionManager
-    public: true
     arguments: ['@service_container']
   Ladb\CoreBundle\Manager\Faq\QuestionManager: '@ladb_core.faq_question_manager'
   ladb_core.find_find_manager:
     class: Ladb\CoreBundle\Manager\Find\FindManager
-    public: true
     arguments: ['@service_container']
   Ladb\CoreBundle\Manager\Find\FindManager: '@ladb_core.find_find_manager'
   ladb_core.event_event_manager:
     class: Ladb\CoreBundle\Manager\Event\EventManager
-    public: true
     arguments: ['@service_container']
   Ladb\CoreBundle\Manager\Event\EventManager: '@ladb_core.event_event_manager'
   ladb_core.howto_howto_manager:
     class: Ladb\CoreBundle\Manager\Howto\HowtoManager
-    public: true
     arguments: ['@service_container']
   Ladb\CoreBundle\Manager\Howto\HowtoManager: '@ladb_core.howto_howto_manager'
   ladb_core.howto_article_manager:
     class: Ladb\CoreBundle\Manager\Howto\ArticleManager
-    public: true
     arguments: ['@service_container']
   Ladb\CoreBundle\Manager\Howto\ArticleManager: '@ladb_core.howto_article_manager'
   ladb_core.knowledge_provider_manager:
     class: Ladb\CoreBundle\Manager\Knowledge\ProviderManager
-    public: true
     arguments: ['@service_container']
   Ladb\CoreBundle\Manager\Knowledge\ProviderManager: '@ladb_core.knowledge_provider_manager'
   ladb_core.knowledge_school_manager:
     class: Ladb\CoreBundle\Manager\Knowledge\SchoolManager
-    public: true
     arguments: ['@service_container']
   Ladb\CoreBundle\Manager\Knowledge\SchoolManager: '@ladb_core.knowledge_school_manager'
   ladb_core.knowledge_school_testimonial_manager:
@@ -344,32 +361,26 @@ services:
   Ladb\CoreBundle\Manager\Knowledge\School\TestimonialManager: '@ladb_core.knowledge_school_testimonial_manager'
   ladb_core.knowledge_tool_manager:
     class: Ladb\CoreBundle\Manager\Knowledge\ToolManager
-    public: true
     arguments: ['@service_container']
   Ladb\CoreBundle\Manager\Knowledge\ToolManager: '@ladb_core.knowledge_tool_manager'
   ladb_core.knowledge_book_manager:
     class: Ladb\CoreBundle\Manager\Knowledge\BookManager
-    public: true
     arguments: ['@service_container']
   Ladb\CoreBundle\Manager\Knowledge\BookManager: '@ladb_core.knowledge_book_manager'
   ladb_core.knowledge_wood_manager:
     class: Ladb\CoreBundle\Manager\Knowledge\WoodManager
-    public: true
     arguments: ['@service_container']
   Ladb\CoreBundle\Manager\Knowledge\WoodManager: '@ladb_core.knowledge_wood_manager'
   ladb_core.knowledge_software_manager:
     class: Ladb\CoreBundle\Manager\Knowledge\SoftwareManager
-    public: true
     arguments: ['@service_container']
   Ladb\CoreBundle\Manager\Knowledge\SoftwareManager: '@ladb_core.knowledge_software_manager'
   ladb_core.workflow_workflow_manager:
     class: Ladb\CoreBundle\Manager\Workflow\WorkflowManager
-    public: true
     arguments: ['@service_container']
   Ladb\CoreBundle\Manager\Workflow\WorkflowManager: '@ladb_core.workflow_workflow_manager'
   ladb_core.collection_collection_manager:
     class: Ladb\CoreBundle\Manager\Collection\CollectionManager
-    public: true
     arguments: ['@service_container']
   Ladb\CoreBundle\Manager\Collection\CollectionManager: '@ladb_core.collection_collection_manager'
   ladb_core.funding_funding_manager:
@@ -388,12 +399,10 @@ services:
   Ladb\CoreBundle\Manager\Qa\AnswerManager: '@ladb_core.qa_answer_manager'
   ladb_core.promotion_graphic_manager:
     class: Ladb\CoreBundle\Manager\Promotion\GraphicManager
-    public: true
     arguments: ['@service_container']
   Ladb\CoreBundle\Manager\Promotion\GraphicManager: '@ladb_core.promotion_graphic_manager'
   ladb_core.offer_offer_manager:
     class: Ladb\CoreBundle\Manager\Offer\OfferManager
-    public: true
     arguments: ['@service_container']
   Ladb\CoreBundle\Manager\Offer\OfferManager: '@ladb_core.offer_offer_manager'
   ladb_core.took_manager:

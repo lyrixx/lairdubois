@@ -3,12 +3,21 @@
 namespace Ladb\CoreBundle\Utils;
 
 use Ladb\CoreBundle\Model\TypableInterface;
+use Psr\Container\ContainerInterface as PsrContainerInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use Symfony\Component\PropertyAccess\PropertyPath;
 
 class TypableUtils extends AbstractContainerAwareUtils {
 
 	const NAME = 'ladb_core.typable_utils';
+
+	private $managerLocator;
+
+	public function __construct(ContainerInterface $container, PsrContainerInterface $managerLocator) {
+		parent::__construct($container);
+		$this->managerLocator = $managerLocator;
+	}
 
 	/////
 
@@ -185,7 +194,7 @@ class TypableUtils extends AbstractContainerAwareUtils {
 	public function getManagerByType($type) {
 		$strippedName = $this->getStrippedNameByType($type);
 		if (!is_null($strippedName)) {
-			$manager = $this->get('ladb_core.'.$strippedName.'_manager');
+			$manager = $this->managerLocator->get($strippedName);
 			return $manager;
 		}
 		return null;
