@@ -511,10 +511,15 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `castor app:db:schema` le rejoue.
 - Le Routing de 4.4 fait taire l'erreur de `preg_match()` « lookbehind assertion is not fixed
   length » en compilant les routes, mais PCRE2 10.43 et plus (celui de PHP 8.5) l'appelle « length
-  of lookbehind assertion is not limited » : chaque construction du cache du routeur affiche
-  quelque 350 warnings PHP (`cache:clear`, `cache:warmup`, première requête après un cache vidé).
-  Sans effet sur les routes, ça ne fait rien échouer ; corrigé en 5.4. En prod, `cache:warmup`
-  construit ce cache avant la première requête.
+  of lookbehind assertion is not limited » : chaque construction du cache du routeur donne
+  quelque 350 warnings PHP. Sans effet sur les routes ; corrigé en 5.4. En CLI (`cache:clear`,
+  `cache:warmup`), ils s'affichent. Une requête web le construit aussi, en dev, après un
+  `cache:clear --no-warmup` (`composer install`) ou la modification d'un controller : affichés
+  avant les en-têtes, ils casseraient la page (500, la session ne démarre plus), d'où
+  `display_errors = Off` dans le FPM (`app-fpm.ini`), comme en prod. Les erreurs natives de PHP
+  d'une requête sont dans les logs du frontend (`castor logs --service=frontend`) ; après le boot,
+  celles de Symfony ont leurs pages d'erreur. En prod, `cache:warmup` construit ce cache avant la
+  première requête.
 - Le kernel de 4.4 passe `error_reporting` à `E_ALL ^ E_WARNING` pendant qu'il inclut le container
   en cache, avant tout gestionnaire d'erreurs de Symfony : PHP 8.4+ afficherait les dépréciations
   de compilation des fichiers chargés à ce moment (paramètres implicitement nullables de Symfony
