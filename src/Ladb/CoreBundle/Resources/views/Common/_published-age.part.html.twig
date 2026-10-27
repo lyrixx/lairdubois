@@ -1,6 +1,6 @@
-{% spaceless %}
+{% apply spaceless %}
 
 {# set entity #}
 
 <span class="ladb-published-age{% if classes is defined %} {{ classes }}{% endif %}">Publié <time datetime="{{ entity.createdAt|date('Y-m-d H:i:s') }}">{{ entity.createdAt|time_diff() }}</time></span>
-{% endspaceless %}
+{% endapply %}

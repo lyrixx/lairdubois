@@ -489,7 +489,9 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   serveur) et la lecture de la session par le serveur (`unserialize()` de Ratchet, PHP 8.3) sont
   remplacés par les classes de `src/Ladb/CoreBundle/WebSocket/`, à retirer avec Gos (#21). Le
   template de `{{ ws_client() }}`, écrit pour Assetic, est remplacé par
-  `app/Resources/GosWebSocketBundle/views/client.html.twig` (groupe `websocket` de Vite).
+  `app/Resources/GosWebSocketBundle/views/client.html.twig` (groupe `websocket` de Vite), que les
+  templates incluent à la place de `ws_client()` : son extension Twig, dépréciée, est retirée de
+  Twig (`gos_web_socket.twig.extension` redéfini sans son tag dans `services.yml`).
 - `bin/console` lit `SYMFONY_ENV`, pas `APP_ENV`.
 - Les sessions sont en base (`PdoSessionHandler`) : `doctrine:schema:create` ne crée pas la table
   `sessions`.

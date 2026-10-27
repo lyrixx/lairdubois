@@ -36,10 +36,10 @@
             {% endif %}
             {% set activityIndex = 0 %}
             {% for comment in commentContext.comments %}
-                {% for activity in commentContext.activities|slice(activityIndex) if activity.createdAt <= comment.createdAt %}
+                {% for activity in commentContext.activities|slice(activityIndex) %}{% if activity.createdAt <= comment.createdAt %}
                     {% include 'LadbCoreBundle:Core/Activity:_row-'~activity.strippedName~'.part.html.twig' %}
                     {% set activityIndex = activityIndex + 1 %}
-                {% endfor %}
+                {% endif %}{% endfor %}
                 {% include 'LadbCoreBundle:Core/Comment:_row.part.html.twig' %}
                 <div id="ladb_comment_{{ comment.id }}_group" class="ladb-comment-children-collapse collapse"{% if is_granted('ROLE_USER') %} data-ladb-new-path="{{ path('core_comment_new', { 'entityType':comment.entityType, 'entityId':comment.entityId, 'parentId':comment.id }) }}"{% endif %}>
                     {% for child in comment.children %}

@@ -740,6 +740,13 @@ services:
     arguments: ['@gos_web_socket.session_handler']
     tags:
       - { name: kernel.event_listener, event: gos_web_socket.client_connected, method: onClientConnect, priority: 10 }  # Before the authentication of Gos
+  # Deprecated, as its ws_client() (Assetic): the templates include its template instead. Redefined
+  # abstract, without its tag twig.extension, it is removed from the container, and the autowiring does not
+  # load its deprecated class (to remove with Gos, #21)
+  gos_web_socket.twig.extension:
+    class: Gos\Bundle\WebSocketBundle\Twig\GosWebSocketServerExtension
+    abstract: true
+    autoconfigure: false
 
   # Consumer
   Ladb\CoreBundle\Consumer\ViewConsumer:

@@ -1,4 +1,4 @@
-{% spaceless %}
+{% apply spaceless %}
 
 {# set entities #}
 {# set noShowMore (facultative) #}
@@ -9,7 +9,7 @@
 {% set noShowMore = noShowMore|default(false) %}
 {% set listSorter = listSorter|default('@sort-popular-likes:desc') %}
 
-{% endspaceless %}
+{% endapply %}
 ----------
 
 {{ entities|length }} {{ (transPrefix~'.choice.new_'~type~'s')|transchoice((entities|length)) }}

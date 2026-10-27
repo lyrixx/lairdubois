@@ -1,4 +1,4 @@
-{% spaceless %}
+{% apply spaceless %}
 
 {# set entity #}
 {# set hideBy (facultative) #}
@@ -14,4 +14,4 @@
 {% set authorItemprop = authorItemprop|default('author') %}
 
 <span{% if not noMicrodataAuthor %} itemprop="{{ authorItemprop }}" itemscope itemtype="http://schema.org/{{ authorItemtype }}"{% endif %} class="ladb-author">{% if not hideBy %}{{ 'default.by'|trans() }} {% endif %}{% include 'LadbCoreBundle:Core/User:_displayname-link.part.html.twig' with { 'user':entity.user } %}</span>
-{% endspaceless %}
+{% endapply %}

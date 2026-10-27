@@ -16,9 +16,9 @@
                         {% endif %}
                     </div>
                     <div class="ladb-participants">
-                        {% for participant in thread.participants if participant != app.user %}
+                        {% for participant in thread.participants %}{% if participant != app.user %}
                             <div class="ladb-participant">{% include 'LadbCoreBundle:Core/User:_avatar.part.html.twig' with { 'user':participant, 'size':20 } %} {% include 'LadbCoreBundle:Core/User:_displayname.part.html.twig' with { 'user':participant, 'noBadge':true } %}</div>
-                        {% endfor %}
+                        {% endif %}{% endfor %}
                     </div>
                 </div>
                 <div class="col-sm-9 col-xs-12">
