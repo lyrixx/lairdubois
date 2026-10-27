@@ -592,7 +592,8 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
 - `MailerUtils` signe chaque mail avec la clé DKIM de la prod (`keys/private.pem`, hors git) : sans
   elle, tout mail du site (confirmation d'adresse, notifications…) donne une 500. `castor
   app:install` en génère une jetable si elle manque. Les mails de FOSUserBundle (mot de passe
-  oublié) ne passent pas par là.
+  oublié) ne passent pas par là : `Ladb\CoreBundle\Fos\Mailer` (`fos_user.service.mailer`) les
+  envoie comme le mailer par défaut de FOSUserBundle, qui demandait le composant `templating`.
 - Les notifications web push sont signées avec les clés VAPID de la prod (`bentools_webpush.*` de
   `parameters.yml`) : avec celles de `parameters.yml.dist`, le consumer `webpush_notification`
   s'arrête au premier message. `castor app:install` y écrit une paire jetable, que les `composer
@@ -606,6 +607,10 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   avec un TTL de 0 et sans timeout : `services.yml` le redéfinit avec ceux de web-push 2.0 (4
   semaines, 30 s). Sa route d'abonnement lit `{"subscription": …}`, alors que le JS du site envoie
   la `PushSubscription` telle quelle : `WebpushController` la remplace (même nom, même chemin).
+- Plus de composant `templating` : les templates se nomment dans la notation de Twig
+  (`@LadbCore/Dir/file.html.twig`, `@FOSUser/…`, `base.html.twig` pour `app/Resources/views`), la
+  notation de bundle (`LadbCoreBundle:Dir:file.html.twig`, `::base.html.twig`) ne les trouve plus.
+  Un service reçoit `Twig\Environment`.
 - Twig reste en 3.27 (`~3.27.1`) : depuis la 3.28 (twigphp/Twig#4292), un template qui en étend
   un autre affiche les espaces des `{% if %}` qu'il a hors de ses blocs (l'indentation de leurs
   `{% set %}`), avant le doctype ; Twig 3.27 les retire, comme Twig 2.

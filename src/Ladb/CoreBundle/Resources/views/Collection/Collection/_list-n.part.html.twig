@@ -1,6 +1,6 @@
-{% extends 'LadbCoreBundle:Common:_list-n.part.html.twig' %}
+{% extends '@LadbCore/Common/_list-n.part.html.twig' %}
 
-{% use 'LadbCoreBundle:Common/Blocks:list-autopager.blocks.html.twig' %}
+{% use '@LadbCore/Common/Blocks/list-autopager.blocks.html.twig' %}
 
 {# set collection #}
 {# set nextPageUrl #}
@@ -9,6 +9,6 @@
 
 {% block items %}
     {% for collection in collections %}
-        {% include 'LadbCoreBundle:Collection:Collection/_list-thumbnail.part.html.twig' %}
+        {% include '@LadbCore/Collection/Collection/_list-thumbnail.part.html.twig' %}
     {% endfor %}
 {% endblock %}

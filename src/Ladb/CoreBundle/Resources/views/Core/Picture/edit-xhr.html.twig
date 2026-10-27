@@ -1,10 +1,10 @@
-{% extends 'LadbCoreBundle:Common/Modal:_modal.part.html.twig' %}
+{% extends '@LadbCore/Common/Modal/_modal.part.html.twig' %}
 
 {% set id = 'edit_'~formSection~'_'~picture.id~'_modal' %}
 {% set title = 'picture.edit'|trans() %}
 {% set bodyClasses = 'row' %}
 
-{% form_theme form 'LadbCoreBundle:Common:_form-theme.twig.twig' %}
+{% form_theme form '@LadbCore/Common/_form-theme.twig.twig' %}
 
 {% block contentInner %}
     {{ form_start(form, { 'action':path('core_picture_update', { 'id':picture.id, 'formSection':formSection, 'sortable':sortable }), 'method':'POST' }) }}
@@ -48,10 +48,10 @@
             <a href="#" class="btn btn-default" onclick="pictureGalleryRotatePreview($('#{{ id }}_preview'), $('#{{ form.rotation.vars.id }}'), 90); return false;" data-tooltip="tooltip" title="{{ 'picture.turn_left'|trans() }}"><i class="ladb-icon-rotate-right ladb-icon-lg"></i></a>
         </div>
     </div>
-    {% include 'LadbCoreBundle:Core/Picture:_fieldset.part.html.twig' %}
+    {% include '@LadbCore/Core/Picture/_fieldset.part.html.twig' %}
 {% endblock %}
 
 {% block footerInner %}
     <a href="#" class="btn btn-default" onclick="pictureGalleryCancelEditPicture('{{ formSection }}', '{{ picture.id }}'); return false;">{{ 'default.cancel'|trans() }}</a>
-    {% include 'LadbCoreBundle:Common:_form-btn-loading.part.html.twig' with { 'id':formSection~'_'~picture.id~'_save_btn', 'text':('default.save'|trans()), 'classes':'btn-primary' } %}
+    {% include '@LadbCore/Common/_form-btn-loading.part.html.twig' with { 'id':formSection~'_'~picture.id~'_save_btn', 'text':('default.save'|trans()), 'classes':'btn-primary' } %}
 {% endblock %}

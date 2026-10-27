@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Blog/Post:_form.html.twig' %}
+{% extends '@LadbCore/Blog/Post/_form.html.twig' %}
 
 {% set pageTitle =  'blog.post.new'|trans() %}
 {% set formAction = path('core_blog_post_create') %}
@@ -8,6 +8,6 @@
 {% endblock %}
 
 {% block form_buttons %}
-    {% include 'LadbCoreBundle:Common:_form-btn-loading.part.html.twig' with { 'text':('default.save'|trans()), 'classes':'ladb-form-save-btn btn-primary btn-block' } %}
+    {% include '@LadbCore/Common/_form-btn-loading.part.html.twig' with { 'text':('default.save'|trans()), 'classes':'ladb-form-save-btn btn-primary btn-block' } %}
 {% endblock %}
 

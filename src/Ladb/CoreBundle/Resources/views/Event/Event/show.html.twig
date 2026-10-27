@@ -1,6 +1,6 @@
-{% extends 'LadbCoreBundle:Common:Layout/_show.html.twig' %}
+{% extends '@LadbCore/Common/Layout/_show.html.twig' %}
 
-{% use 'LadbCoreBundle:Common/Blocks:map.blocks.html.twig' %}
+{% use '@LadbCore/Common/Blocks/map.blocks.html.twig' %}
 
 {% set entity = event %}
 
@@ -42,12 +42,12 @@
 {% endblock %}
 
 {% block bodyHeaderContainerContent %}
-    {% include 'LadbCoreBundle:Common/Header:_entity-show-header.part.html.twig' %}
+    {% include '@LadbCore/Common/Header/_entity-show-header.part.html.twig' %}
 {% endblock %}
 
 {% block contentBody %}
     {% if event.isDraft %}
-        {% include 'LadbCoreBundle:Event/Event:_draft-alert.part.html.twig' %}
+        {% include '@LadbCore/Event/Event/_draft-alert.part.html.twig' %}
     {% endif %}
     <div class="ladb-event">
         {% if event.cancelled %}
@@ -57,13 +57,13 @@
             </a>
         {% else %}
             <meta itemprop="eventStatus" content="http://schema.org/EventScheduled">
-            {% include 'LadbCoreBundle:Core/Feedback:_contains-panel.part.html.twig' %}
+            {% include '@LadbCore/Core/Feedback/_contains-panel.part.html.twig' %}
         {% endif %}
         {% if event.pictures is defined %}
-            {% embed 'LadbCoreBundle:Common:_entity-showcase.part.html.twig' with { 'entity':event, 'pictures':event.pictures, 'alt':event.title, 'editable':(permissionContext.editable and permissionContext.isGrantedOwner) } %}
+            {% embed '@LadbCore/Common/_entity-showcase.part.html.twig' with { 'entity':event, 'pictures':event.pictures, 'alt':event.title, 'editable':(permissionContext.editable and permissionContext.isGrantedOwner) } %}
                 {% block picture0 %}
                     {{ parent() }}
-                    {% include 'LadbCoreBundle:Event/Event:_event-calendar.part.html.twig' with { 'event':event, 'topRight':true } %}
+                    {% include '@LadbCore/Event/Event/_event-calendar.part.html.twig' with { 'event':event, 'topRight':true } %}
                 {% endblock %}
             {% endembed %}
         {% endif %}
@@ -123,54 +123,54 @@
         {% endif %}
         {% if not event.isDraft and joinContext.isJoinable %}
             <div class="ladb-join-row">
-                {% include 'LadbCoreBundle:Core/Join:_widget.part.html.twig' %}
+                {% include '@LadbCore/Core/Join/_widget.part.html.twig' %}
             </div>
         {% endif %}
         <hr>
         <div class="ladb-body">
             {% for block in event.bodyBlocks %}
-                {% include 'LadbCoreBundle:Core/Block:_show-'~block.strippedName~'.part.html.twig' %}
+                {% include '@LadbCore/Core/Block/_show-'~block.strippedName~'.part.html.twig' %}
             {% endfor %}
         </div>
     </div>
     {% if event.updatedAt > event.createdAt %}
-        {% include 'LadbCoreBundle:Common:_updated-age.part.html.twig' with { 'entity':event } %}
+        {% include '@LadbCore/Common/_updated-age.part.html.twig' with { 'entity':event } %}
     {% endif %}
     {% if not permissionContext.isOwner %}
-        {% include 'LadbCoreBundle:Common:_like-and-follow.part.html.twig' %}
+        {% include '@LadbCore/Common/_like-and-follow.part.html.twig' %}
     {% endif %}
-    {% include 'LadbCoreBundle:Core/Feedback:_widget.part.html.twig' %}
-    {% include 'LadbCoreBundle:Core/Comment:_widget.part.html.twig' with { 'noMicrodata':true } %}
+    {% include '@LadbCore/Core/Feedback/_widget.part.html.twig' %}
+    {% include '@LadbCore/Core/Comment/_widget.part.html.twig' with { 'noMicrodata':true } %}
 {% endblock %}
 
 {% block contentMetasPanel %}
     <div class="ladb-metas">
-        {% include 'LadbCoreBundle:Core/Like:_meta-counter.part.html.twig' %}
-        {% include 'LadbCoreBundle:Core/View:_meta-counter.part.html.twig' %}
-        {% include 'LadbCoreBundle:Core/Comment:_meta-counter.part.html.twig' %}
-        {% include 'LadbCoreBundle:Core/Join:_meta-counter.part.html.twig' %}
-        {% include 'LadbCoreBundle:Core/Feedback:_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/Like/_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/View/_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/Comment/_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/Join/_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/Feedback/_meta-counter.part.html.twig' %}
         {% if hasMap %}
             <div class="ladb-meta">
                 {% if hasMap %}
-                    {% include 'LadbCoreBundle:Common:_map-area.part.html.twig' with { 'autoInit':true, 'mapHeight':'150px', 'markersUrl':path('core_event_location', { 'id':event.id }), 'classes':'ladb-map-thumbnail ladb-margin-top' } %}
+                    {% include '@LadbCore/Common/_map-area.part.html.twig' with { 'autoInit':true, 'mapHeight':'150px', 'markersUrl':path('core_event_location', { 'id':event.id }), 'classes':'ladb-map-thumbnail ladb-margin-top' } %}
                 {% endif %}
             </div>
         {% endif %}
     </div>
-    {% include 'LadbCoreBundle:Core/Tag:_metas.part.html.twig' with { 'tags':event.tags, 'type':'events' } %}
+    {% include '@LadbCore/Core/Tag/_metas.part.html.twig' with { 'tags':event.tags, 'type':'events' } %}
 {% endblock %}
 
 {% block contentSuggests %}
     {% if userEvents is not empty %}
         <div class="panel panel-default">
             <div class="panel-heading">
-                {{ ('event.event.other_from')|trans() }} {% include 'LadbCoreBundle:Core/User:_displayname-link.part.html.twig' with { 'user':event.user, 'noMicrodata':true } %}
+                {{ ('event.event.other_from')|trans() }} {% include '@LadbCore/Core/User/_displayname-link.part.html.twig' with { 'user':event.user, 'noMicrodata':true } %}
             </div>
             <div class="panel-body row">
                 {% for userEvent in userEvents %}
                     <div class="col-xs-6">
-                        {% include 'LadbCoreBundle:Event/Event:_thumbnail-link.part.html.twig' with { 'event':userEvent } %}
+                        {% include '@LadbCore/Event/Event/_thumbnail-link.part.html.twig' with { 'event':userEvent } %}
                     </div>
                 {% endfor %}
                 {% if event.user.meta.publicEventCount > 2 %}
@@ -189,7 +189,7 @@
             <div class="panel-body row">
                 {% for similarEvent in similarEvents %}
                     <div class="col-xs-6">
-                        {% include 'LadbCoreBundle:Event/Event:_thumbnail-link.part.html.twig' with { 'event':similarEvent, 'classes':(loop.last ? null : 'ladb-margin-bottom') } %}
+                        {% include '@LadbCore/Event/Event/_thumbnail-link.part.html.twig' with { 'event':similarEvent, 'classes':(loop.last ? null : 'ladb-margin-bottom') } %}
                     </div>
                 {% endfor %}
             </div>

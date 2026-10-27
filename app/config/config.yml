@@ -25,8 +25,6 @@ framework:
              sitemaps:
                 version:    ""
                 base_urls:  ["%router.request_context.scheme%://%router.request_context.host%"]
-    templating:
-        engines:    ['twig']
     default_locale:  "%locale%"
     session:
         handler_id: session.handler.pdo
@@ -157,6 +155,7 @@ fos_user:
     user_class: Ladb\CoreBundle\Entity\Core\User
     use_listener: false
     service:
+        mailer: ladb_core.fos.mailer
         user_manager: ladb_core.fos.user_manager
     from_email:
         address:        noreply@lairdubois.fr

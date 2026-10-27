@@ -1,10 +1,10 @@
-{% extends 'LadbCoreBundle:Common:_list-topbar.part.html.twig' %}
+{% extends '@LadbCore/Common/_list-topbar.part.html.twig' %}
 
 {% set heading = 'faq.question.list'|trans() %}
 {% set headingLevel = 2 %}
 
 {% block listTopbarMiddleInner %}
-    {% include 'LadbCoreBundle:Faq/Question:_searchbox.part.html.twig' %}
+    {% include '@LadbCore/Faq/Question/_searchbox.part.html.twig' %}
 {% endblock %}
 
 {% block listTopbarRightOuter %}

@@ -104,7 +104,7 @@ class UserController extends AbstractController {
 			if (!is_null($memberInvitation)) {
 
 				// Flashbag
-				$this->addFlash('info', $this->renderView('LadbCoreBundle:Core/Member:_invitation-alert.part.html.twig', array(
+				$this->addFlash('info', $this->renderView('@LadbCore/Core/Member/_invitation-alert.part.html.twig', array(
 					'invitation' => $memberInvitation,
 				)));
 
@@ -114,7 +114,7 @@ class UserController extends AbstractController {
 			if (!is_null($memberRequest)) {
 
 				// Flashbag
-				$this->addFlash('info', $this->renderView('LadbCoreBundle:Core/Member:_request-alert.part.html.twig', array(
+				$this->addFlash('info', $this->renderView('@LadbCore/Core/Member/_request-alert.part.html.twig', array(
 					'request' => $memberRequest,
 				)));
 
@@ -135,7 +135,7 @@ class UserController extends AbstractController {
 
 	/**
 	 * @Route("/email/check", name="core_user_email_check")
-	 * @Template("LadbCoreBundle:Core/User:emailCheck.html.twig")
+	 * @Template("@LadbCore/Core/User/emailCheck.html.twig")
 	 */
 	public function emailCheckAction(MailerUtils $mailerUtils, TokenGeneratorInterface $tokenGenerator, UserManager $userManager) {
 
@@ -157,7 +157,7 @@ class UserController extends AbstractController {
 
 	/**
 	 * @Route("/email/confirm/{token}", name="core_user_email_confirm")
-	 * @Template("LadbCoreBundle:Core/User:emailConfirm.html.twig")
+	 * @Template("@LadbCore/Core/User/emailConfirm.html.twig")
 	 */
 	public function emailConfirmAction($token, TranslatorInterface $translator, UserManager $userManager) {
 
@@ -192,7 +192,7 @@ class UserController extends AbstractController {
 
 	/**
 	 * @Route("/email/unsubscribe/{list}/{encryptedEmail}", requirements={"list" = "notifications|weeknews"}, name="core_user_email_unsubscribe")
-	 * @Template("LadbCoreBundle:Core/User:emailUnsubscribe.html.twig")
+	 * @Template("@LadbCore/Core/User/emailUnsubscribe.html.twig")
 	 */
 	public function emailUnsubscribeAction($list, $encryptedEmail, CryptoUtils $cryptoUtils, UserManager $userManager) {
 
@@ -250,7 +250,7 @@ class UserController extends AbstractController {
 	 * @Route("/collectifs", defaults={"family"="team"}, name="core_user_team_list")
 	 * @Route("/collectifs/{page}", defaults={"family"="team"}, requirements={"page" = "\d+"}, name="core_user_team_list_page")
 	 * @Route("/collectifs.geojson", defaults={"_format" = "json", "page"=-1, "layout"="geojson", "family"="team"}, name="core_user_team_list_geojson")
-	 * @Template("LadbCoreBundle:Core/User:list.html.twig")
+	 * @Template("@LadbCore/Core/User/list.html.twig")
 	 */
 	public function listAction(Request $request, LocalisableUtils $localisableUtils, SearchUtils $searchUtils, $page = 0, $layout = 'view', $family = 'user') {
 
@@ -395,11 +395,11 @@ class UserController extends AbstractController {
 				'collection' => $collection,
 			));
 
-			return $this->render('LadbCoreBundle:Core/User:list-xhr.geojson.twig', $parameters);
+			return $this->render('@LadbCore/Core/User/list-xhr.geojson.twig', $parameters);
 		}
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Core/User:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Core/User/list-xhr.html.twig', $parameters);
 		}
 
 		return $parameters;
@@ -417,7 +417,7 @@ class UserController extends AbstractController {
 
 	/**
 	 * @Route("/@{username}/parametres", name="core_user_settings")
-	 * @Template("LadbCoreBundle:Core/User:settings.html.twig")
+	 * @Template("@LadbCore/Core/User/settings.html.twig")
 	 */
 	public function settingsAction(Request $request, $username, FieldPreprocessorUtils $fieldPreprocessorUtils, LocalisableUtils $localisableUtils, SearchUtils $searchUtils, TranslatorInterface $translator, UserManager $userManager, UserUtils $userUtils) {
 		$om = $this->getDoctrine()->getManager();
@@ -496,7 +496,7 @@ class UserController extends AbstractController {
 
 	/**
 	 * @Route("/@me/counters.json", name="core_user_counters_me", defaults={"_format" = "json"})
-	 * @Template("LadbCoreBundle:Core/User:counters-xhr.json.twig")
+	 * @Template("@LadbCore/Core/User/counters-xhr.json.twig")
 	 */
 	public function countersAction(Request $request, PropertyUtils $propertyUtils, TypableUtils $typableUtils, UserUtils $userUtils) {
 		if (!$request->isXmlHttpRequest()) {
@@ -566,7 +566,7 @@ class UserController extends AbstractController {
 
 	/**
 	 * @Route("/@{username}/location.geojson", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_location", defaults={"_format" = "json"})
-	 * @Template("LadbCoreBundle:Core/User:location.geojson.twig")
+	 * @Template("@LadbCore/Core/User/location.geojson.twig")
 	 */
 	public function locationAction(Request $request, $username) {
 		$user = $this->retrieveUserByUsername($username);
@@ -594,7 +594,7 @@ class UserController extends AbstractController {
 
 	/**
 	 * @Route("/@{username}/card.xhr", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_card")
-	 * @Template("LadbCoreBundle:Core/User:card-xhr.html.twig")
+	 * @Template("@LadbCore/Core/User/card-xhr.html.twig")
 	 */
 	public function cardAction(Request $request, $username) {
 		if (!$request->isXmlHttpRequest()) {
@@ -620,7 +620,7 @@ class UserController extends AbstractController {
 
 	/**
 	 * @Route("/@{username}/a-propos", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_show_about")
-	 * @Template("LadbCoreBundle:Core/User:showAbout.html.twig")
+	 * @Template("@LadbCore/Core/User/showAbout.html.twig")
 	 */
 	public function showAboutAction($username, FollowerUtils $followerUtils) {
 		$user = $this->retrieveUserByUsername($username);
@@ -651,7 +651,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/coups-de-coeur", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_show_likes")
 	 * @Route("/@{username}/coups-de-coeur/{filter}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "sent|recieved"}, name="core_user_show_likes_filter")
 	 * @Route("/@{username}/coups-de-coeur/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_likes_filter_page")
-	 * @Template("LadbCoreBundle:Core/User:showLikes.html.twig")
+	 * @Template("@LadbCore/Core/User/showLikes.html.twig")
 	 */
 	public function showLikesAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = "sent", $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
@@ -675,7 +675,7 @@ class UserController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Core/Like:list-byuser-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Core/Like/list-byuser-xhr.html.twig', $parameters);
 		}
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
@@ -693,7 +693,7 @@ class UserController extends AbstractController {
 	/**
 	 * @Route("/@{username}/commentaires", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_show_comments")
 	 * @Route("/@{username}/commentaires/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "page" = "\d+"}, name="core_user_show_comments_page")
-	 * @Template("LadbCoreBundle:Core/User:showComments.html.twig")
+	 * @Template("@LadbCore/Core/User/showComments.html.twig")
 	 */
 	public function showCommentsAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
@@ -716,7 +716,7 @@ class UserController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Core/Comment:list-byuser-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Core/Comment/list-byuser-xhr.html.twig', $parameters);
 		}
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
@@ -735,7 +735,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/votes", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_show_votes")
 	 * @Route("/@{username}/votes/{filter}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "positive|negative"}, name="core_user_show_votes_filter")
 	 * @Route("/@{username}/votes/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "positive|negative", "page" = "\d+"}, name="core_user_show_votes_filter_page")
-	 * @Template("LadbCoreBundle:Core/User:showVotes.html.twig")
+	 * @Template("@LadbCore/Core/User/showVotes.html.twig")
 	 */
 	public function showVotesAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = 'positive', $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
@@ -759,7 +759,7 @@ class UserController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Core/Vote:list-byuser-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Core/Vote/list-byuser-xhr.html.twig', $parameters);
 		}
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
@@ -778,7 +778,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/reviews", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_show_reviews")
 	 * @Route("/@{username}/reviews/{filter}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+"}, name="core_user_show_reviews_filter")
 	 * @Route("/@{username}/reviews/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_reviews_filter_page")
-	 * @Template("LadbCoreBundle:Core/User:showReviews.html.twig")
+	 * @Template("@LadbCore/Core/User/showReviews.html.twig")
 	 */
 	public function showReviewsAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = 'recent', $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
@@ -802,7 +802,7 @@ class UserController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Core/Review:list-byuser-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Core/Review/list-byuser-xhr.html.twig', $parameters);
 		}
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
@@ -821,7 +821,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/feedbacks", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_show_feedbacks")
 	 * @Route("/@{username}/feedbacks/{filter}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+"}, name="core_user_show_feedbacks_filter")
 	 * @Route("/@{username}/feedbacks/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_feedbacks_filter_page")
-	 * @Template("LadbCoreBundle:Core/User:showFeedbacks.html.twig")
+	 * @Template("@LadbCore/Core/User/showFeedbacks.html.twig")
 	 */
 	public function showFeedbacksAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
@@ -845,7 +845,7 @@ class UserController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Core/Feedback:list-byuser-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Core/Feedback/list-byuser-xhr.html.twig', $parameters);
 		}
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
@@ -864,7 +864,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/creations", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_show_creations")
 	 * @Route("/@{username}/creations/{filter}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+"}, name="core_user_show_creations_filter")
 	 * @Route("/@{username}/creations/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_creations_filter_page")
-	 * @Template("LadbCoreBundle:Core/User:showCreations.html.twig")
+	 * @Template("@LadbCore/Core/User/showCreations.html.twig")
 	 */
 	public function showCreationsAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = null, $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
@@ -902,7 +902,7 @@ class UserController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Wonder/Creation:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Wonder/Creation/list-xhr.html.twig', $parameters);
 		}
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
@@ -921,7 +921,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/ateliers", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_show_workshops")
 	 * @Route("/@{username}/ateliers/{filter}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+"}, name="core_user_show_workshops_filter")
 	 * @Route("/@{username}/ateliers/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_workshops_filter_page")
-	 * @Template("LadbCoreBundle:Core/User:showWorkshops.html.twig")
+	 * @Template("@LadbCore/Core/User/showWorkshops.html.twig")
 	 */
 	public function showWorkshopsAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = null, $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
@@ -959,7 +959,7 @@ class UserController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Wonder/Workshop:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Wonder/Workshop/list-xhr.html.twig', $parameters);
 		}
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
@@ -978,7 +978,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/plans", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_show_plans")
 	 * @Route("/@{username}/plans/{filter}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+"}, name="core_user_show_plans_filter")
 	 * @Route("/@{username}/plans/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_plans_filter_page")
-	 * @Template("LadbCoreBundle:Core/User:showPlans.html.twig")
+	 * @Template("@LadbCore/Core/User/showPlans.html.twig")
 	 */
 	public function showPlansAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = null, $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
@@ -1016,7 +1016,7 @@ class UserController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Wonder/Plan:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Wonder/Plan/list-xhr.html.twig', $parameters);
 		}
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
@@ -1035,7 +1035,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/pas-a-pas", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_show_howtos")
 	 * @Route("/@{username}/pas-a-pas/{filter}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+"}, name="core_user_show_howtos_filter")
 	 * @Route("/@{username}/pas-a-pas/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_howtos_filter_page")
-	 * @Template("LadbCoreBundle:Core/User:showHowtos.html.twig")
+	 * @Template("@LadbCore/Core/User/showHowtos.html.twig")
 	 */
 	public function showHowtosAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = null, $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
@@ -1073,7 +1073,7 @@ class UserController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Howto/Howto:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Howto/Howto/list-xhr.html.twig', $parameters);
 		}
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
@@ -1092,7 +1092,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/trouvailles", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_show_finds")
 	 * @Route("/@{username}/trouvailles/{filter}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+"}, name="core_user_show_finds_filter")
 	 * @Route("/@{username}/trouvailles/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_finds_filter_page")
-	 * @Template("LadbCoreBundle:Core/User:showFinds.html.twig")
+	 * @Template("@LadbCore/Core/User/showFinds.html.twig")
 	 */
 	public function showFindsAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = null, $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
@@ -1130,7 +1130,7 @@ class UserController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Find/Find:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Find/Find/list-xhr.html.twig', $parameters);
 		}
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
@@ -1149,7 +1149,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/questions", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_show_questions")
 	 * @Route("/@{username}/questions/{filter}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+"}, name="core_user_show_questions_filter")
 	 * @Route("/@{username}/questions/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_questions_filter_page")
-	 * @Template("LadbCoreBundle:Core/User:showQuestions.html.twig")
+	 * @Template("@LadbCore/Core/User/showQuestions.html.twig")
 	 */
 	public function showQuestionsAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = null, $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
@@ -1187,7 +1187,7 @@ class UserController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Qa/Question:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Qa/Question/list-xhr.html.twig', $parameters);
 		}
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
@@ -1206,7 +1206,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/reponses", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_show_answers")
 	 * @Route("/@{username}/reponses/{filter}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+"}, name="core_user_show_answers_filter")
 	 * @Route("/@{username}/reponses/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_answers_filter_page")
-	 * @Template("LadbCoreBundle:Core/User:showAnswers.html.twig")
+	 * @Template("@LadbCore/Core/User/showAnswers.html.twig")
 	 */
 	public function showAnswersAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
@@ -1230,7 +1230,7 @@ class UserController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Qa/Answer:list-byuser-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Qa/Answer/list-byuser-xhr.html.twig', $parameters);
 		}
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
@@ -1249,7 +1249,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/graphismes", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_show_graphics")
 	 * @Route("/@{username}/graphismes/{filter}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+"}, name="core_user_show_graphics_filter")
 	 * @Route("/@{username}/graphismes/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_graphics_filter_page")
-	 * @Template("LadbCoreBundle:Core/User:showGraphics.html.twig")
+	 * @Template("@LadbCore/Core/User/showGraphics.html.twig")
 	 */
 	public function showGraphicsAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = null, $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
@@ -1287,7 +1287,7 @@ class UserController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Promotion/Graphic:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Promotion/Graphic/list-xhr.html.twig', $parameters);
 		}
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
@@ -1306,7 +1306,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/processus", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_show_workflows")
 	 * @Route("/@{username}/processus/{filter}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+"}, name="core_user_show_workflows_filter")
 	 * @Route("/@{username}/processus/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_workflows_filter_page")
-	 * @Template("LadbCoreBundle:Core/User:showWorkflows.html.twig")
+	 * @Template("@LadbCore/Core/User/showWorkflows.html.twig")
 	 */
 	public function showWorkflowsAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = null, $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
@@ -1344,7 +1344,7 @@ class UserController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Workflow:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Workflow/list-xhr.html.twig', $parameters);
 		}
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
@@ -1363,7 +1363,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/annonces", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_show_offers")
 	 * @Route("/@{username}/annonces/{filter}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+"}, name="core_user_show_offers_filter")
 	 * @Route("/@{username}/annonces/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_offers_filter_page")
-	 * @Template("LadbCoreBundle:Core/User:showOffers.html.twig")
+	 * @Template("@LadbCore/Core/User/showOffers.html.twig")
 	 */
 	public function showOffersAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = null, $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
@@ -1401,7 +1401,7 @@ class UserController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Offer/Offer:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Offer/Offer/list-xhr.html.twig', $parameters);
 		}
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
@@ -1420,7 +1420,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/abonnements", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_show_following")
 	 * @Route("/@{username}/abonnements/{filter}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+"}, name="core_user_show_following_filter")
 	 * @Route("/@{username}/abonnements/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_following_filter_page")
-	 * @Template("LadbCoreBundle:Core/User:showFollowing.html.twig")
+	 * @Template("@LadbCore/Core/User/showFollowing.html.twig")
 	 */
 	public function showFollowingAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = "popular-followers", $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
@@ -1446,7 +1446,7 @@ class UserController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Core/Follower:following-list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Core/Follower/following-list-xhr.html.twig', $parameters);
 		}
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
@@ -1465,7 +1465,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/abonnes", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_show_followers")
 	 * @Route("/@{username}/abonnes/{filter}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+"}, name="core_user_show_followers_filter")
 	 * @Route("/@{username}/abonnes/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_followers_filter_page")
-	 * @Template("LadbCoreBundle:Core/User:showFollowers.html.twig")
+	 * @Template("@LadbCore/Core/User/showFollowers.html.twig")
 	 */
 	public function showFollowersAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = "popular-followers", $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
@@ -1491,7 +1491,7 @@ class UserController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Core/Follower:followers-list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Core/Follower/followers-list-xhr.html.twig', $parameters);
 		}
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
@@ -1504,7 +1504,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/membres", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_show_members")
 	 * @Route("/@{username}/membres/{filter}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+"}, name="core_user_show_members_filter")
 	 * @Route("/@{username}/membres/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_members_filter_page")
-	 * @Template("LadbCoreBundle:Core/User:showMembers.html.twig")
+	 * @Template("@LadbCore/Core/User/showMembers.html.twig")
 	 */
 	public function showMembersAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = "popular-followers", $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
@@ -1530,7 +1530,7 @@ class UserController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Core/Member:members-list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Core/Member/members-list-xhr.html.twig', $parameters);
 		}
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
@@ -1542,7 +1542,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/invitations", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_show_invitations")
 	 * @Route("/@{username}/invitations/{filter}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+"}, name="core_user_show_invitations_filter")
 	 * @Route("/@{username}/invitations/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_invitations_filter_page")
-	 * @Template("LadbCoreBundle:Core/User:showInvitations.html.twig")
+	 * @Template("@LadbCore/Core/User/showInvitations.html.twig")
 	 */
 	public function showInvitationsAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = "popular-followers", $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
@@ -1577,7 +1577,7 @@ class UserController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Core/Member:invitations-list-xhr.html.twig', array_merge(array( 'user' => $user ), $parameters));
+			return $this->render('@LadbCore/Core/Member/invitations-list-xhr.html.twig', array_merge(array( 'user' => $user ), $parameters));
 		}
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
@@ -1589,7 +1589,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/demandes", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_show_requests")
 	 * @Route("/@{username}/demandes/{filter}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+"}, name="core_user_show_requests_filter")
 	 * @Route("/@{username}/demandes/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_requests_filter_page")
-	 * @Template("LadbCoreBundle:Core/User:showRequests.html.twig")
+	 * @Template("@LadbCore/Core/User/showRequests.html.twig")
 	 */
 	public function showRequestsAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = "popular-followers", $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
@@ -1624,7 +1624,7 @@ class UserController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Core/Member:requests-list-xhr.html.twig', array_merge(array( 'user' => $user ), $parameters));
+			return $this->render('@LadbCore/Core/Member/requests-list-xhr.html.twig', array_merge(array( 'user' => $user ), $parameters));
 		}
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
@@ -1636,7 +1636,7 @@ class UserController extends AbstractController {
 	 * @Route("/@{username}/collectifs", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_show_teams")
 	 * @Route("/@{username}/collectifs/{filter}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+"}, name="core_user_show_teams_filter")
 	 * @Route("/@{username}/collectifs/{filter}/{page}", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_user_show_teams_filter_page")
-	 * @Template("LadbCoreBundle:Core/User:showTeams.html.twig")
+	 * @Template("@LadbCore/Core/User/showTeams.html.twig")
 	 */
 	public function showTeamsAction(Request $request, $username, FollowerUtils $followerUtils, PaginatorUtils $paginatorUtils, $filter = "popular-followers", $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
@@ -1662,7 +1662,7 @@ class UserController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Core/Follower:teams-list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Core/Follower/teams-list-xhr.html.twig', $parameters);
 		}
 
 		return $this->_fillCommonShowParameters($user, array_merge($parameters, array(
@@ -1735,7 +1735,7 @@ class UserController extends AbstractController {
 
 	/**
 	 * @Route("/collectifs/new", name="core_user_team_new")
-	 * @Template("LadbCoreBundle:Core/User/Team:new.html.twig")
+	 * @Template("@LadbCore/Core/User/Team/new.html.twig")
 	 */
 	public function teamNewAction(UserManager $userManager) {
 		if (!$this->getUser()->getEmailConfirmed()) {
@@ -1752,7 +1752,7 @@ class UserController extends AbstractController {
 
 	/**
 	 * @Route("/collectifs/create", methods={"POST"}, name="core_user_team_create")
-	 * @Template("LadbCoreBundle:Core/User/Team:new.html.twig")
+	 * @Template("@LadbCore/Core/User/Team/new.html.twig")
 	 */
 	public function teamCreateAction(Request $request, MailerUtils $mailerUtils, MemberManager $memberManager, SearchUtils $searchUtils, TranslatorInterface $translator, UserManager $userManager, UserUtils $userUtils) {
 		if (!$this->getUser()->getEmailConfirmed()) {
@@ -1824,7 +1824,7 @@ class UserController extends AbstractController {
 
 	/**
 	 * @Route("/@{username}/admin", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_show_admin")
-	 * @Template("LadbCoreBundle:Core/User:showAdmin.html.twig")
+	 * @Template("@LadbCore/Core/User/showAdmin.html.twig")
 	 */
 	public function showAdminAction($username, FollowerUtils $followerUtils, UserManager $userManager) {
 		if (!$this->isGranted('ROLE_ADMIN')) {

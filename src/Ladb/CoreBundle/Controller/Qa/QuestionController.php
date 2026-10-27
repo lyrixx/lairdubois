@@ -48,7 +48,7 @@ class QuestionController extends AbstractController {
 
 	/**
 	 * @Route("/new", name="core_qa_question_new")
-	 * @Template("LadbCoreBundle:Qa/Question:new.html.twig")
+	 * @Template("@LadbCore/Qa/Question/new.html.twig")
 	 */
 	public function newAction(Request $request, TagUtils $tagUtils) {
 
@@ -65,7 +65,7 @@ class QuestionController extends AbstractController {
 
 	/**
 	 * @Route("/create", methods={"POST"}, name="core_qa_question_create")
-	 * @Template("LadbCoreBundle:Qa/Question:new.html.twig")
+	 * @Template("@LadbCore/Qa/Question/new.html.twig")
 	 */
 	public function createAction(Request $request, BlockBodiedUtils $blockBodiedUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
@@ -178,7 +178,7 @@ class QuestionController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_qa_question_edit")
-	 * @Template("LadbCoreBundle:Qa/Question:edit.html.twig")
+	 * @Template("@LadbCore/Qa/Question/edit.html.twig")
 	 */
 	public function editAction($id, TagUtils $tagUtils) {
 
@@ -196,7 +196,7 @@ class QuestionController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_qa_question_update")
-	 * @Template("LadbCoreBundle:Qa/Question:edit.html.twig")
+	 * @Template("@LadbCore/Qa/Question/edit.html.twig")
 	 */
 	public function updateAction(Request $request, $id, BlockBodiedUtils $blockBodiedUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
@@ -289,7 +289,7 @@ class QuestionController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/widget", requirements={"id" = "\d+"}, name="core_qa_question_widget")
-	 * @Template("LadbCoreBundle:Qa/Question:widget-xhr.html.twig")
+	 * @Template("@LadbCore/Qa/Question/widget-xhr.html.twig")
 	 */
 	public function widgetAction($id) {
 
@@ -304,7 +304,7 @@ class QuestionController extends AbstractController {
 	/**
 	 * @Route("/", name="core_qa_question_list")
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_qa_question_list_page")
-	 * @Template("LadbCoreBundle:Qa/Question:list.html.twig")
+	 * @Template("@LadbCore/Qa/Question/list.html.twig")
 	 */
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, MaybeUtils $maybeUtils, SearchUtils $searchUtils, TranslatorInterface $translator, $page = 0) {
 
@@ -547,14 +547,14 @@ class QuestionController extends AbstractController {
 
 		if ($request->isXmlHttpRequest()) {
 			if ($layout == 'choice') {
-				return $this->render('LadbCoreBundle:Qa/Question:list-choice-xhr.html.twig', $parameters);
+				return $this->render('@LadbCore/Qa/Question/list-choice-xhr.html.twig', $parameters);
 			} else {
-				return $this->render('LadbCoreBundle:Qa/Question:list-xhr.html.twig', $parameters);
+				return $this->render('@LadbCore/Qa/Question/list-xhr.html.twig', $parameters);
 			}
 		}
 
 		if ($layout == 'choice') {
-			return $this->render('LadbCoreBundle:Qa/Question:list-choice.html.twig', $parameters);
+			return $this->render('@LadbCore/Qa/Question/list-choice.html.twig', $parameters);
 		}
 
 		$parameters = array_merge($parameters, array(
@@ -579,7 +579,7 @@ class QuestionController extends AbstractController {
 	 * @Route("/{id}/creations", requirements={"id" = "\d+"}, name="core_qa_question_creations")
 	 * @Route("/{id}/creations/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_qa_question_creations_filter")
 	 * @Route("/{id}/creations/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_qa_question_creations_filter_page")
-	 * @Template("LadbCoreBundle:Qa/Question:creations.html.twig")
+	 * @Template("@LadbCore/Qa/Question/creations.html.twig")
 	 */
 	public function creationsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -604,7 +604,7 @@ class QuestionController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Wonder/Creation:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Wonder/Creation/list-xhr.html.twig', $parameters);
 		}
 
 		return array_merge($parameters, array(
@@ -616,7 +616,7 @@ class QuestionController extends AbstractController {
 	 * @Route("/{id}/plans", requirements={"id" = "\d+"}, name="core_qa_question_plans")
 	 * @Route("/{id}/plans/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_qa_question_plans_filter")
 	 * @Route("/{id}/plans/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_qa_question_plans_filter_page")
-	 * @Template("LadbCoreBundle:Qa/Question:plans.html.twig")
+	 * @Template("@LadbCore/Qa/Question/plans.html.twig")
 	 */
 	public function plansAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -641,7 +641,7 @@ class QuestionController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Wonder/Plan:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Wonder/Plan/list-xhr.html.twig', $parameters);
 		}
 
 		return array_merge($parameters, array(
@@ -653,7 +653,7 @@ class QuestionController extends AbstractController {
 	 * @Route("/{id}/pas-a-pas", requirements={"id" = "\d+"}, name="core_qa_question_howtos")
 	 * @Route("/{id}/pas-a-pas/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_qa_question_howtos_filter")
 	 * @Route("/{id}/pas-a-pas/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_qa_question_howtos_filter_page")
-	 * @Template("LadbCoreBundle:Qa/Question:howtos.html.twig")
+	 * @Template("@LadbCore/Qa/Question/howtos.html.twig")
 	 */
 	public function howtosAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -678,7 +678,7 @@ class QuestionController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Howto/Howto:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Howto/Howto/list-xhr.html.twig', $parameters);
 		}
 
 		return array_merge($parameters, array(
@@ -688,7 +688,7 @@ class QuestionController extends AbstractController {
 
 	/**
 	 * @Route("/{id}.html", name="core_qa_question_show")
-	 * @Template("LadbCoreBundle:Qa/Question:show.html.twig")
+	 * @Template("@LadbCore/Qa/Question/show.html.twig")
 	 */
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, VotableUtils $votableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();

@@ -43,7 +43,7 @@ class JoinController extends AbstractController {
 
 	/**
 	 * @Route("/{entityType}/{entityId}/create", requirements={"entityType" = "\d+", "entityId" = "\d+"}, name="core_join_create")
-	 * @Template("LadbCoreBundle:Core/Join:create-xhr.html.twig")
+	 * @Template("@LadbCore/Core/Join/create-xhr.html.twig")
 	 */
 	public function createAction(Request $request, $entityType, $entityId, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, JoinableUtils $joinableUtils, TypableUtils $typableUtils, WatchableUtils $watchableUtils) {
 
@@ -117,7 +117,7 @@ class JoinController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_join_delete")
-	 * @Template("LadbCoreBundle:Core/Join:delete-xhr.html.twig")
+	 * @Template("@LadbCore/Core/Join/delete-xhr.html.twig")
 	 */
 	public function deleteAction(Request $request, $id, ActivityUtils $activityUtils, JoinableUtils $joinableUtils, SearchUtils $searchUtils, TypableUtils $typableUtils) {
 		$om = $this->getDoctrine()->getManager();
@@ -169,7 +169,7 @@ class JoinController extends AbstractController {
 	/**
 	 * @Route("/{entityType}/{entityId}", requirements={"entityType" = "\d+", "entityId" = "\d+"}, name="core_join_list_byentity")
 	 * @Route("/{entityType}/{entityId}/{page}", requirements={"entityType" = "\d+", "entityId" = "\d+", "page" = "\d+"}, name="core_join_list_byentity_page")
-	 * @Template("LadbCoreBundle:Core/Join:list-byentity.html.twig")
+	 * @Template("@LadbCore/Core/Join/list-byentity.html.twig")
 	 */
 	public function listByEntityAction(Request $request, $entityType, $entityId, PaginatorUtils $paginatorUtils, TypableUtils $typableUtils, $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -194,7 +194,7 @@ class JoinController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Core/Join:list-byentity-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Core/Join/list-byentity-xhr.html.twig', $parameters);
 		}
 		return $parameters;
 	}

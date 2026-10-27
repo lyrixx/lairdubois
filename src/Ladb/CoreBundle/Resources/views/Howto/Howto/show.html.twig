@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:Layout/_show.html.twig' %}
+{% extends '@LadbCore/Common/Layout/_show.html.twig' %}
 
 {% set entity = howto %}
 
@@ -97,14 +97,14 @@
 {% endblock %}
 
 {% block bodyHeaderContainerContent %}
-    {% embed 'LadbCoreBundle:Common/Header:_entity-show-header.part.html.twig' with { 'shareModalAddonTemplate':'LadbCoreBundle:Howto/Howto:_share-modal-addon.part.html.twig' } %}
+    {% embed '@LadbCore/Common/Header/_entity-show-header.part.html.twig' with { 'shareModalAddonTemplate':'@LadbCore/Howto/Howto/_share-modal-addon.part.html.twig' } %}
     {% endembed %}
 {% endblock %}
 
 {% block bodyContainerContent %}
     {{ parent() }}
     {% if referral is defined and referral is not null and referral.displayRedirectionWarning %}
-        {% include 'LadbCoreBundle:Core/Referer:_referral-modal.part.html.twig' %}
+        {% include '@LadbCore/Core/Referer/_referral-modal.part.html.twig' %}
         <script>
             $(window).load(function() {
                 $("#referral_modal").modal('show');
@@ -115,11 +115,11 @@
 
 {% block contentBody %}
     {% if howto.isDraft %}
-        {% include 'LadbCoreBundle:Howto/Howto:_draft-alert.part.html.twig' %}
+        {% include '@LadbCore/Howto/Howto/_draft-alert.part.html.twig' %}
     {% endif %}
-    {% include 'LadbCoreBundle:Howto/Howto:_wip-alert.part.html.twig' %}
+    {% include '@LadbCore/Howto/Howto/_wip-alert.part.html.twig' %}
     <div class="ladb-howto">
-        {% include 'LadbCoreBundle:Core/Picture:_img-link.part.html.twig' with { 'picture':howto.mainPicture, 'width':'594', 'height':'294', 'alt':howto.title, 'noMicrodata':true } %}
+        {% include '@LadbCore/Core/Picture/_img-link.part.html.twig' with { 'picture':howto.mainPicture, 'width':'594', 'height':'294', 'alt':howto.title, 'noMicrodata':true } %}
         <div class="ladb-body">
             {{ howto.htmlBody|raw }}
         </div>
@@ -137,7 +137,7 @@
         {% endif %}
     </div>
     {% if howto.updatedAt > howto.createdAt %}
-        {% include 'LadbCoreBundle:Common:_updated-age.part.html.twig' with { 'entity':howto } %}
+        {% include '@LadbCore/Common/_updated-age.part.html.twig' with { 'entity':howto } %}
     {% endif %}
     {% block manageArticlesShortcutBlock %}
         {% if permissionContext.isGrantedOwner and permissionContext.editable %}
@@ -157,8 +157,8 @@
                             {% if not howto.isDraft and not article.isDraft %}
                                 <a href="#share_article_{{ article.id }}_modal" class="btn btn-default btn-sm" data-toggle="modal" title="{{ 'howto.article.share'|trans() }}" data-tooltip="tooltip"><i class="ladb-icon-share"></i><span class="ladb-hidden-mobile"> {{ 'default.share'|trans() }}</span></a>
                                 &nbsp;
-                                {% embed 'LadbCoreBundle:Common/Modal:_modal.part.html.twig' with { 'id':'share_article_'~article.id~'_modal', 'title':('howto.article.share'|trans()) } %}
-                                    {% use 'LadbCoreBundle:Common/Blocks:sharebuttons-widget.blocks.html.twig' %}
+                                {% embed '@LadbCore/Common/Modal/_modal.part.html.twig' with { 'id':'share_article_'~article.id~'_modal', 'title':('howto.article.share'|trans()) } %}
+                                    {% use '@LadbCore/Common/Blocks/sharebuttons-widget.blocks.html.twig' %}
                                     {% block bodyInner %}
                                         <h4>{{ 'share.social.heading'|trans() }}</h4>
                                         {% set sbUrl = ladb_entity_url_action(article) %}
@@ -191,14 +191,14 @@
                                                     <textarea class="form-control" style="font-family: courier;" rows="5" onclick="$(this).focus(); $(this).select();"></textarea>
                                                 </div>
                                                 <div class="tab-pane" id="ladb_article_{{ article.id }}_sticker_preview" style="height: 300px;">
-                                                    {% include 'LadbCoreBundle:Common:_loading.part.html.twig' with { 'noHidden':true} %}
+                                                    {% include '@LadbCore/Common/_loading.part.html.twig' with { 'noHidden':true} %}
                                                     <p class="text-center"><img src="" height="300"></p>
                                                 </div>
                                             </div>
                                             <script>
                                                 $('#share_article_{{ article.id }}_modal').on('show.bs.modal', function (e) {
-                                                    $("#ladb_article_{{ article.id }}_sticker_bbcode textarea").val("{{ include('LadbCoreBundle:Howto/Article:_sticker.bbcode.twig')|escape('js') }}");
-                                                    $("#ladb_article_{{ article.id }}_sticker_html textarea").val("{{ include('LadbCoreBundle:Howto/Article:_sticker.html.twig')|escape('js') }}");
+                                                    $("#ladb_article_{{ article.id }}_sticker_bbcode textarea").val("{{ include('@LadbCore/Howto/Article/_sticker.bbcode.twig')|escape('js') }}");
+                                                    $("#ladb_article_{{ article.id }}_sticker_html textarea").val("{{ include('@LadbCore/Howto/Article/_sticker.html.twig')|escape('js') }}");
                                                 })
                                                 $('a[href="#ladb_article_{{ article.id }}_sticker_preview"]').on("shown.bs.tab", function (e) {
                                                     var img = $("#ladb_article_{{ article.id }}_sticker_preview img");
@@ -223,7 +223,7 @@
                             {% endif %}
                             {% if is_granted("ROLE_ADMIN") and not article.isDraft %}
                                 <a href="#unpublish_howto_article_{{ article.id }}_modal" class="btn btn-default btn-sm" data-toggle="modal" title="{{ 'howto.article.unpublish'|trans() }}" data-tooltip="tooltip"><i class="ladb-icon-unpublish"></i> {{ 'default.unpublish'|trans() }}</a>
-                                {% embed 'LadbCoreBundle:Common/Modal:_modal.part.html.twig' with { 'id':'unpublish_howto_article_'~article.id~'_modal', 'title':('default.unpublishing'|trans()) } %}
+                                {% embed '@LadbCore/Common/Modal/_modal.part.html.twig' with { 'id':'unpublish_howto_article_'~article.id~'_modal', 'title':('default.unpublishing'|trans()) } %}
                                     {% block bodyInner %}
                                         <p>La dépublication de l'article <strong>{{ article.title }}</strong> le rendra invisible des autres utilisateurs.</p>
                                         <p>Confirmez l'action pour continuer.</p>
@@ -238,16 +238,16 @@
                         <h2>{{ article.title }}</h2>
                     </div>
                     {% if article.isDraft and not howto.isDraft %}
-                        {% include 'LadbCoreBundle:Howto/Article:_draft-alert.part.html.twig' %}
+                        {% include '@LadbCore/Howto/Article/_draft-alert.part.html.twig' %}
                     {% endif %}
                     <div class="ladb-body">
                         {% for block in article.bodyBlocks %}
-                            {% include 'LadbCoreBundle:Core/Block:_show-'~block.strippedName~'.part.html.twig' %}
+                            {% include '@LadbCore/Core/Block/_show-'~block.strippedName~'.part.html.twig' %}
                         {% endfor %}
                     </div>
                     <div class="ladb-ages">
                         {% if not article.isDraft %}
-                            {% include 'LadbCoreBundle:Common:_published-age.part.html.twig' with { 'entity':article } %}{% if article.updatedAt > article.createdAt %}{% include 'LadbCoreBundle:Common:_updated-age.part.html.twig' with { 'entity':article } %}{% endif %}
+                            {% include '@LadbCore/Common/_published-age.part.html.twig' with { 'entity':article } %}{% if article.updatedAt > article.createdAt %}{% include '@LadbCore/Common/_updated-age.part.html.twig' with { 'entity':article } %}{% endif %}
                         {% endif %}
                     </div>
                 </div>
@@ -257,15 +257,15 @@
             {{ block('manageArticlesShortcutBlock') }}
         {% endif %}
         <br/>
-        {% include 'LadbCoreBundle:Howto/Howto:_wip-alert.part.html.twig' %}
+        {% include '@LadbCore/Howto/Howto/_wip-alert.part.html.twig' %}
         {% if not permissionContext.isOwner %}
-            {% include 'LadbCoreBundle:Common:_like-and-follow.part.html.twig' %}
+            {% include '@LadbCore/Common/_like-and-follow.part.html.twig' %}
         {% endif %}
         {% if howto.questionCount > 0 or howto.planCount > 0 or howto.creationCount > 0 or howto.workflowCount > 0 or howto.workshopCount > 0 or howto.providerCount > 0 or howto.schoolCount > 0 %}
-            {% embed 'LadbCoreBundle:Common:_linkedto-widget.part.html.twig' %}
+            {% embed '@LadbCore/Common/_linkedto-widget.part.html.twig' %}
                 {% block body %}
                     {% if howto.questionCount > 0 %}
-                        {% include 'LadbCoreBundle:Common:_linkedto-widget-item.part.html.twig' with {
+                        {% include '@LadbCore/Common/_linkedto-widget-item.part.html.twig' with {
                             'path':howto.questionCount == 1 ? path('core_qa_question_show', { 'id':howto.questions[0].sluggedId }) : path('core_howto_questions', { 'id':howto.id }),
                             'picture':howto.questions[0].mainPicture,
                             'icon':'ladb-icon-question',
@@ -274,7 +274,7 @@
                         } %}
                     {% endif %}
                     {% if howto.planCount > 0 %}
-                        {% include 'LadbCoreBundle:Common:_linkedto-widget-item.part.html.twig' with {
+                        {% include '@LadbCore/Common/_linkedto-widget-item.part.html.twig' with {
                             'path':howto.planCount == 1 ? path('core_plan_show', { 'id':howto.plans[0].sluggedId }) : path('core_howto_plans', { 'id':howto.id }),
                             'picture':howto.plans[0].mainPicture,
                             'icon':'ladb-icon-plan',
@@ -282,7 +282,7 @@
                         } %}
                     {% endif %}
                     {% if howto.creationCount > 0 %}
-                        {% include 'LadbCoreBundle:Common:_linkedto-widget-item.part.html.twig' with {
+                        {% include '@LadbCore/Common/_linkedto-widget-item.part.html.twig' with {
                             'path':howto.creationCount == 1 ? path('core_creation_show', { 'id':howto.creations[0].sluggedId }) : path('core_howto_creations', { 'id':howto.id }),
                             'picture':howto.creations[0].mainPicture,
                             'icon':'ladb-icon-creation',
@@ -290,7 +290,7 @@
                         } %}
                     {% endif %}
                     {% if howto.workflowCount > 0 %}
-                        {% include 'LadbCoreBundle:Common:_linkedto-widget-item.part.html.twig' with {
+                        {% include '@LadbCore/Common/_linkedto-widget-item.part.html.twig' with {
                             'path':howto.workflowCount == 1 ? path('core_workflow_show', { 'id':howto.workflows[0].sluggedId }) : path('core_howto_workflows', { 'id':howto.id }),
                             'picture':howto.workflows[0].mainPicture,
                             'icon':'ladb-icon-workflow',
@@ -299,7 +299,7 @@
                         } %}
                     {% endif %}
                     {% if howto.workshopCount > 0 %}
-                        {% include 'LadbCoreBundle:Common:_linkedto-widget-item.part.html.twig' with {
+                        {% include '@LadbCore/Common/_linkedto-widget-item.part.html.twig' with {
                             'path':howto.workshopCount == 1 ? path('core_workshop_show', { 'id':howto.workshops[0].sluggedId }) : path('core_howto_workshops', { 'id':howto.id }),
                             'picture':howto.workshops[0].mainPicture,
                             'icon':'ladb-icon-workshop',
@@ -307,7 +307,7 @@
                         } %}
                     {% endif %}
                     {% if howto.providerCount > 0 %}
-                        {% include 'LadbCoreBundle:Common:_linkedto-widget-item.part.html.twig' with {
+                        {% include '@LadbCore/Common/_linkedto-widget-item.part.html.twig' with {
                             'path':howto.providerCount == 1 ? path('core_provider_show', { 'id':howto.providers[0].sluggedId }) : path('core_howto_providers', { 'id':howto.id }),
                             'picture':howto.providers[0].mainPicture,
                             'icon':'ladb-icon-provider',
@@ -315,7 +315,7 @@
                         } %}
                     {% endif %}
                     {% if howto.schoolCount > 0 %}
-                        {% include 'LadbCoreBundle:Common:_linkedto-widget-item.part.html.twig' with {
+                        {% include '@LadbCore/Common/_linkedto-widget-item.part.html.twig' with {
                             'path':howto.schoolCount == 1 ? path('core_school_show', { 'id':howto.schools[0].sluggedId }) : path('core_howto_schools', { 'id':howto.id }),
                             'picture':howto.schools[0].mainPicture,
                             'icon':'ladb-icon-school',
@@ -326,24 +326,24 @@
             {% endembed %}
         {% endif %}
         {% if howto.referralCount > 0 %}
-            {% include 'LadbCoreBundle:Core/Referer:_widget.part.html.twig' with { 'referrals':howto.referrals } %}
+            {% include '@LadbCore/Core/Referer/_widget.part.html.twig' with { 'referrals':howto.referrals } %}
         {% endif %}
 {#        {% if howto.id == 237 %} #}{# Workround to prevent OutOfMemory a a specific Howto #}
 {#            <div class="panel panel-default ladb-margin-top">#}
 {#                <div class="panel-body text-center"><i class="ladb-icon-warning"></i> Les commentaires sont temporairement désactivés pour ce pas à pas.</div>#}
 {#            </div>#}
 {#        {% else %}#}
-            {% include 'LadbCoreBundle:Core/Comment:_widget.part.html.twig' %}
+            {% include '@LadbCore/Core/Comment/_widget.part.html.twig' %}
 {#        {% endif %}#}
     </div>
 {% endblock %}
 
 {% block contentMetasPanel %}
-    {% include 'LadbCoreBundle:Core/Spotlight:_spotlight-meta.part.html.twig' %}
+    {% include '@LadbCore/Core/Spotlight/_spotlight-meta.part.html.twig' %}
     <div id="ladb_common_metas" class="ladb-metas">
-        {% include 'LadbCoreBundle:Core/Like:_meta-counter.part.html.twig' %}
-        {% include 'LadbCoreBundle:Core/View:_meta-counter.part.html.twig' %}
-        {% include 'LadbCoreBundle:Core/Comment:_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/Like/_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/View/_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/Comment/_meta-counter.part.html.twig' %}
         {% if howto.referralCount > 0 %}
             <div class="ladb-meta">
                 <a href="#" class="ladb-scrollto-btn" onclick="$('#ladb_referer_widget').ladbScrollTo(event);"><i class="ladb-icon-arrow-down"></i></a>
@@ -355,7 +355,7 @@
     </div>
     <div class="ladb-metas">
         <h4 class="ladb-heading">{{ 'default.links'|trans() }}</h4>
-        {% include 'LadbCoreBundle:Collection/Collection:_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Collection/Collection/_meta-counter.part.html.twig' %}
         <div class="ladb-meta{% if howto.questionCount == 0 %} text-muted{% endif %}">
             <i class="ladb-icon-question ladb-icon-fixed-center"></i>
             {% if howto.questionCount > 0 %}
@@ -430,20 +430,20 @@
             {% endif %}
         </div>
     </div>
-    {% include 'LadbCoreBundle:Core/Tag:_metas.part.html.twig' with { 'tags':howto.tags, 'type':'howtos' } %}
-    {% include 'LadbCoreBundle:Core/License:_metas.part.html.twig' with { 'license':howto.license } %}
+    {% include '@LadbCore/Core/Tag/_metas.part.html.twig' with { 'tags':howto.tags, 'type':'howtos' } %}
+    {% include '@LadbCore/Core/License/_metas.part.html.twig' with { 'license':howto.license } %}
 {% endblock %}
 
 {% block contentSuggests %}
     {% if userHowtos is not empty %}
         <div class="panel panel-default">
             <div class="panel-heading">
-                {{ ('howto.howto.other_from')|trans() }} {% include 'LadbCoreBundle:Core/User:_displayname-link.part.html.twig' with { 'user':howto.user, 'noMicrodata':true } %}
+                {{ ('howto.howto.other_from')|trans() }} {% include '@LadbCore/Core/User/_displayname-link.part.html.twig' with { 'user':howto.user, 'noMicrodata':true } %}
             </div>
             <div class="panel-body row">
                 {% for userHowto in userHowtos %}
                     <div class="col-xs-6">
-                        {% include 'LadbCoreBundle:Howto/Howto:_thumbnail-link.part.html.twig' with { 'howto':userHowto } %}
+                        {% include '@LadbCore/Howto/Howto/_thumbnail-link.part.html.twig' with { 'howto':userHowto } %}
                     </div>
                 {% endfor %}
                 {% if howto.user.meta.publicHowtoCount > 2 %}
@@ -462,7 +462,7 @@
             <div class="panel-body row">
                 {% for similarHowto in similarHowtos %}
                     <div class="col-xs-6">
-                        {% include 'LadbCoreBundle:Howto/Howto:_thumbnail-link.part.html.twig' with { 'howto':similarHowto, 'classes':(loop.last ? null : 'ladb-margin-bottom') } %}
+                        {% include '@LadbCore/Howto/Howto/_thumbnail-link.part.html.twig' with { 'howto':similarHowto, 'classes':(loop.last ? null : 'ladb-margin-bottom') } %}
                     </div>
                 {% endfor %}
             </div>

@@ -4,7 +4,7 @@ namespace Ladb\CoreBundle\Event;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Ladb\CoreBundle\Fos\UserManager;
-use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
+use Twig\Environment;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use FOS\UserBundle\Event\FilterUserResponseEvent;
 use FOS\UserBundle\FOSUserEvents;
@@ -19,16 +19,16 @@ class UserListener implements EventSubscriberInterface {
 	private $mailerUtils;
 	private $messageUtils;
 	private $om;
-	private $templating;
+	private $twig;
 	private $userManager;
 	private $userUtils;
 
-	public function __construct($adminUsername, MailerUtils $mailerUtils, MessageUtils $messageUtils, EntityManagerInterface $om, EngineInterface $templating, UserManager $userManager, UserUtils $userUtils) {
+	public function __construct($adminUsername, MailerUtils $mailerUtils, MessageUtils $messageUtils, EntityManagerInterface $om, Environment $twig, UserManager $userManager, UserUtils $userUtils) {
 		$this->adminUsername = $adminUsername;
 		$this->mailerUtils = $mailerUtils;
 		$this->messageUtils = $messageUtils;
 		$this->om = $om;
-		$this->templating = $templating;
+		$this->twig = $twig;
 		$this->userManager = $userManager;
 		$this->userUtils = $userUtils;
 	}
@@ -68,7 +68,7 @@ class UserListener implements EventSubscriberInterface {
 		if (!is_null($sender)) {
 			// Unread message count: composeThread() leaves it to the caller
 			$user->getMeta()->incrementUnreadMessageCount();
-			$this->messageUtils->composeThread($sender, array( $user ), 'Bienvenue !', $this->templating->render('LadbCoreBundle:Core/User:message-welcome.md.twig', array( 'recipientUser' => $user )), null, true);
+			$this->messageUtils->composeThread($sender, array( $user ), 'Bienvenue !', $this->twig->render('@LadbCore/Core/User/message-welcome.md.twig', array( 'recipientUser' => $user )), null, true);
 		}
 
 		// Send admin email notification

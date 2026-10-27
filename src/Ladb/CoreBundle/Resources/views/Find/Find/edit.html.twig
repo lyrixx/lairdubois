@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Find/Find:_form.html.twig' %}
+{% extends '@LadbCore/Find/Find/_form.html.twig' %}
 
 {% set pageTitle = 'find.find.edit'|trans() %}
 {% set formAction = path('core_find_update', { 'id':find.id }) %}
@@ -9,7 +9,7 @@
 
 {% block form_buttons %}
     <a href="{{ path('core_find_show', { 'id':find.sluggedId }) }}" class="btn btn-default btn-block">{{ 'default.close'|trans() }}</a>
-    {% include 'LadbCoreBundle:Common:_form-btn-loading.part.html.twig' with { 'text':('default.update'|trans()), 'classes':'ladb-form-save-btn btn-primary btn-block' } %}
+    {% include '@LadbCore/Common/_form-btn-loading.part.html.twig' with { 'text':('default.update'|trans()), 'classes':'ladb-form-save-btn btn-primary btn-block' } %}
     {% if is_granted('ROLE_ADMIN') %}
         <div class="checkbox">
             <label>
@@ -21,7 +21,7 @@
 
 {% block sections %}
     {% if find.isDraft %}
-        {% include 'LadbCoreBundle:Find/Find:_draft-alert.part.html.twig' %}
+        {% include '@LadbCore/Find/Find/_draft-alert.part.html.twig' %}
     {% endif %}
     {{ parent() }}
 {% endblock %}

@@ -1,9 +1,9 @@
-{% extends 'LadbCoreBundle:Wonder:_wonder-list-thumbnail.part.html.twig' %}
+{% extends '@LadbCore/Wonder/_wonder-list-thumbnail.part.html.twig' %}
 
 {% set wonder = creation %}
 
 {% block entityMetas %}
-    {% include 'LadbCoreBundle:Wonder/Creation:_linkto-entity-metas.part.html.twig' %}
+    {% include '@LadbCore/Wonder/Creation/_linkto-entity-metas.part.html.twig' %}
     {{ parent() }}
     {% if entity.feedbackCount > 0 %}
         <li class="ladb-counter ladb-color-feedback"><i class="ladb-icon-feedback"></i> <span>{{ entity.feedbackCount|number_format(0, ',', ' ') }}</span></li>
@@ -12,6 +12,6 @@
 
 {% block footer %}
     {{ parent() }}
-    {% include 'LadbCoreBundle:Core/Spotlight:_spotlight-star.part.html.twig' %}
+    {% include '@LadbCore/Core/Spotlight/_spotlight-star.part.html.twig' %}
 {% endblock %}
 

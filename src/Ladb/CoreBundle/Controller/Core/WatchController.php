@@ -34,7 +34,7 @@ class WatchController extends AbstractController {
 
 	/**
 	 * @Route("/{entityType}/{entityId}/create", requirements={"entityType" = "\d+", "entityId" = "\d+"}, name="core_watch_create")
-	 * @Template("LadbCoreBundle:Core/Watch:create-xhr.html.twig")
+	 * @Template("@LadbCore/Core/Watch/create-xhr.html.twig")
 	 */
 	public function createAction(Request $request, $entityType, $entityId, TranslatorInterface $translator, TypableUtils $typableUtils, WatchableUtils $watchableUtils) {
 
@@ -70,7 +70,7 @@ class WatchController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_watch_delete")
-	 * @Template("LadbCoreBundle:Core/Watch:delete-xhr.html.twig")
+	 * @Template("@LadbCore/Core/Watch/delete-xhr.html.twig")
 	 */
 	public function deleteAction(Request $request, $id, TypableUtils $typableUtils, WatchableUtils $watchableUtils) {
 		$om = $this->getDoctrine()->getManager();
@@ -111,7 +111,7 @@ class WatchController extends AbstractController {
 	/**
 	 * @Route("/{entityType}/{entityId}", requirements={"entityType" = "\d+", "entityId" = "\d+"}, name="core_watch_list_byentity")
 	 * @Route("/{entityType}/{entityId}/{page}", requirements={"entityType" = "\d+", "entityId" = "\d+", "page" = "\d+"}, name="core_watch_list_byentity_page")
-	 * @Template("LadbCoreBundle:Core/Watch:list-byentity.html.twig")
+	 * @Template("@LadbCore/Core/Watch/list-byentity.html.twig")
 	 */
 	public function listByEntityAction(Request $request, $entityType, $entityId, PaginatorUtils $paginatorUtils, TypableUtils $typableUtils, $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -136,7 +136,7 @@ class WatchController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Core/Watch:list-byentity-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Core/Watch/list-byentity-xhr.html.twig', $parameters);
 		}
 		return $parameters;
 	}

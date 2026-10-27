@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:_list-n.part.html.twig' %}
+{% extends '@LadbCore/Common/_list-n.part.html.twig' %}
 
 {# set schools #}
 {# set nextPageUrl #}
@@ -12,7 +12,7 @@
                 </a>
             </div>
             <div class="ladb-tools">
-                <a href="#" class="btn btn-default" onclick="window.parent.schoolAdded('{% apply escape('js') %}{% include 'LadbCoreBundle:Knowledge/School:_form-thumbnail.part.html.twig' %}{% endapply %}');">Choisir</a>
+                <a href="#" class="btn btn-default" onclick="window.parent.schoolAdded('{% apply escape('js') %}{% include '@LadbCore/Knowledge/School/_form-thumbnail.part.html.twig' %}{% endapply %}');">Choisir</a>
             </div>
             <div class="ladb-body">
                 <h4 class="ladb-heading">{{ school.title }}</h4>

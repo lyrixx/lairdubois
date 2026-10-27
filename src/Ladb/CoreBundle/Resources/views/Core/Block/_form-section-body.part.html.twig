@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:_form-section.part.html.twig' %}
+{% extends '@LadbCore/Common/_form-section.part.html.twig' %}
 
 {# set formSection (facultative) #}
 {# set mandatory (facultative) #}
@@ -12,5 +12,5 @@
 {% set classes = 'ladb-block-section' %}
 
 {% block body %}
-    {% include 'LadbCoreBundle:Core/Block:_form-section-body-inner.part.html.twig' %}
+    {% include '@LadbCore/Core/Block/_form-section-body-inner.part.html.twig' %}
 {% endblock %}

@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:Layout/_show.html.twig' %}
+{% extends '@LadbCore/Common/Layout/_show.html.twig' %}
 
 {% block bodyJavascripts %}
     {{ parent() }}
@@ -32,8 +32,8 @@
 
 {% block contentBody %}
     {{ parent() }}
-    {% include 'LadbCoreBundle:Core/Vote:_modals.part.html.twig' %}
-    {% embed 'LadbCoreBundle:Common/Modal:_modal.part.html.twig' with { 'id':'proposals_modal', 'title':('knowledge.proposals'|trans()), 'classes':'modal-wide' } %}
+    {% include '@LadbCore/Core/Vote/_modals.part.html.twig' %}
+    {% embed '@LadbCore/Common/Modal/_modal.part.html.twig' with { 'id':'proposals_modal', 'title':('knowledge.proposals'|trans()), 'classes':'modal-wide' } %}
         {% block headerInner %}
             {{ 'default.loading'|trans() }}
         {% endblock %}

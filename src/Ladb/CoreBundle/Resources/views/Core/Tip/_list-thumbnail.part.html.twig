@@ -26,8 +26,8 @@
         </div>
         {% if not tiny %}
             <div class="ladb-footer">
-                {% include 'LadbCoreBundle:Common:_unviewed-bullet.part.html.twig' with { 'entity':tip } %}
-                {% include 'LadbCoreBundle:Common:_age.part.html.twig' with { 'entity':tip } %}
+                {% include '@LadbCore/Common/_unviewed-bullet.part.html.twig' with { 'entity':tip } %}
+                {% include '@LadbCore/Common/_age.part.html.twig' with { 'entity':tip } %}
             </div>
         {% endif %}
     </div>

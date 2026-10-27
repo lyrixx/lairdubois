@@ -1,6 +1,6 @@
-{% extends 'LadbCoreBundle:Wonder:_wonder-show.html.twig' %}
+{% extends '@LadbCore/Wonder/_wonder-show.html.twig' %}
 
-{% use 'LadbCoreBundle:Common/Blocks:map.blocks.html.twig' %}
+{% use '@LadbCore/Common/Blocks/map.blocks.html.twig' %}
 
 {% set wonderType = 'workshop' %}
 {% set wonder = workshop %}
@@ -57,13 +57,13 @@
 {% endblock %}
 
 {% block contentBody %}
-    {% include 'LadbCoreBundle:Core/Feedback:_contains-panel.part.html.twig' %}
+    {% include '@LadbCore/Core/Feedback/_contains-panel.part.html.twig' %}
     {{ parent() }}
 {% endblock %}
 
 {% block baseMetas %}
     {{ parent() }}
-    {% include 'LadbCoreBundle:Core/Feedback:_meta-counter.part.html.twig' %}
+    {% include '@LadbCore/Core/Feedback/_meta-counter.part.html.twig' %}
 {% endblock %}
 
 {% block characteristicsMetas %}
@@ -77,7 +77,7 @@
         </span>
         <span><i class="ladb-icon-location"></i>&nbsp;{{ 'default.location'|trans() }}</span>
         {% if hasMap %}
-            {% include 'LadbCoreBundle:Common:_map-area.part.html.twig' with { 'autoInit':true, 'mapHeight':'250px', 'markersUrl':path('core_workshop_location', { 'id':workshop.id }), 'classes':'ladb-map-thumbnail ladb-margin-top' } %}
+            {% include '@LadbCore/Common/_map-area.part.html.twig' with { 'autoInit':true, 'mapHeight':'250px', 'markersUrl':path('core_workshop_location', { 'id':workshop.id }), 'classes':'ladb-map-thumbnail ladb-margin-top' } %}
         {% endif %}
     </div>
 {% endblock %}
@@ -121,10 +121,10 @@
 
 {% block contentLinkedTo %}
     {% if workshop.planCount > 0 or workshop.howtoCount > 0 or workshop.workflowCount > 0 %}
-        {% embed 'LadbCoreBundle:Common:_linkedto-widget.part.html.twig' %}
+        {% embed '@LadbCore/Common/_linkedto-widget.part.html.twig' %}
             {% block body %}
                 {% if workshop.planCount > 0 %}
-                    {% include 'LadbCoreBundle:Common:_linkedto-widget-item.part.html.twig' with {
+                    {% include '@LadbCore/Common/_linkedto-widget-item.part.html.twig' with {
                         'path':workshop.planCount == 1 ? path('core_plan_show', { 'id':workshop.plans[0].sluggedId }) : path('core_workshop_plans', { 'id':workshop.id }),
                         'picture':workshop.plans[0].mainPicture,
                         'icon':'ladb-icon-plan',
@@ -132,7 +132,7 @@
                     } %}
                 {% endif %}
                 {% if workshop.howtoCount > 0 %}
-                    {% include 'LadbCoreBundle:Common:_linkedto-widget-item.part.html.twig' with {
+                    {% include '@LadbCore/Common/_linkedto-widget-item.part.html.twig' with {
                         'path':workshop.howtoCount == 1 ? path('core_howto_show', { 'id':workshop.howtos[0].sluggedId }) : path('core_workshop_howtos', { 'id':workshop.id }),
                         'picture':workshop.howtos[0].mainPicture,
                         'icon':'ladb-icon-howto',
@@ -140,7 +140,7 @@
                     } %}
                 {% endif %}
                 {% if workshop.workflowCount > 0 %}
-                    {% include 'LadbCoreBundle:Common:_linkedto-widget-item.part.html.twig' with {
+                    {% include '@LadbCore/Common/_linkedto-widget-item.part.html.twig' with {
                         'path':workshop.workflowCount == 1 ? path('core_workflow_show', { 'id':workshop.workflows[0].sluggedId }) : path('core_workshop_workflows', { 'id':workshop.id }),
                         'picture':workshop.workflows[0].mainPicture,
                         'icon':'ladb-icon-workflow',
@@ -153,5 +153,5 @@
 {% endblock %}
 
 {% block contentFeedbacks %}
-    {% include 'LadbCoreBundle:Core/Feedback:_widget.part.html.twig' %}
+    {% include '@LadbCore/Core/Feedback/_widget.part.html.twig' %}
 {% endblock %}

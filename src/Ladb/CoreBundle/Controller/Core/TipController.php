@@ -29,7 +29,7 @@ class TipController extends AbstractController {
 
 	/**
 	 * @Route("/new", name="core_tip_new")
-	 * @Template("LadbCoreBundle:Core/Tip:new.html.twig")
+	 * @Template("@LadbCore/Core/Tip/new.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_TIP')", statusCode=404, message="Not allowed (core_tip_new)")
 	 */
 	public function newAction() {
@@ -44,7 +44,7 @@ class TipController extends AbstractController {
 
 	/**
 	 * @Route("/create", methods={"POST"}, name="core_tip_create")
-	 * @Template("LadbCoreBundle:Core/Tip:new.html.twig")
+	 * @Template("@LadbCore/Core/Tip/new.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_TIP')", statusCode=404, message="Not allowed (core_tip_create)")
 	 */
 	public function createAction(Request $request, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TranslatorInterface $translator) {
@@ -83,7 +83,7 @@ class TipController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_tip_edit")
-	 * @Template("LadbCoreBundle:Core/Tip:edit.html.twig")
+	 * @Template("@LadbCore/Core/Tip/edit.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_TIP')", statusCode=404, message="Not allowed (core_tip_edit)")
 	 */
 	public function editAction($id) {
@@ -105,7 +105,7 @@ class TipController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_tip_update")
-	 * @Template("LadbCoreBundle:Core/Tip:edit.html.twig")
+	 * @Template("@LadbCore/Core/Tip/edit.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_TIP')", statusCode=404, message="Not allowed (core_tip_update)")
 	 */
 	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TranslatorInterface $translator) {
@@ -173,7 +173,7 @@ class TipController extends AbstractController {
 	/**
 	 * @Route("/", name="core_tip_list")
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_tip_list_page")
-	 * @Template("LadbCoreBundle:Core/Tip:list.html.twig")
+	 * @Template("@LadbCore/Core/Tip/list.html.twig")
 	 */
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, SearchUtils $searchUtils, $page = 0) {
 
@@ -238,7 +238,7 @@ class TipController extends AbstractController {
 		));
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Core/Tip:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Core/Tip/list-xhr.html.twig', $parameters);
 		}
 
 		return $parameters;
@@ -246,7 +246,7 @@ class TipController extends AbstractController {
 
 	/**
 	 * @Route("/{id}.html", name="core_tip_show")
-	 * @Template("LadbCoreBundle:Core/Tip:show.html.twig")
+	 * @Template("@LadbCore/Core/Tip/show.html.twig")
 	 */
 	public function showAction(Request $request, $id, EventDispatcherInterface $dispatcher, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();

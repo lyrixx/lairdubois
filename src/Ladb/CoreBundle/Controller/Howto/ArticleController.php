@@ -42,7 +42,7 @@ class ArticleController extends AbstractHowtoBasedController {
 
 	/**
 	 * @Route("/pas-a-pas/{id}/articles/new", requirements={"id" = "\d+"}, name="core_howto_article_new")
-	 * @Template("LadbCoreBundle:Howto/Article:new.html.twig")
+	 * @Template("@LadbCore/Howto/Article/new.html.twig")
 	 */
 	public function newAction(Request $request, $id) {
 
@@ -62,7 +62,7 @@ class ArticleController extends AbstractHowtoBasedController {
 
 	/**
 	 * @Route("/pas-a-pas/{id}/articles/create", requirements={"id" = "\d+"}, methods={"POST"}, name="core_howto_article_create")
-	 * @Template("LadbCoreBundle:Howto/Article:new.html.twig")
+	 * @Template("@LadbCore/Howto/Article/new.html.twig")
 	 */
 	public function createAction(Request $request, $id, BlockBodiedUtils $blockUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, TranslatorInterface $translator) {
 
@@ -158,7 +158,7 @@ class ArticleController extends AbstractHowtoBasedController {
 
 	/**
 	 * @Route("/pas-a-pas/articles/{id}/edit", requirements={"id" = "\d+"}, name="core_howto_article_edit")
-	 * @Template("LadbCoreBundle:Howto/Article:edit.html.twig")
+	 * @Template("@LadbCore/Howto/Article/edit.html.twig")
 	 */
 	public function editAction(Request $request, $id) {
 
@@ -184,7 +184,7 @@ class ArticleController extends AbstractHowtoBasedController {
 
 	/**
 	 * @Route("/pas-a-pas/articles/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_howto_article_update")
-	 * @Template("LadbCoreBundle:Howto/Article:edit.html.twig")
+	 * @Template("@LadbCore/Howto/Article/edit.html.twig")
 	 */
 	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EmbeddableUtils $embaddableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, MentionUtils $mentionUtils, SearchUtils $searchUtils, TranslatorInterface $translator) {
 
@@ -273,7 +273,7 @@ class ArticleController extends AbstractHowtoBasedController {
 
 	/**
 	 * @Route("/pas-a-pas/articles/{id}/widget", requirements={"id" = "\d+"}, name="core_howto_article_widget")
-	 * @Template("LadbCoreBundle:Howto/Article:widget-xhr.html.twig")
+	 * @Template("@LadbCore/Howto/Article/widget-xhr.html.twig")
 	 */
 	public function widgetAction(Request $request, $id) {
 
@@ -344,7 +344,7 @@ class ArticleController extends AbstractHowtoBasedController {
 
 	/**
 	 * @Route("/pas-a-pas/articles/{id}.html", name="core_howto_article_show")
-	 * @Template("LadbCoreBundle:Howto/Article:show.html.twig")
+	 * @Template("@LadbCore/Howto/Article/show.html.twig")
 	 */
 	public function showAction(Request $request, $id, EventDispatcherInterface $dispatcher, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();

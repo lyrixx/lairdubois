@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:Layout/_show.html.twig' %}
+{% extends '@LadbCore/Common/Layout/_show.html.twig' %}
 
 {% set entity = post %}
 
@@ -61,41 +61,41 @@
 {% endblock %}
 
 {% block bodyHeaderContainerContent %}
-    {% include 'LadbCoreBundle:Common/Header:_entity-show-header.part.html.twig' %}
+    {% include '@LadbCore/Common/Header/_entity-show-header.part.html.twig' %}
 {% endblock %}
 
 {% block contentBody %}
     {% if post.isDraft %}
-        {% include 'LadbCoreBundle:Blog/Post:_draft-alert.part.html.twig' %}
+        {% include '@LadbCore/Blog/Post/_draft-alert.part.html.twig' %}
     {% endif %}
     <div class="ladb-post">
-        {% include 'LadbCoreBundle:Core/Picture:_img-link.part.html.twig' with { 'picture':post.mainPicture, 'width':'594', 'height':'294', 'filterMode':'o', 'alt':post.title, 'noSizer':true, 'noLazyLoad':true } %}
+        {% include '@LadbCore/Core/Picture/_img-link.part.html.twig' with { 'picture':post.mainPicture, 'width':'594', 'height':'294', 'filterMode':'o', 'alt':post.title, 'noSizer':true, 'noLazyLoad':true } %}
         <div class="ladb-body" itemprop="articleBody">
             {% for block in post.bodyBlocks %}
-                {% include 'LadbCoreBundle:Core/Block:_show-'~block.strippedName~'.part.html.twig' %}
+                {% include '@LadbCore/Core/Block/_show-'~block.strippedName~'.part.html.twig' %}
             {% endfor %}
         </div>
         {% if post.updatedAt > post.createdAt %}
-            {% include 'LadbCoreBundle:Common:_updated-age.part.html.twig' with { 'entity':post } %}
+            {% include '@LadbCore/Common/_updated-age.part.html.twig' with { 'entity':post } %}
         {% endif %}
     </div>
     {% if not permissionContext.isOwner %}
-        {% include 'LadbCoreBundle:Common:_like-and-follow.part.html.twig' %}
+        {% include '@LadbCore/Common/_like-and-follow.part.html.twig' %}
     {% endif %}
-    {% include 'LadbCoreBundle:Core/Comment:_widget.part.html.twig' %}
+    {% include '@LadbCore/Core/Comment/_widget.part.html.twig' %}
 {% endblock %}
 
 {% block contentMetasPanel %}
     <div class="ladb-metas">
-        {% include 'LadbCoreBundle:Core/Like:_meta-counter.part.html.twig' %}
-        {% include 'LadbCoreBundle:Core/View:_meta-counter.part.html.twig' %}
-        {% include 'LadbCoreBundle:Core/Comment:_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/Like/_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/View/_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/Comment/_meta-counter.part.html.twig' %}
     </div>
     <div class="ladb-metas">
         <h4 class="ladb-heading">{{ 'default.links'|trans() }}</h4>
-        {% include 'LadbCoreBundle:Collection/Collection:_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Collection/Collection/_meta-counter.part.html.twig' %}
     </div>
-    {% include 'LadbCoreBundle:Core/Tag:_metas.part.html.twig' with { 'tags':post.tags, 'type':'posts' } %}
+    {% include '@LadbCore/Core/Tag/_metas.part.html.twig' with { 'tags':post.tags, 'type':'posts' } %}
 {% endblock %}
 
 {% block contentSuggests %}
@@ -107,7 +107,7 @@
             <div class="panel-body row">
                 {% for similarPost in similarPosts %}
                     <div class="col-xs-6">
-                        {% include 'LadbCoreBundle:Blog/Post:_thumbnail-link.part.html.twig' with { 'post':similarPost, 'classes':(loop.last ? null : 'ladb-margin-bottom') } %}
+                        {% include '@LadbCore/Blog/Post/_thumbnail-link.part.html.twig' with { 'post':similarPost, 'classes':(loop.last ? null : 'ladb-margin-bottom') } %}
                     </div>
                 {% endfor %}
             </div>

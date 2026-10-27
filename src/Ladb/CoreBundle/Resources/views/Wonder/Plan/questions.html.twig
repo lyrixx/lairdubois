@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:Layout/_list.html.twig' %}
+{% extends '@LadbCore/Common/Layout/_list.html.twig' %}
 
 {% set pageUrl = url('core_plan_questions', { 'id':plan.id }) %}
 {% set pageTitle = 'Questions associées à '~plan.title %}
@@ -11,7 +11,7 @@
 {% set hideHeaderContainer = false %}
 
 {% block bodyHeaderContainerContent %}
-    {% include 'LadbCoreBundle:Common/Header:_entity-header.part.html.twig' with { 'entity':plan } %}
+    {% include '@LadbCore/Common/Header/_entity-header.part.html.twig' with { 'entity':plan } %}
 {% endblock %}
 
 {% block bodyContainerContent %}
@@ -25,7 +25,7 @@
                 Liste des question recencées par <a href="{{ path('core_user_show', { 'username':plan.user.usernameCanonical }) }}">{{ plan.user.displayname }}</a> pour aide à la réalisation de la création <a href="{{ ladb_entity_url_action(plan) }}">{{ plan.title }}</a>.
             </div>
         </div>
-        {% embed 'LadbCoreBundle:Qa/Question:_list-filterbar.part.html.twig' %}
+        {% embed '@LadbCore/Qa/Question/_list-filterbar.part.html.twig' %}
             {% set filterPath = 'core_plan_questions_filter' %}
             {% set filterPathParameters = { 'id':plan.id } %}
             {% block filterbarRightContent%}
@@ -37,5 +37,5 @@
 {% endblock %}
 
 {% block autopagerContainerInner %}
-    {% include 'LadbCoreBundle:Qa/Question:_list-n.part.html.twig' %}
+    {% include '@LadbCore/Qa/Question/_list-n.part.html.twig' %}
 {% endblock %}

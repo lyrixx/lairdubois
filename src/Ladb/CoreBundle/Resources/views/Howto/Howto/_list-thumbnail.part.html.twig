@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:_masonry-list-thumbnail-wide.part.html.twig' %}
+{% extends '@LadbCore/Common/_masonry-list-thumbnail-wide.part.html.twig' %}
 
 {# set howto #}
 
@@ -10,7 +10,7 @@
 {% endblock %}
 
 {% block entityMetas %}
-    {% include 'LadbCoreBundle:Howto/Howto:_linkto-entity-metas.part.html.twig' %}
+    {% include '@LadbCore/Howto/Howto/_linkto-entity-metas.part.html.twig' %}
     {{ parent() }}
 {% endblock %}
 
@@ -23,6 +23,6 @@
 
 {% block footer %}
     {{ parent() }}
-    {% include 'LadbCoreBundle:Core/Spotlight:_spotlight-star.part.html.twig' %}
+    {% include '@LadbCore/Core/Spotlight/_spotlight-star.part.html.twig' %}
 {% endblock %}
 

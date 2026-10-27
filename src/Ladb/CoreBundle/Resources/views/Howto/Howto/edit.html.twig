@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Howto/Howto:_form.html.twig' %}
+{% extends '@LadbCore/Howto/Howto/_form.html.twig' %}
 
 {% set pageTitle = 'howto.howto.edit'|trans() %}
 {% set formAction = path('core_howto_update', { 'id':howto.id }) %}
@@ -32,12 +32,12 @@
 
 {% block form_buttons %}
     <a href="{{ path('core_howto_show', { 'id':howto.sluggedId }) }}" class="btn btn-default btn-block">{{ 'default.close'|trans() }}</a>
-    {% include 'LadbCoreBundle:Common:_form-btn-loading.part.html.twig' with { 'text':('default.update'|trans()), 'classes':'ladb-form-save-btn btn-primary btn-block' } %}
+    {% include '@LadbCore/Common/_form-btn-loading.part.html.twig' with { 'text':('default.update'|trans()), 'classes':'ladb-form-save-btn btn-primary btn-block' } %}
 {% endblock %}
 
 {% block sections %}
     {% if howto.isDraft %}
-        {% include 'LadbCoreBundle:Howto/Howto:_draft-alert.part.html.twig' %}
+        {% include '@LadbCore/Howto/Howto/_draft-alert.part.html.twig' %}
     {% endif %}
     {{ parent() }}
 {% endblock %}
@@ -59,7 +59,7 @@
                         <div class="pull-right">
                             <a href="{{ path('core_howto_article_edit', { 'id':article.id }) }}" class="btn btn-default btn-sm"><i class="ladb-icon-edit"></i><span class="ladb-hidden-mobile"> {{ 'default.edit'|trans() }}</span></a>
                             <a href="#delete_article_{{ article.id }}_modal" data-toggle="modal" class="btn btn-danger btn-sm"><i class="ladb-icon-delete"></i><span class="ladb-hidden-mobile"> {{ 'default.delete'|trans() }}</span></a>
-                            {% embed 'LadbCoreBundle:Common/Modal:_modal.part.html.twig' with { 'id':'delete_article_'~article.id~'_modal', 'title':('default.deletion'|trans()) } %}
+                            {% embed '@LadbCore/Common/Modal/_modal.part.html.twig' with { 'id':'delete_article_'~article.id~'_modal', 'title':('default.deletion'|trans()) } %}
                                 {% block bodyInner %}
                                     <p>La suppression de l'article <strong>{{ article.title }}</strong> entrainera la perte de toutes les informations qui lui sont relatives.</p>
                                     <p>Confirmez l'action pour continuer.</p>

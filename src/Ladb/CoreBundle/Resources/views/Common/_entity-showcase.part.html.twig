@@ -16,14 +16,14 @@
             {% set filterMode = 'o' %}
         {% endif %}
         {% block picture0 %}
-            {% include 'LadbCoreBundle:Core/Picture:_img-link.part.html.twig' with { 'picture':pictures[0] } %}
+            {% include '@LadbCore/Core/Picture/_img-link.part.html.twig' with { 'picture':pictures[0] } %}
         {% endblock %}
     </div>
     {% if pictures.count > 1  or editable or isPortrait %}
         {% for index in 1..4 %}
             <div class="ladb-showcase-picture-n col-xs-6 col-sm-3{% if pictures.count == 1 or index >= pictures.count and index > 2 and pictures.count <= 3 %} ladb-hidden-mobile{% endif %}">
                 {% if index < pictures.count %}
-                    {% include 'LadbCoreBundle:Core/Picture:_img-link.part.html.twig' with { 'picture':pictures[index], 'width':'128', 'height':'128', 'filterMode':'o', 'alt':alt, 'attributes':'data-pin-nopin="true"' } %}
+                    {% include '@LadbCore/Core/Picture/_img-link.part.html.twig' with { 'picture':pictures[index], 'width':'128', 'height':'128', 'filterMode':'o', 'alt':alt, 'attributes':'data-pin-nopin="true"' } %}
                 {% else %}
                     <div class="thumbnail thumbnail-empty">
                         {% if editable %}

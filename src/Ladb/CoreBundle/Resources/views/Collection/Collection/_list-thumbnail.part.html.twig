@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:_masonry-list-thumbnail-wide.part.html.twig' %}
+{% extends '@LadbCore/Common/_masonry-list-thumbnail-wide.part.html.twig' %}
 
 {% set gender = 'f' %}
 {% set entity = collection %}
@@ -15,7 +15,7 @@
         </li>
     {% endif %}{% endfor %}
     <li class="ladb-counter">
-        {% include 'LadbCoreBundle:Collection/Collection:_publications-counter.part.html.twig' with { 'classes':collection.viewCount > 0 ? 'ladb-horizontal-separator-right pull-right' : '' } %}
+        {% include '@LadbCore/Collection/Collection/_publications-counter.part.html.twig' with { 'classes':collection.viewCount > 0 ? 'ladb-horizontal-separator-right pull-right' : '' } %}
     </li>
 {% endblock %}
 

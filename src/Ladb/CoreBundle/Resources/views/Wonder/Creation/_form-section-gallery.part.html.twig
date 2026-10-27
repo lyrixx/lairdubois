@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:_form-section.part.html.twig' %}
+{% extends '@LadbCore/Common/_form-section.part.html.twig' %}
 
 {# set formCreations #}
 {# set creations #}
@@ -24,12 +24,12 @@
     {{ form_widget(formCreations) }}
     <ul id="creation_thumbnails" class="ladb-form-thumbnails">
         {% for creation in creations %}
-            {% include 'LadbCoreBundle:Wonder/Creation:_form-thumbnail.part.html.twig' with { 'wonder':creation } %}
+            {% include '@LadbCore/Wonder/Creation/_form-thumbnail.part.html.twig' with { 'wonder':creation } %}
         {% endfor %}
     </ul>
     <div id="linkto_creation_buttons">
         <a href="#linkto_creation_modal" data-toggle="modal" class="btn btn-success" onclick="updateCreationChoiceModal();"><i class="ladb-icon-link"></i> {{ 'wonder.creation.linkto'|trans() }}</a>
-        {% embed 'LadbCoreBundle:Common/Modal:_modal.part.html.twig' with { 'id':'linkto_creation_modal', 'title':('wonder.creation.linkto'|trans()), 'embeddedBody':true } %}
+        {% embed '@LadbCore/Common/Modal/_modal.part.html.twig' with { 'id':'linkto_creation_modal', 'title':('wonder.creation.linkto'|trans()), 'embeddedBody':true } %}
             {% block bodyInner %}
                 <iframe id="linkto_creation_modal_iframe" src="" frameborder="0" width="100%" height="380"></iframe>
             {% endblock %}

@@ -3,7 +3,7 @@
 namespace Ladb\CoreBundle\Utils;
 
 use Doctrine\Persistence\ManagerRegistry;
-use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
+use Twig\Environment;
 use Imagine\Gd\Imagine;
 use Imagine\Image\Box;
 use Imagine\Image\Palette\RGB;
@@ -18,12 +18,12 @@ class TextureUtils {
 	const NAME = 'ladb_core.texture_utils';
 
 	private $doctrine;
-	private $templating;
+	private $twig;
 	private $translator;
 
-	public function __construct(ManagerRegistry $doctrine, EngineInterface $templating, TranslatorInterface $translator) {
+	public function __construct(ManagerRegistry $doctrine, Environment $twig, TranslatorInterface $translator) {
 		$this->doctrine = $doctrine;
-		$this->templating = $templating;
+		$this->twig = $twig;
 		$this->translator = $translator;
 	}
 
@@ -204,7 +204,7 @@ class TextureUtils {
 
 			$zip->addFile($texture->getSinglePicture()->getAbsolutePath(), $singleFilename);
 			$zip->addFile($texture->getMosaicPicture()->getAbsolutePath(), $mosaicFilename);
-			$zip->addFromString('LisezMoi.txt', $this->templating->render('LadbCoreBundle:Knowledge/Wood:texture-readme.txt.twig', array( 'texture' => $texture, 'files' => array( $singleFilename, $mosaicFilename ) )));
+			$zip->addFromString('LisezMoi.txt', $this->twig->render('@LadbCore/Knowledge/Wood/texture-readme.txt.twig', array( 'texture' => $texture, 'files' => array( $singleFilename, $mosaicFilename ) )));
 			$zip->close();
 
 			return true;

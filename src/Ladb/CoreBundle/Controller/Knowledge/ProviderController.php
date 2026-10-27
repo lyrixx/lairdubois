@@ -45,7 +45,7 @@ class ProviderController extends AbstractController {
 
 	/**
 	 * @Route("/new", name="core_provider_new")
-	 * @Template("LadbCoreBundle:Knowledge/Provider:new.html.twig")
+	 * @Template("@LadbCore/Knowledge/Provider/new.html.twig")
 	 */
 	public function newAction(KnowledgeUtils $knowledgeUtils) {
 
@@ -65,7 +65,7 @@ class ProviderController extends AbstractController {
 
 	/**
 	 * @Route("/create", methods={"POST"}, name="core_provider_create")
-	 * @Template("LadbCoreBundle:Knowledge/Provider:new.html.twig")
+	 * @Template("@LadbCore/Knowledge/Provider/new.html.twig")
 	 */
 	public function createAction(Request $request, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, TranslatorInterface $translator) {
 
@@ -159,7 +159,7 @@ class ProviderController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/location.geojson", name="core_provider_location", defaults={"_format" = "json"})
-	 * @Template("LadbCoreBundle:Knowledge/Provider:location.geojson.twig")
+	 * @Template("@LadbCore/Knowledge/Provider/location.geojson.twig")
 	 */
 	public function locationAction(Request $request, $id) {
 
@@ -186,7 +186,7 @@ class ProviderController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/widget", requirements={"id" = "\d+"}, name="core_provider_widget")
-	 * @Template("LadbCoreBundle:Knowledge/Provider:widget-xhr.html.twig")
+	 * @Template("@LadbCore/Knowledge/Provider/widget-xhr.html.twig")
 	 */
 	public function widgetAction(Request $request, $id) {
 
@@ -202,7 +202,7 @@ class ProviderController extends AbstractController {
 	 * @Route("/", name="core_provider_list")
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_provider_list_page")
 	 * @Route(".geojson", defaults={"_format" = "json", "page"=-1, "layout"="geojson"}, name="core_provider_list_geojson")
-	 * @Template("LadbCoreBundle:Knowledge/Provider:list.html.twig")
+	 * @Template("@LadbCore/Knowledge/Provider/list.html.twig")
 	 */
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, ElasticaQueryUtils $elasticaQueryUtils, LocalisableUtils $localisableUtils, SearchUtils $searchUtils, $page = 0, $layout = 'view') {
 
@@ -451,7 +451,7 @@ class ProviderController extends AbstractController {
 				'collection' => $collection,
 			));
 
-			return $this->render('LadbCoreBundle:Knowledge/Provider:list-xhr.geojson.twig', $parameters);
+			return $this->render('@LadbCore/Knowledge/Provider/list-xhr.geojson.twig', $parameters);
 		}
 
 		// Dispatch publication event
@@ -459,14 +459,14 @@ class ProviderController extends AbstractController {
 
 		if ($request->isXmlHttpRequest()) {
 			if ($layout == 'choice') {
-				return $this->render('LadbCoreBundle:Knowledge/Provider:list-choice-xhr.html.twig', $parameters);
+				return $this->render('@LadbCore/Knowledge/Provider/list-choice-xhr.html.twig', $parameters);
 			} else {
-				return $this->render('LadbCoreBundle:Knowledge/Provider:list-xhr.html.twig', $parameters);
+				return $this->render('@LadbCore/Knowledge/Provider/list-xhr.html.twig', $parameters);
 			}
 		}
 
 		if ($layout == 'choice') {
-			return $this->render('LadbCoreBundle:Knowledge/Provider:list-choice.html.twig', $parameters);
+			return $this->render('@LadbCore/Knowledge/Provider/list-choice.html.twig', $parameters);
 		}
 
 		return $parameters;
@@ -476,7 +476,7 @@ class ProviderController extends AbstractController {
 	 * @Route("/{id}/creations", requirements={"id" = "\d+"}, name="core_provider_creations")
 	 * @Route("/{id}/creations/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_provider_creations_filter")
 	 * @Route("/{id}/creations/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_provider_creations_filter_page")
-	 * @Template("LadbCoreBundle:Knowledge/Provider:creations.html.twig")
+	 * @Template("@LadbCore/Knowledge/Provider/creations.html.twig")
 	 */
 	public function creationsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -504,7 +504,7 @@ class ProviderController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Wonder/Creation:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Wonder/Creation/list-xhr.html.twig', $parameters);
 		}
 
 		return array_merge($parameters, array(
@@ -516,7 +516,7 @@ class ProviderController extends AbstractController {
 	 * @Route("/{id}/pas-a-pas", requirements={"id" = "\d+"}, name="core_provider_howtos")
 	 * @Route("/{id}/pas-a-pas/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_provider_howtos_filter")
 	 * @Route("/{id}/pas-a-pas/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_provider_howtos_filter_page")
-	 * @Template("LadbCoreBundle:Knowledge/Provider:howtos.html.twig")
+	 * @Template("@LadbCore/Knowledge/Provider/howtos.html.twig")
 	 */
 	public function howtosAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -544,7 +544,7 @@ class ProviderController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Wonder/Creation:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Wonder/Creation/list-xhr.html.twig', $parameters);
 		}
 
 		return array_merge($parameters, array(
@@ -554,7 +554,7 @@ class ProviderController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/card.xhr", name="core_provider_card")
-	 * @Template("LadbCoreBundle:Knowledge/Provider:card-xhr.html.twig")
+	 * @Template("@LadbCore/Knowledge/Provider/card-xhr.html.twig")
 	 */
 	public function cardAction(Request $request, $id) {
 		if (!$request->isXmlHttpRequest()) {
@@ -578,7 +578,7 @@ class ProviderController extends AbstractController {
 
 	/**
 	 * @Route("/{id}.html", name="core_provider_show")
-	 * @Template("LadbCoreBundle:Knowledge/Provider:show.html.twig")
+	 * @Template("@LadbCore/Knowledge/Provider/show.html.twig")
 	 */
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ElasticaQueryUtils $elasticaQueryUtils, LikableUtils $likableUtils, ReviewableUtils $reviewableUtils, SearchUtils $searchUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();

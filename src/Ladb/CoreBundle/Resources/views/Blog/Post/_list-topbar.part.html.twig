@@ -1,10 +1,10 @@
-{% extends 'LadbCoreBundle:Common:_list-topbar.part.html.twig' %}
+{% extends '@LadbCore/Common/_list-topbar.part.html.twig' %}
 
 {% set heading = 'blog.post.list'|trans() %}
 {% set headingLevel = 2 %}
 
 {% block listTopbarMiddleInner %}
-    {% include 'LadbCoreBundle:Blog/Post:_searchbox.part.html.twig' %}
+    {% include '@LadbCore/Blog/Post/_searchbox.part.html.twig' %}
 {% endblock %}
 
 {% block listTopbarRightOuter %}

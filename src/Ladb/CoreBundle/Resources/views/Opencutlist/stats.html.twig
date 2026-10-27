@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:Layout/_list.html.twig' %}
+{% extends '@LadbCore/Common/Layout/_list.html.twig' %}
 
 {% set pageTitle = 'OpenCutList Stats' %}
 {% set hideHeaderContainer = false %}
@@ -113,7 +113,7 @@
 {% endblock %}
 
 {% block bodyHeaderContainerContent %}
-    {% include 'LadbCoreBundle:Opencutlist:_list-topbar.part.html.twig' %}
+    {% include '@LadbCore/Opencutlist/_list-topbar.part.html.twig' %}
 {% endblock %}
 
 {% block bodyContainerContent %}
@@ -129,16 +129,16 @@
             </div>
         </div>
         <div class="col-md-3 col-xs-12">
-            {% include 'LadbCoreBundle:Opencutlist:_country-panel.part.html.twig' with { 'title':'Upgrades', 'data':downloadsByCountry, 'totalCount':downloadsCount , 'color':'FD6586' } %}
+            {% include '@LadbCore/Opencutlist/_country-panel.part.html.twig' with { 'title':'Upgrades', 'data':downloadsByCountry, 'totalCount':downloadsCount , 'color':'FD6586' } %}
         </div>
         <div class="col-md-3 col-xs-12">
-            {% include 'LadbCoreBundle:Opencutlist:_country-panel.part.html.twig' with { 'title':'Manifests', 'data':manifestsByCountry, 'totalCount':manifestsCount, 'color':'3DA4E8' } %}
+            {% include '@LadbCore/Opencutlist/_country-panel.part.html.twig' with { 'title':'Manifests', 'data':manifestsByCountry, 'totalCount':manifestsCount, 'color':'3DA4E8' } %}
         </div>
         <div class="col-md-3 col-xs-12">
-            {% include 'LadbCoreBundle:Opencutlist:_country-panel.part.html.twig' with { 'title':'Tutorials', 'data':tutorialsByCountry, 'totalCount':tutorialsCount, 'color':'71D4A9' } %}
+            {% include '@LadbCore/Opencutlist/_country-panel.part.html.twig' with { 'title':'Tutorials', 'data':tutorialsByCountry, 'totalCount':tutorialsCount, 'color':'71D4A9' } %}
         </div>
         <div class="col-md-3 col-xs-12">
-            {% include 'LadbCoreBundle:Opencutlist:_country-panel.part.html.twig' with { 'title':'Docs', 'data':docsByCountry, 'totalCount':docsCount, 'color':'FED06E' } %}
+            {% include '@LadbCore/Opencutlist/_country-panel.part.html.twig' with { 'title':'Docs', 'data':docsByCountry, 'totalCount':docsCount, 'color':'FED06E' } %}
         </div>
     </div>
     {{ parent() }}
@@ -146,5 +146,5 @@
 
 {% block autopagerContainerInner %}
     <h2>{{ accesses.count }} requêtes</h2>
-    {% include 'LadbCoreBundle:Opencutlist:_list-n.part.html.twig' %}
+    {% include '@LadbCore/Opencutlist/_list-n.part.html.twig' %}
 {% endblock %}

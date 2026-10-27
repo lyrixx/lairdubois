@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:_list-n.part.html.twig' %}
+{% extends '@LadbCore/Common/_list-n.part.html.twig' %}
 
 {# set questions #}
 {# set nextPageUrl #}
@@ -12,7 +12,7 @@
                 </a>
             </div>
             <div class="ladb-tools">
-                <a href="#" class="btn btn-default" onclick="window.parent.questionAdded('{% apply escape('js') %}{% include 'LadbCoreBundle:Qa/Question:_form-thumbnail.part.html.twig' %}{% endapply %}');">Choisir</a>
+                <a href="#" class="btn btn-default" onclick="window.parent.questionAdded('{% apply escape('js') %}{% include '@LadbCore/Qa/Question/_form-thumbnail.part.html.twig' %}{% endapply %}');">Choisir</a>
             </div>
             <div class="ladb-body">
                 <h4 class="ladb-heading">{{ question.title }}</h4>

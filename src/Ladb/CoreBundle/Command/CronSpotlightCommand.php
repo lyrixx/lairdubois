@@ -5,7 +5,7 @@ namespace Ladb\CoreBundle\Command;
 use Ladb\CoreBundle\Entity\Core\Member;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
+use Twig\Environment;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -29,7 +29,7 @@ class CronSpotlightCommand extends Command {
 	private $mastodonInstance;
 	private $om;
 	private $searchUtils;
-	private $templating;
+	private $twig;
 	private $twitterAccessSecret;
 	private $twitterAccessToken;
 	private $twitterConsumerKey;
@@ -46,7 +46,7 @@ class CronSpotlightCommand extends Command {
 		$mastodonInstance,
 		EntityManagerInterface $om,
 		SearchUtils $searchUtils,
-		EngineInterface $templating,
+		Environment $twig,
 		$twitterAccessSecret,
 		$twitterAccessToken,
 		$twitterConsumerKey,
@@ -62,7 +62,7 @@ class CronSpotlightCommand extends Command {
 		$this->mastodonInstance = $mastodonInstance;
 		$this->om = $om;
 		$this->searchUtils = $searchUtils;
-		$this->templating = $templating;
+		$this->twig = $twig;
 		$this->twitterAccessSecret = $twitterAccessSecret;
 		$this->twitterAccessToken = $twitterAccessToken;
 		$this->twitterConsumerKey = $twitterConsumerKey;
@@ -338,7 +338,7 @@ EOT
         return false;
 
 		$success = false;
-		$status = $this->templating->render('LadbCoreBundle:Command:_cron-spotlight-twitter-status.txt.twig', array( 'spotlight' => $spotlight, 'entity' => $entity));
+		$status = $this->twig->render('@LadbCore/Command/_cron-spotlight-twitter-status.txt.twig', array( 'spotlight' => $spotlight, 'entity' => $entity));
 		$mediaIds = '';
 		if ($verbose) {
 			$output->writeln('<info>Posting to Twitter (<fg=yellow>'.$status.'</fg=yellow>) ...</info>');
@@ -407,8 +407,8 @@ EOT
         return false;
 
 		$success = true;
-		$message = $this->templating->render('LadbCoreBundle:Command:_cron-spotlight-facebook-message.txt.twig', array( 'spotlight' => $spotlight, 'entity' => $entity));
-		$link = $this->templating->render('LadbCoreBundle:Command:_cron-spotlight-facebook-link.txt.twig', array( 'spotlight' => $spotlight, 'entity' => $entity));
+		$message = $this->twig->render('@LadbCore/Command/_cron-spotlight-facebook-message.txt.twig', array( 'spotlight' => $spotlight, 'entity' => $entity));
+		$link = $this->twig->render('@LadbCore/Command/_cron-spotlight-facebook-link.txt.twig', array( 'spotlight' => $spotlight, 'entity' => $entity));
 		if ($verbose) {
 			$output->writeln('<info>Posting to Facebook (<fg=yellow>'.$message.' '.$link.'</fg=yellow>) ...</info>');
 		}
@@ -467,7 +467,7 @@ EOT
 
 	private function _publishOnMastodon($spotlight, $entity, $forced, $forcedMastodon, $verbose, $output) {
 
-		$status = $this->templating->render('LadbCoreBundle:Command:_cron-spotlight-mastodon-status.txt.twig', array( 'spotlight' => $spotlight, 'entity' => $entity));
+		$status = $this->twig->render('@LadbCore/Command/_cron-spotlight-mastodon-status.txt.twig', array( 'spotlight' => $spotlight, 'entity' => $entity));
 		if ($verbose) {
 			$output->writeln('<info>Posting to Mastodon (<fg=yellow>'.$status.'</fg=yellow>) ...</info>');
 		}

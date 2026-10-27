@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:_list-n.part.html.twig' %}
+{% extends '@LadbCore/Common/_list-n.part.html.twig' %}
 
 {# set donations #}
 {# set nextPageUrl #}
@@ -9,10 +9,10 @@
             <div class="ladb-donation-row-left">
                 <div class="media">
                     <div class="media-left">
-                        {% include 'LadbCoreBundle:Core/User:_avatar-link.part.html.twig' with { 'user':donation.user } %}
+                        {% include '@LadbCore/Core/User/_avatar-link.part.html.twig' with { 'user':donation.user } %}
                     </div>
                     <div class="media-body">
-                        {% include 'LadbCoreBundle:Core/User:_displayname-link.part.html.twig' with { 'user':donation.user } %}{% include 'LadbCoreBundle:Common:_age.part.html.twig' with { 'entity':donation } %}
+                        {% include '@LadbCore/Core/User/_displayname-link.part.html.twig' with { 'user':donation.user } %}{% include '@LadbCore/Common/_age.part.html.twig' with { 'entity':donation } %}
                         <div class="ladb-ref">N° de don: <span>{{ donation.hashid }}</span></div>
                     </div>
                 </div>

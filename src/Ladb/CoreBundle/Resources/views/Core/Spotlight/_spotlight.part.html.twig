@@ -7,7 +7,7 @@
     <div class="ladb-shadow">
         <div class="container">
             <div class="ladb-caption">
-                {% include 'LadbCoreBundle:Core/User:_avatar-link.part.html.twig' with { 'user':entity.user, 'size':'50', 'linkClasses':'ladb-avatar ladb-hidden-mobile', 'noMicrodata':true } %}
+                {% include '@LadbCore/Core/User/_avatar-link.part.html.twig' with { 'user':entity.user, 'size':'50', 'linkClasses':'ladb-avatar ladb-hidden-mobile', 'noMicrodata':true } %}
                 <ul class="ladb-counters">
                     {% block counters %}
                         <li class="ladb-counter"><i class="ladb-icon-eye"></i> {{ entity.viewCount|number_format(0, ',', ' ') }}</li>
@@ -25,7 +25,7 @@
                 <div class="ladb-body">
                     <h2 class="ladb-heading" ><i class="ladb-icon-{{ ladb_entity_type_stripped_name(entity) }}"></i> {{ entity.title|raw }}</h2>
                     <span class="ladb-subheading">
-                        {% include 'LadbCoreBundle:Common:_author.part.html.twig' with { 'noMicrodata':true } %}{% include 'LadbCoreBundle:Common:_age.part.html.twig' with { 'classes':'ladb-hidden-mobile' } %}
+                        {% include '@LadbCore/Common/_author.part.html.twig' with { 'noMicrodata':true } %}{% include '@LadbCore/Common/_age.part.html.twig' with { 'classes':'ladb-hidden-mobile' } %}
                     </span>
                 </div>
             </div>

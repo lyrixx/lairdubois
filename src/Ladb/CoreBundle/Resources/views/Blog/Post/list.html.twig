@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:Layout/_list.html.twig' %}
+{% extends '@LadbCore/Common/Layout/_list.html.twig' %}
 
 {% set pageTitle = 'blog.title'|trans() %}
 {% set pageDescription = 'blog.description'|trans() %}
@@ -13,7 +13,7 @@
 {% set countableEntityList = true %}
 
 {% block bodyHeaderContainerContent %}
-    {% include 'LadbCoreBundle:Blog/Post:_list-topbar.part.html.twig' %}
+    {% include '@LadbCore/Blog/Post/_list-topbar.part.html.twig' %}
 {% endblock %}
 
 {% block bodyContainerContent %}
@@ -24,5 +24,5 @@
 {% endblock %}
 
 {% block autopagerContainerInner %}
-    {% include 'LadbCoreBundle:Blog/Post:_list-n.part.html.twig' %}
+    {% include '@LadbCore/Blog/Post/_list-n.part.html.twig' %}
 {% endblock %}

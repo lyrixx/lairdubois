@@ -1,9 +1,9 @@
-{% extends 'LadbCoreBundle:Common:_list-topbar.part.html.twig' %}
+{% extends '@LadbCore/Common/_list-topbar.part.html.twig' %}
 
 {% set heading = 'collection.collection.list'|trans() %}
 
 {% block listTopbarMiddleInner %}
-    {% include 'LadbCoreBundle:Collection:Collection/_searchbox.part.html.twig' %}
+    {% include '@LadbCore/Collection/Collection/_searchbox.part.html.twig' %}
 {% endblock %}
 
 {% block listTopbarRightInner %}

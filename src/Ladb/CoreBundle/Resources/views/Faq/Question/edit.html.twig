@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Faq/Question:_form.html.twig' %}
+{% extends '@LadbCore/Faq/Question/_form.html.twig' %}
 
 {% set pageTitle = 'faq.question.edit'|trans() %}
 {% set formAction = path('core_faq_question_update', { 'id':question.id }) %}
@@ -9,12 +9,12 @@
 
 {% block form_buttons %}
     <a href="{{ path('core_faq_question_show', { 'id':question.sluggedId }) }}" class="btn btn-default btn-block">{{ 'default.close'|trans() }}</a>
-    {% include 'LadbCoreBundle:Common:_form-btn-loading.part.html.twig' with { 'text':('default.update'|trans()), 'classes':'ladb-form-save-btn btn-primary btn-block' } %}
+    {% include '@LadbCore/Common/_form-btn-loading.part.html.twig' with { 'text':('default.update'|trans()), 'classes':'ladb-form-save-btn btn-primary btn-block' } %}
 {% endblock %}
 
 {% block sections %}
     {% if question.isDraft %}
-        {% include 'LadbCoreBundle:Faq/Question:_draft-alert.part.html.twig' %}
+        {% include '@LadbCore/Faq/Question/_draft-alert.part.html.twig' %}
     {% endif %}
     {{ parent() }}
 {% endblock %}

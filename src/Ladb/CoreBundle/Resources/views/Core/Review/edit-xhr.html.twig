@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Core/Review:_form.html.twig' %}
+{% extends '@LadbCore/Core/Review/_form.html.twig' %}
 
 {% set i18nPrefix = i18nPrefix|default(ladb_entity_type_stripped_name(ladb_entity(review.entityType, review.entityId))) %}
 {% set formAction = path('core_review_update', { 'id':review.id }) %}
@@ -7,5 +7,5 @@
 
 {% block buttons %}
     {{ parent() }}
-    {% include 'LadbCoreBundle:Common:_form-btn-loading.part.html.twig' with { 'text':('default.save'|trans()), 'classes':'btn-primary' } %}
+    {% include '@LadbCore/Common/_form-btn-loading.part.html.twig' with { 'text':('default.save'|trans()), 'classes':'btn-primary' } %}
 {% endblock %}

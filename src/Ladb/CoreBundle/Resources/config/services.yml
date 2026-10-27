@@ -53,6 +53,13 @@ services:
     class: Ladb\CoreBundle\Fos\UserManager
     arguments: ['@fos_user.util.password_updater', '@ladb_core.fos.canonical_fields_updater', '@doctrine.orm.entity_manager', '%fos_user.model.user.class%']
   Ladb\CoreBundle\Fos\UserManager: '@ladb_core.fos.user_manager'
+  # The default mailer of FOSUserBundle needs the templating component (see the class): fos_user.service.mailer
+  ladb_core.fos.mailer:
+    class: Ladb\CoreBundle\Fos\Mailer
+    arguments:
+      $parameters:
+        template: { confirmation: '%fos_user.registration.confirmation.template%', resetting: '%fos_user.resetting.email.template%' }
+        from_email: { confirmation: '%fos_user.registration.confirmation.from_email%', resetting: '%fos_user.resetting.email.from_email%' }
   # FOSUserBundle has no alias by type for it, nor an interface (UserController::adminActivateAction()):
   # an alias of the id, by its class
   FOS\UserBundle\Util\UserManipulator: '@fos_user.util.user_manipulator'
@@ -170,7 +177,7 @@ services:
   Ladb\CoreBundle\Utils\MessageUtils: '@ladb_core.message_utils'
   ladb_core.plan_utils:
     class: Ladb\CoreBundle\Utils\PlanUtils
-    arguments: ['@templating', '@router']
+    arguments: ['@twig', '@router']
   Ladb\CoreBundle\Utils\PlanUtils: '@ladb_core.plan_utils'
   ladb_core.graphic_utils:
     class: Ladb\CoreBundle\Utils\GraphicUtils

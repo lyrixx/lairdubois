@@ -19,15 +19,15 @@
         <textarea class="form-control" style="font-family: courier;" rows="5" onclick="$(this).focus(); $(this).select();"></textarea>
     </div>
     <div class="tab-pane" id="ladb_sticker_preview" style="height: 300px;">
-        {% include 'LadbCoreBundle:Common:_loading.part.html.twig' with { 'noHidden':true} %}
+        {% include '@LadbCore/Common/_loading.part.html.twig' with { 'noHidden':true} %}
         <p class="text-center"><img src="" height="300"></p>
     </div>
 </div>
 <script>
     $('#share_modal').on('show.bs.modal', function (e) {
-        $("#ladb_sticker_bbcode textarea").val("{{ include('LadbCoreBundle:Wonder:_sticker.bbcode.twig')|escape('js') }}");
-        $("#ladb_sticker_html textarea").val("{{ include('LadbCoreBundle:Wonder:_sticker.html.twig')|escape('js') }}");
-        $("#ladb_sticker_markdown textarea").val("{{ include('LadbCoreBundle:Wonder:_sticker.markdown.twig')|escape('js') }}");
+        $("#ladb_sticker_bbcode textarea").val("{{ include('@LadbCore/Wonder/_sticker.bbcode.twig')|escape('js') }}");
+        $("#ladb_sticker_html textarea").val("{{ include('@LadbCore/Wonder/_sticker.html.twig')|escape('js') }}");
+        $("#ladb_sticker_markdown textarea").val("{{ include('@LadbCore/Wonder/_sticker.markdown.twig')|escape('js') }}");
     });
     $('a[href="#ladb_sticker_preview"]').on("shown.bs.tab", function (e) {
         var img = $("#ladb_sticker_preview img");

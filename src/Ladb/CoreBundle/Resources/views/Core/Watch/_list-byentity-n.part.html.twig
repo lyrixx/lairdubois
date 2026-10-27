@@ -1,10 +1,10 @@
-{% extends 'LadbCoreBundle:Common:_list-n.part.html.twig' %}
+{% extends '@LadbCore/Common/_list-n.part.html.twig' %}
 
 {# set watchs #}
 {# set nextPageUrl #}
 
 {% block items %}
     {% for watch in watchs %}
-        {% include 'LadbCoreBundle:Core/User:_list-row.part.html.twig' with { 'user':watch.user } %}
+        {% include '@LadbCore/Core/User/_list-row.part.html.twig' with { 'user':watch.user } %}
     {% endfor %}
 {% endblock %}

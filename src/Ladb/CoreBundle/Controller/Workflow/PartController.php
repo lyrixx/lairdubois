@@ -16,7 +16,7 @@ class PartController extends AbstractWorkflowBasedController {
 
 	/**
 	 * @Route("/{id}/part/new", requirements={"id" = "\d+"}, name="core_workflow_part_new")
-	 * @Template("LadbCoreBundle:Workflow:Part/new-xhr.html.twig")
+	 * @Template("@LadbCore/Workflow/Part/new-xhr.html.twig")
 	 */
 	public function newAction(Request $request, $id) {
 
@@ -35,7 +35,7 @@ class PartController extends AbstractWorkflowBasedController {
 
 	/**
 	 * @Route("/{id}/part/create", requirements={"id" = "\d+"}, methods={"POST"}, name="core_workflow_part_create")
-	 * @Template("LadbCoreBundle:Workflow:Part/new-xhr.html.twig")
+	 * @Template("@LadbCore/Workflow/Part/new-xhr.html.twig")
 	 */
 	public function createAction(Request $request, $id) {
 
@@ -57,7 +57,7 @@ class PartController extends AbstractWorkflowBasedController {
 
 			$om->flush();
 
-			return $this->render('LadbCoreBundle:Workflow:Part/create-xhr.html.twig', array(
+			return $this->render('@LadbCore/Workflow/Part/create-xhr.html.twig', array(
 				'part' => $part,
 			));
 		}
@@ -70,7 +70,7 @@ class PartController extends AbstractWorkflowBasedController {
 
 	/**
 	 * @Route("/part/{id}/edit", requirements={"id" = "\d+"}, name="core_workflow_part_edit")
-	 * @Template("LadbCoreBundle:Workflow:Part/edit-xhr.html.twig")
+	 * @Template("@LadbCore/Workflow/Part/edit-xhr.html.twig")
 	 */
 	public function editAction(Request $request, $id) {
 		$om = $this->getDoctrine()->getManager();
@@ -92,7 +92,7 @@ class PartController extends AbstractWorkflowBasedController {
 
 	/**
 	 * @Route("/part/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_workflow_part_update")
-	 * @Template("LadbCoreBundle:Workflow:Part/edit-xhr.html.twig")
+	 * @Template("@LadbCore/Workflow/Part/edit-xhr.html.twig")
 	 */
 	public function updateAction(Request $request, $id) {
 		$om = $this->getDoctrine()->getManager();
@@ -133,7 +133,7 @@ class PartController extends AbstractWorkflowBasedController {
 				));
 			}
 
-			return $this->render('LadbCoreBundle:Workflow:Part/update-xhr.html.twig', array(
+			return $this->render('@LadbCore/Workflow/Part/update-xhr.html.twig', array(
 				'part' => $part,
 			));
 		}
@@ -146,7 +146,7 @@ class PartController extends AbstractWorkflowBasedController {
 
 	/**
 	 * @Route("/part/{id}/delete", requirements={"id" = "\d+"}, name="core_workflow_part_delete")
-	 * @Template("LadbCoreBundle:Workflow:Part/delete-xhr.html.twig")
+	 * @Template("@LadbCore/Workflow/Part/delete-xhr.html.twig")
 	 */
 	public function deleteAction(Request $request, $id) {
 		$om = $this->getDoctrine()->getManager();
@@ -192,7 +192,7 @@ class PartController extends AbstractWorkflowBasedController {
 
 	/**
 	 * @Route("/{id}/parts", requirements={"id" = "\d+"}, name="core_workflow_part_list")
-	 * @Template("LadbCoreBundle:Workflow:Part/list-xhr.html.twig")
+	 * @Template("@LadbCore/Workflow/Part/list-xhr.html.twig")
 	 */
 	public function listAction(Request $request, $id) {
 

@@ -58,7 +58,7 @@ class PictureController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_picture_edit")
-	 * @Template("LadbCoreBundle:Core/Picture:edit-xhr.html.twig")
+	 * @Template("@LadbCore/Core/Picture/edit-xhr.html.twig")
 	 */
 	public function editAction(Request $request, $id) {
 		if (!$request->isXmlHttpRequest()) {
@@ -93,7 +93,7 @@ class PictureController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_picture_update")
-	 * @Template("LadbCoreBundle:Core/Picture:update-error-xhr.html.twig")
+	 * @Template("@LadbCore/Core/Picture/update-error-xhr.html.twig")
 	 */
 	public function updateAction(Request $request, $id) {
 		if (!$request->isXmlHttpRequest()) {
@@ -178,7 +178,7 @@ class PictureController extends AbstractController {
 
 			$om->flush();
 
-			return $this->render('LadbCoreBundle:Core/Picture:update-success-xhr.html.twig', array(
+			return $this->render('@LadbCore/Core/Picture/update-success-xhr.html.twig', array(
 				'picture'     => $picture,
 				'formSection' => $request->get('formSection', 'pictures'),
 				'sortable'    => $request->get('sortable', false),

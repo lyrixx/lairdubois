@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:Layout/_list.html.twig' %}
+{% extends '@LadbCore/Common/Layout/_list.html.twig' %}
 
 {% set pageTitle = 'core.tip.list'|trans() %}
 {% set pageDescription = 'core.tip.description'|trans() %}
@@ -11,9 +11,9 @@
 {% set hideHeaderContainer = false %}
 
 {% block bodyHeaderContainerContent %}
-    {% include 'LadbCoreBundle:Core/Tip:_list-topbar.part.html.twig' %}
+    {% include '@LadbCore/Core/Tip/_list-topbar.part.html.twig' %}
 {% endblock %}
 
 {% block autopagerContainerInner %}
-    {% include 'LadbCoreBundle:Core/Tip:_list-n.part.html.twig' %}
+    {% include '@LadbCore/Core/Tip/_list-n.part.html.twig' %}
 {% endblock %}

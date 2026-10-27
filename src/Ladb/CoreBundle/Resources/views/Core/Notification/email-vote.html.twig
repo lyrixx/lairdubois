@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Core/Notification:_email.html.twig' %}
+{% extends '@LadbCore/Core/Notification/_email.html.twig' %}
 
 {# set row #}
 
@@ -17,7 +17,7 @@
     </p>
     <table cellspacing="10" cellpadding="0">
         <tbody>
-        {% include 'LadbCoreBundle:Common:_entity-email-row.part.html.twig' with { 'entity':row.entity } %}
+        {% include '@LadbCore/Common/_entity-email-row.part.html.twig' with { 'entity':row.entity } %}
         </tbody>
     </table>
     <p style="margin: 5px 0 5px 0;">
@@ -29,7 +29,7 @@
                         <strong>{{ ('knowledge.'~row.entity.strippedName~'.field.'~row.activityEntity.parentEntityField)|trans() }} :</strong>
                     </td>
                     <td>
-                        {% include 'LadbCoreBundle:Knowledge:_field-show-meta-'~fieldType~'.part.html.twig' with { 'knowledge':row.entity, 'value':row.activityEntity, 'emailRendered':true } %}{% if fieldSuffix is not null %}&nbsp;<em>{{ fieldSuffix|raw }}</em>{% endif %}
+                        {% include '@LadbCore/Knowledge/_field-show-meta-'~fieldType~'.part.html.twig' with { 'knowledge':row.entity, 'value':row.activityEntity, 'emailRendered':true } %}{% if fieldSuffix is not null %}&nbsp;<em>{{ fieldSuffix|raw }}</em>{% endif %}
                     </td>
                 {% endif %}
             </tr>

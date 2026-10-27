@@ -1,8 +1,8 @@
-{% extends 'LadbCoreBundle:Collection:Collection/show.html.twig' %}
+{% extends '@LadbCore/Collection/Collection/show.html.twig' %}
 
 {% block contentBody %}
     {% if not collection.isPublic and collection.entryCount > 0 %}
-        {% include 'LadbCoreBundle:Collection:Collection/_draft-alert.part.html.twig' %}
+        {% include '@LadbCore/Collection/Collection/_draft-alert.part.html.twig' %}
     {% endif %}
     <div class="ladb-collection">
         {% if collection.htmlBody is not empty %}
@@ -45,20 +45,20 @@
         {% endif %}
     </div>
     {% if collection.updatedAt > collection.createdAt %}
-        {% include 'LadbCoreBundle:Common:_updated-age.part.html.twig' with { 'entity':collection } %}
+        {% include '@LadbCore/Common/_updated-age.part.html.twig' with { 'entity':collection } %}
     {% endif %}
-    {% include 'LadbCoreBundle:Core/Comment:_widget.part.html.twig' %}
+    {% include '@LadbCore/Core/Comment/_widget.part.html.twig' %}
 {% endblock %}
 
 {% block contentMetasPanel %}
     <div class="ladb-metas">
-        {% include 'LadbCoreBundle:Core/Like:_meta-counter.part.html.twig' %}
-        {% include 'LadbCoreBundle:Core/View:_meta-counter.part.html.twig' %}
-        {% include 'LadbCoreBundle:Core/Comment:_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/Like/_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/View/_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/Comment/_meta-counter.part.html.twig' %}
     </div>
     <div class="ladb-metas">
         <h4 class="ladb-heading">{{ 'default.links'|trans() }}</h4>
-        {% include 'LadbCoreBundle:Collection/Collection:_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Collection/Collection/_meta-counter.part.html.twig' %}
     </div>
-    {% include 'LadbCoreBundle:Core/Tag:_metas.part.html.twig' with { 'tags':collection.tags, 'type':'collections' } %}
+    {% include '@LadbCore/Core/Tag/_metas.part.html.twig' with { 'tags':collection.tags, 'type':'collections' } %}
 {% endblock %}

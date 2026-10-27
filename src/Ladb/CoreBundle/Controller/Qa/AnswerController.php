@@ -36,7 +36,7 @@ class AnswerController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/reponses/new", requirements={"id" = "\d+"}, name="core_qa_answer_new")
-	 * @Template("LadbCoreBundle:Qa/Answer:new-xhr.html.twig")
+	 * @Template("@LadbCore/Qa/Answer/new-xhr.html.twig")
 	 */
 	public function newAction(Request $request, $id) {
 		if (!$request->isXmlHttpRequest()) {
@@ -61,7 +61,7 @@ class AnswerController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/reponses/create", requirements={"id" = "\d+"}, methods={"POST"}, name="core_qa_answer_create")
-	 * @Template("LadbCoreBundle:Qa/Answer:new-xhr.html.twig")
+	 * @Template("@LadbCore/Qa/Answer/new-xhr.html.twig")
 	 */
 	public function createAction(Request $request, $id, ActivityUtils $activityUtils, BlockBodiedUtils $blockUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, MentionUtils $mentionUtils, QuestionManager $questionManager, VotableUtils $votableUtils, WatchableUtils $watchableUtils, WebpushNotificationUtils $webpushNotificationUtils) {
 		if (!$request->isXmlHttpRequest()) {
@@ -131,7 +131,7 @@ class AnswerController extends AbstractController {
 				$webpushNotificationUtils->enqueueNewAnswerNotification($answer, $question);
 			}
 
-			return $this->render('LadbCoreBundle:Qa/Answer:create-xhr.html.twig', array(
+			return $this->render('@LadbCore/Qa/Answer/create-xhr.html.twig', array(
 				'question'       => $question,
 				'answer'         => $answer,
 				'commentContext' => $commentableUtils->getCommentContext($answer, $this->getUser(), false),
@@ -147,7 +147,7 @@ class AnswerController extends AbstractController {
 
 	/**
 	 * @Route("/reponses/{id}/edit", requirements={"id" = "\d+"}, name="core_qa_answer_edit")
-	 * @Template("LadbCoreBundle:Qa/Answer:edit-xhr.html.twig")
+	 * @Template("@LadbCore/Qa/Answer/edit-xhr.html.twig")
 	 */
 	public function editAction(Request $request, $id) {
 		if (!$request->isXmlHttpRequest()) {
@@ -175,7 +175,7 @@ class AnswerController extends AbstractController {
 
 	/**
 	 * @Route("/reponses/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_qa_answer_update")
-	 * @Template("LadbCoreBundle:Qa/Answer:edit-xhr.html.twig")
+	 * @Template("@LadbCore/Qa/Answer/edit-xhr.html.twig")
 	 */
 	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, MentionUtils $mentionUtils, VotableUtils $votableUtils) {
 		if (!$request->isXmlHttpRequest()) {
@@ -218,7 +218,7 @@ class AnswerController extends AbstractController {
 			// Dispatch publication event (on Question)
 			$dispatcher->dispatch(new PublicationEvent($answer->getQuestion()), PublicationListener::PUBLICATION_UPDATED);
 
-			return $this->render('LadbCoreBundle:Qa/Answer:update-xhr.html.twig', array(
+			return $this->render('@LadbCore/Qa/Answer/update-xhr.html.twig', array(
 				'question'       => $answer->getQuestion(),
 				'answer'         => $answer,
 				'commentContext' => $commentableUtils->getCommentContext($answer, $this->getUser(), false),
@@ -326,7 +326,7 @@ class AnswerController extends AbstractController {
 	/**
 	 * @Route("/{id}/reponses", requirements={"id" = "\d+"}, name="core_qa_answer_list")
 	 * @Route("/{id}/reponses/{sorter}", requirements={"id" = "\d+", "sorter" = "[a-z-]+"}, name="core_qa_answer_list_sorter")
-	 * @Template("LadbCoreBundle:Qa/Answer:list-xhr.html.twig")
+	 * @Template("@LadbCore/Qa/Answer/list-xhr.html.twig")
 	 */
 	public function listAction(Request $request, $id, CommentableUtils $commentableUtils, VotableUtils $votableUtils, $sorter = 'score') {
 		if (!$request->isXmlHttpRequest()) {

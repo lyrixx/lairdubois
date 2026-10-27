@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:_list-n.part.html.twig' %}
+{% extends '@LadbCore/Common/_list-n.part.html.twig' %}
 
 {# set entity #}
 {# set collections #}
@@ -10,14 +10,14 @@
         <div class="ladb-collection-row">
             <div class="media">
                 <div class="media-left">
-                    {% include 'LadbCoreBundle:Collection/Entry:_widget.part.html.twig' with { 'entryContext':entryContexts[loop.index0], 'disabled':disabled } %}
+                    {% include '@LadbCore/Collection/Entry/_widget.part.html.twig' with { 'entryContext':entryContexts[loop.index0], 'disabled':disabled } %}
                 </div>
                 <div class="media-body">
                     <div style="font-size: 110%;">{% if disabled %}<del>{% endif %}{{ collection.title }}{% if disabled %}</del>{% endif %}</div>
-                    <div style="font-size: 80%;">{% include 'LadbCoreBundle:Collection/Collection:_publications-counter.part.html.twig' %}</div>
+                    <div style="font-size: 80%;">{% include '@LadbCore/Collection/Collection/_publications-counter.part.html.twig' %}</div>
                 </div>
                 <div class="media-right">
-                    {% include 'LadbCoreBundle:Collection:Collection/_visibility-badge.part.html.twig' %}
+                    {% include '@LadbCore/Collection/Collection/_visibility-badge.part.html.twig' %}
                 </div>
             </div>
         </div>

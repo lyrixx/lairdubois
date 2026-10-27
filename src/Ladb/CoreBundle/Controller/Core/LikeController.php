@@ -41,7 +41,7 @@ class LikeController extends AbstractController {
 
 	/**
 	 * @Route("/{entityType}/{entityId}/create", requirements={"entityType" = "\d+", "entityId" = "\d+"}, name="core_like_create")
-	 * @Template("LadbCoreBundle:Core/Like:create-xhr.html.twig")
+	 * @Template("@LadbCore/Core/Like/create-xhr.html.twig")
 	 */
 	public function createAction(Request $request, $entityType, $entityId, ActivityUtils $activityUtils, LikableUtils $likableUtils, SearchUtils $searchUtils, TypableUtils $typableUtils, WatchableUtils $watchableUtils, WebpushNotificationUtils $webpushNotificationUtils) {
 
@@ -127,7 +127,7 @@ class LikeController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_like_delete")
-	 * @Template("LadbCoreBundle:Core/Like:delete-xhr.html.twig")
+	 * @Template("@LadbCore/Core/Like/delete-xhr.html.twig")
 	 */
 	public function deleteAction(Request $request, $id, ActivityUtils $activityUtils, LikableUtils $likableUtils, SearchUtils $searchUtils, TypableUtils $typableUtils) {
 		$om = $this->getDoctrine()->getManager();
@@ -188,7 +188,7 @@ class LikeController extends AbstractController {
 	/**
 	 * @Route("/{entityType}/{entityId}", requirements={"entityType" = "\d+", "entityId" = "\d+"}, name="core_like_list_byentity")
 	 * @Route("/{entityType}/{entityId}/{page}", requirements={"entityType" = "\d+", "entityId" = "\d+", "page" = "\d+"}, name="core_like_list_byentity_page")
-	 * @Template("LadbCoreBundle:Core/Like:list-byentity.html.twig")
+	 * @Template("@LadbCore/Core/Like/list-byentity.html.twig")
 	 */
 	public function listByEntityAction(Request $request, $entityType, $entityId, PaginatorUtils $paginatorUtils, TypableUtils $typableUtils, $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -213,7 +213,7 @@ class LikeController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Core/Like:list-byentity-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Core/Like/list-byentity-xhr.html.twig', $parameters);
 		}
 		return $parameters;
 	}

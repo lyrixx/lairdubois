@@ -25,7 +25,7 @@ class YoutookController extends AbstractController {
 
 	/**
 	 * @Route("/create", methods={"POST"}, name="core_youtook_create")
-	 * @Template("LadbCoreBundle:Extra/Youtook:create-xhr.html.twig")
+	 * @Template("@LadbCore/Extra/Youtook/create-xhr.html.twig")
 	 */
 	public function createAction(Request $request, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TranslatorInterface $translator) {
 
@@ -77,7 +77,7 @@ class YoutookController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_youtook_edit")
-	 * @Template("LadbCoreBundle:Extra/Youtook:edit.html.twig")
+	 * @Template("@LadbCore/Extra/Youtook/edit.html.twig")
 	 */
 	public function editAction($id) {
 		$om = $this->getDoctrine()->getManager();
@@ -101,7 +101,7 @@ class YoutookController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_youtook_update")
-	 * @Template("LadbCoreBundle:Extra/Youtook:edit.html.twig")
+	 * @Template("@LadbCore/Extra/Youtook/edit.html.twig")
 	 */
 	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TranslatorInterface $translator) {
 		$om = $this->getDoctrine()->getManager();
@@ -178,7 +178,7 @@ class YoutookController extends AbstractController {
 	 * @Route("/", name="core_youtook_list")
 	 * @Route("/{filter}", requirements={"filter" = "\w+"}, name="core_youtook_list_filter")
 	 * @Route("/{filter}/{page}", requirements={"filter" = "\w+", "page" = "\d+"}, name="core_youtook_list_filter_page")
-	 * @Template("LadbCoreBundle:Extra/Youtook:list.html.twig")
+	 * @Template("@LadbCore/Extra/Youtook/list.html.twig")
 	 */
 	public function listAction(Request $request, PaginatorUtils $paginatorUtils, $filter = 'all', $page = 0) {
 		if (!$this->isGranted('ROLE_ADMIN')) {
@@ -202,7 +202,7 @@ class YoutookController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Extra/Youtook:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Extra/Youtook/list-xhr.html.twig', $parameters);
 		}
 		return $parameters;
 	}
@@ -211,7 +211,7 @@ class YoutookController extends AbstractController {
 	 * @Route("/mes-tooks", name="core_youtook_user_list")
 	 * @Route("/mes-tooks/{filter}", requirements={"filter" = "\w+"}, name="core_youtook_user_list_filter")
 	 * @Route("/mes-tooks/{filter}/{page}", requirements={"filter" = "\w+", "page" = "\d+"}, name="core_youtook_user_list_filter_page")
-	 * @Template("LadbCoreBundle:Extra/Youtook:userList.html.twig")
+	 * @Template("@LadbCore/Extra/Youtook/userList.html.twig")
 	 */
 	public function userListAction(Request $request, PaginatorUtils $paginatorUtils, $filter = 'all', $page = 0) {
 		if (!$this->isGranted('ROLE_USER')) {
@@ -239,14 +239,14 @@ class YoutookController extends AbstractController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Extra/Youtook:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Extra/Youtook/list-xhr.html.twig', $parameters);
 		}
 		return $parameters;
 	}
 
 	/**
 	 * @Route("/{id}.html", name="core_youtook_show")
-	 * @Template("LadbCoreBundle:Extra/Youtook:show.html.twig")
+	 * @Template("@LadbCore/Extra/Youtook/show.html.twig")
 	 */
 	public function showAction(Request $request, $id, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();

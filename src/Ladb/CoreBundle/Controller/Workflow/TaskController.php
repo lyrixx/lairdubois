@@ -120,7 +120,7 @@ class TaskController extends AbstractWorkflowBasedController {
 
 	/**
 	 * @Route("/{id}/task/new", requirements={"id" = "\d+"}, name="core_workflow_task_new")
-	 * @Template("LadbCoreBundle:Workflow:Task/new-xhr.html.twig")
+	 * @Template("@LadbCore/Workflow/Task/new-xhr.html.twig")
 	 */
 	public function newAction(Request $request, $id) {
 
@@ -142,7 +142,7 @@ class TaskController extends AbstractWorkflowBasedController {
 
 	/**
 	 * @Route("/{id}/task/create", requirements={"id" = "\d+"}, name="core_workflow_task_create")
-	 * @Template("LadbCoreBundle:Workflow:Task/new-xhr.html.twig")
+	 * @Template("@LadbCore/Workflow/Task/new-xhr.html.twig")
 	 */
 	public function createAction(Request $request, $id) {
 
@@ -239,7 +239,7 @@ class TaskController extends AbstractWorkflowBasedController {
 
 	/**
 	 * @Route("/{id}/task/edit", requirements={"id" = "\d+"}, name="core_workflow_task_edit")
-	 * @Template("LadbCoreBundle:Workflow:Task/edit-xhr.html.twig")
+	 * @Template("@LadbCore/Workflow/Task/edit-xhr.html.twig")
 	 */
 	public function editAction(Request $request, $id) {
 
@@ -262,7 +262,7 @@ class TaskController extends AbstractWorkflowBasedController {
 
 	/**
 	 * @Route("/{id}/task/update", requirements={"id" = "\d+"}, name="core_workflow_task_update")
-	 * @Template("LadbCoreBundle:Workflow:Task/edit-xhr.html.twig")
+	 * @Template("@LadbCore/Workflow/Task/edit-xhr.html.twig")
 	 */
 	public function updateAction(Request $request, $id) {
 		$om = $this->getDoctrine()->getManager();

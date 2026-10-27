@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Core/User:_show-list.html.twig' %}
+{% extends '@LadbCore/Core/User/_show-list.html.twig' %}
 
 {% block bodyContainerContent %}
     {% if invitations.count == 0 %}
@@ -6,7 +6,7 @@
             <strong>{{ user.username }}</strong> n'a pas d'invitation en attente.
         </div>
     {% else %}
-        {% embed 'LadbCoreBundle:Core/User:_list-filterbar.part.html.twig' with { 'classes':'ladb-filterbar-line' } %}
+        {% embed '@LadbCore/Core/User/_list-filterbar.part.html.twig' with { 'classes':'ladb-filterbar-line' } %}
             {% set filterPath = 'core_user_show_invitations_filter' %}
             {% set filterPathParameters = { 'username':user.usernameCanonical } %}
             {% block filterbarRightContent%}
@@ -18,5 +18,5 @@
 {% endblock %}
 
 {% block autopagerContainerInner %}
-    {% include 'LadbCoreBundle:Core/Member:_invitations-list-n.part.html.twig' %}
+    {% include '@LadbCore/Core/Member/_invitations-list-n.part.html.twig' %}
 {% endblock %}

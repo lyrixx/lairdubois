@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Knowledge:_form-value.part.html.twig' %}
+{% extends '@LadbCore/Knowledge/_form-value.part.html.twig' %}
 
 {% set actionPath = path('core_knowledge_value_update', { 'entityType':knowledge.type, 'entityId':knowledge.id, 'field':field, 'id':form.vars.data.id }) %}
 

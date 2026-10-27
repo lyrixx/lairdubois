@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:_list-n.part.html.twig' %}
+{% extends '@LadbCore/Common/_list-n.part.html.twig' %}
 
 {# set providers #}
 {# set nextPageUrl #}
@@ -7,7 +7,7 @@
 
 {% block items %}
     {% for provider in providers %}
-        {% include 'LadbCoreBundle:Knowledge/Provider:_list-thumbnail.part.html.twig' %}
+        {% include '@LadbCore/Knowledge/Provider/_list-thumbnail.part.html.twig' %}
     {% endfor %}
 {% endblock %}
 

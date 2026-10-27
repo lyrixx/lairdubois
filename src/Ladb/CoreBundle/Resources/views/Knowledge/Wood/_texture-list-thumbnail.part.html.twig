@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:_masonry-list-thumbnail.part.html.twig' %}
+{% extends '@LadbCore/Common/_masonry-list-thumbnail.part.html.twig' %}
 
 {# set texture #}
 
@@ -16,7 +16,7 @@
 {% endblock %}
 
 {% block image %}
-    {% include 'LadbCoreBundle:Core/Picture:_img.part.html.twig' with { 'picture':texture.singlePicture, 'width':282, 'height':280 } %}
+    {% include '@LadbCore/Core/Picture/_img.part.html.twig' with { 'picture':texture.singlePicture, 'width':282, 'height':280 } %}
 {% endblock %}
 
 {% block entityMetas %}

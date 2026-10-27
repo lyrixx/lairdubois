@@ -13,4 +13,4 @@
 {% set noRounded = noRounded|default(false) %}
 {% set imgClasses = (noRounded ? '' : 'img-rounded ')~(imgClasses|default()) %}
 
-{% include 'LadbCoreBundle:Core/Picture:_img.part.html.twig' with { 'alt':title, 'noSizer':true } %}
+{% include '@LadbCore/Core/Picture/_img.part.html.twig' with { 'alt':title, 'noSizer':true } %}

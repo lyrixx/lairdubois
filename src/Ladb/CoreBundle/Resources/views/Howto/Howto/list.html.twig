@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:Layout/_list.html.twig' %}
+{% extends '@LadbCore/Common/Layout/_list.html.twig' %}
 
 {% set pageTitle = 'howto.howto.list'|trans() %}
 {% set pageDescription = 'howto.howto.description'|trans() %}
@@ -13,7 +13,7 @@
 {% set countableEntityList = true %}
 
 {% block bodyHeaderContainerContent %}
-    {% include 'LadbCoreBundle:Howto/Howto:_list-topbar.part.html.twig' %}
+    {% include '@LadbCore/Howto/Howto/_list-topbar.part.html.twig' %}
 {% endblock %}
 
 {% block autopagerContainerInner %}
@@ -22,5 +22,5 @@
             💖 Découvrez ou redécouvrez <a href="/pas-a-pas/?q=@author:%22sylvainlefrancomtois%22%20@sort-popular-likes:desc">les inestimables contributions</a> de <a href="/@sylvainlefrancomtois" >Sylvain</a> à L'Air du Bois !
         </div>
     </div>
-    {% include 'LadbCoreBundle:Howto/Howto:_list-n.part.html.twig' %}
+    {% include '@LadbCore/Howto/Howto/_list-n.part.html.twig' %}
 {% endblock %}

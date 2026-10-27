@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:_list-row.part.html.twig' %}
+{% extends '@LadbCore/Common/_list-row.part.html.twig' %}
 
 {% set entity = user %}
 {% set classes = 'ladb-user-row' %}
@@ -69,9 +69,9 @@
 {% endblock %}
 
 {% block headingInner %}
-    {% include 'LadbCoreBundle:Core/User:_displayname-link.part.html.twig' %}{% if user.isFullnameDisplayble %}&nbsp;<small>({{ user.fullname }})</small>{% endif %}
+    {% include '@LadbCore/Core/User/_displayname-link.part.html.twig' %}{% if user.isFullnameDisplayble %}&nbsp;<small>({{ user.fullname }})</small>{% endif %}
 {% endblock %}
 
 {% block subheadingInner %}
-    {% include 'LadbCoreBundle:Core/User:_location-and-social.part.html.twig' %}
+    {% include '@LadbCore/Core/User/_location-and-social.part.html.twig' %}
 {% endblock %}

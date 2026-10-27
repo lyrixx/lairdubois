@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:Layout/_show.html.twig' %}
+{% extends '@LadbCore/Common/Layout/_show.html.twig' %}
 
 {% set entity = question %}
 
@@ -47,25 +47,25 @@
 {% endblock %}
 
 {% block bodyHeaderContainerContent %}
-    {% include 'LadbCoreBundle:Common/Header:_entity-show-header.part.html.twig' %}
+    {% include '@LadbCore/Common/Header/_entity-show-header.part.html.twig' %}
 {% endblock %}
 
 {% block contentBody %}
     {% if question.isDraft %}
-        {% include 'LadbCoreBundle:Faq/Question:_draft-alert.part.html.twig' %}
+        {% include '@LadbCore/Faq/Question/_draft-alert.part.html.twig' %}
     {% endif %}
     <div class="ladb-question">
         <div class="ladb-body" itemprop="articleBody">
             {% for block in question.bodyBlocks %}
-                {% include 'LadbCoreBundle:Core/Block:_show-'~block.strippedName~'.part.html.twig' %}
+                {% include '@LadbCore/Core/Block/_show-'~block.strippedName~'.part.html.twig' %}
             {% endfor %}
         </div>
     </div>
     {% if question.updatedAt > question.createdAt %}
-        {% include 'LadbCoreBundle:Common:_updated-age.part.html.twig' with { 'entity':question } %}
+        {% include '@LadbCore/Common/_updated-age.part.html.twig' with { 'entity':question } %}
     {% endif %}
     {% if not permissionContext.isOwner %}
-        {% include 'LadbCoreBundle:Common:_like-and-follow.part.html.twig' %}
+        {% include '@LadbCore/Common/_like-and-follow.part.html.twig' %}
     {% endif %}
     {% if similarQuestions is not empty %}
         <div class="panel panel-default ladb-linkedto-panel ladb-margin-top">
@@ -79,20 +79,20 @@
             </div>
         </div>
     {% endif %}
-    {% include 'LadbCoreBundle:Core/Comment:_widget.part.html.twig' %}
+    {% include '@LadbCore/Core/Comment/_widget.part.html.twig' %}
 {% endblock %}
 
 {% block contentMetasPanel %}
     <div class="ladb-metas">
-        {% include 'LadbCoreBundle:Core/Like:_meta-counter.part.html.twig' %}
-        {% include 'LadbCoreBundle:Core/View:_meta-counter.part.html.twig' %}
-        {% include 'LadbCoreBundle:Core/Comment:_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/Like/_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/View/_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/Comment/_meta-counter.part.html.twig' %}
     </div>
     <div class="ladb-metas">
         <h4 class="ladb-heading">{{ 'default.links'|trans() }}</h4>
-        {% include 'LadbCoreBundle:Collection/Collection:_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Collection/Collection/_meta-counter.part.html.twig' %}
     </div>
-    {% include 'LadbCoreBundle:Core/Tag:_metas.part.html.twig' with { 'tags':question.tags, 'type':'questions' } %}
+    {% include '@LadbCore/Core/Tag/_metas.part.html.twig' with { 'tags':question.tags, 'type':'questions' } %}
 {% endblock %}
 
 {% block contentSuggests %}

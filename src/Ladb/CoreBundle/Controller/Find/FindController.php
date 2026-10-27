@@ -44,7 +44,7 @@ class FindController extends AbstractController {
 
 	/**
 	 * @Route("/new", name="core_find_new")
-	 * @Template("LadbCoreBundle:Find/Find:new.html.twig")
+	 * @Template("@LadbCore/Find/Find/new.html.twig")
 	 */
 	public function newAction(Request $request, TagUtils $tagUtils) {
 
@@ -61,7 +61,7 @@ class FindController extends AbstractController {
 
 	/**
 	 * @Route("/create", methods={"POST"}, name="core_find_create")
-	 * @Template("LadbCoreBundle:Find/Find:new.html.twig")
+	 * @Template("@LadbCore/Find/Find/new.html.twig")
 	 */
 	public function createAction(Request $request, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, FindUtils $findUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
@@ -171,7 +171,7 @@ class FindController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_find_edit")
-	 * @Template("LadbCoreBundle:Find/Find:edit.html.twig")
+	 * @Template("@LadbCore/Find/Find/edit.html.twig")
 	 */
 	public function editAction($id, TagUtils $tagUtils) {
 
@@ -189,7 +189,7 @@ class FindController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_find_update")
-	 * @Template("LadbCoreBundle:Find/Find:edit.html.twig")
+	 * @Template("@LadbCore/Find/Find/edit.html.twig")
 	 */
 	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, FindUtils $findUtils, PicturedUtils $picturedUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
@@ -290,7 +290,7 @@ class FindController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/widget", requirements={"id" = "\d+"}, name="core_find_widget")
-	 * @Template("LadbCoreBundle:Find/Find:widget-xhr.html.twig")
+	 * @Template("@LadbCore/Find/Find/widget-xhr.html.twig")
 	 */
 	public function widgetAction($id) {
 
@@ -304,7 +304,7 @@ class FindController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/location.geojson", name="core_find_location", defaults={"_format" = "json"})
-	 * @Template("LadbCoreBundle:Find/Find:location.geojson.twig")
+	 * @Template("@LadbCore/Find/Find/location.geojson.twig")
 	 */
 	public function locationAction($id) {
 
@@ -331,7 +331,7 @@ class FindController extends AbstractController {
 
 	/**
 	 * @Route("/{id}/card.xhr", name="core_find_card")
-	 * @Template("LadbCoreBundle:Find/Find:card-xhr.html.twig")
+	 * @Template("@LadbCore/Find/Find/card-xhr.html.twig")
 	 */
 	public function cardAction(Request $request, $id) {
 		if (!$request->isXmlHttpRequest()) {
@@ -358,7 +358,7 @@ class FindController extends AbstractController {
 	 * @Route("/", name="core_find_list")
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_find_list_page")
 	 * @Route(".geojson", defaults={"_format" = "json", "page"=-1, "layout"="geojson"}, name="core_find_list_geojson")
-	 * @Template("LadbCoreBundle:Find/Find:list.html.twig")
+	 * @Template("@LadbCore/Find/Find/list.html.twig")
 	 */
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, LocalisableUtils $localisableUtils, SearchUtils $searchUtils, TranslatorInterface $translator, $page = 0, $layout = 'view') {
 
@@ -547,14 +547,14 @@ class FindController extends AbstractController {
 				'collection' => $collection,
 			));
 
-			return $this->render('LadbCoreBundle:Find/Find:list-xhr.geojson.twig', $parameters);
+			return $this->render('@LadbCore/Find/Find/list-xhr.geojson.twig', $parameters);
 		}
 
 		// Dispatch publication event
 		$dispatcher->dispatch(new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()), PublicationListener::PUBLICATIONS_LISTED);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Find/Find:list-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Find/Find/list-xhr.html.twig', $parameters);
 		}
 
 		if ($this->isGranted('ROLE_USER') && $this->getUser()->getMeta()->getPrivateFindCount() > 0) {
@@ -572,7 +572,7 @@ class FindController extends AbstractController {
 
 	/**
 	 * @Route("/{id}.html", name="core_find_show")
-	 * @Template("LadbCoreBundle:Find/Find:show.html.twig")
+	 * @Template("@LadbCore/Find/Find/show.html.twig")
 	 */
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();

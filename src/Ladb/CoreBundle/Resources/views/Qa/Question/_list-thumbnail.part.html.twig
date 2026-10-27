@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:_masonry-list-thumbnail-wide.part.html.twig' %}
+{% extends '@LadbCore/Common/_masonry-list-thumbnail-wide.part.html.twig' %}
 
 {% set entity = question %}
 
@@ -7,12 +7,12 @@
 {% block imageOuter %}{% endblock %}
 
 {% block entityMetas %}
-    {% include 'LadbCoreBundle:Qa/Question:_linkto-entity-metas.part.html.twig' %}
+    {% include '@LadbCore/Qa/Question/_linkto-entity-metas.part.html.twig' %}
     {{ parent() }}
     <li class="ladb-counter">
         {% if question.bestAnswer %}
             <span class="ladb-best ladb-color-best-answer ladb-horizontal-separator-right"><i class="ladb-icon-favorite"></i></span>
         {% endif %}
-        {% include 'LadbCoreBundle:Qa/Question:_answers-counter.part.html.twig' with { 'classes':'ladb-horizontal-separator-right' } %}
+        {% include '@LadbCore/Qa/Question/_answers-counter.part.html.twig' with { 'classes':'ladb-horizontal-separator-right' } %}
     </li>
 {% endblock %}

@@ -9,5 +9,5 @@
         <strong>{{ entity.reviewCount|number_format(0, ',', ' ') }}</strong>
         <small>{{ ('review.'~i18nPrefix~'.choice.entities')|trans({ '%count%':entity.reviewCount }) }}</small>
     </a>
-    {% if entity.averageRating > 0 %}{% include 'LadbCoreBundle:Common:_rating-stars.part.html.twig' with { 'rating':entity.averageRating, 'ratingCount':entity.reviewCount, 'classes':'ladb-horizontal-separator-left' } %}{% endif %}
+    {% if entity.averageRating > 0 %}{% include '@LadbCore/Common/_rating-stars.part.html.twig' with { 'rating':entity.averageRating, 'ratingCount':entity.reviewCount, 'classes':'ladb-horizontal-separator-left' } %}{% endif %}
 </div>

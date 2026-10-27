@@ -1,6 +1,6 @@
-{% extends 'LadbCoreBundle:Common/Modal:_modal-content.part.html.twig' %}
+{% extends '@LadbCore/Common/Modal/_modal-content.part.html.twig' %}
 
-{% use 'LadbCoreBundle:Common/Blocks:list-autopager.blocks.html.twig' %}
+{% use '@LadbCore/Common/Blocks/list-autopager.blocks.html.twig' %}
 
 {% set id = 'members_modal' %}
 {% set title = '<i class="ladb-icon-plus"></i>&nbsp;'~(titleTransKey|trans()) %}
@@ -20,7 +20,7 @@
     {% if members|length == 0 %}
         <p>Vous n'êtes membre d'aucun collectif.</p>
     {% endif %}
-    {% include 'LadbCoreBundle:Core/Member:_list-session-teams-n.part.html.twig' %}
+    {% include '@LadbCore/Core/Member/_list-session-teams-n.part.html.twig' %}
     {{ block('autopagerScript') }}
 {% endblock %}
 

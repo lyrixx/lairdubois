@@ -1,6 +1,6 @@
-{% extends 'LadbCoreBundle:Common/Modal:_modal-content.part.html.twig' %}
+{% extends '@LadbCore/Common/Modal/_modal-content.part.html.twig' %}
 
-{% use 'LadbCoreBundle:Common/Blocks:list-autopager.blocks.html.twig' %}
+{% use '@LadbCore/Common/Blocks/list-autopager.blocks.html.twig' %}
 
 {% set id = 'collections_modal' %}
 {% set title = '<i class="ladb-icon-collection-add"></i>&nbsp;'~('collection.collection.add'|trans()) %}
@@ -13,7 +13,7 @@
     {% if collections|length == 0 %}
         <p>Vous n'avez aucune collection pour l'instant.</p>
     {% endif %}
-    {% include 'LadbCoreBundle:Collection/Collection:_list-available-n.part.html.twig' %}
+    {% include '@LadbCore/Collection/Collection/_list-available-n.part.html.twig' %}
     {{ block('autopagerScript') }}
 {% endblock %}
 

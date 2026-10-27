@@ -1,10 +1,10 @@
-{% extends 'LadbCoreBundle:Common:_list-topbar.part.html.twig' %}
+{% extends '@LadbCore/Common/_list-topbar.part.html.twig' %}
 
 {% set heading = 'core.tip.list'|trans() %}
 {% set headingLevel = 2 %}
 
 {% block listTopbarMiddleInner %}
-    {% include 'LadbCoreBundle:Core/Tip:_searchbox.part.html.twig' %}
+    {% include '@LadbCore/Core/Tip/_searchbox.part.html.twig' %}
 {% endblock %}
 
 {% block listTopbarRightOuter %}

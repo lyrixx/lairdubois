@@ -1,10 +1,10 @@
-{% extends 'LadbCoreBundle::email-layout.html.twig' %}
+{% extends '@LadbCore/email-layout.html.twig' %}
 
 {% block content %}
     <p>Votre annonce <em>{{ offer.title }}</em> a expiré et a été automatiquement dépubliée.</p>
     <table cellspacing="10" cellpadding="0">
         <tbody>
-        {% include 'LadbCoreBundle:Common:_entity-email-row.part.html.twig' with { 'entity':offer } %}
+        {% include '@LadbCore/Common/_entity-email-row.part.html.twig' with { 'entity':offer } %}
         </tbody>
     </table>
     {% if offer.publishCount < constant('Ladb\\CoreBundle\\Entity\\Offer\\Offer::MAX_PUBLISH_COUNT') %}

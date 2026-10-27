@@ -1,9 +1,9 @@
-{% extends 'LadbCoreBundle:Message:_layout.html.twig' %}
+{% extends '@LadbCore/Message/_layout.html.twig' %}
 
 {% set bodyContainerClasses = 'ladb-margin-top' %}
 {% set tab = 'new_thread' %}
 
-{% form_theme form 'LadbCoreBundle:Common:_form-theme.twig.twig' %}
+{% form_theme form '@LadbCore/Common/_form-theme.twig.twig' %}
 
 {% block headStylesheets %}
     {{ parent() }}
@@ -88,8 +88,8 @@
                         {{ form_label(form.body, 'Message') }}
                         {{ form_errors(form.body) }}
                         {{ form_widget(form.body, { 'attr': { 'rows':'10', 'class':'form-control ladb-autosize' } }) }}
-                        {% include 'LadbCoreBundle:Core/Picture:_form-gallery-script.part.html.twig' with { 'fieldId':form.pictures.vars.id, 'maxPictureCount':4, 'hideTextOverlayWarning':true, 'sortable':true } %}
-                        {% include 'LadbCoreBundle:Core/Picture:_form-gallery-collapse.part.html.twig' %}
+                        {% include '@LadbCore/Core/Picture/_form-gallery-script.part.html.twig' with { 'fieldId':form.pictures.vars.id, 'maxPictureCount':4, 'hideTextOverlayWarning':true, 'sortable':true } %}
+                        {% include '@LadbCore/Core/Picture/_form-gallery-collapse.part.html.twig' %}
                         <script>
                             if (document.readyState === "complete") {
                                 $("#{{ form.body.vars.id }}").markdown().ladbTextcompletify({
@@ -104,8 +104,8 @@
                             }
                         </script>
                     </div>
-                    {% include alertTemplate|default('LadbCoreBundle:Message:_alert-new-thread.part.html.twig') %}
-                    {% include 'LadbCoreBundle:Common:_form-btn-loading.part.html.twig' with { 'text':('default.send'|trans()) } %}
+                    {% include alertTemplate|default('@LadbCore/Message/_alert-new-thread.part.html.twig') %}
+                    {% include '@LadbCore/Common/_form-btn-loading.part.html.twig' with { 'text':('default.send'|trans()) } %}
                 {{ form_end(form) }}
             </div>
         </div>

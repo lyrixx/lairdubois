@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:Layout/_list.html.twig' %}
+{% extends '@LadbCore/Common/Layout/_list.html.twig' %}
 
 {% set pageTitle = 'qa.question.list'|trans() %}
 {% set pageDescription = 'qa.question.description'|trans() %}
@@ -18,7 +18,7 @@
 {% endblock %}
 
 {% block bodyHeaderContainerContent %}
-    {% include 'LadbCoreBundle:Qa/Question:_list-topbar.part.html.twig' %}
+    {% include '@LadbCore/Qa/Question/_list-topbar.part.html.twig' %}
 {% endblock %}
 
 {% block bodyContainerContent %}
@@ -32,10 +32,10 @@
 
 {% block autopagerContainerInner %}
     {% if highlightedTip is defined and highlightedTip %}
-        {% include 'LadbCoreBundle:Core/Tip:_list-thumbnail-highlighted.part.html.twig' with { 'tip':highlightedTip, 'tiny':true, 'masonryWide':true } %}
+        {% include '@LadbCore/Core/Tip/_list-thumbnail-highlighted.part.html.twig' with { 'tip':highlightedTip, 'tiny':true, 'masonryWide':true } %}
     {% endif %}
     {% if highlightedOffer is defined and highlightedOffer %}
-        {% include 'LadbCoreBundle:Offer/Offer:_list-thumbnail-highlighted.part.html.twig' with { 'offer':highlightedOffer, 'masonryWide':true } %}
+        {% include '@LadbCore/Offer/Offer/_list-thumbnail-highlighted.part.html.twig' with { 'offer':highlightedOffer, 'masonryWide':true } %}
     {% endif %}
-    {% include 'LadbCoreBundle:Qa/Question:_list-n.part.html.twig' %}
+    {% include '@LadbCore/Qa/Question/_list-n.part.html.twig' %}
 {% endblock %}

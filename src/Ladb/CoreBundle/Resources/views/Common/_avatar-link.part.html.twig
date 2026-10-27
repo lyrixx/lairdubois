@@ -11,5 +11,5 @@
 {% set noMicrodata = noMicrodata|default(false) %}
 
 <a href="{{ showPath }}"{% if not noMicrodata %} itemprop="url"{% endif %} {% if linkClasses is defined %}class="{{ linkClasses }}"{% endif %} data-tooltip="tooltip" title="{{ title }}">
-    {% include 'LadbCoreBundle:Common:_avatar.part.html.twig' %}
+    {% include '@LadbCore/Common/_avatar.part.html.twig' %}
 </a>

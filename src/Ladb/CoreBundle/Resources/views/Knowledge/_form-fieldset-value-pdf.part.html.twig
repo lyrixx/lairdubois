@@ -1,7 +1,7 @@
-{% extends 'LadbCoreBundle:Knowledge:_form-fieldset-value.part.html.twig' %}
+{% extends '@LadbCore/Knowledge/_form-fieldset-value.part.html.twig' %}
 
 {% block dataFormGroup %}
-    {% include 'LadbCoreBundle:Core/Resource:_form-gallery.part.html.twig' with { 'formResources':form.data, 'resources':(form.vars.data is null or form.vars.data.data is null ? [] : [ form.vars.data.data ]), 'maxResourceCount':1 } %}
+    {% include '@LadbCore/Core/Resource/_form-gallery.part.html.twig' with { 'formResources':form.data, 'resources':(form.vars.data is null or form.vars.data.data is null ? [] : [ form.vars.data.data ]), 'maxResourceCount':1 } %}
 {% endblock %}
 
 {% block sourceWarning %}

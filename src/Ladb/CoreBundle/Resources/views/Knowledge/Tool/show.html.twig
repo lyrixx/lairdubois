@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Knowledge:_show.html.twig' %}
+{% extends '@LadbCore/Knowledge/_show.html.twig' %}
 
 {% set entity = tool %}
 
@@ -41,7 +41,7 @@
 {% endblock %}
 
 {% block bodyHeaderContainerContent %}
-    {% embed 'LadbCoreBundle:Common/Header:_entity-show-header.part.html.twig' %}
+    {% embed '@LadbCore/Common/Header/_entity-show-header.part.html.twig' %}
         {% set headingClasses = tool.nameRejected ? 'ladb-strikethrough' : null %}
         {% block subheadingInner %}
             {% if tool.brand %}<span class="ladb-subblock"><em>{{ tool.brand }}</em></span>{% endif %}
@@ -50,10 +50,10 @@
 {% endblock %}
 
 {% block contentBody %}
-    {% include 'LadbCoreBundle:Knowledge:_completion-panel.part.html.twig' %}
+    {% include '@LadbCore/Knowledge/_completion-panel.part.html.twig' %}
     <div class="ladb-knowledge-showcase row">
-        {% include 'LadbCoreBundle:Knowledge:_field-show-showcase-picture.part.html.twig' with { 'knowledge':tool, 'wide':true, 'field':constant('FIELD_PHOTO', tool), 'picture':tool.photo, 'values':tool.photoValues, 'pictureBoxClasses':(tool.photoRejected ? 'ladb-box-barred' : null), 'itemprop':'image' } %}
-        {% include 'LadbCoreBundle:Knowledge:_field-show-showcase-pdf.part.html.twig' with { 'knowledge':tool, 'wide':true, 'field':constant('FIELD_MANUAL', tool), 'resource':tool.manual, 'values':tool.manualValues } %}
+        {% include '@LadbCore/Knowledge/_field-show-showcase-picture.part.html.twig' with { 'knowledge':tool, 'wide':true, 'field':constant('FIELD_PHOTO', tool), 'picture':tool.photo, 'values':tool.photoValues, 'pictureBoxClasses':(tool.photoRejected ? 'ladb-box-barred' : null), 'itemprop':'image' } %}
+        {% include '@LadbCore/Knowledge/_field-show-showcase-pdf.part.html.twig' with { 'knowledge':tool, 'wide':true, 'field':constant('FIELD_MANUAL', tool), 'resource':tool.manual, 'values':tool.manualValues } %}
     </div>
     <div>
         {% if searchableBrotherCount > 1 %}
@@ -65,54 +65,54 @@
         {% endif %}
         <div class="ladb-metas">
             <h4 class="ladb-heading">Outil</h4>
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':tool, 'field':constant('FIELD_NAME', tool), 'data':tool.name, 'values':tool.nameValues, 'itemprop':'name' } %}
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':tool, 'field':constant('FIELD_ENGLISH_NAME', tool), 'data':tool.englishName, 'values':tool.englishNameValues } %}
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':tool, 'field':constant('FIELD_BRAND', tool), 'data':tool.brand, 'values':tool.brandValues, 'itemprop':'brand' } %}
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':tool, 'field':constant('FIELD_PRODUCT_NAME', tool), 'data':tool.productName, 'values':tool.productNameValues, 'itemprop':'sku' } %}
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':tool, 'field':constant('FIELD_DESCRIPTION', tool), 'data':tool.description, 'values':tool.descriptionValues, 'itemprop':'description' } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':tool, 'field':constant('FIELD_NAME', tool), 'data':tool.name, 'values':tool.nameValues, 'itemprop':'name' } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':tool, 'field':constant('FIELD_ENGLISH_NAME', tool), 'data':tool.englishName, 'values':tool.englishNameValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':tool, 'field':constant('FIELD_BRAND', tool), 'data':tool.brand, 'values':tool.brandValues, 'itemprop':'brand' } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':tool, 'field':constant('FIELD_PRODUCT_NAME', tool), 'data':tool.productName, 'values':tool.productNameValues, 'itemprop':'sku' } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':tool, 'field':constant('FIELD_DESCRIPTION', tool), 'data':tool.description, 'values':tool.descriptionValues, 'itemprop':'description' } %}
         </div>
         <div class="ladb-metas">
             <h4 class="ladb-heading">Caractéristiques</h4>
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':tool, 'field':constant('FIELD_FAMILY', tool), 'data':tool.family, 'values':tool.familyValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':tool, 'field':constant('FIELD_FAMILY', tool), 'data':tool.family, 'values':tool.familyValues } %}
             {% if tool.powerSupplyValues is not empty or tool.family == 'Electroportatif' %}
-                {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':tool, 'field':constant('FIELD_POWER_SUPPLY', tool), 'data':tool.powerSupply, 'values':tool.powerSupplyValues, 'indented':true } %}
+                {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':tool, 'field':constant('FIELD_POWER_SUPPLY', tool), 'data':tool.powerSupply, 'values':tool.powerSupplyValues, 'indented':true } %}
             {% endif %}
             {% if tool.powerValues is not empty or tool.family == 'Electroportatif' or tool.family == 'Machine stationnaire' %}
-                {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':tool, 'field':constant('FIELD_POWER', tool), 'data':tool.power, 'values':tool.powerValues, 'indented':true } %}
+                {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':tool, 'field':constant('FIELD_POWER', tool), 'data':tool.power, 'values':tool.powerValues, 'indented':true } %}
             {% endif %}
             {% if tool.voltageValues is not empty or tool.family == 'Electroportatif' or tool.family == 'Machine stationnaire' %}
-                {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':tool, 'field':constant('FIELD_VOLTAGE', tool), 'data':tool.voltage, 'values':tool.voltageValues, 'indented':true } %}
+                {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':tool, 'field':constant('FIELD_VOLTAGE', tool), 'data':tool.voltage, 'values':tool.voltageValues, 'indented':true } %}
             {% endif %}
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':tool, 'field':constant('FIELD_WEIGHT', tool), 'data':tool.weight, 'values':tool.weightValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':tool, 'field':constant('FIELD_WEIGHT', tool), 'data':tool.weight, 'values':tool.weightValues } %}
         </div>
         <div class="ladb-metas">
             <h4 class="ladb-heading">Divers</h4>
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':tool, 'field':constant('FIELD_UTILIZATION', tool), 'data':tool.utilization, 'values':tool.utilizationValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':tool, 'field':constant('FIELD_UTILIZATION', tool), 'data':tool.utilization, 'values':tool.utilizationValues } %}
         </div>
         <div class="ladb-metas">
             <h4 class="ladb-heading">Ressources</h4>
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':tool, 'field':constant('FIELD_DOCS', tool), 'data':tool.docs, 'values':tool.docsValues } %}
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':tool, 'field':constant('FIELD_CATALOG_LINK', tool), 'data':tool.catalogLink, 'values':tool.catalogLinkValues } %}
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':tool, 'field':constant('FIELD_VIDEO', tool), 'data':tool.video, 'values':tool.videoValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':tool, 'field':constant('FIELD_DOCS', tool), 'data':tool.docs, 'values':tool.docsValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':tool, 'field':constant('FIELD_CATALOG_LINK', tool), 'data':tool.catalogLink, 'values':tool.catalogLinkValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':tool, 'field':constant('FIELD_VIDEO', tool), 'data':tool.video, 'values':tool.videoValues } %}
         </div>
-        {% include 'LadbCoreBundle:Knowledge:_disclaimer-panel.part.html.twig' %}
+        {% include '@LadbCore/Knowledge/_disclaimer-panel.part.html.twig' %}
         {% if tool.updatedAt > tool.createdAt %}
-            {% include 'LadbCoreBundle:Common:_updated-age.part.html.twig' %}
+            {% include '@LadbCore/Common/_updated-age.part.html.twig' %}
         {% endif %}
         <div style="padding: 10px; text-align: center;">
-            {% include 'LadbCoreBundle:Core/Like:_widget.part.html.twig' with { 'likeContext':likeContext } %}
+            {% include '@LadbCore/Core/Like/_widget.part.html.twig' with { 'likeContext':likeContext } %}
         </div>
-        {% include 'LadbCoreBundle:Core/Review:_widget.part.html.twig' %}
-        {% include 'LadbCoreBundle:Core/Comment:_widget.part.html.twig' with { 'noMicrodata':true, 'activitiesHidden':(not is_granted('ROLE_USER')), 'alertTransKey':'knowledge.tool.comment_alert' } %}
+        {% include '@LadbCore/Core/Review/_widget.part.html.twig' %}
+        {% include '@LadbCore/Core/Comment/_widget.part.html.twig' with { 'noMicrodata':true, 'activitiesHidden':(not is_granted('ROLE_USER')), 'alertTransKey':'knowledge.tool.comment_alert' } %}
     </div>
     {{ parent() }}
 {% endblock %}
 
 {% block contentMetasPanel %}
     <div class="ladb-metas">
-        {% include 'LadbCoreBundle:Core/Like:_meta-counter.part.html.twig' %}
-        {% include 'LadbCoreBundle:Core/View:_meta-counter.part.html.twig' %}
-        {% include 'LadbCoreBundle:Core/Comment:_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/Like/_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/View/_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/Comment/_meta-counter.part.html.twig' %}
         <div class="ladb-meta">
             <i class="ladb-icon-contributor ladb-icon-fixed-center"></i>
             {% if tool.contributorCount > 0 %}
@@ -124,8 +124,8 @@
                 </a>
             {% endif %}
         </div>
-        {% include 'LadbCoreBundle:Core/Vote:_meta-counter.part.html.twig' with { 'entity':tool } %}
-        {% include 'LadbCoreBundle:Core/Review:_meta-counter.part.html.twig' with { 'entity':tool } %}
+        {% include '@LadbCore/Core/Vote/_meta-counter.part.html.twig' with { 'entity':tool } %}
+        {% include '@LadbCore/Core/Review/_meta-counter.part.html.twig' with { 'entity':tool } %}
         {% if tool.manualCount > 0 %}
             <div class="ladb-btn">
                 <div class="btn-group" style="display: flex;">
@@ -151,7 +151,7 @@
     </div>
     <div class="ladb-metas">
         <h4 class="ladb-heading">{{ 'default.links'|trans() }}</h4>
-        {% include 'LadbCoreBundle:Collection/Collection:_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Collection/Collection/_meta-counter.part.html.twig' %}
         <div class="ladb-meta{% if searchableCreationCount == 0 %} text-muted{% endif %}">
             <i class="ladb-icon-creation ladb-icon-fixed-center"></i>
             {% if searchableCreationCount > 0 %}

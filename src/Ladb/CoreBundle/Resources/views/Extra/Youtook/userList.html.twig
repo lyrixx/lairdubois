@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:Layout/_list.html.twig' %}
+{% extends '@LadbCore/Common/Layout/_list.html.twig' %}
 
 {% set pageTitle = 'youtook.user_list'|trans() %}
 {% set pageDescription = 'youtook.description'|trans() %}
@@ -24,7 +24,7 @@
         <i class="ladb-icon-facebook-square"></i>
     </div>
     <div id="ladb_youtook_widget">
-        {% include 'LadbCoreBundle:Extra/Youtook:_form.part.html.twig' %}&nbsp;
+        {% include '@LadbCore/Extra/Youtook/_form.part.html.twig' %}&nbsp;
     </div>
 {% endblock %}
 
@@ -40,5 +40,5 @@
 {% endblock %}
 
 {% block autopagerContainerInner %}
-    {% include 'LadbCoreBundle:Extra/Youtook:_list-n.part.html.twig' %}
+    {% include '@LadbCore/Extra/Youtook/_list-n.part.html.twig' %}
 {% endblock %}

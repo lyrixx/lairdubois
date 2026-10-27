@@ -21,7 +21,7 @@ class EntryController extends AbstractCollectionBasedController {
 
 	/**
 	 * @Route("/{id}/entry/{entityType}/{entityId}/create", requirements={"id" = "\d+", "entityType" = "\d+", "entityId" = "\d+"}, name="core_collection_entry_create")
-	 * @Template("LadbCoreBundle:Collection/Entry:create-xhr.html.twig")
+	 * @Template("@LadbCore/Collection/Entry/create-xhr.html.twig")
 	 */
 	public function createAction($id, $entityType, $entityId, CollectionnableUtils $collectionnableUtils) {
 
@@ -51,7 +51,7 @@ class EntryController extends AbstractCollectionBasedController {
 
 	/**
 	 * @Route("/{id}/entry/{entityType}/{entityId}/delete", requirements={"id" = "\d+", "entityType" = "\d+", "entityId" = "\d+"}, name="core_collection_entry_delete")
-	 * @Template("LadbCoreBundle:Collection/Entry:delete-xhr.html.twig")
+	 * @Template("@LadbCore/Collection/Entry/delete-xhr.html.twig")
 	 */
 	public function deleteAction($id, $entityType, $entityId, CollectionnableUtils $collectionnableUtils, EventDispatcherInterface $dispatcher) {
 		$om = $this->getDoctrine()->getManager();

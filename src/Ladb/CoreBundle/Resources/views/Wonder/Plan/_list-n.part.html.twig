@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:_list-n.part.html.twig' %}
+{% extends '@LadbCore/Common/_list-n.part.html.twig' %}
 
 {# set plans #}
 {# set nextPageUrl #}
@@ -7,7 +7,7 @@
 
 {% block items %}
     {% for plan in plans %}
-        {% include 'LadbCoreBundle:Wonder/Plan:_list-thumbnail.part.html.twig' %}
+        {% include '@LadbCore/Wonder/Plan/_list-thumbnail.part.html.twig' %}
     {% endfor %}
 {% endblock %}
 

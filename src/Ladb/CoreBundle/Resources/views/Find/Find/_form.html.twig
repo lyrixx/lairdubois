@@ -1,19 +1,19 @@
-{% extends 'LadbCoreBundle:Common:Layout/_form.html.twig' %}
+{% extends '@LadbCore/Common/Layout/_form.html.twig' %}
 
 {% set navSection = 'finds' %}
 
 {% block bodyJavascripts %}
     {{ parent() }}
-    {% include 'LadbCoreBundle:Core/Picture:_form-gallery-script.part.html.twig' with { 'formSection':'content_link', 'fieldId':form.link.thumbnail.vars.id, 'maxPictureCount':1 } %}
-    {% include 'LadbCoreBundle:Core/Picture:_form-gallery-script.part.html.twig' with { 'formSection':'content_gallery', 'fieldId':form.gallery.pictures.vars.id, 'maxPictureCount':5, 'sortable':true } %}
-    {% include 'LadbCoreBundle:Common:_form-token-script.part.html.twig' with { 'fieldId':form.tags.vars.id, 'proposals':tagProposals, 'proposalsHelp':('tag.token.proposals.help'|trans()), 'help':('tag.token.help'|trans()), 'typeaheadSourcePath':(path('core_search_typeahead_tags_json')|raw) } %}
+    {% include '@LadbCore/Core/Picture/_form-gallery-script.part.html.twig' with { 'formSection':'content_link', 'fieldId':form.link.thumbnail.vars.id, 'maxPictureCount':1 } %}
+    {% include '@LadbCore/Core/Picture/_form-gallery-script.part.html.twig' with { 'formSection':'content_gallery', 'fieldId':form.gallery.pictures.vars.id, 'maxPictureCount':5, 'sortable':true } %}
+    {% include '@LadbCore/Common/_form-token-script.part.html.twig' with { 'fieldId':form.tags.vars.id, 'proposals':tagProposals, 'proposalsHelp':('tag.token.proposals.help'|trans()), 'help':('tag.token.help'|trans()), 'typeaheadSourcePath':(path('core_search_typeahead_tags_json')|raw) } %}
 {% endblock %}
 
 {% block sidenav %}
-    {% include 'LadbCoreBundle:Common:_form-sidenav-title.part.html.twig' %}
+    {% include '@LadbCore/Common/_form-sidenav-title.part.html.twig' %}
     <li><a href="#content"><i class="ladb-icon-find"></i> {{ 'default.content'|trans() }}</a></li>
-    {% include 'LadbCoreBundle:Core/Block:_form-sidenav-body.part.html.twig' with { 'title':('default.descriptive'|trans) } %}
-    {% include 'LadbCoreBundle:Core/Tag:_form-sidenav.part.html.twig' %}
+    {% include '@LadbCore/Core/Block/_form-sidenav-body.part.html.twig' with { 'title':('default.descriptive'|trans) } %}
+    {% include '@LadbCore/Core/Tag/_form-sidenav.part.html.twig' %}
 {% endblock %}
 
 {% block sections %}
@@ -24,8 +24,8 @@
         </div>
     </div>
     {{ parent() }}
-    {% include 'LadbCoreBundle:Common:_form-section-title.part.html.twig' with { 'mandatory':true, 'help':('find.find.form.help.title'|trans()) } %}
-    {% embed 'LadbCoreBundle:Common:_form-section.part.html.twig' with { 'mandatory':true, 'icon':'globe', 'title':('default.content'|trans()), 'formSection':'content' } %}
+    {% include '@LadbCore/Common/_form-section-title.part.html.twig' with { 'mandatory':true, 'help':('find.find.form.help.title'|trans()) } %}
+    {% embed '@LadbCore/Common/_form-section.part.html.twig' with { 'mandatory':true, 'icon':'globe', 'title':('default.content'|trans()), 'formSection':'content' } %}
         {% block body %}
             <p><span style="border: 1px solid #000; border-radius: 50%; width: 20px; height: 20px; display: inline-block; text-align: center; line-height: 20px; background-color: #000; color: #fff; font-size: 18px;">1</span> {{ 'find.find.form.help.data'|trans()|raw }}</p>
             <div class="form-group">
@@ -56,14 +56,14 @@
                     </div>
                     <div{% if not is_granted("ROLE_ADMIN") %} class="ladb-pseudo-hidden"{% endif %}>
                         <label>{{ 'default.thumbnail'|trans() }}</label>
-                        {% include 'LadbCoreBundle:Core/Picture:_form-gallery.part.html.twig' with { 'formSection':'content_link', 'formPictures':form.link.thumbnail, 'pictures':(form.link.vars.data is null or form.link.vars.data.thumbnail is null ? [] : [ form.link.vars.data.thumbnail ]), 'form':form.link, 'maxPictureCount':1, 'title':('default.thumbnail'|trans), 'hideTextOverlayWarning':true } %}
+                        {% include '@LadbCore/Core/Picture/_form-gallery.part.html.twig' with { 'formSection':'content_link', 'formPictures':form.link.thumbnail, 'pictures':(form.link.vars.data is null or form.link.vars.data.thumbnail is null ? [] : [ form.link.vars.data.thumbnail ]), 'form':form.link, 'maxPictureCount':1, 'title':('default.thumbnail'|trans), 'hideTextOverlayWarning':true } %}
                     </div>
                 </div>
                 <div id="ladb_content_tab_pane_{{ constant('Ladb\\CoreBundle\\Entity\\Find\\Find::CONTENT_TYPE_GALLERY') }}" class="tab-pane{% if form.contentType.vars.data == constant('Ladb\\CoreBundle\\Entity\\Find\\Find::CONTENT_TYPE_GALLERY') %} active{% endif %}">
                     <p><span style="border: 1px solid #000; border-radius: 50%; width: 20px; height: 20px; display: inline-block; text-align: center; line-height: 20px; background-color: #000; color: #fff; font-size: 18px;">2</span> {{ 'find.find.form.help.gallery'|trans()|raw }}</p>
                     <div class="form-group">
                         <label>Photos<span class="ladb-mandatory">*</span></label>
-                        {% include 'LadbCoreBundle:Core/Picture:_form-gallery.part.html.twig' with { 'formSection':'content_gallery', 'form':form.gallery, 'maxPictureCount':5, 'sortable':true, 'title':('default.showcase'|trans), 'help':('find.find.form.help.gallery_pictures'|trans()), 'hideTextOverlayWarning':true } %}
+                        {% include '@LadbCore/Core/Picture/_form-gallery.part.html.twig' with { 'formSection':'content_gallery', 'form':form.gallery, 'maxPictureCount':5, 'sortable':true, 'title':('default.showcase'|trans), 'help':('find.find.form.help.gallery_pictures'|trans()), 'hideTextOverlayWarning':true } %}
                     </div>
                     <div class="form-group">
                         {{ form_label(form.gallery.location, 'default.location') }}
@@ -78,6 +78,6 @@
             </div>
         {% endblock %}
     {% endembed %}
-    {% include 'LadbCoreBundle:Core/Block:_form-section-body.part.html.twig' with { 'mandatory':true, 'title':('default.descriptive'|trans()), 'help':('find.find.form.help.body'|trans()) } %}
-    {% include 'LadbCoreBundle:Core/Tag:_form-section.part.html.twig' with { 'help':('find.find.form.help.tags'|trans()) } %}
+    {% include '@LadbCore/Core/Block/_form-section-body.part.html.twig' with { 'mandatory':true, 'title':('default.descriptive'|trans()), 'help':('find.find.form.help.body'|trans()) } %}
+    {% include '@LadbCore/Core/Tag/_form-section.part.html.twig' with { 'help':('find.find.form.help.tags'|trans()) } %}
 {% endblock %}

@@ -32,7 +32,7 @@
                 {% block imageOuter %}
                     <div class="ladb-image">
                         {% block image %}
-                            {% include 'LadbCoreBundle:Core/Picture:_img.part.html.twig' with { 'picture':entity.mainPicture, 'width':'180', 'height':'180', 'alt':entity.title } %}
+                            {% include '@LadbCore/Core/Picture/_img.part.html.twig' with { 'picture':entity.mainPicture, 'width':'180', 'height':'180', 'alt':entity.title } %}
                         {% endblock %}
                         {% if entity.bodyBlockVideoCount is defined and entity.bodyBlockVideoCount > 0 %}
                             <div class="ladb-image-overlay" data-tooltip="tooltip" title="{{ 'default.choice.contains_videos'|trans({ '%count%':entity.bodyBlockVideoCount }) }}"><i class="ladb-icon-video"></i></div>
@@ -60,8 +60,8 @@
         </div>
         <div class="ladb-footer">
             {% block footer %}
-                {% include 'LadbCoreBundle:Common:_unviewed-bullet.part.html.twig' %}
-                {% include 'LadbCoreBundle:Common:_author.part.html.twig' %}{% include 'LadbCoreBundle:Common:_age.part.html.twig' with { 'classes':'ladb-visible-desktop' } %}
+                {% include '@LadbCore/Common/_unviewed-bullet.part.html.twig' %}
+                {% include '@LadbCore/Common/_author.part.html.twig' %}{% include '@LadbCore/Common/_age.part.html.twig' with { 'classes':'ladb-visible-desktop' } %}
             {% endblock %}
         </div>
     </div>

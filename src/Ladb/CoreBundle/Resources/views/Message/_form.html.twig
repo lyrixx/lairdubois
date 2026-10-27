@@ -4,8 +4,8 @@
     <div class="form-group">
         {{ form_errors(form.body) }}
         {{ form_widget(form.body, { 'attr': { 'rows':'2', 'class':'form-control ladb-autosize' } }) }}
-        {% include 'LadbCoreBundle:Core/Picture:_form-gallery-script.part.html.twig' with { 'fieldId':form.pictures.vars.id, 'maxPictureCount':4, 'hideTextOverlayWarning':true, 'sortable':true } %}
-        {% include 'LadbCoreBundle:Core/Picture:_form-gallery-collapse.part.html.twig' %}
+        {% include '@LadbCore/Core/Picture/_form-gallery-script.part.html.twig' with { 'fieldId':form.pictures.vars.id, 'maxPictureCount':4, 'hideTextOverlayWarning':true, 'sortable':true } %}
+        {% include '@LadbCore/Core/Picture/_form-gallery-collapse.part.html.twig' %}
         <script>
             $("#{{ form.body.vars.id }}")
                 .markdown()

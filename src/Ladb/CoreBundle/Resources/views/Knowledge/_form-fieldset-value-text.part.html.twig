@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Knowledge:_form-fieldset-value.part.html.twig' %}
+{% extends '@LadbCore/Knowledge/_form-fieldset-value.part.html.twig' %}
 
 {% set fieldDef = knowledge is defined ? knowledge.fieldDefs[field] : fieldDef|default(null) %}
 

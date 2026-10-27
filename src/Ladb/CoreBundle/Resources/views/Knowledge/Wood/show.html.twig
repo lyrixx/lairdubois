@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Knowledge:_show.html.twig' %}
+{% extends '@LadbCore/Knowledge/_show.html.twig' %}
 
 {% set entity = wood %}
 
@@ -20,7 +20,7 @@
 {% endblock %}
 
 {% block bodyHeaderContainerContent %}
-    {% embed 'LadbCoreBundle:Common/Header:_entity-show-header.part.html.twig' %}
+    {% embed '@LadbCore/Common/Header/_entity-show-header.part.html.twig' %}
         {% set headingClasses = wood.nameRejected ? 'ladb-strikethrough' : null %}
         {% block subheadingInner %}
             {% if wood.availability == 1 %}
@@ -39,58 +39,58 @@
 {% endblock %}
 
 {% block contentBody %}
-    {% include 'LadbCoreBundle:Knowledge:_completion-panel.part.html.twig' %}
+    {% include '@LadbCore/Knowledge/_completion-panel.part.html.twig' %}
     <div class="ladb-knowledge-showcase row">
-        {% include 'LadbCoreBundle:Knowledge:_field-show-showcase-picture.part.html.twig' with { 'knowledge':wood, 'wide':true, 'field':constant('FIELD_GRAIN', wood), 'picture':wood.grain, 'values':wood.grainValues, 'pictureBoxClasses':(wood.grainRejected ? 'ladb-box-barred' : null) } %}
-        {% include 'LadbCoreBundle:Knowledge:_field-show-showcase-picture.part.html.twig' with { 'knowledge':wood, 'wide':true, 'field':constant('FIELD_ENDGRAIN', wood), 'picture':wood.endgrain, 'values':wood.endgrainValues } %}
-        {% include 'LadbCoreBundle:Knowledge:_field-show-showcase-picture.part.html.twig' with { 'knowledge':wood, 'wide':false, 'field':constant('FIELD_LUMBER', wood), 'picture':wood.lumber, 'values':wood.lumberValues } %}
-        {% include 'LadbCoreBundle:Knowledge:_field-show-showcase-picture.part.html.twig' with { 'knowledge':wood, 'wide':false, 'field':constant('FIELD_TREE', wood), 'picture':wood.tree, 'values':wood.treeValues } %}
-        {% include 'LadbCoreBundle:Knowledge:_field-show-showcase-picture.part.html.twig' with { 'knowledge':wood, 'wide':false, 'field':constant('FIELD_LEAF', wood), 'picture':wood.leaf, 'values':wood.leafValues } %}
-        {% include 'LadbCoreBundle:Knowledge:_field-show-showcase-picture.part.html.twig' with { 'knowledge':wood, 'wide':false, 'field':constant('FIELD_BARK', wood), 'picture':wood.bark, 'values':wood.barkValues } %}
+        {% include '@LadbCore/Knowledge/_field-show-showcase-picture.part.html.twig' with { 'knowledge':wood, 'wide':true, 'field':constant('FIELD_GRAIN', wood), 'picture':wood.grain, 'values':wood.grainValues, 'pictureBoxClasses':(wood.grainRejected ? 'ladb-box-barred' : null) } %}
+        {% include '@LadbCore/Knowledge/_field-show-showcase-picture.part.html.twig' with { 'knowledge':wood, 'wide':true, 'field':constant('FIELD_ENDGRAIN', wood), 'picture':wood.endgrain, 'values':wood.endgrainValues } %}
+        {% include '@LadbCore/Knowledge/_field-show-showcase-picture.part.html.twig' with { 'knowledge':wood, 'wide':false, 'field':constant('FIELD_LUMBER', wood), 'picture':wood.lumber, 'values':wood.lumberValues } %}
+        {% include '@LadbCore/Knowledge/_field-show-showcase-picture.part.html.twig' with { 'knowledge':wood, 'wide':false, 'field':constant('FIELD_TREE', wood), 'picture':wood.tree, 'values':wood.treeValues } %}
+        {% include '@LadbCore/Knowledge/_field-show-showcase-picture.part.html.twig' with { 'knowledge':wood, 'wide':false, 'field':constant('FIELD_LEAF', wood), 'picture':wood.leaf, 'values':wood.leafValues } %}
+        {% include '@LadbCore/Knowledge/_field-show-showcase-picture.part.html.twig' with { 'knowledge':wood, 'wide':false, 'field':constant('FIELD_BARK', wood), 'picture':wood.bark, 'values':wood.barkValues } %}
     </div>
     <div>
         <div class="ladb-metas">
             <h4 class="ladb-heading">Appellation</h4>
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':wood, 'field':constant('FIELD_NAME', wood), 'data':wood.name, 'values':wood.nameValues } %}
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':wood, 'field':constant('FIELD_SCIENTIFICNAME', wood), 'data':wood.scientificname, 'values':wood.scientificnameValues } %}
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':wood, 'field':constant('FIELD_ENGLISHNAME', wood), 'data':wood.englishname, 'values':wood.englishnameValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':wood, 'field':constant('FIELD_NAME', wood), 'data':wood.name, 'values':wood.nameValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':wood, 'field':constant('FIELD_SCIENTIFICNAME', wood), 'data':wood.scientificname, 'values':wood.scientificnameValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':wood, 'field':constant('FIELD_ENGLISHNAME', wood), 'data':wood.englishname, 'values':wood.englishnameValues } %}
         </div>
         <div class="ladb-metas">
             <h4 class="ladb-heading">Caractéristiques</h4>
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':wood, 'field':constant('FIELD_FAMILY', wood), 'data':wood.family, 'values':wood.familyValues } %}
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':wood, 'field':constant('FIELD_DENSITY', wood), 'data':wood.density, 'values':wood.densityValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':wood, 'field':constant('FIELD_FAMILY', wood), 'data':wood.family, 'values':wood.familyValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':wood, 'field':constant('FIELD_DENSITY', wood), 'data':wood.density, 'values':wood.densityValues } %}
         </div>
         <div class="ladb-metas">
             <h4 class="ladb-heading">Marché</h4>
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':wood, 'field':constant('FIELD_AVAILABILITY', wood), 'data':wood.availability, 'values':wood.availabilityValues } %}
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':wood, 'field':constant('FIELD_PRICE', wood), 'data':wood.price, 'values':wood.priceValues } %}
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':wood, 'field':constant('FIELD_ORIGIN', wood), 'data':wood.origin, 'values':wood.originValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':wood, 'field':constant('FIELD_AVAILABILITY', wood), 'data':wood.availability, 'values':wood.availabilityValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':wood, 'field':constant('FIELD_PRICE', wood), 'data':wood.price, 'values':wood.priceValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':wood, 'field':constant('FIELD_ORIGIN', wood), 'data':wood.origin, 'values':wood.originValues } %}
         </div>
         <div class="ladb-metas">
             <h4 class="ladb-heading">Divers</h4>
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':wood, 'field':constant('FIELD_UTILIZATION', wood), 'data':wood.utilization, 'values':wood.utilizationValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':wood, 'field':constant('FIELD_UTILIZATION', wood), 'data':wood.utilization, 'values':wood.utilizationValues } %}
         </div>
         <div class="ladb-metas">
             <h4 class="ladb-heading">Aller plus loin</h4>
-            {% include 'LadbCoreBundle:Knowledge:_field-show-meta.part.html.twig' with { 'knowledge':wood, 'field':constant('FIELD_DATABASE_LINK', wood), 'data':wood.databaseLink, 'values':wood.databaseLinkValues } %}
+            {% include '@LadbCore/Knowledge/_field-show-meta.part.html.twig' with { 'knowledge':wood, 'field':constant('FIELD_DATABASE_LINK', wood), 'data':wood.databaseLink, 'values':wood.databaseLinkValues } %}
         </div>
-        {% include 'LadbCoreBundle:Knowledge:_disclaimer-panel.part.html.twig' %}
+        {% include '@LadbCore/Knowledge/_disclaimer-panel.part.html.twig' %}
         {% if wood.updatedAt > wood.createdAt %}
-            {% include 'LadbCoreBundle:Common:_updated-age.part.html.twig' %}
+            {% include '@LadbCore/Common/_updated-age.part.html.twig' %}
         {% endif %}
         <div style="padding: 10px; text-align: center;">
-            {% include 'LadbCoreBundle:Core/Like:_widget.part.html.twig' with { 'likeContext':likeContext } %}
+            {% include '@LadbCore/Core/Like/_widget.part.html.twig' with { 'likeContext':likeContext } %}
         </div>
-        {% include 'LadbCoreBundle:Core/Comment:_widget.part.html.twig' with { 'noMicrodata':true, 'activitiesHidden':(not is_granted('ROLE_USER')) } %}
+        {% include '@LadbCore/Core/Comment/_widget.part.html.twig' with { 'noMicrodata':true, 'activitiesHidden':(not is_granted('ROLE_USER')) } %}
     </div>
     {{ parent() }}
 {% endblock %}
 
 {% block contentMetasPanel %}
     <div class="ladb-metas">
-        {% include 'LadbCoreBundle:Core/Like:_meta-counter.part.html.twig' %}
-        {% include 'LadbCoreBundle:Core/View:_meta-counter.part.html.twig' %}
-        {% include 'LadbCoreBundle:Core/Comment:_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/Like/_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/View/_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Core/Comment/_meta-counter.part.html.twig' %}
         <div class="ladb-meta">
             <i class="ladb-icon-contributor ladb-icon-fixed-center"></i>
             {% if wood.contributorCount > 0 %}
@@ -102,7 +102,7 @@
                 </a>
             {% endif %}
         </div>
-        {% include 'LadbCoreBundle:Core/Vote:_meta-counter.part.html.twig' with { 'entity':wood } %}
+        {% include '@LadbCore/Core/Vote/_meta-counter.part.html.twig' with { 'entity':wood } %}
         <div class="ladb-meta{% if wood.textureCount == 0 %} text-muted{% endif %}">
             <i class="ladb-icon-texture ladb-icon-fixed-center"></i>
             {% if wood.textureCount > 0 %}
@@ -122,7 +122,7 @@
     </div>
     <div class="ladb-metas">
         <h4 class="ladb-heading">{{ 'default.links'|trans() }}</h4>
-        {% include 'LadbCoreBundle:Collection/Collection:_meta-counter.part.html.twig' %}
+        {% include '@LadbCore/Collection/Collection/_meta-counter.part.html.twig' %}
         <div class="ladb-meta{% if searchableCreationCount == 0 %} text-muted{% endif %}">
             <i class="ladb-icon-creation ladb-icon-fixed-center"></i>
             {% if searchableCreationCount > 0 %}
@@ -146,5 +146,5 @@
             {% endif %}
         </div>
     </div>
-    {% include 'LadbCoreBundle:Core/License:_metas.part.html.twig' with { 'license':wood.license } %}
+    {% include '@LadbCore/Core/License/_metas.part.html.twig' with { 'license':wood.license } %}
 {% endblock %}

@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Core/Feedback:_form.html.twig' %}
+{% extends '@LadbCore/Core/Feedback/_form.html.twig' %}
 
 {% set i18nPrefix = i18nPrefix|default(ladb_entity_type_stripped_name(entity)) %}
 {% set formAction = path('core_feedback_create', { 'entityType':entity.type, 'entityId':entity.id }) %}
@@ -17,5 +17,5 @@
         </div>
     </div>
     {{ parent() }}
-    {% include 'LadbCoreBundle:Common:_form-btn-loading.part.html.twig' with { 'text':('default.publish'|trans()), 'classes':'btn-primary' } %}
+    {% include '@LadbCore/Common/_form-btn-loading.part.html.twig' with { 'text':('default.publish'|trans()), 'classes':'btn-primary' } %}
 {% endblock %}

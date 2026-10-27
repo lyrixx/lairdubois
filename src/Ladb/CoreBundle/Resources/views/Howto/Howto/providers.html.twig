@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Common:Layout/_list.html.twig' %}
+{% extends '@LadbCore/Common/Layout/_list.html.twig' %}
 
 {% set pageUrl = url('core_howto_providers', { 'id':howto.id }) %}
 {% set pageTitle = 'Fournisseurs associés à '~howto.title %}
@@ -11,7 +11,7 @@
 {% set hideHeaderContainer = false %}
 
 {% block bodyHeaderContainerContent %}
-    {% include 'LadbCoreBundle:Common/Header:_entity-header.part.html.twig' with { 'entity':howto } %}
+    {% include '@LadbCore/Common/Header/_entity-header.part.html.twig' with { 'entity':howto } %}
 {% endblock %}
 
 {% block bodyContainerContent %}
@@ -25,7 +25,7 @@
                 Liste des fournisseurs recencés par <a href="{{ path('core_user_show', { 'username':howto.user.usernameCanonical }) }}">{{ howto.user.displayname }}</a> pour la réalisation du pas à pas <a href="{{ ladb_entity_url_action(howto) }}">{{ howto.title }}</a>.
             </div>
         </div>
-        {% embed 'LadbCoreBundle:Knowledge/Provider:_list-filterbar.part.html.twig' %}
+        {% embed '@LadbCore/Knowledge/Provider/_list-filterbar.part.html.twig' %}
             {% set filterPath = 'core_howto_providers_filter' %}
             {% set filterPathParameters = { 'id':howto.id } %}
             {% block filterbarRightContent%}
@@ -37,5 +37,5 @@
 {% endblock %}
 
 {% block autopagerContainerInner %}
-    {% include 'LadbCoreBundle:Knowledge/Provider:_list-n.part.html.twig' %}
+    {% include '@LadbCore/Knowledge/Provider/_list-n.part.html.twig' %}
 {% endblock %}

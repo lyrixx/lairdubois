@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Collection:Collection/_form.html.twig' %}
+{% extends '@LadbCore/Collection/Collection/_form.html.twig' %}
 
 {% set pageTitle = 'collection.collection.new'|trans() %}
 {% set formAction = path('core_collection_create', { 'entityType':entityType, 'entityId':entityId }) %}
@@ -9,7 +9,7 @@
 {% endblock %}
 
 {% block form_buttons %}
-    {% include 'LadbCoreBundle:Common:_form-btn-loading.part.html.twig' with { 'text':'Enregistrer et continuer', 'classes':'ladb-form-save-btn btn-primary btn-block' } %}
+    {% include '@LadbCore/Common/_form-btn-loading.part.html.twig' with { 'text':'Enregistrer et continuer', 'classes':'ladb-form-save-btn btn-primary btn-block' } %}
 {% endblock %}
 
 {% block asideInner %}

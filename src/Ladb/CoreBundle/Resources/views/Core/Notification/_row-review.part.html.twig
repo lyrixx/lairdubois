@@ -1,4 +1,4 @@
-{% extends 'LadbCoreBundle:Core/Notification:_row.part.html.twig' %}
+{% extends '@LadbCore/Core/Notification/_row.part.html.twig' %}
 
 {% set icon = 'review' %}
 {% set entity = ladb_entity(notification.activity.review.entityType, notification.activity.review.entityId) %}

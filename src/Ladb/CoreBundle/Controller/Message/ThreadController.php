@@ -25,7 +25,7 @@ class ThreadController extends AbstractThreadController {
 	/**
 	 * @Route("/thread/new", name="core_message_thread_new", defaults={"recipientUsername" = null, "announcement" = false})
 	 * @Route("/thread/to/{recipientUsername}/new", requirements={"recipientUsername" = "[a-zA-Z0-9]+"}, name="core_message_thread_new_recipientusername", defaults={"announcement" = false})
-	 * @Template("LadbCoreBundle:Message:newThread.html.twig")
+	 * @Template("@LadbCore/Message/newThread.html.twig")
 	 */
 	public function newAction($recipientUsername, UserManager $userManager, $subject = null, $message = null, $alertTemplate =  null) {
 //		if (!is_null($this->getUser()) && $this->getUser()->getIsTeam()) {
@@ -60,7 +60,7 @@ class ThreadController extends AbstractThreadController {
 
 	/**
 	 * @Route("/thread/create", methods={"POST"}, name="core_message_thread_create")
-	 * @Template("LadbCoreBundle:Message:newThread.html.twig")
+	 * @Template("@LadbCore/Message/newThread.html.twig")
 	 */
 	public function createAction(Request $request, MailerUtils $mailerUtils, MessageUtils $messageUtils, TranslatorInterface $translator) {
 //		if (!is_null($this->getUser()) && $this->getUser()->getIsTeam()) {
@@ -119,7 +119,7 @@ class ThreadController extends AbstractThreadController {
 
 	/**
 	 * @Route("/thread/{id}/delete", requirements={"id" = "\d+"}, name="core_message_thread_delete")
-	 * @Template("LadbCoreBundle:Message:deleteThread.html.twig")
+	 * @Template("@LadbCore/Message/deleteThread.html.twig")
 	 */
 	public function deleteAction($id) {
 		$om = $this->getDoctrine()->getManager();
@@ -152,7 +152,7 @@ class ThreadController extends AbstractThreadController {
 
 	/**
 	 * @Route("/thread/{id}", requirements={"id" = "\d+"}, name="core_message_thread_show")
-	 * @Template("LadbCoreBundle:Message:showThread.html.twig")
+	 * @Template("@LadbCore/Message/showThread.html.twig")
 	 */
 	public function showAction($id) {
 
@@ -211,7 +211,7 @@ class ThreadController extends AbstractThreadController {
 	 * @Route("/", name="core_message_mailbox")
 	 * @Route("/{filter}", requirements={"filter" = "\w+"}, name="core_message_mailbox_filter")
 	 * @Route("/{filter}/{page}", requirements={"filter" = "\w+", "page" = "\d+"}, name="core_message_mailbox_filter_page")
-	 * @Template("LadbCoreBundle:Message:mailbox.html.twig")
+	 * @Template("@LadbCore/Message/mailbox.html.twig")
 	 */
 	public function mailboxAction(Request $request, PaginatorUtils $paginatorUtils, $filter = 'all', $page = 0) {
 		$om = $this->getDoctrine()->getManager();
@@ -250,7 +250,7 @@ class ThreadController extends AbstractThreadController {
 		);
 
 		if ($request->isXmlHttpRequest()) {
-			return $this->render('LadbCoreBundle:Message:mailbox-xhr.html.twig', $parameters);
+			return $this->render('@LadbCore/Message/mailbox-xhr.html.twig', $parameters);
 		}
 		return $parameters;
 	}

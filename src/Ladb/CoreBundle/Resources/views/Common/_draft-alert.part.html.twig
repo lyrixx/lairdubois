@@ -26,7 +26,7 @@
 </div>
 {% block modal %}
     {% if not noBtn %}
-        {% embed 'LadbCoreBundle:Common:_publish-modal.part.html.twig' with { 'id':'publish_modal', 'title':('default.publishing'|trans()), 'noFinalDisclaimer':modalNoFinalDisclaimer|default(false) } %}
+        {% embed '@LadbCore/Common/_publish-modal.part.html.twig' with { 'id':'publish_modal', 'title':('default.publishing'|trans()), 'noFinalDisclaimer':modalNoFinalDisclaimer|default(false) } %}
             {% block whatItIs %}{{ modalMessage|raw }}{% endblock %}
         {% endembed %}
     {% endif %}
