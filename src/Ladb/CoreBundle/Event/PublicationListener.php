@@ -2,6 +2,7 @@
 
 namespace Ladb\CoreBundle\Event;
 
+use Doctrine\Persistence\ManagerRegistry;
 use Ladb\CoreBundle\Entity\AbstractDraftableAuthoredPublication;
 use Ladb\CoreBundle\Model\FeedbackableInterface;
 use Ladb\CoreBundle\Model\LinkedToInterface;
@@ -9,7 +10,9 @@ use Ladb\CoreBundle\Model\MentionSourceInterface;
 use Ladb\CoreBundle\Model\RepublishableInterface;
 use Ladb\CoreBundle\Utils\FeedbackableUtils;
 use Ladb\CoreBundle\Utils\MentionUtils;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Liip\ImagineBundle\Imagine\Cache\CacheManager;
+use Liip\ImagineBundle\Imagine\Data\DataManager;
+use Liip\ImagineBundle\Imagine\Filter\FilterManager;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Ladb\CoreBundle\Utils\UserUtils;
 use Ladb\CoreBundle\Utils\OpenGraphUtils;
@@ -50,10 +53,42 @@ class PublicationListener implements EventSubscriberInterface {
 	const PUBLICATION_SHOWN = 'ladb.publication.shown';
 	const PUBLICATIONS_LISTED = 'ladb.publications.listed';
 
-	private $container;
+	private $activityUtils;
+	private $cacheManager;
+	private $commentableUtils;
+	private $dataManager;
+	private $doctrine;
+	private $feedbackableUtils;
+	private $filterManager;
+	private $globalUtils;
+	private $likableUtils;
+	private $mentionUtils;
+	private $openGraphUtils;
+	private $searchUtils;
+	private $tagUtils;
+	private $typableUtils;
+	private $userUtils;
+	private $viewableUtils;
+	private $watchableUtils;
 
-	public function __construct(ContainerInterface $container) {
-		$this->container = $container;
+	public function __construct(ActivityUtils $activityUtils, CacheManager $cacheManager, CommentableUtils $commentableUtils, DataManager $dataManager, ManagerRegistry $doctrine, FeedbackableUtils $feedbackableUtils, FilterManager $filterManager, GlobalUtils $globalUtils, LikableUtils $likableUtils, MentionUtils $mentionUtils, OpenGraphUtils $openGraphUtils, SearchUtils $searchUtils, TagUtils $tagUtils, TypableUtils $typableUtils, UserUtils $userUtils, ViewableUtils $viewableUtils, WatchableUtils $watchableUtils) {
+		$this->activityUtils = $activityUtils;
+		$this->cacheManager = $cacheManager;
+		$this->commentableUtils = $commentableUtils;
+		$this->dataManager = $dataManager;
+		$this->doctrine = $doctrine;
+		$this->feedbackableUtils = $feedbackableUtils;
+		$this->filterManager = $filterManager;
+		$this->globalUtils = $globalUtils;
+		$this->likableUtils = $likableUtils;
+		$this->mentionUtils = $mentionUtils;
+		$this->openGraphUtils = $openGraphUtils;
+		$this->searchUtils = $searchUtils;
+		$this->tagUtils = $tagUtils;
+		$this->typableUtils = $typableUtils;
+		$this->userUtils = $userUtils;
+		$this->viewableUtils = $viewableUtils;
+		$this->watchableUtils = $watchableUtils;
 	}
 
 	public static function getSubscribedEvents() {
@@ -85,10 +120,6 @@ class PublicationListener implements EventSubscriberInterface {
 			return;
 		}
 
-		$filterManager = $this->container->get('liip_imagine.filter.manager');
-		$cacheManager = $this->container->get('liip_imagine.cache.manager');
-		$dataManager = $this->container->get('liip_imagine.data.manager');
-
 		foreach ($pictures as $picture) {
 			if (is_null($picture)) {
 				continue;
@@ -99,10 +130,10 @@ class PublicationListener implements EventSubscriberInterface {
 				continue;
 			}
 			$path = $picture->getPath();
-			if (!$cacheManager->isStored($path, $filter)) {
-				$binary = $dataManager->find($filter, $path);
-				$cacheManager->store(
-					$filterManager->applyFilter($binary, $filter),
+			if (!$this->cacheManager->isStored($path, $filter)) {
+				$binary = $this->dataManager->find($filter, $path);
+				$this->cacheManager->store(
+					$this->filterManager->applyFilter($binary, $filter),
 					$path,
 					$filter
 				);
@@ -112,7 +143,7 @@ class PublicationListener implements EventSubscriberInterface {
 	}
 
 	private function _scrapeOpenGraph(AbstractPublication $publication) {
-		if ($this->container->get(GlobalUtils::NAME)->getDebug()) {
+		if ($this->globalUtils->getDebug()) {
 			return;
 		}
 		if (!($publication instanceof ScrapableInterface) || !$publication->getIsScrapable()) {
@@ -120,8 +151,7 @@ class PublicationListener implements EventSubscriberInterface {
 		}
 
 		// Scrape Open Graph URL (canonical)
-		$openGraphUtils = $this->container->get(OpenGraphUtils::NAME);
-		$openGraphUtils->scrape($this->container->get(TypableUtils::NAME)->getUrlAction($publication, 'show', true, false));
+		$this->openGraphUtils->scrape($this->typableUtils->getUrlAction($publication, 'show', true, false));
 
 	}
 
@@ -133,24 +163,21 @@ class PublicationListener implements EventSubscriberInterface {
 		if ($publication instanceof TaggableInterface) {
 
 			// Tags usage
-			$tagUtils = $this->container->get(TagUtils::NAME);
-			$tagUtils->useTaggableTags($publication);
+			$this->tagUtils->useTaggableTags($publication);
 
 		}
 
 		if ($publication instanceof WatchableInterface) {
 
 			// Auto watch
-			$watchableUtils = $this->container->get(WatchableUtils::NAME);
-			$watchableUtils->autoCreateWatch($publication, $this->container->get(GlobalUtils::NAME)->getUser());
+			$this->watchableUtils->autoCreateWatch($publication, $this->globalUtils->getUser());
 
 		}
 
 		if ($publication instanceof IndexableInterface && $publication->isIndexable()) {
 
 			// Search index update
-			$searchUtils = $this->container->get(SearchUtils::NAME);
-			$searchUtils->insertEntityToIndex($publication);
+			$this->searchUtils->insertEntityToIndex($publication);
 
 		}
 
@@ -168,22 +195,19 @@ class PublicationListener implements EventSubscriberInterface {
 		if ($publication instanceof MentionSourceInterface) {
 
 			// Process mentions
-			$mentionUtils = $this->container->get(MentionUtils::NAME);
-			$mentionUtils->processMentions($publication);
+			$this->mentionUtils->processMentions($publication);
 
 		}
 
 		if ($publication instanceof TaggableInterface) {
 
 			// Tags usage
-			$tagUtils = $this->container->get(TagUtils::NAME);
-			$tagUtils->useTaggableTags($publication);
+			$this->tagUtils->useTaggableTags($publication);
 
 		}
 
 		// Search index update
-		$searchUtils = $this->container->get(SearchUtils::NAME);
-		$searchUtils->insertEntityToIndex($publication);
+		$this->searchUtils->insertEntityToIndex($publication);
 
 		// Resolve main picture to avoid image url redirection
 		$this->_resolvePicturesPageImageFilter($publication);
@@ -199,16 +223,14 @@ class PublicationListener implements EventSubscriberInterface {
 		if ($publication instanceof ViewableInterface) {
 
 			// Delete listed views
-			$viewableUtils = $this->container->get(ViewableUtils::NAME);
-			$viewableUtils->deleteViews($publication);
+			$this->viewableUtils->deleteViews($publication);
 
 		}
 
 		if ($publication instanceof IndexableInterface && $publication->isIndexable()) {
 
 			// Search index update
-			$searchUtils = $this->container->get(SearchUtils::NAME);
-			$searchUtils->replaceEntityInIndex($publication);
+			$this->searchUtils->replaceEntityInIndex($publication);
 
 		}
 
@@ -220,16 +242,14 @@ class PublicationListener implements EventSubscriberInterface {
 		if ($publication instanceof MentionSourceInterface) {
 
 			// Process mentions
-			$mentionUtils = $this->container->get(MentionUtils::NAME);
-			$mentionUtils->processMentions($publication);
+			$this->mentionUtils->processMentions($publication);
 
 		}
 
 		if ($publication instanceof IndexableInterface && $publication->isIndexable()) {
 
 			// Search index update
-			$searchUtils = $this->container->get(SearchUtils::NAME);
-			$searchUtils->replaceEntityInIndex($publication);
+			$this->searchUtils->replaceEntityInIndex($publication);
 
 			// Linked entities update
 			if ($publication instanceof LinkedToInterface) {
@@ -237,7 +257,7 @@ class PublicationListener implements EventSubscriberInterface {
 					if ($entity instanceof IndexableInterface && $entity->isIndexable()) {
 
 						// Search index update
-						$searchUtils->replaceEntityInIndex($entity);
+						$this->searchUtils->replaceEntityInIndex($entity);
 
 					}
 				}
@@ -248,8 +268,7 @@ class PublicationListener implements EventSubscriberInterface {
 		if ($publication instanceof TaggableInterface && array_key_exists('previouslyUsedTags', $event->getData())) {
 
 			// Tags usage
-			$tagUtils = $this->container->get(TagUtils::NAME);
-			$tagUtils->useTaggableTags($publication, $event->getData()['previouslyUsedTags']);
+			$this->tagUtils->useTaggableTags($publication, $event->getData()['previouslyUsedTags']);
 
 		}
 
@@ -267,8 +286,7 @@ class PublicationListener implements EventSubscriberInterface {
 		if ($publication instanceof IndexableInterface && $publication->isIndexable()) {
 
 			// Search index update
-			$searchUtils = $this->container->get(SearchUtils::NAME);
-			$searchUtils->deleteEntityFromIndex($publication);
+			$this->searchUtils->deleteEntityFromIndex($publication);
 
 			// Linked entities update
 			if ($publication instanceof LinkedToInterface) {
@@ -276,7 +294,7 @@ class PublicationListener implements EventSubscriberInterface {
 					if ($entity instanceof IndexableInterface && $entity->isIndexable()) {
 
 						// Search index update
-						$searchUtils->replaceEntityInIndex($entity);
+						$this->searchUtils->replaceEntityInIndex($entity);
 
 					}
 				}
@@ -287,16 +305,14 @@ class PublicationListener implements EventSubscriberInterface {
         if ($publication instanceof ViewableInterface) {
 
             // Delete views
-            $viewableUtils = $this->container->get(ViewableUtils::NAME);
-            $viewableUtils->deleteViews($publication);
+            $this->viewableUtils->deleteViews($publication);
 
         }
 
         if ($publication->getNotificationStrategy() != PublicationInterface::NOTIFICATION_STRATEGY_NONE) {
 
 			// Delete activity
-			$activityUtils = $this->container->get(ActivityUtils::NAME);
-			$activityUtils->deleteActivitiesByEntityTypeAndEntityId($publication->getType(), $publication->getId());
+			$this->activityUtils->deleteActivitiesByEntityTypeAndEntityId($publication->getType(), $publication->getId());
 
 		}
 
@@ -314,8 +330,7 @@ class PublicationListener implements EventSubscriberInterface {
 		if ($publication instanceof IndexableInterface && $publication->isIndexable()) {
 
 			// Search index update
-			$searchUtils = $this->container->get(SearchUtils::NAME);
-			$searchUtils->replaceEntityInIndex($publication);
+			$this->searchUtils->replaceEntityInIndex($publication);
 
 			// Linked entities update
 			if ($publication instanceof LinkedToInterface) {
@@ -323,7 +338,7 @@ class PublicationListener implements EventSubscriberInterface {
 					if ($entity instanceof IndexableInterface && $entity->isIndexable()) {
 
 						// Search index update
-						$searchUtils->replaceEntityInIndex($entity);
+						$this->searchUtils->replaceEntityInIndex($entity);
 
 					}
 				}
@@ -334,24 +349,21 @@ class PublicationListener implements EventSubscriberInterface {
 		if ($publication instanceof CommentableInterface) {
 
 			// Increment users counters
-			$commentableUtils = $this->container->get(CommentableUtils::NAME);
-			$commentableUtils->incrementUsersCommentCount($publication);
+			$this->commentableUtils->incrementUsersCommentCount($publication);
 
 		}
 
 		if ($publication instanceof LikableInterface) {
 
 			// Increment users counters
-			$likableUtils = $this->container->get(LikableUtils::NAME);
-			$likableUtils->incrementUsersLikeCount($publication);
+			$this->likableUtils->incrementUsersLikeCount($publication);
 
 		}
 
 		if ($publication instanceof FeedbackableInterface) {
 
 			// Increment users counters
-			$feedbackableUtils = $this->container->get(FeedbackableUtils::NAME);
-			$feedbackableUtils->incrementUsersFeedbackCount($publication, 1);
+			$this->feedbackableUtils->incrementUsersFeedbackCount($publication, 1);
 
 		}
 
@@ -361,12 +373,10 @@ class PublicationListener implements EventSubscriberInterface {
 			&& !($publication instanceof RepublishableInterface && $publication->getPublishCount() > 1)) {
 
 			// Get session user as "publisher"
-			$globalUtils = $this->container->get(GlobalUtils::NAME);
-			$user = $globalUtils->getUser();
+			$user = $this->globalUtils->getUser();
 
 			// Create activity
-			$activityUtils = $this->container->get(ActivityUtils::NAME);
-			$activityUtils->createPublishActivity($publication->getUser(), $publication->getType(), $publication->getId(), $user);
+			$this->activityUtils->createPublishActivity($publication->getUser(), $publication->getType(), $publication->getId(), $user);
 
 		}
 
@@ -384,8 +394,7 @@ class PublicationListener implements EventSubscriberInterface {
 		if ($publication instanceof IndexableInterface && $publication->isIndexable()) {
 
 			// Search index update
-			$searchUtils = $this->container->get(SearchUtils::NAME);
-			$searchUtils->replaceEntityInIndex($publication);
+			$this->searchUtils->replaceEntityInIndex($publication);
 
 			// Linked entities update
 			if ($publication instanceof LinkedToInterface) {
@@ -393,7 +402,7 @@ class PublicationListener implements EventSubscriberInterface {
 					if ($entity instanceof IndexableInterface && $entity->isIndexable()) {
 
 						// Search index update
-						$searchUtils->replaceEntityInIndex($entity);
+						$this->searchUtils->replaceEntityInIndex($entity);
 
 					}
 				}
@@ -404,32 +413,28 @@ class PublicationListener implements EventSubscriberInterface {
 		if ($publication instanceof ViewableInterface) {
 
 			// Delete listed views
-			$viewableUtils = $this->container->get(ViewableUtils::NAME);
-			$viewableUtils->deleteViews($publication);
+			$this->viewableUtils->deleteViews($publication);
 
 		}
 
 		if ($publication instanceof CommentableInterface) {
 
 			// Decrement users counters
-			$commentableUtils = $this->container->get(CommentableUtils::NAME);
-			$commentableUtils->incrementUsersCommentCount($publication, -1);
+			$this->commentableUtils->incrementUsersCommentCount($publication, -1);
 
 		}
 
 		if ($publication instanceof LikableInterface) {
 
 			// Decrement users counters
-			$likableUtils = $this->container->get(LikableUtils::NAME);
-			$likableUtils->incrementUsersLikeCount($publication, -1);
+			$this->likableUtils->incrementUsersLikeCount($publication, -1);
 
 		}
 
 		if ($publication instanceof FeedbackableInterface) {
 
 			// Decrement users counters
-			$feedbackableUtils = $this->container->get(FeedbackableUtils::NAME);
-			$feedbackableUtils->incrementUsersFeedbackCount($publication, -1);
+			$this->feedbackableUtils->incrementUsersFeedbackCount($publication, -1);
 
 		}
 
@@ -437,8 +442,7 @@ class PublicationListener implements EventSubscriberInterface {
 			&& !($publication instanceof RepublishableInterface)) {
 
 			// Delete activity
-			$activityUtils = $this->container->get(ActivityUtils::NAME);
-			$activityUtils->deleteActivitiesByEntityTypeAndEntityId($publication->getType(), $publication->getId());
+			$this->activityUtils->deleteActivitiesByEntityTypeAndEntityId($publication->getType(), $publication->getId());
 
 		}
 
@@ -450,8 +454,7 @@ class PublicationListener implements EventSubscriberInterface {
 		if ($publication instanceof ViewableInterface) {
 
 			// Process showed view
-			$viewableUtils = $this->container->get(ViewableUtils::NAME);
-			$viewableUtils->processShownView($publication);
+			$this->viewableUtils->processShownView($publication);
 
 		}
 
@@ -460,8 +463,7 @@ class PublicationListener implements EventSubscriberInterface {
 	public function onPublicationsListed(PublicationsEvent $event) {
 		$publications = $event->getPublications();
 
-		$globalUtils = $this->container->get(GlobalUtils::NAME);
-		$user = $globalUtils->getUser();
+		$user = $this->globalUtils->getUser();
 		if (!is_null($user)) {
 
 			// Prepare publication isShown field
@@ -479,7 +481,7 @@ class PublicationListener implements EventSubscriberInterface {
 				return;
 			}
 
-			$om = $this->container->get('doctrine')->getManager();
+			$om = $this->doctrine->getManager();
 			$viewRepository = $om->getRepository(View::CLASS_NAME);
 			$views = $viewRepository->findByEntityTypeAndEntityIdsAndUserAndKind($entityType, $entityIds, $user, View::KIND_SHOWN);
 			if (!is_null($views) && count($views) > 0) {
@@ -496,19 +498,17 @@ class PublicationListener implements EventSubscriberInterface {
 			if ($event->isNeedCounterResetRefreshTime()) {
 
 				// Compute unlisted counter for viewable entity type (if outdated) to be able to keep counter value after first list display
-				$userUtils = $this->container->get(UserUtils::NAME);
-				$userUtils->computeUnlistedCounterByEntityType($user, $entityType, true, false);
+				$this->userUtils->computeUnlistedCounterByEntityType($user, $entityType, true, false);
 
 			}
 
 			// Process listed view
-			$viewableUtils = $this->container->get(ViewableUtils::NAME);
-			$viewableUtils->processListedView($publications);
+			$this->viewableUtils->processListedView($publications);
 
 			if ($event->isNeedCounterResetRefreshTime()) {
 
 				// Reset unlisted counter refresh time
-				$userUtils->resetUnlistedCounterRefreshTimeByEntityType($user, $entityType);
+				$this->userUtils->resetUnlistedCounterRefreshTimeByEntityType($user, $entityType);
 
 			}
 

@@ -176,13 +176,13 @@ refaire la CI en local, sur une stack démarrée (`castor start`) :
 
 ```bash
 castor -c ci qa:all          # qa:lint, qa:phpstan, qa:phpunit, puis qa:deprecations
-castor -c ci qa:lint         # lint:twig, lint:yaml, doctrine:schema:validate, cache:warmup --env=prod, composer validate
+castor -c ci qa:lint         # lint:twig, lint:yaml, doctrine:schema:validate, cache:warmup et lint:container --env=prod, composer validate
 castor qa:phpstan [-b]       # niveau 0, phpstan-baseline.neon ; -b la régénère
 castor qa:phpunit [-- --filter …]
 castor qa:deprecations       # var/deprecations/report.md, et le résumé du job en CI
 castor qa:install            # outils de tools/ (PHPStan, PHPUnit), installés à la volée sinon
 castor qa:e2e [-- --grep …]  # tests E2E (Playwright) : recharge la base du dev, hors qa:all, job E2E en CI
-castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() des actions → arguments (#16), des utils et des managers → constructeur (#118)
+castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() des actions → arguments (#16), des utils, managers, listeners et validateurs → constructeur (#118)
 ```
 
 - PHPUnit 9.6, dans `tools/phpunit` et pas dans le `composer.json` de l'application : c'est la
@@ -306,6 +306,9 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
     entité après une requête plutôt que de garder celle d'avant. L'entity manager d'une requête
     peut garder une entité qu'elle a supprimée (article d'un pas à pas) : `clear()` avant de
     vérifier une suppression par `find()`.
+  - `static::$container` : le container de test, qui lit aussi les services privés (ceux de
+    `services.yml`), dans le kernel du dernier `createClient()` ou `bootKernel()`, reboots du
+    client compris.
 - Pas de RabbitMQ ni de websocket en test : les producers `old_sound_rabbit_mq.view_producer` et
   `webpush_notification_producer`, et le pusher `gos_web_socket.wamp.pusher`, sont décorés par
   `Tests\Double\InMemoryProducer` et `InMemoryPusher`, qui gardent les messages
@@ -552,6 +555,11 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   dans des propriétés protégées que leurs sous-classes lisent sans les redemander : le
   constructeur reste aux sous-classes. `Qa\AnswerManager` reçoit `Qa\QuestionManager` par un
   setter, qui le reçoit dans son constructeur (le container refuse un cycle de constructeurs).
+- Listeners (`Event/`), validateurs, `WorkflowTopic` et `ViewConsumer` : dépendances et paramètres
+  par le constructeur. Plus rien ne lit le container hors des controllers : les services de
+  `services.yml` sont privés. `LadbExtension`, que Twig crée avec lui-même à chaque requête, lit
+  `TypableUtils` et `UserManager` (le gestionnaire d'entités) et `VideoHostingUtils` (qui reçoit
+  Twig) dans `ladb.twig.ladb_extension.service_locator`, au moment de s'en servir.
 - PHPStan lit la version de PHP dans `composer.json` (`>=7.3`) : la syntaxe PHP 8 (propriétés
   promues, `readonly`, virgule finale dans une signature) y est une erreur, même si tout tourne en
   8.5.

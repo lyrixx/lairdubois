@@ -6050,6 +6050,15 @@ parameters:
 
 		-
 			message: '''
+				#^Parameter \$templating of method Ladb\\CoreBundle\\Event\\UserListener\:\:__construct\(\) has typehint with deprecated interface Symfony\\Bundle\\FrameworkBundle\\Templating\\EngineInterface\:
+				since version 4\.3, to be removed in 5\.0; use Twig instead\.$#
+			'''
+			identifier: parameter.deprecatedInterface
+			count: 1
+			path: src/Ladb/CoreBundle/Event/UserListener.php
+
+		-
+			message: '''
 				#^Class Ladb\\CoreBundle\\Event\\VotableEvent extends deprecated class Symfony\\Component\\EventDispatcher\\Event\:
 				since Symfony 4\.3, use "Symfony\\Contracts\\EventDispatcher\\Event" instead$#
 			'''
@@ -6133,10 +6142,13 @@ parameters:
 			path: src/Ladb/CoreBundle/Repository/Qa/AnswerRepository.php
 
 		-
-			message: '#^Call to an undefined method Ladb\\CoreBundle\\Topic\\AbstractTopic\:\:getClientManipulator\(\)\.$#'
-			identifier: method.notFound
+			message: '''
+				#^Parameter \$translator of method Ladb\\CoreBundle\\Twig\\LadbExtension\:\:__construct\(\) has typehint with deprecated interface Symfony\\Component\\Translation\\TranslatorInterface\:
+				since Symfony 4\.2, use Symfony\\Contracts\\Translation\\TranslatorInterface instead$#
+			'''
+			identifier: parameter.deprecatedInterface
 			count: 1
-			path: src/Ladb/CoreBundle/Topic/AbstractTopic.php
+			path: src/Ladb/CoreBundle/Twig/LadbExtension.php
 
 		-
 			message: '#^Deprecated in PHP 8\.4\: Parameter \#4 \$publisherUser \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'

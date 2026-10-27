@@ -2,8 +2,9 @@
 
 namespace Ladb\CoreBundle\Event;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Ladb\CoreBundle\Fos\UserManager;
-use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use FOS\UserBundle\Event\FilterUserResponseEvent;
 use FOS\UserBundle\FOSUserEvents;
@@ -14,10 +15,22 @@ use Ladb\CoreBundle\Utils\UserUtils;
 
 class UserListener implements EventSubscriberInterface {
 
-	private $container;
+	private $adminUsername;
+	private $mailerUtils;
+	private $messageUtils;
+	private $om;
+	private $templating;
+	private $userManager;
+	private $userUtils;
 
-	public function __construct(ContainerInterface $container) {
-		$this->container = $container;
+	public function __construct($adminUsername, MailerUtils $mailerUtils, MessageUtils $messageUtils, EntityManagerInterface $om, EngineInterface $templating, UserManager $userManager, UserUtils $userUtils) {
+		$this->adminUsername = $adminUsername;
+		$this->mailerUtils = $mailerUtils;
+		$this->messageUtils = $messageUtils;
+		$this->om = $om;
+		$this->templating = $templating;
+		$this->userManager = $userManager;
+		$this->userUtils = $userUtils;
 	}
 
 	/////
@@ -31,19 +44,12 @@ class UserListener implements EventSubscriberInterface {
 	/////
 
 	public function onRegistrationCompleted(FilterUserResponseEvent $event) {
-		$userManager = $this->container->get(UserManager::NAME);
-		$templating = $this->container->get('templating');
-		$messageUtils = $this->container->get(MessageUtils::NAME);
-		$mailerUtils = $this->container->get(MailerUtils::NAME);
-		$userUtils = $this->container->get(UserUtils::NAME);
-		$om = $this->container->get('doctrine.orm.entity_manager');
-
 		$user = $event->getUser();
 
 		/////
 
 		// Create default avatar
-		$userUtils->createDefaultAvatar($user, false);
+		$this->userUtils->createDefaultAvatar($user, false);
 
 		/////
 
@@ -52,22 +58,21 @@ class UserListener implements EventSubscriberInterface {
 		$registration->setClientIp4($event->getRequest()->getClientIp());
 		$registration->setClientUserAgent($event->getRequest()->server->get('HTTP_USER_AGENT'));
 
-		$om->persist($registration);
-		$om->flush();
+		$this->om->persist($registration);
+		$this->om->flush();
 
 		/////
 
 		// Send welcome Message
-		$adminUsername = $this->container->getParameter('admin_username');
-		$sender = $userManager->findUserByUsername($adminUsername);
+		$sender = $this->userManager->findUserByUsername($this->adminUsername);
 		if (!is_null($sender)) {
 			// Unread message count: composeThread() leaves it to the caller
 			$user->getMeta()->incrementUnreadMessageCount();
-			$messageUtils->composeThread($sender, array( $user ), 'Bienvenue !', $templating->render('LadbCoreBundle:Core/User:message-welcome.md.twig', array( 'recipientUser' => $user )), null, true);
+			$this->messageUtils->composeThread($sender, array( $user ), 'Bienvenue !', $this->templating->render('LadbCoreBundle:Core/User:message-welcome.md.twig', array( 'recipientUser' => $user )), null, true);
 		}
 
 		// Send admin email notification
-		$mailerUtils->sendNewUserNotificationEmailMessage($user);
+		$this->mailerUtils->sendNewUserNotificationEmailMessage($user);
 
 	}
 

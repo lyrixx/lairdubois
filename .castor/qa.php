@@ -52,6 +52,8 @@ function lint(): int
         // Needs the database and its schema (castor app:db:schema)
         ['bin/console', 'doctrine:schema:validate'],
         ['bin/console', 'cache:warmup', '--env=prod'],
+        // In prod: the doubles of the test environment are not of the type of the services they decorate
+        ['bin/console', 'lint:container', '--env=prod'],
         ['composer', 'validate', '--no-check-publish'],
     ];
 
@@ -257,8 +259,8 @@ function rector(
 /**
  * The rules of tools/rector leave "__RECTOR_REMOVED_LINE__;" in place of the statements they
  * remove (php-parser would reprint the comments before them): removed here with their line, and
- * the empty line after them when it would double the one before, or detach a comment from the next
- * statement. ContainerToConstructorRector writes its new members as a constant
+ * the empty line after them when it would double the one before, detach a comment from the next
+ * statement, or open a block. ContainerToConstructorRector writes its new members as a constant
  * "__RECTOR_INSERTED_CODE__", whose value is their code in base64 (php-parser would indent them
  * wrong): its line is replaced by the code, and the next line gets its indentation.
  */
@@ -285,7 +287,7 @@ function rector_remove_lines(string $file): void
         }
         $removed = true;
         $previous = trim($kept[\count($kept) - 1] ?? '');
-        if (('' === $previous || str_starts_with($previous, '//')) && $i + 1 < $count && '' === trim($lines[$i + 1])) {
+        if (('' === $previous || str_starts_with($previous, '//') || str_ends_with($previous, '{')) && $i + 1 < $count && '' === trim($lines[$i + 1])) {
             ++$i;
         }
     }

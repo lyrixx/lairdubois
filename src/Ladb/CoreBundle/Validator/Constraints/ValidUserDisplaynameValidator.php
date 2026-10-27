@@ -2,18 +2,20 @@
 
 namespace Ladb\CoreBundle\Validator\Constraints;
 
+use Doctrine\Persistence\ManagerRegistry;
 use Ladb\CoreBundle\Fos\DisplaynameCanonicalizer;
-use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Ladb\CoreBundle\Entity\Core\User;
 
 class ValidUserDisplaynameValidator extends ConstraintValidator {
 
-	protected $container;
+	private $displaynameCanonicalizer;
+	private $doctrine;
 
-	public function __construct(Container $container) {
-		$this->container = $container;
+	public function __construct(DisplaynameCanonicalizer $displaynameCanonicalizer, ManagerRegistry $doctrine) {
+		$this->displaynameCanonicalizer = $displaynameCanonicalizer;
+		$this->doctrine = $doctrine;
 	}
 
 	/**
@@ -27,9 +29,8 @@ class ValidUserDisplaynameValidator extends ConstraintValidator {
 	public function validate($value, Constraint $constraint) {
 		if ($value instanceof User) {
 
-			$displaynameCanonicalizer = $this->container->get(DisplaynameCanonicalizer::NAME);
 			try {
-				$displaynameCanonical = $displaynameCanonicalizer->canonicalize($value->getDisplayname());
+				$displaynameCanonical = $this->displaynameCanonicalizer->canonicalize($value->getDisplayname());
 			} catch(\Exception $e) {
 				$this->context->buildViolation('Ce nom est invalide.')
 					->atPath('displayname')
@@ -43,7 +44,7 @@ class ValidUserDisplaynameValidator extends ConstraintValidator {
 					->addViolation();
 			}
 
-			$userRepository = $this->container->get('doctrine')->getRepository(User::class);
+			$userRepository = $this->doctrine->getRepository(User::class);
 			$currentUser = $value->getId() ? $userRepository->findOneById($value->getId()) : null;
 			$user = $userRepository->findOneByDisplaynameCanonical($displaynameCanonical);
 

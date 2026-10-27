@@ -54,6 +54,8 @@ use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
  *   their constructor. A property that a parent class already declares (protected) is not injected again: run the
  *   rule on the parent classes first, as it reads them as they are on disk.
  * - The class no longer extends AbstractContainerAwareUtils (#125). AbstractManager stays, with $doctrine.
+ * - A class that keeps the container in $this->container, set by its constructor (listeners, validators), loses the
+ *   property and the container argument.
  *
  * A class is left untouched when one of its reads is not mechanical: an id that is neither a class constant nor in
  * SERVICES, a parameter whose name is not a string or that an abstract class reads, has(), another use of
@@ -70,7 +72,13 @@ final class ContainerToConstructorRector extends AbstractRector
         'Ladb\\CoreBundle\\Manager\\' => ['Ladb\\CoreBundle\\Manager\\AbstractManager', false],
     ];
 
-    private const CONTAINER_CLASS = 'Symfony\\Component\\DependencyInjection\\ContainerInterface';
+    /**
+     * The types of a container argument.
+     */
+    private const CONTAINER_CLASSES = [
+        'Symfony\\Component\\DependencyInjection\\Container',
+        'Symfony\\Component\\DependencyInjection\\ContainerInterface',
+    ];
 
     public function __construct(
         private readonly ReflectionProvider $reflectionProvider,
@@ -92,9 +100,13 @@ final class ContainerToConstructorRector extends AbstractRector
      * the name of the property. The same names as ControllerGetToActionArgumentRector.
      */
     private const SERVICES = [
+        // The key of getDoctrine(): the same property
+        'doctrine' => ['Doctrine\\Persistence\\ManagerRegistry', 'doctrine'],
         'doctrine.orm.entity_manager' => ['Doctrine\\ORM\\EntityManagerInterface', 'om'],
         'event_dispatcher' => ['Symfony\\Component\\EventDispatcher\\EventDispatcherInterface', 'dispatcher'],
         'liip_imagine.cache.manager' => ['Liip\\ImagineBundle\\Imagine\\Cache\\CacheManager', 'cacheManager'],
+        'liip_imagine.data.manager' => ['Liip\\ImagineBundle\\Imagine\\Data\\DataManager', 'dataManager'],
+        'liip_imagine.filter.manager' => ['Liip\\ImagineBundle\\Imagine\\Filter\\FilterManager', 'filterManager'],
         'logger' => ['Psr\\Log\\LoggerInterface', 'logger'],
         'mailer' => ['Swift_Mailer', 'mailer'],
         'router' => ['Symfony\\Component\\Routing\\RouterInterface', 'router'],
@@ -158,7 +170,7 @@ CODE_SAMPLE
     {
         $changed = false;
         // The container, and the classes of the services read in a parent class
-        $imports = [self::CONTAINER_CLASS];
+        $imports = self::CONTAINER_CLASSES;
         foreach ($node->stmts as $stmt) {
             if ($stmt instanceof Class_ && $this->refactorClass($node, $stmt, $imports)) {
                 $changed = true;
@@ -179,7 +191,7 @@ CODE_SAMPLE
     private function refactorClass(Namespace_ $namespace, Class_ $class, array &$imports): bool
     {
         $className = $this->getName($class);
-        if (null === $className || null === $class->extends || !$this->reflectionProvider->hasClass($className)) {
+        if (null === $className || !$this->reflectionProvider->hasClass($className)) {
             return false;
         }
         $baseClass = null;
@@ -191,7 +203,8 @@ CODE_SAMPLE
         }
         $classReflection = $this->reflectionProvider->getClass($className);
         $parentClasses = $classReflection->getParentClassesNames();
-        if (null === $baseClass || ($removesExtends ? $baseClass !== $this->getName($class->extends) : !\in_array($baseClass, $parentClasses, true))) {
+        $keepsContainer = $this->keepsContainer($class);
+        if (!$keepsContainer && (null === $baseClass || null === $class->extends || ($removesExtends ? $baseClass !== $this->getName($class->extends) : !\in_array($baseClass, $parentClasses, true)))) {
             return false;
         }
 
@@ -200,7 +213,8 @@ CODE_SAMPLE
         $properties = [];
         $isMechanical = true;
         foreach ($class->getMethods() as $method) {
-            if (null === $method->stmts) {
+            // The constructor that sets $this->container is checked below
+            if (null === $method->stmts || ($keepsContainer && '__construct' === $method->name->toString())) {
                 continue;
             }
             $this->traverseNodesWithCallable($method->stmts, function (Node $node) use (&$properties, &$isMechanical, $method, $namespace): ?int {
@@ -271,12 +285,15 @@ CODE_SAMPLE
         // The existing constructor: its arguments, except the container, and its statements, except the call to the parent
         $constructor = $class->getMethod('__construct');
         $params = [];
+        $containerParams = [];
         $otherStmts = [];
         $existingProperties = [];
         if (null !== $constructor) {
             foreach ($constructor->params as $param) {
                 $name = $this->getName($param->var);
-                if (null !== $param->type && self::CONTAINER_CLASS === $this->getName($param->type)) {
+                if (null !== $param->type && \in_array($this->getName($param->type), self::CONTAINER_CLASSES, true)) {
+                    $containerParams[] = $name;
+
                     continue;
                 }
                 if (isset($injected[$name])) {
@@ -286,6 +303,10 @@ CODE_SAMPLE
             }
             foreach ((array) $constructor->stmts as $stmt) {
                 if ($stmt instanceof Expression && $stmt->expr instanceof StaticCall && $this->isName($stmt->expr->class, 'parent') && $this->isName($stmt->expr->name, '__construct')) {
+                    continue;
+                }
+                // $this->container = $container;, removed with the property
+                if ($keepsContainer && $this->isContainerAssignment($stmt, $containerParams)) {
                     continue;
                 }
                 // $this->foo = $foo;, written again below
@@ -334,7 +355,10 @@ CODE_SAMPLE
                 $visibilities[$this->getName($stmt->props[0])] = $stmt->isProtected() ? 'protected' : ($stmt->isPublic() ? 'public' : 'private');
             }
         }
-        $class->stmts = array_values(array_filter($class->stmts, fn (Stmt $stmt): bool => !($stmt instanceof Property && 1 === \count($stmt->props) && isset($visibilities[$this->getName($stmt->props[0])])) && !($stmt instanceof ClassMethod && '__construct' === $stmt->name->toString())));
+        if ($keepsContainer) {
+            $visibilities['container'] = null;
+        }
+        $class->stmts = array_values(array_filter($class->stmts, fn (Stmt $stmt): bool => !($stmt instanceof Property && 1 === \count($stmt->props) && \array_key_exists($this->getName($stmt->props[0]), $visibilities)) && !($stmt instanceof ClassMethod && '__construct' === $stmt->name->toString())));
         // After the constants and properties before the first method
         $position = 0;
         foreach ($class->stmts as $i => $stmt) {
@@ -377,6 +401,38 @@ CODE_SAMPLE
         }
 
         return true;
+    }
+
+    /**
+     * A concrete class with a $container property, that its constructor sets from an argument typed as a container.
+     */
+    private function keepsContainer(Class_ $class): bool
+    {
+        $constructor = $class->getMethod('__construct');
+        if ($class->isAbstract() || null === $constructor || null === $class->getProperty('container')) {
+            return false;
+        }
+        $containerParams = [];
+        foreach ($constructor->params as $param) {
+            if (null !== $param->type && \in_array($this->getName($param->type), self::CONTAINER_CLASSES, true)) {
+                $containerParams[] = $this->getName($param->var);
+            }
+        }
+        foreach ((array) $constructor->stmts as $stmt) {
+            if ($this->isContainerAssignment($stmt, $containerParams)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param list<string|null> $containerParams
+     */
+    private function isContainerAssignment(Stmt $stmt, array $containerParams): bool
+    {
+        return $stmt instanceof Expression && $stmt->expr instanceof Assign && $stmt->expr->var instanceof PropertyFetch && $stmt->expr->var->var instanceof Variable && $this->isName($stmt->expr->var->var, 'this') && $this->isName($stmt->expr->var->name, 'container') && $stmt->expr->expr instanceof Variable && \in_array($this->getName($stmt->expr->expr), $containerParams, true);
     }
 
     private function refactorMethod(ClassMethod $method, Namespace_ $namespace): void

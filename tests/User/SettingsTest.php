@@ -144,7 +144,7 @@ final class SettingsTest extends WebTestCase
     public function testUnsubscribeFromNotifications(): void
     {
         $client = static::createClient();
-        $encryptedEmail = $client->getContainer()->get(CryptoUtils::NAME)->encryptString('user@lairdubois.test');
+        $encryptedEmail = static::$container->get(CryptoUtils::NAME)->encryptString('user@lairdubois.test');
 
         $client->request('GET', '/email/unsubscribe/notifications/'.$encryptedEmail);
 
@@ -158,7 +158,7 @@ final class SettingsTest extends WebTestCase
     public function testUnsubscribeFromWeekNews(): void
     {
         $client = static::createClient();
-        $encryptedEmail = $client->getContainer()->get(CryptoUtils::NAME)->encryptString('user@lairdubois.test');
+        $encryptedEmail = static::$container->get(CryptoUtils::NAME)->encryptString('user@lairdubois.test');
 
         $client->request('GET', '/email/unsubscribe/weeknews/'.$encryptedEmail);
 

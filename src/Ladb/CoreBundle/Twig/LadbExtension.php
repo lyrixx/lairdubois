@@ -3,11 +3,13 @@
 namespace Ladb\CoreBundle\Twig;
 
 use Ladb\CoreBundle\Utils\UrlUtils;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Ladb\CoreBundle\Utils\VideoHostingUtils;
 use Ladb\CoreBundle\Parser\Markdown\LadbMarkdown;
 use Ladb\CoreBundle\Utils\TypableUtils;
 use Ladb\CoreBundle\Fos\UserManager;
+use Psr\Container\ContainerInterface as PsrContainerInterface;
+use Symfony\Component\Routing\RouterInterface;
+use Symfony\Component\Translation\TranslatorInterface;
 use Twig\Environment;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
@@ -16,10 +18,18 @@ use Twig\TwigTest;
 
 class LadbExtension extends AbstractExtension {
 
-	private $container;
+	private $router;
+	private $serviceLocator;
+	private $translator;
+	private $urlUtils;
 
-	public function __construct(ContainerInterface $container) {
-		$this->container = $container;
+	// Twig creates its extensions with itself, at each request: TypableUtils, UserManager (the entity
+	// manager) and VideoHostingUtils (Twig) are read from $serviceLocator when a filter or a function needs them
+	public function __construct(RouterInterface $router, PsrContainerInterface $serviceLocator, TranslatorInterface $translator, UrlUtils $urlUtils) {
+		$this->router = $router;
+		$this->serviceLocator = $serviceLocator;
+		$this->translator = $translator;
+		$this->urlUtils = $urlUtils;
 	}
 
 	public function getFilters() {
@@ -83,7 +93,7 @@ class LadbExtension extends AbstractExtension {
 	}
 
 	public function markdownFilter($str) {
-		$parser = new LadbMarkdown($this->container->get(UserManager::NAME), $this->container->get('router'), $this->container->get(UrlUtils::NAME));
+		$parser = new LadbMarkdown($this->serviceLocator->get(UserManager::NAME), $this->router, $this->urlUtils);
 		return $parser->parse($str);
 	}
 
@@ -93,7 +103,7 @@ class LadbExtension extends AbstractExtension {
 	}
 
 	public function urlTruncateFilter($str, $removeProtocol = true, $lengthL = 14, $lengthR = 15, $separator = '...', $charset = 'UTF-8') {
-		return $this->container->get(UrlUtils::NAME)->truncateUrl($str, $removeProtocol, $lengthL, $lengthR, $separator, $charset);
+		return $this->urlUtils->truncateUrl($str, $removeProtocol, $lengthL, $lengthR, $separator, $charset);
 	}
 
 	public function urlBeautifyFilter($str) {
@@ -109,7 +119,7 @@ class LadbExtension extends AbstractExtension {
 		$d = new \DateTime();
 		$d->add(new \DateInterval('PT'.$duration.'S'));
 		$interval = $d->diff(new \DateTime());
-		$translator = $this->container->get('translator');
+		$translator = $this->translator;
 		if ($interval->y > 0) {
 			$str = $translator->transChoice('interval.'.($long ? 'long' : 'short').'.year', $interval->y, array('%count%' => $interval->y), 'date');
 			if ($interval->m > 0) {
@@ -148,7 +158,7 @@ class LadbExtension extends AbstractExtension {
 		if ($duration > 0) {
 			$hours = floor($duration / 3600);
 			$minutes = floor(($duration / 60) % 60);
-			$translator = $this->container->get('translator');
+			$translator = $this->translator;
 			if ($hours > 0) {
 				$str = $translator->transChoice('interval.'.($long ? 'long' : 'short').'.hour', $hours, array('%count%' => $hours), 'date');
 				if ($minutes > 0) {
@@ -204,7 +214,7 @@ class LadbExtension extends AbstractExtension {
 			$count = $diff->$attribute;
 			if (0 !== $count) {
 				$id = sprintf('diff.%s.%s', $diff->invert ? 'in' : 'ago', $unit);
-				return $this->container->get('translator')->transChoice($id, $count, array( '%count%' => $count ), 'date');
+				return $this->translator->transChoice($id, $count, array( '%count%' => $count ), 'date');
 			}
 		}
 
@@ -230,7 +240,7 @@ class LadbExtension extends AbstractExtension {
 	}
 
 	public function entityFunction($type, $id) {
-		$typableUtils = $this->container->get(TypableUtils::NAME);
+		$typableUtils = $this->serviceLocator->get(TypableUtils::NAME);
 		$typable = $typableUtils->findTypable($type, $id);
 		return $typable;
 	}
@@ -238,14 +248,14 @@ class LadbExtension extends AbstractExtension {
 	public function entityUrlActionFunction($entity, $action = 'show', $absoluteUrl = true, $useSluggedId = true, $additionalParams = null) {
 		$url = '';
 		if ($entity instanceof \Ladb\CoreBundle\Model\TypableInterface) {
-			$typableUtils = $this->container->get(TypableUtils::NAME);
+			$typableUtils = $this->serviceLocator->get(TypableUtils::NAME);
 			$url = $typableUtils->getUrlAction($entity, $action, $absoluteUrl, $useSluggedId, $additionalParams);
 		}
 		return $url;
 	}
 
     public function entityTypeStrippedNameFunction($entityOrType, $delimiter = '_', $capitalize = false) {
-		$typableUtils = $this->container->get(TypableUtils::NAME);
+		$typableUtils = $this->serviceLocator->get(TypableUtils::NAME);
         if ($entityOrType instanceof \Ladb\CoreBundle\Model\TypableInterface) {
 			return $typableUtils->getStrippedName($entityOrType, $delimiter, $capitalize);
         } else if (is_int($entityOrType) or is_string($entityOrType)) {
@@ -255,7 +265,7 @@ class LadbExtension extends AbstractExtension {
     }
 
     public function entityTypeIconFunction($entityOrType) {
-		$typableUtils = $this->container->get(TypableUtils::NAME);
+		$typableUtils = $this->serviceLocator->get(TypableUtils::NAME);
         if ($entityOrType instanceof \Ladb\CoreBundle\Model\TypableInterface) {
 			return $typableUtils->getIcon($entityOrType);
         } else if (is_int($entityOrType) or is_string($entityOrType)) {
@@ -291,12 +301,12 @@ class LadbExtension extends AbstractExtension {
 	}
 
 	public function videoPlayerFrameFunction($kind, $embedIdentifier, $width = '560', $height = '420', $styleClass = '', $autoPlay = false) {
-		$videoHostingUtils = $this->container->get(VideoHostingUtils::NAME);
+		$videoHostingUtils = $this->serviceLocator->get(VideoHostingUtils::NAME);
 		return $videoHostingUtils->getPlayerFrame($kind, $embedIdentifier, $width, $height, $styleClass, $autoPlay);
 	}
 
 	public function videoIconClassFunction($kind, $prefix = 'ladb-icon-') {
-		$videoHostingUtils = $this->container->get(VideoHostingUtils::NAME);
+		$videoHostingUtils = $this->serviceLocator->get(VideoHostingUtils::NAME);
 		return $videoHostingUtils->getIconClass($kind, $prefix);
 	}
 
