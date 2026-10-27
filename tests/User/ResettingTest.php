@@ -17,7 +17,7 @@ final class ResettingTest extends WebTestCase
 
         $this->requestReset($client, 'user@lairdubois.test');
 
-        self::assertSame('/resetting/check-email?username=user%40lairdubois.test', $client->getResponse()->headers->get('Location'));
+        self::assertSame('/resetting/check-email?username=user@lairdubois.test', $client->getResponse()->headers->get('Location'));
         $messages = static::getSentEmails($client);
         self::assertCount(1, $messages);
         self::assertSame(['user@lairdubois.test'], static::getEmailRecipients($messages[0]));

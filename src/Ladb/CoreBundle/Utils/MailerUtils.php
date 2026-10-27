@@ -61,7 +61,7 @@ class MailerUtils {
 		$signer = new \Swift_Signers_DKIMSigner($privateKey, $domainName, $selector);
 
 		// Create the message instance
-		$message = \Swift_Message::newInstance()
+		$message = (new \Swift_Message())
 			->attachSigner($signer)
 			->setFrom(array('noreply@lairdubois.fr' => 'L\'Air du Bois'))
 			->setTo($toEmail)

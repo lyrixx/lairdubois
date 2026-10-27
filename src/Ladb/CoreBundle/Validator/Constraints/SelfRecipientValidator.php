@@ -4,13 +4,13 @@ namespace Ladb\CoreBundle\Validator\Constraints;
 
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class SelfRecipientValidator extends ConstraintValidator {
 
 	protected $tokenStorage;
 
-	public function __construct(TokenStorage $tokenStorage) {
+	public function __construct(TokenStorageInterface $tokenStorage) {
 		$this->tokenStorage = $tokenStorage;
 	}
 

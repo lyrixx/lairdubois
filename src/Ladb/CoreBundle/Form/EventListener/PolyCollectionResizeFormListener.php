@@ -62,12 +62,13 @@ class PolyCollectionResizeFormListener extends ResizeFormListener
             $type       = $prototype->getConfig()->getType()->getInnerType();
 
             if (null === $defaultType) {
-                $defaultType = $type;
+                $defaultType = get_class($type);
             }
 
+            // The class of the type: the ResizeFormListener of Symfony 4 only takes a class
             $typeKey = $type instanceof FormTypeInterface ? $type->getBlockPrefix() : $type;
-            $this->typeMap[$typeKey] = $type;
-            $this->classMap[$modelClass] = $type;
+            $this->typeMap[$typeKey] = get_class($type);
+            $this->classMap[$modelClass] = get_class($type);
         }
 
         parent::__construct($defaultType, $options, $allowAdd, $allowDelete);
@@ -97,7 +98,7 @@ class PolyCollectionResizeFormListener extends ResizeFormListener
      * the form type to use to process the data.
      *
      * @param  array                     $data
-     * @return string|FormTypeInterface
+     * @return string
      * @throws \InvalidArgumentException when _type is not present or is invalid
      */
     protected function getTypeForData(array $data)
@@ -130,7 +131,7 @@ class PolyCollectionResizeFormListener extends ResizeFormListener
         // Then add all rows again in the correct order
         foreach ($data as $name => $value) {
             $type = $this->getTypeForObject($value);
-            $form->add($name, get_class($type), array_replace(array(
+            $form->add($name, $type, array_replace(array(
                 'property_path' => '['.$name.']',
             ), $this->options));
         }
@@ -168,7 +169,7 @@ class PolyCollectionResizeFormListener extends ResizeFormListener
             foreach ($data as $name => $value) {
                 if (!$form->has($name)) {
                     $type = $this->getTypeForData($value);
-                    $form->add($name, get_class($type), array_replace(array(
+                    $form->add($name, $type, array_replace(array(
                         'property_path' => '['.$name.']',
                     ), $this->options));
                 }
