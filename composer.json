@@ -89,6 +89,9 @@
         "doctrine/doctrine-fixtures-bundle": "^3.4",
         "symfony/phpunit-bridge": "~3.0"
     },
+    "replace": {
+        "robloach/component-installer": "*"
+    },
     "scripts": {
         "symfony-scripts": [
             "Incenteev\\ParameterHandler\\ScriptHandler::buildParameters",
@@ -109,11 +112,15 @@
             "composer/package-versions-deprecated": true,
             "oomphinc/composer-installers-extender": true,
             "php-http/discovery": false,
-            "robloach/component-installer": true
+            "robloach/component-installer": false
         },
         "bin-dir": "bin"
     },
     "extra": {
+        "installer-types": ["component"],
+        "installer-paths": {
+            "vendor/{$vendor}/{$name}/": ["type:component"]
+        },
         "incenteev-parameters": {
             "file": "app/config/parameters.yml",
             "env-map": {

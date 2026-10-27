@@ -167,9 +167,8 @@ function assets_install(): void
 {
     $rootDir = variable('root_dir');
 
-    // The sources of the assets: the bundles of vendor/, and components/ (jQuery...) that
-    // robloach/component-installer writes
-    if (!is_dir($rootDir . '/vendor') || !is_dir($rootDir . '/components')) {
+    // The sources of the assets: the bundles and the components (jQuery...) of vendor/
+    if (!is_dir($rootDir . '/vendor')) {
         install();
     }
 

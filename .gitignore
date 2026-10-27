@@ -12,6 +12,7 @@
 /build/
 /backups/
 /var/
+# Written by robloach/component-installer until #18, the components are now in vendor/
 /components/
 /docs/private
 /downloads/

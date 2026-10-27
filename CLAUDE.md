@@ -447,8 +447,13 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `sensio/distribution-bundle`, parti depuis : un `composer install` sur un clone neuf passe aussi
   avec Composer 2.10, rien n'empêche plus de monter. Composer 2.2 ne lit pas
   `COMPOSER_IGNORE_PLATFORM_REQ` et n'a pas `composer audit` (2.4 et plus).
-- `allow-plugins` doit lister `robloach/component-installer` : il installe `components/` (jQuery…),
-  que `vite.config.js` concatène. Il garde `kriswallsmith/assetic` dans le lock, sans le bundle.
+- Les paquets de type `component` (jQuery, jQuery UI, Masonry, Moment…), que `vite.config.js`
+  concatène, s'installent dans `vendor/` par `oomphinc/composer-installers-extender`
+  (`installer-types` et `installer-paths` de `composer.json`). `robloach/component-installer`, qui
+  les copiait aussi dans `components/`, est remplacé par le projet (`replace` : il est exigé par
+  `eonasdan/bootstrap-datetimepicker`) : toutes ses versions tirent `kriswallsmith/assetic` 1.x,
+  qui refuse `symfony/process` 4. Il reste à `false` dans `allow-plugins` : sinon, sur une copie
+  où il est encore installé, `composer install` s'arrête avant de le retirer.
 - Le bundle `symfony/reprise` exige Symfony `^7.4` et PHP 8.4 : avant le saut en 7.4, seul le côté
   JS (Vite et le plugin npm `@symfony/reprise`) est utilisable. Ce plugin demande Node 22.18 ou plus.
 - Sans `web/build/manifest.json`, `asset(…, 'build')` lève une exception : toute page répond 500.
