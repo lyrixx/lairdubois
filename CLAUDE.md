@@ -515,6 +515,13 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   quelque 350 warnings PHP (`cache:clear`, `cache:warmup`, première requête après un cache vidé).
   Sans effet sur les routes, ça ne fait rien échouer ; corrigé en 5.4. En prod, `cache:warmup`
   construit ce cache avant la première requête.
+- Le kernel de 4.4 passe `error_reporting` à `E_ALL ^ E_WARNING` pendant qu'il inclut le container
+  en cache, avant tout gestionnaire d'erreurs de Symfony : PHP 8.4+ afficherait les dépréciations
+  de compilation des fichiers chargés à ce moment (paramètres implicitement nullables de Symfony
+  4.4) en tête de la première page après un démarrage de FPM, et à chaque commande en prod.
+  `AppKernel::initializeContainer()` ignore alors ce que le niveau de l'appelant cache (php.ini,
+  `bin/console`) et passe le reste au gestionnaire précédent : sous PHPUnit (`error_reporting=-1`),
+  `Tests\DeprecationCollector` les compte toujours. À revoir au saut en 5.4.
 - En 3.4 et 4.4, `HttpKernel` n'attrape que les `\Exception` : une `\Error` PHP (appel sur `null`,
   `TypeError`) sort du kernel au lieu de donner une 500.
 - Les mots de passe sont hashés en sha512 par FOSUserBundle : les comptes existants doivent continuer
