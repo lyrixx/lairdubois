@@ -27,7 +27,7 @@ final class ArticleTest extends WebTestCase
         $crawler = $client->request('GET', $this->path('core_howto_article_show', ['id' => self::ID]));
 
         self::assertSame(200, $client->getResponse()->getStatusCode());
-        self::assertStringContainsStringIgnoringCase($this->findArticle()->getTitle(), $crawler->filter('title')->text());
+        self::assertStringContainsStringIgnoringCase($this->findArticle()->getTitle(), $crawler->filter('title')->text(null, false));
     }
 
     /**

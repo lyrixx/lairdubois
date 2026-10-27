@@ -65,7 +65,7 @@ class Howto extends AbstractDraftableAuthoredPublication implements TitledInterf
 	/**
 	 * @ORM\Column(type="string", length=100)
 	 * @Assert\NotBlank()
-	 * @Assert\Length(min=4, max=100)
+	 * @Assert\Length(min=4, max=100, allowEmptyString=true)
 	 */
 	private $title;
 
@@ -83,7 +83,7 @@ class Howto extends AbstractDraftableAuthoredPublication implements TitledInterf
 	/**
 	 * @ORM\Column(type="text", nullable=false)
 	 * @Assert\NotBlank()
-	 * @Assert\Length(min=2, max=2000)
+	 * @Assert\Length(min=2, max=2000, allowEmptyString=true)
 	 */
 	private $body;
 

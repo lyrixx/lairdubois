@@ -29,7 +29,7 @@ class Biography implements IdentifiableInterface, HtmlBodiedInterface {
 
 	/**
 	 * @ORM\Column(type="text", nullable=true)
-	 * @Assert\Length(min=2, max=10000)
+	 * @Assert\Length(min=2, max=10000, allowEmptyString=true)
 	 */
 	private $body;
 

@@ -76,7 +76,7 @@ class EntryController extends AbstractCollectionBasedController {
 		$collectionnableUtils->deleteEntry($entry, $entity, $om, true);
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_CHANGED, new PublicationEvent($collection));
+		$dispatcher->dispatch(new PublicationEvent($collection), PublicationListener::PUBLICATION_CHANGED);
 
 		return array(
 			'entryContext' => $collectionnableUtils->getEntryContext($collection, $entity),

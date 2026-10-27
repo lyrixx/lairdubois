@@ -11,7 +11,7 @@ use Imagine\Image\Point;
 use Ladb\CoreBundle\Entity\Knowledge\Wood;
 use Ladb\CoreBundle\Entity\Knowledge\Wood\Texture;
 use Ladb\CoreBundle\Entity\Knowledge\Value\Picture;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class TextureUtils {
 

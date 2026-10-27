@@ -118,7 +118,7 @@ class OfferManager extends AbstractAuthoredPublicationManager {
 		$om->flush();
 
 		// Dispatch publication event
-		$this->dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED_FROM_CONVERT, new PublicationEvent($question));
+		$this->dispatcher->dispatch(new PublicationEvent($question), PublicationListener::PUBLICATION_CREATED_FROM_CONVERT);
 
 		// User counter
 		if ($question->getIsDraft()) {

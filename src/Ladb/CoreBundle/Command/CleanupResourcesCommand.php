@@ -31,7 +31,7 @@ EOT
 		);
 	}
 
-	protected function execute(InputInterface $input, OutputInterface $output) {
+	protected function execute(InputInterface $input, OutputInterface $output): int {
 
 		$om = $this->om;
 
@@ -46,7 +46,7 @@ EOT
 		try {
 			$resources = $queryBuilder->getQuery()->getResult();
 		} catch (\Doctrine\ORM\NoResultException $e) {
-			return null;
+			return 0;
 		}
 
 		$resourceCounters = array();
@@ -155,6 +155,8 @@ EOT
 		} else {
 			$output->writeln('<info>'.$unusedResourceCount.' resources to remove</info>');
 		}
+
+		return 0;
 	}
 
 }

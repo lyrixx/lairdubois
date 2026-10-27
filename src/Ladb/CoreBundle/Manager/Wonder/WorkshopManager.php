@@ -140,7 +140,7 @@ class WorkshopManager extends AbstractWonderManager {
 		$om->flush();
 
 		// Dispatch publication event
-		$this->dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED_FROM_CONVERT, new PublicationEvent($creation));
+		$this->dispatcher->dispatch(new PublicationEvent($creation), PublicationListener::PUBLICATION_CREATED_FROM_CONVERT);
 
 		// User counter
 		if ($creation->getIsDraft()) {
@@ -253,7 +253,7 @@ class WorkshopManager extends AbstractWonderManager {
 		$om->flush();
 
 		// Dispatch publications event
-		$this->dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED_FROM_CONVERT, new PublicationEvent($howto));
+		$this->dispatcher->dispatch(new PublicationEvent($howto), PublicationListener::PUBLICATION_CREATED_FROM_CONVERT);
 
 		// User counter
 		if ($howto->getIsDraft()) {

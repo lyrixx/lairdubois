@@ -38,6 +38,6 @@ final class QuestionTest extends EditorialTestCase
         $crawler = $client->request('GET', $this->path('show', ['id' => $question->getSlug()]));
 
         self::assertSame(200, $client->getResponse()->getStatusCode());
-        self::assertStringContainsStringIgnoringCase($question->getTitle(), $crawler->filter('title')->text());
+        self::assertStringContainsStringIgnoringCase($question->getTitle(), $crawler->filter('title')->text(null, false));
     }
 }

@@ -6,7 +6,6 @@ use Ladb\CoreBundle\Controller\AbstractController;
 use Ladb\CoreBundle\Controller\PublicationControllerTrait;
 use Ladb\CoreBundle\Utils\MentionUtils;
 use Ladb\CoreBundle\Utils\WebpushNotificationUtils;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
@@ -26,7 +25,7 @@ use Ladb\CoreBundle\Manager\Qa\QuestionManager;
 use Ladb\CoreBundle\Utils\ActivityUtils;
 use Ladb\CoreBundle\Utils\WatchableUtils;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @Route("/questions")
@@ -122,7 +121,7 @@ class AnswerController extends AbstractController {
 			$activityUtils->createAnswerActivity($answer, false);
 
 			// Dispatch publication event (on Question)
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_CHANGED, new PublicationEvent($question));
+			$dispatcher->dispatch(new PublicationEvent($question), PublicationListener::PUBLICATION_CHANGED);
 
 			// Auto watch
 			$watchableUtils->autoCreateWatch($question, $this->getUser());
@@ -217,7 +216,7 @@ class AnswerController extends AbstractController {
 			$mentionUtils->processMentions($answer);
 
 			// Dispatch publication event (on Question)
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_UPDATED, new PublicationEvent($answer->getQuestion()));
+			$dispatcher->dispatch(new PublicationEvent($answer->getQuestion()), PublicationListener::PUBLICATION_UPDATED);
 
 			return $this->render('LadbCoreBundle:Qa/Answer:update-xhr.html.twig', array(
 				'question'       => $answer->getQuestion(),
@@ -268,7 +267,7 @@ class AnswerController extends AbstractController {
 		$om->flush();
 
 		// Dispatch publication event (on Question)
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_UPDATED, new PublicationEvent($question));
+		$dispatcher->dispatch(new PublicationEvent($question), PublicationListener::PUBLICATION_UPDATED);
 
 		return $this->redirect($this->generateUrl('core_qa_answer_show', array( 'id' => $answer->getId() )));
 	}

@@ -189,7 +189,7 @@ class QuestionManager extends AbstractAuthoredPublicationManager {
 		$om->flush();
 
 		// Dispatch publication event
-		$this->dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED_FROM_CONVERT, new PublicationEvent($offer));
+		$this->dispatcher->dispatch(new PublicationEvent($offer), PublicationListener::PUBLICATION_CREATED_FROM_CONVERT);
 
 		// User counter
 		if ($offer->getIsDraft()) {

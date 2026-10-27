@@ -6,7 +6,6 @@ use Ladb\CoreBundle\Controller\AbstractController;
 use Ladb\CoreBundle\Controller\PublicationControllerTrait;
 use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Utils\CollectionnableUtils;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
@@ -28,7 +27,7 @@ use Ladb\CoreBundle\Event\PublicationsEvent;
 use Ladb\CoreBundle\Manager\Blog\PostManager;
 use Ladb\CoreBundle\Manager\Core\WitnessManager;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @Route("/blog")
@@ -81,7 +80,7 @@ class PostController extends AbstractController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($post));
+			$dispatcher->dispatch(new PublicationEvent($post), PublicationListener::PUBLICATION_CREATED);
 
 			return $this->redirect($this->generateUrl('core_blog_post_show', array( 'id' => $post->getSluggedId() )));
 		}
@@ -216,9 +215,9 @@ class PostController extends AbstractController {
 
 			// Dispatch publication event
 			if ($doUp) {
-				$dispatcher->dispatch(PublicationListener::PUBLICATION_CHANGED, new PublicationEvent($post, array( 'previouslyUsedTags' => $previouslyUsedTags )));
+				$dispatcher->dispatch(new PublicationEvent($post, array( 'previouslyUsedTags' => $previouslyUsedTags )), PublicationListener::PUBLICATION_CHANGED);
 			}
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_UPDATED, new PublicationEvent($post, array( 'previouslyUsedTags' => $previouslyUsedTags )));
+			$dispatcher->dispatch(new PublicationEvent($post, array( 'previouslyUsedTags' => $previouslyUsedTags )), PublicationListener::PUBLICATION_UPDATED);
 
 			// Flashbag
 			$this->addFlash('success', $translator->trans('blog.post.form.alert.update_success', array( '%title%' => $post->getTitle() )));
@@ -407,7 +406,7 @@ class PostController extends AbstractController {
 		);
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATIONS_LISTED, new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()));
+		$dispatcher->dispatch(new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()), PublicationListener::PUBLICATIONS_LISTED);
 
 		$parameters = array_merge($searchParameters, array(
 			'posts' => $searchParameters['entities'],
@@ -442,7 +441,7 @@ class PostController extends AbstractController {
 		$similarPosts = $explorableUtils->getSimilarExplorables($post, 'fos_elastica.index.ladb.blog_post', Post::CLASS_NAME);
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($post));
+		$dispatcher->dispatch(new PublicationEvent($post), PublicationListener::PUBLICATION_SHOWN);
 
 		return array(
 			'post'              => $post,

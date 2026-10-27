@@ -8,7 +8,6 @@ use Ladb\CoreBundle\Entity\Knowledge\Value\SoftwareIdentity;
 use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Utils\CollectionnableUtils;
 use Ladb\CoreBundle\Utils\ReviewableUtils;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
@@ -32,7 +31,7 @@ use Ladb\CoreBundle\Event\PublicationListener;
 use Ladb\CoreBundle\Event\KnowledgeEvent;
 use Ladb\CoreBundle\Event\KnowledgeListener;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @Route("/logiciels")
@@ -102,8 +101,8 @@ class SoftwareController extends AbstractController {
 			$software->addIconValue($iconValue);
 
 			// Dispatch knowledge events
-			$dispatcher->dispatch(KnowledgeListener::FIELD_VALUE_ADDED, new KnowledgeEvent($software, array( 'field' => Software::FIELD_IDENTITY, 'value' => $identityValue )));
-			$dispatcher->dispatch(KnowledgeListener::FIELD_VALUE_ADDED, new KnowledgeEvent($software, array( 'field' => Software::FIELD_ICON, 'value' => $iconValue )));
+			$dispatcher->dispatch(new KnowledgeEvent($software, array( 'field' => Software::FIELD_IDENTITY, 'value' => $identityValue )), KnowledgeListener::FIELD_VALUE_ADDED);
+			$dispatcher->dispatch(new KnowledgeEvent($software, array( 'field' => Software::FIELD_ICON, 'value' => $iconValue )), KnowledgeListener::FIELD_VALUE_ADDED);
 
 			$identityValue->setParentEntity($software);
 			$identityValue->setParentEntityField(Software::FIELD_IDENTITY);
@@ -120,12 +119,12 @@ class SoftwareController extends AbstractController {
 			$activityUtils->createContributeActivity($iconValue, false);
 
 			// Dispatch publication event
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($software));
+			$dispatcher->dispatch(new PublicationEvent($software), PublicationListener::PUBLICATION_CREATED);
 
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_PUBLISHED, new PublicationEvent($software));
+			$dispatcher->dispatch(new PublicationEvent($software), PublicationListener::PUBLICATION_PUBLISHED);
 
 			return $this->redirect($this->generateUrl('core_software_show', array('id' => $software->getSluggedId())));
 		}
@@ -337,7 +336,7 @@ class SoftwareController extends AbstractController {
 		);
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATIONS_LISTED, new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()));
+		$dispatcher->dispatch(new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()), PublicationListener::PUBLICATIONS_LISTED);
 
 		$parameters = array_merge($searchParameters, array(
 			'softwares' => $searchParameters['entities'],
@@ -369,7 +368,7 @@ class SoftwareController extends AbstractController {
 		}
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($software));
+		$dispatcher->dispatch(new PublicationEvent($software), PublicationListener::PUBLICATION_SHOWN);
 
 		$hostSoftware = $software->getIsAddOn() && !is_null($software->getHostSoftwareName()) ? $softwareRepository->findOneByName($software->getHostSoftwareName()) : null;
 

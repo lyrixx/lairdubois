@@ -4,10 +4,10 @@ namespace Ladb\CoreBundle\Controller;
 
 use Ladb\CoreBundle\Entity\Core\Member;
 use Ladb\CoreBundle\Entity\Core\UserWitness;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController as BaseAbstractController;
 use Symfony\Component\HttpFoundation\Request;
 
-abstract class AbstractController extends Controller {
+abstract class AbstractController extends BaseAbstractController {
 
 	const LOCK_TTL_CREATE_ACTION = 3;		// 3 seconds
 
@@ -32,7 +32,7 @@ abstract class AbstractController extends Controller {
 			$memcached->addServer($this->getParameter('memcached_host'), $this->getParameter('memcached_port'));
 			$store = new \Symfony\Component\Lock\Store\MemcachedStore($memcached);
 		}
-		$factory = new \Symfony\Component\Lock\Factory($store);
+		$factory = new \Symfony\Component\Lock\LockFactory($store);
 		$resource = $name.'_'.($this->getUser() ? $this->getUser()->getId() : '');
 		$lock = $factory->createLock($resource, $ttl, $autoRelease);
 		if (!$lock->acquire($blocking)) {

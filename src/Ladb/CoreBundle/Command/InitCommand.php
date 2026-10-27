@@ -28,7 +28,7 @@ EOT
 		);
 	}
 
-	protected function execute(InputInterface $input, OutputInterface $output) {
+	protected function execute(InputInterface $input, OutputInterface $output): int {
 		// Run doctrine:schema:update --force
 
 		$command = $this->getApplication()->find('doctrine:schema:update');
@@ -45,6 +45,8 @@ EOT
 		}
 
 		$output->writeln('<info>Ladb init complete</info>');
+
+		return 0;
 	}
 
 }

@@ -4,7 +4,6 @@ namespace Ladb\CoreBundle\Controller\Message;
 
 use Ladb\CoreBundle\Entity\Message\MessageMeta;
 use Ladb\CoreBundle\Fos\UserManager;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
@@ -16,7 +15,7 @@ use Ladb\CoreBundle\Utils\MessageUtils;
 use Ladb\CoreBundle\Form\Type\Message\NewThreadMessageType;
 use Ladb\CoreBundle\Form\Model\NewThreadMessage;
 use Ladb\CoreBundle\Utils\MailerUtils;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @Route("/messagerie")

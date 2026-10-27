@@ -53,7 +53,7 @@ EOT
 		);
 	}
 
-	protected function execute(InputInterface $input, OutputInterface $output) {
+	protected function execute(InputInterface $input, OutputInterface $output): int {
 
 		$forced = $input->getOption('force');
 		$targetUsername = $input->getOption('target-username');
@@ -69,7 +69,7 @@ EOT
 
 		if (is_null($targetUser)) {
 			$output->writeln('<error>Unknow unsername='.$targetUsername.'</error>', 0);
-			return;
+			return 0;
 		}
 
 		// Retrieve creation ////
@@ -90,6 +90,8 @@ EOT
 		} else {
 			$output->writeln('<fg=cyan>[Fake]</fg=cyan>');
 		}
+
+		return 0;
 
 	}
 

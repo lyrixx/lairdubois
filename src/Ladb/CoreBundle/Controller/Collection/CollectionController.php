@@ -7,7 +7,6 @@ use Ladb\CoreBundle\Entity\Collection\Entry;
 use Ladb\CoreBundle\Utils\CollectionnableUtils;
 use Ladb\CoreBundle\Utils\PaginatorUtils;
 use Ladb\CoreBundle\Utils\TypableUtils;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -28,7 +27,7 @@ use Ladb\CoreBundle\Manager\Collection\CollectionManager;
 use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Form\Type\Collection\CollectionType;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @Route("/collections")
@@ -79,7 +78,7 @@ class CollectionController extends AbstractCollectionBasedController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($collection));
+			$dispatcher->dispatch(new PublicationEvent($collection), PublicationListener::PUBLICATION_CREATED);
 
 			// Check auto add
 			$entityType = $request->get('entityType', null);
@@ -227,7 +226,7 @@ class CollectionController extends AbstractCollectionBasedController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_UPDATED, new PublicationEvent($collection, array( 'previouslyUsedTags' => $previouslyUsedTags )));
+			$dispatcher->dispatch(new PublicationEvent($collection, array( 'previouslyUsedTags' => $previouslyUsedTags )), PublicationListener::PUBLICATION_UPDATED);
 
 			// Flashbag
 			$this->addFlash('success', $translator->trans('collection.collection.form.alert.update_success', array( '%title%' => $collection->getTitle() )));
@@ -422,7 +421,7 @@ class CollectionController extends AbstractCollectionBasedController {
 		);
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATIONS_LISTED, new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()));
+		$dispatcher->dispatch(new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()), PublicationListener::PUBLICATIONS_LISTED);
 
 		$parameters = array_merge($searchParameters, array(
 			'collections' => $searchParameters['entities'],
@@ -525,7 +524,7 @@ class CollectionController extends AbstractCollectionBasedController {
 		}
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($collection));
+		$dispatcher->dispatch(new PublicationEvent($collection), PublicationListener::PUBLICATION_SHOWN);
 
 		$parameters = array(
 			'entityType'        => $entityType,

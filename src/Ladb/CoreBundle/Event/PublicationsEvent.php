@@ -3,7 +3,7 @@
 namespace Ladb\CoreBundle\Event;
 
 use Ladb\CoreBundle\Model\PublicationInterface;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
 class PublicationsEvent extends Event {
 

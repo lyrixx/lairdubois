@@ -4,7 +4,6 @@ namespace Ladb\CoreBundle\Controller\Wonder;
 
 use Ladb\CoreBundle\Controller\CustomOwnerControllerTrait;
 use Ladb\CoreBundle\Controller\PublicationControllerTrait;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -42,7 +41,7 @@ use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Utils\StripableUtils;
 use Liip\ImagineBundle\Controller\ImagineController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @Route("/plans")
@@ -104,7 +103,7 @@ class PlanController extends AbstractController {
 			$om->flush();	// Resave to store file size
 
 			// Dispatch publication event
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($plan));
+			$dispatcher->dispatch(new PublicationEvent($plan), PublicationListener::PUBLICATION_CREATED);
 
 			return $this->redirect($this->generateUrl('core_plan_show', array('id' => $plan->getSluggedId())));
 		}
@@ -239,7 +238,7 @@ class PlanController extends AbstractController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_UPDATED, new PublicationEvent($plan, array( 'previouslyUsedTags' => $previouslyUsedTags )));
+			$dispatcher->dispatch(new PublicationEvent($plan, array( 'previouslyUsedTags' => $previouslyUsedTags )), PublicationListener::PUBLICATION_UPDATED);
 
 			// Flashbag
 			$this->addFlash('success', $translator->trans('wonder.plan.form.alert.update_success', array( '%title%' => $plan->getTitle() )));
@@ -941,7 +940,7 @@ class PlanController extends AbstractController {
 		);
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATIONS_LISTED, new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()));
+		$dispatcher->dispatch(new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()), PublicationListener::PUBLICATIONS_LISTED);
 
 		$parameters = array_merge($searchParameters, array(
 			'plans'           => $searchParameters['entities'],
@@ -996,7 +995,7 @@ class PlanController extends AbstractController {
 		$referral = $embaddableUtils->processReferer($plan, $request);
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($plan));
+		$dispatcher->dispatch(new PublicationEvent($plan), PublicationListener::PUBLICATION_SHOWN);
 
 		$searchableSoftwareCount = $searchUtils->searchEntitiesCount(array(
 			new \Elastica\Query\MatchQuery('supportedFiles', implode(',', $plan->getResourceFileExtensions()))

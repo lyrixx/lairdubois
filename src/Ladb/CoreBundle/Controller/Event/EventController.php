@@ -8,7 +8,6 @@ use Ladb\CoreBundle\Entity\Core\Member;
 use Ladb\CoreBundle\Utils\CollectionnableUtils;
 use Ladb\CoreBundle\Utils\FeedbackableUtils;
 use Ladb\CoreBundle\Utils\LocalisableUtils;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
@@ -36,7 +35,7 @@ use Ladb\CoreBundle\Utils\BlockBodiedUtils;
 use Ladb\CoreBundle\Utils\EventUtils;
 use Ladb\CoreBundle\Utils\JoinableUtils;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @Route("/evenements")
@@ -92,7 +91,7 @@ class EventController extends AbstractController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($event));
+			$dispatcher->dispatch(new PublicationEvent($event), PublicationListener::PUBLICATION_CREATED);
 
 			return $this->redirect($this->generateUrl('core_event_show', array('id' => $event->getSluggedId())));
 		}
@@ -219,7 +218,7 @@ class EventController extends AbstractController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_UPDATED, new PublicationEvent($event, array( 'previouslyUsedTags' => $previouslyUsedTags )));
+			$dispatcher->dispatch(new PublicationEvent($event, array( 'previouslyUsedTags' => $previouslyUsedTags )), PublicationListener::PUBLICATION_UPDATED);
 
 			// Flashbag
 			$this->addFlash('success', $translator->trans('event.event.form.alert.update_success', array( '%title%' => $event->getTitle() )));
@@ -593,7 +592,7 @@ class EventController extends AbstractController {
 		}
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATIONS_LISTED, new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()));
+		$dispatcher->dispatch(new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()), PublicationListener::PUBLICATIONS_LISTED);
 
 		if ($request->isXmlHttpRequest()) {
 			return $this->render('LadbCoreBundle:Event/Event:list-xhr.html.twig', $parameters);
@@ -632,7 +631,7 @@ class EventController extends AbstractController {
 		$this->assertShowable($event);
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($event));
+		$dispatcher->dispatch(new PublicationEvent($event), PublicationListener::PUBLICATION_SHOWN);
 
 		$userEvents = $explorableUtils->getPreviousAndNextPublishedUserExplorables($event, $eventRepository, $event->getUser()->getMeta()->getPublicEventCount());
 		$similarEvents = $explorableUtils->getSimilarExplorables($event, 'fos_elastica.index.ladb.event_event', Event::CLASS_NAME, $userEvents);

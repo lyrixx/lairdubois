@@ -69,7 +69,7 @@ class Event extends AbstractDraftableAuthoredPublication implements TitledInterf
 	/**
 	 * @ORM\Column(type="string", length=100)
 	 * @Assert\NotBlank()
-	 * @Assert\Length(min=4, max=100)
+	 * @Assert\Length(min=4, max=100, allowEmptyString=true)
 	 */
 	private $title;
 
@@ -143,14 +143,14 @@ class Event extends AbstractDraftableAuthoredPublication implements TitledInterf
 
 	/**
 	 * @ORM\Column(name="start_date", type="date")
-	 * @Assert\Date()
+	 * @Assert\Type("\DateTimeInterface")
 	 * @Assert\NotBlank()
 	 */
 	private $startDate;
 
 	/**
 	 * @ORM\Column(name="start_time", type="time", nullable=true)
-	 * @Assert\Time()
+	 * @Assert\Type("\DateTimeInterface")
 	 */
 	private $startTime;
 
@@ -161,13 +161,13 @@ class Event extends AbstractDraftableAuthoredPublication implements TitledInterf
 
 	/**
 	 * @ORM\Column(name="end_date", type="date", nullable=true)
-	 * @Assert\Date()
+	 * @Assert\Type("\DateTimeInterface")
 	 */
 	private $endDate;
 
 	/**
 	 * @ORM\Column(name="end_time", type="time", nullable=true)
-	 * @Assert\Time()
+	 * @Assert\Type("\DateTimeInterface")
 	 */
 	private $endTime;
 

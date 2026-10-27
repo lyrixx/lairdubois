@@ -3,7 +3,7 @@
 namespace Ladb\CoreBundle\Event;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 /**
@@ -21,7 +21,7 @@ class ReturnToUrlListener implements EventSubscriberInterface {
 
 	/////
 
-	public function onKernelRequest(GetResponseEvent $event) {
+	public function onKernelRequest(RequestEvent $event) {
 		$request = $event->getRequest();
 		foreach (array( $request->query, $request->request ) as $parameters) {
 			if ($parameters->has('rtu') && !$this->isSiteUrl($parameters->get('rtu'), $request->getHost())) {

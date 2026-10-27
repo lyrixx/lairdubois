@@ -74,7 +74,7 @@ class Testimonial implements TypableInterface, HtmlBodiedInterface {
 	/**
 	 * @ORM\Column(type="text", nullable=true)
 	 * @Assert\NotBlank()
-	 * @Assert\Length(min=5, max=5000)
+	 * @Assert\Length(min=5, max=5000, allowEmptyString=true)
 	 * @LadbAssert\NoMediaLink()
 	 */
 	private $body;

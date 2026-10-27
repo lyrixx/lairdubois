@@ -16,8 +16,8 @@ class Configuration implements ConfigurationInterface {
 	 * {@inheritDoc}
 	 */
 	public function getConfigTreeBuilder() {
-		$treeBuilder = new TreeBuilder();
-		$rootNode = $treeBuilder->root('ladb_core');
+		$treeBuilder = new TreeBuilder('ladb_core');
+		$rootNode = $treeBuilder->getRootNode();
 
 		// Here you should define the parameters that are allowed to
 		// configure your bundle. See the documentation linked above for

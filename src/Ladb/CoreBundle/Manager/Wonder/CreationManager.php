@@ -225,7 +225,7 @@ class CreationManager extends AbstractWonderManager {
 		$om->flush();
 
 		// Dispatch publication event
-		$this->dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED_FROM_CONVERT, new PublicationEvent($workshop));
+		$this->dispatcher->dispatch(new PublicationEvent($workshop), PublicationListener::PUBLICATION_CREATED_FROM_CONVERT);
 
 		// User counter
 		if ($workshop->getIsDraft()) {
@@ -353,7 +353,7 @@ class CreationManager extends AbstractWonderManager {
 		$om->flush();
 
 		// Dispatch publications event
-		$this->dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED_FROM_CONVERT, new PublicationEvent($howto));
+		$this->dispatcher->dispatch(new PublicationEvent($howto), PublicationListener::PUBLICATION_CREATED_FROM_CONVERT);
 
 		// User counter
 		if ($howto->getIsDraft()) {
@@ -430,7 +430,7 @@ class CreationManager extends AbstractWonderManager {
 		$om->flush();
 
 		// Dispatch publications event
-		$this->dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED_FROM_CONVERT, new PublicationEvent($find));
+		$this->dispatcher->dispatch(new PublicationEvent($find), PublicationListener::PUBLICATION_CREATED_FROM_CONVERT);
 
 		// User counter
 		if ($find->getIsDraft()) {
@@ -498,7 +498,7 @@ class CreationManager extends AbstractWonderManager {
 		$om->flush();
 
 		// Dispatch publications event
-		$this->dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED_FROM_CONVERT, new PublicationEvent($question));
+		$this->dispatcher->dispatch(new PublicationEvent($question), PublicationListener::PUBLICATION_CREATED_FROM_CONVERT);
 
 		// User counter
 		if ($question->getIsDraft()) {
@@ -575,7 +575,7 @@ class CreationManager extends AbstractWonderManager {
 		$om->flush();
 
 		// Dispatch publication event
-		$this->dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED_FROM_CONVERT, new PublicationEvent($offer));
+		$this->dispatcher->dispatch(new PublicationEvent($offer), PublicationListener::PUBLICATION_CREATED_FROM_CONVERT);
 
 		// User counter
 		if ($offer->getIsDraft()) {

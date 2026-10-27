@@ -71,7 +71,7 @@ class CollectionnableUtils {
 		$om->flush();
 
 		// Dispatch publication event
-		$this->dispatcher->dispatch(PublicationListener::PUBLICATION_CHANGED, new PublicationEvent($collection));
+		$this->dispatcher->dispatch(new PublicationEvent($collection), PublicationListener::PUBLICATION_CHANGED);
 
 	}
 

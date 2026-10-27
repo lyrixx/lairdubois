@@ -8,7 +8,6 @@ use Ladb\CoreBundle\Entity\Howto\Article;
 use Ladb\CoreBundle\Entity\Qa\Answer;
 use Ladb\CoreBundle\Model\WatchableChildInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Ladb\CoreBundle\Entity\Core\Notification;

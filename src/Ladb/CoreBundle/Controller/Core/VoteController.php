@@ -297,7 +297,7 @@ class VoteController extends AbstractController {
 		}
 
 		// Dispatch votable parent event
-		$dispatcher->dispatch(VotableListener::VOTE_UPDATED, new VotableEvent($entity, $parentEntity));
+		$dispatcher->dispatch(new VotableEvent($entity, $parentEntity), VotableListener::VOTE_UPDATED);
 
 		// Create activity
 		$activityUtils->createVoteActivity($vote, false);
@@ -380,7 +380,7 @@ class VoteController extends AbstractController {
 		$activityUtils->deleteActivitiesByVote($vote, false);
 
 		// Dispatch votable parent event
-		$dispatcher->dispatch(VotableListener::VOTE_UPDATED, new VotableEvent($entity, $parentEntity));
+		$dispatcher->dispatch(new VotableEvent($entity, $parentEntity), VotableListener::VOTE_UPDATED);
 
 		$om->flush();
 

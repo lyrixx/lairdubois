@@ -81,7 +81,7 @@ final class RegistrationTest extends WebTestCase
         ]));
 
         self::assertSame(200, $client->getResponse()->getStatusCode());
-        $errors = $crawler->filter('form[action="/salut/"]')->text();
+        $errors = $crawler->filter('form[action="/salut/"]')->text(null, false);
         self::assertStringContainsString("Le nom d'utilisateur est déjà utilisé.", $errors);
         self::assertStringContainsString("L'adresse e-mail est déjà utilisée.", $errors);
         self::assertStringContainsString('Les deux mots de passe ne sont pas identiques.', $errors);

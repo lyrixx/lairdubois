@@ -87,7 +87,7 @@ EOT
 
 	/////
 
-	protected function execute(InputInterface $input, OutputInterface $output) {
+	protected function execute(InputInterface $input, OutputInterface $output): int {
 
 		$forced = $input->getOption('force');
 		$noPosting = $input->getOption('no-posting');
@@ -328,6 +328,8 @@ EOT
 			}
 
 		}
+
+		return 0;
 
 	}
 

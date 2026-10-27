@@ -3,7 +3,6 @@
 namespace Ladb\CoreBundle\Controller\Core;
 
 use Ladb\CoreBundle\Controller\AbstractController;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 
@@ -16,7 +15,7 @@ class AboutController extends AbstractController {
 	 * @Route("/", name="core_about")
 	 */
 	public function aboutAction() {
-		$response = $this->forward('LadbCoreBundle:Core/About:faq');
+		$response = $this->forward(AboutController::class.'::faqAction');
 		return $response;
 	}
 

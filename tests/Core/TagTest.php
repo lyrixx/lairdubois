@@ -16,7 +16,7 @@ final class TagTest extends InteractionTestCase
 
         $tags = $crawler->filter('a.ladb-tag');
         // Labels are normalized, without accent
-        self::assertSame(['table', 'chene', 'salon'], $tags->each(fn ($tag) => $tag->text()));
+        self::assertSame(['table', 'chene', 'salon'], $tags->each(fn ($tag) => $tag->text(null, false)));
 
         $crawler = $client->click($tags->last()->link());
         self::assertSame(200, $client->getResponse()->getStatusCode());

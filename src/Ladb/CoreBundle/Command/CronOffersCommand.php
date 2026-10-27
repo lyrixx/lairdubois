@@ -52,7 +52,7 @@ EOT
 
 	/////
 
-	protected function execute(InputInterface $input, OutputInterface $output) {
+	protected function execute(InputInterface $input, OutputInterface $output): int {
 
 		$forced = $input->getOption('force');
 		$verbose = $input->getOption('verbose');
@@ -160,6 +160,8 @@ EOT
 		if ($forced) {
 			$om->flush();
 		}
+
+		return 0;
 
 	}
 }

@@ -109,7 +109,7 @@ abstract class AbstractPublicationManager extends AbstractManager {
 		}
 
 		// Dispatch publication event
-		$this->dispatcher->dispatch(PublicationListener::PUBLICATION_LOCKED, new PublicationEvent($publication));
+		$this->dispatcher->dispatch(new PublicationEvent($publication), PublicationListener::PUBLICATION_LOCKED);
 
 	}
 
@@ -123,7 +123,7 @@ abstract class AbstractPublicationManager extends AbstractManager {
 		}
 
 		// Dispatch publication event
-		$this->dispatcher->dispatch(PublicationListener::PUBLICATION_UNLOCKED, new PublicationEvent($publication));
+		$this->dispatcher->dispatch(new PublicationEvent($publication), PublicationListener::PUBLICATION_UNLOCKED);
 
 	}
 	
@@ -161,7 +161,7 @@ abstract class AbstractPublicationManager extends AbstractManager {
 		}
 
 		// Dispatch publication event
-		$this->dispatcher->dispatch(PublicationListener::PUBLICATION_PUBLISHED, new PublicationEvent($publication));
+		$this->dispatcher->dispatch(new PublicationEvent($publication), PublicationListener::PUBLICATION_PUBLISHED);
 
 	}
 
@@ -192,7 +192,7 @@ abstract class AbstractPublicationManager extends AbstractManager {
 		}
 
 		// Dispatch publication event
-		$this->dispatcher->dispatch(PublicationListener::PUBLICATION_UNPUBLISHED, new PublicationEvent($publication));
+		$this->dispatcher->dispatch(new PublicationEvent($publication), PublicationListener::PUBLICATION_UNPUBLISHED);
 
 	}
 
@@ -229,7 +229,7 @@ abstract class AbstractPublicationManager extends AbstractManager {
 		}
 
 		// Dispatch publication event
-		$this->dispatcher->dispatch(PublicationListener::PUBLICATION_DELETED, new PublicationEvent($publication));
+		$this->dispatcher->dispatch(new PublicationEvent($publication), PublicationListener::PUBLICATION_DELETED);
 
 		if ($withWitness) {
 
