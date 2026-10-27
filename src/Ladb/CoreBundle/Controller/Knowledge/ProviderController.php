@@ -7,7 +7,6 @@ use Ladb\CoreBundle\Controller\PublicationControllerTrait;
 use Ladb\CoreBundle\Utils\CollectionnableUtils;
 use Ladb\CoreBundle\Utils\ElasticaQueryUtils;
 use Ladb\CoreBundle\Utils\KnowledgeUtils;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
@@ -34,7 +33,7 @@ use Ladb\CoreBundle\Utils\SearchUtils;
 use Ladb\CoreBundle\Utils\WatchableUtils;
 use Ladb\CoreBundle\Utils\ReviewableUtils;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 
 /**
@@ -102,8 +101,8 @@ class ProviderController extends AbstractController {
 			$provider->addLogoValue($logoValue);
 
 			// Dispatch knowledge events
-			$dispatcher->dispatch(KnowledgeListener::FIELD_VALUE_ADDED, new KnowledgeEvent($provider, array( 'field' => Provider::FIELD_SIGN, 'value' => $signValue )));
-			$dispatcher->dispatch(KnowledgeListener::FIELD_VALUE_ADDED, new KnowledgeEvent($provider, array( 'field' => Provider::FIELD_LOGO, 'value' => $logoValue )));
+			$dispatcher->dispatch(new KnowledgeEvent($provider, array( 'field' => Provider::FIELD_SIGN, 'value' => $signValue )), KnowledgeListener::FIELD_VALUE_ADDED);
+			$dispatcher->dispatch(new KnowledgeEvent($provider, array( 'field' => Provider::FIELD_LOGO, 'value' => $logoValue )), KnowledgeListener::FIELD_VALUE_ADDED);
 
 			$signValue->setParentEntity($provider);
 			$signValue->setParentEntityField(Provider::FIELD_SIGN);
@@ -120,12 +119,12 @@ class ProviderController extends AbstractController {
 			$activityUtils->createContributeActivity($logoValue, false);
 
 			// Dispatch publication event
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($provider));
+			$dispatcher->dispatch(new PublicationEvent($provider), PublicationListener::PUBLICATION_CREATED);
 
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_PUBLISHED, new PublicationEvent($provider));
+			$dispatcher->dispatch(new PublicationEvent($provider), PublicationListener::PUBLICATION_PUBLISHED);
 
 			return $this->redirect($this->generateUrl('core_provider_show', array('id' => $provider->getSluggedId())));
 		}
@@ -456,7 +455,7 @@ class ProviderController extends AbstractController {
 		}
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATIONS_LISTED, new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()));
+		$dispatcher->dispatch(new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()), PublicationListener::PUBLICATIONS_LISTED);
 
 		if ($request->isXmlHttpRequest()) {
 			if ($layout == 'choice') {
@@ -596,7 +595,7 @@ class ProviderController extends AbstractController {
 		}
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($provider));
+		$dispatcher->dispatch(new PublicationEvent($provider), PublicationListener::PUBLICATION_SHOWN);
 
 		$searchableStoreCount = $searchUtils->searchEntitiesCount(array( new \Elastica\Query\MatchQuery('brand', $provider->getBrand()) ), 'fos_elastica.index.ladb.knowledge_provider');
 		$searchableWoodCount = $searchUtils->searchEntitiesCount(array( $elasticaQueryUtils->createShouldMatchPhraseQuery('name', $provider->getWoods()) ), 'fos_elastica.index.ladb.knowledge_wood');

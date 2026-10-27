@@ -32,7 +32,7 @@ EOT
 			);
 	}
 
-	protected function execute(InputInterface $input, OutputInterface $output) {
+	protected function execute(InputInterface $input, OutputInterface $output): int {
 
 		$om = $this->om;
 
@@ -50,7 +50,7 @@ EOT
 		try {
 			$creations = $queryBuilder->getQuery()->getResult();
 		} catch (\Doctrine\ORM\NoResultException $e) {
-			return null;
+			return 0;
 		}
 
 		foreach ($creations as $creation) {
@@ -71,7 +71,7 @@ EOT
 		try {
 			$plans = $queryBuilder->getQuery()->getResult();
 		} catch (\Doctrine\ORM\NoResultException $e) {
-			return null;
+			return 0;
 		}
 
 		foreach ($plans as $plan) {
@@ -92,7 +92,7 @@ EOT
 		try {
 			$workshops = $queryBuilder->getQuery()->getResult();
 		} catch (\Doctrine\ORM\NoResultException $e) {
-			return null;
+			return 0;
 		}
 
 		foreach ($workshops as $workshop) {
@@ -113,7 +113,7 @@ EOT
 		try {
 			$howtos = $queryBuilder->getQuery()->getResult();
 		} catch (\Doctrine\ORM\NoResultException $e) {
-			return null;
+			return 0;
 		}
 
 		foreach ($howtos as $howto) {
@@ -134,7 +134,7 @@ EOT
 		try {
 			$finds = $queryBuilder->getQuery()->getResult();
 		} catch (\Doctrine\ORM\NoResultException $e) {
-			return null;
+			return 0;
 		}
 
 		foreach ($finds as $find) {
@@ -155,12 +155,14 @@ EOT
 		try {
 			$posts = $queryBuilder->getQuery()->getResult();
 		} catch (\Doctrine\ORM\NoResultException $e) {
-			return null;
+			return 0;
 		}
 
 		foreach ($posts as $post) {
 			$this->_generateTagUsages($post);
 		}
+
+		return 0;
 
 	}
 

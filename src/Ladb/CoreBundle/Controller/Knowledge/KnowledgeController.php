@@ -4,7 +4,6 @@ namespace Ladb\CoreBundle\Controller\Knowledge;
 
 use Ladb\CoreBundle\Entity\Knowledge\Value\BaseValue;
 use Ladb\CoreBundle\Entity\Knowledge\Value\Pdf;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -212,7 +211,7 @@ class KnowledgeController extends AbstractController {
 			$propertyUtils->addValue($entity, $field.'_value', $value);
 
 			// Dispatch knowledge event
-			$dispatcher->dispatch(KnowledgeListener::FIELD_VALUE_ADDED, new KnowledgeEvent($entity, array('field' => $field, 'value' => $value)));
+			$dispatcher->dispatch(new KnowledgeEvent($entity, array('field' => $field, 'value' => $value)), KnowledgeListener::FIELD_VALUE_ADDED);
 
 			// Update contributors
 			$contributorIds = $entityRepository->findUserIdsById($entity->getId());
@@ -229,7 +228,7 @@ class KnowledgeController extends AbstractController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_CHANGED, new PublicationEvent($entity));
+			$dispatcher->dispatch(new PublicationEvent($entity), PublicationListener::PUBLICATION_CHANGED);
 
 			if ($entity instanceof WatchableInterface) {
 
@@ -356,12 +355,12 @@ class KnowledgeController extends AbstractController {
 			}
 
 			// Dispatch knowledge event
-			$dispatcher->dispatch(KnowledgeListener::FIELD_VALUE_UPDATED, new KnowledgeEvent($entity, array('field' => $field, 'value' => $value)));
+			$dispatcher->dispatch(new KnowledgeEvent($entity, array('field' => $field, 'value' => $value)), KnowledgeListener::FIELD_VALUE_UPDATED);
 
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_UPDATED, new PublicationEvent($entity));
+			$dispatcher->dispatch(new PublicationEvent($entity), PublicationListener::PUBLICATION_UPDATED);
 
 			return $this->render('LadbCoreBundle:Knowledge:value-update-xhr.html.twig', array(
 				'knowledge'      => $entity,
@@ -418,7 +417,7 @@ class KnowledgeController extends AbstractController {
 		$propertyUtils->removeValue($entity, $field.'_value', $value);
 
 		// Dispatch knowledge event
-		$dispatcher->dispatch(KnowledgeListener::FIELD_VALUE_REMOVED, new KnowledgeEvent($entity, array('field' => $field, 'value' => $value)));
+		$dispatcher->dispatch(new KnowledgeEvent($entity, array('field' => $field, 'value' => $value)), KnowledgeListener::FIELD_VALUE_REMOVED);
 
 		// Decrement user proposal count
 		$value->getUser()->getMeta()->incrementProposalCount(-1);
@@ -444,7 +443,7 @@ class KnowledgeController extends AbstractController {
 		}
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_CHANGED, new PublicationEvent($entity));
+		$dispatcher->dispatch(new PublicationEvent($entity), PublicationListener::PUBLICATION_CHANGED);
 
 		// Reload values
 
@@ -593,7 +592,7 @@ class KnowledgeController extends AbstractController {
 			throw $this->createNotFoundException('Unable to find Value entity (id='.$id.').');
 		}
 
-		return $this->forward('LadbCoreBundle:Knowledge/Knowledge:showField', array(
+		return $this->forward(KnowledgeController::class.'::showFieldAction', array(
 			'entityType'         => $value->getParentEntityType(),
 			'entityId'           => $value->getParentEntityId(),
 			'field'              => $value->getParentEntityField(),
@@ -648,18 +647,18 @@ class KnowledgeController extends AbstractController {
 		$propertyUtils->removeValue($entity, $fieldSrc.'_value', $value);
 
 		// Dispatch knowledge event
-		$dispatcher->dispatch(KnowledgeListener::FIELD_VALUE_REMOVED, new KnowledgeEvent($entity, array('field' => $fieldSrc, 'value' => $value)));
+		$dispatcher->dispatch(new KnowledgeEvent($entity, array('field' => $fieldSrc, 'value' => $value)), KnowledgeListener::FIELD_VALUE_REMOVED);
 
 		// Add to DEST
 		$propertyUtils->addValue($entity, $fieldDest.'_value', $value);
 
 		// Dispatch knowledge event
-		$dispatcher->dispatch(KnowledgeListener::FIELD_VALUE_ADDED, new KnowledgeEvent($entity, array('field' => $fieldDest, 'value' => $value)));
+		$dispatcher->dispatch(new KnowledgeEvent($entity, array('field' => $fieldDest, 'value' => $value)), KnowledgeListener::FIELD_VALUE_ADDED);
 
 		$om->flush();
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_CHANGED, new PublicationEvent($entity));
+		$dispatcher->dispatch(new PublicationEvent($entity), PublicationListener::PUBLICATION_CHANGED);
 
 		// Reload values
 

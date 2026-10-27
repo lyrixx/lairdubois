@@ -30,7 +30,7 @@ use Ladb\CoreBundle\Manager\Howto\HowtoManager;
 use Ladb\CoreBundle\Manager\Core\WitnessManager;
 use Liip\ImagineBundle\Controller\ImagineController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @Route("/pas-a-pas")
@@ -82,7 +82,7 @@ class HowtoController extends AbstractHowtoBasedController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($howto));
+			$dispatcher->dispatch(new PublicationEvent($howto), PublicationListener::PUBLICATION_CREATED);
 
 			return $this->redirect($this->generateUrl('core_howto_article_new', array( 'id' => $howto->getId(), 'owner' => $owner->getUsernameCanonical() )));
 		}
@@ -211,7 +211,7 @@ class HowtoController extends AbstractHowtoBasedController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_UPDATED, new PublicationEvent($howto, array( 'previouslyUsedTags' => $previouslyUsedTags )));
+			$dispatcher->dispatch(new PublicationEvent($howto, array( 'previouslyUsedTags' => $previouslyUsedTags )), PublicationListener::PUBLICATION_UPDATED);
 
 			// Flashbag
 			$this->addFlash('success', $translator->trans('howto.howto.form.alert.update_success', array( '%title%' => $howto->getTitle() )));
@@ -575,7 +575,7 @@ class HowtoController extends AbstractHowtoBasedController {
 		);
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATIONS_LISTED, new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()));
+		$dispatcher->dispatch(new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()), PublicationListener::PUBLICATIONS_LISTED);
 
 		$parameters = array_merge($searchParameters, array(
 			'howtos'          => $searchParameters['entities'],
@@ -887,7 +887,7 @@ class HowtoController extends AbstractHowtoBasedController {
 		$this->assertShowable($howto);
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($howto));
+		$dispatcher->dispatch(new PublicationEvent($howto), PublicationListener::PUBLICATION_SHOWN);
 
 		return $this->computeShowParameters($howto, $request);
 	}

@@ -65,7 +65,7 @@ abstract class KnowledgeTestCase extends WebTestCase
         $crawler = $client->request('GET', $this->path('show', ['id' => static::ID]));
 
         self::assertSame(200, $client->getResponse()->getStatusCode());
-        self::assertStringContainsStringIgnoringCase($this->find(static::ID)->getTitle(), $crawler->filter('title')->text());
+        self::assertStringContainsStringIgnoringCase($this->find(static::ID)->getTitle(), $crawler->filter('title')->text(null, false));
     }
 
     /**
@@ -134,7 +134,7 @@ abstract class KnowledgeTestCase extends WebTestCase
         $client->submit($form);
 
         // On an invalid form, the message tells which field
-        self::assertSame(302, $client->getResponse()->getStatusCode(), implode("\n", $client->getCrawler()->filter('.help-block, .alert-danger')->each(fn (Crawler $node) => $node->text())));
+        self::assertSame(302, $client->getResponse()->getStatusCode(), implode("\n", $client->getCrawler()->filter('.help-block, .alert-danger')->each(fn (Crawler $node) => $node->text(null, false))));
         $knowledge = $this->findLast();
         self::assertGreaterThan($lastId, $knowledge->getId());
         self::assertTrue($client->getResponse()->isRedirect($this->getShowPath($knowledge->getId())));

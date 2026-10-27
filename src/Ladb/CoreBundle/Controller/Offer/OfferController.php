@@ -3,10 +3,10 @@
 namespace Ladb\CoreBundle\Controller\Offer;
 
 use Ladb\CoreBundle\Controller\AbstractController;
+use Ladb\CoreBundle\Controller\Message\ThreadController;
 use Ladb\CoreBundle\Controller\PublicationControllerTrait;
 use Ladb\CoreBundle\Utils\CollectionnableUtils;
 use Ladb\CoreBundle\Utils\LocalisableUtils;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
@@ -35,7 +35,7 @@ use Ladb\CoreBundle\Utils\OfferUtils;
 use Ladb\CoreBundle\Utils\JoinableUtils;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @Route("/annonces")
@@ -91,7 +91,7 @@ class OfferController extends AbstractController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($offer));
+			$dispatcher->dispatch(new PublicationEvent($offer), PublicationListener::PUBLICATION_CREATED);
 
 			return $this->redirect($this->generateUrl('core_offer_show', array('id' => $offer->getSluggedId())));
 		}
@@ -220,7 +220,7 @@ class OfferController extends AbstractController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_UPDATED, new PublicationEvent($offer, array( 'previouslyUsedTags' => $previouslyUsedTags )));
+			$dispatcher->dispatch(new PublicationEvent($offer, array( 'previouslyUsedTags' => $previouslyUsedTags )), PublicationListener::PUBLICATION_UPDATED);
 
 			// Flashbag
 			$this->addFlash('success', $translator->trans('offer.offer.form.alert.update_success', array( '%title%' => $offer->getTitle() )));
@@ -347,7 +347,7 @@ class OfferController extends AbstractController {
 			throw $this->createNotFoundException('Unable to send to yourself (core_offer_message_new)');
 		}
 
-		return $this->forward('LadbCoreBundle:Message/Thread:new', array(
+		return $this->forward(ThreadController::class.'::newAction', array(
 			'recipientUsername' => $offer->getUser()->getUsernameCanonical(),
 			'subject'           => $translator->trans('offer.offer.contact.subject', array('%TITLE%' => $offer->getTitle())),
 			'message'           => $translator->trans('offer.offer.contact.body', array(
@@ -568,7 +568,7 @@ class OfferController extends AbstractController {
 		}
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATIONS_LISTED, new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()));
+		$dispatcher->dispatch(new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()), PublicationListener::PUBLICATIONS_LISTED);
 
 		if ($request->isXmlHttpRequest()) {
 			return $this->render('LadbCoreBundle:Offer/Offer:list-xhr.html.twig', $parameters);
@@ -607,7 +607,7 @@ class OfferController extends AbstractController {
 		$this->assertShowable($offer);
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($offer));
+		$dispatcher->dispatch(new PublicationEvent($offer), PublicationListener::PUBLICATION_SHOWN);
 
 		$userOffers = $explorableUtils->getPreviousAndNextPublishedUserExplorables($offer, $offerRepository, $offer->getUser()->getMeta()->getPublicOfferCount());
 		$similarOffers = $explorableUtils->getSimilarExplorables($offer, 'fos_elastica.index.ladb.offer_offer', Offer::CLASS_NAME, $userOffers, 2, array( new \Elastica\Query\Term(array( 'kind' => $offer->getKind() )), new \Elastica\Query\Term(array( 'category' => $offer->getCategory() )) ));

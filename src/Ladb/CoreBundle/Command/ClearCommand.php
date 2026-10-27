@@ -29,7 +29,7 @@ EOT
 		);
 	}
 
-	protected function execute(InputInterface $input, OutputInterface $output) {
+	protected function execute(InputInterface $input, OutputInterface $output): int {
 		// Run doctrine:database:drop --force
 
 		$forced = $input->getOption('force');
@@ -62,6 +62,8 @@ EOT
 		}
 
 		$output->writeln('<info>Ladb clear complete</info>');
+
+		return 0;
 	}
 
 }

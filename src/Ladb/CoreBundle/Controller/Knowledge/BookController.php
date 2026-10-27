@@ -7,7 +7,6 @@ use Ladb\CoreBundle\Controller\PublicationControllerTrait;
 use Ladb\CoreBundle\Entity\Knowledge\Value\BookIdentity;
 use Ladb\CoreBundle\Utils\CollectionnableUtils;
 use Ladb\CoreBundle\Utils\ReviewableUtils;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
@@ -31,7 +30,7 @@ use Ladb\CoreBundle\Event\PublicationListener;
 use Ladb\CoreBundle\Event\KnowledgeEvent;
 use Ladb\CoreBundle\Event\KnowledgeListener;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @Route("/livres")
@@ -101,8 +100,8 @@ class BookController extends AbstractController {
 			$book->addCoverValue($coverValue);
 
 			// Dispatch knowledge events
-			$dispatcher->dispatch(KnowledgeListener::FIELD_VALUE_ADDED, new KnowledgeEvent($book, array( 'field' => Book::FIELD_IDENTITY, 'value' => $identityValue )));
-			$dispatcher->dispatch(KnowledgeListener::FIELD_VALUE_ADDED, new KnowledgeEvent($book, array( 'field' => Book::FIELD_COVER, 'value' => $coverValue )));
+			$dispatcher->dispatch(new KnowledgeEvent($book, array( 'field' => Book::FIELD_IDENTITY, 'value' => $identityValue )), KnowledgeListener::FIELD_VALUE_ADDED);
+			$dispatcher->dispatch(new KnowledgeEvent($book, array( 'field' => Book::FIELD_COVER, 'value' => $coverValue )), KnowledgeListener::FIELD_VALUE_ADDED);
 
 			$identityValue->setParentEntity($book);
 			$identityValue->setParentEntityField(Book::FIELD_IDENTITY);
@@ -119,12 +118,12 @@ class BookController extends AbstractController {
 			$activityUtils->createContributeActivity($coverValue, false);
 
 			// Dispatch publication event
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($book));
+			$dispatcher->dispatch(new PublicationEvent($book), PublicationListener::PUBLICATION_CREATED);
 
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_PUBLISHED, new PublicationEvent($book));
+			$dispatcher->dispatch(new PublicationEvent($book), PublicationListener::PUBLICATION_PUBLISHED);
 
 			return $this->redirect($this->generateUrl('core_book_show', array('id' => $book->getSluggedId())));
 		}
@@ -323,7 +322,7 @@ class BookController extends AbstractController {
 		);
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATIONS_LISTED, new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()));
+		$dispatcher->dispatch(new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()), PublicationListener::PUBLICATIONS_LISTED);
 
 		$parameters = array_merge($searchParameters, array(
 			'books' => $searchParameters['entities'],
@@ -355,7 +354,7 @@ class BookController extends AbstractController {
 		}
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($book));
+		$dispatcher->dispatch(new PublicationEvent($book), PublicationListener::PUBLICATION_SHOWN);
 
 		$searchableVolumeCount = $searchUtils->searchEntitiesCount(array( new \Elastica\Query\MatchQuery('work', $book->getWork()) ), 'fos_elastica.index.ladb.knowledge_book');
 

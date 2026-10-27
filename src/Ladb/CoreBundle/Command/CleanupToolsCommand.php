@@ -31,7 +31,7 @@ EOT
 		);
 	}
 
-	protected function execute(InputInterface $input, OutputInterface $output) {
+	protected function execute(InputInterface $input, OutputInterface $output): int {
 
 		$om = $this->om;
 
@@ -46,7 +46,7 @@ EOT
 		try {
 			$tools = $queryBuilder->getQuery()->getResult();
 		} catch (\Doctrine\ORM\NoResultException $e) {
-			return null;
+			return 0;
 		}
 
 		$toolCounters = array();
@@ -68,7 +68,7 @@ EOT
 		try {
 			$creations = $queryBuilder->getQuery()->getResult();
 		} catch (\Doctrine\ORM\NoResultException $e) {
-			return null;
+			return 0;
 		}
 
 		foreach ($creations as $creation) {
@@ -104,6 +104,8 @@ EOT
 		} else {
 			$output->writeln('<info>'.$unusedToolCount.' tools to remove</info>');
 		}
+
+		return 0;
 	}
 
 }

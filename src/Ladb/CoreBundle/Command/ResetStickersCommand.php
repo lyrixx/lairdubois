@@ -34,7 +34,7 @@ EOT
 			);
 	}
 
-	protected function execute(InputInterface $input, OutputInterface $output) {
+	protected function execute(InputInterface $input, OutputInterface $output): int {
 
 		$om = $this->om;
 		$embaddableUtils = $this->embeddableUtils;
@@ -168,6 +168,8 @@ EOT
 		} else {
 			$output->writeln('<info>'.$resetStickerCount.' stickers to reset</info>');
 		}
+
+		return 0;
 	}
 
 }

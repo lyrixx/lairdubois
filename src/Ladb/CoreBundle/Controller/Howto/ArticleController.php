@@ -21,7 +21,7 @@ use Ladb\CoreBundle\Manager\Howto\ArticleManager;
 use Ladb\CoreBundle\Manager\Core\WitnessManager;
 use Liip\ImagineBundle\Controller\ImagineController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ArticleController extends AbstractHowtoBasedController {
 
@@ -365,7 +365,7 @@ class ArticleController extends AbstractHowtoBasedController {
 		$mainPicture = null;
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($howto));
+		$dispatcher->dispatch(new PublicationEvent($howto), PublicationListener::PUBLICATION_SHOWN);
 
 		$parameters = array_merge($this->computeShowParameters($howto, $request), array(
 			'article'     => $article,

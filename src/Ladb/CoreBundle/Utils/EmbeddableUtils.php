@@ -23,7 +23,7 @@ use Ladb\CoreBundle\Entity\Core\Referer\Referral;
 use Ladb\CoreBundle\Model\BlockBodiedInterface;
 use Ladb\CoreBundle\Model\MultiPicturedInterface;
 use Ladb\CoreBundle\Model\PicturedInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class EmbeddableUtils {
 

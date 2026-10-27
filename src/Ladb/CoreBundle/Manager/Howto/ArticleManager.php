@@ -32,7 +32,7 @@ class ArticleManager extends AbstractPublicationManager {
 		parent::publishPublication($article, $flush);
 
 		// Dispatch publication event
-		$this->dispatcher->dispatch(PublicationListener::PUBLICATION_CHANGED, new PublicationEvent($howto));
+		$this->dispatcher->dispatch(new PublicationEvent($howto), PublicationListener::PUBLICATION_CHANGED);
 
 		// Search index update
 		$this->searchUtils->replaceEntityInIndex($howto);

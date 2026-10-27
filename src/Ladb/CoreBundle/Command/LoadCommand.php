@@ -24,7 +24,7 @@ EOT
 		);
 	}
 
-	protected function execute(InputInterface $input, OutputInterface $output) {
+	protected function execute(InputInterface $input, OutputInterface $output): int {
 		// Run doctrine:fixtures:load
 
 		$command = $this->getApplication()->find('doctrine:fixtures:load');
@@ -40,6 +40,8 @@ EOT
 		}
 
 		$output->writeln('<info>Ladb load complete</info>');
+
+		return 0;
 	}
 
 }

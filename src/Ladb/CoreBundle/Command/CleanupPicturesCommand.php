@@ -31,7 +31,7 @@ EOT
 		);
 	}
 
-	protected function execute(InputInterface $input, OutputInterface $output) {
+	protected function execute(InputInterface $input, OutputInterface $output): int {
 
 		$om = $this->om;
 
@@ -878,6 +878,8 @@ EOT
 		} else {
 			$output->writeln('<info>'.$unusedPictureCount.' pictures to remove</info>');
 		}
+
+		return 0;
 	}
 
 }

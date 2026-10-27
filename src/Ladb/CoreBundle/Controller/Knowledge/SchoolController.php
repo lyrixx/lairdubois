@@ -6,7 +6,6 @@ use Ladb\CoreBundle\Controller\AbstractController;
 use Ladb\CoreBundle\Controller\PublicationControllerTrait;
 use Ladb\CoreBundle\Entity\Knowledge\Provider;
 use Ladb\CoreBundle\Utils\KnowledgeUtils;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
@@ -34,7 +33,7 @@ use Ladb\CoreBundle\Event\PublicationListener;
 use Ladb\CoreBundle\Event\KnowledgeEvent;
 use Ladb\CoreBundle\Event\KnowledgeListener;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @Route("/ecoles")
@@ -99,8 +98,8 @@ class SchoolController extends AbstractController {
 			$school->addLogoValue($logoValue);
 
 			// Dispatch knowledge events
-			$dispatcher->dispatch(KnowledgeListener::FIELD_VALUE_ADDED, new KnowledgeEvent($school, array( 'field' => School::FIELD_NAME, 'value' => $nameValue )));
-			$dispatcher->dispatch(KnowledgeListener::FIELD_VALUE_ADDED, new KnowledgeEvent($school, array( 'field' => School::FIELD_LOGO, 'value' => $logoValue )));
+			$dispatcher->dispatch(new KnowledgeEvent($school, array( 'field' => School::FIELD_NAME, 'value' => $nameValue )), KnowledgeListener::FIELD_VALUE_ADDED);
+			$dispatcher->dispatch(new KnowledgeEvent($school, array( 'field' => School::FIELD_LOGO, 'value' => $logoValue )), KnowledgeListener::FIELD_VALUE_ADDED);
 
 			$nameValue->setParentEntity($school);
 			$nameValue->setParentEntityField(School::FIELD_NAME);
@@ -117,12 +116,12 @@ class SchoolController extends AbstractController {
 			$activityUtils->createContributeActivity($logoValue, false);
 
 			// Dispatch publication event
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($school));
+			$dispatcher->dispatch(new PublicationEvent($school), PublicationListener::PUBLICATION_CREATED);
 
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_PUBLISHED, new PublicationEvent($school));
+			$dispatcher->dispatch(new PublicationEvent($school), PublicationListener::PUBLICATION_PUBLISHED);
 
 			return $this->redirect($this->generateUrl('core_school_show', array('id' => $school->getSluggedId())));
 		}
@@ -408,7 +407,7 @@ class SchoolController extends AbstractController {
 		}
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATIONS_LISTED, new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()));
+		$dispatcher->dispatch(new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()), PublicationListener::PUBLICATIONS_LISTED);
 
 		if ($request->isXmlHttpRequest()) {
 			if ($layout == 'choice') {
@@ -599,7 +598,7 @@ class SchoolController extends AbstractController {
 		}
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($school));
+		$dispatcher->dispatch(new PublicationEvent($school), PublicationListener::PUBLICATION_SHOWN);
 
 		return array(
 			'school'            => $school,

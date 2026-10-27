@@ -194,8 +194,8 @@ final class OpencutlistTest extends WebTestCase
         $crawler = $client->request('GET', static::generatePath('core_opencutlist_stats'));
 
         self::assertSame(200, $client->getResponse()->getStatusCode());
-        self::assertStringContainsString('1 requêtes', $crawler->filter('h2')->text());
-        $panels = $crawler->filter('.panel')->each(fn ($panel) => preg_replace('/\s+/', ' ', trim($panel->text())));
+        self::assertStringContainsString('1 requêtes', $crawler->filter('h2')->text(null, false));
+        $panels = $crawler->filter('.panel')->each(fn ($panel) => preg_replace('/\s+/', ' ', trim($panel->text(null, false))));
         self::assertContains('Upgrades - Utilisateurs / pays 1 utilisateurs | 1 pays France 1', $panels);
         self::assertContains('Manifests - Utilisateurs / pays 0 utilisateurs | 0 pays', $panels);
 

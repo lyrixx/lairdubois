@@ -3,7 +3,7 @@
 namespace Ladb\CoreBundle\Controller\Core;
 
 use Ladb\CoreBundle\Controller\AbstractController;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Ladb\CoreBundle\Controller\Wonder\CreationController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
@@ -14,7 +14,7 @@ class DefaultController extends AbstractController {
 	 * @Route("/", name="core_welcome")
 	 */
 	public function welcomeAction() {
-		$response = $this->forward('LadbCoreBundle:Wonder/Creation:list', array(
+		$response = $this->forward(CreationController::class.'::listAction', array(
 			'homepage' => true,
 		));
 		return $response;

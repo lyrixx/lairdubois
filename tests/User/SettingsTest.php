@@ -129,7 +129,7 @@ final class SettingsTest extends WebTestCase
         ]));
 
         self::assertSame(200, $client->getResponse()->getStatusCode());
-        self::assertStringContainsString('Le mot de passe est invalide.', $crawler->filter('form[action="/parametres/change-password"]')->text());
+        self::assertStringContainsString('Le mot de passe est invalide.', $crawler->filter('form[action="/parametres/change-password"]')->text(null, false));
     }
 
     public function testChangePasswordAnonymous(): void

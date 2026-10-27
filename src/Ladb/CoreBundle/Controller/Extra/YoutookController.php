@@ -3,7 +3,6 @@
 namespace Ladb\CoreBundle\Controller\Extra;
 
 use Ladb\CoreBundle\Controller\AbstractController;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
@@ -17,7 +16,7 @@ use Ladb\CoreBundle\Event\PublicationListener;
 use Ladb\CoreBundle\Manager\Youtook\TookManager;
 use Ladb\CoreBundle\Manager\Core\WitnessManager;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @Route("/yt")
@@ -61,7 +60,7 @@ class YoutookController extends AbstractController {
 			}
 
 			// Dispatch publication event
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($took));
+			$dispatcher->dispatch(new PublicationEvent($took), PublicationListener::PUBLICATION_CREATED);
 
 			// Flashbag
 			$this->addFlash('success', $translator->trans('youtook.form.alert.create_success'));
@@ -130,7 +129,7 @@ class YoutookController extends AbstractController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_UPDATED, new PublicationEvent($took));
+			$dispatcher->dispatch(new PublicationEvent($took), PublicationListener::PUBLICATION_UPDATED);
 
 			// Flashbag
 			$this->addFlash('success', $translator->trans('youtook.form.alert.update_success', array( '%title%' => $took->getTitle() )));

@@ -74,7 +74,7 @@ abstract class EditorialTestCase extends WebTestCase
         $crawler = $client->request('GET', $this->path('show', ['id' => static::ID]));
 
         self::assertSame(200, $client->getResponse()->getStatusCode());
-        self::assertStringContainsStringIgnoringCase($this->find(static::ID)->getTitle(), $crawler->filter('title')->text());
+        self::assertStringContainsStringIgnoringCase($this->find(static::ID)->getTitle(), $crawler->filter('title')->text(null, false));
     }
 
     /**
@@ -149,7 +149,7 @@ abstract class EditorialTestCase extends WebTestCase
         $client->submit($this->selectForm($crawler, $this->path('create'))->setValues($this->getNewFormValues()));
 
         // On an invalid form, the message tells which field
-        self::assertSame(302, $client->getResponse()->getStatusCode(), implode("\n", $client->getCrawler()->filter('.help-block')->each(fn (Crawler $node) => $node->text())));
+        self::assertSame(302, $client->getResponse()->getStatusCode(), implode("\n", $client->getCrawler()->filter('.help-block')->each(fn (Crawler $node) => $node->text(null, false))));
         $publication = $this->findLast();
         self::assertSame(UserFixtures::ADMIN, $publication->getUser()->getUsername());
         self::assertTrue($publication->getIsDraft());

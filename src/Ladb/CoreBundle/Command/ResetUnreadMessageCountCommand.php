@@ -32,7 +32,7 @@ EOT
 			);
 	}
 
-	protected function execute(InputInterface $input, OutputInterface $output) {
+	protected function execute(InputInterface $input, OutputInterface $output): int {
 
 		$verbose = $input->getOption('verbose');
 		$forced = $input->getOption('force');
@@ -110,6 +110,8 @@ EOT
 		$progress->finish();
 
 		$output->writeln('<comment>[Finished]</comment>');
+
+		return 0;
 
 	}
 

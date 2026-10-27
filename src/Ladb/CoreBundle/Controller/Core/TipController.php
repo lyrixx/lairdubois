@@ -3,7 +3,6 @@
 namespace Ladb\CoreBundle\Controller\Core;
 
 use Ladb\CoreBundle\Controller\AbstractController;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -21,7 +20,7 @@ use Ladb\CoreBundle\Event\PublicationEvent;
 use Ladb\CoreBundle\Event\PublicationListener;
 use Ladb\CoreBundle\Event\PublicationsEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @Route("/astuces")
@@ -66,8 +65,8 @@ class TipController extends AbstractController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($tip));
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_PUBLISHED, new PublicationEvent($tip));
+			$dispatcher->dispatch(new PublicationEvent($tip), PublicationListener::PUBLICATION_CREATED);
+			$dispatcher->dispatch(new PublicationEvent($tip), PublicationListener::PUBLICATION_PUBLISHED);
 
 			return $this->redirect($this->generateUrl('core_tip_list'));
 		}
@@ -128,7 +127,7 @@ class TipController extends AbstractController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_UPDATED, new PublicationEvent($tip));
+			$dispatcher->dispatch(new PublicationEvent($tip), PublicationListener::PUBLICATION_UPDATED);
 
 			// Flashbag
 			$this->addFlash('success', $translator->trans('core.tip.form.alert.update_success', array( '%title%' => $tip->getTitle() )));
@@ -232,7 +231,7 @@ class TipController extends AbstractController {
 		);
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATIONS_LISTED, new PublicationsEvent($searchParameters['entities'], false));
+		$dispatcher->dispatch(new PublicationsEvent($searchParameters['entities'], false), PublicationListener::PUBLICATIONS_LISTED);
 
 		$parameters = array_merge($searchParameters, array(
 			'tips' => $searchParameters['entities'],
@@ -264,7 +263,7 @@ class TipController extends AbstractController {
 		}
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($tip));
+		$dispatcher->dispatch(new PublicationEvent($tip), PublicationListener::PUBLICATION_SHOWN);
 
 		return $this->redirect($tip->getUrl());
 	}

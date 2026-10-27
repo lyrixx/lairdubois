@@ -5,7 +5,6 @@ namespace Ladb\CoreBundle\Controller\Core;
 use Ladb\CoreBundle\Entity\Qa\Question;
 use Ladb\CoreBundle\Manager\Core\CommentManager;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -24,7 +23,7 @@ use Ladb\CoreBundle\Utils\FieldPreprocessorUtils;
 use Ladb\CoreBundle\Utils\TypableUtils;
 use Ladb\CoreBundle\Utils\MentionUtils;
 use Symfony\Component\Form\FormFactoryInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @Route("/commentaires")

@@ -60,7 +60,7 @@ abstract class WebTestCase extends BaseWebTestCase
     {
         // The writes to the index are searchable after its next refresh, every second: the next
         // test sees all of them, whatever the time between the two
-        $container = null === static::$kernel ? null : static::$kernel->getContainer();
+        $container = static::$booted ? static::$kernel->getContainer() : null;
         if (null !== $container) {
             $container->get('fos_elastica.index.ladb')->refresh();
 
@@ -104,6 +104,10 @@ abstract class WebTestCase extends BaseWebTestCase
      */
     protected static function createClient(array $options = [], array $server = []): Client
     {
+        // The kernel booted before, if any (fixtures read before the client, another client):
+        // the parent shuts it down too, but deprecates it and throws from Symfony 5.0
+        static::ensureKernelShutdown();
+
         return parent::createClient($options, $server + ['HTTP_HOST' => self::HOST, 'HTTPS' => 'on']);
     }
 
@@ -131,7 +135,7 @@ abstract class WebTestCase extends BaseWebTestCase
     protected static function getEntityManager(): EntityManagerInterface
     {
         // No kernel yet, or the one of the previous test, shut down
-        if (null === static::$kernel || null === static::$kernel->getContainer()) {
+        if (!static::$booted) {
             static::bootKernel();
         }
 

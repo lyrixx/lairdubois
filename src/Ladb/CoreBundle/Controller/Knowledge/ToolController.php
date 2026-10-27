@@ -7,7 +7,6 @@ use Ladb\CoreBundle\Controller\PublicationControllerTrait;
 use Ladb\CoreBundle\Entity\Knowledge\Value\ToolIdentity;
 use Ladb\CoreBundle\Utils\CollectionnableUtils;
 use Ladb\CoreBundle\Utils\ReviewableUtils;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
@@ -31,7 +30,7 @@ use Ladb\CoreBundle\Event\PublicationListener;
 use Ladb\CoreBundle\Event\KnowledgeEvent;
 use Ladb\CoreBundle\Event\KnowledgeListener;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @Route("/outils")
@@ -108,10 +107,10 @@ class ToolController extends AbstractController {
 			if ($brandDefined) $tool->addBrandValue($brandValue);
 
 			// Dispatch knowledge events
-			$dispatcher->dispatch(KnowledgeListener::FIELD_VALUE_ADDED, new KnowledgeEvent($tool, array( 'field' => Tool::FIELD_NAME, 'value' => $nameValue )));
-			$dispatcher->dispatch(KnowledgeListener::FIELD_VALUE_ADDED, new KnowledgeEvent($tool, array( 'field' => Tool::FIELD_PHOTO, 'value' => $photoValue )));
-			if ($productNameDefined) $dispatcher->dispatch(KnowledgeListener::FIELD_VALUE_ADDED, new KnowledgeEvent($tool, array( 'field' => Tool::FIELD_PRODUCT_NAME, 'value' => $productNameValue )));
-			if ($brandDefined) $dispatcher->dispatch(KnowledgeListener::FIELD_VALUE_ADDED, new KnowledgeEvent($tool, array( 'field' => Tool::FIELD_BRAND, 'value' => $brandValue )));
+			$dispatcher->dispatch(new KnowledgeEvent($tool, array( 'field' => Tool::FIELD_NAME, 'value' => $nameValue )), KnowledgeListener::FIELD_VALUE_ADDED);
+			$dispatcher->dispatch(new KnowledgeEvent($tool, array( 'field' => Tool::FIELD_PHOTO, 'value' => $photoValue )), KnowledgeListener::FIELD_VALUE_ADDED);
+			if ($productNameDefined) $dispatcher->dispatch(new KnowledgeEvent($tool, array( 'field' => Tool::FIELD_PRODUCT_NAME, 'value' => $productNameValue )), KnowledgeListener::FIELD_VALUE_ADDED);
+			if ($brandDefined) $dispatcher->dispatch(new KnowledgeEvent($tool, array( 'field' => Tool::FIELD_BRAND, 'value' => $brandValue )), KnowledgeListener::FIELD_VALUE_ADDED);
 
 			$nameValue->setParentEntity($tool);
 			$nameValue->setParentEntityField(Tool::FIELD_NAME);
@@ -144,12 +143,12 @@ class ToolController extends AbstractController {
 			if ($brandDefined) $activityUtils->createContributeActivity($brandValue, false);
 
 			// Dispatch publication event
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($tool));
+			$dispatcher->dispatch(new PublicationEvent($tool), PublicationListener::PUBLICATION_CREATED);
 
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_PUBLISHED, new PublicationEvent($tool));
+			$dispatcher->dispatch(new PublicationEvent($tool), PublicationListener::PUBLICATION_PUBLISHED);
 
 			return $this->redirect($this->generateUrl('core_tool_show', array('id' => $tool->getSluggedId())));
 		}
@@ -345,7 +344,7 @@ class ToolController extends AbstractController {
 		);
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATIONS_LISTED, new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()));
+		$dispatcher->dispatch(new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()), PublicationListener::PUBLICATIONS_LISTED);
 
 		$parameters = array_merge($searchParameters, array(
 			'tools' => $searchParameters['entities'],
@@ -377,7 +376,7 @@ class ToolController extends AbstractController {
 		}
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($tool));
+		$dispatcher->dispatch(new PublicationEvent($tool), PublicationListener::PUBLICATION_SHOWN);
 
 		$searchableBrotherCount = $searchUtils->searchEntitiesCount(array( new \Elastica\Query\MatchQuery('nameKeyword', $tool->getName()) ), 'fos_elastica.index.ladb.knowledge_tool');
 		$searchableCreationCount = $searchUtils->searchEntitiesCount(array( $elasticaQueryUtils->createShouldMatchPhraseQuery('tools.label', $tool->getTitle()) ), 'fos_elastica.index.ladb.wonder_creation');

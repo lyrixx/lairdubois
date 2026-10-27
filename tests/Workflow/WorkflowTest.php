@@ -36,7 +36,7 @@ final class WorkflowTest extends WebTestCase
         $crawler = $client->request('GET', $this->path('show', ['id' => self::ID]));
 
         self::assertSame(200, $client->getResponse()->getStatusCode());
-        self::assertStringContainsStringIgnoringCase('fabrication d\'une table basse', $crawler->filter('title')->text());
+        self::assertStringContainsStringIgnoringCase('fabrication d\'une table basse', $crawler->filter('title')->text(null, false));
     }
 
     /**
@@ -711,7 +711,7 @@ final class WorkflowTest extends WebTestCase
         ]));
 
         // On an invalid form, the message tells which field
-        self::assertSame(302, $client->getResponse()->getStatusCode(), implode("\n", $client->getCrawler()->filter('.help-block')->each(fn (Crawler $node) => $node->text())));
+        self::assertSame(302, $client->getResponse()->getStatusCode(), implode("\n", $client->getCrawler()->filter('.help-block')->each(fn (Crawler $node) => $node->text(null, false))));
     }
 
     private function getNewForm(Client $client, string $owner): Form

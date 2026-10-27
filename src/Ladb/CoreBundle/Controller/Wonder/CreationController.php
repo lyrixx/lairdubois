@@ -2,7 +2,6 @@
 
 namespace Ladb\CoreBundle\Controller\Wonder;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -53,7 +52,7 @@ use Ladb\CoreBundle\Entity\Core\View;
 use Liip\ImagineBundle\Controller\ImagineController;
 use Liip\ImagineBundle\Imagine\Cache\CacheManager;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @Route("/creations")
@@ -109,7 +108,7 @@ class CreationController extends AbstractController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($creation));
+			$dispatcher->dispatch(new PublicationEvent($creation), PublicationListener::PUBLICATION_CREATED);
 
 			return $this->redirect($this->generateUrl('core_creation_show', array( 'id' => $creation->getSluggedId() )));
 		}
@@ -250,9 +249,9 @@ class CreationController extends AbstractController {
 
 			// Dispatch publication event
 			if ($doUp) {
-				$dispatcher->dispatch(PublicationListener::PUBLICATION_CHANGED, new PublicationEvent($creation));
+				$dispatcher->dispatch(new PublicationEvent($creation), PublicationListener::PUBLICATION_CHANGED);
 			}
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_UPDATED, new PublicationEvent($creation, array( 'previouslyUsedTags' => $previouslyUsedTags )));
+			$dispatcher->dispatch(new PublicationEvent($creation, array( 'previouslyUsedTags' => $previouslyUsedTags )), PublicationListener::PUBLICATION_UPDATED);
 
 			// Flashbag
 			$this->addFlash('success', $translator->trans('wonder.creation.form.alert.update_success', array( '%title%' => $creation->getTitle() )));
@@ -1018,7 +1017,7 @@ class CreationController extends AbstractController {
 		);
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATIONS_LISTED, new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()));
+		$dispatcher->dispatch(new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()), PublicationListener::PUBLICATIONS_LISTED);
 
 		$parameters = array_merge($searchParameters, array(
 			'creations'       => $searchParameters['entities'],
@@ -1134,7 +1133,7 @@ class CreationController extends AbstractController {
 		$referral = $embaddableUtils->processReferer($creation, $request);
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($creation));
+		$dispatcher->dispatch(new PublicationEvent($creation), PublicationListener::PUBLICATION_SHOWN);
 
 		$userCreations = $explorableUtils->getPreviousAndNextPublishedUserExplorables($creation, $creationRepository, $creation->getUser()->getMeta()->getPublicCreationCount());
 		$similarCreations = $explorableUtils->getSimilarExplorables($creation, 'fos_elastica.index.ladb.wonder_creation', Creation::CLASS_NAME, $userCreations);

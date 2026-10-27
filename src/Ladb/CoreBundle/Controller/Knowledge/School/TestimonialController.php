@@ -3,7 +3,6 @@
 namespace Ladb\CoreBundle\Controller\Knowledge\School;
 
 use Ladb\CoreBundle\Controller\AbstractController;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
@@ -17,7 +16,7 @@ use Ladb\CoreBundle\Manager\Knowledge\School\TestimonialManager;
 use Ladb\CoreBundle\Event\PublicationEvent;
 use Ladb\CoreBundle\Event\PublicationListener;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @Route("/ecoles")
@@ -101,7 +100,7 @@ class TestimonialController extends AbstractController {
 			$activityUtils->createTestifyActivity($testimonial, false);
 
 			// Dispatch publication event (on School)
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_CHANGED, new PublicationEvent($school));
+			$dispatcher->dispatch(new PublicationEvent($school), PublicationListener::PUBLICATION_CHANGED);
 
 			// Auto watch
 			$watchableUtils->autoCreateWatch($school, $this->getUser());

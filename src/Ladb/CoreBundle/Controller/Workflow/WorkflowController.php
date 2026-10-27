@@ -31,7 +31,7 @@ use Ladb\CoreBundle\Entity\Wonder\Workshop;
 use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Utils\PaginatorUtils;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @Route("/processus")
@@ -90,7 +90,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($workflow));
+			$dispatcher->dispatch(new PublicationEvent($workflow), PublicationListener::PUBLICATION_CREATED);
 
 			return $this->redirect($this->generateUrl('core_workflow_show', array( 'id' => $workflow->getId(), 'layout' => 'workspace' )));
 		}
@@ -212,7 +212,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_UPDATED, new PublicationEvent($workflow, array( 'previouslyUsedTags' => $previouslyUsedTags )));
+			$dispatcher->dispatch(new PublicationEvent($workflow, array( 'previouslyUsedTags' => $previouslyUsedTags )), PublicationListener::PUBLICATION_UPDATED);
 
 			// Flashbag
 			$this->addFlash('success', $translator->trans('workflow.workflow.form.alert.update_success', array( '%title%' => $workflow->getTitle() )));
@@ -607,7 +607,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		$this->assertShowable($workflow);
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($workflow));
+		$dispatcher->dispatch(new PublicationEvent($workflow), PublicationListener::PUBLICATION_SHOWN);
 
 		$parameters = array(
 			'workflow'          => $workflow,
@@ -814,7 +814,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		);
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATIONS_LISTED, new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()));
+		$dispatcher->dispatch(new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()), PublicationListener::PUBLICATIONS_LISTED);
 
 		$parameters = array_merge($searchParameters, array(
 			'workflows'       => $searchParameters['entities'],

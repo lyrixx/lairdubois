@@ -266,7 +266,7 @@ class WorkflowManager extends AbstractAuthoredPublicationManager {
 		}
 
 		// Dispatch publication event
-		$this->dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($newWorkflow));
+		$this->dispatcher->dispatch(new PublicationEvent($newWorkflow), PublicationListener::PUBLICATION_CREATED);
 
 		return $newWorkflow;
 	}

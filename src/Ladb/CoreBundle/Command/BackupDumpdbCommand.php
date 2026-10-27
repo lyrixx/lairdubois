@@ -50,7 +50,7 @@ EOT
 			);
 	}
 
-	protected function execute(InputInterface $input, OutputInterface $output) {
+	protected function execute(InputInterface $input, OutputInterface $output): int {
 
 		$dumpDir = $input->getOption('dump-dir');
 		$compress = $input->getOption('compress');
@@ -112,7 +112,7 @@ EOT
 				$fs->remove($sqlFile);
 			} else {
 				$output->writeln('<error>A previous dump already exists. Use --overwrite to overwrite it.</error>');
-				return;
+				return 0;
 			}
 		}
 
@@ -122,7 +122,7 @@ EOT
 		$output->writeln(' '.$mysqldumpCommand);
 		if (system($mysqldumpCommand) === false) {
 			$output->writeln('<error>Error executing mysqldump command.</error>');
-			return;
+			return 0;
 		}
 
 		if ($compress && $fs->exists($sqlFile)) {
@@ -137,12 +137,14 @@ EOT
 			$tarCommand = 'gzip < '.$sqlFile.' > '.$gzFile;
 			if (system($tarCommand) === false) {
 				$output->writeln('<error>Error executing gzip command.</error>');
-				return;
+				return 0;
 			}
 
 		}
 
 		$output->writeln('<info>Dump complete at </info>'.$sqlFile.($compress ? '<info> and </info>'.$gzFile : ''));
+
+		return 0;
 
 	}
 

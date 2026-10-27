@@ -24,9 +24,7 @@ use Ladb\CoreBundle\Manager\Core\MemberRequestManager;
 use Ladb\CoreBundle\Utils\MemberUtils;
 use Ladb\CoreBundle\Utils\PropertyUtils;
 use Ladb\CoreBundle\Utils\TypableUtils;
-use Symfony\Component\Debug\Exception\UndefinedMethodException;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Ladb\CoreBundle\Entity\Core\UserWitness;
@@ -56,7 +54,7 @@ use Ladb\CoreBundle\Utils\LikableUtils;
 use Ladb\CoreBundle\Utils\UserUtils;
 use FOS\UserBundle\Util\TokenGeneratorInterface;
 use FOS\UserBundle\Util\UserManipulator;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @Route("/")
@@ -1699,21 +1697,21 @@ class UserController extends AbstractController {
 
 		$CrawlerDetect = new CrawlerDetect();
 		if ($CrawlerDetect->isCrawler() || $user->getIsTeam() && !is_null($user->getMeta()->getBiography()) && !empty($user->getMeta()->getBiography()->getHtmlBody())) {	 /* Return about page for Crawlers */
-			$forwardController = 'LadbCoreBundle:Core/User:showAbout';
+			$forwardController = UserController::class.'::showAboutAction';
 		} else if ($user->getIsTeam()) {
-			$forwardController = 'LadbCoreBundle:Core/User:showMembers';
+			$forwardController = UserController::class.'::showMembersAction';
 		} else if ($user->getMeta()->getPublicCreationCount() > 0) {
-			$forwardController = 'LadbCoreBundle:Core/User:showCreations';
+			$forwardController = UserController::class.'::showCreationsAction';
 		} else if ($user->getMeta()->getPublicPlanCount() > 0) {
-			$forwardController = 'LadbCoreBundle:Core/User:showPlans';
+			$forwardController = UserController::class.'::showPlansAction';
 		} else if ($user->getMeta()->getPublicHowtoCount() > 0) {
-			$forwardController = 'LadbCoreBundle:Core/User:showHowtos';
+			$forwardController = UserController::class.'::showHowtosAction';
 		} else if ($user->getMeta()->getPublicWorkshopCount() > 0) {
-			$forwardController = 'LadbCoreBundle:Core/User:showWorkshops';
+			$forwardController = UserController::class.'::showWorkshopsAction';
 		} else if ($user->getMeta()->getPublicFindCount() > 0) {
-			$forwardController = 'LadbCoreBundle:Core/User:showFinds';
+			$forwardController = UserController::class.'::showFindsAction';
 		} else {
-			$forwardController = 'LadbCoreBundle:Core/User:showAbout';
+			$forwardController = UserController::class.'::showAboutAction';
 		}
 
 		if ($user->getIsTeam() && $this->isGranted('ROLE_USER')) {

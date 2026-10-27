@@ -57,7 +57,7 @@ EOT
 		return $entityCount;
 	}
 
-	protected function execute(InputInterface $input, OutputInterface $output) {
+	protected function execute(InputInterface $input, OutputInterface $output): int {
 
 		$forced = $input->getOption('force');
 
@@ -81,6 +81,8 @@ EOT
 		} else {
 			$output->writeln('<info>'.$entityCount.' to generate</info>');
 		}
+
+		return 0;
 
 	}
 

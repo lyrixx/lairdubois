@@ -28,7 +28,7 @@ final class ValueTest extends WebTestCase
         $crawler = $client->request('GET', $this->getFieldPath(Wood::FIELD_NAME));
 
         self::assertSame(200, $client->getResponse()->getStatusCode());
-        self::assertStringContainsString('Chêne', $crawler->filter('body')->text());
+        self::assertStringContainsString('Chêne', $crawler->filter('body')->text(null, false));
         // Only the users propose a value
         self::assertCount(0, $crawler->filter(\sprintf('form[action="%s"]', $this->getCreatePath(Wood::FIELD_NAME))));
     }

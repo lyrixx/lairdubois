@@ -72,14 +72,14 @@ class Review implements TypableInterface, BasicTimestampableInterface, AuthoredI
 	/**
 	 * @ORM\Column(type="string", length=100, nullable=false)
 	 * @Assert\NotBlank()
-	 * @Assert\Length(min=2, max=100)
+	 * @Assert\Length(min=2, max=100, allowEmptyString=true)
 	 */
 	protected $title;
 
 	/**
 	 * @ORM\Column(type="text", nullable=true)
 	 * @Assert\NotBlank()
-	 * @Assert\Length(min=5, max=5000)
+	 * @Assert\Length(min=5, max=5000, allowEmptyString=true)
 	 * @LadbAssert\NoMediaLink()
 	 */
 	protected $body;

@@ -60,19 +60,19 @@ class User extends \FOS\UserBundle\Model\User implements IndexableInterface, Sit
 	private $emailConfirmed = false;
 
 	/**
-	 * @Assert\Length(min=3, max=25)
+	 * @Assert\Length(min=3, max=25, allowEmptyString=true)
 	 */
 	protected $username;
 
 	/**
 	 * @Assert\NotBlank(groups={"settings"})
-	 * @Assert\Email(strict=true, groups={"settings"})
+	 * @Assert\Email(mode="strict", groups={"settings"})
 	 */
 	protected $email;
 
 	/**
 	 * @ORM\Column(type="string", length=25, unique=true)
-	 * @Assert\Length(min=3, max=25, groups={"settings"})
+	 * @Assert\Length(min=3, max=25, allowEmptyString=true, groups={"settings"})
 	 * @Assert\NotBlank(groups={"settings"})
 	 * @Assert\Regex("/^[ a-zA-Z0-9ÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿÑñ'°’’-]+$/")
 	 */
@@ -85,7 +85,7 @@ class User extends \FOS\UserBundle\Model\User implements IndexableInterface, Sit
 
 	/**
 	 * @ORM\Column(type="string", length=100, nullable=true)
-	 * @Assert\Length(min=3, max=100, groups={"settings"})
+	 * @Assert\Length(min=3, max=100, allowEmptyString=true, groups={"settings"})
 	 * @Assert\Regex("/^[A-Za-z][ a-zA-Z0-9ÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿÑñ'°’’-]+$/")
 	 */
 	private $fullname;

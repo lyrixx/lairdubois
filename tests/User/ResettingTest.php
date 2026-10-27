@@ -87,7 +87,7 @@ final class ResettingTest extends WebTestCase
         $crawler = $client->request('GET', '/resetting/check-email?username=user');
 
         self::assertSame(200, $client->getResponse()->getStatusCode());
-        self::assertStringContainsString('Un e-mail a été envoyé.', $crawler->filter('.panel-body')->text());
+        self::assertStringContainsString('Un e-mail a été envoyé.', $crawler->filter('.panel-body')->text(null, false));
     }
 
     private function requestReset(Client $client, string $username): void

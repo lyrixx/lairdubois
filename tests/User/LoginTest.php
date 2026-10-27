@@ -60,7 +60,7 @@ final class LoginTest extends WebTestCase
 
         self::assertSame('https://lairdubois.test/login', $client->getResponse()->headers->get('Location'));
         $crawler = $client->followRedirect();
-        self::assertStringContainsString('Identifiants invalides.', $crawler->filter('.alert-danger')->text());
+        self::assertStringContainsString('Identifiants invalides.', $crawler->filter('.alert-danger')->text(null, false));
         self::assertNotLoggedIn($client);
     }
 
@@ -73,7 +73,7 @@ final class LoginTest extends WebTestCase
 
         // As a wrong password: the fix of CVE-2021-21424 (account enumeration) hides the reason
         $crawler = $client->followRedirect();
-        self::assertStringContainsString('Identifiants invalides.', $crawler->filter('.alert-danger')->text());
+        self::assertStringContainsString('Identifiants invalides.', $crawler->filter('.alert-danger')->text(null, false));
         self::assertNotLoggedIn($client);
     }
 

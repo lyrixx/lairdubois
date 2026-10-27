@@ -34,7 +34,7 @@ final class CollectionTest extends WebTestCase
         $crawler = $client->request('GET', $this->path('show', ['id' => self::ID]));
 
         self::assertSame(200, $client->getResponse()->getStatusCode());
-        self::assertStringContainsStringIgnoringCase('mes meubles de salon', $crawler->filter('title')->text());
+        self::assertStringContainsStringIgnoringCase('mes meubles de salon', $crawler->filter('title')->text(null, false));
     }
 
     /**
@@ -86,7 +86,7 @@ final class CollectionTest extends WebTestCase
         $crawler = static::xhr($client, 'GET', $this->path('list_available', ['entityType' => Find::TYPE, 'entityId' => self::ID]));
 
         self::assertSame(200, $client->getResponse()->getStatusCode());
-        self::assertStringContainsStringIgnoringCase('mes meubles de salon', $crawler->text());
+        self::assertStringContainsStringIgnoringCase('mes meubles de salon', $crawler->text(null, false));
     }
 
     /**

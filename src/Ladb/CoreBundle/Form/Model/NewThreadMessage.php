@@ -18,13 +18,13 @@ class NewThreadMessage {
 
 	/**
 	 * @Assert\NotBlank()
-	 * @Assert\Length(min=2, max=255)
+	 * @Assert\Length(min=2, max=255, allowEmptyString=true)
 	 */
 	private $subject;
 
 	/**
 	 * @Assert\NotBlank()
-	 * @Assert\Length(min=2, max=10000)
+	 * @Assert\Length(min=2, max=10000, allowEmptyString=true)
 	 */
 	private $body;
 

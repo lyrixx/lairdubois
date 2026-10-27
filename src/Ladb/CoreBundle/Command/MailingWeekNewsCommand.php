@@ -37,7 +37,7 @@ EOT
 			);
 	}
 
-	protected function execute(InputInterface $input, OutputInterface $output) {
+	protected function execute(InputInterface $input, OutputInterface $output): int {
 
 		if (!$this->lock()) {
 			$output->writeln('The command is already running in another process.');
@@ -443,6 +443,8 @@ EOT
 			$output->writeln('<comment>[Finished]</comment>');
 
 		}
+
+		return 0;
 
 	}
 

@@ -57,7 +57,7 @@ final class YoutookTest extends WebTestCase
         $crawler = $client->request('GET', $this->path('show', ['id' => self::ID]));
 
         self::assertSame(200, $client->getResponse()->getStatusCode());
-        self::assertStringContainsString('Fabriquer un maillet en frêne', $crawler->filter('title')->text());
+        self::assertStringContainsString('Fabriquer un maillet en frêne', $crawler->filter('title')->text(null, false));
         self::assertNotCount(0, $crawler->filter('iframe[src*="aqz-KE-bpKQ"]'));
         self::assertNotCount(0, $crawler->filter(\sprintf('a[href="%s"]', self::URL)));
     }
@@ -115,7 +115,7 @@ final class YoutookTest extends WebTestCase
 
         self::assertSame(200, $client->getResponse()->getStatusCode());
         self::assertCount(1, $crawler->filter(\sprintf('form[action="%s"]', $this->path('create'))));
-        self::assertSame($listed, str_contains($crawler->text(), 'Fabriquer un maillet en frêne'));
+        self::assertSame($listed, str_contains($crawler->text(null, false), 'Fabriquer un maillet en frêne'));
     }
 
     /**
@@ -139,7 +139,7 @@ final class YoutookTest extends WebTestCase
 
         self::assertSame($status, $client->getResponse()->getStatusCode());
         if (200 === $status) {
-            self::assertStringContainsString('Fabriquer un maillet en frêne', $crawler->text());
+            self::assertStringContainsString('Fabriquer un maillet en frêne', $crawler->text(null, false));
         }
     }
 

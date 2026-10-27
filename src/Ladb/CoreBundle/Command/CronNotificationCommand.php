@@ -24,7 +24,7 @@ EOT
 			);
 	}
 
-	protected function execute(InputInterface $input, OutputInterface $output) {
+	protected function execute(InputInterface $input, OutputInterface $output): int {
 
 		$forced = $input->getOption('force');
 		$verbose = $input->getOption('verbose');
@@ -46,7 +46,7 @@ EOT
 			if ($verbose) {
 				$output->writeln('<error>Error in ladb:cron:notification:populate command</error>');
 			}
-			return;
+			return 0;
 		}
 
 		// Email command
@@ -67,6 +67,8 @@ EOT
 				$output->writeln('<error>Error in ladb:cron:notification:email command</error>');
 			}
 		}
+
+		return 0;
 
 	}
 

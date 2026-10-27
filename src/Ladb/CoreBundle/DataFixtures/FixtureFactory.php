@@ -244,7 +244,7 @@ final class FixtureFactory {
 		$this->om->persist($publication);
 		$this->om->flush();
 
-		$this->dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($publication));
+		$this->dispatcher->dispatch(new PublicationEvent($publication), PublicationListener::PUBLICATION_CREATED);
 
 		// The next action (publish...) gets the publication as loaded from the database by
 		// another request: its inverse collections (creations of a plan...) are only set then
@@ -252,7 +252,7 @@ final class FixtureFactory {
 	}
 
 	public function dispatch(string $eventName, PublicationInterface $publication): void {
-		$this->dispatcher->dispatch($eventName, new PublicationEvent($publication));
+		$this->dispatcher->dispatch(new PublicationEvent($publication), $eventName);
 	}
 
 	// Knowledge /////
@@ -262,7 +262,7 @@ final class FixtureFactory {
 	 * controllers do. The value must already be added to the knowledge (addNameValue()...).
 	 */
 	public function proposeValue(AbstractKnowledge $knowledge, string $field, BaseValue $value, User $user): void {
-		$this->dispatcher->dispatch(KnowledgeListener::FIELD_VALUE_ADDED, new KnowledgeEvent($knowledge, array( 'field' => $field, 'value' => $value )));
+		$this->dispatcher->dispatch(new KnowledgeEvent($knowledge, array( 'field' => $field, 'value' => $value )), KnowledgeListener::FIELD_VALUE_ADDED);
 
 		$value->setParentEntity($knowledge);
 		$value->setParentEntityField($field);
@@ -338,7 +338,7 @@ final class FixtureFactory {
 			$user->getMeta()->incrementNegativeVoteCount();
 		}
 
-		$this->dispatcher->dispatch(VotableListener::VOTE_UPDATED, new VotableEvent($entity, $parentEntity));
+		$this->dispatcher->dispatch(new VotableEvent($entity, $parentEntity), VotableListener::VOTE_UPDATED);
 
 		$this->activityUtils->createVoteActivity($vote, false);
 

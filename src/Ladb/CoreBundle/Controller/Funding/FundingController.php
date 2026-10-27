@@ -3,7 +3,6 @@
 namespace Ladb\CoreBundle\Controller\Funding;
 
 use Stripe\Exception\ApiErrorException;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Annotation\Route;

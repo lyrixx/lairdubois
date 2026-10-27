@@ -84,7 +84,7 @@ final class ThreadTest extends WebTestCase
         $crawler = $client->request('GET', $this->getShowPath());
 
         self::assertSame(200, $client->getResponse()->getStatusCode());
-        self::assertStringContainsString('Ta table basse', $crawler->filter('h2.ladb-subject')->text());
+        self::assertStringContainsString('Ta table basse', $crawler->filter('h2.ladb-subject')->text(null, false));
         self::assertSame($unreadMessageCount - 1, static::findUser(UserFixtures::USER)->getMeta()->getUnreadMessageCount());
     }
 

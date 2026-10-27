@@ -7,7 +7,6 @@ use Ladb\CoreBundle\Controller\CustomOwnerControllerTrait;
 use Ladb\CoreBundle\Controller\PublicationControllerTrait;
 use Ladb\CoreBundle\Utils\CollectionnableUtils;
 use Ladb\CoreBundle\Utils\FeedbackableUtils;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
@@ -39,7 +38,7 @@ use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Utils\LocalisableUtils;
 use Liip\ImagineBundle\Controller\ImagineController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @Route("/ateliers")
@@ -95,7 +94,7 @@ class WorkshopController extends AbstractController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($workshop));
+			$dispatcher->dispatch(new PublicationEvent($workshop), PublicationListener::PUBLICATION_CREATED);
 
 			return $this->redirect($this->generateUrl('core_workshop_show', array('id' => $workshop->getSluggedId())));
 		}
@@ -230,7 +229,7 @@ class WorkshopController extends AbstractController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_UPDATED, new PublicationEvent($workshop, array( 'previouslyUsedTags' => $previouslyUsedTags )));
+			$dispatcher->dispatch(new PublicationEvent($workshop, array( 'previouslyUsedTags' => $previouslyUsedTags )), PublicationListener::PUBLICATION_UPDATED);
 
 			// Flashbag
 			$this->addFlash('success', $translator->trans('wonder.workshop.form.alert.update_success', array( '%title%' => $workshop->getTitle() )));
@@ -789,7 +788,7 @@ class WorkshopController extends AbstractController {
 		}
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATIONS_LISTED, new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()));
+		$dispatcher->dispatch(new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()), PublicationListener::PUBLICATIONS_LISTED);
 
 		if ($request->isXmlHttpRequest()) {
 			return $this->render('LadbCoreBundle:Wonder/Workshop:list-xhr.html.twig', $parameters);
@@ -830,7 +829,7 @@ class WorkshopController extends AbstractController {
 		$referral = $embaddableUtils->processReferer($workshop, $request);
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($workshop));
+		$dispatcher->dispatch(new PublicationEvent($workshop), PublicationListener::PUBLICATION_SHOWN);
 
 		$userWorkshops = $explorableUtils->getPreviousAndNextPublishedUserExplorables($workshop, $workshopRepository, $workshop->getUser()->getMeta()->getPublicWorkshopCount());
 		$similarWorkshops = $explorableUtils->getSimilarExplorables($workshop, 'fos_elastica.index.ladb.wonder_workshop', Workshop::CLASS_NAME, $userWorkshops);

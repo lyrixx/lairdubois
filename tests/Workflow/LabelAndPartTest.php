@@ -76,7 +76,7 @@ final class LabelAndPartTest extends WebTestCase
         $crawler = static::xhr($client, 'GET', static::generatePath(\sprintf('core_workflow_%s_list', $kind), ['id' => self::WORKFLOW_ID]));
 
         self::assertSame(200, $client->getResponse()->getStatusCode());
-        self::assertStringContainsString('label' === $kind ? 'Débit' : 'Plateau', $crawler->text());
+        self::assertStringContainsString('label' === $kind ? 'Débit' : 'Plateau', $crawler->text(null, false));
     }
 
     /**

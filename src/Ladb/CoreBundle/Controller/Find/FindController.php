@@ -6,7 +6,6 @@ use Ladb\CoreBundle\Controller\AbstractController;
 use Ladb\CoreBundle\Controller\PublicationControllerTrait;
 use Ladb\CoreBundle\Entity\Core\Member;
 use Ladb\CoreBundle\Utils\LocalisableUtils;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
@@ -34,7 +33,7 @@ use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Utils\BlockBodiedUtils;
 use Ladb\CoreBundle\Utils\FindUtils;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @Route("/trouvailles")
@@ -91,7 +90,7 @@ class FindController extends AbstractController {
 			$om->flush();
 
 			// Dispatch publication event
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_CREATED, new PublicationEvent($find));
+			$dispatcher->dispatch(new PublicationEvent($find), PublicationListener::PUBLICATION_CREATED);
 
 			return $this->redirect($this->generateUrl('core_find_show', array('id' => $find->getSluggedId())));
 		}
@@ -229,9 +228,9 @@ class FindController extends AbstractController {
 
 			// Dispatch publication event
 			if ($doUp) {
-				$dispatcher->dispatch(PublicationListener::PUBLICATION_CHANGED, new PublicationEvent($find));
+				$dispatcher->dispatch(new PublicationEvent($find), PublicationListener::PUBLICATION_CHANGED);
 			}
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_UPDATED, new PublicationEvent($find, array( 'previouslyUsedTags' => $previouslyUsedTags )));
+			$dispatcher->dispatch(new PublicationEvent($find, array( 'previouslyUsedTags' => $previouslyUsedTags )), PublicationListener::PUBLICATION_UPDATED);
 
 			// Flashbag
 			$this->addFlash('success', $translator->trans('find.find.form.alert.update_success', array( '%title%' => $find->getTitle() )));
@@ -552,7 +551,7 @@ class FindController extends AbstractController {
 		}
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATIONS_LISTED, new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()));
+		$dispatcher->dispatch(new PublicationsEvent($searchParameters['entities'], !$request->isXmlHttpRequest()), PublicationListener::PUBLICATIONS_LISTED);
 
 		if ($request->isXmlHttpRequest()) {
 			return $this->render('LadbCoreBundle:Find/Find:list-xhr.html.twig', $parameters);
@@ -591,7 +590,7 @@ class FindController extends AbstractController {
 		$this->assertShowable($find);
 
 		// Dispatch publication event
-		$dispatcher->dispatch(PublicationListener::PUBLICATION_SHOWN, new PublicationEvent($find));
+		$dispatcher->dispatch(new PublicationEvent($find), PublicationListener::PUBLICATION_SHOWN);
 
 		$userFinds = $explorableUtils->getPreviousAndNextPublishedUserExplorables($find, $findRepository, $find->getUser()->getMeta()->getPublicFindCount());
 		$similarFinds = $explorableUtils->getSimilarExplorables($find, 'fos_elastica.index.ladb.find_find', Find::CLASS_NAME, $userFinds);

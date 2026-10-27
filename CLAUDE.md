@@ -183,7 +183,7 @@ castor qa:phpunit [-- --filter …]
 castor qa:deprecations       # var/deprecations/report.md, et le résumé du job en CI
 castor qa:install            # outils de tools/ (PHPStan, PHPUnit), installés à la volée sinon
 castor qa:e2e [-- --grep …]  # tests E2E (Playwright) : recharge la base du dev, hors qa:all, job E2E en CI
-castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() des actions → arguments (#16), des utils, managers, listeners et validateurs → constructeur (#118)
+castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() des actions → arguments (#16), des utils, managers, listeners et validateurs → constructeur (#118), dépréciations de 4.x (#133)
 ```
 
 - PHPUnit 9.6, dans `tools/phpunit` et pas dans le `composer.json` de l'application : c'est la
@@ -227,6 +227,12 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() des ac
   une hiérarchie, une passe par niveau, les parentes d'abord. Le cache de Rector
   (`tools/rector/var/`) ignore les modifications d'une règle et des classes parentes : le vider
   avant chaque passe.
+- Les règles de rector-symfony (les sets de 4.x ne sont plus dans Rector 2 : une règle à la fois
+  dans `rector.php`) ne s'appliquent qu'à partir d'une version d'un paquet de Symfony
+  (`symfony/console`…), lue dans `vendor/composer/installed.json`, où `symfony/symfony` les
+  remplace : `rector.php` donne à Rector la version de `symfony/symfony` pour chacun, sinon il
+  les ignore sans rien dire. Elles typent par PHPStan : `MakeDispatchFirstArgumentEventRector` ne
+  reconnaît pas le dispatcher d'une propriété sans type (`$this->dispatcher` des managers).
 
 ## Fixtures
 

@@ -141,7 +141,7 @@ final class FundingTest extends WebTestCase
         $client = static::createClientAs($username);
         $crawler = static::xhr($client, 'GET', $this->generateForCurrent('core_funding_infos', ['panel' => 'charge-balance']));
 
-        self::assertStringContainsString('Hébergement', $crawler->filter('.ladb-charge-table')->text());
+        self::assertStringContainsString('Hébergement', $crawler->filter('.ladb-charge-table')->text(null, false));
         self::assertCount($editLinkCount, $crawler->filter('.ladb-charge-row[data-href]'));
     }
 
@@ -409,7 +409,7 @@ final class FundingTest extends WebTestCase
 
         self::assertSame($status, $client->getResponse()->getStatusCode());
         if (200 === $status) {
-            self::assertSame([$this->findDonation()->getHashid()], $crawler->filter('.ladb-ref span')->each(fn ($node) => $node->text()));
+            self::assertSame([$this->findDonation()->getHashid()], $crawler->filter('.ladb-ref span')->each(fn ($node) => $node->text(null, false)));
         }
     }
 

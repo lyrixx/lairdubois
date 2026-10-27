@@ -12,7 +12,7 @@ use Ladb\CoreBundle\Entity\Qa\Question;
 use Ladb\CoreBundle\Entity\Wonder\Creation;
 use Ladb\CoreBundle\Utils\CryptoUtils;
 use Symfony\Bundle\FrameworkBundle\Client;
-use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
+use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\Route;
 use Tests\WebTestCase;
@@ -176,8 +176,8 @@ final class RouteSmokeTest extends WebTestCase
     private function request(Client $client, string $url, array $server = []): ?string
     {
         $this->exception = null;
-        $client->getContainer()->get('event_dispatcher')->addListener(KernelEvents::EXCEPTION, function (GetResponseForExceptionEvent $event): void {
-            $this->exception ??= $event->getException();
+        $client->getContainer()->get('event_dispatcher')->addListener(KernelEvents::EXCEPTION, function (ExceptionEvent $event): void {
+            $this->exception ??= $event->getThrowable();
         }, 2048);
 
         // A \Throwable thrown while a response streams its content leaves the output buffer of

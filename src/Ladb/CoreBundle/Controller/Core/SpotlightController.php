@@ -5,7 +5,6 @@ namespace Ladb\CoreBundle\Controller\Core;
 use Ladb\CoreBundle\Controller\AbstractController;
 use Ladb\CoreBundle\Entity\Core\Tip;
 use Ladb\CoreBundle\Utils\MaybeUtils;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -44,7 +43,7 @@ use Ladb\CoreBundle\Entity\Wonder\Plan;
 use Ladb\CoreBundle\Entity\Wonder\Creation;
 use Ladb\CoreBundle\Entity\Core\View;
 use Ladb\CoreBundle\Entity\Find\Find;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @Route("/spotlights")

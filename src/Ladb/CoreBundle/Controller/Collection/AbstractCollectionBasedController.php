@@ -3,7 +3,6 @@
 namespace Ladb\CoreBundle\Controller\Collection;
 
 use Ladb\CoreBundle\Controller\AbstractController;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Ladb\CoreBundle\Entity\Collection\Collection;
 use Ladb\CoreBundle\Model\CollectionnableInterface;
 use Ladb\CoreBundle\Utils\TypableUtils;

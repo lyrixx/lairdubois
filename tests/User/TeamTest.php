@@ -136,8 +136,8 @@ final class TeamTest extends WebTestCase
         // admin is already invited, user2 is already a member: the page shows the first error only
         self::assertNull($this->findInvitation(UserFixtures::USER2));
         $crawler = $client->followRedirect();
-        self::assertStringContainsString('admin est déjà invité.', $crawler->filter('.alert-error')->text());
-        self::assertStringContainsString('1 invitation envoyée', $crawler->filter('.alert-success')->text());
+        self::assertStringContainsString('admin est déjà invité.', $crawler->filter('.alert-error')->text(null, false));
+        self::assertStringContainsString('1 invitation envoyée', $crawler->filter('.alert-success')->text(null, false));
     }
 
     public function testInviteAsNotMember(): void

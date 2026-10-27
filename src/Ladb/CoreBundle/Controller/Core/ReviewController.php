@@ -4,7 +4,6 @@ namespace Ladb\CoreBundle\Controller\Core;
 
 use Ladb\CoreBundle\Controller\AbstractController;
 use Ladb\CoreBundle\Utils\CommentableUtils;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
@@ -21,7 +20,7 @@ use Ladb\CoreBundle\Entity\Core\Review;
 use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Utils\ReviewableUtils;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @Route("/reviews")
@@ -126,7 +125,7 @@ class ReviewController extends AbstractController {
 			$activityUtils->createReviewActivity($review, false);
 
 			// Dispatch publication event (on entity)
-			$dispatcher->dispatch(PublicationListener::PUBLICATION_CHANGED, new PublicationEvent($entity));
+			$dispatcher->dispatch(new PublicationEvent($entity), PublicationListener::PUBLICATION_CHANGED);
 
 			// Auto watch
 			$watchableUtils->autoCreateWatch($entity, $this->getUser());

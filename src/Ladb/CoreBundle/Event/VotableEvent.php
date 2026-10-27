@@ -2,7 +2,7 @@
 
 namespace Ladb\CoreBundle\Event;
 
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 use Ladb\CoreBundle\Model\VotableInterface;
 use Ladb\CoreBundle\Model\VotableParentInterface;
 

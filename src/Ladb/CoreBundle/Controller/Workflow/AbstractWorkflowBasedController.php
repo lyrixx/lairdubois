@@ -4,7 +4,6 @@ namespace Ladb\CoreBundle\Controller\Workflow;
 
 use Gos\Bundle\WebSocketBundle\Pusher\PusherInterface;
 use Ladb\CoreBundle\Controller\AbstractController;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Ladb\CoreBundle\Entity\Workflow\Workflow;
 
 abstract class AbstractWorkflowBasedController extends AbstractController {
