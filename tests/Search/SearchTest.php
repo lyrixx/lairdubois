@@ -229,7 +229,7 @@ final class SearchTest extends WebTestCase
      */
     private function isListed(Client $client, string $route, string $query, object $entity): bool
     {
-        $showPath = $client->getContainer()->get(TypableUtils::NAME)->getUrlAction($entity, 'show', false);
+        $showPath = static::$container->get(TypableUtils::NAME)->getUrlAction($entity, 'show', false);
         $crawler = $client->request('GET', static::generatePath($route, ['q' => $query]));
         self::assertSame(200, $client->getResponse()->getStatusCode(), \sprintf('Search of "%s" in %s.', $query, $route));
 

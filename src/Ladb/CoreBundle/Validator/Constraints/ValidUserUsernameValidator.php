@@ -2,9 +2,9 @@
 
 namespace Ladb\CoreBundle\Validator\Constraints;
 
+use Doctrine\Persistence\ManagerRegistry;
 use Ladb\CoreBundle\Entity\Core\UserWitness;
 use Ladb\CoreBundle\Fos\UserManager;
-use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Ladb\CoreBundle\Entity\Core\User;
@@ -94,10 +94,12 @@ class ValidUserUsernameValidator extends ConstraintValidator {
 
 	);
 
-	protected $container;
+	private $doctrine;
+	private $userManager;
 
-	public function __construct(Container $container) {
-		$this->container = $container;
+	public function __construct(ManagerRegistry $doctrine, UserManager $userManager) {
+		$this->doctrine = $doctrine;
+		$this->userManager = $userManager;
 	}
 
 	/**
@@ -133,19 +135,18 @@ class ValidUserUsernameValidator extends ConstraintValidator {
 					->addViolation();
 			}
 
-			$userRepository = $this->container->get('doctrine')->getRepository(User::class);
+			$userRepository = $this->doctrine->getRepository(User::class);
 			$currentUser = $value->getId() ? $userRepository->findOneById($value->getId()) : null;
 
-			$userManager = $this->container->get(UserManager::NAME);
-			$user = $userManager->findUserByUsername($value->getUsername());
+			$user = $this->userManager->findUserByUsername($value->getUsername());
 			if (is_null($user)) {
-				$user = $userManager->findUserByDisplayname($value->getUsername());
+				$user = $this->userManager->findUserByDisplayname($value->getUsername());
 			}
 
 			$exists = !is_null($user) && is_null($currentUser) || !is_null($user) && !is_null($currentUser) && $user !== $currentUser;
 			if (is_null($user)) {
 
-				$userWitnessRepository = $this->container->get('doctrine')->getRepository(UserWitness::class);
+				$userWitnessRepository = $this->doctrine->getRepository(UserWitness::class);
 				$userWitness = $userWitnessRepository->findOneByUsername($value->getUsernameCanonical());
 				if (is_null($userWitness)) {
 

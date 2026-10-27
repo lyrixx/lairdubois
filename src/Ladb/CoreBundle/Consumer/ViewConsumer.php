@@ -1,8 +1,8 @@
 <?php
 namespace Ladb\CoreBundle\Consumer;
 
+use Doctrine\Persistence\ManagerRegistry;
 use Ladb\CoreBundle\Model\IndexableInterface;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use OldSound\RabbitMqBundle\RabbitMq\ConsumerInterface;
 use PhpAmqpLib\Message\AMQPMessage;
 use Psr\Log\LoggerInterface;
@@ -21,16 +21,16 @@ class ViewConsumer implements ConsumerInterface {
 	private $typableUtils;
 	private $searchUtils;
 
-	public function __construct(ContainerInterface $container, LoggerInterface $logger) {
+	public function __construct(ManagerRegistry $doctrine, LoggerInterface $logger, SearchUtils $searchUtils, TypableUtils $typableUtils) {
 
 		$this->logger = $logger;
 
-		$this->om = $container->get('doctrine')->getManager();
+		$this->om = $doctrine->getManager();
 		$this->userRepository = $this->om->getRepository(User::CLASS_NAME);
 		$this->viewRepository = $this->om->getRepository(View::CLASS_NAME);
 
-		$this->typableUtils = $container->get(TypableUtils::NAME);
-		$this->searchUtils = $container->get(SearchUtils::NAME);
+		$this->typableUtils = $typableUtils;
+		$this->searchUtils = $searchUtils;
 
 	}
 

@@ -114,7 +114,7 @@ final class RouteSmokeTest extends WebTestCase
     public function testRouteDoesNotFail(string $name, string $role): void
     {
         $client = $this->createClientFor($role);
-        $url = $client->getContainer()->get('router')->generate($name, $this->getParameters($client, $name));
+        $url = $client->getContainer()->get('router')->generate($name, $this->getParameters($name));
 
         $failure = $this->request($client, $url);
         // The actions which only answer XHR (cards, counters...) are requested again as such
@@ -204,13 +204,13 @@ final class RouteSmokeTest extends WebTestCase
     /**
      * @return array<string, string|int>
      */
-    private function getParameters(Client $client, string $name): array
+    private function getParameters(string $name): array
     {
         // The collection of the router of a new kernel would load the annotations of all the controllers again
         $route = self::getRoutes()[$name];
         $variables = $route->compile()->getVariables();
         // Any variable, optional ones included: the others would end up in the query string
-        $parameters = array_intersect_key($this->getRouteParameters($client, $name), array_flip($variables));
+        $parameters = array_intersect_key($this->getRouteParameters($name), array_flip($variables));
 
         foreach (array_diff($variables, array_keys($route->getDefaults()), array_keys($parameters)) as $variable) {
             if (!isset(self::PARAMETERS[$variable])) {
@@ -227,7 +227,7 @@ final class RouteSmokeTest extends WebTestCase
      *
      * @return array<string, string|int>
      */
-    private function getRouteParameters(Client $client, string $name): array
+    private function getRouteParameters(string $name): array
     {
         $em = static::getEntityManager();
 
@@ -276,7 +276,7 @@ final class RouteSmokeTest extends WebTestCase
             case 'core_user_email_unsubscribe':
                 $user = $em->getRepository(User::class)->findOneBy(['usernameCanonical' => UserFixtures::USER]);
 
-                return ['encryptedEmail' => $client->getContainer()->get(CryptoUtils::NAME)->encryptString($user->getEmailCanonical())];
+                return ['encryptedEmail' => static::$container->get(CryptoUtils::NAME)->encryptString($user->getEmailCanonical())];
         }
 
         return [];

@@ -1,7 +1,7 @@
 services:
 
-  # Private unless the code still reads it from the container ($this->get(Xxx::NAME), has()...).
-  # The ids stay "ladb_core.*" until then: an alias by class lets autowiring find each service by its type.
+  # Private: nothing reads them from the container (#118). The ids stay "ladb_core.*": an alias by class lets
+  # autowiring find each service by its type.
   _defaults:
     autowire: true
     autoconfigure: true
@@ -10,7 +10,17 @@ services:
   # Twig extensions
   ladb.twig.ladb_extension:
     class: Ladb\CoreBundle\Twig\LadbExtension
-    arguments: ['@service_container']
+    arguments: { $serviceLocator: '@ladb.twig.ladb_extension.service_locator' }
+  # LadbExtension: the services that it reads when a filter or a function needs them, by their id. Twig creates it
+  # at each request: TypableUtils and UserManager would create the entity manager, VideoHostingUtils needs Twig
+  ladb.twig.ladb_extension.service_locator:
+    class: Symfony\Component\DependencyInjection\ServiceLocator
+    tags: ['container.service_locator']
+    arguments:
+      -
+        ladb_core.fos.user_manager: '@ladb_core.fos.user_manager'
+        ladb_core.typable_utils: '@ladb_core.typable_utils'
+        ladb_core.video_hosting_utils: '@ladb_core.video_hosting_utils'
 
   # Imagine Post processors
   ladb_imagine.filter.post_processor.imageoptimizer:
@@ -18,10 +28,9 @@ services:
     tags:
       - { name: liip_imagine.filter.post_processor, post_processor: ladb_imageoptimizer }
 
-  # Fos (public until #16)
+  # Fos
   ladb_core.fos.displayname_canonicalizer:
     class: Ladb\CoreBundle\Fos\DisplaynameCanonicalizer
-    public: true
   Ladb\CoreBundle\Fos\DisplaynameCanonicalizer: '@ladb_core.fos.displayname_canonicalizer'
   ladb_core.fos.canonical_fields_updater:
     class: Ladb\CoreBundle\Fos\CanonicalFieldsUpdater
@@ -29,17 +38,15 @@ services:
   Ladb\CoreBundle\Fos\CanonicalFieldsUpdater: '@ladb_core.fos.canonical_fields_updater'
   ladb_core.fos.user_manager:
     class: Ladb\CoreBundle\Fos\UserManager
-    public: true
     arguments: ['@fos_user.util.password_updater', '@ladb_core.fos.canonical_fields_updater', '@doctrine.orm.entity_manager', '%fos_user.model.user.class%']
   Ladb\CoreBundle\Fos\UserManager: '@ladb_core.fos.user_manager'
   # FOSUserBundle has no alias by type for it, nor an interface (UserController::adminActivateAction()):
   # an alias of the id, by its class
   FOS\UserBundle\Util\UserManipulator: '@fos_user.util.user_manipulator'
 
-  # Utils (public until #118: read by get() in Event/, LadbExtension, ViewConsumer and tests/)
+  # Utils
   ladb_core.global_utils:
     class: Ladb\CoreBundle\Utils\GlobalUtils
-    public: true
     arguments: { $debug: '%kernel.debug%', $environment: '%kernel.environment%' }
   Ladb\CoreBundle\Utils\GlobalUtils: '@ladb_core.global_utils'
   ladb_core.maybe_utils:
@@ -47,7 +54,6 @@ services:
   Ladb\CoreBundle\Utils\MaybeUtils: '@ladb_core.maybe_utils'
   ladb_core.crypto_utils:
     class: Ladb\CoreBundle\Utils\CryptoUtils
-    public: true
     arguments: { $secret: '%secret%' }
   Ladb\CoreBundle\Utils\CryptoUtils: '@ladb_core.crypto_utils'
   ladb_core.paginator_utils:
@@ -55,12 +61,10 @@ services:
   Ladb\CoreBundle\Utils\PaginatorUtils: '@ladb_core.paginator_utils'
   ladb_core.video_hosting_utils:
     class: Ladb\CoreBundle\Utils\VideoHostingUtils
-    public: true
     arguments: { $googleApiKey: '%google_api_key%' }
   Ladb\CoreBundle\Utils\VideoHostingUtils: '@ladb_core.video_hosting_utils'
   ladb_core.viewable_utils:
     class: Ladb\CoreBundle\Utils\ViewableUtils
-    public: true
     arguments: { $producerLocator: '@ladb_core.rabbit_mq_producer_locator' }
   Ladb\CoreBundle\Utils\ViewableUtils: '@ladb_core.viewable_utils'
   # ViewableUtils and WebpushNotificationUtils: their producer, by its name in config.yml, read when they
@@ -74,11 +78,9 @@ services:
         webpush_notification: '@old_sound_rabbit_mq.webpush_notification_producer'
   ladb_core.likable_utils:
     class: Ladb\CoreBundle\Utils\LikableUtils
-    public: true
   Ladb\CoreBundle\Utils\LikableUtils: '@ladb_core.likable_utils'
   ladb_core.watchable_utils:
     class: Ladb\CoreBundle\Utils\WatchableUtils
-    public: true
   Ladb\CoreBundle\Utils\WatchableUtils: '@ladb_core.watchable_utils'
   ladb_core.votable_utils:
     class: Ladb\CoreBundle\Utils\VotableUtils
@@ -88,7 +90,6 @@ services:
   Ladb\CoreBundle\Utils\JoinableUtils: '@ladb_core.joinable_utils'
   ladb_core.commentable_utils:
     class: Ladb\CoreBundle\Utils\CommentableUtils
-    public: true
   Ladb\CoreBundle\Utils\CommentableUtils: '@ladb_core.commentable_utils'
   ladb_core.collectionnable_utils:
     class: Ladb\CoreBundle\Utils\CollectionnableUtils
@@ -98,7 +99,6 @@ services:
   Ladb\CoreBundle\Utils\ReviewableUtils: '@ladb_core.reviewable_utils'
   ladb_core.feedbackable_utils:
     class: Ladb\CoreBundle\Utils\FeedbackableUtils
-    public: true
   Ladb\CoreBundle\Utils\FeedbackableUtils: '@ladb_core.feedbackable_utils'
   ladb_core.reportable_utils:
     class: Ladb\CoreBundle\Utils\ReportableUtils
@@ -113,7 +113,6 @@ services:
     arguments: [{ timeout: 10 }]
   ladb_core.typable_utils:
     class: Ladb\CoreBundle\Utils\TypableUtils
-    public: true
     arguments: { $managerLocator: '@ladb_core.typable_utils.manager_locator' }
   Ladb\CoreBundle\Utils\TypableUtils: '@ladb_core.typable_utils'
   # TypableUtils::getManagerByType(): the manager of each type, by TypableUtils::getStrippedNameByType()
@@ -151,11 +150,9 @@ services:
   Ladb\CoreBundle\Utils\FollowerUtils: '@ladb_core.follower_utils'
   ladb_core.mailer_utils:
     class: Ladb\CoreBundle\Utils\MailerUtils
-    public: true
   Ladb\CoreBundle\Utils\MailerUtils: '@ladb_core.mailer_utils'
   ladb_core.message_utils:
     class: Ladb\CoreBundle\Utils\MessageUtils
-    public: true
     arguments: ['@doctrine.orm.entity_manager', '@ladb_core.field_preprocessor_utils']
   Ladb\CoreBundle\Utils\MessageUtils: '@ladb_core.message_utils'
   ladb_core.plan_utils:
@@ -170,7 +167,6 @@ services:
   Ladb\CoreBundle\Utils\FindUtils: '@ladb_core.find_utils'
   ladb_core.search_utils:
     class: Ladb\CoreBundle\Utils\SearchUtils
-    public: true
     arguments: { $index: '@fos_elastica.index.ladb', $persisterRegistry: '@fos_elastica.persister_registry' }
   Ladb\CoreBundle\Utils\SearchUtils: '@ladb_core.search_utils'
   ladb_core.explorable_utils:
@@ -182,7 +178,6 @@ services:
   Ladb\CoreBundle\Utils\PicturedUtils: '@ladb_core.pictured_utils'
   ladb_core.tag_utils:
     class: Ladb\CoreBundle\Utils\TagUtils
-    public: true
     arguments: ['@doctrine.orm.entity_manager']
   Ladb\CoreBundle\Utils\TagUtils: '@ladb_core.tag_utils'
   ladb_core.field_preprocessor_utils:
@@ -204,26 +199,21 @@ services:
   Ladb\CoreBundle\Utils\WebScreenshotUtils: '@ladb_core.web_screenshot_utils'
   ladb_core.open_graph_utils:
     class: Ladb\CoreBundle\Utils\OpenGraphUtils
-    public: true
     arguments: { $facebookAccessToken: '%facebook_access_token%', $facebookAppId: '%facebook_app_id%', $facebookAppSecret: '%facebook_app_secret%' }
   Ladb\CoreBundle\Utils\OpenGraphUtils: '@ladb_core.open_graph_utils'
   ladb_core.user_utils:
     class: Ladb\CoreBundle\Utils\UserUtils
-    public: true
     arguments: { $memcachedHost: '%memcached_host%', $memcachedPort: '%memcached_port%' }
   Ladb\CoreBundle\Utils\UserUtils: '@ladb_core.user_utils'
   ladb_core.activity_utils:
     class: Ladb\CoreBundle\Utils\ActivityUtils
-    public: true
     arguments: ['@doctrine.orm.entity_manager']
   Ladb\CoreBundle\Utils\ActivityUtils: '@ladb_core.activity_utils'
   ladb_core.texture_utils:
     class: Ladb\CoreBundle\Utils\TextureUtils
-    public: true
   Ladb\CoreBundle\Utils\TextureUtils: '@ladb_core.texture_utils'
   ladb_core.knowledge_utils:
     class: Ladb\CoreBundle\Utils\KnowledgeUtils
-    public: true
   Ladb\CoreBundle\Utils\KnowledgeUtils: '@ladb_core.knowledge_utils'
   ladb_core.property_utils:
     class: Ladb\CoreBundle\Utils\PropertyUtils
@@ -244,17 +234,15 @@ services:
   Ladb\CoreBundle\Utils\LinkUtils: '@ladb_core.link_utils'
   ladb_core.mention_utils:
     class: Ladb\CoreBundle\Utils\MentionUtils
-    public: true
   Ladb\CoreBundle\Utils\MentionUtils: '@ladb_core.mention_utils'
   ladb_core.url_utils:
     class: Ladb\CoreBundle\Utils\UrlUtils
-    public: true
   Ladb\CoreBundle\Utils\UrlUtils: '@ladb_core.url_utils'
   ladb_core.member_utils:
     class: Ladb\CoreBundle\Utils\MemberUtils
   Ladb\CoreBundle\Utils\MemberUtils: '@ladb_core.member_utils'
 
-  # Managers (public until #118)
+  # Managers
   ladb_core.core_picture_manager:
     class: Ladb\CoreBundle\Manager\Core\PictureManager
   Ladb\CoreBundle\Manager\Core\PictureManager: '@ladb_core.core_picture_manager'
@@ -335,7 +323,6 @@ services:
   Ladb\CoreBundle\Manager\Funding\FundingManager: '@ladb_core.funding_funding_manager'
   ladb_core.qa_question_manager:
     class: Ladb\CoreBundle\Manager\Qa\QuestionManager
-    public: true
   Ladb\CoreBundle\Manager\Qa\QuestionManager: '@ladb_core.qa_question_manager'
   ladb_core.qa_answer_manager:
     class: Ladb\CoreBundle\Manager\Qa\AnswerManager
@@ -357,13 +344,11 @@ services:
     autoconfigure: false
     tags:
       - { name: validator.constraint_validator, alias: ladb_core.valid_user_username_validator }
-    arguments: ['@service_container']
   ladb_core.valid_user_displayname_validator:
     class: Ladb\CoreBundle\Validator\Constraints\ValidUserDisplaynameValidator
     autoconfigure: false
     tags:
       - { name: validator.constraint_validator, alias: ladb_core.valid_user_displayname_validator }
-    arguments: ['@service_container']
   ladb_core.valid_user_email_validator:
     class: Ladb\CoreBundle\Validator\Constraints\ValidUserEmailValidator
     autoconfigure: false
@@ -527,16 +512,13 @@ services:
   # Listeners
   ladb_core.user_listener:
     class: Ladb\CoreBundle\Event\UserListener
-    arguments: ['@service_container']
+    arguments: { $adminUsername: '%admin_username%' }
   ladb_core.publication_listener:
     class: Ladb\CoreBundle\Event\PublicationListener
-    arguments: ['@service_container']
   ladb_core.knowledge_listener:
     class: Ladb\CoreBundle\Event\KnowledgeListener
-    arguments: ['@service_container']
   ladb_core.votable_parent_listener:
     class: Ladb\CoreBundle\Event\VotableListener
-    arguments: ['@service_container']
   ladb_core.return_to_url_listener:
     class: Ladb\CoreBundle\Event\ReturnToUrlListener
 
@@ -660,7 +642,6 @@ services:
     class: Ladb\CoreBundle\Topic\WorkflowTopic
     tags:
       - { name: gos_web_socket.topic }
-    arguments: ['@service_container']
 
   # Gos WebSocket in PHP 8 (to remove with it, #21)
   gos_web_socket.wamp.pusher:  # Redefined: LadbCoreBundle is registered after GosWebSocketBundle, its definition wins
@@ -689,8 +670,7 @@ services:
     autoconfigure: false
 
   # Consumer
-  Ladb\CoreBundle\Consumer\ViewConsumer:
-    arguments: ['@service_container']
+  Ladb\CoreBundle\Consumer\ViewConsumer: ~
   Ladb\CoreBundle\Consumer\WebpushNotificationConsumer: ~
 
   # Controllers: tagged controller.service_arguments by autoconfigure, which makes them public (the
