@@ -9,6 +9,11 @@ x-templates:
         DATABASE_USER: root
         ELASTICSEARCH_HOST: elasticsearch
         MEMCACHED_HOST: memcached
+        # The same key signs the JWT of the site (publisher) and of the subscribers, for the hub
+        # (service "mercure")
+        MERCURE_JWT_SECRET: &mercure_jwt_secret "lairdubois-dev-mercure-jwt-secret-not-secret"
+        MERCURE_PUBLIC_URL: "https://${PROJECT_ROOT_DOMAIN}${PROJECT_HTTPS_PORT:+:${PROJECT_HTTPS_PORT}}/.well-known/mercure"
+        MERCURE_URL: http://mercure/.well-known/mercure
         RABBITMQ_HOST: rabbitmq
         RABBITMQ_PASSWORD: app
         RABBITMQ_USER: app
@@ -97,6 +102,31 @@ services:
         image: memcached:1.6-alpine
         profiles:
             - default
+
+    # The hub of Mercure, in HTTP behind the router: same domain and port as the site. No
+    # anonymous subscriber, as in production: the site sets the JWT in a cookie
+    mercure:
+        image: dunglas/mercure:v0.24.2
+        environment:
+            SERVER_NAME: ":80"
+            MERCURE_PUBLISHER_JWT_KEY: *mercure_jwt_secret
+            MERCURE_SUBSCRIBER_JWT_KEY: *mercure_jwt_secret
+        healthcheck:
+            test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/healthz"]
+            interval: 5s
+            timeout: 5s
+            retries: 10
+        profiles:
+            - default
+        # Its rule is longer than the one of the frontend: Traefik gives it the priority on
+        # /.well-known/mercure
+        labels:
+            - "traefik.enable=true"
+            - "project-name=${PROJECT_NAME}"
+            - "traefik.http.routers.${PROJECT_NAME}-mercure.rule=Host(${PROJECT_DOMAINS}) && PathPrefix(`/.well-known/mercure`)"
+            - "traefik.http.routers.${PROJECT_NAME}-mercure.tls=true"
+            # The image exposes several ports (Caddy)
+            - "traefik.http.services.${PROJECT_NAME}-mercure.loadbalancer.server.port=80"
 
     frontend:
         build:

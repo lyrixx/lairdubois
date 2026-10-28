@@ -63,6 +63,12 @@ services:
         class: Tests\Double\InMemoryPusher
         decorates: gos_web_socket.wamp.pusher
         public: true
+    # Nor does the Mercure hub: the updates are kept (getUpdates())
+    tests.mercure_hub:
+        class: Tests\Double\InMemoryHub
+        decorates: mercure.hub.default
+        arguments: ['@tests.mercure_hub.inner']
+        public: true
     # The messages sent to RabbitMQ: getSent()
     tests.view_transport:
         alias: messenger.transport.view

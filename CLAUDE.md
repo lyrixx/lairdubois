@@ -139,6 +139,11 @@ Contextes : `--context=test` (`SYMFONY_ENV=test`), `--context=ci` (le même, san
   (profil `worker`) : les deux de Messenger (`messenger:consume view`, `messenger:consume
   webpush_notification`) et `websocket` (routé sur `/ws`). Extension PHP `amqp` dans les images, pour
   le transport AMQP de Messenger.
+- Hub Mercure (service `mercure`, profil `default`, #21) : l'image `dunglas/mercure`, en HTTP
+  (`SERVER_NAME=:80`), routé sur `/.well-known/mercure` du domaine et du port du site. Une clé JWT
+  de dev fixe (`MERCURE_JWT_SECRET` de `docker-compose.yml`) signe la publication et
+  l'abonnement ; pas d'abonné anonyme : sans JWT, 401. Paramètres `mercure_url` (interne, pour
+  publier), `mercure_public_url` (celle du navigateur) et `mercure_jwt_secret`.
 - Playwright (service `playwright`, profil `e2e`, lancé par `castor qa:e2e`) : l'image officielle
   `mcr.microsoft.com/playwright`, avec Node 24 et les navigateurs, à la version de
   `@playwright/test` dans `tests/e2e/package.json`.
@@ -325,6 +330,9 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   reboot suivant). `static::consumeMessage($message, 'view')` passe un message à ses handlers, comme
   le worker. `UnreachableRabbitMqTest` met les transports sur un port fermé
   (`LADB_TEST_MESSENGER_TRANSPORT_DSN`).
+- Pas de hub Mercure en test : `mercure.hub.default` est décoré par `Tests\Double\InMemoryHub`, qui
+  garde les `Update` publiées (`$client->getContainer()->get('tests.mercure_hub')->getUpdates()`,
+  avant le reboot suivant) ; ses URL et son JWT restent ceux de la configuration.
 - Envoi des notifications web push (`tests/Webpush/`) : le test passe le message au handler
   (`consumeMessage()`), le client Guzzle de l'envoi passe par
   `Tests\Double\InMemoryPushHandler` (`tests.webpush_push_handler`), qui garde les requêtes et
@@ -526,6 +534,9 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `templates/bundles/GosWebSocketBundle/client.html.twig` (groupe `websocket` de Vite), que les
   templates incluent à la place de `ws_client()` : son extension Twig, dépréciée, est retirée de
   Twig (`gos_web_socket.twig.extension` redéfini sans son tag dans `services.yml`).
+- Le hub Mercure reste en 0.24 tant que `symfony/mercure-bundle` est en 0.3 (`symfony/mercure`
+  0.6, protocole 0.x : claim `mercure`, cookie `mercureAuthorization`, `topic=`). La 1.x change
+  le protocole : elle vient avec le bundle 0.6, au saut en 6.4 (#154).
 - `bin/console` lit `SYMFONY_ENV`, pas `APP_ENV`.
 - Les sessions sont en base (`PdoSessionHandler`) : `doctrine:schema:create` ne crée pas la table
   `sessions`. Depuis Symfony 4.4, `sess_lifetime` porte la date d'expiration, trop grande pour
