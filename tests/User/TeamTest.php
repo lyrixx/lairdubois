@@ -130,7 +130,7 @@ final class TeamTest extends WebTestCase
         self::assertSame('/@team/invitations', $client->getResponse()->headers->get('Location'));
         self::assertNotNull($this->findInvitation('apprenti'));
         // A webpush notification to the recipient
-        $messages = $client->getContainer()->get('tests.webpush_notification_producer')->getMessages();
+        $messages = $client->getContainer()->get('tests.webpush_notification_transport')->getSent();
         self::assertCount(1, $messages);
 
         // admin is already invited, user2 is already a member: the page shows the first error only

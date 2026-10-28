@@ -19,6 +19,7 @@
     },
     "require": {
         "php": ">=7.3",
+        "ext-amqp": "*",
         "ext-curl": "*",
         "ext-dom": "*",
         "ext-imagick": "*",
@@ -52,7 +53,6 @@
         "gos/web-socket-bundle": "1.10.4",
         "bentools/webpush-bundle": "^0.7.1",
         "guzzlehttp/promises": "^1.5",
-        "php-amqplib/rabbitmq-bundle": "^1.14",
 
         "facebook/graph-sdk": "~5.0",
         "willdurand/geocoder": "^4.6",

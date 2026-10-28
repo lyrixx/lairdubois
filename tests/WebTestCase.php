@@ -13,6 +13,8 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Messenger\Envelope;
+use Symfony\Component\Messenger\Stamp\ReceivedStamp;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 
 /**
@@ -172,6 +174,15 @@ abstract class WebTestCase extends BaseWebTestCase
     protected static function getEmailRecipients(\Swift_Message $message): array
     {
         return array_keys($message->getHeaders()->get('X-Swift-To')->getFieldBodyModel());
+    }
+
+    /**
+     * Handles a message as the worker of its transport ("messenger:consume view") would, in the
+     * container of the last client or kernel: by its handlers, without sending it again.
+     */
+    protected static function consumeMessage(object $message, string $transportName): void
+    {
+        static::$container->get('messenger.default_bus')->dispatch(new Envelope($message, [new ReceivedStamp($transportName)]));
     }
 
     /**

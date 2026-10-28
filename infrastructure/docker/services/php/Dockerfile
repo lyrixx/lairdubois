@@ -32,6 +32,7 @@ ARG PHP_MIN_VERSIONS="8.5.12"
 # Extensions of the production server (docs/01-installation.md)
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
+        "php${PHP_VERSION}-amqp" \
         "php${PHP_VERSION}-bcmath" \
         "php${PHP_VERSION}-bz2" \
         "php${PHP_VERSION}-cli" \

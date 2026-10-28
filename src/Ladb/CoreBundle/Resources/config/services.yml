@@ -73,17 +73,7 @@ services:
   Ladb\CoreBundle\Utils\VideoHostingUtils: '@ladb_core.video_hosting_utils'
   ladb_core.viewable_utils:
     class: Ladb\CoreBundle\Utils\ViewableUtils
-    arguments: { $producerLocator: '@ladb_core.rabbit_mq_producer_locator' }
   Ladb\CoreBundle\Utils\ViewableUtils: '@ladb_core.viewable_utils'
-  # ViewableUtils and WebpushNotificationUtils: their producer, by its name in config.yml, read when they
-  # publish. Creating it connects to RabbitMQ (lazy: false), and they log the failure instead of throwing it
-  ladb_core.rabbit_mq_producer_locator:
-    class: Symfony\Component\DependencyInjection\ServiceLocator
-    tags: ['container.service_locator']
-    arguments:
-      -
-        view: '@old_sound_rabbit_mq.view_producer'
-        webpush_notification: '@old_sound_rabbit_mq.webpush_notification_producer'
   ladb_core.likable_utils:
     class: Ladb\CoreBundle\Utils\LikableUtils
   Ladb\CoreBundle\Utils\LikableUtils: '@ladb_core.likable_utils'
@@ -242,8 +232,7 @@ services:
   ladb_core.resource_utils:
     class: Ladb\CoreBundle\Utils\ResourceUtils
   Ladb\CoreBundle\Utils\ResourceUtils: '@ladb_core.resource_utils'
-  Ladb\CoreBundle\Utils\WebpushNotificationUtils:
-    arguments: { $producerLocator: '@ladb_core.rabbit_mq_producer_locator' }
+  Ladb\CoreBundle\Utils\WebpushNotificationUtils: ~
   ladb_core.link_utils:
     class: Ladb\CoreBundle\Utils\LinkUtils
   Ladb\CoreBundle\Utils\LinkUtils: '@ladb_core.link_utils'
@@ -689,7 +678,7 @@ services:
     abstract: true
     autoconfigure: false
 
-  # Consumer
+  # Handlers of the messages of Messenger (tagged messenger.message_handler by autoconfigure)
   Ladb\CoreBundle\Consumer\ViewConsumer: ~
   Ladb\CoreBundle\Consumer\WebpushNotificationConsumer: ~
 

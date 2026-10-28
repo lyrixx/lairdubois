@@ -2,13 +2,13 @@
 namespace Ladb\CoreBundle\Consumer;
 
 use Doctrine\ORM\EntityManagerInterface;
-use PhpAmqpLib\Message\AMQPMessage;
+use Ladb\CoreBundle\Message\WebpushNotificationMessage;
 use Psr\Log\LoggerInterface;
 use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Utils\WebpushNotificationUtils;
-use OldSound\RabbitMqBundle\RabbitMq\ConsumerInterface;
+use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
 
-class WebpushNotificationConsumer implements ConsumerInterface {
+class WebpushNotificationConsumer implements MessageHandlerInterface {
 
 	private $logger;
 	private $om;
@@ -27,31 +27,16 @@ class WebpushNotificationConsumer implements ConsumerInterface {
 
 	/////
 
-	public function execute(AMQPMessage $msg) {
+	public function __invoke(WebpushNotificationMessage $message) {
 
-		try {
-
-			$msgBody = unserialize($msg->getBody());
-
-			$userId = $msgBody['userId'];
-			$body = $msgBody['body'];
-			$icon = $msgBody['icon'];
-			$link = $msgBody['link'];
-
-		} catch (\Exception $e) {
-			$this->logger->error('WebpushNotificationConsumer/execute', array( 'execption' => $e ));
-			return false;
-		}
-
-		$user = $this->userRepository->findOneById($userId);
+		$user = $this->userRepository->findOneById($message->getUserId());
 		if (!is_null($user)) {
 
 			// Send notification
-			$this->webpushNotificationUtils->sendNotification($user, $body, $icon, $link);
+			$this->webpushNotificationUtils->sendNotification($user, $message->getBody(), $message->getIcon(), $message->getLink());
 
 		}
 
-		return true;
 	}
 
 }

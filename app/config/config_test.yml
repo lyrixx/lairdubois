@@ -8,6 +8,13 @@ framework:
     # The profiler only collects on demand: $client->enableProfiler()
     profiler:
         collect: false
+    # RabbitMQ gets no messages from the tests: the workers of the dev stack would process them on
+    # the dev database, and the CI does not start them. In memory (tests.view_transport,
+    # tests.webpush_notification_transport), unless a test sets the variable (UnreachableRabbitMqTest)
+    messenger:
+        transports:
+            view: '%env(LADB_TEST_MESSENGER_TRANSPORT_DSN)%'
+            webpush_notification: '%env(LADB_TEST_MESSENGER_TRANSPORT_DSN)%'
 
 web_profiler:
     toolbar: false
@@ -29,6 +36,7 @@ monolog:
 # no such protocol, and fails before any connection
 parameters:
     mastodon_instance: 'offline://mastodon'
+    env(LADB_TEST_MESSENGER_TRANSPORT_DSN): 'in-memory://'
 
 # Their own database and index, loaded with the fixtures (castor -c test app:db:fixtures): the
 # tests do not overwrite the data of the dev environment. Each test runs in a transaction rolled
@@ -49,27 +57,21 @@ services:
         autoconfigure: true
         public: false
 
-    # Neither RabbitMQ nor the websocket server get messages from the tests: the workers of the
-    # dev stack would process them on the dev database, and the CI does not start them.
-    # Decorated, not redefined: the definitions of the bundles would win over the ones of the app
-    tests.view_producer:
-        class: Tests\Double\InMemoryProducer
-        decorates: old_sound_rabbit_mq.view_producer
-        public: true
+    # The websocket server gets no messages from the tests either, as RabbitMQ (framework.messenger).
+    # Decorated, not redefined: the definition of the bundle would win over the one of the app
     tests.wamp_pusher:
         class: Tests\Double\InMemoryPusher
         decorates: gos_web_socket.wamp.pusher
         public: true
-    tests.webpush_notification_producer:
-        class: Tests\Double\InMemoryProducer
-        decorates: old_sound_rabbit_mq.webpush_notification_producer
+    # The messages sent to RabbitMQ: getSent()
+    tests.view_transport:
+        alias: messenger.transport.view
+        public: true
+    tests.webpush_notification_transport:
+        alias: messenger.transport.webpush_notification
         public: true
 
-    # No push service: the requests of the web push notifications go to Tests\Double\InMemoryPushHandler.
-    # The consumer, that RabbitMQ would call, is run by the tests
-    tests.webpush_notification_consumer:
-        alias: Ladb\CoreBundle\Consumer\WebpushNotificationConsumer
-        public: true
+    # No push service: the requests of the web push notifications go to Tests\Double\InMemoryPushHandler
     tests.webpush_push_handler:
         class: Tests\Double\InMemoryPushHandler
         public: true

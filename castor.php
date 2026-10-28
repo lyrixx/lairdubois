@@ -77,7 +77,7 @@ function install(): void
 
     // The web push notifications are signed with the VAPID keys of the production server
     // (parameters.yml, out of git): with the placeholders of parameters.yml.dist, the
-    // webpush_notification consumer stops on its first message. A throwaway pair for dev and
+    // webpush_notification worker fails on every message. A throwaway pair for dev and
     // test, that the next composer install keeps.
     docker_compose_run(['php', '-r', <<<'PHP'
         require 'vendor/autoload.php';

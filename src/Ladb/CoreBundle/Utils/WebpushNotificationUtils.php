@@ -5,9 +5,11 @@ namespace Ladb\CoreBundle\Utils;
 use Ladb\CoreBundle\Entity\Core\MemberInvitation;
 use Ladb\CoreBundle\Entity\Core\MemberRequest;
 use Ladb\CoreBundle\Manager\Webpush\UserSubscriptionManager;
+use Ladb\CoreBundle\Message\WebpushNotificationMessage;
 use Liip\ImagineBundle\Imagine\Cache\CacheManager;
-use Psr\Container\ContainerInterface as PsrContainerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Messenger\Exception\TransportException;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use BenTools\WebPushBundle\Model\Message\PushMessage;
 use BenTools\WebPushBundle\Sender\PushMessageSender;
@@ -23,16 +25,16 @@ class WebpushNotificationUtils {
 
 	private $cacheManager;
 	private $logger;
-	private $producerLocator;
+	private $messageBus;
 	private $pushMessageSender;
 	private $router;
 	private $typableUtils;
 	private $userSubscriptionManager;
 
-	public function __construct(CacheManager $cacheManager, LoggerInterface $logger, PsrContainerInterface $producerLocator, PushMessageSender $pushMessageSender, RouterInterface $router, TypableUtils $typableUtils, UserSubscriptionManager $userSubscriptionManager) {
+	public function __construct(CacheManager $cacheManager, LoggerInterface $logger, MessageBusInterface $messageBus, PushMessageSender $pushMessageSender, RouterInterface $router, TypableUtils $typableUtils, UserSubscriptionManager $userSubscriptionManager) {
 		$this->cacheManager = $cacheManager;
 		$this->logger = $logger;
-		$this->producerLocator = $producerLocator;
+		$this->messageBus = $messageBus;
 		$this->pushMessageSender = $pushMessageSender;
 		$this->router = $router;
 		$this->typableUtils = $typableUtils;
@@ -61,7 +63,7 @@ class WebpushNotificationUtils {
 
 	public function enqueueNewMemberInvitationNotification(MemberInvitation $memberInvitation) {
 		$this->enqueueNotification(
-			$memberInvitation->getRecipient(),
+			$memberInvitation->getRecipient()->getId(),
 			$memberInvitation->getSender()->getDisplayname().' vous invite à rejoindre le collectif '.$memberInvitation->getTeam()->getDisplayname(),
 			$this->cacheManager->getBrowserPath($memberInvitation->getTeam()->getAvatar()->getWebPath(), '128x128o'),
 			$this->router->generate('core_user_show', array( 'username' => $memberInvitation->getTeam()->getUsernameCanonical()), UrlGeneratorInterface::ABSOLUTE_URL)
@@ -70,7 +72,7 @@ class WebpushNotificationUtils {
 
 	public function enqueueIncomingMessageNotification(User $recipient, User $sender, Thread $thread) {
 		$this->enqueueNotification(
-			$recipient,
+			$recipient->getId(),
 			'Nouveau message de '.$sender->getDisplayname(),
 			$this->cacheManager->getBrowserPath($sender->getAvatar()->getWebPath(), '128x128o'),
 			$this->router->generate('core_message_thread_show', array( 'id' => $thread->getId()), UrlGeneratorInterface::ABSOLUTE_URL)
@@ -79,15 +81,9 @@ class WebpushNotificationUtils {
 
 	public function enqueueNotification($userId, $body, $icon, $link) {
 		try {
-			$producer = $this->producerLocator->get('webpush_notification');
-			$producer->publish(serialize(array(
-				'userId' => $userId,
-				'body'   => $body,
-				'icon'   => $icon,
-				'link'   => $link,
-			)));
-		} catch (\Exception $e) {
-
+			$this->messageBus->dispatch(new WebpushNotificationMessage($userId, $body, $icon, $link));
+		} catch (TransportException $e) {
+			$this->logger->error('Failed to publish the webpush notification in queue.', array( 'exception' => $e ));
 		}
 	}
 

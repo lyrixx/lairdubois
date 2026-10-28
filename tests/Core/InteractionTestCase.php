@@ -4,7 +4,9 @@ namespace Tests\Core;
 
 use Ladb\CoreBundle\DataFixtures\UserFixtures;
 use Ladb\CoreBundle\Entity\Wonder\Creation;
+use Ladb\CoreBundle\Message\WebpushNotificationMessage;
 use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Component\Messenger\Envelope;
 use Tests\WebTestCase;
 use Tests\XhrTrait;
 
@@ -49,13 +51,13 @@ abstract class InteractionTestCase extends WebTestCase
      * The messages for the webpush notifications, sent to RabbitMQ by the last request of the
      * client.
      *
-     * @return list<array{userId: mixed, body: string, icon: string, link: string}>
+     * @return list<WebpushNotificationMessage>
      */
     protected static function getWebpushNotifications(Client $client): array
     {
         return array_map(
-            fn (array $message) => unserialize($message['body']),
-            $client->getContainer()->get('tests.webpush_notification_producer')->getMessages(),
+            fn (Envelope $envelope) => $envelope->getMessage(),
+            $client->getContainer()->get('tests.webpush_notification_transport')->getSent(),
         );
     }
 }
