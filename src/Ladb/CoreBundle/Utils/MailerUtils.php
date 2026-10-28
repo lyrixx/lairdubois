@@ -95,6 +95,26 @@ class MailerUtils {
 		}
 	}
 
+	/**
+	 * The forgotten password email, as FOSUserBundle sent it: without DKIM signature, its subject on the
+	 * first line of the template.
+	 */
+	public function sendResettingEmailMessage(User $recipientUser) {
+		$renderedLines = explode("\n", trim($this->_renderTemplate('@FOSUser/Resetting/email.txt.twig', array(
+			'user'            => $recipientUser,
+			'confirmationUrl' => $this->router->generate('fos_user_resetting_reset', array( 'token' => $recipientUser->getConfirmationToken() ), UrlGeneratorInterface::ABSOLUTE_URL),
+		))));
+		$subject = array_shift($renderedLines);
+
+		$message = (new \Swift_Message())
+			->setSubject($subject)
+			->setFrom(array('noreply@lairdubois.fr' => 'L\'Air du Bois'))
+			->setTo((string) $recipientUser->getEmail())
+			->setBody(implode("\n", $renderedLines))
+		;
+		$this->mailer->send($message);
+	}
+
 	public function sendIncomingMessageNotificationEmailMessage(User $originRecipientUser, User $recipientUser, User $actorUser, Thread $thread, Message $message) {
 		if ($recipientUser->getMeta()->getIncomingMessageEmailNotificationEnabled() && $recipientUser->getEmailConfirmed()) {
 			$parameters = array(

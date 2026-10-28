@@ -117,6 +117,23 @@ final class SettingsTest extends WebTestCase
         self::assertSame('https://lairdubois.test/', $client->getResponse()->headers->get('Location'));
     }
 
+    public function testChangePasswordShowsASuccessMessage(): void
+    {
+        $client = static::createClientAs(UserFixtures::USER);
+        $crawler = $client->request('GET', '/parametres/change-password');
+        $client->submit($crawler->filter('form[action="/parametres/change-password"]')->form([
+            'fos_user_change_password_form[current_password]' => UserFixtures::USER,
+            'fos_user_change_password_form[plainPassword][first]' => 'Nouveau-mot-de-passe-1',
+            'fos_user_change_password_form[plainPassword][second]' => 'Nouveau-mot-de-passe-1',
+        ]));
+
+        $client->followRedirect();
+        $crawler = $client->followRedirect();
+
+        self::assertSame('/@user', $client->getRequest()->getPathInfo());
+        self::assertStringContainsString('Le mot de passe a été modifié.', $crawler->filter('.alert-success')->text(null, false));
+    }
+
     public function testChangePasswordWithWrongCurrentPassword(): void
     {
         $client = static::createClientAs(UserFixtures::USER);

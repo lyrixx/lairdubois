@@ -53,13 +53,6 @@ services:
     class: Ladb\CoreBundle\Fos\UserManager
     arguments: ['@fos_user.util.password_updater', '@ladb_core.fos.canonical_fields_updater', '@doctrine.orm.entity_manager', '%fos_user.model.user.class%']
   Ladb\CoreBundle\Fos\UserManager: '@ladb_core.fos.user_manager'
-  # The default mailer of FOSUserBundle needs the templating component (see the class): fos_user.service.mailer
-  ladb_core.fos.mailer:
-    class: Ladb\CoreBundle\Fos\Mailer
-    arguments:
-      $parameters:
-        template: { confirmation: '%fos_user.registration.confirmation.template%', resetting: '%fos_user.resetting.email.template%' }
-        from_email: { confirmation: '%fos_user.registration.confirmation.from_email%', resetting: '%fos_user.resetting.email.from_email%' }
   # FOSUserBundle has no alias by type for it, nor an interface (UserController::adminActivateAction()):
   # an alias of the id, by its class
   FOS\UserBundle\Util\UserManipulator: '@fos_user.util.user_manipulator'
@@ -168,6 +161,13 @@ services:
   ladb_core.follower_utils:
     class: Ladb\CoreBundle\Utils\FollowerUtils
   Ladb\CoreBundle\Utils\FollowerUtils: '@ladb_core.follower_utils'
+  ladb_core.login_utils:
+    class: Ladb\CoreBundle\Utils\LoginUtils
+    arguments:
+      $rememberMeServices: '@security.authentication.rememberme.services.simplehash.main'
+      $sessionStrategy: '@security.authentication.session_strategy'
+      $userChecker: '@security.user_checker.main'
+  Ladb\CoreBundle\Utils\LoginUtils: '@ladb_core.login_utils'
   ladb_core.mailer_utils:
     class: Ladb\CoreBundle\Utils\MailerUtils
   Ladb\CoreBundle\Utils\MailerUtils: '@ladb_core.mailer_utils'
@@ -530,9 +530,6 @@ services:
       - { name: validator.constraint_validator, alias: ladb_core.exclude_domains_link_validator }
 
   # Listeners
-  ladb_core.user_listener:
-    class: Ladb\CoreBundle\Event\UserListener
-    arguments: { $adminUsername: '%admin_username%' }
   ladb_core.publication_listener:
     class: Ladb\CoreBundle\Event\PublicationListener
   ladb_core.knowledge_listener:

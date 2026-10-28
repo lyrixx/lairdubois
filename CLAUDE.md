@@ -591,9 +591,14 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `refresh()` après le premier `flush()`.
 - `MailerUtils` signe chaque mail avec la clé DKIM de la prod (`keys/private.pem`, hors git) : sans
   elle, tout mail du site (confirmation d'adresse, notifications…) donne une 500. `castor
-  app:install` en génère une jetable si elle manque. Les mails de FOSUserBundle (mot de passe
-  oublié) ne passent pas par là : `Ladb\CoreBundle\Fos\Mailer` (`fos_user.service.mailer`) les
-  envoie comme le mailer par défaut de FOSUserBundle, qui demandait le composant `templating`.
+  app:install` en génère une jetable si elle manque. Sauf le mail du mot de passe oublié
+  (`sendResettingEmailMessage()`), envoyé comme FOSUserBundle l'envoyait : sans signature, le
+  sujet sur la première ligne de son template.
+- Connexion, inscription, mot de passe oublié et changement de mot de passe : nos controllers
+  (`SecurityController`, `RegistrationController`, `ResettingController`,
+  `ChangePasswordController`), qui gardent les routes, les noms de formulaires et les templates
+  (`@FOSUser/…`) de FOSUserBundle (#24). `LoginUtils` connecte un compte après son inscription ou
+  un nouveau mot de passe, comme le `LoginManager` de FOSUserBundle.
 - Les notifications web push sont signées avec les clés VAPID de la prod (`bentools_webpush.*` de
   `parameters.yml`) : avec celles de `parameters.yml.dist`, le consumer `webpush_notification`
   s'arrête au premier message. `castor app:install` y écrit une paire jetable, que les `composer
