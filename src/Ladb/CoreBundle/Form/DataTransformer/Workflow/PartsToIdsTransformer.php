@@ -5,7 +5,7 @@ namespace Ladb\CoreBundle\Form\DataTransformer\Workflow;
 use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\Form\Exception\TransformationFailedException;
 use Symfony\Component\Form\Exception\UnexpectedTypeException;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectManager;
 
 class PartsToIdsTransformer implements DataTransformerInterface {
 

@@ -2,7 +2,7 @@
 
 namespace Ladb\CoreBundle\Form\Type\Message;
 
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectManager;
 use Ladb\CoreBundle\Manager\Core\UserManager;
 use Ladb\CoreBundle\Form\DataTransformer\UsersToUsernamesTransformer;
 use Symfony\Component\Form\AbstractType;

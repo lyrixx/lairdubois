@@ -2,7 +2,7 @@
 
 namespace Ladb\CoreBundle\Validator\Constraints;
 
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Ladb\CoreBundle\Entity\Knowledge\Wood;

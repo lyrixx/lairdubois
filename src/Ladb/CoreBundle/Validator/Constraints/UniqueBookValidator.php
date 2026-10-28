@@ -2,7 +2,7 @@
 
 namespace Ladb\CoreBundle\Validator\Constraints;
 
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectManager;
 use Ladb\CoreBundle\Entity\Knowledge\Value\BookIdentity;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
