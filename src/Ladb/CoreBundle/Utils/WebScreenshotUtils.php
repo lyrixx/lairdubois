@@ -81,6 +81,8 @@ class WebScreenshotUtils {
 
 			// creates a new page and navigate to an url
 			$page = $browser->createPage();
+			// The headless mode of recent Chromiums counts the browser UI in the window size
+			$page->setViewport($width, $height)->await();
 			$page->navigate($url)->waitForNavigation(\HeadlessChromium\Page::DOM_CONTENT_LOADED);
 
 			if ($waitBeforeCapture > 0) {
