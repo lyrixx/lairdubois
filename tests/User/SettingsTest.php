@@ -67,6 +67,29 @@ final class SettingsTest extends WebTestCase
         self::assertSame('user@lairdubois.test', static::findUser(UserFixtures::USER)->getEmail());
     }
 
+    /**
+     * The full name has no NotBlank: empty, it arrives as null, which Length ignores (#177).
+     */
+    public function testEditSettingsWithEmptyFullname(): void
+    {
+        $client = static::createClientAs(UserFixtures::USER);
+
+        $this->submitSettings($client, UserFixtures::USER, ['ladb_usersettings[fullname]' => '']);
+
+        self::assertSame('/@user', $client->getResponse()->headers->get('Location'));
+        self::assertNull(static::findUser(UserFixtures::USER)->getFullname());
+    }
+
+    public function testEditSettingsWithTooShortFullname(): void
+    {
+        $client = static::createClientAs(UserFixtures::USER);
+
+        $crawler = $this->submitSettings($client, UserFixtures::USER, ['ladb_usersettings[fullname]' => 'Al']);
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertSame(['Cette chaîne est trop courte. Elle doit avoir au minimum 3 caractères.'], static::getFieldErrors($crawler, 'ladb_usersettings[fullname]'));
+    }
+
     public function testEditSettingsOfAnotherUser(): void
     {
         $client = static::createClientAs(UserFixtures::USER2);

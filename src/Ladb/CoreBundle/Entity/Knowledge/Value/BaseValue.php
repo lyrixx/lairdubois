@@ -105,7 +105,7 @@ abstract class BaseValue implements AuthoredInterface, WatchableChildInterface, 
 	/**
 	 * @ORM\Column(type="string", length=2048, nullable=true)
 	 * @Assert\NotBlank(groups={"website", "other"})
-	 * @Assert\Length(min=2, max=2048, allowEmptyString=true, groups={"website", "other"})
+	 * @Assert\Length(min=2, max=2048, groups={"website", "other"})
 	 * @Assert\Url(groups={"website"})
 	 */
 	private $source;

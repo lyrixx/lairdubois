@@ -12,6 +12,7 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase as BaseWebTestCase;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Mailer\Event\MessageEvents;
 use Symfony\Component\Messenger\Envelope;
@@ -153,6 +154,22 @@ abstract class WebTestCase extends BaseWebTestCase
         }
 
         return $user;
+    }
+
+    /**
+     * The error messages of a field of a form, shown in its ".form-group" (form_errors of
+     * _form-theme.twig.twig).
+     *
+     * @return list<string>
+     */
+    protected static function getFieldErrors(Crawler $crawler, string $fieldName): array
+    {
+        $group = $crawler->filter(\sprintf('[name="%s"]', $fieldName))->closest('.form-group');
+        if (null === $group) {
+            throw new \LogicException(\sprintf('The page has no field "%s" in a ".form-group".', $fieldName));
+        }
+
+        return $group->filter('.alert-danger li')->each(fn (Crawler $node): string => $node->text());
     }
 
     /**

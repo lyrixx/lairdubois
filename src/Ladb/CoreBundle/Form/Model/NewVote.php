@@ -9,7 +9,7 @@ class NewVote {
 
 	/**
 	 * @Assert\NotBlank(groups={"down"})
-	 * @Assert\Length(min=10, max=10000, allowEmptyString=true, groups={"down"})
+	 * @Assert\Length(min=10, max=10000, groups={"down"})
 	 * @LadbAssert\NoMediaLink()
 	 */
 	private $body;

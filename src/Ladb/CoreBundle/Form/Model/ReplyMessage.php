@@ -13,7 +13,7 @@ class ReplyMessage {
 
 	/**
 	 * @Assert\NotBlank()
-	 * @Assert\Length(min=2, max=10000, allowEmptyString=true)
+	 * @Assert\Length(min=2, max=10000)
 	 */
 	private $body;
 

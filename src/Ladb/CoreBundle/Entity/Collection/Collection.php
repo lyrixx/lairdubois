@@ -45,7 +45,7 @@ class Collection extends AbstractAuthoredPublication implements IndexableInterfa
 	/**
 	 * @ORM\Column(type="string", length=100)
 	 * @Assert\NotBlank()
-	 * @Assert\Length(min=4, max=100, allowEmptyString=true)
+	 * @Assert\Length(min=4, max=100)
 	 */
 	private $title;
 
@@ -64,7 +64,7 @@ class Collection extends AbstractAuthoredPublication implements IndexableInterfa
 	/**
 	 * @ORM\Column(type="text", nullable=true)
 	 * @Assert\Length(max=4000)
-	 * @Assert\Length(min=5, allowEmptyString=true, groups={"public"})
+	 * @Assert\Length(min=5, groups={"public"})
 	 * @Assert\NotBlank(groups={"public"})
 	 */
 	private $body;

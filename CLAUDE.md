@@ -336,7 +336,9 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
     vérifier une suppression par `find()`.
   - `static::getContainer()` : le container de test, qui lit aussi les services privés (ceux de
     `services.yml`), dans le kernel du dernier `createClient()` ou `bootKernel()`, reboots du
-    client compris.
+    client compris ;
+  - `static::getFieldErrors($crawler, 'ladb_usersettings[fullname]')` : les messages d'erreur d'un
+    champ, dans son `.form-group`.
 - Pas de RabbitMQ en test : les transports de Messenger sont `in-memory://` (`config_test.yml`). Ils
   gardent les messages (`$client->getContainer()->get('tests.view_transport')->getSent()`, avant le
   reboot suivant). `static::consumeMessage($message, 'view')` passe un message à ses handlers, comme
@@ -743,3 +745,7 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   avec le bundle (#27).
 - SensioFrameworkExtraBundle est en 5.5 : le `TemplateListener` de la 5.4 demande un
   `Twig_Environment`, qui n'existe plus en Twig 3 (`TypeError` sur toute action à `@Template`).
+- `Length` n'a plus `allowEmptyString` (#177, retiré en 6.0) : elle refuse `''` avec `min`, mais
+  ignore `null`, ce que donne un champ de formulaire vide (`TextType` sans `empty_data`). Une valeur
+  validée qui vaudrait `''` (`empty_data: ''`, écrite par le code) serait « trop courte », en plus
+  du message de `NotBlank`.

@@ -69,7 +69,7 @@ class Comment implements TypableInterface, BasicTimestampableInterface, Authored
 	/**
 	 * @ORM\Column(type="text", nullable=false)
 	 * @Assert\NotBlank()
-	 * @Assert\Length(min=2, max=10000, allowEmptyString=true)
+	 * @Assert\Length(min=2, max=10000)
 	 * @LadbAssert\NoMediaLink()
 	 */
 	private $body;

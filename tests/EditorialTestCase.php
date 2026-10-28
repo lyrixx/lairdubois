@@ -174,6 +174,31 @@ abstract class EditorialTestCase extends WebTestCase
         self::assertSame($lastId, $this->findLast()->getId());
     }
 
+    /**
+     * An empty title arrives as null, which Length ignores: the only message is the one of NotBlank (#177).
+     *
+     * @dataProvider provideInvalidTitles
+     */
+    public function testCreateWithInvalidTitle(string $title, string $error): void
+    {
+        $client = static::createClientAs(UserFixtures::ADMIN);
+        $crawler = $client->request('GET', $this->path('new'));
+        $form = $this->selectForm($crawler, $this->path('create'));
+        $fieldName = $this->getFieldName($form, 'title');
+        $form[$fieldName] = $title;
+
+        $crawler = $client->submit($form);
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertSame([$error], static::getFieldErrors($crawler, $fieldName));
+    }
+
+    public static function provideInvalidTitles(): iterable
+    {
+        yield 'empty' => ['', 'Cette valeur ne doit pas être vide.'];
+        yield 'too short' => ['abc', 'Cette chaîne est trop courte. Elle doit avoir au minimum 4 caractères.'];
+    }
+
     public function testUpdate(): void
     {
         $client = static::createClientAs(UserFixtures::ADMIN);
