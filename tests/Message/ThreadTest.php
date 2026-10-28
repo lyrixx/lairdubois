@@ -9,6 +9,7 @@ use Ladb\CoreBundle\Utils\MessageUtils;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\DomCrawler\Form;
+use Symfony\Component\Mime\Email;
 use Tests\WebTestCase;
 use Tests\XhrTrait;
 
@@ -141,7 +142,7 @@ final class ThreadTest extends WebTestCase
 
         $thread = $this->findLastThread();
         self::assertTrue($client->getResponse()->isRedirect(static::generatePath('core_message_thread_show', ['id' => $thread->getId()])));
-        $recipients = array_merge(...array_map(fn (\Swift_Message $email) => static::getEmailRecipients($email), static::getSentEmails($client)));
+        $recipients = array_merge(...array_map(fn (Email $email) => static::getEmailRecipients($email), static::getSentEmails($client)));
         sort($recipients);
         self::assertSame([UserFixtures::USER2.'@lairdubois.test', UserFixtures::USER.'@lairdubois.test'], $recipients);
 

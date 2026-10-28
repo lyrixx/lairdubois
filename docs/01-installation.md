@@ -486,7 +486,6 @@ Create crontab for www-data user
 
 And add the following lines
 ```
-*/2 * * * * php /var/www/www.lairdubois.fr/bin/console --env=prod swiftmailer:spool:send --message-limit=100 &> /dev/null
 0 4 * * 5 php /var/www/www.lairdubois.fr/bin/console --env=prod ladb:mailing:weeknews --force &> /dev/null
 0 * * * * php /var/www/www.lairdubois.fr/bin/console --env=prod ladb:cron:spotlight --force &> /dev/null
 */2 * * * * php /var/www/www.lairdubois.fr/bin/console --env=prod ladb:cron:notification:populate --force &> /dev/null
@@ -641,7 +640,7 @@ And restart Postfix:
 
 Now, you have a SMTP server accessible in localhost without authentication. You can see sendings logs, and possible errors, in `/var/log/mail.log`.
 
-And don't forget to change the `mailer_host`, `mailer_user` and `mailer_password` in symfony configuration `/app/config/parameters.yml`.
+And don't forget to change the `mailer_dsn` in symfony configuration `/app/config/parameters.yml`: `smtp://localhost:25`. Symfony Mailer starts TLS when the server offers it, and checks its certificate: if Postfix offers TLS (`postconf smtpd_tls_security_level` gives `may`) with the self-signed certificate of Debian (`ssl-cert-snakeoil`), add `?verify_peer=0`.
 
 ## Step 16 - System configuration tuning (Not necessary on the **DEV** server)
 

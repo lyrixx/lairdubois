@@ -21,7 +21,7 @@ final class ResettingTest extends WebTestCase
         $messages = static::getSentEmails($client);
         self::assertCount(1, $messages);
         self::assertSame(['user@lairdubois.test'], static::getEmailRecipients($messages[0]));
-        self::assertSame(1, preg_match('{https://lairdubois\.test(/resetting/reset/[\w-]+)}', $messages[0]->getBody(), $matches));
+        self::assertSame(1, preg_match('{https://lairdubois\.test(/resetting/reset/[\w-]+)}', $messages[0]->getTextBody(), $matches));
 
         $crawler = $client->request('GET', $matches[1]);
         self::assertSame(200, $client->getResponse()->getStatusCode());
@@ -150,7 +150,7 @@ final class ResettingTest extends WebTestCase
     private function resetPassword(KernelBrowser $client, string $username, string $password): void
     {
         $this->requestReset($client, $username);
-        self::assertSame(1, preg_match('{https://lairdubois\.test(/resetting/reset/[\w-]+)}', static::getSentEmails($client)[0]->getBody(), $matches));
+        self::assertSame(1, preg_match('{https://lairdubois\.test(/resetting/reset/[\w-]+)}', static::getSentEmails($client)[0]->getTextBody(), $matches));
 
         $crawler = $client->request('GET', $matches[1]);
         $client->submit($crawler->filter('form[action="'.$matches[1].'"]')->form([

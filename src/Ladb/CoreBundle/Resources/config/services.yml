@@ -530,6 +530,14 @@ services:
     class: Ladb\CoreBundle\Event\ReturnToUrlListener
   ladb_core.last_login_listener:
     class: Ladb\CoreBundle\Event\LastLoginListener
+  ladb_core.dkim_signed_message_listener:
+    class: Ladb\CoreBundle\Event\DkimSignedMessageListener
+    arguments: ['@ladb_core.dkim_signer']
+  # The key of the production server (out of git, castor app:install creates a throwaway one), for
+  # dkim._domainkey.lairdubois.fr: read when the listener is created
+  ladb_core.dkim_signer:
+    class: Symfony\Component\Mime\Crypto\DkimSigner
+    arguments: ['file://%kernel.project_dir%/keys/private.pem', 'lairdubois.fr', 'dkim']
 
   # Handlers
   ladb_core.authentification_handler:

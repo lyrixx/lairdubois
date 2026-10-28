@@ -8,8 +8,7 @@ x-templates:
         DATABASE_PASSWORD: app
         DATABASE_USER: root
         ELASTICSEARCH_HOST: elasticsearch
-        # The SMTP of Mailpit (service "mailpit"), for Symfony Mailer (#19). Swiftmailer does
-        # not read it: it keeps its file spool, that nothing sends in dev
+        # The SMTP of Mailpit (service "mailpit")
         MAILER_DSN: smtp://mailpit:1025
         MEMCACHED_HOST: memcached
         # The same key signs the JWT of the site (publisher) and of the subscribers, for the hub

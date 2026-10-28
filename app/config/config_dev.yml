@@ -8,6 +8,11 @@ framework:
     profiler: { only_exceptions: false }
     # Domain of the Docker stacks (see castor.php), the same for every git worktree
     trusted_hosts: ['^lairdubois\.test$']
+    # Every email goes to this address (Mailpit in Docker): only the envelope changes, the To
+    # header keeps the recipients
+    mailer:
+        envelope:
+            recipients: ['dev@lairdubois.fr']
 
 web_profiler:
     toolbar: true
@@ -42,6 +47,3 @@ monolog:
         #chromephp:
         #    type:   chromephp
         #    level:  info
-
-swiftmailer:
-    delivery_address: dev@lairdubois.fr
