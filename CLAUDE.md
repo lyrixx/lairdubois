@@ -337,8 +337,8 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
 - Envoi des notifications web push (`tests/Webpush/`) : le test passe le message au handler
   (`consumeMessage()`), le client Guzzle de l'envoi passe par
   `Tests\Double\InMemoryPushHandler` (`tests.webpush_push_handler`), qui garde les requêtes et
-  répond 201, 410 (`expire()`) ou rien (`makeUnreachable()`). `NotificationTest` vérifie le JWT
-  VAPID et déchiffre le contenu avec les clés de l'abonnement.
+  leurs options (timeout) et répond 201, 410 (`expire()`) ou rien (`makeUnreachable()`).
+  `NotificationTest` vérifie le JWT VAPID et déchiffre le contenu avec les clés de l'abonnement.
 - Le profiler ne collecte qu'à la demande : `$client->enableProfiler()` avant la requête, puis
   `$client->getProfile()` (mails : collector `swiftmailer`, la livraison est coupée en test).
 - Aucun appel réseau sortant. Les GET du smoke test n'en font pas : Stripe ne part qu'en XHR, le
@@ -650,14 +650,16 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
 - Le géocodage (`geocoder-php/common-http`) trouve sa fabrique PSR-17 par `php-http/discovery`, à
   l'exécution : `GuzzleHttp\Psr7\HttpFactory` de `guzzlehttp/psr7` 2. Le plugin Composer de
   discovery est coupé dans `allow-plugins`.
-- `bentools/webpush-bundle` 0.7 appelle `GuzzleHttp\Psr7\stream_for()`, supprimée de
-  `guzzlehttp/psr7` 2 : il est en 0.8. Jusqu'à la 0.10, il appelle `GuzzleHttp\Promise\settle()`,
-  supprimée de `guzzlehttp/promises` 2 : `composer.json` le garde en `^1.5`, ce qui bloque Guzzle
-  en 7.9 (la 7.10 exige promises 2), avec des advisories ouvertes (#159). Son
-  `PushMessageSender` envoie avec un TTL de 0 et sans timeout : `services.yml` le redéfinit avec
-  ceux de web-push 2.0 (4 semaines, 30 s). Sa route d'abonnement lit `{"subscription": …}`, alors
-  que le JS du site envoie la `PushSubscription` telle quelle : `WebpushController` la remplace
-  (même nom, même chemin).
+- `bentools/webpush-bundle` est en 0.12, la dernière qui accepte Symfony 4.4 (la 0.13 exige 5.4) ;
+  jusqu'à la 0.10, il appelait `GuzzleHttp\Promise\settle()`, supprimée de `guzzlehttp/promises` 2,
+  qu'exige Guzzle depuis la 7.10. Son `PushMessageSender` envoie avec un TTL de 0 : `services.yml`
+  le redéfinit avec celui de web-push 2.0 (4 semaines). Le timeout est le sien, 30 s par requête
+  (`DEFAULT_TIMEOUT`), qui passe avant les options du client Guzzle : ce client n'en a pas, il
+  n'est un service que pour le handler du test. Son `RequestBuilder`, créé par le sender et non
+  remplaçable, passe le `TTL` et le `Content-Length` en entiers à `withHeader()` : une dépréciation
+  de `guzzlehttp/psr7` 2.11 à chaque envoi (une erreur en psr7 3), jusqu'à la 0.14 comprise. Sa
+  route d'abonnement lit `{"subscription": …}`, alors que le JS du site envoie la
+  `PushSubscription` telle quelle : `WebpushController` la remplace (même nom, même chemin).
 - Plus de composant `templating` : les templates se nomment dans la notation de Twig
   (`@LadbCore/Dir/file.html.twig`, `@FOSUser/…`, `base.html.twig` pour `templates/`), la
   notation de bundle (`LadbCoreBundle:Dir:file.html.twig`, `::base.html.twig`) ne les trouve plus.

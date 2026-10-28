@@ -16,7 +16,7 @@ class WebpushController extends AbstractController {
 
 	/**
 	 * The subscription action of bentools/webpush-bundle 0.3: the JS of the site (ladb-webpush-client.js)
-	 * sends the PushSubscription as is, the one of the bundle 0.7 reads it under a "subscription" key.
+	 * sends the PushSubscription as is, the one of the bundle (0.7 to 0.12) reads it under a "subscription" key.
 	 *
 	 * @Route("/", methods={"POST", "DELETE"}, name="bentools_webpush.subscription")
 	 */
