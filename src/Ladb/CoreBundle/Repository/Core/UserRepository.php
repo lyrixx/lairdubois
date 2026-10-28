@@ -7,8 +7,39 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 use Ladb\CoreBundle\Entity\Core\Picture;
 use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Repository\AbstractEntityRepository;
+use Ladb\CoreBundle\Utils\CanonicalFieldsUpdater;
+use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
+use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
-class UserRepository extends AbstractEntityRepository {
+class UserRepository extends AbstractEntityRepository implements UserLoaderInterface, PasswordUpgraderInterface {
+
+	/**
+	 * The user of the login form and of the remember me cookie, by its username or its email: the
+	 * provider fos_user.user_provider.username_email of FOSUserBundle (#24).
+	 */
+	public function loadUserByUsername($username) {
+		if (preg_match('/^.+\@\S+\.\S+$/', $username)) {
+			$user = $this->findOneBy(array( 'emailCanonical' => CanonicalFieldsUpdater::canonicalize($username) ));
+			if (null !== $user) {
+				return $user;
+			}
+		}
+
+		return $this->findOneBy(array( 'usernameCanonical' => CanonicalFieldsUpdater::canonicalize($username) ));
+	}
+
+	/**
+	 * At the login, when the hash is not the one of the encoder of security.yml (the sha512 of
+	 * FOSUserBundle): the new hash holds its salt. Flushed here, no action handles the login form.
+	 */
+	public function upgradePassword(UserInterface $user, string $newEncodedPassword): void {
+		$user->setPassword($newEncodedPassword);
+		$user->setSalt(null);
+		$this->getEntityManager()->flush();
+	}
+
+	/////
 
 	public function createIsEnabledQueryBuilder() {
 		return $this->createQueryBuilder('a')->where('a.enabled = true');	// FOSElasticaBundle bug -> use 'a'

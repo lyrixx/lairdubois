@@ -5,7 +5,7 @@ namespace Ladb\CoreBundle\Command;
 use Ladb\CoreBundle\Entity\Core\Block\Gallery;
 use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Entity\Wonder\Creation;
-use Ladb\CoreBundle\Fos\UserManager;
+use Ladb\CoreBundle\Manager\Core\UserManager;
 use Ladb\CoreBundle\Manager\Wonder\CreationManager;
 use Ladb\CoreBundle\Model\AuthoredInterface;
 use Ladb\CoreBundle\Model\BlockBodiedInterface;

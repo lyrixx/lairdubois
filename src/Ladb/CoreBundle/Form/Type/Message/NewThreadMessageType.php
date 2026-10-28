@@ -3,14 +3,13 @@
 namespace Ladb\CoreBundle\Form\Type\Message;
 
 use Doctrine\Common\Persistence\ObjectManager;
-use FOS\UserBundle\Model\UserManagerInterface;
+use Ladb\CoreBundle\Manager\Core\UserManager;
 use Ladb\CoreBundle\Form\DataTransformer\UsersToUsernamesTransformer;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use FOS\UserBundle\Form\Type\UsernameFormType;
 use Ladb\CoreBundle\Form\DataTransformer\PicturesToIdsTransformer;
 
 class NewThreadMessageType extends AbstractType {
@@ -18,7 +17,7 @@ class NewThreadMessageType extends AbstractType {
 	private $om;
 	private $userManager;
 
-	public function __construct(ObjectManager $om, UserManagerInterface $userManager) {
+	public function __construct(ObjectManager $om, UserManager $userManager) {
 		$this->om = $om;
 		$this->userManager = $userManager;
 	}

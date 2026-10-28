@@ -433,7 +433,7 @@ This step will create an admin user for the platform. It will prompt you for :
   - a password
 
 ```bash
-    $ ladb fos:user:create
+    $ ladb ladb:user:create
 ```
 
 ## Step 13 - Activate cron commands (Not necessary on the **DEV** server)

@@ -7,7 +7,7 @@ use Ladb\CoreBundle\Entity\Core\Member;
 use Ladb\CoreBundle\Entity\Core\Picture;
 use Ladb\CoreBundle\Entity\Core\Registration;
 use Ladb\CoreBundle\Entity\Core\User;
-use Ladb\CoreBundle\Fos\UserManager;
+use Ladb\CoreBundle\Manager\Core\UserManager;
 use Tests\WebTestCase;
 
 /**

@@ -12,7 +12,7 @@ use Ladb\CoreBundle\Entity\AbstractPublication;
 use Ladb\CoreBundle\Entity\Core\Picture;
 use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Entity\Core\View;
-use Ladb\CoreBundle\Fos\UserManager;
+use Ladb\CoreBundle\Manager\Core\UserManager;
 use Ladb\CoreBundle\Manager\Core\PictureManager;
 use Ladb\CoreBundle\Model\HiddableInterface;
 

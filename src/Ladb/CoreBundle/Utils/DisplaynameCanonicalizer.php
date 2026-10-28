@@ -1,12 +1,10 @@
 <?php
 
-namespace Ladb\CoreBundle\Fos;
+namespace Ladb\CoreBundle\Utils;
 
-use FOS\UserBundle\Util\CanonicalizerInterface;
+class DisplaynameCanonicalizer {
 
-class DisplaynameCanonicalizer implements CanonicalizerInterface {
-
-	const NAME = 'ladb_core.fos.displayname_canonicalizer';
+	const NAME = 'ladb_core.displayname_canonicalizer';
 
 	public function canonicalize($string) {
 		$oldLocale = setlocale(LC_ALL, '0');

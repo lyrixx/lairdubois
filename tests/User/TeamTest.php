@@ -8,7 +8,7 @@ use Ladb\CoreBundle\Entity\Core\MemberInvitation;
 use Ladb\CoreBundle\Entity\Core\MemberRequest;
 use Ladb\CoreBundle\Entity\Core\Registration;
 use Ladb\CoreBundle\Entity\Core\User;
-use Ladb\CoreBundle\Fos\UserManager;
+use Ladb\CoreBundle\Manager\Core\UserManager;
 use Tests\Double\OfflineLocalisableUtils;
 use Tests\WebTestCase;
 

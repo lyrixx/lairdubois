@@ -1,20 +1,32 @@
 security:
     encoders:
-        FOS\UserBundle\Model\UserInterface: sha512
+        # The hash of FOSUserBundle, the one of the accounts that have not logged in since #24: hashed
+        # again by the native encoder at their next login (UserRepository::upgradePassword())
+        fos_user_sha512:
+            algorithm: sha512
+            encode_as_base64: true
+            iterations: 5000
+        Ladb\CoreBundle\Entity\Core\User:
+            # Not "auto": in Symfony 4.4, it ignores migrate_from
+            algorithm: native
+            migrate_from: [fos_user_sha512]
 
     role_hierarchy:
         ROLE_ADMIN:       ROLE_USER
         ROLE_SUPER_ADMIN: ROLE_ADMIN
 
     providers:
-        fos_userbundle:
-            id: fos_user.user_provider.username_email
+        # By username or email (UserRepository::loadUserByUsername())
+        users:
+            entity:
+                class: Ladb\CoreBundle\Entity\Core\User
 
     firewalls:
         main:
             pattern: ^/
+            user_checker: ladb_core.user_checker
             form_login:
-                provider: fos_userbundle
+                provider: users
                 csrf_token_generator: security.csrf.token_manager
                 use_referer: true
             logout:
@@ -26,7 +38,6 @@ security:
                 path:     /
                 domain:   ~ # Defaults to the current domain from $_SERVER
             switch_user: { role: ROLE_ADMIN, parameter: _switch_to }
-            logout_on_user_change: true
 
         dev:
             pattern:  ^/(_(profiler|wdt)|css|images|js)/

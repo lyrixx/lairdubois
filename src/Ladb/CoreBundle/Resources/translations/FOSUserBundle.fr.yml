@@ -1,0 +1,28 @@
+# The translations of FOSUserBundle that the site uses (#24), in their domain
+change_password:
+  flash:
+    success: 'Le mot de passe a été modifié.'
+registration:
+  flash:
+    user_created: 'L''utilisateur a été créé avec succès.'
+resetting:
+  flash:
+    success: 'Le mot de passe a été réinitialisé avec succès.'
+  email:
+    subject: 'Réinitialisation de votre mot de passe'
+    message: |
+      Bonjour %username% !
+
+      Pour réinitialiser votre mot de passe, merci de vous rendre sur %confirmationUrl%
+
+      Cordialement,
+      L'équipe
+
+form:
+  username: 'Nom d''utilisateur'
+  email: 'Adresse e-mail'
+  current_password: 'Mot de passe actuel'
+  password: 'Mot de passe'
+  password_confirmation: 'Répéter le mot de passe'
+  new_password: 'Nouveau mot de passe'
+  new_password_confirmation: 'Répéter le nouveau mot de passe'

@@ -7,7 +7,7 @@ use Doctrine\Persistence\ObjectManager;
 use Ladb\CoreBundle\Entity\Core\Biography;
 use Ladb\CoreBundle\Entity\Core\Registration;
 use Ladb\CoreBundle\Entity\Core\User;
-use Ladb\CoreBundle\Fos\UserManager;
+use Ladb\CoreBundle\Manager\Core\UserManager;
 use Ladb\CoreBundle\Manager\Core\MemberInvitationManager;
 use Ladb\CoreBundle\Manager\Core\MemberManager;
 
@@ -111,7 +111,7 @@ final class UserFixtures extends Fixture {
 		$user->setAccountType($accountType);
 		$user->setAvatar($this->factory->picture($user, 'avatar-'.$username.'.png', 'avatar-'.$username));
 
-		// Hashes the password with the FOSUserBundle encoder (sha512), as the registration does
+		// Hashes the password with the encoder of security.yml (native), as the registration does
 		$this->userManager->updateUser($user);
 		$this->register($manager, $user);
 

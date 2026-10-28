@@ -2,7 +2,6 @@
 
 namespace Ladb\CoreBundle\Controller\Core;
 
-use FOS\UserBundle\Model\UserInterface;
 use Jaybizzle\CrawlerDetect\CrawlerDetect;
 use Ladb\CoreBundle\Controller\AbstractController;
 use Ladb\CoreBundle\Controller\UserControllerTrait;
@@ -16,8 +15,7 @@ use Ladb\CoreBundle\Entity\Core\Vote;
 use Ladb\CoreBundle\Entity\Offer\Offer;
 use Ladb\CoreBundle\Form\Type\Core\UserTeamSettingsType;
 use Ladb\CoreBundle\Form\Type\Core\UserTeamType;
-use Ladb\CoreBundle\Fos\DisplaynameCanonicalizer;
-use Ladb\CoreBundle\Fos\UserManager;
+use Ladb\CoreBundle\Manager\Core\UserManager;
 use Ladb\CoreBundle\Manager\Core\MemberInvitationManager;
 use Ladb\CoreBundle\Manager\Core\MemberManager;
 use Ladb\CoreBundle\Manager\Core\MemberRequestManager;
@@ -52,8 +50,7 @@ use Ladb\CoreBundle\Utils\SearchUtils;
 use Ladb\CoreBundle\Utils\FieldPreprocessorUtils;
 use Ladb\CoreBundle\Utils\LikableUtils;
 use Ladb\CoreBundle\Utils\UserUtils;
-use FOS\UserBundle\Util\TokenGeneratorInterface;
-use FOS\UserBundle\Util\UserManipulator;
+use Symfony\Component\Security\Csrf\TokenGenerator\TokenGeneratorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
@@ -1905,7 +1902,7 @@ class UserController extends AbstractController {
 	/**
 	 * @Route("/@{username}/admin/activate", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_admin_activate")
 	 */
-	public function adminActivateAction($username, UserManipulator $manipulator, SearchUtils $searchUtils, TranslatorInterface $translator, UserManager $userManager) {
+	public function adminActivateAction($username, SearchUtils $searchUtils, TranslatorInterface $translator, UserManager $userManager) {
 		if (!$this->isGranted('ROLE_ADMIN')) {
 			throw $this->createNotFoundException('Access denied');
 		}
@@ -1915,7 +1912,8 @@ class UserController extends AbstractController {
 			throw $this->createNotFoundException('User not found');
 		}
 
-		$manipulator->activate($username);
+		$user->setEnabled(true);
+		$userManager->updateUser($user);
 
 		// Search index update
 		$searchUtils->insertEntityToIndex($user);
@@ -1929,7 +1927,7 @@ class UserController extends AbstractController {
 	/**
 	 * @Route("/@{username}/admin/deactivate", requirements={"username" = "^[a-zA-Z0-9.]{3,25}$"}, name="core_user_admin_deactivate")
 	 */
-	public function adminDeactivateAction($username, UserManipulator $manipulator, SearchUtils $searchUtils, TranslatorInterface $translator, UserManager $userManager) {
+	public function adminDeactivateAction($username, SearchUtils $searchUtils, TranslatorInterface $translator, UserManager $userManager) {
 		if (!$this->isGranted('ROLE_ADMIN')) {
 			throw $this->createNotFoundException('Access denied');
 		}
@@ -1939,7 +1937,8 @@ class UserController extends AbstractController {
 			throw $this->createNotFoundException('User not found');
 		}
 
-		$manipulator->deactivate($username);
+		$user->setEnabled(false);
+		$userManager->updateUser($user);
 
 		// Search index update
 		$searchUtils->deleteEntityFromIndex($user);

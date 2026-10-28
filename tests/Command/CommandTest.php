@@ -77,6 +77,10 @@ final class CommandTest extends WebTestCase
         'ladb:reset:stickers' => self::DRY_RUN_AND_FORCE,
         'ladb:reset:unreadmessagecount' => self::DRY_RUN_AND_FORCE,
         'ladb:reset:updatedat' => self::DRY_RUN_AND_FORCE,
+        'ladb:user:create' => [
+            'copeau copeau@lairdubois.test Copeaux-de-chene-1',
+            'copeau copeau@lairdubois.test Copeaux-de-chene-1 --super-admin --inactive',
+        ],
     ];
 
     /**

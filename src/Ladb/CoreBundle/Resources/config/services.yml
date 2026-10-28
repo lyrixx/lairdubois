@@ -18,7 +18,7 @@ services:
     tags: ['container.service_locator']
     arguments:
       -
-        ladb_core.fos.user_manager: '@ladb_core.fos.user_manager'
+        ladb_core.core_user_manager: '@ladb_core.core_user_manager'
         ladb_core.typable_utils: '@ladb_core.typable_utils'
         ladb_core.video_hosting_utils: '@ladb_core.video_hosting_utils'
 
@@ -41,23 +41,18 @@ services:
     tags:
       - { name: liip_imagine.filter.post_processor, post_processor: ladb_imageoptimizer }
 
-  # Fos
-  ladb_core.fos.displayname_canonicalizer:
-    class: Ladb\CoreBundle\Fos\DisplaynameCanonicalizer
-  Ladb\CoreBundle\Fos\DisplaynameCanonicalizer: '@ladb_core.fos.displayname_canonicalizer'
-  ladb_core.fos.canonical_fields_updater:
-    class: Ladb\CoreBundle\Fos\CanonicalFieldsUpdater
-    arguments: ['@fos_user.util.username_canonicalizer', '@fos_user.util.email_canonicalizer', '@ladb_core.fos.displayname_canonicalizer']
-  Ladb\CoreBundle\Fos\CanonicalFieldsUpdater: '@ladb_core.fos.canonical_fields_updater'
-  ladb_core.fos.user_manager:
-    class: Ladb\CoreBundle\Fos\UserManager
-    arguments: ['@fos_user.util.password_updater', '@ladb_core.fos.canonical_fields_updater', '@doctrine.orm.entity_manager', '%fos_user.model.user.class%']
-  Ladb\CoreBundle\Fos\UserManager: '@ladb_core.fos.user_manager'
-  # FOSUserBundle has no alias by type for it, nor an interface (UserController::adminActivateAction()):
-  # an alias of the id, by its class
-  FOS\UserBundle\Util\UserManipulator: '@fos_user.util.user_manipulator'
+  # Security: the user checker of the firewall
+  ladb_core.user_checker:
+    class: Ladb\CoreBundle\Security\UserChecker
+  Ladb\CoreBundle\Security\UserChecker: '@ladb_core.user_checker'
 
   # Utils
+  ladb_core.displayname_canonicalizer:
+    class: Ladb\CoreBundle\Utils\DisplaynameCanonicalizer
+  Ladb\CoreBundle\Utils\DisplaynameCanonicalizer: '@ladb_core.displayname_canonicalizer'
+  ladb_core.canonical_fields_updater:
+    class: Ladb\CoreBundle\Utils\CanonicalFieldsUpdater
+  Ladb\CoreBundle\Utils\CanonicalFieldsUpdater: '@ladb_core.canonical_fields_updater'
   ladb_core.global_utils:
     class: Ladb\CoreBundle\Utils\GlobalUtils
     arguments: { $debug: '%kernel.debug%', $environment: '%kernel.environment%' }
@@ -263,6 +258,9 @@ services:
   Ladb\CoreBundle\Utils\MemberUtils: '@ladb_core.member_utils'
 
   # Managers
+  ladb_core.core_user_manager:
+    class: Ladb\CoreBundle\Manager\Core\UserManager
+  Ladb\CoreBundle\Manager\Core\UserManager: '@ladb_core.core_user_manager'
   ladb_core.core_picture_manager:
     class: Ladb\CoreBundle\Manager\Core\PictureManager
   Ladb\CoreBundle\Manager\Core\PictureManager: '@ladb_core.core_picture_manager'
@@ -358,6 +356,9 @@ services:
   Ladb\CoreBundle\Manager\Youtook\TookManager: '@ladb_core.took_manager'
 
   # Validators
+  # Tagged validator.initializer by autoconfigure
+  ladb_core.canonical_fields_initializer:
+    class: Ladb\CoreBundle\Validator\CanonicalFieldsInitializer
   # Not autoconfigured: it would add a second validator.constraint_validator tag, without the alias that validatedBy() returns
   ladb_core.valid_user_username_validator:
     class: Ladb\CoreBundle\Validator\Constraints\ValidUserUsernameValidator
@@ -538,6 +539,8 @@ services:
     class: Ladb\CoreBundle\Event\VotableListener
   ladb_core.return_to_url_listener:
     class: Ladb\CoreBundle\Event\ReturnToUrlListener
+  ladb_core.last_login_listener:
+    class: Ladb\CoreBundle\Event\LastLoginListener
 
   # Handlers
   ladb_core.authentification_handler:
@@ -622,7 +625,7 @@ services:
     arguments: ['@ladb_core.video_hosting_utils']
   ladb_message_newthread:
     class: Ladb\CoreBundle\Form\Type\Message\NewThreadMessageType
-    arguments: ['@doctrine.orm.entity_manager', '@fos_user.user_manager']
+    arguments: ['@doctrine.orm.entity_manager', '@ladb_core.core_user_manager']
   ladb_message_replymessage:
     class: Ladb\CoreBundle\Form\Type\Message\ReplyMessageType
     arguments: ['@doctrine.orm.entity_manager']

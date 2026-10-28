@@ -3,7 +3,7 @@
 namespace Ladb\CoreBundle\Validator\Constraints;
 
 use Doctrine\Persistence\ManagerRegistry;
-use Ladb\CoreBundle\Fos\DisplaynameCanonicalizer;
+use Ladb\CoreBundle\Utils\DisplaynameCanonicalizer;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Ladb\CoreBundle\Entity\Core\User;
