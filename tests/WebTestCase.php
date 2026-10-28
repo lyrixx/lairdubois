@@ -14,8 +14,11 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Mailer\Event\MessageEvents;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Stamp\ReceivedStamp;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 
 /**
@@ -166,22 +169,21 @@ abstract class WebTestCase extends BaseWebTestCase
      * The emails sent during the last request of the client, which needs $client->enableProfiler()
      * before it. Nothing is delivered (config_test.yml).
      *
-     * @return list<\Swift_Message>
+     * @return list<Email>
      */
     protected static function getSentEmails(KernelBrowser $client): array
     {
-        return array_values($client->getProfile()->getCollector('swiftmailer')->getMessages());
+        return self::getQueuedEmails($client->getProfile()->getCollector('mailer')->getEvents());
     }
 
     /**
-     * The recipients of an email, before delivery_address of config_dev.yml replaced them (it
-     * keeps them in the X-Swift-To header).
+     * The recipients of an email: envelope.recipients of config_dev.yml only changes the envelope.
      *
      * @return list<string>
      */
-    protected static function getEmailRecipients(\Swift_Message $message): array
+    protected static function getEmailRecipients(Email $message): array
     {
-        return array_keys($message->getHeaders()->get('X-Swift-To')->getFieldBodyModel());
+        return array_map(fn (Address $address): string => $address->getAddress(), $message->getTo());
     }
 
     /**
@@ -218,18 +220,11 @@ abstract class WebTestCase extends BaseWebTestCase
     /**
      * The emails sent by the last static::runCommand(). Nothing is delivered (config_test.yml).
      *
-     * @return list<\Swift_Message>
+     * @return list<Email>
      */
     protected static function getSentEmailsByCommand(): array
     {
-        // The logger keeps a copy of each message twice: when the command sends it to the memory
-        // spool, then when the end of the command flushes the spool
-        $messages = [];
-        foreach (static::$kernel->getContainer()->get('swiftmailer.mailer.default.plugin.messagelogger')->getMessages() as $message) {
-            $messages[$message->getId()] = $message;
-        }
-
-        return array_values($messages);
+        return self::getQueuedEmails(static::getContainer()->get('mailer.message_logger_listener')->getEvents());
     }
 
     /**
@@ -267,5 +262,23 @@ abstract class WebTestCase extends BaseWebTestCase
         }
 
         return $counts;
+    }
+
+    /**
+     * The emails as Mailer puts them on the message bus: the transport sends a copy, signed with DKIM
+     * (DkimSignedMessageListener), which is not an Email anymore.
+     *
+     * @return list<Email>
+     */
+    private static function getQueuedEmails(MessageEvents $events): array
+    {
+        $emails = [];
+        foreach ($events->getEvents() as $event) {
+            if ($event->isQueued()) {
+                $emails[] = $event->getMessage();
+            }
+        }
+
+        return $emails;
     }
 }

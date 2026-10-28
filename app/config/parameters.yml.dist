@@ -7,10 +7,7 @@ parameters:
     database_password:              YOUR_DATABASE_PASSWORD
     database_path:                  null
 
-    mailer_transport:               smtp
-    mailer_host:                    localhost
-    mailer_user:                    null
-    mailer_password:                null
+    mailer_dsn:                     smtp://localhost:25
 
     elasticsearch_host:             localhost
     elasticsearch_port:             9200

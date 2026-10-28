@@ -9,6 +9,9 @@ use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Entity\Message\Thread;
 use Ladb\CoreBundle\Entity\Core\Report;
 use Twig\Environment;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 
@@ -24,7 +27,7 @@ class MailerUtils {
 	private $router;
 	private $twig;
 
-	public function __construct(CryptoUtils $cryptoUtils, \Swift_Mailer $mailer, RouterInterface $router, Environment $twig) {
+	public function __construct(CryptoUtils $cryptoUtils, MailerInterface $mailer, RouterInterface $router, Environment $twig) {
 		$this->cryptoUtils = $cryptoUtils;
 		$this->mailer = $mailer;
 		$this->router = $router;
@@ -54,26 +57,18 @@ class MailerUtils {
 			return;	// Invalid email
 		}
 
-		// Create the DKIM signer
-		$privateKey = file_get_contents(__DIR__.'/../../../../keys/private.pem');
-		$domainName = 'lairdubois.fr';
-		$selector = 'dkim';		// For dkim._domainkey.lairdubois.fr
-		$signer = new \Swift_Signers_DKIMSigner($privateKey, $domainName, $selector);
-
-		// Create the message instance
-		$message = (new \Swift_Message())
-			->attachSigner($signer)
-			->setFrom(array('noreply@lairdubois.fr' => 'L\'Air du Bois'))
-			->setTo($toEmail)
-			->setSubject($subject)
-			->setBody($body)
-
+		// Create the message instance, signed with DKIM when it is sent (DkimSignedMessageListener)
+		$message = (new Email())
+			->from(new Address('noreply@lairdubois.fr', 'L\'Air du Bois'))
+			->to($toEmail)
+			->subject($subject)
+			->text($body)
 		;
 		if (!is_null($listUnsubscribeLink)) {
 			$message->getHeaders()->addTextHeader('List-Unsubscribe', '<mailto:unsubscribe@lairdubois.fr?subject='.$listUnsubscribeLink.'>');
 		}
 		if (!is_null($htmlBody)) {
-			$message->addPart($htmlBody, 'text/html');
+			$message->html($htmlBody);
 		}
 		$this->mailer->send($message);
 	}
@@ -96,8 +91,7 @@ class MailerUtils {
 	}
 
 	/**
-	 * The forgotten password email, as FOSUserBundle sent it: without DKIM signature, its subject on the
-	 * first line of the template.
+	 * The forgotten password email, as FOSUserBundle sent it: its subject on the first line of the template.
 	 */
 	public function sendResettingEmailMessage(User $recipientUser) {
 		$renderedLines = explode("\n", trim($this->_renderTemplate('@FOSUser/Resetting/email.txt.twig', array(
@@ -106,11 +100,11 @@ class MailerUtils {
 		))));
 		$subject = array_shift($renderedLines);
 
-		$message = (new \Swift_Message())
-			->setSubject($subject)
-			->setFrom(array('noreply@lairdubois.fr' => 'L\'Air du Bois'))
-			->setTo((string) $recipientUser->getEmail())
-			->setBody(implode("\n", $renderedLines))
+		$message = (new Email())
+			->subject($subject)
+			->from(new Address('noreply@lairdubois.fr', 'L\'Air du Bois'))
+			->to((string) $recipientUser->getEmail())
+			->text(implode("\n", $renderedLines))
 		;
 		$this->mailer->send($message);
 	}

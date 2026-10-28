@@ -48,6 +48,11 @@ framework:
         default_options:
             timeout: 3
             max_duration: 10
+    # Sent as soon as the mailer gets them: SendEmailMessage has no transport below. Mailer starts
+    # TLS when the SMTP server offers it, and checks its certificate (?verify_peer=0 in mailer_dsn
+    # for a self-signed one). Signed with DKIM when sent (DkimSignedMessageListener)
+    mailer:
+        dsn: '%mailer_dsn%'
 
     # Two queues in RabbitMQ (the rabbitmq_* parameters), each with its exchange of the same name and
     # its worker: "messenger:consume view", "messenger:consume webpush_notification". The connection
@@ -169,16 +174,6 @@ doctrine_migrations:
     # default of dir_name reads kernel.root_dir, removed in Symfony 5.0
     migrations_paths:
         'Application\Migrations': "%kernel.project_dir%/app/DoctrineMigrations"
-
-# Swiftmailer Configuration
-swiftmailer:
-    transport: "%mailer_transport%"
-    host:      "%mailer_host%"
-    username:  "%mailer_user%"
-    password:  "%mailer_password%"
-    spool:
-        type: file
-        path: "%kernel.project_dir%/app/spool"
 
 # StofDoctrineExtensions
 stof_doctrine_extensions:

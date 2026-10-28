@@ -145,7 +145,7 @@ final class RegistrationTest extends WebTestCase
         self::assertCount(1, $messages);
         self::assertSame(['user@lairdubois.test'], static::getEmailRecipients($messages[0]));
         self::assertSame('Confirmation de votre adresse e-mail', $messages[0]->getSubject());
-        self::assertSame(1, preg_match('{https://lairdubois\.test(/email/confirm/[\w-]+)}', $messages[0]->getBody(), $matches));
+        self::assertSame(1, preg_match('{https://lairdubois\.test(/email/confirm/[\w-]+)}', $messages[0]->getTextBody(), $matches));
 
         $client->request('GET', $matches[1]);
 

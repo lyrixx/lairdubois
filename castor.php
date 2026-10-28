@@ -71,8 +71,9 @@ function install(): void
     // bundles assets and clear the cache.
     docker_compose_run(['composer', 'install', '-n', '--prefer-dist', '--optimize-autoloader', '--ignore-platform-req=php+']);
 
-    // MailerUtils signs every email with the DKIM key of the production server (keys/private.pem,
-    // out of git): without a key, sending an email fails. A throwaway one for dev and test.
+    // DkimSignedMessageListener signs every email with the DKIM key of the production server
+    // (keys/private.pem, out of git): without a key, sending an email fails. A throwaway one for
+    // dev and test.
     docker_compose_run(['sh', '-c', 'test -f keys/private.pem || (mkdir -p keys && openssl genrsa -out keys/private.pem 2048)']);
 
     // The web push notifications are signed with the VAPID keys of the production server

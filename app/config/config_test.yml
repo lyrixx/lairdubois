@@ -8,6 +8,10 @@ framework:
     # The profiler only collects on demand: $client->enableProfiler()
     profiler:
         collect: false
+    # Nothing is delivered: the tests read the emails in the profiler (collector "mailer") or in
+    # the container (Tests\WebTestCase)
+    mailer:
+        dsn: 'null://null'
     # RabbitMQ gets no messages from the tests: the workers of the dev stack would process them on
     # the dev database, and the CI does not start them. In memory (tests.view_transport,
     # tests.webpush_notification_transport), unless a test sets the variable (RabbitMqTest,
@@ -25,12 +29,6 @@ framework:
 web_profiler:
     toolbar: false
     intercept_redirects: false
-
-swiftmailer:
-    disable_delivery: true
-    # Not the file spool of config.yml, shared with the dev environment
-    spool:
-        type: memory
 
 # The debug level of config_dev.yml writes 200 MB per run of the smoke test
 monolog:

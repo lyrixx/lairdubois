@@ -153,8 +153,9 @@ Contextes : `--context=test` (`SYMFONY_ENV=test`), `--context=ci` (le même, san
   mails en SMTP sur `mailpit:1025` et les affiche dans son interface, routée sur `/mailpit/` du
   domaine et du port du site (`MP_WEBROOT`) : `castor about` donne son URL. Base temporaire, sans
   volume : les mails sont perdus quand il redémarre. `MAILER_DSN` (`smtp://mailpit:1025`) est dans
-  l'environnement du builder, pour Symfony Mailer. Swiftmailer ne le lit pas : il garde son spool
-  fichier, que rien ne vide en dev, aucun mail du site n'arrive donc dans Mailpit.
+  l'environnement du builder, pour `mailer_dsn`. Tous les mails du site y arrivent, envoyés à
+  `dev@lairdubois.fr` (`envelope.recipients` de `config_dev.yml`) : seule l'enveloppe SMTP change,
+  l'en-tête `To` garde le destinataire d'origine.
 - Playwright (service `playwright`, profil `e2e`, lancé par `castor qa:e2e`) : l'image officielle
   `mcr.microsoft.com/playwright`, avec Node 24 et les navigateurs, à la version de
   `@playwright/test` dans `tests/e2e/package.json`.
@@ -352,7 +353,7 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   leurs options (timeout) et répond 201, 410 (`expire()`) ou rien (`makeUnreachable()`).
   `NotificationTest` vérifie le JWT VAPID et déchiffre le contenu avec les clés de l'abonnement.
 - Le profiler ne collecte qu'à la demande : `$client->enableProfiler()` avant la requête, puis
-  `$client->getProfile()` (mails : collector `swiftmailer`, la livraison est coupée en test).
+  `$client->getProfile()` (mails : collector `mailer`, transport `null://` en test).
 - Aucun appel réseau sortant. Les GET du smoke test n'en font pas : Stripe ne part qu'en XHR, le
   compteur de partages Facebook qu'avec `?url=`, le titre d'un referer qu'avec `?referer=1`, le
   scrape Open Graph de Facebook jamais en debug. Doubles de `config_test.yml`
@@ -427,10 +428,10 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   dont un compte au hash sha512 de FOSUserBundle écrit tel quel en base, rehashé à sa connexion, et
   des sessions ouvertes avant #24, au token sérialisé en dur (`LoginTest`).
 - Mails : `static::getSentEmails($client)` (après `$client->enableProfiler()`) et
-  `static::getEmailRecipients($message)`. Le `delivery_address` de `config_dev.yml` remplace les
-  destinataires de chaque mail par `dev@lairdubois.fr`, ceux d'origine restent dans l'en-tête
-  `X-Swift-To`. Spool en mémoire en test : le spool fichier de `config.yml` (`app/spool/`) est
-  partagé avec le dev.
+  `static::getEmailRecipients($message)` (l'en-tête `To`). Ils lisent les `Email` que Mailer met sur
+  le bus de Messenger (`isQueued()` de `mailer.message_logger_listener`), sans signature : le
+  transport (`null://` en test, rien ne part) envoie une copie signée, un `Message`, que
+  `Tests\Mail\DkimSignatureTest` vérifie.
 - Commandes (`tests/Command/`) : `static::runCommand('ladb:cron:offers --force')` lance une ligne
   de commande dans la transaction du test et rend son code de sortie et sa sortie ; le kernel
   reste celui de la commande (`static::getEntityManager()`), ses mails sont dans
@@ -655,11 +656,20 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
 - Les managers (`publish()`…) parcourent les collections inverses (créations d'un plan…), qui ne sont
   initialisées que sur une entité chargée depuis la base : `FixtureFactory::create()` fait un
   `refresh()` après le premier `flush()`.
-- `MailerUtils` signe chaque mail avec la clé DKIM de la prod (`keys/private.pem`, hors git) : sans
-  elle, tout mail du site (confirmation d'adresse, notifications…) donne une 500. `castor
-  app:install` en génère une jetable si elle manque. Sauf le mail du mot de passe oublié
-  (`sendResettingEmailMessage()`), envoyé comme FOSUserBundle l'envoyait : sans signature, le
-  sujet sur la première ligne de son template.
+- Symfony Mailer (#19) : `MailerUtils` envoie des `Email`, que Mailer passe au bus de Messenger ;
+  `SendEmailMessage` n'y a pas de transport, son handler les envoie tout de suite, dans la requête
+  ou la commande. Un seul paramètre, `mailer_dsn` (`framework.mailer.dsn`). Mailer lance STARTTLS
+  dès que le serveur SMTP l'annonce et vérifie son certificat, ce que Swiftmailer ne faisait pas
+  sans `encryption` : `?verify_peer=0` pour un Postfix au certificat autosigné (l'option `auto_tls`
+  n'arrive qu'en 7.1).
+- `Event\DkimSignedMessageListener` signe chaque mail avec la clé DKIM de la prod
+  (`keys/private.pem`, hors git, `relaxed/relaxed`) quand le transport l'envoie (`MessageEvent` pas
+  `isQueued()`), pas quand Mailer le met sur le bus : le message en file reste un `Email`, que les
+  tests et le profiler lisent. Symfony 7.3 a le sien (`framework.mailer.dkim_signer`), qui signe
+  aussi le message mis en file. Sans la clé, tout mail du site (confirmation d'adresse,
+  notifications…) donne une 500 : `castor app:install` en génère une jetable si elle manque. Le
+  mail du mot de passe oublié (`sendResettingEmailMessage()`) est construit comme FOSUserBundle le
+  faisait (texte seul, le sujet sur la première ligne de son template), et signé comme les autres.
 - Connexion, inscription, mot de passe oublié et changement de mot de passe : nos controllers
   (`SecurityController`, `RegistrationController`, `ResettingController`,
   `ChangePasswordController`), qui gardent les routes, les noms de formulaires et les templates
