@@ -136,7 +136,9 @@ Contextes : `--context=test` (`SYMFONY_ENV=test`), `--context=ci` (le même, san
   `vite.config.js`. Le dev sert le build : `castor app:assets:watch` pendant qu'on modifie un
   LESS ou un JS, pas de serveur de Vite.
 - MariaDB 10.11 (`root`/`app`), Elasticsearch 5.6, RabbitMQ 3.13 (`app`/`app`), Memcached. Workers
-  (profil `worker`) : les deux consumers RabbitMQ et `websocket` (routé sur `/ws`).
+  (profil `worker`) : les deux de Messenger (`messenger:consume view`, `messenger:consume
+  webpush_notification`) et `websocket` (routé sur `/ws`). Extension PHP `amqp` dans les images, pour
+  le transport AMQP de Messenger.
 - Playwright (service `playwright`, profil `e2e`, lancé par `castor qa:e2e`) : l'image officielle
   `mcr.microsoft.com/playwright`, avec Node 24 et les navigateurs, à la version de
   `@playwright/test` dans `tests/e2e/package.json`.
@@ -317,12 +319,14 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   - `static::$container` : le container de test, qui lit aussi les services privés (ceux de
     `services.yml`), dans le kernel du dernier `createClient()` ou `bootKernel()`, reboots du
     client compris.
-- Pas de RabbitMQ ni de websocket en test : les producers `old_sound_rabbit_mq.view_producer` et
-  `webpush_notification_producer`, et le pusher `gos_web_socket.wamp.pusher`, sont décorés par
-  `Tests\Double\InMemoryProducer` et `InMemoryPusher`, qui gardent les messages
-  (`$client->getContainer()->get('tests.view_producer')->getMessages()`, avant le reboot suivant).
-- Envoi des notifications web push (`tests/Webpush/`) : le test lance le consumer
-  (`tests.webpush_notification_consumer`), le client Guzzle de l'envoi passe par
+- Pas de RabbitMQ ni de websocket en test : les transports de Messenger sont `in-memory://`
+  (`config_test.yml`), et le pusher `gos_web_socket.wamp.pusher` est décoré par `InMemoryPusher`. Ils
+  gardent les messages (`$client->getContainer()->get('tests.view_transport')->getSent()`, avant le
+  reboot suivant). `static::consumeMessage($message, 'view')` passe un message à ses handlers, comme
+  le worker. `UnreachableRabbitMqTest` met les transports sur un port fermé
+  (`LADB_TEST_MESSENGER_TRANSPORT_DSN`).
+- Envoi des notifications web push (`tests/Webpush/`) : le test passe le message au handler
+  (`consumeMessage()`), le client Guzzle de l'envoi passe par
   `Tests\Double\InMemoryPushHandler` (`tests.webpush_push_handler`), qui garde les requêtes et
   répond 201, 410 (`expire()`) ou rien (`makeUnreachable()`). `NotificationTest` vérifie le JWT
   VAPID et déchiffre le contenu avec les clés de l'abonnement.
@@ -431,7 +435,7 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
 - `castor qa:e2e [-- --grep …]` recharge les fixtures dans la base et l'index du dev (le site sert
   `app_dev.php`, quel que soit le contexte : les données de dev sont perdues), redémarre le serveur
   websocket en dev, puis lance la suite dans le service `playwright` (`npm ci` si `node_modules`
-  manque ou date d'avant le lock). Aucun consumer RabbitMQ n'est nécessaire.
+  manque ou date d'avant le lock). Aucun worker de Messenger n'est nécessaire.
 - Traces, captures et contexte des tests en échec dans `var/e2e/test-results/` (artifact
   `e2e-test-results` en CI) : `npx playwright show-trace`, ou trace.playwright.dev.
 - Le navigateur joint le site par le réseau de la stack : `--host-resolver-rules` de Chromium
@@ -575,10 +579,9 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   (`ladb_core.typable_utils.manager_locator` de `services.yml`), par le nom que donne
   `getStrippedNameByType()` : un manager n'a pas à être public pour lui. `Tests\Command\ManagerByTypeTest`
   vérifie le manager de chaque type.
-- Utils : dépendances et paramètres par le constructeur (`Utils/`, sans container). Un producer
-  RabbitMQ se connecte dès sa création (`lazy: false`) : `ViewableUtils` et `WebpushNotificationUtils`
-  le lisent au moment de publier, dans `ladb_core.rabbit_mq_producer_locator`, et journalisent un
-  échec de connexion au lieu de le lever. `SearchUtils` reçoit un type par l'id de son service
+- Utils : dépendances et paramètres par le constructeur (`Utils/`, sans container). `ViewableUtils`
+  et `WebpushNotificationUtils` envoient leurs messages par le bus de Messenger et journalisent un
+  échec d'envoi (`TransportException`, RabbitMQ injoignable) au lieu de le lever. `SearchUtils` reçoit un type par l'id de son service
   (`fos_elastica.index.ladb.<type>`) et le demande à l'index.
 - Managers : dépendances par le constructeur (`Manager/`, sans container). Les classes abstraites
   (`AbstractManager`, `AbstractPublicationManager`…) les reçoivent par des setters `@required`,
@@ -620,9 +623,16 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   un nouveau mot de passe, comme le `LoginManager` de FOSUserBundle. Le namespace `@FOSUser` est un
   chemin Twig de `config.yml` (`templates/bundles/FOSUserBundle/`), les traductions utilisées sont
   dans les domaines `FOSUserBundle` et `validators` du bundle.
+- Messenger 4.4 (#22) : deux transports AMQP (`config.yml`), chacun avec son échange et sa file du
+  même nom, `view` et `webpush_notification`. Les anciennes files de RabbitMqBundle (`view_queue`…)
+  ne servent plus : le `PhpSerializer` de la 4.4 lit un de leurs messages comme un array, et le
+  worker s'arrêterait sans le retirer. La connexion est en options : dans le DSN, le mot de passe et
+  le vhost `/` seraient à encoder. Un handler en échec est rejoué 3 fois (échange `delays`), puis le
+  message est supprimé (log critical). Le worker vide l'entity manager après chaque message : un
+  handler flush ce qu'il persiste, sinon c'est perdu.
 - Les notifications web push sont signées avec les clés VAPID de la prod (`bentools_webpush.*` de
-  `parameters.yml`) : avec celles de `parameters.yml.dist`, le consumer `webpush_notification`
-  s'arrête au premier message. `castor app:install` y écrit une paire jetable, que les `composer
+  `parameters.yml`) : avec celles de `parameters.yml.dist`, le worker `webpush_notification`
+  échoue sur chaque message. `castor app:install` y écrit une paire jetable, que les `composer
   install` suivants gardent.
 - `guzzlehttp/psr7` reste en 1.x tant que Gos WebSocket est là (`cboden/ratchet` et
   `ratchet/rfc6455` exigent `^1.0`), sans fabrique PSR-17 : `http-interop/http-factory-guzzle` la
