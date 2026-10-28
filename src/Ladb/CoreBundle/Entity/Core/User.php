@@ -269,8 +269,8 @@ class User implements UserInterface, EquatableInterface, \Serializable, Indexabl
 		if ($this->salt !== $user->getSalt()) {
 			return false;
 		}
-		// Unknown in a session of FOSUserBundle, whose token keeps them: they cannot have changed since
-		// the last request before #24
+		// Unknown in a session of FOSUserBundle: compared from its next request on, once the session
+		// holds the reloaded user
 		if (null !== $this->roles) {
 			$roles = $this->getRoles();
 			$userRoles = $user->getRoles();

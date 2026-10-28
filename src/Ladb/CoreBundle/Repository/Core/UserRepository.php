@@ -30,9 +30,8 @@ class UserRepository extends AbstractEntityRepository implements UserLoaderInter
 	}
 
 	/**
-	 * The hash of a password, again at the login when it is not the one of the encoder of
-	 * security.yml (the sha512 of FOSUserBundle): it salts the hash itself. Saved at once, the login
-	 * form being no action.
+	 * At the login, when the hash is not the one of the encoder of security.yml (the sha512 of
+	 * FOSUserBundle): the new hash holds its salt. Flushed here, no action handles the login form.
 	 */
 	public function upgradePassword(UserInterface $user, string $newEncodedPassword): void {
 		$user->setPassword($newEncodedPassword);
