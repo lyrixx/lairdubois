@@ -91,7 +91,7 @@ class PublicationListener implements EventSubscriberInterface {
 		$this->watchableUtils = $watchableUtils;
 	}
 
-	public static function getSubscribedEvents() {
+	public static function getSubscribedEvents(): array {
 		return array(
 			PublicationListener::PUBLICATION_CREATED              => 'onPublicationCreated',
 			PublicationListener::PUBLICATION_CREATED_FROM_CONVERT => 'onPublicationCreatedFromConvert',

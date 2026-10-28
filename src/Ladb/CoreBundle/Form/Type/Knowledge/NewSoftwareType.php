@@ -39,7 +39,7 @@ class NewSoftwareType extends AbstractType {
 		));
 	}
 
-	public function getBlockPrefix() {
+	public function getBlockPrefix(): string {
 		return 'ladb_knowledge_newsoftware';
 	}
 

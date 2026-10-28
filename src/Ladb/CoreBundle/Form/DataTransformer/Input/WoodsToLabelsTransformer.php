@@ -15,7 +15,7 @@ class WoodsToLabelsTransformer implements DataTransformerInterface {
 		$this->om = $om;
 	}
 
-	public function transform($woods) {
+	public function transform($woods): mixed {
 		if (null === $woods) {
 			return '';
 		}
@@ -31,7 +31,7 @@ class WoodsToLabelsTransformer implements DataTransformerInterface {
 		return implode(',', $labelsArray);
 	}
 
-	public function reverseTransform($labelsString) {
+	public function reverseTransform($labelsString): mixed {
 		if (!$labelsString) {
 			return array();
 		}

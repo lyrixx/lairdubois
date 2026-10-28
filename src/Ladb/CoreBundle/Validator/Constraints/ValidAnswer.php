@@ -11,11 +11,11 @@ class ValidAnswer extends Constraint {
 
 	public $message = 'Vidéo introuvable.';
 
-	public function validatedBy() {
+	public function validatedBy(): string {
 		return 'ladb_core.valid_answer_validator';
 	}
 
-	public function getTargets() {
+	public function getTargets(): string|array {
 		return self::CLASS_CONSTRAINT;
 	}
 

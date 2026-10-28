@@ -17,7 +17,7 @@ class UsersToUsernamesTransformer implements DataTransformerInterface {
 	/**
 	 * Transforms an object (user) to a string (username).
 	 */
-	public function transform($users) {
+	public function transform($users): mixed {
 		if (null === $users) {
 			return '';
 		}
@@ -36,7 +36,7 @@ class UsersToUsernamesTransformer implements DataTransformerInterface {
 	/**
 	 * Transforms a string (username) to an object (user).
 	 */
-	public function reverseTransform($usernamesString) {
+	public function reverseTransform($usernamesString): mixed {
 		if (!$usernamesString) {
 			return array();
 		}

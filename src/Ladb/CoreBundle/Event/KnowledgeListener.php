@@ -20,7 +20,7 @@ class KnowledgeListener implements EventSubscriberInterface {
 		$this->textureUtils = $textureUtils;
 	}
 
-	public static function getSubscribedEvents() {
+	public static function getSubscribedEvents(): array {
 		return array(
 			KnowledgeListener::FIELD_VALUE_ADDED   => 'onFieldValueAdded',
 			KnowledgeListener::FIELD_VALUE_UPDATED => 'onFieldValueUpdated',

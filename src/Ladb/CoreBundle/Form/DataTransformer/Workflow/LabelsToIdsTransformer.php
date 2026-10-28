@@ -15,7 +15,7 @@ class LabelsToIdsTransformer implements DataTransformerInterface {
 		$this->om = $om;
 	}
 
-	public function transform($labels) {
+	public function transform($labels): mixed {
 		if (null === $labels) {
 			return '';
 		}
@@ -31,7 +31,7 @@ class LabelsToIdsTransformer implements DataTransformerInterface {
 		return implode(',', $idsArray);
 	}
 
-	public function reverseTransform($idsString) {
+	public function reverseTransform($idsString): mixed {
 		if (!$idsString) {
 			return array();
 		}

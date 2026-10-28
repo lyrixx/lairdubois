@@ -16,7 +16,7 @@ class PlansToIdsTransformer implements DataTransformerInterface {
 		$this->om = $om;
 	}
 
-	public function transform($plans) {
+	public function transform($plans): mixed {
 		if (null === $plans) {
 			return '';
 		}
@@ -32,7 +32,7 @@ class PlansToIdsTransformer implements DataTransformerInterface {
 		return implode(',', $idsArray);
 	}
 
-	public function reverseTransform($idsString) {
+	public function reverseTransform($idsString): mixed {
 		if (!$idsString) {
 			return array();
 		}

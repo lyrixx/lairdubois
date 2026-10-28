@@ -43,7 +43,7 @@ class SoftwareIdentityValueType extends AbstractValueType {
 		));
 	}
 
-	public function getBlockPrefix() {
+	public function getBlockPrefix(): string {
 		return 'ladb_knowledge_value_software_identity';
 	}
 

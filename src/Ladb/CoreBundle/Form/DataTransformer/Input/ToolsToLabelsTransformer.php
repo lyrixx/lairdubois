@@ -15,7 +15,7 @@ class ToolsToLabelsTransformer implements DataTransformerInterface {
 		$this->om = $om;
 	}
 
-	public function transform($tools) {
+	public function transform($tools): mixed {
 		if (null === $tools) {
 			return '';
 		}
@@ -31,7 +31,7 @@ class ToolsToLabelsTransformer implements DataTransformerInterface {
 		return implode(',', $labelsArray);
 	}
 
-	public function reverseTransform($labelsString) {
+	public function reverseTransform($labelsString): mixed {
 		if (!$labelsString) {
 			return array();
 		}

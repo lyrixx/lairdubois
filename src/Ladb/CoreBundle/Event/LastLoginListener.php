@@ -20,7 +20,7 @@ final class LastLoginListener implements EventSubscriberInterface {
 		$this->userManager = $userManager;
 	}
 
-	public static function getSubscribedEvents() {
+	public static function getSubscribedEvents(): array {
 		return array(
 			SecurityEvents::INTERACTIVE_LOGIN => 'onSecurityInteractiveLogin',
 		);

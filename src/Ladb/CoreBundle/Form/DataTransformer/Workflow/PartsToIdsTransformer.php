@@ -15,7 +15,7 @@ class PartsToIdsTransformer implements DataTransformerInterface {
 		$this->om = $om;
 	}
 
-	public function transform($parts) {
+	public function transform($parts): mixed {
 		if (null === $parts) {
 			return '';
 		}
@@ -31,7 +31,7 @@ class PartsToIdsTransformer implements DataTransformerInterface {
 		return implode(',', $idsArray);
 	}
 
-	public function reverseTransform($idsString) {
+	public function reverseTransform($idsString): mixed {
 		if (!$idsString) {
 			return array();
 		}

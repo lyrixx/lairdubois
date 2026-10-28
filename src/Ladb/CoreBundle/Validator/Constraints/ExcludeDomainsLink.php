@@ -12,11 +12,11 @@ class ExcludeDomainsLink extends Constraint {
 	public $excludedDomainPaterns = array();
 	public $message = 'Ce domaine n\'est pas autorisé.';
 
-	public function validatedBy() {
+	public function validatedBy(): string {
 		return 'ladb_core.exclude_domains_link_validator';
 	}
 
-	public function getTargets() {
+	public function getTargets(): string|array {
 		return self::PROPERTY_CONSTRAINT;
 	}
 

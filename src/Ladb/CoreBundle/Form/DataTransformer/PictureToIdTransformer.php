@@ -16,7 +16,7 @@ class PictureToIdTransformer implements DataTransformerInterface {
 		$this->om = $om;
 	}
 
-	public function transform($picture) {
+	public function transform($picture): mixed {
 		if (null === $picture) {
 			return '';
 		}
@@ -28,7 +28,7 @@ class PictureToIdTransformer implements DataTransformerInterface {
 		return $picture->getId();
 	}
 
-	public function reverseTransform($idString) {
+	public function reverseTransform($idString): mixed {
 		if (!$idString) {
 			return null;
 		}

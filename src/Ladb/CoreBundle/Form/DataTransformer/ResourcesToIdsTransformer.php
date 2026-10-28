@@ -16,7 +16,7 @@ class ResourcesToIdsTransformer implements DataTransformerInterface {
 		$this->om = $om;
 	}
 
-	public function transform($resources) {
+	public function transform($resources): mixed {
 		if (null === $resources) {
 			return '';
 		}
@@ -32,7 +32,7 @@ class ResourcesToIdsTransformer implements DataTransformerInterface {
 		return implode(',', $idsArray);
 	}
 
-	public function reverseTransform($idsString) {
+	public function reverseTransform($idsString): mixed {
 		if (!$idsString) {
 			return array();
 		}

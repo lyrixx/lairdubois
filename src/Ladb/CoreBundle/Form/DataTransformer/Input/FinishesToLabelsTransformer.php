@@ -15,7 +15,7 @@ class FinishesToLabelsTransformer implements DataTransformerInterface {
 		$this->om = $om;
 	}
 
-	public function transform($finishes) {
+	public function transform($finishes): mixed {
 		if (null === $finishes) {
 			return '';
 		}
@@ -31,7 +31,7 @@ class FinishesToLabelsTransformer implements DataTransformerInterface {
 		return implode(',', $labelsArray);
 	}
 
-	public function reverseTransform($labelsString) {
+	public function reverseTransform($labelsString): mixed {
 		if (!$labelsString) {
 			return array();
 		}

@@ -16,7 +16,7 @@ class CreationsToIdsTransformer implements DataTransformerInterface {
 		$this->om = $om;
 	}
 
-	public function transform($creations) {
+	public function transform($creations): mixed {
 		if (null === $creations) {
 			return '';
 		}
@@ -32,7 +32,7 @@ class CreationsToIdsTransformer implements DataTransformerInterface {
 		return implode(',', $idsArray);
 	}
 
-	public function reverseTransform($idsString) {
+	public function reverseTransform($idsString): mixed {
 		if (!$idsString) {
 			return array();
 		}

@@ -25,7 +25,7 @@ final class OfflineStripeClient implements ClientInterface
         ApiRequestor::setHttpClient($this);
     }
 
-    public function request($method, $absUrl, $headers, $params, $hasFile)
+    public function request($method, $absUrl, $headers, $params, $hasFile): array
     {
         $path = parse_url($absUrl, \PHP_URL_PATH);
         $this->requests[] = ['method' => $method, 'path' => $path, 'params' => $params];

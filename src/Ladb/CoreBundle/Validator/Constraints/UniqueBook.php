@@ -12,11 +12,11 @@ class UniqueBook extends Constraint {
 	public $excludedId = 0;
 	public $message = 'Ce livre existe déjà.';
 
-	public function validatedBy() {
+	public function validatedBy(): string {
 		return 'ladb_core.unique_book_validator';
 	}
 
-	public function getTargets() {
+	public function getTargets(): string|array {
 		return self::PROPERTY_CONSTRAINT;
 	}
 

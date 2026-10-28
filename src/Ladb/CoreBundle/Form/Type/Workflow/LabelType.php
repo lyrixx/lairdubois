@@ -23,7 +23,7 @@ class LabelType extends AbstractType {
 		));
 	}
 
-	public function getBlockPrefix() {
+	public function getBlockPrefix(): string {
 		return 'ladb_workflow_label';
 	}
 

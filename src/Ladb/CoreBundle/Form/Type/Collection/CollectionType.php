@@ -48,7 +48,7 @@ class CollectionType extends AbstractType {
 		));
 	}
 
-	public function getBlockPrefix() {
+	public function getBlockPrefix(): string {
 		return 'ladb_collection_collection';
 	}
 
