@@ -8,6 +8,9 @@ framework:
     router:
         resource: "%kernel.project_dir%/app/config/routing.yml"
         strict_requirements: "%kernel.debug%"
+        # Not the default of Symfony 6 (true): the requirements of the routes keep matching bytes,
+        # not UTF-8 characters
+        utf8: false
     form:            true
     csrf_protection: true
     validation:      { enable_annotations: true }
@@ -27,6 +30,7 @@ framework:
                 base_urls:  ["%router.request_context.scheme%://%router.request_context.host%"]
     default_locale:  "%locale%"
     session:
+        storage_factory_id: session.storage.factory.native
         handler_id: session.handler.pdo
         save_path: "%kernel.project_dir%/app/sessions"
         cookie_lifetime: 0
@@ -51,6 +55,7 @@ framework:
     # A message whose handler fails is retried 3 times (after 1, 2 and 4 seconds, by the exchange
     # "delays" and its "delay_*" queues), then removed with a critical log.
     messenger:
+        reset_on_message: true
         buses:
             messenger.bus.default:
                 # A worker runs for days: reconnects to the database after a long idle time
@@ -217,8 +222,8 @@ liip_imagine:
     data_loader:          default
     default_image:        null
     controller:
-        filter_action:         liip_imagine.controller:filterAction
-        filter_runtime_action: liip_imagine.controller:filterRuntimeAction
+        filter_action:         liip_imagine.controller::filterAction
+        filter_runtime_action: liip_imagine.controller::filterRuntimeAction
 
     filter_sets:
         cache: ~

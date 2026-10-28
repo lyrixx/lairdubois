@@ -51,11 +51,11 @@ final class CountersTest extends WebTestCase
     }
 
     /**
-     * In test, the session is a file (session.storage.mock_file of config_test.yml).
+     * In test, the session is a file (session.storage.factory.mock_file of config_test.yml).
      */
     private function getSessionFile(KernelBrowser $client): string
     {
-        $session = $client->getContainer()->get('session');
+        $session = $client->getContainer()->get('session.factory')->createSession();
 
         return $client->getContainer()->getParameter('kernel.cache_dir').'/sessions/'.$client->getCookieJar()->get($session->getName())->getValue().'.mocksess';
     }

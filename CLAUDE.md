@@ -333,7 +333,7 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
     entité après une requête plutôt que de garder celle d'avant. L'entity manager d'une requête
     peut garder une entité qu'elle a supprimée (article d'un pas à pas) : `clear()` avant de
     vérifier une suppression par `find()`.
-  - `static::$container` : le container de test, qui lit aussi les services privés (ceux de
+  - `static::getContainer()` : le container de test, qui lit aussi les services privés (ceux de
     `services.yml`), dans le kernel du dernier `createClient()` ou `bootKernel()`, reboots du
     client compris.
 - Pas de RabbitMQ en test : les transports de Messenger sont `in-memory://` (`config_test.yml`). Ils
@@ -682,8 +682,9 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   ne servent plus : le `PhpSerializer` lit un de leurs messages comme un array, et le
   worker s'arrêterait sans le retirer. La connexion est en options : dans le DSN, le mot de passe et
   le vhost `/` seraient à encoder. Un handler en échec est rejoué 3 fois (échange `delays`), puis le
-  message est supprimé (log critical). Le worker vide l'entity manager après chaque message : un
-  handler flush ce qu'il persiste, sinon c'est perdu.
+  message est supprimé (log critical). Après chaque message, le worker vide l'entity manager et
+  remet à zéro les services (`reset_on_message`, le défaut de 6.0) : un handler flush ce qu'il
+  persiste, sinon c'est perdu, et ne garde rien d'un message à l'autre.
 - Les notifications web push sont signées avec les clés VAPID de la prod (`bentools_webpush.*` de
   `parameters.yml`) : avec celles de `parameters.yml.dist`, le worker `webpush_notification`
   échoue sur chaque message. `castor app:install` y écrit une paire jetable, que les `composer

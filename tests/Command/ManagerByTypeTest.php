@@ -39,7 +39,7 @@ final class ManagerByTypeTest extends WebTestCase
     public function testGetManagerByType(int $type, string $entityClass): void
     {
         static::bootKernel();
-        $typableUtils = static::$container->get(TypableUtils::NAME);
+        $typableUtils = static::getContainer()->get(TypableUtils::NAME);
 
         $managerClass = str_replace('\\Entity\\', '\\Manager\\', $entityClass).'Manager';
         if (!class_exists($managerClass)) {

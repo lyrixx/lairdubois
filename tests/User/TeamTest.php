@@ -337,7 +337,7 @@ final class TeamTest extends WebTestCase
     private function createUser(string $username): User
     {
         static::bootKernel();
-        $userManager = static::$container->get(UserManager::NAME);
+        $userManager = static::getContainer()->get(UserManager::NAME);
         $user = $userManager->createUser();
         $user->setUsername($username);
         $user->setDisplayname(ucfirst($username));

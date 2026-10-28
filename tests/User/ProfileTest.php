@@ -176,7 +176,7 @@ final class ProfileTest extends WebTestCase
     public function testDelete(): void
     {
         static::bootKernel();
-        $container = static::$container;
+        $container = static::getContainer();
         $userManager = $container->get(UserManager::NAME);
         $factory = $container->get('tests.fixture_factory');
         $user = $userManager->createUser();
@@ -227,7 +227,7 @@ final class ProfileTest extends WebTestCase
     public function testDeleteWithRegistration(): void
     {
         static::bootKernel();
-        $container = static::$container;
+        $container = static::getContainer();
         $userManager = $container->get(UserManager::NAME);
         $user = $userManager->createUser();
         $user->setUsername('apprenti');

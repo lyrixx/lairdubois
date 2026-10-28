@@ -262,7 +262,7 @@ final class LoginTest extends WebTestCase
     {
         $client = static::createClient();
         $this->setPasswordHash($username, self::SHA512_HASH, self::SALT);
-        $session = $client->getContainer()->get('session');
+        $session = $client->getContainer()->get('session.factory')->createSession();
         $session->set('_security_main', $serializedToken);
         $session->save();
         $client->getCookieJar()->set(new Cookie($session->getName(), $session->getId()));
@@ -293,7 +293,7 @@ final class LoginTest extends WebTestCase
     {
         $client = static::createClient();
         $this->setPasswordHash(UserFixtures::USER, self::SYMFONY_44_HASH, null);
-        $session = $client->getContainer()->get('session');
+        $session = $client->getContainer()->get('session.factory')->createSession();
         // The token of a login by the form with Symfony 4.4.51 (PHP 8.5)
         $session->set('_security_main', 'O:74:"Symfony\\Component\\Security\\Core\\Authentication\\Token\\UsernamePasswordToken":3:{i:0;N;i:1;s:4:"main";i:2;a:5:{i:0;O:32:"Ladb\\CoreBundle\\Entity\\Core\\User":9:{i:0;s:97:"$argon2id$v=19$m=65536,t=4,p=1$ZkdxcUg5T1dpclFnYjJBUA$xaqpAZakiM6hwj+94/K42DTswt8FQX1+TXhKQWknOhk";i:1;N;i:2;s:4:"user";i:3;s:4:"user";i:4;b:1;i:5;i:2;i:6;s:20:"user@lairdubois.test";i:7;s:20:"user@lairdubois.test";i:8;a:0:{}}i:1;b:1;i:2;a:1:{i:0;O:41:"Symfony\\Component\\Security\\Core\\Role\\Role":1:{s:47:"'."\0".'Symfony\\Component\\Security\\Core\\Role\\Role'."\0".'role";s:9:"ROLE_USER";}}i:3;a:0:{}i:4;a:1:{i:0;s:9:"ROLE_USER";}}}');
         $session->save();
