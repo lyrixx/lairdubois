@@ -174,6 +174,45 @@ If you want to monitor RabbitMQ, enable the management plugin
     $ sudo rabbitmq-plugins enable rabbitmq_management
 ```
 
+### Install [Mercure](https://mercure.rocks/) - *The real-time hub of the workflow editor*
+
+The hub is a single binary (a build of [Caddy](https://caddyserver.com/)), with its `Caddyfile`. Keep the 0.24 version: `symfony/mercure-bundle` 0.3 does not speak the protocol of Mercure 1.x.
+
+``` bash
+    $ cd /tmp
+    $ wget https://github.com/dunglas/mercure/releases/download/v0.24.2/mercure_Linux_x86_64.tar.gz
+    $ sudo mkdir /opt/mercure
+    $ sudo tar -xzf mercure_Linux_x86_64.tar.gz -C /opt/mercure mercure Caddyfile
+```
+
+Generate a random secret: the site signs with it the JWT of its updates and of the subscriptions of its workspaces. The same value goes in the `mercure_jwt_secret` parameter (Step 4).
+
+``` bash
+    $ openssl rand -base64 48
+```
+
+Then write the configuration of the hub, read by its service (Step 14.4), readable by `root` only.
+
+``` bash
+    $ sudo nano /etc/mercure.env
+    $ sudo chmod 600 /etc/mercure.env
+```
+
+```
+# /etc/mercure.env
+
+# HTTP only, on the local interface: nginx serves it on /.well-known/mercure (Step 6)
+SERVER_NAME=:3000
+CADDY_SERVER_EXTRA_DIRECTIVES=bind 127.0.0.1
+MERCURE_PUBLISHER_JWT_KEY=THE_SECRET
+MERCURE_SUBSCRIBER_JWT_KEY=THE_SECRET
+# Keeps the subscriptions open (600s by default): a workspace reloads its tasks at each reconnection
+MERCURE_EXTRA_DIRECTIVES=write_timeout 0s
+# Where the hub keeps its state (mercure.db), see StateDirectory in its service
+XDG_DATA_HOME=/var/lib/ladb_mercure
+XDG_CONFIG_HOME=/var/lib/ladb_mercure
+```
+
 ### Install [ImageMagick](http://www.imagemagick.org/) - *The image manipulation library*
 
 ``` bash
@@ -292,6 +331,8 @@ L'Air du Bois uses a lot of external libs and bundles. This step permits to auto
 
 At the end of the download process, you will be invite to enter configuration parameters (like database server, etc ...).
 This will auto generate the `app/config/parameters.yml` file.
+
+For the Mercure hub: `mercure_url` is `http://127.0.0.1:3000/.well-known/mercure`, `mercure_public_url` is `https://www.lairdubois.fr/.well-known/mercure`, and `mercure_jwt_secret` is the secret of `/etc/mercure.env`.
 
 Now you are ready to configure Nginx to access to the webroot directory.
 
@@ -530,7 +571,35 @@ RestartSec=3
 WantedBy=multi-user.target
 ```
 
-### 14.4 Enable and start Services
+### 14.4 The Mercure hub.
+
+The workflow editor publishes its changes to the hub, which sends them to the open workspaces. Start it before deploying the site: without it, each change in the editor answers with an error.
+
+Create service file
+``` bash
+    $ sudo nano /etc/systemd/system/ladb_mercure.service
+```
+
+And add the following lines
+```
+[Unit]
+Description=The Mercure hub.
+
+[Service]
+Type=simple
+User=www-data
+EnvironmentFile=/etc/mercure.env
+StateDirectory=ladb_mercure
+WorkingDirectory=/var/lib/ladb_mercure
+ExecStart=/opt/mercure/mercure run --config /opt/mercure/Caddyfile
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### 14.5 Enable and start Services
 
 Load these new service files
 ``` bash
@@ -542,6 +611,7 @@ Enable these services on boot
     $ sudo systemctl enable ladb_consumer_view.service
     $ sudo systemctl enable ladb_consumer_webpush.service
     $ sudo systemctl enable ladb_websocket.service
+    $ sudo systemctl enable ladb_mercure.service
 ```
 
 Start these services
@@ -549,7 +619,10 @@ Start these services
     $ sudo systemctl start ladb_consumer_view.service
     $ sudo systemctl start ladb_consumer_webpush.service
     $ sudo systemctl start ladb_websocket.service
+    $ sudo systemctl start ladb_mercure.service
 ```
+
+Check the hub: `curl -i http://127.0.0.1:3000/healthz` answers 200, and `https://www.lairdubois.fr/.well-known/mercure` answers 401 (no JWT).
 
 ## Step 15 - Sending emails (Not necessary on the **DEV** server)
 

@@ -11,7 +11,7 @@ use Tests\XhrTrait;
 
 /**
  * The tasks of the workspace of a workflow, which its JS reads and changes over HTTP; each change
- * goes to the websocket, for the other workspaces open on the workflow (InMemoryPusher). The
+ * goes to the Mercure hub, for the other workspaces open on the workflow (InMemoryHub). The
  * workflow of the fixtures, of "user", has the task "Débiter les planches" (workable), then the
  * task "Poncer et huiler" (pending), with label "Débit" and part "Plateau" on the first one.
  */
@@ -100,7 +100,7 @@ final class TaskTest extends WebTestCase
         ]);
 
         self::assertSame(404, $client->getResponse()->getStatusCode());
-        self::assertSame([], $client->getContainer()->get('tests.wamp_pusher')->getMessages());
+        self::assertSame([], $client->getContainer()->get('tests.mercure_hub')->getUpdates());
         self::assertSame(2, $this->findWorkflow()->getTaskCount());
         self::assertSame(Task::STATUS_WORKABLE, $this->findTask(self::FIRST)->getStatus());
     }
@@ -195,7 +195,7 @@ final class TaskTest extends WebTestCase
 
         self::assertSame(200, $client->getResponse()->getStatusCode());
         self::assertCount(1, $crawler->filter('form'));
-        self::assertSame([], $client->getContainer()->get('tests.wamp_pusher')->getMessages());
+        self::assertSame([], $client->getContainer()->get('tests.mercure_hub')->getUpdates());
         self::assertSame(2, $this->findWorkflow()->getTaskCount());
     }
 
@@ -390,11 +390,12 @@ final class TaskTest extends WebTestCase
      */
     private function getPushedData(Client $client): array
     {
-        $messages = $client->getContainer()->get('tests.wamp_pusher')->getMessages();
-        self::assertCount(1, $messages);
-        self::assertSame('workflow_show_topic', $messages[0]['routeName']);
-        self::assertSame(['id' => self::WORKFLOW_ID], $messages[0]['routeParameters']);
+        $updates = $client->getContainer()->get('tests.mercure_hub')->getUpdates();
+        self::assertCount(1, $updates);
+        // The workflow of "user" (id 2)
+        self::assertSame(['https://lairdubois.fr/workflows/1', 'https://lairdubois.fr/users/2/workflows/1'], $updates[0]->getTopics());
+        self::assertTrue($updates[0]->isPrivate());
 
-        return $messages[0]['data'];
+        return json_decode($updates[0]->getData(), true);
     }
 }

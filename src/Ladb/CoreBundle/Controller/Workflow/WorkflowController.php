@@ -9,6 +9,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mercure\Authorization;
 use Ladb\CoreBundle\Form\Type\Workflow\WorkflowType;
 use Ladb\CoreBundle\Utils\FieldPreprocessorUtils;
 use Ladb\CoreBundle\Utils\TagUtils;
@@ -589,7 +590,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	 * @Route("/{id}.html", name="core_workflow_show")
 	 * @Template("@LadbCore/Workflow/Workflow/show.html.twig")
 	 */
-	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, FollowerUtils $followerUtils, LikableUtils $likableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
+	public function showAction(Request $request, $id, Authorization $authorization, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, FollowerUtils $followerUtils, LikableUtils $likableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$om = $this->getDoctrine()->getManager();
 		$workflowRepository = $om->getRepository(Workflow::CLASS_NAME);
 
@@ -626,7 +627,16 @@ class WorkflowController extends AbstractWorkflowBasedController {
 			$isBot = preg_match('/bot|spider|crawler|curl|facebookexternalhit|^$/i', $_SERVER['HTTP_USER_AGENT']);
 
 			if (!$isBot) {
-				return $this->render('@LadbCore/Workflow/Workflow/show-workspace.html.twig', $parameters);
+
+				// The workspace gets the changes of its workflow from the Mercure hub (_push()),
+				// with this cookie
+				if (!$parameters['readOnly']) {
+					$authorization->setCookie($request, array( $this->_getMercureSubscribeTopic() ));
+				}
+
+				return $this->render('@LadbCore/Workflow/Workflow/show-workspace.html.twig', array_merge($parameters, array(
+					'mercureTopic' => $this->_getMercureTopic($workflow),
+				)));
 			}
 
 		}

@@ -6,6 +6,7 @@ use Ladb\CoreBundle\DataFixtures\UserFixtures;
 use Symfony\Bundle\FrameworkBundle\Client;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\DomCrawler\Crawler;
+use Symfony\Component\HttpFoundation\Cookie as ResponseCookie;
 use Tests\WebTestCase;
 
 /**
@@ -110,6 +111,25 @@ final class LoginTest extends WebTestCase
 
         self::assertSame('https://lairdubois.test/creations/1.html', $client->getResponse()->headers->get('Location'));
         self::assertNotLoggedIn($client);
+    }
+
+    /**
+     * The subscription cookie of the workspaces (Mercure) lasts a year: the logout deletes it, as
+     * the session.
+     */
+    public function testLogoutDeletesTheMercureCookie(): void
+    {
+        $client = static::createClientAs(UserFixtures::USER);
+
+        $client->request('GET', '/logout');
+
+        $cookies = array_values(array_filter($client->getResponse()->headers->getCookies(), static function (ResponseCookie $cookie): bool {
+            return 'mercureAuthorization' === $cookie->getName();
+        }));
+        self::assertCount(1, $cookies);
+        self::assertTrue($cookies[0]->isCleared());
+        self::assertSame('/.well-known/mercure', $cookies[0]->getPath());
+        self::assertNull($cookies[0]->getDomain());
     }
 
     public function testRememberMe(): void

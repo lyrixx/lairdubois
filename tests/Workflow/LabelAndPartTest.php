@@ -49,7 +49,7 @@ final class LabelAndPartTest extends WebTestCase
         self::assertSame(404, $client->getResponse()->getStatusCode());
 
         self::assertNotNull($this->findItem($kind));
-        self::assertSame([], $client->getContainer()->get('tests.wamp_pusher')->getMessages());
+        self::assertSame([], $client->getContainer()->get('tests.mercure_hub')->getUpdates());
     }
 
     /**
@@ -112,7 +112,7 @@ final class LabelAndPartTest extends WebTestCase
         } else {
             self::assertSame(['Plateau', 'Pied'], array_values($workflow->getParts()->map(fn (Part $part) => $part->getName())->toArray()));
         }
-        self::assertSame([], $client->getContainer()->get('tests.wamp_pusher')->getMessages());
+        self::assertSame([], $client->getContainer()->get('tests.mercure_hub')->getUpdates());
     }
 
     /**
@@ -177,12 +177,14 @@ final class LabelAndPartTest extends WebTestCase
 
     private function assertPushedBoxOfTheTask(Client $client): void
     {
-        $messages = $client->getContainer()->get('tests.wamp_pusher')->getMessages();
-        self::assertCount(1, $messages);
-        self::assertSame('workflow_show_topic', $messages[0]['routeName']);
-        self::assertSame(['id' => self::WORKFLOW_ID], $messages[0]['routeParameters']);
-        self::assertSame(['updatedTaskInfos'], array_keys($messages[0]['data']));
-        self::assertSame([$this->findTask()->getId()], array_column($messages[0]['data']['updatedTaskInfos'], 'id'));
-        self::assertSame(['id', 'box'], array_keys($messages[0]['data']['updatedTaskInfos'][0]));
+        $updates = $client->getContainer()->get('tests.mercure_hub')->getUpdates();
+        self::assertCount(1, $updates);
+        // The workflow of "user" (id 2)
+        self::assertSame(['https://lairdubois.fr/workflows/1', 'https://lairdubois.fr/users/2/workflows/1'], $updates[0]->getTopics());
+        self::assertTrue($updates[0]->isPrivate());
+        $data = json_decode($updates[0]->getData(), true);
+        self::assertSame(['updatedTaskInfos'], array_keys($data));
+        self::assertSame([$this->findTask()->getId()], array_column($data['updatedTaskInfos'], 'id'));
+        self::assertSame(['id', 'box'], array_keys($data['updatedTaskInfos'][0]));
     }
 }

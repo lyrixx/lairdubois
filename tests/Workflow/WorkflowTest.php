@@ -7,9 +7,14 @@ use Ladb\CoreBundle\Entity\Core\Activity\Publish;
 use Ladb\CoreBundle\Entity\Wonder\Creation;
 use Ladb\CoreBundle\Entity\Workflow\Task;
 use Ladb\CoreBundle\Entity\Workflow\Workflow;
+use Lcobucci\JWT\Configuration;
+use Lcobucci\JWT\Signer\Hmac\Sha256;
+use Lcobucci\JWT\Signer\Key\InMemory;
+use Lcobucci\JWT\Validation\Constraint\SignedWith;
 use Symfony\Bundle\FrameworkBundle\Client;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\DomCrawler\Form;
+use Symfony\Component\HttpFoundation\Cookie;
 use Tests\WebTestCase;
 use Tests\XhrTrait;
 
@@ -52,7 +57,7 @@ final class WorkflowTest extends WebTestCase
 
     /**
      * The tasks of the workspace come from the JS (core_workflow_task_list); the author and the
-     * admins edit them and get the changes from the websocket, the others only read them. The
+     * admins edit them and get the changes from the Mercure hub, the others only read them. The
      * JS itself: see #11.
      *
      * @dataProvider provideWorkspaceUsers
@@ -72,7 +77,64 @@ final class WorkflowTest extends WebTestCase
         $content = $client->getResponse()->getContent();
         self::assertStringContainsString("listTaskPath: '/processus/1/tasks'", $content);
         self::assertStringContainsString('readOnly: '.($readOnly ? 'true' : 'false'), $content);
-        self::assertSame(!$readOnly, str_contains($content, "wsChannel: 'workflow/1'"));
+        self::assertSame(!$readOnly, str_contains($content, "mercureTopic: 'https://lairdubois.fr/workflows/1'"));
+    }
+
+    /**
+     * The workspace subscribes to the changes of its workflow on the Mercure hub with a cookie
+     * that the page sets: its JWT allows the workflows of the author, all of them for an admin.
+     * None for a read-only workspace: the hub refuses a subscriber without a JWT.
+     *
+     * @dataProvider provideSubscribeClaims
+     *
+     * @param list<string>|null $subscribe
+     */
+    public function testShowWorkspaceSetsTheSubscriptionCookie(?string $username, ?array $subscribe): void
+    {
+        $_SERVER['HTTP_USER_AGENT'] = 'Mozilla/5.0';
+        try {
+            $client = $this->createClientFor($username);
+            $client->request('GET', $this->path('show', ['id' => self::ID, 'layout' => 'workspace']));
+        } finally {
+            unset($_SERVER['HTTP_USER_AGENT']);
+        }
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        $cookies = array_values(array_filter($client->getResponse()->headers->getCookies(), static function (Cookie $cookie): bool {
+            return 'mercureAuthorization' === $cookie->getName();
+        }));
+        if (null === $subscribe) {
+            self::assertSame([], $cookies);
+
+            return;
+        }
+        self::assertCount(1, $cookies);
+        // Only sent to the hub, never read by the JS
+        self::assertSame('/.well-known/mercure', $cookies[0]->getPath());
+        self::assertTrue($cookies[0]->isHttpOnly());
+        self::assertTrue($cookies[0]->isSecure());
+        self::assertSame(Cookie::SAMESITE_STRICT, $cookies[0]->getSameSite());
+
+        $jwt = Configuration::forSymmetricSigner(new Sha256(), InMemory::plainText($client->getContainer()->getParameter('mercure_jwt_secret')));
+        $token = $jwt->parser()->parse($cookies[0]->getValue());
+        self::assertTrue($jwt->validator()->validate($token, new SignedWith($jwt->signer(), $jwt->verificationKey())));
+        self::assertSame(['publish' => [], 'subscribe' => $subscribe], $token->claims()->get('mercure'));
+        // A year, as remember_me: the hub closes the subscription when the JWT expires. Counted in
+        // local time, as the bundle does: an hour off across a change of daylight saving time
+        self::assertEqualsWithDelta((new \DateTimeImmutable('+31536000 seconds'))->getTimestamp(), $cookies[0]->getExpiresTime(), 60);
+        self::assertSame($cookies[0]->getExpiresTime(), $token->claims()->get('exp')->getTimestamp());
+    }
+
+    /**
+     * @return iterable<string, array{?string, list<string>|null}>
+     */
+    public static function provideSubscribeClaims(): iterable
+    {
+        // The workflows of "user" (id 2)
+        yield 'author' => [UserFixtures::USER, ['https://lairdubois.fr/users/2/workflows/{id}']];
+        yield 'other user' => [UserFixtures::USER2, null];
+        yield 'anonymous' => [null, null];
+        yield 'admin' => [UserFixtures::ADMIN, ['https://lairdubois.fr/workflows/{id}']];
     }
 
     /**
@@ -615,7 +677,7 @@ final class WorkflowTest extends WebTestCase
 
     /**
      * The tasks start again: their durations become the estimated ones, the first ones are
-     * workable, the others pending. The workspaces get it from the websocket.
+     * workable, the others pending. The workspaces get it from the Mercure hub.
      */
     public function testRestart(): void
     {
@@ -630,12 +692,14 @@ final class WorkflowTest extends WebTestCase
         $task = $this->findTask('Débiter les planches');
         self::assertSame([0, 1800], [$task->getDuration(), $task->getEstimatedDuration()]);
         self::assertSame([0, 1800], [$this->find()->getDuration(), $this->find()->getEstimatedDuration()]);
-        $messages = $client->getContainer()->get('tests.wamp_pusher')->getMessages();
-        self::assertCount(1, $messages);
-        self::assertSame('workflow_show_topic', $messages[0]['routeName']);
-        self::assertSame(['id' => self::ID], $messages[0]['routeParameters']);
-        self::assertSame(['workflowInfos', 'updatedTaskInfos'], array_keys($messages[0]['data']));
-        self::assertCount(2, $messages[0]['data']['updatedTaskInfos']);
+        $updates = $client->getContainer()->get('tests.mercure_hub')->getUpdates();
+        self::assertCount(1, $updates);
+        // The workflow of "user" (id 2)
+        self::assertSame(['https://lairdubois.fr/workflows/1', 'https://lairdubois.fr/users/2/workflows/1'], $updates[0]->getTopics());
+        self::assertTrue($updates[0]->isPrivate());
+        $data = json_decode($updates[0]->getData(), true);
+        self::assertSame(['workflowInfos', 'updatedTaskInfos'], array_keys($data));
+        self::assertCount(2, $data['updatedTaskInfos']);
         self::assertSame(Task::STATUS_WORKABLE, $this->findTask('Débiter les planches')->getStatus());
         self::assertSame(Task::STATUS_PENDING, $this->findTask('Poncer et huiler')->getStatus());
     }
@@ -652,7 +716,7 @@ final class WorkflowTest extends WebTestCase
 
         self::assertSame(404, $client->getResponse()->getStatusCode());
         self::assertSame(Task::STATUS_DONE, $this->findTask('Débiter les planches')->getStatus());
-        self::assertSame([], $client->getContainer()->get('tests.wamp_pusher')->getMessages());
+        self::assertSame([], $client->getContainer()->get('tests.mercure_hub')->getUpdates());
     }
 
     private function path(string $action, array $parameters = []): string

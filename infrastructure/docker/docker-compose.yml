@@ -111,6 +111,9 @@ services:
             SERVER_NAME: ":80"
             MERCURE_PUBLISHER_JWT_KEY: *mercure_jwt_secret
             MERCURE_SUBSCRIBER_JWT_KEY: *mercure_jwt_secret
+            # Keeps the subscriptions open (600s by default): a workspace reloads its tasks at
+            # each reconnection. The hub still closes one when its JWT expires
+            MERCURE_EXTRA_DIRECTIVES: "write_timeout 0s"
         healthcheck:
             test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/healthz"]
             interval: 5s

@@ -143,7 +143,9 @@ Contextes : `--context=test` (`SYMFONY_ENV=test`), `--context=ci` (le même, san
   (`SERVER_NAME=:80`), routé sur `/.well-known/mercure` du domaine et du port du site. Une clé JWT
   de dev fixe (`MERCURE_JWT_SECRET` de `docker-compose.yml`) signe la publication et
   l'abonnement ; pas d'abonné anonyme : sans JWT, 401. Paramètres `mercure_url` (interne, pour
-  publier), `mercure_public_url` (celle du navigateur) et `mercure_jwt_secret`.
+  publier), `mercure_public_url` (celle du navigateur) et `mercure_jwt_secret`. `write_timeout 0s`
+  (`MERCURE_EXTRA_DIRECTIVES`) : sinon le hub ferme chaque abonnement au bout de 10 minutes, et
+  l'espace de travail recharge ses tâches à chaque reconnexion.
 - Playwright (service `playwright`, profil `e2e`, lancé par `castor qa:e2e`) : l'image officielle
   `mcr.microsoft.com/playwright`, avec Node 24 et les navigateurs, à la version de
   `@playwright/test` dans `tests/e2e/package.json`.
@@ -529,14 +531,24 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `websocket_host` (`websocket`) ne sert qu'au pusher.
 - Gos WebSocket ne marche pas tel quel en PHP 8 : le pusher WAMP (son client lit mal la réponse du
   serveur) et la lecture de la session par le serveur (`unserialize()` de Ratchet, PHP 8.3) sont
-  remplacés par les classes de `src/Ladb/CoreBundle/WebSocket/`, à retirer avec Gos (#21). Le
-  template de `{{ ws_client() }}`, écrit pour Assetic, est remplacé par
-  `templates/bundles/GosWebSocketBundle/client.html.twig` (groupe `websocket` de Vite), que les
-  templates incluent à la place de `ws_client()` : son extension Twig, dépréciée, est retirée de
-  Twig (`gos_web_socket.twig.extension` redéfini sans son tag dans `services.yml`).
+  remplacés par les classes de `src/Ladb/CoreBundle/WebSocket/`, à retirer avec Gos (#21). Son
+  extension Twig, dépréciée, est retirée de Twig (`gos_web_socket.twig.extension` redéfini sans
+  son tag dans `services.yml`). L'éditeur de processus ne s'en sert plus (Mercure) : seul son
+  serveur tourne encore, jusqu'au retrait de Gos.
 - Le hub Mercure reste en 0.24 tant que `symfony/mercure-bundle` est en 0.3 (`symfony/mercure`
   0.6, protocole 0.x : claim `mercure`, cookie `mercureAuthorization`, `topic=`). La 1.x change
   le protocole : elle vient avec le bundle 0.6, au saut en 6.4 (#154).
+- Éditeur de processus et Mercure (#21) : chaque modification est publiée sur le hub
+  (`_push()` d'`AbstractWorkflowBasedController`), en update privée sur deux topics fixes,
+  indépendants de l'hôte : `https://lairdubois.fr/workflows/{id}`, celui de l'espace de travail,
+  et `…/users/{userId}/workflows/{id}`, par propriétaire. La page de l'espace de travail, hors
+  lecture seule, pose le cookie `mercureAuthorization` (chemin `/.well-known/mercure`), dont le
+  JWT vise les processus du compte (tous pour un admin) : deux onglets sur deux processus ne
+  l'écrasent pas. Le hub ferme un abonnement quand son JWT expire, et le navigateur se
+  reconnecte avec le même cookie : cookie et JWT durent un an, comme `remember_me`, et la
+  déconnexion supprime le cookie (`delete_cookies` de `security.yml`). Hub injoignable : 500
+  après le flush, comme avec le websocket ; le client HTTP du hub (`framework.http_client`,
+  qu'aucun autre service n'utilise) abandonne au bout de 3 secondes sans réponse, 10 au plus.
 - `bin/console` lit `SYMFONY_ENV`, pas `APP_ENV`.
 - Les sessions sont en base (`PdoSessionHandler`) : `doctrine:schema:create` ne crée pas la table
   `sessions`. Depuis Symfony 4.4, `sess_lifetime` porte la date d'expiration, trop grande pour
