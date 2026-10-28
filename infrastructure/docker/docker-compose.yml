@@ -20,8 +20,6 @@ x-templates:
         # The port of the router is part of the host in a worktree (see
         # .castor/worktree.php): the assets URLs are absolute (base_urls in config.yml)
         ROUTER_REQUEST_CONTEXT_HOST: "${PROJECT_ROOT_DOMAIN}${PROJECT_HTTPS_PORT:+:${PROJECT_HTTPS_PORT}}"
-        WEBSOCKET_HOST: websocket
-        WEBSOCKET_URI: "wss://${PROJECT_ROOT_DOMAIN}${PROJECT_HTTPS_PORT:+:${PROJECT_HTTPS_PORT}}/ws"
     worker_base: &worker_base
         build:
             context: services/php
@@ -166,20 +164,6 @@ services:
     worker_consumer_webpush_notification:
         <<: *worker_base
         command: php bin/console messenger:consume webpush_notification
-
-    # The parameter "websocket_host" is the host the pusher of the frontend connects
-    # to, and the address the server listens on: an IP only, hence "--host"
-    websocket:
-        <<: *worker_base
-        command: php bin/console gos:websocket:server --host=0.0.0.0
-        # Its rule is longer than the one of the frontend: Traefik gives it the priority on /ws
-        labels:
-            - "traefik.enable=true"
-            - "project-name=${PROJECT_NAME}"
-            - "traefik.http.routers.${PROJECT_NAME}-websocket.rule=Host(${PROJECT_DOMAINS}) && PathPrefix(`/ws`)"
-            - "traefik.http.routers.${PROJECT_NAME}-websocket.tls=true"
-            # The worker image exposes no port
-            - "traefik.http.services.${PROJECT_NAME}-websocket.loadbalancer.server.port=8080"
 
     builder:
         build:

@@ -66,7 +66,8 @@ Ordre :
 
 - On change la plomberie, pas le site. Le front (Bootstrap 3, jQuery, LESS) est gelé, seul le build
   des assets change. Aucune différence visible pour les utilisateurs.
-- On garde toutes les features, y compris Twitter, Facebook, Pinterest et le websocket.
+- On garde toutes les features, y compris Twitter, Facebook, Pinterest et le temps réel de l'éditeur
+  de processus.
 - Diff minimal : on garde le namespace `Ladb\CoreBundle`, `app/` et `web/` tant que rien n'oblige à
   bouger. Un déplacement de fichiers = une PR qui ne contient que des `git mv`.
 - Rector pour les réécritures mécaniques : ne pas faire à la main ce qu'il sait faire.
@@ -137,8 +138,7 @@ Contextes : `--context=test` (`SYMFONY_ENV=test`), `--context=ci` (le même, san
   LESS ou un JS, pas de serveur de Vite.
 - MariaDB 10.11 (`root`/`app`), Elasticsearch 5.6, RabbitMQ 3.13 (`app`/`app`), Memcached. Workers
   (profil `worker`) : les deux de Messenger (`messenger:consume view`, `messenger:consume
-  webpush_notification`) et `websocket` (routé sur `/ws`). Extension PHP `amqp` dans les images, pour
-  le transport AMQP de Messenger.
+  webpush_notification`). Extension PHP `amqp` dans les images, pour le transport AMQP de Messenger.
 - Hub Mercure (service `mercure`, profil `default`, #21) : l'image `dunglas/mercure`, en HTTP
   (`SERVER_NAME=:80`), routé sur `/.well-known/mercure` du domaine et du port du site. Une clé JWT
   de dev fixe (`MERCURE_JWT_SECRET` de `docker-compose.yml`) signe la publication et
@@ -164,7 +164,7 @@ Plusieurs worktrees git tournent en même temps (`.castor/worktree.php`, celui d
 - Worktree : projet `lairdubois-wt-<worktree>` (nom du dossier dans `.git/worktrees/`), donc
   conteneurs, volumes, réseau et images propres. Même domaine, mais ports HTTP, HTTPS et admin
   dérivés de ce nom (crc32, entre 10000 et 60000) : `https://lairdubois.test:<port>`, voir `castor
-  docker:ports`. Les URL des assets et du websocket portent ce port (`parameters.yml`).
+  docker:ports`. Les URL des assets et du hub Mercure portent ce port (`parameters.yml`).
 - Seuls les worktrees sont isolés : deux clones du repo ont le même projet et les mêmes ports.
 - Pour lire une page sans toucher à `/etc/hosts` : `curl --resolve lairdubois.test:<port>:127.0.0.1
   https://lairdubois.test:<port>/` (`-k` sans mkcert).
@@ -326,8 +326,7 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   - `static::$container` : le container de test, qui lit aussi les services privés (ceux de
     `services.yml`), dans le kernel du dernier `createClient()` ou `bootKernel()`, reboots du
     client compris.
-- Pas de RabbitMQ ni de websocket en test : les transports de Messenger sont `in-memory://`
-  (`config_test.yml`), et le pusher `gos_web_socket.wamp.pusher` est décoré par `InMemoryPusher`. Ils
+- Pas de RabbitMQ en test : les transports de Messenger sont `in-memory://` (`config_test.yml`). Ils
   gardent les messages (`$client->getContainer()->get('tests.view_transport')->getSent()`, avant le
   reboot suivant). `static::consumeMessage($message, 'view')` passe un message à ses handlers, comme
   le worker. `UnreachableRabbitMqTest` met les transports sur un port fermé
@@ -439,13 +438,13 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   test échoue quand le bug est corrigé.
 
 Tests E2E (`tests/e2e/`, Playwright en TypeScript, son `package.json` et son lock) : seulement ce
-que `WebTestCase` ne peut pas tester (JS, uploads, websocket), un parcours par feature. Rien de
+que `WebTestCase` ne peut pas tester (JS, uploads, hub Mercure), un parcours par feature. Rien de
 Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
 
 - `castor qa:e2e [-- --grep …]` recharge les fixtures dans la base et l'index du dev (le site sert
-  `app_dev.php`, quel que soit le contexte : les données de dev sont perdues), redémarre le serveur
-  websocket en dev, puis lance la suite dans le service `playwright` (`npm ci` si `node_modules`
-  manque ou date d'avant le lock). Aucun worker de Messenger n'est nécessaire.
+  `app_dev.php`, quel que soit le contexte : les données de dev sont perdues), puis lance la suite
+  dans le service `playwright` (`npm ci` si `node_modules` manque ou date d'avant le lock). Aucun
+  worker de Messenger n'est nécessaire.
 - Traces, captures et contexte des tests en échec dans `var/e2e/test-results/` (artifact
   `e2e-test-results` en CI) : `npx playwright show-trace`, ou trace.playwright.dev.
 - Le navigateur joint le site par le réseau de la stack : `--host-resolver-rules` de Chromium
@@ -527,14 +526,6 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   Docker les lui présente comme locales, `getClientIp()` vaut donc toujours `127.0.0.1` en dev.
 - Sans index Elasticsearch, la page d'accueil répond 500 (`no such index [ladb]`) :
   `castor app:elasticsearch:populate`.
-- Le serveur websocket de Gos n'écoute que sur une IP : il tourne avec `--host=0.0.0.0`, et
-  `websocket_host` (`websocket`) ne sert qu'au pusher.
-- Gos WebSocket ne marche pas tel quel en PHP 8 : le pusher WAMP (son client lit mal la réponse du
-  serveur) et la lecture de la session par le serveur (`unserialize()` de Ratchet, PHP 8.3) sont
-  remplacés par les classes de `src/Ladb/CoreBundle/WebSocket/`, à retirer avec Gos (#21). Son
-  extension Twig, dépréciée, est retirée de Twig (`gos_web_socket.twig.extension` redéfini sans
-  son tag dans `services.yml`). L'éditeur de processus ne s'en sert plus (Mercure) : seul son
-  serveur tourne encore, jusqu'au retrait de Gos.
 - Le hub Mercure reste en 0.24 tant que `symfony/mercure-bundle` est en 0.3 (`symfony/mercure`
   0.6, protocole 0.x : claim `mercure`, cookie `mercureAuthorization`, `topic=`). La 1.x change
   le protocole : elle vient avec le bundle 0.6, au saut en 6.4 (#154).
@@ -547,8 +538,8 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   l'écrasent pas. Le hub ferme un abonnement quand son JWT expire, et le navigateur se
   reconnecte avec le même cookie : cookie et JWT durent un an, comme `remember_me`, et la
   déconnexion supprime le cookie (`delete_cookies` de `security.yml`). Hub injoignable : 500
-  après le flush, comme avec le websocket ; le client HTTP du hub (`framework.http_client`,
-  qu'aucun autre service n'utilise) abandonne au bout de 3 secondes sans réponse, 10 au plus.
+  après le flush ; le client HTTP du hub (`framework.http_client`, qu'aucun autre service
+  n'utilise) abandonne au bout de 3 secondes sans réponse, 10 au plus.
 - `bin/console` lit `SYMFONY_ENV`, pas `APP_ENV`.
 - Les sessions sont en base (`PdoSessionHandler`) : `doctrine:schema:create` ne crée pas la table
   `sessions`. Depuis Symfony 4.4, `sess_lifetime` porte la date d'expiration, trop grande pour
@@ -596,8 +587,7 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   un trait ou un controller abstrait par un setter `@required`. Les paramètres sont lus par
   `$this->getParameter()` : en 3.4, un `bind` ne s'appliquait à un argument d'action que s'il
   désignait un service ; en 4.4, il s'applique aussi à une valeur (`%param%`). Un service de
-  bundle sans alias par type reçoit un alias de son id dans `services.yml` (`PusherInterface` de
-  Gos).
+  bundle sans alias par type reçoit un alias de son id dans `services.yml`.
 - `TypableUtils::getManagerByType()` (`ladb:change:owner`) lit les managers dans un service locator
   (`ladb_core.typable_utils.manager_locator` de `services.yml`), par le nom que donne
   `getStrippedNameByType()` : un manager n'a pas à être public pour lui. `Tests\Command\ManagerByTypeTest`
@@ -657,10 +647,10 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `parameters.yml`) : avec celles de `parameters.yml.dist`, le worker `webpush_notification`
   échoue sur chaque message. `castor app:install` y écrit une paire jetable, que les `composer
   install` suivants gardent.
-- `guzzlehttp/psr7` reste en 1.x tant que Gos WebSocket est là (`cboden/ratchet` et
-  `ratchet/rfc6455` exigent `^1.0`), sans fabrique PSR-17 : `http-interop/http-factory-guzzle` la
+- `guzzlehttp/psr7` est encore en 1.x, sans fabrique PSR-17 : `http-interop/http-factory-guzzle` la
   fournit au géocodage (`geocoder-php/common-http`, par `php-http/discovery`, dont le plugin
-  Composer est coupé dans `allow-plugins`). À retirer avec Gos (#21), en passant en 2.x.
+  Composer est coupé dans `allow-plugins`). Plus rien n'exige la 1.x depuis le retrait de Gos : à
+  passer en 2.x, en retirant `http-factory-guzzle` (#21, PR 4).
 - `bentools/webpush-bundle` (0.7 à 0.9) appelle `GuzzleHttp\Promise\settle()`, supprimée de
   `guzzlehttp/promises` 2 : `composer.json` le garde en `^1.5`. Son `PushMessageSender` envoie
   avec un TTL de 0 et sans timeout : `services.yml` le redéfinit avec ceux de web-push 2.0 (4

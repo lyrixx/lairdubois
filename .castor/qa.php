@@ -16,7 +16,6 @@ use function Castor\with;
 use function assets_build_if_missing;
 use function db_fixtures;
 use function db_has_users;
-use function docker\docker_compose;
 use function docker\docker_compose_run;
 use function docker\docker_exit_code;
 
@@ -205,12 +204,9 @@ function e2e(#[AsRawTokens] array $rawTokens = []): int
     assets_build_if_missing();
 
     // The site serves the dev environment (web/app_dev.php) in every context: the suite resets
-    // its database and index. The websocket server keeps a connection to the dropped database:
-    // it restarts, in the dev environment too (it reads the sessions of the site). The suite
-    // needs no consumer of RabbitMQ.
+    // its database and index. The suite needs no consumer of RabbitMQ.
     with(static function (): void {
         db_fixtures();
-        docker_compose(['up', '--detach', '--wait', '--no-build', '--no-deps', '--force-recreate', 'websocket'], profiles: ['default', 'worker']);
     }, context: context()->withEnvironment(['SYMFONY_ENV' => 'dev']));
 
     io()->section('Running Playwright');

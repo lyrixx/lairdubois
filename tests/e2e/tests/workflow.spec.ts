@@ -5,8 +5,7 @@ test.use({ storageState: storageStateOf(USER) });
 
 // The workspace of workflow 1 of the fixtures, by user. It loads its tasks once subscribed to the
 // Mercure hub (EventSource, with the cookie of the page). An edition answers with JSON: the board
-// only changes on the update the server publishes to every window of the workflow. The names of
-// the tests still say "websocket": they are those of Gos WebSocket, the same behaviour.
+// only changes on the update the server publishes to every window of the workflow.
 async function openWorkspace(page: Page): Promise<void> {
     await gotoAndSettle(page, '/processus/1.html?layout=workspace');
     // "Connexion...", then "Chargement des tâches..."
@@ -14,11 +13,11 @@ async function openWorkspace(page: Page): Promise<void> {
     await expect(page.locator('.ladb-workflow-task-widget', { hasText: 'Débiter les planches' })).toBeVisible();
 }
 
-test('connects to the websocket server, then loads the tasks', async ({ page }) => {
+test('connects to the Mercure hub, then loads the tasks', async ({ page }) => {
     await openWorkspace(page);
 });
 
-test('edits a workflow, and its other windows follow through the websocket', async ({ page, context }) => {
+test('edits a workflow, and its other windows follow through the Mercure hub', async ({ page, context }) => {
     const other = await context.newPage();
     await openWorkspace(page);
     await openWorkspace(other);

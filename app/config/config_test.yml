@@ -57,13 +57,9 @@ services:
         autoconfigure: true
         public: false
 
-    # The websocket server gets no messages from the tests either, as RabbitMQ (framework.messenger).
-    # Decorated, not redefined: the definition of the bundle would win over the one of the app
-    tests.wamp_pusher:
-        class: Tests\Double\InMemoryPusher
-        decorates: gos_web_socket.wamp.pusher
-        public: true
-    # Nor does the Mercure hub: the updates are kept (getUpdates())
+    # The Mercure hub gets no updates from the tests either, as RabbitMQ (framework.messenger): they
+    # are kept (getUpdates()). Decorated, not redefined: the definition of the bundle would win over
+    # the one of the app
     tests.mercure_hub:
         class: Tests\Double\InMemoryHub
         decorates: mercure.hub.default

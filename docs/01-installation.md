@@ -191,7 +191,7 @@ Generate a random secret: the site signs with it the JWT of its updates and of t
     $ openssl rand -base64 48
 ```
 
-Then write the configuration of the hub, read by its service (Step 14.4), readable by `root` only.
+Then write the configuration of the hub, read by its service (Step 14.3), readable by `root` only.
 
 ``` bash
     $ sudo nano /etc/mercure.env
@@ -499,31 +499,7 @@ And add the following lines
 
 ## Step 14 - Create services and launch it for background process
 
-### 14.1 The Workflow web socket server.
-
-Create service file
-``` bash
-    $ sudo nano /etc/systemd/system/ladb_websocket.service
-```
-
-And add the following lines
-```
-[Unit]
-Description=The Workflow web socket server.
-
-[Service]
-Type=simple
-User=www-data
-WorkingDirectory=/var/www/www.lairdubois.fr/
-ExecStart=/usr/bin/php bin/console --env=prod gos:websocket:server
-Restart=always
-RestartSec=3
-
-[Install]
-WantedBy=multi-user.target
-```
-
-### 14.2 The RabbitMQ view consumer.
+### 14.1 The RabbitMQ view consumer.
 
 Create service file
 ``` bash
@@ -547,7 +523,7 @@ RestartSec=3
 WantedBy=multi-user.target
 ```
 
-### 14.3 The RabbitMQ webpush notification consumer.
+### 14.2 The RabbitMQ webpush notification consumer.
 
 Create service file
 ``` bash
@@ -571,7 +547,7 @@ RestartSec=3
 WantedBy=multi-user.target
 ```
 
-### 14.4 The Mercure hub.
+### 14.3 The Mercure hub.
 
 The workflow editor publishes its changes to the hub, which sends them to the open workspaces. Start it before deploying the site: without it, each change in the editor answers with an error.
 
@@ -599,7 +575,7 @@ RestartSec=3
 WantedBy=multi-user.target
 ```
 
-### 14.5 Enable and start Services
+### 14.4 Enable and start Services
 
 Load these new service files
 ``` bash
@@ -610,7 +586,6 @@ Enable these services on boot
 ``` bash
     $ sudo systemctl enable ladb_consumer_view.service
     $ sudo systemctl enable ladb_consumer_webpush.service
-    $ sudo systemctl enable ladb_websocket.service
     $ sudo systemctl enable ladb_mercure.service
 ```
 
@@ -618,7 +593,6 @@ Start these services
 ``` bash
     $ sudo systemctl start ladb_consumer_view.service
     $ sudo systemctl start ladb_consumer_webpush.service
-    $ sudo systemctl start ladb_websocket.service
     $ sudo systemctl start ladb_mercure.service
 ```
 
