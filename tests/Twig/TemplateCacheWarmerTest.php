@@ -11,11 +11,12 @@ use Twig\Error\Error;
  */
 final class TemplateCacheWarmerTest extends WebTestCase
 {
-    // Templates of Symfony that need a Twig extension the site does not install: the warmer skips
+    // Templates of vendors that need a Twig extension the site does not install: the warmer skips
     // them, no page renders them
     private const UNCOMPILABLE = [
         '@email/zurb_2/notification/body.html.twig', // inky_to_html, twig/inky-extra
         '@email/zurb_2/notification/content_markdown.html.twig', // markdown_to_html, twig/markdown-extra
+        '@GosWebSocket/client.html.twig', // javascripts, Assetic; the workflow editor uses Mercure, goes with Gos (#21)
     ];
 
     /**
