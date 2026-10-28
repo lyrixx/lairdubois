@@ -95,8 +95,8 @@ Ordre :
   le 2026-10-23 : le code actuel démarre, compile le container, passe `lint:twig` et
   `doctrine:schema:validate` et rend les pages en 8.5.
 - `E_DEPRECATED` est coupé en dev, sinon PHP 8.4 et 8.5 noient chaque commande de deprecations :
-  dans le `php.ini` des images et dans `bin/console` (`Debug::enable()` remet `E_ALL` sinon). Les
-  dépréciations Symfony (`E_USER_DEPRECATED`) restent.
+  dans le `php.ini` des images et dans `bin/console`, qui fait ce que fait `Debug::enable()` sans
+  son `error_reporting(-1)`. Les dépréciations Symfony (`E_USER_DEPRECATED`) restent.
 
 ## Docker
 

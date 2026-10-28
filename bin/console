@@ -3,7 +3,9 @@
 
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArgvInput;
-use Symfony\Component\Debug\Debug;
+use Symfony\Component\ErrorHandler\BufferingLogger;
+use Symfony\Component\ErrorHandler\DebugClassLoader;
+use Symfony\Component\ErrorHandler\ErrorHandler;
 
 // if you don't want to setup permissions the proper way, just uncomment the following PHP line
 // read http://symfony.com/doc/current/book/installation.html#configuration-and-setup for more information
@@ -19,8 +21,16 @@ $env = $input->getParameterOption(['--env', '-e'], getenv('SYMFONY_ENV') ?: 'dev
 $debug = getenv('SYMFONY_DEBUG') !== '0' && !$input->hasParameterOption(['--no-debug', '']) && $env !== 'prod';
 
 if ($debug) {
-    // PHP 8 deprecates a lot of the code of the dependencies: E_DEPRECATED would drown every command
-    Debug::enable(E_ALL & ~E_DEPRECATED);
+    // PHP 8 deprecates a lot of the code of the dependencies: E_DEPRECATED would drown every command.
+    // What Symfony\Component\ErrorHandler\Debug::enable() does, without its error_reporting(-1): PHP
+    // would display the deprecations of the files it loads, before the error handler is registered.
+    error_reporting(E_ALL & ~E_DEPRECATED);
+    DebugClassLoader::enable();
+    $bootstrappingLogger = new BufferingLogger();
+    ErrorHandler::register(new ErrorHandler($bootstrappingLogger, true));
+    // The logs of a command that does not start (unknown name, --version) reach no logger: this buffer
+    // would write them on stderr when destroyed (the one of the Debug component dropped them).
+    register_shutdown_function([$bootstrappingLogger, 'cleanLogs']);
 }
 
 $kernel = new AppKernel($env, $debug);
