@@ -192,11 +192,6 @@ const scripts = {
     'values': [
         `${ASSETS}/js/ladb/ladb-values.js`,
     ],
-    // {{ ws_client() }} of GosWebSocketBundle (templates/bundles/GosWebSocketBundle/client.html.twig)
-    'websocket': [
-        'vendor/gos/web-socket-bundle/Resources/public/js/vendor/autobahn.min.js',
-        'vendor/gos/web-socket-bundle/Resources/public/js/gos_web_socket_client.js',
-    ],
     'workflow-diagram': [
         `${ASSETS}/js/jquery-panzoom/jquery.panzoom.min.js`,
         `${ASSETS}/js/ladb/jquery.ladb.workflowdiagram.js`,
@@ -214,7 +209,7 @@ const scripts = {
 };
 
 // Assetic did not minify them (no "?closure" filter)
-const UNMINIFIED_SCRIPTS = ['map', 'websocket'];
+const UNMINIFIED_SCRIPTS = ['map'];
 
 const STYLE_PREFIX = 'ladb-styles:';
 

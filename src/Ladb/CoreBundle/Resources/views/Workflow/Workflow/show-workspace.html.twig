@@ -20,7 +20,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.0/Chart.min.js"></script>
     <script src="{{ asset('build/workflow-workspace.js', 'build') }}"></script>
-    {{ include('@GosWebSocket/client.html.twig') }}
     <script>
         $(document).ready(function() {
             $('.ladb-workflow-workspace').ladbWorkflowWorkspace({
@@ -29,8 +28,8 @@
                 listTaskPath: '{{ path('core_workflow_task_list', { 'id':workflow.id }) }}'
                 {% if not readOnly %}
                     ,
-                    wsUri: '{{ websocket_uri }}',
-                    wsChannel: 'workflow/{{ workflow.id }}',
+                    mercureHubUrl: '{{ mercure() }}',
+                    mercureTopic: '{{ mercureTopic }}',
                     newTaskPath: '{{ path('core_workflow_task_new', { 'id':workflow.id }) }}',
                     createTaskPath: '{{ path('core_workflow_task_create', { 'id':workflow.id }) }}',
                     editTaskPath: '{{ path('core_workflow_task_edit', { 'id':workflow.id }) }}',

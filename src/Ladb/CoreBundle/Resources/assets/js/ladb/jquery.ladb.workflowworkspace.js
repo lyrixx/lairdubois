@@ -13,7 +13,6 @@
         this.options = options;
         this.$element = $(element);
 
-        this.session = null;
         this.plumb = null;
 
         this.$loadingPanel = $('.ladb-loading-panel', this.$element);
@@ -36,8 +35,8 @@
     LadbWorkflowWorkspace.DEFAULTS = {
         readOnly: false,
         durationsHidden: false,
-        wsUri: 'ws://127.0.0.1:8080',
-        wsChannel: '',
+        mercureHubUrl: '',
+        mercureTopic: '',
         minScale: 0.2,
         maxScale: 1,
         incScale: 0.1,
@@ -1394,7 +1393,7 @@
 
         // Check capabilities
         if (!Modernizr.touchevents) {}
-        if (!Modernizr.websockets) {
+        if (!('EventSource' in window)) {
 
             that.switchToReadOnly();
 
@@ -1415,76 +1414,58 @@
             // Loading
             this._uiMarkLoading('Connexion...');
 
-            // Connect WebSocket
-            var ws = WS.connect(this.options.wsUri);
-            ws.on('socket/connect', function (session) {
+            // Subscribe to the changes of the workflow on the Mercure hub, with the cookie of the page
+            var connected = false;
+            var eventSource = new EventSource(this.options.mercureHubUrl + '?topic=' + encodeURIComponent(this.options.mercureTopic));
+            eventSource.onopen = function () {
 
-                // Keep ws session
-                that.session = session;
+                connected = true;
 
-                // Subscribe to the channel
+                // Load tasks, at each (re)connection
+                that.loadTasks();
+
+            };
+            eventSource.onmessage = function (e) {
                 try {
+                    that.updateBoardFromJsonData(e.data);
+                } catch (error) {
+                    console.log("Error updating diagram", error);
+                }
+            };
+            eventSource.onerror = function () {
 
-                    session.subscribe(that.options.wsChannel, function (uri, payload) {
-                        try {
-                            that.updateBoardFromJsonData(payload);
-                        } catch (error) {
-                            console.log("Error updating diagram", error);
+                if (connected) {
+
+                    if (eventSource.readyState === EventSource.CLOSED) {
+
+                        // The hub refused to reconnect
+                        that._uiMarkLoading('Re-Connexion impossible avec le serveur :(');
+
+                    } else {
+
+                        // Connection lost: the browser reconnects
+                        that._uiMarkLoading('Connexion perdue avec le serveur');
+
+                    }
+
+                } else {
+
+                    // Connection could not be established
+                    eventSource.close();
+                    that._uiMarkLoading('Connexion impossible avec le serveur :(');
+
+                    bootbox.alert({
+                        title: 'Aie !',
+                        message: '<div class="media"><div class="media-left"><i class="ladb-icon-bug ladb-icon-xl"></i></div><div class="media-body">La connexion avec le serveur temps réel est impossible pour le moment.<br>En attendant de retirer les copeaux du serveur le processus sera ouvert en <strong>lecture seule</strong>.</div></div>',
+                        callback: function () {
+                            that.switchToReadOnly();
+                            that.loadTasks(true);
                         }
                     });
 
-                } catch (error) {
-                    console.log("Subscription failed", error);
                 }
 
-                // Load tasks
-                that.loadTasks();
-
-            });
-            ws.on('socket/disconnect', function (error) {
-
-                // Reset ws session
-                that.session = null;
-
-                switch (error.code) {
-
-                    case 0: // Connexion close by client
-                        break;
-
-                    case 2: // Connection max retry
-                        that._uiMarkLoading('Re-Connexion impossible avec le serveur :(');
-                        break;
-
-                    case 3: // Connection could not be established
-                        that._uiMarkLoading('Connexion impossible avec le serveur :(');
-
-                        bootbox.alert({
-                            title: 'Aie !',
-                            message: '<div class="media"><div class="media-left"><i class="ladb-icon-bug ladb-icon-xl"></i></div><div class="media-body">La connexion avec le serveur temps réel est impossible pour le moment.<br>En attendant de retirer les copeaux du serveur le processus sera ouvert en <strong>lecture seule</strong>.</div></div>',
-                            callback: function () {
-                                that.switchToReadOnly();
-                                that.loadTasks(true);
-                            }
-                        });
-
-                        break;
-
-                    case 5: // Connection unreachable
-                        that._uiMarkLoading('Connexion impossible : Nouvel essai ...');
-                        notifyError('Disconnected for ' + error.reason + ' with code ' + error.code);
-                        break;
-
-                    case 6: // Connection lost
-                        that._uiMarkLoading('Connexion perdue avec le serveur');
-                        break;
-
-                    default:
-                        that._uiMarkLoading('Vous avez été déconnecté :(');
-                        break;
-
-                }
-
-            });
+            };
 
         }
 
