@@ -33,17 +33,15 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-/**
- * @Route("/livres")
- */
+#[Route(path: '/livres')]
 class BookController extends AbstractController {
 
 	use PublicationControllerTrait;
 
 	/**
-	 * @Route("/new", name="core_book_new")
 	 * @Template("@LadbCore/Knowledge/Book/new.html.twig")
 	 */
+	#[Route(path: '/new', name: 'core_book_new')]
 	public function newAction(KnowledgeUtils $knowledgeUtils) {
 
 		// Exclude if user is not email confirmed
@@ -61,9 +59,9 @@ class BookController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/create", methods={"POST"}, name="core_book_create")
 	 * @Template("@LadbCore/Knowledge/Book/new.html.twig")
 	 */
+	#[Route(path: '/create', methods: ['POST'], name: 'core_book_create')]
 	public function createAction(Request $request, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, EntityManagerInterface $om, TranslatorInterface $translator) {
 
 		// Exclude if user is not email confirmed
@@ -138,9 +136,9 @@ class BookController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_book_delete")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_book_delete)")
 	 */
+	#[Route(path: '/{id}/delete', requirements: ['id' => '\d+'], name: 'core_book_delete')]
 	public function deleteAction($id, BookManager $bookMananger, TranslatorInterface $translator) {
 
 		$book = $this->retrievePublication($id, Book::CLASS_NAME);
@@ -156,9 +154,9 @@ class BookController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/widget", requirements={"id" = "\d+"}, name="core_book_widget")
 	 * @Template("@LadbCore/Knowledge/Book/widget-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/widget', requirements: ['id' => '\d+'], name: 'core_book_widget')]
 	public function widgetAction($id) {
 
 		$book = $this->retrievePublication($id, Book::CLASS_NAME);
@@ -170,10 +168,10 @@ class BookController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/", name="core_book_list")
-	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_book_list_page")
 	 * @Template("@LadbCore/Knowledge/Book/list.html.twig")
 	 */
+	#[Route(path: '/', name: 'core_book_list')]
+	#[Route(path: '/{page}', requirements: ['page' => '\d+'], name: 'core_book_list_page')]
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, ElasticaQueryUtils $elasticaQueryUtils, SearchUtils $searchUtils, $page = 0) {
 
 		// Elasticsearch paginiation limit
@@ -335,9 +333,9 @@ class BookController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}.html", name="core_book_show")
 	 * @Template("@LadbCore/Knowledge/Book/show.html.twig")
 	 */
+	#[Route(path: '/{id}.html', name: 'core_book_show')]
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, LikableUtils $likableUtils, EntityManagerInterface $om, ReviewableUtils $reviewableUtils, SearchUtils $searchUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$bookRepository = $om->getRepository(Book::CLASS_NAME);
 

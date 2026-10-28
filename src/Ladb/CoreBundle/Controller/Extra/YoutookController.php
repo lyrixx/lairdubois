@@ -19,15 +19,13 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-/**
- * @Route("/yt")
- */
+#[Route(path: '/yt')]
 class YoutookController extends AbstractController {
 
 	/**
-	 * @Route("/create", methods={"POST"}, name="core_youtook_create")
 	 * @Template("@LadbCore/Extra/Youtook/create-xhr.html.twig")
 	 */
+	#[Route(path: '/create', methods: ['POST'], name: 'core_youtook_create')]
 	public function createAction(Request $request, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TranslatorInterface $translator) {
 
 		$this->createLock('core_youtook_create', false, self::LOCK_TTL_CREATE_ACTION, false);
@@ -75,9 +73,9 @@ class YoutookController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_youtook_edit")
 	 * @Template("@LadbCore/Extra/Youtook/edit.html.twig")
 	 */
+	#[Route(path: '/{id}/edit', requirements: ['id' => '\d+'], name: 'core_youtook_edit')]
 	public function editAction($id, EntityManagerInterface $om) {
 		$tookRepository = $om->getRepository(Took::CLASS_NAME);
 
@@ -98,9 +96,9 @@ class YoutookController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_youtook_update")
 	 * @Template("@LadbCore/Extra/Youtook/edit.html.twig")
 	 */
+	#[Route(path: '/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_youtook_update')]
 	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TranslatorInterface $translator) {
 		$tookRepository = $om->getRepository(Took::CLASS_NAME);
 
@@ -147,9 +145,7 @@ class YoutookController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_youtook_delete")
-	 */
+	#[Route(path: '/{id}/delete', requirements: ['id' => '\d+'], name: 'core_youtook_delete')]
 	public function deleteAction($id, EntityManagerInterface $om, TookManager $tookManager, TranslatorInterface $translator) {
 		$tookRepository = $om->getRepository(Took::CLASS_NAME);
 
@@ -171,11 +167,11 @@ class YoutookController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/", name="core_youtook_list")
-	 * @Route("/{filter}", requirements={"filter" = "\w+"}, name="core_youtook_list_filter")
-	 * @Route("/{filter}/{page}", requirements={"filter" = "\w+", "page" = "\d+"}, name="core_youtook_list_filter_page")
 	 * @Template("@LadbCore/Extra/Youtook/list.html.twig")
 	 */
+	#[Route(path: '/', name: 'core_youtook_list')]
+	#[Route(path: '/{filter}', requirements: ['filter' => '\w+'], name: 'core_youtook_list_filter')]
+	#[Route(path: '/{filter}/{page}', requirements: ['filter' => '\w+', 'page' => '\d+'], name: 'core_youtook_list_filter_page')]
 	public function listAction(Request $request, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = 'all', $page = 0) {
 		if (!$this->isGranted('ROLE_ADMIN')) {
 			throw $this->createNotFoundException('Access denied');
@@ -203,11 +199,11 @@ class YoutookController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/mes-tooks", name="core_youtook_user_list")
-	 * @Route("/mes-tooks/{filter}", requirements={"filter" = "\w+"}, name="core_youtook_user_list_filter")
-	 * @Route("/mes-tooks/{filter}/{page}", requirements={"filter" = "\w+", "page" = "\d+"}, name="core_youtook_user_list_filter_page")
 	 * @Template("@LadbCore/Extra/Youtook/userList.html.twig")
 	 */
+	#[Route(path: '/mes-tooks', name: 'core_youtook_user_list')]
+	#[Route(path: '/mes-tooks/{filter}', requirements: ['filter' => '\w+'], name: 'core_youtook_user_list_filter')]
+	#[Route(path: '/mes-tooks/{filter}/{page}', requirements: ['filter' => '\w+', 'page' => '\d+'], name: 'core_youtook_user_list_filter_page')]
 	public function userListAction(Request $request, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = 'all', $page = 0) {
 		if (!$this->isGranted('ROLE_USER')) {
 			throw $this->createNotFoundException('Access denied');
@@ -239,9 +235,9 @@ class YoutookController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}.html", name="core_youtook_show")
 	 * @Template("@LadbCore/Extra/Youtook/show.html.twig")
 	 */
+	#[Route(path: '/{id}.html', name: 'core_youtook_show')]
 	public function showAction(Request $request, $id, EntityManagerInterface $om, WitnessManager $witnessManager) {
 		$tookRepository = $om->getRepository(Took::CLASS_NAME);
 

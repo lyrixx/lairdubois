@@ -12,9 +12,7 @@ use Ladb\CoreBundle\Entity\Workflow\Task;
 use Ladb\CoreBundle\Form\Type\Workflow\TaskType;
 use Doctrine\ORM\EntityManagerInterface;
 
-/**
- * @Route("/processus")
- */
+#[Route(path: '/processus')]
 class TaskController extends AbstractWorkflowBasedController {
 
 	use PublicationControllerTrait;
@@ -117,11 +115,10 @@ class TaskController extends AbstractWorkflowBasedController {
 	}
 
 	/////
-
 	/**
-	 * @Route("/{id}/task/new", requirements={"id" = "\d+"}, name="core_workflow_task_new")
 	 * @Template("@LadbCore/Workflow/Task/new-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/task/new', requirements: ['id' => '\d+'], name: 'core_workflow_task_new')]
 	public function newAction(Request $request, $id) {
 
 		// Retrieve workflow
@@ -141,9 +138,9 @@ class TaskController extends AbstractWorkflowBasedController {
 	}
 
 	/**
-	 * @Route("/{id}/task/create", requirements={"id" = "\d+"}, name="core_workflow_task_create")
 	 * @Template("@LadbCore/Workflow/Task/new-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/task/create', requirements: ['id' => '\d+'], name: 'core_workflow_task_create')]
 	public function createAction(Request $request, $id, EntityManagerInterface $om) {
 
 		$this->createLock('core_workflow_task_create', false, self::LOCK_TTL_CREATE_ACTION, false);
@@ -236,9 +233,9 @@ class TaskController extends AbstractWorkflowBasedController {
 	}
 
 	/**
-	 * @Route("/{id}/task/edit", requirements={"id" = "\d+"}, name="core_workflow_task_edit")
 	 * @Template("@LadbCore/Workflow/Task/edit-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/task/edit', requirements: ['id' => '\d+'], name: 'core_workflow_task_edit')]
 	public function editAction(Request $request, $id, EntityManagerInterface $om) {
 
 		// Retrieve workflow
@@ -259,9 +256,9 @@ class TaskController extends AbstractWorkflowBasedController {
 	}
 
 	/**
-	 * @Route("/{id}/task/update", requirements={"id" = "\d+"}, name="core_workflow_task_update")
 	 * @Template("@LadbCore/Workflow/Task/edit-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/task/update', requirements: ['id' => '\d+'], name: 'core_workflow_task_update')]
 	public function updateAction(Request $request, $id, EntityManagerInterface $om) {
 		// Retrieve workflow
 		$workflow = $this->_retrieveWorkflow($id);
@@ -329,9 +326,7 @@ class TaskController extends AbstractWorkflowBasedController {
 		);
 	}
 
-	/**
-	 * @Route("/{id}/task/position/update", requirements={"id" = "\d+"}, name="core_workflow_task_position_update")
-	 */
+	#[Route(path: '/{id}/task/position/update', requirements: ['id' => '\d+'], name: 'core_workflow_task_position_update')]
 	public function positionUpdateAction(Request $request, $id, EntityManagerInterface $om) {
 		$taskRepository = $om->getRepository(Task::CLASS_NAME);
 
@@ -391,9 +386,7 @@ class TaskController extends AbstractWorkflowBasedController {
 		));
 	}
 
-	/**
-	 * @Route("/{id}/task/status/update", requirements={"id" = "\d+"}, name="core_workflow_task_status_update")
-	 */
+	#[Route(path: '/{id}/task/status/update', requirements: ['id' => '\d+'], name: 'core_workflow_task_status_update')]
 	public function statusUpdateAction(Request $request, $id, EntityManagerInterface $om) {
 		// Retrieve Workflow
 		$workflow = $this->_retrieveWorkflow($id);
@@ -493,9 +486,7 @@ class TaskController extends AbstractWorkflowBasedController {
 		));
 	}
 
-	/**
-	 * @Route("/{id}/task/delete", requirements={"id" = "\d+"}, name="core_workflow_task_delete")
-	 */
+	#[Route(path: '/{id}/task/delete', requirements: ['id' => '\d+'], name: 'core_workflow_task_delete')]
 	public function deleteAction(Request $request, $id, EntityManagerInterface $om) {
 		// Retrieve Workflow
 		$workflow = $this->_retrieveWorkflow($id);
@@ -542,9 +533,7 @@ class TaskController extends AbstractWorkflowBasedController {
 		));
 	}
 
-	/**
-	 * @Route("/{id}/tasks", requirements={"id" = "\d+"}, name="core_workflow_task_list")
-	 */
+	#[Route(path: '/{id}/tasks', requirements: ['id' => '\d+'], name: 'core_workflow_task_list')]
 	public function listAction(Request $request, $id) {
 
 		// Retrieve Workflow
@@ -575,9 +564,7 @@ class TaskController extends AbstractWorkflowBasedController {
 		));
 	}
 
-	/**
-	 * @Route("/{id}/task/connection/create", requirements={"id" = "\d+"}, name="core_workflow_task_connection_create")
-	 */
+	#[Route(path: '/{id}/task/connection/create', requirements: ['id' => '\d+'], name: 'core_workflow_task_connection_create')]
 	public function createTaskConnectionAction(Request $request, $id, EntityManagerInterface $om) {
 		// Retrieve Workflow
 		$workflow = $this->_retrieveWorkflow($id);
@@ -624,9 +611,7 @@ class TaskController extends AbstractWorkflowBasedController {
 		));
 	}
 
-	/**
-	 * @Route("/{id}/task/connection/delete", requirements={"id" = "\d+"}, name="core_workflow_task_connection_delete")
-	 */
+	#[Route(path: '/{id}/task/connection/delete', requirements: ['id' => '\d+'], name: 'core_workflow_task_connection_delete')]
 	public function deleteTaskConnectionAction(Request $request, $id, EntityManagerInterface $om) {
 		// Retrieve Workflow
 		$workflow = $this->_retrieveWorkflow($id);

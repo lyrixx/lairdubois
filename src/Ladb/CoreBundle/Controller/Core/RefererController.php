@@ -10,14 +10,10 @@ use Ladb\CoreBundle\Utils\TypableUtils;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-/**
- * @Route("/referer")
- */
+#[Route(path: '/referer')]
 class RefererController extends AbstractController {
 
-	/**
-	 * @Route("/referral/{id}/delete", requirements={"id" = "\d+"}, name="core_referer_referral_delete")
-	 */
+	#[Route(path: '/referral/{id}/delete', requirements: ['id' => '\d+'], name: 'core_referer_referral_delete')]
 	public function referralDeleteAction($id, EntityManagerInterface $om, TranslatorInterface $translator, TypableUtils $typableUtils) {
 		$referralRepository = $om->getRepository(Referral::CLASS_NAME);
 

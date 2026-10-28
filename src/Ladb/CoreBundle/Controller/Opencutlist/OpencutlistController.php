@@ -12,9 +12,7 @@ use Ladb\CoreBundle\Entity\Opencutlist\Access;
 use Ladb\CoreBundle\Utils\PaginatorUtils;
 use Doctrine\ORM\EntityManagerInterface;
 
-/**
- * @Route("/opencutlist")
- */
+#[Route(path: '/opencutlist')]
 class OpencutlistController extends AbstractController {
 
     const BRANCH_PROD = 'master';
@@ -52,18 +50,13 @@ class OpencutlistController extends AbstractController {
 	}
 
 	/////
-
-	/**
-	 * @Route("/", name="core_opencutlist_ew")
-	 */
+	#[Route(path: '/', name: 'core_opencutlist_ew')]
 	public function ewAction() {
 		return $this->redirect('https://extensions.sketchup.com/extension/00f0bf69-7a42-4295-9e1c-226080814e3e/open-cut-list');
 	}
 
-	/**
-	 * @Route("/manifest", name="core_opencutlist_manifest")
-	 * @Route("/manifest-{env}", requirements={"env" = "dev|lab|prod"}, name="core_opencutlist_manifest_env")
-	 */
+	#[Route(path: '/manifest', name: 'core_opencutlist_manifest')]
+	#[Route(path: '/manifest-{env}', requirements: ['env' => 'dev|lab|prod'], name: 'core_opencutlist_manifest_env')]
 	public function manifestAction(Request $request, EntityManagerInterface $om, $env = 'prod') {
 
 		$access = $this->_createAccess($request, $env, Access::KIND_MANIFEST, $om);
@@ -78,10 +71,8 @@ class OpencutlistController extends AbstractController {
 		return $this->redirect('https://raw.githubusercontent.com/lairdubois/lairdubois-opencutlist-sketchup-extension/'.$branch.'/dist/manifest.json');
 	}
 
-	/**
-	 * @Route("/download", name="core_opencutlist_download")
-	 * @Route("/download-{env}", requirements={"env" = "dev|lab|prod"}, name="core_opencutlist_download_env")
-	 */
+	#[Route(path: '/download', name: 'core_opencutlist_download')]
+	#[Route(path: '/download-{env}', requirements: ['env' => 'dev|lab|prod'], name: 'core_opencutlist_download_env')]
 	public function downloadAction(Request $request, EntityManagerInterface $om, $env = 'prod') {
 
 		$access = $this->_createAccess($request, $env, Access::KIND_DOWNLOAD, $om);
@@ -96,10 +87,8 @@ class OpencutlistController extends AbstractController {
         return $this->redirect('https://raw.githubusercontent.com/lairdubois/lairdubois-opencutlist-sketchup-extension/'.$branch.'/dist/ladb_opencutlist.rbz');
 	}
 
-	/**
-	 * @Route("/tutorials", name="core_opencutlist_tutorials")
-	 * @Route("/tutorials-{env}", requirements={"env" = "dev|lab|prod"}, name="core_opencutlist_tutorials_env")
-	 */
+	#[Route(path: '/tutorials', name: 'core_opencutlist_tutorials')]
+	#[Route(path: '/tutorials-{env}', requirements: ['env' => 'dev|lab|prod'], name: 'core_opencutlist_tutorials_env')]
 	public function tutorialsAction(Request $request, EntityManagerInterface $om, $env = 'prod') {
 
 		$access = $this->_createAccess($request, $env, Access::KIND_TUTORIALS, $om);
@@ -113,10 +102,8 @@ class OpencutlistController extends AbstractController {
 		return $this->redirect('https://raw.githubusercontent.com/lairdubois/lairdubois-opencutlist-sketchup-extension/'.$branch.'/docs/json/tutorials.json');
 	}
 
-	/**
-	 * @Route("/docs", name="core_opencutlist_docs")
-	 * @Route("/docs-{env}", requirements={"env" = "dev|lab|prod"}, name="core_opencutlist_docs_env")
-	 */
+	#[Route(path: '/docs', name: 'core_opencutlist_docs')]
+	#[Route(path: '/docs-{env}', requirements: ['env' => 'dev|lab|prod'], name: 'core_opencutlist_docs_env')]
 	public function docsAction(Request $request, EntityManagerInterface $om, $env = 'prod') {
 
 		$access = $this->_createAccess($request, $env, Access::KIND_DOCS, $om);
@@ -224,10 +211,8 @@ class OpencutlistController extends AbstractController {
 		return JsonResponse::fromJsonString('{ "url": "'.$url.'" }');
 	}
 
-    /**
-     * @Route("/changelog", name="core_opencutlist_changelog")
-     * @Route("/changelog-{env}", requirements={"env" = "dev|lab|prod"}, name="core_opencutlist_changelog_env")
-     */
+    #[Route(path: '/changelog', name: 'core_opencutlist_changelog')]
+    #[Route(path: '/changelog-{env}', requirements: ['env' => 'dev|lab|prod'], name: 'core_opencutlist_changelog_env')]
     public function changelogAction(Request $request, EntityManagerInterface $om, $env = 'prod') {
 
         $access = $this->_createAccess($request, $env, Access::KIND_CHANGELOG, $om);
@@ -241,19 +226,17 @@ class OpencutlistController extends AbstractController {
         return $this->redirect('https://raw.githubusercontent.com/lairdubois/lairdubois-opencutlist-sketchup-extension/'.$branch.'/CHANGELOG.md');
     }
 
-    /**
-     * @Route("/try-beta", name="core_opencutlist_go_beta")
-     */
+    #[Route(path: '/try-beta', name: 'core_opencutlist_go_beta')]
     public function tryBetaAction(Request $request) {
         return $this->redirect('https://www.opencutlist.org/lab');
     }
 
     /**
-	 * @Route("/stats", name="core_opencutlist_stats")
-	 * @Route("/stats/{page}", requirements={"page" = "\d+"}, name="core_opencutlist_stats_page")
 	 * @Template("@LadbCore/Opencutlist/stats.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_OPENCUTLIST')", statusCode=404, message="Not allowed (core_opencutlist_stats)")
 	 */
+	#[Route(path: '/stats', name: 'core_opencutlist_stats')]
+	#[Route(path: '/stats/{page}', requirements: ['page' => '\d+'], name: 'core_opencutlist_stats_page')]
 	public function statsAction(Request $request, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $page = 0) {
 
         set_time_limit(300); // Et time limit to 5 min

@@ -33,17 +33,15 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-/**
- * @Route("/promouvoir")
- */
+#[Route(path: '/promouvoir')]
 class GraphicController extends AbstractController {
 
 	use PublicationControllerTrait;
 
 	/**
-	 * @Route("/new", name="core_promotion_graphic_new")
 	 * @Template("@LadbCore/Promotion/Graphic/new.html.twig")
 	 */
+	#[Route(path: '/new', name: 'core_promotion_graphic_new')]
 	public function newAction(Request $request, TagUtils $tagUtils) {
 
 		$graphic = new Graphic();
@@ -57,9 +55,9 @@ class GraphicController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/create", methods={"POST"}, name="core_promotion_graphic_create")
 	 * @Template("@LadbCore/Promotion/Graphic/new.html.twig")
 	 */
+	#[Route(path: '/create', methods: ['POST'], name: 'core_promotion_graphic_create')]
 	public function createAction(Request $request, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, GraphicUtils $graphicUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$owner = $this->retrieveOwner($request);
@@ -104,10 +102,8 @@ class GraphicController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Route("/{id}/lock", requirements={"id" = "\d+"}, defaults={"lock" = true}, name="core_promotion_graphic_lock")
-	 * @Route("/{id}/unlock", requirements={"id" = "\d+"}, defaults={"lock" = false}, name="core_promotion_graphic_unlock")
-	 */
+	#[Route(path: '/{id}/lock', requirements: ['id' => '\d+'], defaults: ['lock' => true], name: 'core_promotion_graphic_lock')]
+	#[Route(path: '/{id}/unlock', requirements: ['id' => '\d+'], defaults: ['lock' => false], name: 'core_promotion_graphic_unlock')]
 	public function lockUnlockAction($id, $lock, GraphicManager $graphicManager, TranslatorInterface $translator) {
 
 		$graphic = $this->retrievePublication($id, Graphic::CLASS_NAME);
@@ -126,9 +122,7 @@ class GraphicController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_promotion_graphic_show', array( 'id' => $graphic->getSluggedId() )));
 	}
 
-	/**
-	 * @Route("/{id}/publish", requirements={"id" = "\d+"}, name="core_promotion_graphic_publish")
-	 */
+	#[Route(path: '/{id}/publish', requirements: ['id' => '\d+'], name: 'core_promotion_graphic_publish')]
 	public function publishAction($id, GraphicManager $graphicManager, TranslatorInterface $translator) {
 
 		$graphic = $this->retrievePublication($id, Graphic::CLASS_NAME);
@@ -143,9 +137,7 @@ class GraphicController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_promotion_graphic_show', array( 'id' => $graphic->getSluggedId() )));
 	}
 
-	/**
-	 * @Route("/{id}/unpublish", requirements={"id" = "\d+"}, name="core_promotion_graphic_unpublish")
-	 */
+	#[Route(path: '/{id}/unpublish', requirements: ['id' => '\d+'], name: 'core_promotion_graphic_unpublish')]
 	public function unpublishAction(Request $request, $id, GraphicManager $graphicManager, TranslatorInterface $translator) {
 
 		$graphic = $this->retrievePublication($id, Graphic::CLASS_NAME);
@@ -167,9 +159,9 @@ class GraphicController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_promotion_graphic_edit")
 	 * @Template("@LadbCore/Promotion/Graphic/edit.html.twig")
 	 */
+	#[Route(path: '/{id}/edit', requirements: ['id' => '\d+'], name: 'core_promotion_graphic_edit')]
 	public function editAction($id, TagUtils $tagUtils) {
 
 		$graphic = $this->retrievePublication($id, Graphic::CLASS_NAME);
@@ -185,9 +177,9 @@ class GraphicController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_promotion_graphic_update")
 	 * @Template("@LadbCore/Promotion/Graphic/edit.html.twig")
 	 */
+	#[Route(path: '/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_promotion_graphic_update')]
 	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, GraphicUtils $graphicUtils, EntityManagerInterface $om, PicturedUtils $picturedUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$graphic = $this->retrievePublication($id, Graphic::CLASS_NAME);
@@ -236,9 +228,7 @@ class GraphicController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_promotion_graphic_delete")
-	 */
+	#[Route(path: '/{id}/delete', requirements: ['id' => '\d+'], name: 'core_promotion_graphic_delete')]
 	public function deleteAction($id, GraphicManager $graphicManager, TranslatorInterface $translator) {
 
 		$graphic = $this->retrievePublication($id, Graphic::CLASS_NAME);
@@ -253,9 +243,7 @@ class GraphicController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_promotion_graphic_list'));
 	}
 
-	/**
-	 * @Route("/{id}/chown", requirements={"id" = "\d+"}, name="core_promotion_graphic_chown")
-	 */
+	#[Route(path: '/{id}/chown', requirements: ['id' => '\d+'], name: 'core_promotion_graphic_chown')]
 	public function chownAction(Request $request, $id, GraphicManager $graphicManager, TranslatorInterface $translator) {
 
 		$graphic = $this->retrievePublication($id, Graphic::CLASS_NAME);
@@ -273,9 +261,9 @@ class GraphicController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/widget", requirements={"id" = "\d+"}, name="core_promotion_graphic_widget")
 	 * @Template("@LadbCore/Promotion/Graphic/widget-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/widget', requirements: ['id' => '\d+'], name: 'core_promotion_graphic_widget')]
 	public function widgetAction($id) {
 
 		$graphic = $this->retrievePublication($id, Graphic::CLASS_NAME);
@@ -286,9 +274,7 @@ class GraphicController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Route("/{id}/download", requirements={"id" = "\d+"}, name="core_promotion_graphic_download")
-	 */
+	#[Route(path: '/{id}/download', requirements: ['id' => '\d+'], name: 'core_promotion_graphic_download')]
 	public function downloadAction($id, GraphicUtils $graphicUtils, EntityManagerInterface $om, SearchUtils $searchUtils) {
 		$graphic = $this->retrievePublication($id, Graphic::CLASS_NAME);
 		$this->assertShowable($graphic);
@@ -323,10 +309,10 @@ class GraphicController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/", name="core_promotion_graphic_list")
-	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_promotion_graphic_list_page")
 	 * @Template("@LadbCore/Promotion/Graphic/list.html.twig")
 	 */
+	#[Route(path: '/', name: 'core_promotion_graphic_list')]
+	#[Route(path: '/{page}', requirements: ['page' => '\d+'], name: 'core_promotion_graphic_list_page')]
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, SearchUtils $searchUtils, TranslatorInterface $translator, $page = 0) {
 
 		// Elasticsearch paginiation limit
@@ -494,9 +480,9 @@ class GraphicController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}.html", name="core_promotion_graphic_show")
 	 * @Template("@LadbCore/Promotion/Graphic/show.html.twig")
 	 */
+	#[Route(path: '/{id}.html', name: 'core_promotion_graphic_show')]
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, EntityManagerInterface $om, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$graphicRepository = $om->getRepository(Graphic::CLASS_NAME);
 

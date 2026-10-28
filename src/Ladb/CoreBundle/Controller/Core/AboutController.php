@@ -6,45 +6,37 @@ use Ladb\CoreBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 
-/**
- * @Route("/a-propos")
- */
+#[Route(path: '/a-propos')]
 class AboutController extends AbstractController {
 
-	/**
-	 * @Route("/", name="core_about")
-	 */
+	#[Route(path: '/', name: 'core_about')]
 	public function aboutAction() {
 		$response = $this->forward(AboutController::class.'::faqAction');
 		return $response;
 	}
 
-	/**
-	 * @Route("/faq.html", name="core_about_faq")
-	 */
+	#[Route(path: '/faq.html', name: 'core_about_faq')]
 	public function faqAction() {
 		return $this->redirect($this->generateUrl('core_faq_question_list'));
 	}
 
 	/**
-	 * @Route("/mentions-legales.html", name="core_about_legals")
 	 * @Template("@LadbCore/Core/About/legals.html.twig")
 	 */
+	#[Route(path: '/mentions-legales.html', name: 'core_about_legals')]
 	public function legalsAction() {
 		return array();
 	}
 
-	/**
-	 * @Route("/cgu.html", name="core_about_cgu")
-	 */
+	#[Route(path: '/cgu.html', name: 'core_about_cgu')]
 	public function cguAction() {
         return $this->redirect($this->generateUrl('core_faq_question_show', array( 'id' => 'quelles-sont-les-conditions-generales-dutilisation-de-lair-du-bois' )));
 	}
 
 	/**
-	 * @Route("/credits.html", name="core_about_credits")
 	 * @Template("@LadbCore/Core/About/credits.html.twig")
 	 */
+	#[Route(path: '/credits.html', name: 'core_about_credits')]
 	public function creditsAction() {
 		$credits = array(
 			array( 'name' => 'Symfony', 'url' => 'http://www.symfony.com', 'labels' => array( 'PHP' ) ),
@@ -121,19 +113,14 @@ class AboutController extends AbstractController {
 	}
 
 	// Backward compatibilities /////
-
-	/**
-	 * @Route("/blog", name="core_about_blog")
-	 * @Route("/blog/", name="core_about_blog_slash")
-	 * @Route("/blog/{filter}", requirements={"filter" = "[a-z-]+"}, name="core_about_blog_filter")
-	 */
+	#[Route(path: '/blog', name: 'core_about_blog')]
+	#[Route(path: '/blog/', name: 'core_about_blog_slash')]
+	#[Route(path: '/blog/{filter}', requirements: ['filter' => '[a-z-]+'], name: 'core_about_blog_filter')]
 	public function blogListAction($filter = 'recent') {
 		return $this->redirect($this->generateUrl('core_blog_post_list_filter', array( 'filter' => $filter )));
 	}
 
-	/**
-	 * @Route("/blog/{id}.html", name="core_about_blog_post_show")
-	 */
+	#[Route(path: '/blog/{id}.html', name: 'core_about_blog_post_show')]
 	public function blogShowAction($id) {
 		return $this->redirect($this->generateUrl('core_blog_post_show', array( 'id' => $id )));
 	}

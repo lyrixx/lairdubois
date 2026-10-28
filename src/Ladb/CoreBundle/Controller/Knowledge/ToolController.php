@@ -33,17 +33,15 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-/**
- * @Route("/outils")
- */
+#[Route(path: '/outils')]
 class ToolController extends AbstractController {
 
 	use PublicationControllerTrait;
 
 	/**
-	 * @Route("/new", name="core_tool_new")
 	 * @Template("@LadbCore/Knowledge/Tool/new.html.twig")
 	 */
+	#[Route(path: '/new', name: 'core_tool_new')]
 	public function newAction(KnowledgeUtils $knowledgeUtils) {
 
 		// Exclude if user is not email confirmed
@@ -61,9 +59,9 @@ class ToolController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/create", methods={"POST"}, name="core_tool_create")
 	 * @Template("@LadbCore/Knowledge/Tool/new.html.twig")
 	 */
+	#[Route(path: '/create', methods: ['POST'], name: 'core_tool_create')]
 	public function createAction(Request $request, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, EntityManagerInterface $om, TranslatorInterface $translator) {
 
 		// Exclude if user is not email confirmed
@@ -163,9 +161,9 @@ class ToolController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_tool_delete")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_tool_delete)")
 	 */
+	#[Route(path: '/{id}/delete', requirements: ['id' => '\d+'], name: 'core_tool_delete')]
 	public function deleteAction($id, ToolManager $toolMananger, TranslatorInterface $translator) {
 
 		$tool = $this->retrievePublication($id, Tool::CLASS_NAME);
@@ -181,9 +179,9 @@ class ToolController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/widget", requirements={"id" = "\d+"}, name="core_tool_widget")
 	 * @Template("@LadbCore/Knowledge/Tool/widget-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/widget', requirements: ['id' => '\d+'], name: 'core_tool_widget')]
 	public function widgetAction($id) {
 
 		$tool = $this->retrievePublication($id, Tool::CLASS_NAME);
@@ -195,10 +193,10 @@ class ToolController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/", name="core_tool_list")
-	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_tool_list_page")
 	 * @Template("@LadbCore/Knowledge/Tool/list.html.twig")
 	 */
+	#[Route(path: '/', name: 'core_tool_list')]
+	#[Route(path: '/{page}', requirements: ['page' => '\d+'], name: 'core_tool_list_page')]
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, SearchUtils $searchUtils, $page = 0) {
 
 		// Elasticsearch paginiation limit
@@ -357,9 +355,9 @@ class ToolController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}.html", name="core_tool_show")
 	 * @Template("@LadbCore/Knowledge/Tool/show.html.twig")
 	 */
+	#[Route(path: '/{id}.html', name: 'core_tool_show')]
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ElasticaQueryUtils $elasticaQueryUtils, LikableUtils $likableUtils, EntityManagerInterface $om, ReviewableUtils $reviewableUtils, SearchUtils $searchUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$toolRepository = $om->getRepository(Tool::CLASS_NAME);
 

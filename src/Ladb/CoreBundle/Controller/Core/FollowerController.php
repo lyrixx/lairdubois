@@ -13,15 +13,13 @@ use Ladb\CoreBundle\Utils\FollowerUtils;
 use Ladb\CoreBundle\Utils\ActivityUtils;
 use Doctrine\ORM\EntityManagerInterface;
 
-/**
- * @Route("/followers")
- */
+#[Route(path: '/followers')]
 class FollowerController extends AbstractController {
 
 	/**
-	 * @Route("/{followingUserId}/create", requirements={"followingUserId" = "\d+"}, name="core_follower_create")
 	 * @Template("@LadbCore/Core/Follower/create-xhr.html.twig")
 	 */
+	#[Route(path: '/{followingUserId}/create', requirements: ['followingUserId' => '\d+'], name: 'core_follower_create')]
 	public function createAction(Request $request, $followingUserId, ActivityUtils $activityUtils, FollowerUtils $followerUtils, EntityManagerInterface $om) {
 
 		$this->createLock('core_follower_create', false, self::LOCK_TTL_CREATE_ACTION, false);
@@ -77,9 +75,9 @@ class FollowerController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_follower_delete")
 	 * @Template("@LadbCore/Core/Follower/delete-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/delete', requirements: ['id' => '\d+'], name: 'core_follower_delete')]
 	public function deleteAction(Request $request, $id, ActivityUtils $activityUtils, FollowerUtils $followerUtils, EntityManagerInterface $om) {
 		$followerRepository = $om->getRepository(Follower::CLASS_NAME);
 

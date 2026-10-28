@@ -36,17 +36,15 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-/**
- * @Route("/trouvailles")
- */
+#[Route(path: '/trouvailles')]
 class FindController extends AbstractController {
 
 	use PublicationControllerTrait;
 
 	/**
-	 * @Route("/new", name="core_find_new")
 	 * @Template("@LadbCore/Find/Find/new.html.twig")
 	 */
+	#[Route(path: '/new', name: 'core_find_new')]
 	public function newAction(Request $request, TagUtils $tagUtils) {
 
 		$find = new Find();
@@ -61,9 +59,9 @@ class FindController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/create", methods={"POST"}, name="core_find_create")
 	 * @Template("@LadbCore/Find/Find/new.html.twig")
 	 */
+	#[Route(path: '/create', methods: ['POST'], name: 'core_find_create')]
 	public function createAction(Request $request, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, FindUtils $findUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$owner = $this->retrieveOwner($request);
@@ -106,10 +104,8 @@ class FindController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Route("/{id}/lock", requirements={"id" = "\d+"}, defaults={"lock" = true}, name="core_find_lock")
-	 * @Route("/{id}/unlock", requirements={"id" = "\d+"}, defaults={"lock" = false}, name="core_find_unlock")
-	 */
+	#[Route(path: '/{id}/lock', requirements: ['id' => '\d+'], defaults: ['lock' => true], name: 'core_find_lock')]
+	#[Route(path: '/{id}/unlock', requirements: ['id' => '\d+'], defaults: ['lock' => false], name: 'core_find_unlock')]
 	public function lockUnlockAction($id, $lock, FindManager $findManager, TranslatorInterface $translator) {
 
 		$find = $this->retrievePublication($id, Find::CLASS_NAME);
@@ -128,9 +124,7 @@ class FindController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_find_show', array( 'id' => $find->getSluggedId() )));
 	}
 
-	/**
-	 * @Route("/{id}/publish", requirements={"id" = "\d+"}, name="core_find_publish")
-	 */
+	#[Route(path: '/{id}/publish', requirements: ['id' => '\d+'], name: 'core_find_publish')]
 	public function publishAction($id, FindManager $findManager, TranslatorInterface $translator) {
 
 		$find = $this->retrievePublication($id, Find::CLASS_NAME);
@@ -145,9 +139,7 @@ class FindController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_find_show', array( 'id' => $find->getSluggedId() )));
 	}
 
-	/**
-	 * @Route("/{id}/unpublish", requirements={"id" = "\d+"}, name="core_find_unpublish")
-	 */
+	#[Route(path: '/{id}/unpublish', requirements: ['id' => '\d+'], name: 'core_find_unpublish')]
 	public function unpublishAction(Request $request, $id, FindManager $findManager, TranslatorInterface $translator) {
 
 		$find = $this->retrievePublication($id, Find::CLASS_NAME);
@@ -169,9 +161,9 @@ class FindController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_find_edit")
 	 * @Template("@LadbCore/Find/Find/edit.html.twig")
 	 */
+	#[Route(path: '/{id}/edit', requirements: ['id' => '\d+'], name: 'core_find_edit')]
 	public function editAction($id, TagUtils $tagUtils) {
 
 		$find = $this->retrievePublication($id, Find::CLASS_NAME);
@@ -187,9 +179,9 @@ class FindController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_find_update")
 	 * @Template("@LadbCore/Find/Find/edit.html.twig")
 	 */
+	#[Route(path: '/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_find_update')]
 	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, FindUtils $findUtils, EntityManagerInterface $om, PicturedUtils $picturedUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$doUp = $request->get('ladb_do_up', false) && $this->isGranted('ROLE_ADMIN');
@@ -250,9 +242,7 @@ class FindController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_find_delete")
-	 */
+	#[Route(path: '/{id}/delete', requirements: ['id' => '\d+'], name: 'core_find_delete')]
 	public function deleteAction($id, FindManager $findManager, TranslatorInterface $translator) {
 
 		$find = $this->retrievePublication($id, Find::CLASS_NAME);
@@ -267,9 +257,7 @@ class FindController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_find_list'));
 	}
 
-	/**
-	 * @Route("/{id}/chown", requirements={"id" = "\d+"}, name="core_find_chown")
-	 */
+	#[Route(path: '/{id}/chown', requirements: ['id' => '\d+'], name: 'core_find_chown')]
 	public function chownAction(Request $request, $id, FindManager $findManager, TranslatorInterface $translator) {
 
 		$find = $this->retrievePublication($id, Find::CLASS_NAME);
@@ -287,9 +275,9 @@ class FindController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/widget", requirements={"id" = "\d+"}, name="core_find_widget")
 	 * @Template("@LadbCore/Find/Find/widget-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/widget', requirements: ['id' => '\d+'], name: 'core_find_widget')]
 	public function widgetAction($id) {
 
 		$find = $this->retrievePublication($id, Find::CLASS_NAME);
@@ -301,9 +289,9 @@ class FindController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/location.geojson", name="core_find_location", defaults={"_format" = "json"})
 	 * @Template("@LadbCore/Find/Find/location.geojson.twig")
 	 */
+	#[Route(path: '/{id}/location.geojson', name: 'core_find_location', defaults: ['_format' => 'json'])]
 	public function locationAction($id) {
 
 		$find = $this->retrievePublication($id, Find::CLASS_NAME);
@@ -328,9 +316,9 @@ class FindController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/card.xhr", name="core_find_card")
 	 * @Template("@LadbCore/Find/Find/card-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/card.xhr', name: 'core_find_card')]
 	public function cardAction(Request $request, $id) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_find_card-');
@@ -344,20 +332,18 @@ class FindController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Route("/{filter}", requirements={"filter" = "[a-z-]+"}, name="core_find_list_filter")
-	 * @Route("/{filter}/{page}", requirements={"filter" = "[a-z-]+", "page" = "\d+"}, name="core_find_list_filter_page")
-	 */
+	#[Route(path: '/{filter}', requirements: ['filter' => '[a-z-]+'], name: 'core_find_list_filter')]
+	#[Route(path: '/{filter}/{page}', requirements: ['filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_find_list_filter_page')]
 	public function goneListAction(Request $request, $filter, $page = 0) {
 		throw new \Symfony\Component\HttpKernel\Exception\GoneHttpException();
 	}
 
 	/**
-	 * @Route("/", name="core_find_list")
-	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_find_list_page")
-	 * @Route(".geojson", defaults={"_format" = "json", "page"=-1, "layout"="geojson"}, name="core_find_list_geojson")
 	 * @Template("@LadbCore/Find/Find/list.html.twig")
 	 */
+	#[Route(path: '/', name: 'core_find_list')]
+	#[Route(path: '/{page}', requirements: ['page' => '\d+'], name: 'core_find_list_page')]
+	#[Route(path: '.geojson', defaults: ['_format' => 'json', 'page' => -1, 'layout' => 'geojson'], name: 'core_find_list_geojson')]
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, LocalisableUtils $localisableUtils, SearchUtils $searchUtils, TranslatorInterface $translator, $page = 0, $layout = 'view') {
 
 		// Elasticsearch paginiation limit
@@ -569,9 +555,9 @@ class FindController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}.html", name="core_find_show")
 	 * @Template("@LadbCore/Find/Find/show.html.twig")
 	 */
+	#[Route(path: '/{id}.html', name: 'core_find_show')]
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, EntityManagerInterface $om, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$findRepository = $om->getRepository(Find::CLASS_NAME);
 

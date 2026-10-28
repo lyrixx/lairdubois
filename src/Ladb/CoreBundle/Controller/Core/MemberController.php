@@ -23,9 +23,7 @@ use Ladb\CoreBundle\Entity\Core\MemberInvitation;
 use Ladb\CoreBundle\Utils\PaginatorUtils;
 use Doctrine\ORM\EntityManagerInterface;
 
-/**
- * @Route("/members")
- */
+#[Route(path: '/members')]
 class MemberController extends AbstractController {
 
 	private function _retrieveTeam($teamId, EntityManagerInterface $om) {
@@ -43,11 +41,10 @@ class MemberController extends AbstractController {
 	}
 
 	/////
-
 	/**
-	 * @Route("/{teamId}/invitation/new", requirements={"teamId" = "\d+"}, name="core_member_invitation_new")
 	 * @Template("@LadbCore/Core/Member/invitation-new.html.twig")
 	 */
+	#[Route(path: '/{teamId}/invitation/new', requirements: ['teamId' => '\d+'], name: 'core_member_invitation_new')]
 	public function newInvitationAction($teamId, EntityManagerInterface $om) {
 
 		$team = $this->_retrieveTeam($teamId, $om);
@@ -63,9 +60,7 @@ class MemberController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Route("/{teamId}/invitation/create", requirements={"teamId" = "\d+"}, name="core_member_invitation_create")
-	 */
+	#[Route(path: '/{teamId}/invitation/create', requirements: ['teamId' => '\d+'], name: 'core_member_invitation_create')]
 	public function createInvitationAction(Request $request, $teamId, MemberInvitationManager $memberInvitationManager, EntityManagerInterface $om, UserManager $userManager, WebpushNotificationUtils $webpushNotificationUtils) {
 
 		$team = $this->_retrieveTeam($teamId, $om);
@@ -128,9 +123,7 @@ class MemberController extends AbstractController {
 		return $this->redirect($this->generateUrl($invitationCount > 0 ? 'core_user_show_invitations' : 'core_user_show', array( 'username' => $team->getUsernameCanonical() )));
 	}
 
-	/**
-	 * @Route("/invitation/{id}/accept", requirements={"id" = "\d+"}, name="core_member_invitation_accept")
-	 */
+	#[Route(path: '/invitation/{id}/accept', requirements: ['id' => '\d+'], name: 'core_member_invitation_accept')]
 	public function acceptInvitationAction($id, FollowerUtils $followerUtils, MemberInvitationManager $memberInvitationManager, MemberManager $memberManager, EntityManagerInterface $om, SearchUtils $searchUtils) {
 		$memberInvitationRepository = $om->getRepository(MemberInvitation::CLASS_NAME);
 
@@ -148,9 +141,7 @@ class MemberController extends AbstractController {
 		return $this->createAction($memberInvitation->getTeam(), $memberInvitation->getRecipient(), $followerUtils, $memberManager, $searchUtils);
 	}
 
-	/**
-	 * @Route("/invitation/{id}/delete", requirements={"id" = "\d+"}, name="core_member_invitation_delete")
-	 */
+	#[Route(path: '/invitation/{id}/delete', requirements: ['id' => '\d+'], name: 'core_member_invitation_delete')]
 	public function deleteInvitationAction(Request $request, $id, MemberInvitationManager $memberInvitationManager, EntityManagerInterface $om) {
 		$memberInvitationRepository = $om->getRepository(MemberInvitation::CLASS_NAME);
 		$memberRepository = $om->getRepository(Member::CLASS_NAME);
@@ -182,11 +173,10 @@ class MemberController extends AbstractController {
 	}
 
 	/////
-
 	/**
-	 * @Route("/{teamId}/request/new", requirements={"teamId" = "\d+"}, name="core_member_request_new")
 	 * @Template("@LadbCore/Core/Member/request-new.html.twig")
 	 */
+	#[Route(path: '/{teamId}/request/new', requirements: ['teamId' => '\d+'], name: 'core_member_request_new')]
 	public function newRequestAction($teamId, EntityManagerInterface $om) {
 
 		$team = $this->_retrieveTeam($teamId, $om);
@@ -205,9 +195,7 @@ class MemberController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Route("/{teamId}/request/create", requirements={"teamId" = "\d+"}, name="core_member_request_create")
-	 */
+	#[Route(path: '/{teamId}/request/create', requirements: ['teamId' => '\d+'], name: 'core_member_request_create')]
 	public function createRequestAction(Request $request, $teamId, MemberRequestManager $memberRequestManager, EntityManagerInterface $om) {
 
 		$team = $this->_retrieveTeam($teamId, $om);
@@ -239,9 +227,7 @@ class MemberController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_user_show', array( 'username' => $team->getUsernameCanonical() )));
 	}
 
-	/**
-	 * @Route("/request/{id}/accept", requirements={"id" = "\d+"}, name="core_member_request_accept")
-	 */
+	#[Route(path: '/request/{id}/accept', requirements: ['id' => '\d+'], name: 'core_member_request_accept')]
 	public function acceptRequestAction($id, FollowerUtils $followerUtils, MemberManager $memberManager, MemberRequestManager $memberRequestManager, EntityManagerInterface $om, SearchUtils $searchUtils) {
 		$memberRequestRepository = $om->getRepository(MemberRequest::CLASS_NAME);
 		$memberRepository = $om->getRepository(Member::CLASS_NAME);
@@ -260,9 +246,7 @@ class MemberController extends AbstractController {
 		return $this->createAction($memberRequest->getTeam(), $memberRequest->getSender(), $followerUtils, $memberManager, $searchUtils);
 	}
 
-	/**
-	 * @Route("/request/{id}/delete", requirements={"id" = "\d+"}, name="core_member_request_delete")
-	 */
+	#[Route(path: '/request/{id}/delete', requirements: ['id' => '\d+'], name: 'core_member_request_delete')]
 	public function deleteRequestAction(Request $request, $id, MemberRequestManager $memberRequestManager, EntityManagerInterface $om) {
 		$memberRequestRepository = $om->getRepository(MemberRequest::CLASS_NAME);
 		$memberRepository = $om->getRepository(Member::CLASS_NAME);
@@ -321,9 +305,7 @@ class MemberController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_user_show', array( 'username' => $team->getUsernameCanonical() )));
 	}
 
-	/**
-	 * @Route("/{teamId}/delete", requirements={"teamId" = "\d+"}, name="core_member_delete")
-	 */
+	#[Route(path: '/{teamId}/delete', requirements: ['teamId' => '\d+'], name: 'core_member_delete')]
 	public function deleteAction(Request $request, $teamId, MemberManager $memberManager, EntityManagerInterface $om, SearchUtils $searchUtils) {
 
 		$team = $this->_retrieveTeam($teamId, $om);
@@ -351,10 +333,10 @@ class MemberController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/", name="core_member_list_session_teams")
-	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_member_list_session_teams_page")
 	 * @Template("@LadbCore/Core/Member/list-session-teams-xhr.html.twig")
 	 */
+	#[Route(path: '/', name: 'core_member_list_session_teams')]
+	#[Route(path: '/{page}', requirements: ['page' => '\d+'], name: 'core_member_list_session_teams_page')]
 	public function listSessionTeamsAction(Request $request, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $page = 0) {
 
 		$titleTransKey = $request->get('title-trans-key');

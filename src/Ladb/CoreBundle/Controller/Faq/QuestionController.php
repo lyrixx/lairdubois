@@ -30,18 +30,16 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-/**
- * @Route("/faq")
- */
+#[Route(path: '/faq')]
 class QuestionController extends AbstractController {
 
 	use PublicationControllerTrait;
 
 	/**
-	 * @Route("/new", name="core_faq_question_new")
 	 * @Template("@LadbCore/Faq/Question/new.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_FAQ')", statusCode=404, message="Not allowed (core_faq_question_new)")
 	 */
+	#[Route(path: '/new', name: 'core_faq_question_new')]
 	public function newAction(Request $request, TagUtils $tagUtils) {
 
 		$question = new Question();
@@ -55,10 +53,10 @@ class QuestionController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/create", methods={"POST"}, name="core_faq_question_create")
 	 * @Template("@LadbCore/Faq/Question/new.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_FAQ')", statusCode=404, message="Not allowed (core_faq_question_create)")
 	 */
+	#[Route(path: '/create', methods: ['POST'], name: 'core_faq_question_create')]
 	public function createAction(Request $request, BlockBodiedUtils $blockBodiedUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$this->createLock('core_faq_question_create', false, self::LOCK_TTL_CREATE_ACTION, false);
@@ -98,10 +96,8 @@ class QuestionController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Route("/{id}/lock", requirements={"id" = "\d+"}, defaults={"lock" = true}, name="core_faq_question_lock")
-	 * @Route("/{id}/unlock", requirements={"id" = "\d+"}, defaults={"lock" = false}, name="core_faq_question_unlock")
-	 */
+	#[Route(path: '/{id}/lock', requirements: ['id' => '\d+'], defaults: ['lock' => true], name: 'core_faq_question_lock')]
+	#[Route(path: '/{id}/unlock', requirements: ['id' => '\d+'], defaults: ['lock' => false], name: 'core_faq_question_unlock')]
 	public function lockUnlockAction($id, $lock, QuestionManager $postManager, TranslatorInterface $translator) {
 
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
@@ -121,9 +117,9 @@ class QuestionController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/publish", requirements={"id" = "\d+"}, name="core_faq_question_publish")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_FAQ')", statusCode=404, message="Not allowed (core_faq_question_publish)")
 	 */
+	#[Route(path: '/{id}/publish', requirements: ['id' => '\d+'], name: 'core_faq_question_publish')]
 	public function publishAction($id, QuestionManager $questionManager, TranslatorInterface $translator) {
 
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
@@ -138,9 +134,7 @@ class QuestionController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_faq_question_show', array( 'id' => $question->getSluggedId() )));
 	}
 
-	/**
-	 * @Route("/{id}/unpublish", requirements={"id" = "\d+"}, name="core_faq_question_unpublish")
-	 */
+	#[Route(path: '/{id}/unpublish', requirements: ['id' => '\d+'], name: 'core_faq_question_unpublish')]
 	public function unpublishAction(Request $request, $id, QuestionManager $questionManager, TranslatorInterface $translator) {
 
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
@@ -162,10 +156,10 @@ class QuestionController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_faq_question_edit")
 	 * @Template("@LadbCore/Faq/Question/edit.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_FAQ')", statusCode=404, message="Not allowed (core_faq_question_edit)")
 	 */
+	#[Route(path: '/{id}/edit', requirements: ['id' => '\d+'], name: 'core_faq_question_edit')]
 	public function editAction($id, TagUtils $tagUtils) {
 
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
@@ -181,10 +175,10 @@ class QuestionController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_faq_question_update")
 	 * @Template("@LadbCore/Faq/Question/edit.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_FAQ')", statusCode=404, message="Not allowed (core_faq_question_update)")
 	 */
+	#[Route(path: '/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_faq_question_update')]
 	public function updateAction(Request $request, $id, BlockBodiedUtils $blockBodiedUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
@@ -237,9 +231,7 @@ class QuestionController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_faq_question_delete")
-	 */
+	#[Route(path: '/{id}/delete', requirements: ['id' => '\d+'], name: 'core_faq_question_delete')]
 	public function deleteAction($id, QuestionManager $questionManager, TranslatorInterface $translator) {
 
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
@@ -255,9 +247,9 @@ class QuestionController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/widget", requirements={"id" = "\d+"}, name="core_faq_question_widget")
 	 * @Template("@LadbCore/Faq/Question/widget-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/widget', requirements: ['id' => '\d+'], name: 'core_faq_question_widget')]
 	public function widgetAction($id) {
 
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
@@ -268,19 +260,17 @@ class QuestionController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Route("/{filter}", requirements={"filter" = "[a-z-]+"}, name="core_faq_question_list_filter")
-	 * @Route("/{filter}/{page}", requirements={"filter" = "[a-z-]+", "page" = "\d+"}, name="core_faq_question_list_filter_page")
-	 */
+	#[Route(path: '/{filter}', requirements: ['filter' => '[a-z-]+'], name: 'core_faq_question_list_filter')]
+	#[Route(path: '/{filter}/{page}', requirements: ['filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_faq_question_list_filter_page')]
 	public function goneListAction(Request $request, $filter, $page = 0) {
 		throw new \Symfony\Component\HttpKernel\Exception\GoneHttpException();
 	}
 
 	/**
-	 * @Route("/", name="core_faq_question_list")
-	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_faq_question_list_page")
 	 * @Template("@LadbCore/Faq/Question/list.html.twig")
 	 */
+	#[Route(path: '/', name: 'core_faq_question_list')]
+	#[Route(path: '/{page}', requirements: ['page' => '\d+'], name: 'core_faq_question_list_page')]
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, SearchUtils $searchUtils, $page = 0) {
 
 		// Elasticsearch paginiation limit
@@ -426,9 +416,9 @@ class QuestionController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}.html", requirements={"slug" = "[a-z-]+"}, name="core_faq_question_show")
 	 * @Template("@LadbCore/Faq/Question/show.html.twig")
 	 */
+	#[Route(path: '/{id}.html', requirements: ['slug' => '[a-z-]+'], name: 'core_faq_question_show')]
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, EntityManagerInterface $om, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$questionRepository = $om->getRepository(Question::CLASS_NAME);
 

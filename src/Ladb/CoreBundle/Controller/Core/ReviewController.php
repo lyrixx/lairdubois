@@ -23,9 +23,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-/**
- * @Route("/reviews")
- */
+#[Route(path: '/reviews')]
 class ReviewController extends AbstractController {
 
 	private function _retrieveRelatedEntity($entityType, $entityId, TypableUtils $typableUtils) {
@@ -41,11 +39,10 @@ class ReviewController extends AbstractController {
 	}
 
 	/////
-
 	/**
-	 * @Route("/{entityType}/{entityId}/new", requirements={"entityType" = "\d+", "entityId" = "\d+"}, name="core_review_new")
 	 * @Template("@LadbCore/Core/Review/new-xhr.html.twig")
 	 */
+	#[Route(path: '/{entityType}/{entityId}/new', requirements: ['entityType' => '\d+', 'entityId' => '\d+'], name: 'core_review_new')]
 	public function newAction(Request $request, $entityType, $entityId, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_review_new)');
@@ -70,9 +67,9 @@ class ReviewController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{entityType}/{entityId}/create",requirements={"entityType" = "\d+", "entityId" = "\d+"}, methods={"POST"}, name="core_review_create")
 	 * @Template("@LadbCore/Core/Review/new-xhr.html.twig")
 	 */
+	#[Route(path: '/{entityType}/{entityId}/create', requirements: ['entityType' => '\d+', 'entityId' => '\d+'], methods: ['POST'], name: 'core_review_create')]
 	public function createAction(Request $request, $entityType, $entityId, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, ReviewableUtils $reviewableUtils, TypableUtils $typableUtils, WatchableUtils $watchableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_review_create)');
@@ -145,9 +142,9 @@ class ReviewController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_review_edit")
 	 * @Template("@LadbCore/Core/Review/edit-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/edit', requirements: ['id' => '\d+'], name: 'core_review_edit')]
 	public function editAction(Request $request, $id, EntityManagerInterface $om, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_review_edit)');
@@ -176,9 +173,9 @@ class ReviewController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_review_update")
 	 * @Template("@LadbCore/Core/Review/edit-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_review_update')]
 	public function updateAction(Request $request, $id, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, ReviewableUtils $reviewableUtils, SearchUtils $searchUtils, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_review_update)');
@@ -229,9 +226,7 @@ class ReviewController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_review_delete")
-	 */
+	#[Route(path: '/{id}/delete', requirements: ['id' => '\d+'], name: 'core_review_delete')]
 	public function deleteAction($id, ActivityUtils $activityUtils, EntityManagerInterface $om, ReviewableUtils $reviewableUtils, SearchUtils $searchUtils, TranslatorInterface $translator, TypableUtils $typableUtils) {
 		$reviewRepository = $om->getRepository(Review::CLASS_NAME);
 
@@ -267,9 +262,7 @@ class ReviewController extends AbstractController {
 		return $this->redirect($typableUtils->getUrlAction($entity));
 	}
 
-	/**
-	 * @Route("/{id}", requirements={"id" = "\d+"}, name="core_review_show")
-	 */
+	#[Route(path: '/{id}', requirements: ['id' => '\d+'], name: 'core_review_show')]
 	public function showAction(Request $request, $id, EntityManagerInterface $om, TypableUtils $typableUtils) {
 		$reviewRepository = $om->getRepository(Review::CLASS_NAME);
 

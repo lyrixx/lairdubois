@@ -38,17 +38,15 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-/**
- * @Route("/annonces")
- */
+#[Route(path: '/annonces')]
 class OfferController extends AbstractController {
 
 	use PublicationControllerTrait;
 
 	/**
-	 * @Route("/new", name="core_offer_new")
 	 * @Template("@LadbCore/Offer/Offer/new.html.twig")
 	 */
+	#[Route(path: '/new', name: 'core_offer_new')]
 	public function newAction(Request $request, TagUtils $tagUtils) {
 
 		$offer = new Offer();
@@ -63,9 +61,9 @@ class OfferController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/create", methods={"POST"}, name="core_offer_create")
 	 * @Template("@LadbCore/Offer/Offer/new.html.twig")
 	 */
+	#[Route(path: '/create', methods: ['POST'], name: 'core_offer_create')]
 	public function createAction(Request $request, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$owner = $this->retrieveOwner($request);
@@ -107,10 +105,8 @@ class OfferController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Route("/{id}/lock", requirements={"id" = "\d+"}, defaults={"lock" = true}, name="core_offer_lock")
-	 * @Route("/{id}/unlock", requirements={"id" = "\d+"}, defaults={"lock" = false}, name="core_offer_unlock")
-	 */
+	#[Route(path: '/{id}/lock', requirements: ['id' => '\d+'], defaults: ['lock' => true], name: 'core_offer_lock')]
+	#[Route(path: '/{id}/unlock', requirements: ['id' => '\d+'], defaults: ['lock' => false], name: 'core_offer_unlock')]
 	public function lockUnlockAction($id, $lock, OfferManager $offerManager, TranslatorInterface $translator) {
 
 		$offer = $this->retrievePublication($id, Offer::CLASS_NAME);
@@ -129,9 +125,7 @@ class OfferController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_offer_show', array( 'id' => $offer->getSluggedId() )));
 	}
 
-	/**
-	 * @Route("/{id}/publish", requirements={"id" = "\d+"}, name="core_offer_publish")
-	 */
+	#[Route(path: '/{id}/publish', requirements: ['id' => '\d+'], name: 'core_offer_publish')]
 	public function publishAction($id, OfferManager $offerManager, TranslatorInterface $translator) {
 
 		$offer = $this->retrievePublication($id, Offer::CLASS_NAME);
@@ -146,9 +140,7 @@ class OfferController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_offer_show', array( 'id' => $offer->getSluggedId() )));
 	}
 
-	/**
-	 * @Route("/{id}/unpublish", requirements={"id" = "\d+"}, name="core_offer_unpublish")
-	 */
+	#[Route(path: '/{id}/unpublish', requirements: ['id' => '\d+'], name: 'core_offer_unpublish')]
 	public function unpublishAction(Request $request, $id, OfferManager $offerManager, TranslatorInterface $translator) {
 
 		$offer = $this->retrievePublication($id, Offer::CLASS_NAME);
@@ -170,9 +162,9 @@ class OfferController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_offer_edit")
 	 * @Template("@LadbCore/Offer/Offer/edit.html.twig")
 	 */
+	#[Route(path: '/{id}/edit', requirements: ['id' => '\d+'], name: 'core_offer_edit')]
 	public function editAction($id, TagUtils $tagUtils) {
 
 		$offer = $this->retrievePublication($id, Offer::CLASS_NAME);
@@ -188,9 +180,9 @@ class OfferController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_offer_update")
 	 * @Template("@LadbCore/Offer/Offer/edit.html.twig")
 	 */
+	#[Route(path: '/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_offer_update')]
 	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, PicturedUtils $picturedUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$offer = $this->retrievePublication($id, Offer::CLASS_NAME);
@@ -240,9 +232,7 @@ class OfferController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_offer_delete")
-	 */
+	#[Route(path: '/{id}/delete', requirements: ['id' => '\d+'], name: 'core_offer_delete')]
 	public function deleteAction($id, OfferManager $offerManager, TranslatorInterface $translator) {
 
 		$offer = $this->retrievePublication($id, Offer::CLASS_NAME);
@@ -257,9 +247,7 @@ class OfferController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_offer_list'));
 	}
 
-	/**
-	 * @Route("/{id}/chown", requirements={"id" = "\d+"}, name="core_offer_chown")
-	 */
+	#[Route(path: '/{id}/chown', requirements: ['id' => '\d+'], name: 'core_offer_chown')]
 	public function chownAction(Request $request, $id, OfferManager $offerManager, TranslatorInterface $translator) {
 
 		$offer = $this->retrievePublication($id, Offer::CLASS_NAME);
@@ -277,9 +265,9 @@ class OfferController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/widget", requirements={"id" = "\d+"}, name="core_offer_widget")
 	 * @Template("@LadbCore/Offer/Offer/widget-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/widget', requirements: ['id' => '\d+'], name: 'core_offer_widget')]
 	public function widgetAction($id) {
 
 		$offer = $this->retrievePublication($id, Offer::CLASS_NAME);
@@ -291,9 +279,9 @@ class OfferController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/location.geojson", name="core_offer_location", defaults={"_format" = "json"})
 	 * @Template("@LadbCore/Offer/Offer/location.geojson.twig")
 	 */
+	#[Route(path: '/{id}/location.geojson', name: 'core_offer_location', defaults: ['_format' => 'json'])]
 	public function locationAction($id) {
 
 		$offer = $this->retrievePublication($id, Offer::CLASS_NAME);
@@ -318,9 +306,9 @@ class OfferController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/card.xhr", name="core_offer_card")
 	 * @Template("@LadbCore/Offer/Offer/card-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/card.xhr', name: 'core_offer_card')]
 	public function cardAction(Request $request, $id) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_offer_card)');
@@ -334,9 +322,7 @@ class OfferController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Route("/{id}/message/new", name="core_offer_message_new")
-	 */
+	#[Route(path: '/{id}/message/new', name: 'core_offer_message_new')]
 	public function messageNewAction(Request $request, $id, TranslatorInterface $translator) {
 
 		$offer = $this->retrievePublication($id, Offer::CLASS_NAME);
@@ -359,11 +345,11 @@ class OfferController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/", name="core_offer_list")
-	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_offer_list_page")
-	 * @Route(".geojson", defaults={"_format" = "json", "page"=-1, "layout"="geojson"}, name="core_offer_list_geojson")
 	 * @Template("@LadbCore/Offer/Offer/list.html.twig")
 	 */
+	#[Route(path: '/', name: 'core_offer_list')]
+	#[Route(path: '/{page}', requirements: ['page' => '\d+'], name: 'core_offer_list_page')]
+	#[Route(path: '.geojson', defaults: ['_format' => 'json', 'page' => -1, 'layout' => 'geojson'], name: 'core_offer_list_geojson')]
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, LocalisableUtils $localisableUtils, SearchUtils $searchUtils, TranslatorInterface $translator, $page = 0, $layout = 'view') {
 
 		// Elasticsearch paginiation limit
@@ -586,9 +572,9 @@ class OfferController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}.html", name="core_offer_show")
 	 * @Template("@LadbCore/Offer/Offer/show.html.twig")
 	 */
+	#[Route(path: '/{id}.html', name: 'core_offer_show')]
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, EntityManagerInterface $om, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$offerRepository = $om->getRepository(Offer::CLASS_NAME);
 
@@ -626,9 +612,9 @@ class OfferController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/admin/converttoquestion", requirements={"id" = "\d+"}, name="core_offer_offer_admin_converttoquestion")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_offer_offer_admin_converttoquestion)")
 	 */
+	#[Route(path: '/{id}/admin/converttoquestion', requirements: ['id' => '\d+'], name: 'core_offer_offer_admin_converttoquestion')]
 	public function adminConvertToQuestionAction($id, OfferManager $offerManager, EntityManagerInterface $om, TranslatorInterface $translator) {
 		$offerRepository = $om->getRepository(Offer::CLASS_NAME);
 

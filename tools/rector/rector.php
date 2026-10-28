@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Ladb\Rector\ControllerGetToActionArgumentRector;
 use Ladb\Rector\ContainerToConstructorRector;
+use PhpParser\PrettyPrinterAbstract;
 use PHPStan\Type\ArrayType;
 use PHPStan\Type\MixedType;
 use PHPStan\Type\ObjectType;
@@ -11,6 +12,9 @@ use PHPStan\Type\StringType;
 use PHPStan\Type\UnionType;
 use Rector\Composer\InstalledPackageResolver;
 use Rector\Config\RectorConfig;
+use Rector\Php80\Rector\Class_\AnnotationToAttributeRector;
+use Rector\Php80\ValueObject\AnnotationToAttribute;
+use Rector\PhpParser\Printer\BetterStandardPrinter;
 use Rector\Renaming\Rector\Name\RenameClassRector;
 use Rector\Symfony\Symfony42\Rector\New_\RootNodeTreeBuilderRector;
 use Rector\Symfony\Symfony43\Rector\MethodCall\MakeDispatchFirstArgumentEventRector;
@@ -54,9 +58,22 @@ return static function (RectorConfig $rectorConfig): void {
             new AddReturnTypeDeclaration('Twig\Extension\ExtensionInterface', 'getFunctions', new ArrayType(new MixedType(), new MixedType())),
             new AddReturnTypeDeclaration('Twig\Extension\ExtensionInterface', 'getTests', new ArrayType(new MixedType(), new MixedType())),
         ])
+        // Annotations → attributes (#25), one kind per PR. Rector 2.7 no longer applies
+        // withAttributesSets(symfonyRoute: true) alone, and its "symfony" option also converts the
+        // constraints and @required. The annotations of SensioFrameworkExtraBundle stay until #27.
+        ->withConfiguredRule(AnnotationToAttributeRector::class, [
+            new AnnotationToAttribute('Symfony\Component\Routing\Annotation\Route'),
+        ])
         ->withIndent("\t", 1)
         ->withCache(__DIR__.'/var')
     ($rectorConfig);
+
+    // php-parser counts a tab of the original code as 4 columns (PrettyPrinterAbstract::$tabWidth),
+    // and Rector prints one indent character per column: a node that it reprints (a method that
+    // gets an attribute, its docblock) would get 4 tabs per level. One column per tab.
+    $rectorConfig->afterResolving(BetterStandardPrinter::class, static function (BetterStandardPrinter $printer): void {
+        (new \ReflectionProperty(PrettyPrinterAbstract::class, 'tabWidth'))->setValue($printer, 1);
+    });
 
     // A rule of rector-symfony applies from a version of a package of Symfony (symfony/console…),
     // read in vendor/composer/installed.json, where symfony/symfony replaces them: Rector would

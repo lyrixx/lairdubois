@@ -22,18 +22,15 @@ final class ResettingController extends AbstractController {
 	private const RETRY_TTL_IN_SECONDS = 7200;
 	private const TOKEN_TTL_IN_SECONDS = 86400;
 
-	/**
-	 * @Route("/request", methods={"GET"}, name="fos_user_resetting_request")
-	 */
+	#[Route(path: '/request', methods: ['GET'], name: 'fos_user_resetting_request')]
 	public function requestAction() {
 		return $this->render('@FOSUser/Resetting/request.html.twig');
 	}
 
 	/**
 	 * The same redirection whether the account exists or not. One email per RETRY_TTL_IN_SECONDS at most.
-	 *
-	 * @Route("/send-email", methods={"POST"}, name="fos_user_resetting_send_email")
 	 */
+	#[Route(path: '/send-email', methods: ['POST'], name: 'fos_user_resetting_send_email')]
 	public function sendEmailAction(Request $request, MailerUtils $mailerUtils, TokenGeneratorInterface $tokenGenerator, UserManager $userManager) {
 		$username = $request->request->get('username');
 
@@ -51,9 +48,7 @@ final class ResettingController extends AbstractController {
 		return $this->redirectToRoute('fos_user_resetting_check_email', array( 'username' => $username ));
 	}
 
-	/**
-	 * @Route("/check-email", methods={"GET"}, name="fos_user_resetting_check_email")
-	 */
+	#[Route(path: '/check-email', methods: ['GET'], name: 'fos_user_resetting_check_email')]
 	public function checkEmailAction(Request $request) {
 		$username = $request->query->get('username');
 		if (null === $username || '' === $username) {
@@ -64,9 +59,7 @@ final class ResettingController extends AbstractController {
 		return $this->render('@FOSUser/Resetting/check_email.html.twig');
 	}
 
-	/**
-	 * @Route("/reset/{token}", methods={"GET", "POST"}, name="fos_user_resetting_reset")
-	 */
+	#[Route(path: '/reset/{token}', methods: ['GET', 'POST'], name: 'fos_user_resetting_reset')]
 	public function resetAction(Request $request, $token, FormFactoryInterface $formFactory, LoginUtils $loginUtils, TranslatorInterface $translator, UserManager $userManager) {
 		$user = $userManager->findUserByConfirmationToken($token);
 		if (null === $user) {

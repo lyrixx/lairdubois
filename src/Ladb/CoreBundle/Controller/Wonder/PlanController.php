@@ -44,17 +44,15 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-/**
- * @Route("/plans")
- */
+#[Route(path: '/plans')]
 class PlanController extends AbstractController {
 
 	use PublicationControllerTrait;
 
 	/**
-	 * @Route("/new", name="core_plan_new")
 	 * @Template("@LadbCore/Wonder/Plan/new.html.twig")
 	 */
+	#[Route(path: '/new', name: 'core_plan_new')]
 	public function newAction(Request $request, TagUtils $tagUtils) {
 
 		$plan = new Plan();
@@ -68,9 +66,9 @@ class PlanController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/create", methods={"POST"}, name="core_plan_create")
 	 * @Template("@LadbCore/Wonder/Plan/new.html.twig")
 	 */
+	#[Route(path: '/create', methods: ['POST'], name: 'core_plan_create')]
 	public function createAction(Request $request, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, PlanUtils $planUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$owner = $this->retrieveOwner($request);
@@ -119,10 +117,8 @@ class PlanController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Route("/{id}/lock", requirements={"id" = "\d+"}, defaults={"lock" = true}, name="core_plan_lock")
-	 * @Route("/{id}/unlock", requirements={"id" = "\d+"}, defaults={"lock" = false}, name="core_plan_unlock")
-	 */
+	#[Route(path: '/{id}/lock', requirements: ['id' => '\d+'], defaults: ['lock' => true], name: 'core_plan_lock')]
+	#[Route(path: '/{id}/unlock', requirements: ['id' => '\d+'], defaults: ['lock' => false], name: 'core_plan_unlock')]
 	public function lockUnlockAction($id, $lock, PlanManager $planManager, TranslatorInterface $translator) {
 
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
@@ -141,9 +137,7 @@ class PlanController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_plan_show', array( 'id' => $plan->getSluggedId() )));
 	}
 
-	/**
-	 * @Route("/{id}/publish", requirements={"id" = "\d+"}, name="core_plan_publish")
-	 */
+	#[Route(path: '/{id}/publish', requirements: ['id' => '\d+'], name: 'core_plan_publish')]
 	public function publishAction($id, PlanManager $planManager, TranslatorInterface $translator) {
 
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
@@ -158,9 +152,7 @@ class PlanController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_plan_show', array( 'id' => $plan->getSluggedId() )));
 	}
 
-	/**
-	 * @Route("/{id}/unpublish", requirements={"id" = "\d+"}, name="core_plan_unpublish")
-	 */
+	#[Route(path: '/{id}/unpublish', requirements: ['id' => '\d+'], name: 'core_plan_unpublish')]
 	public function unpublishAction(Request $request, $id, PlanManager $planManager, TranslatorInterface $translator) {
 
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
@@ -182,9 +174,9 @@ class PlanController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_plan_edit")
 	 * @Template("@LadbCore/Wonder/Plan/edit.html.twig")
 	 */
+	#[Route(path: '/{id}/edit', requirements: ['id' => '\d+'], name: 'core_plan_edit')]
 	public function editAction($id, TagUtils $tagUtils) {
 
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
@@ -200,9 +192,9 @@ class PlanController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_plan_update")
 	 * @Template("@LadbCore/Wonder/Plan/edit.html.twig")
 	 */
+	#[Route(path: '/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_plan_update')]
 	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, EmbeddableUtils $embaddableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, PicturedUtils $picturedUtils, PlanUtils $planUtils, StripableUtils $stripableUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
@@ -258,9 +250,7 @@ class PlanController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_plan_delete")
-	 */
+	#[Route(path: '/{id}/delete', requirements: ['id' => '\d+'], name: 'core_plan_delete')]
 	public function deleteAction($id, PlanManager $planManager, TranslatorInterface $translator) {
 
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
@@ -275,9 +265,7 @@ class PlanController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_plan_list'));
 	}
 
-	/**
-	 * @Route("/{id}/chown", requirements={"id" = "\d+"}, name="core_plan_chown")
-	 */
+	#[Route(path: '/{id}/chown', requirements: ['id' => '\d+'], name: 'core_plan_chown')]
 	public function chownAction(Request $request, $id, PlanManager $planManager, TranslatorInterface $translator) {
 
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
@@ -294,9 +282,7 @@ class PlanController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_plan_show', array( 'id' => $plan->getSluggedId() )));
 	}
 
-	/**
-	 * @Route("/{id}/download", requirements={"id" = "\d+"}, name="core_plan_download")
-	 */
+	#[Route(path: '/{id}/download', requirements: ['id' => '\d+'], name: 'core_plan_download')]
 	public function downloadAction($id, EntityManagerInterface $om, PlanUtils $planUtils, SearchUtils $searchUtils) {
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
 		$this->assertShowable($plan);
@@ -331,11 +317,11 @@ class PlanController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/questions", requirements={"id" = "\d+"}, name="core_plan_questions")
-	 * @Route("/{id}/questions/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_plan_questions_filter")
-	 * @Route("/{id}/questions/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_plan_questions_filter_page")
 	 * @Template("@LadbCore/Wonder/Plan/questions.html.twig")
 	 */
+	#[Route(path: '/{id}/questions', requirements: ['id' => '\d+'], name: 'core_plan_questions')]
+	#[Route(path: '/{id}/questions/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_plan_questions_filter')]
+	#[Route(path: '/{id}/questions/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_plan_questions_filter_page')]
 	public function questionsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
 		$this->assertShowable($plan);
@@ -366,11 +352,11 @@ class PlanController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/pas-a-pas", requirements={"id" = "\d+"}, name="core_plan_howtos")
-	 * @Route("/{id}/pas-a-pas/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_plan_howtos_filter")
-	 * @Route("/{id}/pas-a-pas/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_plan_howtos_filter_page")
 	 * @Template("@LadbCore/Wonder/Plan/howtos.html.twig")
 	 */
+	#[Route(path: '/{id}/pas-a-pas', requirements: ['id' => '\d+'], name: 'core_plan_howtos')]
+	#[Route(path: '/{id}/pas-a-pas/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_plan_howtos_filter')]
+	#[Route(path: '/{id}/pas-a-pas/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_plan_howtos_filter_page')]
 	public function howtosAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
 		$this->assertShowable($plan);
@@ -401,11 +387,11 @@ class PlanController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/creations", requirements={"id" = "\d+"}, name="core_plan_creations")
-	 * @Route("/{id}/creations/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_plan_creations_filter")
-	 * @Route("/{id}/creations/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_plan_creations_filter_page")
 	 * @Template("@LadbCore/Wonder/Plan/creations.html.twig")
 	 */
+	#[Route(path: '/{id}/creations', requirements: ['id' => '\d+'], name: 'core_plan_creations')]
+	#[Route(path: '/{id}/creations/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_plan_creations_filter')]
+	#[Route(path: '/{id}/creations/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_plan_creations_filter_page')]
 	public function creationsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
 		$this->assertShowable($plan);
@@ -436,11 +422,11 @@ class PlanController extends AbstractController {
     }
 
 	/**
-	 * @Route("/{id}/processus", requirements={"id" = "\d+"}, name="core_plan_workflows")
-	 * @Route("/{id}/processus/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_plan_workflows_filter")
-	 * @Route("/{id}/processus/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_plan_workflows_filter_page")
 	 * @Template("@LadbCore/Wonder/Plan/workflows.html.twig")
 	 */
+	#[Route(path: '/{id}/processus', requirements: ['id' => '\d+'], name: 'core_plan_workflows')]
+	#[Route(path: '/{id}/processus/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_plan_workflows_filter')]
+	#[Route(path: '/{id}/processus/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_plan_workflows_filter_page')]
 	public function workflowsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
 		$this->assertShowable($plan);
@@ -471,11 +457,11 @@ class PlanController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/ateliers", requirements={"id" = "\d+"}, name="core_plan_workshops")
-	 * @Route("/{id}/ateliers/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_plan_workshops_filter")
-	 * @Route("/{id}/ateliers/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_plan_workshops_filter_page")
 	 * @Template("@LadbCore/Wonder/Plan/workshops.html.twig")
 	 */
+	#[Route(path: '/{id}/ateliers', requirements: ['id' => '\d+'], name: 'core_plan_workshops')]
+	#[Route(path: '/{id}/ateliers/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_plan_workshops_filter')]
+	#[Route(path: '/{id}/ateliers/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_plan_workshops_filter_page')]
 	public function workshopsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
 		$this->assertShowable($plan);
@@ -506,11 +492,11 @@ class PlanController extends AbstractController {
     }
 
 	/**
-	 * @Route("/{id}/ecoles", requirements={"id" = "\d+"}, name="core_plan_schools")
-	 * @Route("/{id}/ecoles/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_plan_schools_filter")
-	 * @Route("/{id}/ecoles/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_plan_schools_filter_page")
 	 * @Template("@LadbCore/Wonder/Plan/schools.html.twig")
 	 */
+	#[Route(path: '/{id}/ecoles', requirements: ['id' => '\d+'], name: 'core_plan_schools')]
+	#[Route(path: '/{id}/ecoles/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_plan_schools_filter')]
+	#[Route(path: '/{id}/ecoles/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_plan_schools_filter_page')]
 	public function schoolsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
 		$this->assertShowable($plan);
@@ -541,11 +527,11 @@ class PlanController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/inspirations", requirements={"id" = "\d+"}, name="core_plan_inspirations")
-	 * @Route("/{id}/inspirations/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_plan_inspirations_filter")
-	 * @Route("/{id}/inspirations/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_plan_inspirations_filter_page")
 	 * @Template("@LadbCore/Wonder/Plan/inspirations.html.twig")
 	 */
+	#[Route(path: '/{id}/inspirations', requirements: ['id' => '\d+'], name: 'core_plan_inspirations')]
+	#[Route(path: '/{id}/inspirations/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_plan_inspirations_filter')]
+	#[Route(path: '/{id}/inspirations/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_plan_inspirations_filter_page')]
 	public function inspirationsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$planRepository = $om->getRepository(Plan::CLASS_NAME);
 
@@ -576,11 +562,11 @@ class PlanController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/rebonds", requirements={"id" = "\d+"}, name="core_plan_rebounds")
-	 * @Route("/{id}/rebonds/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_plan_rebounds_filter")
-	 * @Route("/{id}/rebonds/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_plan_rebounds_filter_page")
 	 * @Template("@LadbCore/Wonder/Plan/rebounds.html.twig")
 	 */
+	#[Route(path: '/{id}/rebonds', requirements: ['id' => '\d+'], name: 'core_plan_rebounds')]
+	#[Route(path: '/{id}/rebonds/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_plan_rebounds_filter')]
+	#[Route(path: '/{id}/rebonds/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_plan_rebounds_filter_page')]
 	public function reboundsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$planRepository = $om->getRepository(Plan::CLASS_NAME);
 
@@ -610,16 +596,12 @@ class PlanController extends AbstractController {
 		));
 	}
 
-	/**
-	 * @Route("/{id}/sticker.png", requirements={"id" = "\d+"}, name="core_plan_sticker_bc")
-	 */
+	#[Route(path: '/{id}/sticker.png', requirements: ['id' => '\d+'], name: 'core_plan_sticker_bc')]
 	public function bcStickerAction(Request $request, $id) {
 		return $this->redirect($this->generateUrl('core_plan_sticker', array( 'id' => $id )));
 	}
 
-	/**
-	 * @Route("/{id}/sticker", requirements={"id" = "\d+"}, name="core_plan_sticker")
-	 */
+	#[Route(path: '/{id}/sticker', requirements: ['id' => '\d+'], name: 'core_plan_sticker')]
 	public function stickerAction(Request $request, $id, EmbeddableUtils $embeddableUtils, ImagineController $imagineController, EntityManagerInterface $om) {
 		$id = intval($id);
 
@@ -647,9 +629,7 @@ class PlanController extends AbstractController {
 
 	}
 
-	/**
-	 * @Route("/{id}/strip", requirements={"id" = "\d+"}, name="core_plan_strip")
-	 */
+	#[Route(path: '/{id}/strip', requirements: ['id' => '\d+'], name: 'core_plan_strip')]
 	public function stripAction(Request $request, $id, ImagineController $imagineController, EntityManagerInterface $om, StripableUtils $stripableUtils) {
 		$id = intval($id);
 
@@ -678,9 +658,9 @@ class PlanController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/widget", requirements={"id" = "\d+"}, name="core_plan_widget")
 	 * @Template("@LadbCore/Wonder/Plan/widget-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/widget', requirements: ['id' => '\d+'], name: 'core_plan_widget')]
 	public function widgetAction(Request $request, $id, EntityManagerInterface $om) {
 		$id = intval($id);
 
@@ -692,19 +672,17 @@ class PlanController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Route("/{filter}", requirements={"filter" = "[a-z-]+"}, name="core_plan_list_filter")
-	 * @Route("/{filter}/{page}", requirements={"filter" = "[a-z-]+", "page" = "\d+"}, name="core_plan_list_filter_page")
-	 */
+	#[Route(path: '/{filter}', requirements: ['filter' => '[a-z-]+'], name: 'core_plan_list_filter')]
+	#[Route(path: '/{filter}/{page}', requirements: ['filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_plan_list_filter_page')]
 	public function goneListAction(Request $request, $filter, $page = 0) {
 		throw new \Symfony\Component\HttpKernel\Exception\GoneHttpException();
 	}
 
 	/**
-	 * @Route("/", name="core_plan_list")
-	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_plan_list_page")
 	 * @Template("@LadbCore/Wonder/Plan/list.html.twig")
 	 */
+	#[Route(path: '/', name: 'core_plan_list')]
+	#[Route(path: '/{page}', requirements: ['page' => '\d+'], name: 'core_plan_list_page')]
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, ResourceUtils $resourceUtils, SearchUtils $searchUtils, TranslatorInterface $translator, $page = 0) {
 
 		// Elasticsearch paginiation limit
@@ -950,9 +928,9 @@ class PlanController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}.html", name="core_plan_show")
 	 * @Template("@LadbCore/Wonder/Plan/show.html.twig")
 	 */
+	#[Route(path: '/{id}.html', name: 'core_plan_show')]
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, EmbeddableUtils $embaddableUtils, ExplorableUtils $explorableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, EntityManagerInterface $om, SearchUtils $searchUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$planRepository = $om->getRepository(Plan::CLASS_NAME);
 

@@ -13,17 +13,14 @@ use Ladb\CoreBundle\Entity\Collection\Entry;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-/**
- * @Route("/collections")
- */
+#[Route(path: '/collections')]
 class EntryController extends AbstractCollectionBasedController {
 
 	/////
-
 	/**
-	 * @Route("/{id}/entry/{entityType}/{entityId}/create", requirements={"id" = "\d+", "entityType" = "\d+", "entityId" = "\d+"}, name="core_collection_entry_create")
 	 * @Template("@LadbCore/Collection/Entry/create-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/entry/{entityType}/{entityId}/create', requirements: ['id' => '\d+', 'entityType' => '\d+', 'entityId' => '\d+'], name: 'core_collection_entry_create')]
 	public function createAction($id, $entityType, $entityId, CollectionnableUtils $collectionnableUtils) {
 
 		$this->createLock('core_collection_entry_create', false, self::LOCK_TTL_CREATE_ACTION, false);
@@ -51,9 +48,9 @@ class EntryController extends AbstractCollectionBasedController {
 	}
 
 	/**
-	 * @Route("/{id}/entry/{entityType}/{entityId}/delete", requirements={"id" = "\d+", "entityType" = "\d+", "entityId" = "\d+"}, name="core_collection_entry_delete")
 	 * @Template("@LadbCore/Collection/Entry/delete-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/entry/{entityType}/{entityId}/delete', requirements: ['id' => '\d+', 'entityType' => '\d+', 'entityId' => '\d+'], name: 'core_collection_entry_delete')]
 	public function deleteAction($id, $entityType, $entityId, CollectionnableUtils $collectionnableUtils, EventDispatcherInterface $dispatcher, EntityManagerInterface $om) {
 		$entryRepository = $om->getRepository(Entry::CLASS_NAME);
 

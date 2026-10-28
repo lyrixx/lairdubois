@@ -21,9 +21,7 @@ use Doctrine\ORM\EntityManagerInterface;
  */
 final class RegistrationController extends AbstractController {
 
-	/**
-	 * @Route("/", methods={"GET", "POST"}, name="fos_user_registration_register")
-	 */
+	#[Route(path: '/', methods: ['GET', 'POST'], name: 'fos_user_registration_register')]
 	public function registerAction(Request $request, FormFactoryInterface $formFactory, LoginUtils $loginUtils, MailerUtils $mailerUtils, MessageUtils $messageUtils, EntityManagerInterface $om, TranslatorInterface $translator, UserManager $userManager, UserUtils $userUtils) {
 		$user = $userManager->createUser();
 		$user->setEnabled(true);
@@ -77,9 +75,7 @@ final class RegistrationController extends AbstractController {
 		));
 	}
 
-	/**
-	 * @Route("/confirmed", methods={"GET"}, name="fos_user_registration_confirmed")
-	 */
+	#[Route(path: '/confirmed', methods: ['GET'], name: 'fos_user_registration_confirmed')]
 	public function confirmedAction() {
 		$this->denyAccessUnlessGranted('IS_AUTHENTICATED_REMEMBERED');
 
