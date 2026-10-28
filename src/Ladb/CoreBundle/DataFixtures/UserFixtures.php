@@ -44,12 +44,15 @@ final class UserFixtures extends Fixture {
 	public function load(ObjectManager $manager) {
 		$this->factory->copyPlaceholders();
 
+		// One second apart, in this order: the lists of users sorted by date do not depend on the speed of the load
+		$createdAt = new \DateTimeImmutable('-3 seconds');
+
 		// The admin, also the sender of the welcome messages (parameter admin_username)
-		$admin = $this->createUser($manager, self::ADMIN, 'Admin', 'Administrateur de L\'Air du Bois', User::ACCOUNT_TYPE_NONE);
+		$admin = $this->createUser($manager, self::ADMIN, 'Admin', 'Administrateur de L\'Air du Bois', User::ACCOUNT_TYPE_NONE, $createdAt);
 		$admin->addRole('ROLE_ADMIN');
 		$this->userManager->updateUser($admin);
 
-		$user = $this->createUser($manager, self::USER, 'Jeanne Martin', 'Jeanne Martin', User::ACCOUNT_TYPE_HOBBYIST);
+		$user = $this->createUser($manager, self::USER, 'Jeanne Martin', 'Jeanne Martin', User::ACCOUNT_TYPE_HOBBYIST, $createdAt->modify('+1 second'));
 		$user->setLocation('Lyon, France');
 		$user->setLatitude(45.764043);
 		$user->setLongitude(4.835659);
@@ -63,7 +66,7 @@ final class UserFixtures extends Fixture {
 		$user->getMeta()->setBiography($biography);
 		$this->userManager->updateUser($user);
 
-		$user2 = $this->createUser($manager, self::USER2, 'Paul Bernard', 'Paul Bernard', User::ACCOUNT_TYPE_PRO);
+		$user2 = $this->createUser($manager, self::USER2, 'Paul Bernard', 'Paul Bernard', User::ACCOUNT_TYPE_PRO, $createdAt->modify('+2 seconds'));
 		$user2->setLocation('Nantes, France');
 		$user2->setLatitude(47.218371);
 		$user2->setLongitude(-1.553621);
@@ -81,6 +84,7 @@ final class UserFixtures extends Fixture {
 		$team->addRole('ROLE_TEAM');
 		$team->setAvatar($this->factory->picture($team, 'avatar-team.png', 'avatar-team'));
 		$team->getMeta()->setRequestEnabled(true);
+		$team->setCreatedAt(\DateTime::createFromImmutable($createdAt->modify('+3 seconds')));
 		$this->userManager->updateUser($team);
 		$this->register($manager, $team, $user);
 
@@ -99,8 +103,9 @@ final class UserFixtures extends Fixture {
 		$this->addReference(self::TEAM, $team);
 	}
 
-	private function createUser(ObjectManager $manager, string $username, string $displayname, string $fullname, int $accountType): User {
+	private function createUser(ObjectManager $manager, string $username, string $displayname, string $fullname, int $accountType, \DateTimeImmutable $createdAt): User {
 		$user = $this->userManager->createUser();
+		$user->setCreatedAt(\DateTime::createFromImmutable($createdAt));
 		$user->setUsername($username);
 		$user->setDisplayname($displayname);
 		$user->setFullname($fullname);
