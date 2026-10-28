@@ -444,6 +444,10 @@ EOT
 
 		}
 
+		// Otherwise, only when the command is destroyed: a run in the same process (tests) would
+		// find it locked
+		$this->release();
+
 		return 0;
 
 	}

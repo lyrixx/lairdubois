@@ -15,7 +15,7 @@ class NewSchoolType extends AbstractType {
 		$builder
 			->add('nameValue', TextValueType::class, array(
 				'choices'         => null,
-				'dataConstraints' => null,
+				'dataConstraints' => array(),
 				'constraints'     => array(
 					new \Symfony\Component\Validator\Constraints\Valid(),
 					new \Ladb\CoreBundle\Validator\Constraints\UniqueSchool(),
@@ -24,7 +24,7 @@ class NewSchoolType extends AbstractType {
 			))
 			->add('logoValue', PictureValueType::class, array(
 				'choices'         => null,
-				'dataConstraints' => null,
+				'dataConstraints' => array(),
 				'constraints'     => array(
 					new \Symfony\Component\Validator\Constraints\Valid(),
 				),

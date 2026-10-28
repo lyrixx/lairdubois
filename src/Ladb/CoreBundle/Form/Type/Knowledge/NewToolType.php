@@ -14,7 +14,7 @@ class NewToolType extends AbstractType {
 		$builder
 			->add('nameValue', TextValueType::class, array(
 				'choices'         => null,
-				'dataConstraints' => null,
+				'dataConstraints' => array(),
 				'constraints'     => array(
 					new \Symfony\Component\Validator\Constraints\Valid(),
 				),
@@ -22,7 +22,7 @@ class NewToolType extends AbstractType {
 			))
 			->add('photoValue', PictureValueType::class, array(
 				'choices'         => null,
-				'dataConstraints' => null,
+				'dataConstraints' => array(),
 				'constraints'     => array(
 					new \Symfony\Component\Validator\Constraints\Valid(),
 				),
@@ -30,14 +30,14 @@ class NewToolType extends AbstractType {
 			))
 			->add('productNameValue', TextValueType::class, array(
 				'choices'         => null,
-				'dataConstraints' => null,
+				'dataConstraints' => array(),
 				'constraints'     => array(
 					new \Symfony\Component\Validator\Constraints\Valid(),
 				)
 			))
 			->add('brandValue', TextValueType::class, array(
 				'choices'         => null,
-				'dataConstraints' => null,
+				'dataConstraints' => array(),
 				'constraints'     => array(
 					new \Symfony\Component\Validator\Constraints\Valid(),
 				)

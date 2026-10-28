@@ -206,6 +206,10 @@ abstract class WebTestCase extends BaseWebTestCase
         $application = new Application(static::bootKernel());
         $application->setAutoExit(false);
         $application->setCatchExceptions(false);
+        // No signal handler: the console of Symfony 5.2+ registers one per run (pcntl), which chains
+        // the previous ones and keeps their application, kernel and command until the end of the
+        // process
+        $application->setSignalsToDispatchEvent();
         $exitCode = $application->run(new StringInput($commandLine), $output = new BufferedOutput());
 
         return [$exitCode, $output->fetch()];

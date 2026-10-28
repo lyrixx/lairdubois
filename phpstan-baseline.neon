@@ -13,10 +13,703 @@ parameters:
 			path: src/Ladb/CoreBundle/Composer/ScriptHandler.php
 
 		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 10
+			path: src/Ladb/CoreBundle/Controller/Blog/PostController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
+				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Blog/PostController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Collection/AbstractCollectionBasedController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 12
+			path: src/Ladb/CoreBundle/Controller/Collection/CollectionController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
+				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 2
+			path: src/Ladb/CoreBundle/Controller/Collection/CollectionController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Collection/EntryController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 7
+			path: src/Ladb/CoreBundle/Controller/Core/CommentController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 5
+			path: src/Ladb/CoreBundle/Controller/Core/FeedbackController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 2
+			path: src/Ladb/CoreBundle/Controller/Core/FollowerController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 3
+			path: src/Ladb/CoreBundle/Controller/Core/JoinController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 3
+			path: src/Ladb/CoreBundle/Controller/Core/LikeController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 11
+			path: src/Ladb/CoreBundle/Controller/Core/MemberController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 2
+			path: src/Ladb/CoreBundle/Controller/Core/NotificationController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 10
+			path: src/Ladb/CoreBundle/Controller/Core/PictureController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
+				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Core/PictureController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Core/RefererController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Core/RegistrationController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Core/ReportController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 5
+			path: src/Ladb/CoreBundle/Controller/Core/ReviewController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Core/SpotlightController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 5
+			path: src/Ladb/CoreBundle/Controller/Core/TipController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 33
+			path: src/Ladb/CoreBundle/Controller/Core/UserController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 3
+			path: src/Ladb/CoreBundle/Controller/Core/VoteController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 2
+			path: src/Ladb/CoreBundle/Controller/Core/WatchController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 10
+			path: src/Ladb/CoreBundle/Controller/Event/EventController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
+				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Event/EventController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 7
+			path: src/Ladb/CoreBundle/Controller/Extra/YoutookController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 10
+			path: src/Ladb/CoreBundle/Controller/Faq/QuestionController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
+				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Faq/QuestionController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 10
+			path: src/Ladb/CoreBundle/Controller/Find/FindController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
+				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Find/FindController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 11
+			path: src/Ladb/CoreBundle/Controller/Funding/FundingController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 8
+			path: src/Ladb/CoreBundle/Controller/Howto/AbstractHowtoBasedController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
+				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Howto/AbstractHowtoBasedController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 12
+			path: src/Ladb/CoreBundle/Controller/Howto/ArticleController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
+				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Howto/ArticleController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 19
+			path: src/Ladb/CoreBundle/Controller/Howto/HowtoController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
+				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Howto/HowtoController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 9
+			path: src/Ladb/CoreBundle/Controller/Knowledge/BookController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
+				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Knowledge/BookController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 9
+			path: src/Ladb/CoreBundle/Controller/Knowledge/KnowledgeController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 12
+			path: src/Ladb/CoreBundle/Controller/Knowledge/ProviderController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
+				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Knowledge/ProviderController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 6
+			path: src/Ladb/CoreBundle/Controller/Knowledge/School/TestimonialController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 13
+			path: src/Ladb/CoreBundle/Controller/Knowledge/SchoolController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
+				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Knowledge/SchoolController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 9
+			path: src/Ladb/CoreBundle/Controller/Knowledge/SoftwareController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
+				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Knowledge/SoftwareController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 9
+			path: src/Ladb/CoreBundle/Controller/Knowledge/ToolController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
+				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Knowledge/ToolController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 12
+			path: src/Ladb/CoreBundle/Controller/Knowledge/WoodController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
+				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Knowledge/WoodController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 3
+			path: src/Ladb/CoreBundle/Controller/Message/AbstractThreadController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 4
+			path: src/Ladb/CoreBundle/Controller/Message/MessageController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 4
+			path: src/Ladb/CoreBundle/Controller/Message/ThreadController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 11
+			path: src/Ladb/CoreBundle/Controller/Offer/OfferController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
+				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Offer/OfferController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 2
+			path: src/Ladb/CoreBundle/Controller/Opencutlist/OpencutlistController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 11
+			path: src/Ladb/CoreBundle/Controller/Promotion/GraphicController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
+				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Promotion/GraphicController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 15
+			path: src/Ladb/CoreBundle/Controller/Qa/AnswerController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
+				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Qa/AnswerController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 15
+			path: src/Ladb/CoreBundle/Controller/Qa/QuestionController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
+				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Qa/QuestionController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 27
+			path: src/Ladb/CoreBundle/Controller/Wonder/CreationController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
+				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Wonder/CreationController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 22
+			path: src/Ladb/CoreBundle/Controller/Wonder/PlanController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
+				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Wonder/PlanController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 17
+			path: src/Ladb/CoreBundle/Controller/Wonder/WorkshopController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
+				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Wonder/WorkshopController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Workflow/AbstractWorkflowBasedController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 4
+			path: src/Ladb/CoreBundle/Controller/Workflow/LabelController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 4
+			path: src/Ladb/CoreBundle/Controller/Workflow/PartController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 15
+			path: src/Ladb/CoreBundle/Controller/Workflow/TaskController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
+				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Workflow/TaskController.php
+
+		-
 			message: '#^Class Ladb\\CoreBundle\\Entity\\Workflow\\Run referenced with incorrect case\: ladb\\CoreBundle\\Entity\\Workflow\\Run\.$#'
 			identifier: class.nameCase
 			count: 1
 			path: src/Ladb/CoreBundle/Controller/Workflow/TaskController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getDoctrine\(\) of class Symfony\\Bundle\\FrameworkBundle\\Controller\\AbstractController\:
+				since Symfony 5\.4, inject an instance of ManagerRegistry in your controller instead$#
+			'''
+			identifier: method.deprecated
+			count: 17
+			path: src/Ladb/CoreBundle/Controller/Workflow/WorkflowController.php
+
+		-
+			message: '''
+				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
+				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Workflow/WorkflowController.php
 
 		-
 			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
@@ -124,6 +817,15 @@ parameters:
 			message: '#^Access to an undefined property Ladb\\CoreBundle\\Entity\\Core\\User\:\:\$skills\.$#'
 			identifier: property.notFound
 			count: 1
+			path: src/Ladb/CoreBundle/Entity/Core/User.php
+
+		-
+			message: '''
+				#^Call to deprecated method getUsername\(\) of class Ladb\\CoreBundle\\Entity\\Core\\User\:
+				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 2
 			path: src/Ladb/CoreBundle/Entity/Core/User.php
 
 		-
@@ -379,10 +1081,55 @@ parameters:
 			path: src/Ladb/CoreBundle/Entity/Youtook/Took.php
 
 		-
+			message: '''
+				#^Call to method formatCurrency\(\) of deprecated class Symfony\\Component\\Intl\\NumberFormatter\\NumberFormatter\:
+				since Symfony 5\.3, use symfony/polyfill\-intl\-icu \^1\.21 instead$#
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Form/Type/Knowledge/Value/PriceValueType.php
+
+		-
+			message: '''
+				#^Call to method formatCurrency\(\) of deprecated class Symfony\\Component\\Intl\\NumberFormatter\\NumberFormatter\:
+				since Symfony 5\.3, use symfony/polyfill\-intl\-icu \^1\.21 instead$#
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Form/Type/Offer/OfferType.php
+
+		-
+			message: '''
+				#^Class Ladb\\CoreBundle\\Handler\\AuthenticationHandler implements deprecated interface Symfony\\Component\\Security\\Http\\Logout\\LogoutSuccessHandlerInterface\:
+				since Symfony 5\.1$#
+			'''
+			identifier: class.implementsDeprecatedInterface
+			count: 1
+			path: src/Ladb/CoreBundle/Handler/AuthenticationHandler.php
+
+		-
 			message: '#^Deprecated in PHP 8\.4\: Parameter \#3 \$owner \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
 			identifier: parameter.implicitlyNullable
 			count: 1
 			path: src/Ladb/CoreBundle/Handler/PictureUploadHandler.php
+
+		-
+			message: '''
+				#^Call to deprecated method getUsername\(\) of class Ladb\\CoreBundle\\Entity\\Core\\User\:
+				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Manager/Core/UserManager.php
+
+		-
+			message: '''
+				#^Parameter \$encoderFactory of method Ladb\\CoreBundle\\Manager\\Core\\UserManager\:\:__construct\(\) has typehint with deprecated interface Symfony\\Component\\Security\\Core\\Encoder\\EncoderFactoryInterface\:
+				since Symfony 5\.3, use \{@link PasswordHasherFactoryInterface\} instead$#
+			'''
+			identifier: parameter.deprecatedInterface
+			count: 1
+			path: src/Ladb/CoreBundle/Manager/Core/UserManager.php
 
 		-
 			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
@@ -445,14 +1192,41 @@ parameters:
 			path: src/Ladb/CoreBundle/Repository/Qa/AnswerRepository.php
 
 		-
+			message: '''
+				#^Call to method format\(\) of deprecated class Symfony\\Component\\Intl\\DateFormatter\\IntlDateFormatter\:
+				since Symfony 5\.3, use symfony/polyfill\-intl\-icu \^1\.21 instead$#
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Twig/LadbExtension.php
+
+		-
 			message: '#^Deprecated in PHP 8\.4\: Parameter \#4 \$publisherUser \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
 			identifier: parameter.implicitlyNullable
 			count: 1
 			path: src/Ladb/CoreBundle/Utils/ActivityUtils.php
 
 		-
+			message: '''
+				#^Call to deprecated method getUsername\(\) of class Ladb\\CoreBundle\\Entity\\Core\\User\:
+				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Utils/CanonicalFieldsUpdater.php
+
+		-
 			message: '#^Call to an undefined method Ladb\\CoreBundle\\Utils\\CommentableUtils\:\:createNotFoundException\(\)\.$#'
 			identifier: method.notFound
+			count: 2
+			path: src/Ladb/CoreBundle/Utils/CommentableUtils.php
+
+		-
+			message: '''
+				#^Call to deprecated method getUsername\(\) of class Ladb\\CoreBundle\\Entity\\Core\\User\:
+				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
+			'''
+			identifier: method.deprecated
 			count: 2
 			path: src/Ladb/CoreBundle/Utils/CommentableUtils.php
 
@@ -475,7 +1249,22 @@ parameters:
 			path: src/Ladb/CoreBundle/Utils/LikableUtils.php
 
 		-
+			message: '''
+				#^Parameter \$rememberMeServices of method Ladb\\CoreBundle\\Utils\\LoginUtils\:\:__construct\(\) has typehint with deprecated interface Symfony\\Component\\Security\\Http\\RememberMe\\RememberMeServicesInterface\:
+				since Symfony 5\.4, use \{@see RememberMeHandlerInterface\} instead$#
+			'''
+			identifier: parameter.deprecatedInterface
+			count: 1
+			path: src/Ladb/CoreBundle/Utils/LoginUtils.php
+
+		-
 			message: '#^Call to deprecated function curl_close\(\)\.$#'
+			identifier: function.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Utils/OpenGraphUtils.php
+
+		-
+			message: '#^Call to deprecated function utf8_decode\(\)\.$#'
 			identifier: function.deprecated
 			count: 1
 			path: src/Ladb/CoreBundle/Utils/OpenGraphUtils.php
@@ -485,6 +1274,15 @@ parameters:
 			identifier: parameter.implicitlyNullable
 			count: 1
 			path: src/Ladb/CoreBundle/Utils/PicturedUtils.php
+
+		-
+			message: '''
+				#^Call to deprecated method getUsername\(\) of class Ladb\\CoreBundle\\Entity\\Core\\User\:
+				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Utils/UserUtils.php
 
 		-
 			message: '#^Deprecated in PHP 8\.4\: Parameter \#2 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
@@ -499,7 +1297,25 @@ parameters:
 			path: src/Ladb/CoreBundle/Utils/WatchableUtils.php
 
 		-
+			message: '''
+				#^Call to deprecated method getUsername\(\) of class Ladb\\CoreBundle\\Entity\\Core\\User\:
+				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Validator/CanonicalFieldsInitializer.php
+
+		-
 			message: '#^Class Ladb\\CoreBundle\\Entity\\Knowledge\\Value\\ToolIdentity not found\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/Ladb/CoreBundle/Validator/Constraints/ValidToolIdentityValueValidator.php
+
+		-
+			message: '''
+				#^Call to deprecated method getUsername\(\) of class Ladb\\CoreBundle\\Entity\\Core\\User\:
+				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 5
+			path: src/Ladb/CoreBundle/Validator/Constraints/ValidUserUsernameValidator.php

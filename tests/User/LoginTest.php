@@ -23,6 +23,8 @@ final class LoginTest extends WebTestCase
     private const SALT = 'Vq7k3ZbN0pXe9yLr2TfHs6Wm1JcAuGd5Qo8iEnKx4Bw';
     // MessageDigestPasswordEncoder('sha512', true, 5000) of FOSUserBundle, for PASSWORD and SALT
     private const SHA512_HASH = '/r+tTBYXOOfHdCRUDwJuesex6ZpOpafKuYRyXvNtY4RK7S7Qm97lWAr4U8SC/O/IGuxFMoxvooYgaqiTy6kCYA==';
+    // The native hash of "user" in the fixtures when the values of Symfony 4.4 below were captured
+    private const SYMFONY_44_HASH = '$argon2id$v=19$m=65536,t=4,p=1$ZkdxcUg5T1dpclFnYjJBUA$xaqpAZakiM6hwj+94/K42DTswt8FQX1+TXhKQWknOhk';
 
     public function testLoginWithSha512PasswordHash(): void
     {
@@ -283,6 +285,37 @@ final class LoginTest extends WebTestCase
         yield 'admin' => [UserFixtures::ADMIN, 'O:74:"Symfony\\Component\\Security\\Core\\Authentication\\Token\\UsernamePasswordToken":3:{i:0;N;i:1;s:4:"main";i:2;a:5:{i:0;C:32:"Ladb\\CoreBundle\\Entity\\Core\\User":275:{a:8:{i:0;s:88:"/r+tTBYXOOfHdCRUDwJuesex6ZpOpafKuYRyXvNtY4RK7S7Qm97lWAr4U8SC/O/IGuxFMoxvooYgaqiTy6kCYA==";i:1;s:43:"Vq7k3ZbN0pXe9yLr2TfHs6Wm1JcAuGd5Qo8iEnKx4Bw";i:2;s:5:"admin";i:3;s:5:"admin";i:4;b:1;i:5;i:1;i:6;s:21:"admin@lairdubois.test";i:7;s:21:"admin@lairdubois.test";}}i:1;b:1;i:2;a:2:{i:0;O:41:"Symfony\\Component\\Security\\Core\\Role\\Role":1:{s:47:"'."\0".'Symfony\\Component\\Security\\Core\\Role\\Role'."\0".'role";s:10:"ROLE_ADMIN";}i:1;O:41:"Symfony\\Component\\Security\\Core\\Role\\Role":1:{s:47:"'."\0".'Symfony\\Component\\Security\\Core\\Role\\Role'."\0".'role";s:9:"ROLE_USER";}}i:3;a:0:{}i:4;a:2:{i:0;s:10:"ROLE_ADMIN";i:1;s:9:"ROLE_USER";}}}', 200];
     }
 
+    /**
+     * A session opened with Symfony 4.4, after the replacement of FOSUserBundle, stays logged in
+     * with Symfony 5.4, which keeps the Role class of the tokens of 4.x (#23).
+     */
+    public function testSessionOfSymfony44(): void
+    {
+        $client = static::createClient();
+        $this->setPasswordHash(UserFixtures::USER, self::SYMFONY_44_HASH, null);
+        $session = $client->getContainer()->get('session');
+        // The token of a login by the form with Symfony 4.4.51 (PHP 8.5)
+        $session->set('_security_main', 'O:74:"Symfony\\Component\\Security\\Core\\Authentication\\Token\\UsernamePasswordToken":3:{i:0;N;i:1;s:4:"main";i:2;a:5:{i:0;O:32:"Ladb\\CoreBundle\\Entity\\Core\\User":9:{i:0;s:97:"$argon2id$v=19$m=65536,t=4,p=1$ZkdxcUg5T1dpclFnYjJBUA$xaqpAZakiM6hwj+94/K42DTswt8FQX1+TXhKQWknOhk";i:1;N;i:2;s:4:"user";i:3;s:4:"user";i:4;b:1;i:5;i:2;i:6;s:20:"user@lairdubois.test";i:7;s:20:"user@lairdubois.test";i:8;a:0:{}}i:1;b:1;i:2;a:1:{i:0;O:41:"Symfony\\Component\\Security\\Core\\Role\\Role":1:{s:47:"'."\0".'Symfony\\Component\\Security\\Core\\Role\\Role'."\0".'role";s:9:"ROLE_USER";}}i:3;a:0:{}i:4;a:1:{i:0;s:9:"ROLE_USER";}}}');
+        $session->save();
+        $client->getCookieJar()->set(new Cookie($session->getName(), $session->getId()));
+
+        self::assertLoggedInAs($client, UserFixtures::USER);
+    }
+
+    /**
+     * A remember me cookie set by Symfony 4.4 logs in with Symfony 5.4 (#23).
+     */
+    public function testRememberMeOfSymfony44(): void
+    {
+        $client = static::createClient();
+        $this->setPasswordHash(UserFixtures::USER, self::SYMFONY_44_HASH, null);
+        // Set by a login by the form with Symfony 4.4.51, its lifetime raised to 100 years so that
+        // the test does not expire: it signs the expiry date, the user name and the password hash
+        $client->getCookieJar()->set(new Cookie('REMEMBERME', 'TGFkYlxDb3JlQnVuZGxlXEVudGl0eVxDb3JlXFVzZXI6ZFhObGNnPT06NDk0NjgxNzgxODpjMDE1NTU2OGExZTc4NGYxMDcwNjY5NDU5YzM4YTJkYmVhMGM3YjZmOGI2NThkODgzNDNhNDBlZWNiOTNmNTE4'));
+
+        self::assertLoggedInAs($client, UserFixtures::USER);
+    }
+
     private function login(KernelBrowser $client, string $username, string $password): KernelBrowser
     {
         $crawler = $client->request('GET', '/login');
@@ -302,7 +335,7 @@ final class LoginTest extends WebTestCase
         return $crawler->filter('form[action$="/login_check"]');
     }
 
-    private function setPasswordHash(string $username, string $hash, string $salt): void
+    private function setPasswordHash(string $username, string $hash, ?string $salt): void
     {
         static::getEntityManager()->getConnection()->update('tbl_core_user', ['password' => $hash, 'salt' => $salt], ['username_canonical' => $username]);
     }
