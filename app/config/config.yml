@@ -69,6 +69,10 @@ twig:
     strict_variables: "%kernel.debug%"
     # The error pages are rendered by the error controller of FrameworkBundle (TwigErrorRenderer)
     exception_controller: null
+    # The templates of the login, the registration, the forgotten password and the password change keep
+    # the names that FOSUserBundle gave them (#24)
+    paths:
+        '%kernel.project_dir%/templates/bundles/FOSUserBundle': FOSUser
     globals:
         ga_tracking_id: "%ga_tracking_id%"
         stripe_publishable_key: "%stripe_publishable_key%"
@@ -147,23 +151,6 @@ stof_doctrine_extensions:
             sluggable: true
             timestampable: true
             softdeleteable: true
-
-# FOSUserBundle
-fos_user:
-    db_driver: orm
-    firewall_name: main
-    user_class: Ladb\CoreBundle\Entity\Core\User
-    use_listener: false
-    service:
-        # Unused: MailerUtils sends the forgotten password email (#24)
-        mailer: fos_user.mailer.noop
-        user_manager: ladb_core.fos.user_manager
-    from_email:
-        address:        noreply@lairdubois.fr
-        sender_name:    L'Air du Bois
-    registration:
-        confirmation:
-            enabled:    false
 
 # LiipImagineBundle
 liip_imagine:

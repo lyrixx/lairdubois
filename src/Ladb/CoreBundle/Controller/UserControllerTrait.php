@@ -3,7 +3,7 @@
 namespace Ladb\CoreBundle\Controller;
 
 use Ladb\CoreBundle\Entity\Core\UserWitness;
-use Ladb\CoreBundle\Fos\UserManager;
+use Ladb\CoreBundle\Manager\Core\UserManager;
 
 trait UserControllerTrait {
 

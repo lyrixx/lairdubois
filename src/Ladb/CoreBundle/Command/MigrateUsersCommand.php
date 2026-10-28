@@ -3,8 +3,8 @@
 namespace Ladb\CoreBundle\Command;
 
 use Ladb\CoreBundle\Entity\Core\User;
-use Ladb\CoreBundle\Fos\DisplaynameCanonicalizer;
-use Ladb\CoreBundle\Fos\UserManager;
+use Ladb\CoreBundle\Utils\DisplaynameCanonicalizer;
+use Ladb\CoreBundle\Manager\Core\UserManager;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Helper\ProgressBar;

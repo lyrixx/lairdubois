@@ -142,18 +142,6 @@ parameters:
 			path: src/Ladb/CoreBundle/Entity/Core/User.php
 
 		-
-			message: '#^Non\-abstract class Ladb\\CoreBundle\\Entity\\Core\\User implements the Serializable interface, but does not implement __serialize\(\)\.$#'
-			identifier: class.serializable
-			count: 1
-			path: src/Ladb/CoreBundle/Entity/Core/User.php
-
-		-
-			message: '#^Non\-abstract class Ladb\\CoreBundle\\Entity\\Core\\User implements the Serializable interface, but does not implement __unserialize\(\)\.$#'
-			identifier: class.serializable
-			count: 1
-			path: src/Ladb/CoreBundle/Entity/Core/User.php
-
-		-
 			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$banner \(Ladb\\CoreBundle\\Entity\\Core\\Picture\) is implicitly nullable via default value null\.$#'
 			identifier: parameter.implicitlyNullable
 			count: 1
@@ -416,12 +404,6 @@ parameters:
 			identifier: method.deprecatedInterface
 			count: 1
 			path: src/Ladb/CoreBundle/Form/Type/Knowledge/Value/LanguageValueType.php
-
-		-
-			message: '#^Class Ladb\\CoreBundle\\Fos\\CanonicalFieldsUpdater extends @final class FOS\\UserBundle\\Util\\CanonicalFieldsUpdater\.$#'
-			identifier: class.extendsFinalByPhpDoc
-			count: 1
-			path: src/Ladb/CoreBundle/Fos/CanonicalFieldsUpdater.php
 
 		-
 			message: '#^Deprecated in PHP 8\.4\: Parameter \#3 \$owner \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'

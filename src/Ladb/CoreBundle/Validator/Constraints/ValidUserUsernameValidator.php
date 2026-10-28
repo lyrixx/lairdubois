@@ -4,7 +4,7 @@ namespace Ladb\CoreBundle\Validator\Constraints;
 
 use Doctrine\Persistence\ManagerRegistry;
 use Ladb\CoreBundle\Entity\Core\UserWitness;
-use Ladb\CoreBundle\Fos\UserManager;
+use Ladb\CoreBundle\Manager\Core\UserManager;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Ladb\CoreBundle\Entity\Core\User;

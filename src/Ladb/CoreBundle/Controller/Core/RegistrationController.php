@@ -5,7 +5,7 @@ namespace Ladb\CoreBundle\Controller\Core;
 use Ladb\CoreBundle\Controller\AbstractController;
 use Ladb\CoreBundle\Entity\Core\Registration;
 use Ladb\CoreBundle\Form\Type\Core\RegistrationType;
-use Ladb\CoreBundle\Fos\UserManager;
+use Ladb\CoreBundle\Manager\Core\UserManager;
 use Ladb\CoreBundle\Utils\LoginUtils;
 use Ladb\CoreBundle\Utils\MailerUtils;
 use Ladb\CoreBundle\Utils\MessageUtils;

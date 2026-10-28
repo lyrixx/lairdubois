@@ -2,10 +2,10 @@
 
 namespace Ladb\CoreBundle\Controller\Core;
 
-use FOS\UserBundle\Util\TokenGeneratorInterface;
+use Symfony\Component\Security\Csrf\TokenGenerator\TokenGeneratorInterface;
 use Ladb\CoreBundle\Controller\AbstractController;
 use Ladb\CoreBundle\Form\Type\Core\ResettingType;
-use Ladb\CoreBundle\Fos\UserManager;
+use Ladb\CoreBundle\Manager\Core\UserManager;
 use Ladb\CoreBundle\Utils\LoginUtils;
 use Ladb\CoreBundle\Utils\MailerUtils;
 use Symfony\Component\Form\FormFactoryInterface;

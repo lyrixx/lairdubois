@@ -6,7 +6,7 @@ use Ladb\CoreBundle\Utils\UrlUtils;
 use Ladb\CoreBundle\Utils\VideoHostingUtils;
 use Ladb\CoreBundle\Parser\Markdown\LadbMarkdown;
 use Ladb\CoreBundle\Utils\TypableUtils;
-use Ladb\CoreBundle\Fos\UserManager;
+use Ladb\CoreBundle\Manager\Core\UserManager;
 use Psr\Container\ContainerInterface as PsrContainerInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;

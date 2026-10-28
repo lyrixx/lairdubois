@@ -2,7 +2,7 @@
 
 namespace Ladb\CoreBundle\Controller\Core;
 
-use Ladb\CoreBundle\Fos\UserManager;
+use Ladb\CoreBundle\Manager\Core\UserManager;
 use Ladb\CoreBundle\Model\AuthoredInterface;
 use Ladb\CoreBundle\Utils\WebpushNotificationUtils;
 use Symfony\Component\HttpFoundation\Request;

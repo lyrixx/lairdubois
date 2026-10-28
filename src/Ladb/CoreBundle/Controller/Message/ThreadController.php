@@ -3,7 +3,7 @@
 namespace Ladb\CoreBundle\Controller\Message;
 
 use Ladb\CoreBundle\Entity\Message\MessageMeta;
-use Ladb\CoreBundle\Fos\UserManager;
+use Ladb\CoreBundle\Manager\Core\UserManager;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;

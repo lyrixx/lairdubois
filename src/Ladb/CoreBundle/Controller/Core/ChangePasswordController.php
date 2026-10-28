@@ -4,7 +4,7 @@ namespace Ladb\CoreBundle\Controller\Core;
 
 use Ladb\CoreBundle\Controller\AbstractController;
 use Ladb\CoreBundle\Form\Type\Core\ChangePasswordType;
-use Ladb\CoreBundle\Fos\UserManager;
+use Ladb\CoreBundle\Manager\Core\UserManager;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;

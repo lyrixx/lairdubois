@@ -4,13 +4,13 @@ namespace Ladb\CoreBundle\Form\DataTransformer;
 
 use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\Form\Exception\UnexpectedTypeException;
-use FOS\UserBundle\Model\UserManagerInterface;
+use Ladb\CoreBundle\Manager\Core\UserManager;
 
 class UsersToUsernamesTransformer implements DataTransformerInterface {
 
 	private $userManager;
 
-	public function __construct(UserManagerInterface $userManager) {
+	public function __construct(UserManager $userManager) {
 		$this->userManager = $userManager;
 	}
 

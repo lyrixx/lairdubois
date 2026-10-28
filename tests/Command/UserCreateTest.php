@@ -10,12 +10,11 @@ use Tests\WebTestCase;
  */
 final class UserCreateTest extends WebTestCase
 {
-    private const COMMAND = 'fos:user:create';
     private const PASSWORD = 'Copeaux-de-chene-1';
 
     public function testCreate(): void
     {
-        [$exitCode, $output] = static::runCommand(self::COMMAND.' Copeau copeau@lairdubois.test '.self::PASSWORD);
+        [$exitCode, $output] = static::runCommand('ladb:user:create Copeau copeau@lairdubois.test '.self::PASSWORD);
 
         self::assertSame(0, $exitCode, $output);
         self::assertStringEndsWith("Created user Copeau\n", $output);
@@ -37,7 +36,7 @@ final class UserCreateTest extends WebTestCase
 
     public function testCreateInactiveSuperAdmin(): void
     {
-        [$exitCode, $output] = static::runCommand(self::COMMAND.' Copeau copeau@lairdubois.test '.self::PASSWORD.' --super-admin --inactive');
+        [$exitCode, $output] = static::runCommand('ladb:user:create Copeau copeau@lairdubois.test '.self::PASSWORD.' --super-admin --inactive');
 
         self::assertSame(0, $exitCode, $output);
         $user = static::findUser('copeau');

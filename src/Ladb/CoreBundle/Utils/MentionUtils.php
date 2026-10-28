@@ -4,7 +4,7 @@ namespace Ladb\CoreBundle\Utils;
 
 use Doctrine\Persistence\ManagerRegistry;
 use Ladb\CoreBundle\Entity\Core\Mention;
-use Ladb\CoreBundle\Fos\UserManager;
+use Ladb\CoreBundle\Manager\Core\UserManager;
 use Ladb\CoreBundle\Model\BodiedInterface;
 use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Model\MentionSourceInterface;

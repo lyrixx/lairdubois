@@ -251,8 +251,8 @@ Jeu de données de dev et de test, sans donnée de prod : `src/Ladb/CoreBundle/D
   copiés dans `uploads/` sous un nom stable (`fixture-<nom>.jpg`), avec les placeholders
   (`empty.png`, `avatar.png`…) que les templates demandent à Liip Imagine.
 
-Comptes (mot de passe = identifiant, hashé en sha512 par FOSUserBundle, connexion par le formulaire
-`/login`) :
+Comptes (mot de passe = identifiant, hashé par l'encodeur `native` de `security.yml`, connexion par le
+formulaire `/login`) :
 
 | Identifiant | Id | Rôle |
 |-------------|----|------|
@@ -391,8 +391,8 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
 - Logs de test au niveau `notice` (`var/logs/test.log`) : le niveau `debug` du dev écrit 200 Mo
   par passage du smoke test.
 - Comptes et profils (`tests/User/`) : connexion par le vrai formulaire (`form[action$="/login_check"]`),
-  dont un compte au hash sha512 de FOSUserBundle écrit tel quel en base (`LoginTest`, il protège
-  #24).
+  dont un compte au hash sha512 de FOSUserBundle écrit tel quel en base, rehashé à sa connexion, et
+  des sessions ouvertes avant #24, au token sérialisé en dur (`LoginTest`).
 - Mails : `static::getSentEmails($client)` (après `$client->enableProfiler()`) et
   `static::getEmailRecipients($message)`. Le `delivery_address` de `config_dev.yml` remplace les
   destinataires de chaque mail par `dev@lairdubois.fr`, ceux d'origine restent dans l'en-tête
@@ -544,15 +544,25 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `TwigErrorRenderer` ne rend que le HTML (`@Twig/Exception/error.html.twig`) ; les routes au
   `_format` json (`.json`, `.geojson`) gardent leur erreur en JSON par `RequestFormatErrorRenderer`
   (`@Twig/Exception/error.json.twig`). En debug, la page d'exception de Symfony, en HTML.
-- Les mots de passe sont hashés en sha512 par FOSUserBundle : les comptes existants doivent continuer
-  à se connecter sans reset, d'un bout à l'autre de la migration.
+- Les comptes de la prod ont le hash de FOSUserBundle (sha512, 5000 itérations, base64, sel du
+  compte) : ils doivent continuer à se connecter sans reset, d'un bout à l'autre de la migration.
+  `security.yml` le garde en `migrate_from` de l'encodeur `native` (`auto` l'ignore en 4.4) : la
+  première connexion par le formulaire refait le hash (`UserRepository::upgradePassword()`, sel à
+  `null`), ce qui déconnecte les autres sessions du compte et invalide ses cookies `remember_me`.
+- Sécurité sans FOSUserBundle (#24) : provider `entity` (`UserRepository::loadUserByUsername()`,
+  nom d'utilisateur ou e-mail), `Security\UserChecker` (compte désactivé refusé à la connexion),
+  `Event\LastLoginListener`, `Manager\Core\UserManager` (canonisation, hash du mot de passe). Une
+  session est déconnectée quand `User::isEqualTo()` voit changer le mot de passe, le sel, les rôles,
+  le nom ou `enabled` : ce que comparait `hasUserChanged()` de 4.4. Les sessions ouvertes avant #24
+  ont un `User` sérialisé par FOSUserBundle (format `C:` de `\Serializable`, sans les rôles) :
+  `User::unserialize()` les lit, et `isEqualTo()` ne compare pas leurs rôles.
 - Controllers : services autowirés (prototype `Ladb\CoreBundle\Controller\`), une action reçoit ses
   services en arguments, un helper de la classe de l'action qui l'appelle (en dernier argument),
   un trait ou un controller abstrait par un setter `@required`. Les paramètres sont lus par
   `$this->getParameter()` : en 3.4, un `bind` ne s'appliquait à un argument d'action que s'il
   désignait un service ; en 4.4, il s'applique aussi à une valeur (`%param%`). Un service de
   bundle sans alias par type reçoit un alias de son id dans `services.yml` (`PusherInterface` de
-  Gos, `UserManipulator` de FOSUserBundle).
+  Gos).
 - `TypableUtils::getManagerByType()` (`ladb:change:owner`) lit les managers dans un service locator
   (`ladb_core.typable_utils.manager_locator` de `services.yml`), par le nom que donne
   `getStrippedNameByType()` : un manager n'a pas à être public pour lui. `Tests\Command\ManagerByTypeTest`
@@ -599,7 +609,9 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   (`SecurityController`, `RegistrationController`, `ResettingController`,
   `ChangePasswordController`), qui gardent les routes, les noms de formulaires et les templates
   (`@FOSUser/…`) de FOSUserBundle (#24). `LoginUtils` connecte un compte après son inscription ou
-  un nouveau mot de passe, comme le `LoginManager` de FOSUserBundle.
+  un nouveau mot de passe, comme le `LoginManager` de FOSUserBundle. Le namespace `@FOSUser` est un
+  chemin Twig de `config.yml` (`templates/bundles/FOSUserBundle/`), les traductions utilisées sont
+  dans les domaines `FOSUserBundle` et `validators` du bundle.
 - Les notifications web push sont signées avec les clés VAPID de la prod (`bentools_webpush.*` de
   `parameters.yml`) : avec celles de `parameters.yml.dist`, le consumer `webpush_notification`
   s'arrête au premier message. `castor app:install` y écrit une paire jetable, que les `composer
@@ -631,7 +643,5 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `LadbExtension`) le remplace avant lui par un `Nodes` vide ; à retirer en 5.4, dont le TwigBridge
   le fait. `Tests\Twig\TemplateCacheWarmerTest` compile dans un process tous les templates du
   warmer, puis vérifie une page et leurs erreurs.
-- `friendsofsymfony/user-bundle` est en `~2.2.0` : la 3.x, une version majeure, s'installe aussi
-  avec Symfony 4.4 (le container ne compile plus sans `fos_user.service.mailer`, entre autres).
 - SensioFrameworkExtraBundle est en 5.5 : le `TemplateListener` de la 5.4 demande un
   `Twig_Environment`, qui n'existe plus en Twig 3 (`TypeError` sur toute action à `@Template`).

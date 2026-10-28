@@ -32,8 +32,32 @@ final class LoginTest extends WebTestCase
 
         self::assertSame('https://lairdubois.test/', $client->getResponse()->headers->get('Location'));
         self::assertLoggedInAs($client, UserFixtures::USER);
-        // The hash stays as it is
-        self::assertSame(self::SHA512_HASH, static::findUser(UserFixtures::USER)->getPassword());
+        // Hashed again by the native encoder, which salts the hash itself (#24)
+        $user = static::findUser(UserFixtures::USER);
+        self::assertNotSame(self::SHA512_HASH, $user->getPassword());
+        self::assertNotSame('unknown', password_get_info($user->getPassword())['algoName']);
+        self::assertNull($user->getSalt());
+
+        // Again, in a new session
+        $client = $this->login(static::createClient(), UserFixtures::USER, self::PASSWORD);
+
+        self::assertSame('https://lairdubois.test/', $client->getResponse()->headers->get('Location'));
+        self::assertLoggedInAs($client, UserFixtures::USER);
+    }
+
+    /**
+     * The first login of an account with the hash of FOSUserBundle changes its hash (#24): its other
+     * sessions are logged out.
+     */
+    public function testLoginWithSha512PasswordHashLogsOutTheOtherSessions(): void
+    {
+        $this->setPasswordHash(UserFixtures::USER, self::SHA512_HASH, self::SALT);
+        $otherSession = static::createClientAs(UserFixtures::USER);
+        self::assertLoggedInAs($otherSession, UserFixtures::USER);
+
+        $this->login(static::createClient(), UserFixtures::USER, self::PASSWORD);
+
+        self::assertNotLoggedIn($otherSession);
     }
 
     public function testLoginWithEmail(): void
