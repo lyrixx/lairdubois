@@ -108,7 +108,7 @@ le conteneur `builder`, via Castor. Prérequis de l'hôte : Docker et Castor.
 
 ```bash
 castor start                      # build, composer, assets, up, schéma, fixtures si la base est vide, index, workers
-castor about                      # URL de la copie
+castor about                      # URL de la copie et de Mailpit
 castor docker:ports               # ports du routeur de la copie
 castor stop
 castor builder                    # shell dans le builder
@@ -149,6 +149,12 @@ Contextes : `--context=test` (`SYMFONY_ENV=test`), `--context=ci` (le même, san
   publier), `mercure_public_url` (celle du navigateur) et `mercure_jwt_secret`. `write_timeout 0s`
   (`MERCURE_EXTRA_DIRECTIVES`) : sinon le hub ferme chaque abonnement au bout de 10 minutes, et
   l'espace de travail recharge ses tâches à chaque reconnexion.
+- Mailpit (service `mailpit`, profil `default`, #19) : l'image `axllent/mailpit`, qui reçoit les
+  mails en SMTP sur `mailpit:1025` et les affiche dans son interface, routée sur `/mailpit/` du
+  domaine et du port du site (`MP_WEBROOT`) : `castor about` donne son URL. Base temporaire, sans
+  volume : les mails sont perdus quand il redémarre. `MAILER_DSN` (`smtp://mailpit:1025`) est dans
+  l'environnement du builder, pour Symfony Mailer. Swiftmailer ne le lit pas : il garde son spool
+  fichier, que rien ne vide en dev, aucun mail du site n'arrive donc dans Mailpit.
 - Playwright (service `playwright`, profil `e2e`, lancé par `castor qa:e2e`) : l'image officielle
   `mcr.microsoft.com/playwright`, avec Node 24 et les navigateurs, à la version de
   `@playwright/test` dans `tests/e2e/package.json`.

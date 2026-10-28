@@ -69,7 +69,7 @@ function about(): void
             if ("frontend-{$projectName}" === $router['service']) {
                 continue;
             }
-            // The Mercure router also matches a path (/.well-known/mercure): it adds no URL
+            // The routers of Mercure and Mailpit also match a path: they add no host
             if (str_contains($router['rule'], '&&')) {
                 continue;
             }
@@ -88,6 +88,10 @@ function about(): void
     };
 
     io()->listing(array_map($formatUrl, array_unique($urls)));
+
+    io()->section('Mails caught by Mailpit:');
+    // Keep in sync with MP_WEBROOT in infrastructure/docker/docker-compose.yml
+    io()->listing([$formatUrl(variable('root_domain')) . '/mailpit/']);
 }
 
 #[AsTask(description: 'Builds the infrastructure', aliases: ['build'])]

@@ -8,6 +8,9 @@ x-templates:
         DATABASE_PASSWORD: app
         DATABASE_USER: root
         ELASTICSEARCH_HOST: elasticsearch
+        # The SMTP of Mailpit (service "mailpit"), for Symfony Mailer (#19). Swiftmailer does
+        # not read it: it keeps its file spool, that nothing sends in dev
+        MAILER_DSN: smtp://mailpit:1025
         MEMCACHED_HOST: memcached
         # The same key signs the JWT of the site (publisher) and of the subscribers, for the hub
         # (service "mercure")
@@ -132,6 +135,25 @@ services:
             - "traefik.http.routers.${PROJECT_NAME}-mercure.tls=true"
             # The image exposes several ports (Caddy)
             - "traefik.http.services.${PROJECT_NAME}-mercure.loadbalancer.server.port=80"
+
+    # Catches the mails sent in SMTP (port 1025) by the stack, and shows them in its web
+    # interface, behind the router: same domain and port as the site, on /mailpit. The image has
+    # a healthcheck (/mailpit readyz, on the webroot), that "up --wait" waits for
+    mailpit:
+        image: axllent/mailpit:v1.32.0
+        environment:
+            MP_DISABLE_VERSION_CHECK: "true"
+            # Keep in sync with about() in .castor/docker.php
+            MP_WEBROOT: /mailpit
+        profiles:
+            - default
+        labels:
+            - "traefik.enable=true"
+            - "project-name=${PROJECT_NAME}"
+            - "traefik.http.routers.${PROJECT_NAME}-mailpit.rule=Host(${PROJECT_DOMAINS}) && PathPrefix(`/mailpit`)"
+            - "traefik.http.routers.${PROJECT_NAME}-mailpit.tls=true"
+            # The image exposes several ports (SMTP, POP3)
+            - "traefik.http.services.${PROJECT_NAME}-mailpit.loadbalancer.server.port=8025"
 
     frontend:
         build:
