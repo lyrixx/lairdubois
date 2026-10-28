@@ -379,24 +379,6 @@ parameters:
 			path: src/Ladb/CoreBundle/Entity/Youtook/Took.php
 
 		-
-			message: '''
-				#^Call to deprecated method getLanguageBundle\(\) of class Symfony\\Component\\Intl\\Intl\:
-				since Symfony 4\.3, to be removed in 5\.0\. Use \{@see Languages\} or \{@see Scripts\} instead\.$#
-			'''
-			identifier: staticMethod.deprecated
-			count: 1
-			path: src/Ladb/CoreBundle/Form/Type/Knowledge/Value/LanguageValueType.php
-
-		-
-			message: '''
-				#^Call to method getLanguageName\(\) of deprecated interface Symfony\\Component\\Intl\\ResourceBundle\\LanguageBundleInterface\:
-				since Symfony 4\.3, to be removed in 5\.0\.$#
-			'''
-			identifier: method.deprecatedInterface
-			count: 1
-			path: src/Ladb/CoreBundle/Form/Type/Knowledge/Value/LanguageValueType.php
-
-		-
 			message: '#^Deprecated in PHP 8\.4\: Parameter \#3 \$owner \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
 			identifier: parameter.implicitlyNullable
 			count: 1

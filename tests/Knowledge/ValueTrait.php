@@ -19,7 +19,8 @@ trait ValueTrait
 
     /**
      * Proposes a value for $field of $knowledge, from the form of the page of the field, with
-     * personal knowledge as source. The response is the one of the proposal.
+     * personal knowledge as source. The response is the one of the proposal. A value out of the
+     * options of a select is sent as is, as a client could.
      *
      * @param array<string, string> $values by full field name: "ladb_knowledge_value_text[data]"...
      */
@@ -29,7 +30,7 @@ trait ValueTrait
         self::assertSame(200, $client->getResponse()->getStatusCode());
 
         $form = self::selectValueForm($crawler, static::generatePath('core_knowledge_value_create', self::getFieldParameters($knowledge, $field)));
-        $form->setValues($values);
+        $form->disableValidation()->setValues($values);
         $form[self::getSourceTypeFieldName($form)] = (string) BaseValue::SOURCE_TYPE_PERSONAL;
 
         static::xhr($client, 'POST', $form->getUri(), $form->getPhpValues());

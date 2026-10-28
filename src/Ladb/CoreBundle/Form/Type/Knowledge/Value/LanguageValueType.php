@@ -6,7 +6,7 @@ use Symfony\Component\Form\Extension\Core\Type\LanguageType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
-use Symfony\Component\Intl\Intl;
+use Symfony\Component\Intl\Languages;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class LanguageValueType extends AbstractValueType {
@@ -24,7 +24,8 @@ class LanguageValueType extends AbstractValueType {
 
 				$rawLanguage = $value->getRawLanguage();
 
-				$value->setData(Intl::getLanguageBundle()->getLanguageName($rawLanguage));
+				// An empty or unknown code, that the validation refuses, has no name
+				$value->setData(null !== $rawLanguage && Languages::exists($rawLanguage) ? Languages::getName($rawLanguage) : null);
 
 			}
 		);
