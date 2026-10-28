@@ -92,6 +92,23 @@ final class LoginTest extends WebTestCase
         self::assertNotLoggedIn($client);
     }
 
+    public function testLoginWithInvalidCsrfToken(): void
+    {
+        $client = static::createClient();
+        $crawler = $client->request('GET', '/login');
+
+        $client->submit($this->getLoginForm($crawler)->form([
+            '_username' => UserFixtures::USER,
+            '_password' => UserFixtures::USER,
+            '_csrf_token' => 'invalid',
+        ]));
+
+        self::assertSame('https://lairdubois.test/login', $client->getResponse()->headers->get('Location'));
+        $crawler = $client->followRedirect();
+        self::assertStringContainsString('Jeton CSRF invalide.', $crawler->filter('.alert-danger')->text(null, false));
+        self::assertNotLoggedIn($client);
+    }
+
     public function testLoginOfDisabledAccount(): void
     {
         $client = static::createClient();
@@ -132,6 +149,25 @@ final class LoginTest extends WebTestCase
         self::assertTrue($cookies[0]->isCleared());
         self::assertSame('/.well-known/mercure', $cookies[0]->getPath());
         self::assertNull($cookies[0]->getDomain());
+    }
+
+    /**
+     * The logout deletes the remember me cookie: the next visit is anonymous.
+     */
+    public function testLogoutDeletesTheRememberMeCookie(): void
+    {
+        $client = $this->login(static::createClient(), UserFixtures::USER, UserFixtures::USER);
+        self::assertNotNull($client->getCookieJar()->get('REMEMBERME'));
+
+        $client->request('GET', '/logout');
+
+        $cookies = array_values(array_filter($client->getResponse()->headers->getCookies(), static function (ResponseCookie $cookie): bool {
+            return 'REMEMBERME' === $cookie->getName();
+        }));
+        self::assertCount(1, $cookies);
+        self::assertTrue($cookies[0]->isCleared());
+        self::assertNull($client->getCookieJar()->get('REMEMBERME'));
+        self::assertNotLoggedIn($client);
     }
 
     public function testRememberMe(): void
@@ -213,6 +249,19 @@ final class LoginTest extends WebTestCase
     {
         $client = $this->login(static::createClient(), UserFixtures::USER, UserFixtures::USER);
         $this->disable(UserFixtures::USER);
+
+        $this->keepOnlyRememberMe($client);
+
+        self::assertNotLoggedIn($client);
+    }
+
+    /**
+     * The remember me cookie signs the password hash: a new password refuses it.
+     */
+    public function testRememberMeAfterAPasswordChange(): void
+    {
+        $client = $this->login(static::createClient(), UserFixtures::USER, UserFixtures::USER);
+        $this->setPasswordHash(UserFixtures::USER, self::SHA512_HASH, self::SALT);
 
         $this->keepOnlyRememberMe($client);
 

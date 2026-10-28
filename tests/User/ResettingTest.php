@@ -4,6 +4,7 @@ namespace Tests\User;
 
 use Ladb\CoreBundle\DataFixtures\UserFixtures;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
+use Symfony\Component\HttpFoundation\Cookie;
 use Tests\WebTestCase;
 
 /**
@@ -82,6 +83,27 @@ final class ResettingTest extends WebTestCase
         $crawler = $client->followRedirect();
         self::assertSame('/@user', $client->getRequest()->getPathInfo());
         self::assertStringContainsString('Le mot de passe a été réinitialisé avec succès.', $crawler->filter('.alert-success')->text(null, false));
+    }
+
+    /**
+     * The new password logs in without remember me: the cookie of a previous login is deleted.
+     */
+    public function testResetPasswordDeletesTheRememberMeCookie(): void
+    {
+        $client = static::createClient();
+        $this->login($client, UserFixtures::USER2, UserFixtures::USER2);
+        self::assertNotNull($client->getCookieJar()->get('REMEMBERME'));
+
+        $this->resetPassword($client, UserFixtures::USER, 'Nouveau-mot-de-passe-1');
+
+        $cookies = array_values(array_filter($client->getResponse()->headers->getCookies(), static function (Cookie $cookie): bool {
+            return 'REMEMBERME' === $cookie->getName();
+        }));
+        self::assertCount(1, $cookies);
+        self::assertTrue($cookies[0]->isCleared());
+        self::assertNull($client->getCookieJar()->get('REMEMBERME'));
+        $client->request('GET', '/@me/parametres');
+        self::assertSame('/@user/parametres', $client->getResponse()->headers->get('Location'));
     }
 
     /**
