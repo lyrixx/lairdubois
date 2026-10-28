@@ -15,7 +15,7 @@ class NewSoftwareType extends AbstractType {
 		$builder
 			->add('identityValue', SoftwareIdentityValueType::class, array(
 				'choices'         => null,
-				'dataConstraints' => null,
+				'dataConstraints' => array(),
 				'constraints'     => array(
 					new \Symfony\Component\Validator\Constraints\Valid(),
 					new \Ladb\CoreBundle\Validator\Constraints\UniqueSoftware(),
@@ -24,7 +24,7 @@ class NewSoftwareType extends AbstractType {
 			))
 			->add('iconValue', PictureValueType::class, array(
 				'choices'         => null,
-				'dataConstraints' => null,
+				'dataConstraints' => array(),
 				'constraints'     => array(
 					new \Symfony\Component\Validator\Constraints\Valid(),
 				),

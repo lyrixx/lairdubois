@@ -24,7 +24,7 @@ class NewWoodType extends AbstractType {
 			))
 			->add('grainValue', PictureValueType::class, array(
 				'choices'         => null,
-				'dataConstraints' => null,
+				'dataConstraints' => array(),
 				'constraints'     => array(
 					new \Symfony\Component\Validator\Constraints\Valid(),
 				),

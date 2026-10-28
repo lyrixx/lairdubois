@@ -10,11 +10,17 @@ framework:
         collect: false
     # RabbitMQ gets no messages from the tests: the workers of the dev stack would process them on
     # the dev database, and the CI does not start them. In memory (tests.view_transport,
-    # tests.webpush_notification_transport), unless a test sets the variable (UnreachableRabbitMqTest)
+    # tests.webpush_notification_transport), unless a test sets the variable (RabbitMqTest,
+    # UnreachableRabbitMqTest). Then in exchanges and queues of their own, which the workers of the
+    # dev stack do not read.
     messenger:
         transports:
-            view: '%env(LADB_TEST_MESSENGER_TRANSPORT_DSN)%'
-            webpush_notification: '%env(LADB_TEST_MESSENGER_TRANSPORT_DSN)%'
+            view:
+                dsn: '%env(LADB_TEST_MESSENGER_TRANSPORT_DSN)%'
+                options: { exchange: { name: test_view }, queues: { test_view: ~ } }
+            webpush_notification:
+                dsn: '%env(LADB_TEST_MESSENGER_TRANSPORT_DSN)%'
+                options: { exchange: { name: test_webpush_notification }, queues: { test_webpush_notification: ~ } }
 
 web_profiler:
     toolbar: false

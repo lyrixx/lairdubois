@@ -15,7 +15,7 @@ class NewProviderType extends AbstractType {
 		$builder
 			->add('signValue', SignValueType::class, array(
 				'choices'         => null,
-				'dataConstraints' => null,
+				'dataConstraints' => array(),
 				'constraints'     => array(
 					new \Symfony\Component\Validator\Constraints\Valid(),
 					new \Ladb\CoreBundle\Validator\Constraints\UniqueProvider(),
@@ -24,7 +24,7 @@ class NewProviderType extends AbstractType {
 			))
 			->add('logoValue', PictureValueType::class, array(
 				'choices'         => null,
-				'dataConstraints' => null,
+				'dataConstraints' => array(),
 				'constraints'     => array(
 					new \Symfony\Component\Validator\Constraints\Valid(),
 				),

@@ -205,9 +205,8 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() des ac
 ```
 
 - PHPUnit 9.6, dans `tools/phpunit` et pas dans le `composer.json` de l'application : c'est la
-  dernière version qui marche à la fois avec le `WebTestCase` de Symfony 4.4 (setUp/tearDown
-  `void` via `ForwardCompatTestTrait`) et avec `Tests\DeprecationCollector` (`TestResult` et
-  `ErrorHandler` de PHPUnit, supprimés en 10). `symfony/phpunit-bridge`, que `symfony/symfony` ne
+  dernière version qui marche avec `Tests\DeprecationCollector` (`TestResult` et `ErrorHandler`
+  de PHPUnit, supprimés en 10). `symfony/phpunit-bridge`, que `symfony/symfony` ne
   remplace pas, est en 8.1 : il ne dépend d'aucun composant de Symfony, n'exige que PHP 8.1 et
   marche encore avec PHPUnit 9.6, rien à y changer aux sauts de version. Le collecteur ne
   l'appelle plus : il construit lui-même le gestionnaire d'erreurs de PHPUnit du test en cours,
@@ -340,8 +339,10 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
 - Pas de RabbitMQ en test : les transports de Messenger sont `in-memory://` (`config_test.yml`). Ils
   gardent les messages (`$client->getContainer()->get('tests.view_transport')->getSent()`, avant le
   reboot suivant). `static::consumeMessage($message, 'view')` passe un message à ses handlers, comme
-  le worker. `UnreachableRabbitMqTest` met les transports sur un port fermé
-  (`LADB_TEST_MESSENGER_TRANSPORT_DSN`).
+  le worker. `LADB_TEST_MESSENGER_TRANSPORT_DSN` change de transport : `UnreachableRabbitMqTest` les
+  met sur un port fermé, `RabbitMqTest` sur le RabbitMQ de la stack (`amqp://`, qui doit tourner),
+  dans les échanges et files `test_view` et `test_webpush_notification` que les workers du dev ne
+  lisent pas, et les consomme par `messenger:consume` (#168).
 - Pas de hub Mercure en test : `mercure.hub.default` est décoré par `Tests\Double\InMemoryHub`, qui
   garde les `Update` publiées (`$client->getContainer()->get('tests.mercure_hub')->getUpdates()`,
   avant le reboot suivant) ; ses URL et son JWT restent ceux de la configuration.
@@ -371,8 +372,8 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   celles de PHP (comme `ClockMock` du bridge). Il connaît le compteur de partages de
   `OfflineFacebookGraph::URL`, répond une erreur pour `ERROR_URL` et pour toute autre requête, et
   rend les URL appelées (`popRequests()`).
-- Une `\Error` PHP sort du kernel (3.4 et 4.4) : elle remonte de `$client->request()` au lieu de
-  donner une 500. Un warning PHP devient une exception (gestionnaire d'erreurs de PHPUnit) : 500.
+- Une `\Error` PHP sort du kernel (jusqu'en 5.4) : elle remonte de `$client->request()` au lieu
+  de donner une 500. Un warning PHP devient une exception (gestionnaire d'erreurs de PHPUnit) : 500.
 - Smoke test (`tests/Smoke/RouteSmokeTest.php`) : chaque route GET en anonyme, `user` et `admin`,
   rien en 5xx ni en `\Error`. Une action qui refuse
   une requête hors XHR (« Only XML request allowed ») est rappelée en XHR. Paramètres des routes :
@@ -433,7 +434,9 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
 - Commandes (`tests/Command/`) : `static::runCommand('ladb:cron:offers --force')` lance une ligne
   de commande dans la transaction du test et rend son code de sortie et sa sortie ; le kernel
   reste celui de la commande (`static::getEntityManager()`), ses mails sont dans
-  `static::getSentEmailsByCommand()`. `CommandTest` lance chaque commande `ladb:` en verbeux avec
+  `static::getSentEmailsByCommand()`. Sans gestionnaire de signaux : la console de 5.2+ en
+  enregistre un par exécution (pcntl), qui garde l'application, le kernel et la commande jusqu'à
+  la fin du process (`setSignalsToDispatchEvent()`). `CommandTest` lance chaque commande `ladb:` en verbeux avec
   ses options (`COMMANDS`, une nouvelle commande sans entrée fait échouer le test), `UNTESTED` et
   `KNOWN_FAILURES` comme le smoke test. `CrontabTest` lance les lignes de la crontab de
   `docs/01-installation.md` (étape 13) et vérifie l'effet de chaque cron ; il remet les
@@ -565,25 +568,21 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   l'ancien `MEDIUMINT` (500 sur toute page qui écrit la session) :
   `docs/database/schema-sessions.sql` passe aussi une table plus ancienne en `INTEGER UNSIGNED`, et
   `castor app:db:schema` le rejoue.
-- Le Routing de 4.4 fait taire l'erreur de `preg_match()` « lookbehind assertion is not fixed
-  length » en compilant les routes, mais PCRE2 10.43 et plus (celui de PHP 8.5) l'appelle « length
-  of lookbehind assertion is not limited » : chaque construction du cache du routeur donne
-  quelque 350 warnings PHP. Sans effet sur les routes ; corrigé en 5.4. En CLI (`cache:clear`,
-  `cache:warmup`), ils s'affichent. Une requête web le construit aussi, en dev, après un
-  `cache:clear --no-warmup` (`composer install`) ou la modification d'un controller : affichés
-  avant les en-têtes, ils casseraient la page (500, la session ne démarre plus), d'où
-  `display_errors = Off` dans le FPM (`app-fpm.ini`), comme en prod. Les erreurs natives de PHP
-  d'une requête sont dans les logs du frontend (`castor logs --service=frontend`) ; après le boot,
-  celles de Symfony ont leurs pages d'erreur. En prod, `cache:warmup` construit ce cache avant la
-  première requête.
-- Le kernel de 4.4 passe `error_reporting` à `E_ALL ^ E_WARNING` pendant qu'il inclut le container
+- `display_errors = Off` dans le FPM (`app-fpm.ini`), comme en prod : le Routing de 4.4 ne
+  connaissait pas le message de PCRE2 10.43 et plus (PHP 8.5) pour un lookbehind, et chaque
+  construction du cache du routeur donnait quelque 350 warnings PHP, affichés avant les en-têtes
+  (500). Le Routing de 5.4 le connaît. Les erreurs natives de PHP d'une requête sont dans les logs
+  du frontend (`castor logs --service=frontend`) ; après le boot, celles de Symfony ont leurs pages
+  d'erreur.
+- Le kernel (4.4 comme 5.4) passe `error_reporting` à `E_ALL ^ E_WARNING` pendant qu'il inclut le container
   en cache, avant tout gestionnaire d'erreurs de Symfony : PHP 8.4+ afficherait les dépréciations
   de compilation des fichiers chargés à ce moment (paramètres implicitement nullables de Symfony
   4.4) en tête de la première page après un démarrage de FPM, et à chaque commande en prod.
   `AppKernel::initializeContainer()` ignore alors ce que le niveau de l'appelant cache (php.ini,
   `bin/console`) et passe le reste au gestionnaire précédent : sous PHPUnit (`error_reporting=-1`),
-  `Tests\DeprecationCollector` les compte toujours. À revoir au saut en 5.4.
-- En 3.4 et 4.4, `HttpKernel` n'attrape que les `\Exception` : une `\Error` PHP (appel sur `null`,
+  `Tests\DeprecationCollector` les compte toujours. À revoir : les fichiers de Symfony 5.4.55 n'ont
+  plus de paramètre implicitement nullable.
+- Jusqu'en 5.4, `HttpKernel` n'attrape que les `\Exception` : une `\Error` PHP (appel sur `null`,
   `TypeError`) sort du kernel au lieu de donner une 500.
 - Pages d'erreur : contrôleur d'erreur de FrameworkBundle (`twig.exception_controller: null`).
   `TwigErrorRenderer` ne rend que le HTML (`@Twig/Exception/error.html.twig`) ; les routes au
@@ -667,9 +666,19 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   un nouveau mot de passe, comme le `LoginManager` de FOSUserBundle. Le namespace `@FOSUser` est un
   chemin Twig de `config.yml` (`templates/bundles/FOSUserBundle/`), les traductions utilisées sont
   dans les domaines `FOSUserBundle` et `validators` du bundle.
-- Messenger 4.4 (#22) : deux transports AMQP (`config.yml`), chacun avec son échange et sa file du
+- symfony/symfony 5.4 ne livre pas les ponts de Messenger, de Mailer, de Notifier ni de Translation
+  (`export-ignore`) : ils s'installent à part. `symfony/amqp-messenger` porte nos transports.
+  `symfony/doctrine-messenger` ne sert à rien chez nous, mais sans lui DoctrineBundle 2.1 casse la
+  compilation du container en debug : il teste l'ancienne classe du transport Doctrine, que 5.4 ne
+  garde que comme un fichier qui charge celle du pont, et DebugClassLoader refuse un fichier sans
+  sa classe.
+- Les sessions ouvertes en 3.4 et 4.4 ont des objets `Security\Core\Role\Role` dans leur token :
+  Symfony 5.4 garde une classe `Role` interne pour les relire, et elles restent connectées
+  (`LoginTest`, avec un token et un cookie remember_me capturés sur la vraie 4.4). La 6.0.0 la
+  retire, la 6.4 la remet : à revérifier aux sauts suivants (#26).
+- Messenger (#22) : deux transports AMQP (`config.yml`), chacun avec son échange et sa file du
   même nom, `view` et `webpush_notification`. Les anciennes files de RabbitMqBundle (`view_queue`…)
-  ne servent plus : le `PhpSerializer` de la 4.4 lit un de leurs messages comme un array, et le
+  ne servent plus : le `PhpSerializer` lit un de leurs messages comme un array, et le
   worker s'arrêterait sans le retirer. La connexion est en options : dans le DSN, le mot de passe et
   le vhost `/` seraient à encoder. Un handler en échec est rejoué 3 fois (échange `delays`), puis le
   message est supprimé (log critical). Le worker vide l'entity manager après chaque message : un
@@ -706,8 +715,8 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `{% trans_default_domain %}` (`'x'|trans` des templates de FOSUserBundle) : le template ne
   compile pas, et le domaine reste aux templates compilés ensuite par le process, dont ceux de
   `cache:warmup`, qui affichent alors leurs clés (#138). `TransFilterArgumentsNodeVisitor` (de
-  `LadbExtension`) le remplace avant lui par un `Nodes` vide ; à retirer en 5.4, dont le TwigBridge
-  le fait. `Tests\Twig\TemplateCacheWarmerTest` compile dans un process tous les templates du
+  `LadbExtension`) le remplace avant lui par un `Nodes` vide ; le TwigBridge de 5.4 le fait, à
+  retirer. `Tests\Twig\TemplateCacheWarmerTest` compile dans un process tous les templates du
   warmer, puis vérifie une page et leurs erreurs.
 - SensioFrameworkExtraBundle est en 5.5 : le `TemplateListener` de la 5.4 demande un
   `Twig_Environment`, qui n'existe plus en Twig 3 (`TypeError` sur toute action à `@Template`).
