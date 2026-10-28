@@ -25,7 +25,7 @@ final class YoutookFixtures extends Fixture implements DependentFixtureInterface
 		return array( UserFixtures::class );
 	}
 
-	public function load(ObjectManager $manager) {
+	public function load(ObjectManager $manager): void {
 		$user = $this->getReference(UserFixtures::USER);
 
 		// As YoutookController::createAction

@@ -185,6 +185,11 @@ doctrine_migrations:
     # default of dir_name reads kernel.root_dir, removed in Symfony 5.0
     migrations_paths:
         'Application\Migrations': "%kernel.project_dir%/app/DoctrineMigrations"
+    # The table of doctrine/migrations 1 and 2: with the default of 3 (doctrine_migration_versions),
+    # every migration of the production server would run again
+    storage:
+        table_storage:
+            table_name: migration_versions
 
 # StofDoctrineExtensions
 stof_doctrine_extensions:

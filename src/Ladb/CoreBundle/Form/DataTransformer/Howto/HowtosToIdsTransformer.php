@@ -6,6 +6,7 @@ use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\Form\Exception\TransformationFailedException;
 use Symfony\Component\Form\Exception\UnexpectedTypeException;
 use Doctrine\Persistence\ObjectManager;
+use Ladb\CoreBundle\Entity\Howto\Howto;
 
 class HowtosToIdsTransformer implements DataTransformerInterface {
 
@@ -38,7 +39,7 @@ class HowtosToIdsTransformer implements DataTransformerInterface {
 
 		$howtos = array();
 		$idsStrings = preg_split("/[,]+/", $idsString);
-		$repository = $this->om->getRepository('LadbCoreBundle:Howto\Howto');
+		$repository = $this->om->getRepository(Howto::class);
 		foreach ($idsStrings as $idString) {
 			$id = intval($idString);
 			if ($id == 0) {

@@ -34,7 +34,7 @@ final class WorkflowFixtures extends Fixture implements DependentFixtureInterfac
 		return array( UserFixtures::class );
 	}
 
-	public function load(ObjectManager $manager) {
+	public function load(ObjectManager $manager): void {
 		$user = $this->getReference(UserFixtures::USER);
 		$user2 = $this->getReference(UserFixtures::USER2);
 
