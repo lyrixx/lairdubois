@@ -5,11 +5,13 @@ namespace Tests\Core;
 use Ladb\CoreBundle\DataFixtures\UserFixtures;
 use Ladb\CoreBundle\Entity\Core\View;
 use Ladb\CoreBundle\Entity\Wonder\Creation;
-use PhpAmqpLib\Message\AMQPMessage;
+use Ladb\CoreBundle\Message\ListedViewMessage;
+use Ladb\CoreBundle\Message\ShownViewMessage;
 use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Component\Messenger\Envelope;
 
 /**
- * The views of a content: a page sends them to the "view" queue, and its consumer counts them, on
+ * The views of a content: a page sends them to the "view" queue, and its handler counts them, on
  * the creation of the fixtures (by "user").
  */
 final class ViewTest extends InteractionTestCase
@@ -21,7 +23,7 @@ final class ViewTest extends InteractionTestCase
 
         self::assertSame(200, $client->getResponse()->getStatusCode());
         $messages = self::getViewMessages($client);
-        self::assertSame([['kind' => View::KIND_SHOWN, 'entityType' => Creation::TYPE, 'entityIds' => [self::CREATION_ID], 'userId' => null]], $messages);
+        self::assertEquals([new ShownViewMessage(Creation::TYPE, self::CREATION_ID, null)], $messages);
 
         // Once per session
         $client->request('GET', '/creations/1.html');
@@ -40,7 +42,7 @@ final class ViewTest extends InteractionTestCase
         self::assertSame(200, $client->getResponse()->getStatusCode());
         $user2 = static::findUser(UserFixtures::USER2);
         $messages = self::getViewMessages($client);
-        self::assertSame([['kind' => View::KIND_SHOWN, 'entityType' => Creation::TYPE, 'entityIds' => [self::CREATION_ID], 'userId' => $user2->getId()]], $messages);
+        self::assertEquals([new ShownViewMessage(Creation::TYPE, self::CREATION_ID, $user2->getId())], $messages);
 
         $viewCount = static::findCreation()->getViewCount();
         self::consume($messages[0]);
@@ -69,10 +71,11 @@ final class ViewTest extends InteractionTestCase
         $messages = self::getViewMessages($client);
         self::assertCount(1, $messages);
 
-        // Not counted
+        // Not counted, but recorded (the content is shown in the lists)
         $viewCount = static::findCreation()->getViewCount();
         self::consume($messages[0]);
         self::assertSame($viewCount, static::findCreation()->getViewCount());
+        self::assertNotNull(self::findShownView(static::findUser(UserFixtures::USER)->getId()));
     }
 
     public function testList(): void
@@ -84,19 +87,19 @@ final class ViewTest extends InteractionTestCase
         $user2 = static::findUser(UserFixtures::USER2);
         $messages = self::getViewMessages($client);
         self::assertCount(1, $messages);
-        self::assertSame(View::KIND_LISTED, $messages[0]['kind']);
-        self::assertSame(Creation::TYPE, $messages[0]['entityType']);
-        self::assertContains(self::CREATION_ID, $messages[0]['entityIds']);
-        self::assertSame($user2->getId(), $messages[0]['userId']);
+        self::assertInstanceOf(ListedViewMessage::class, $messages[0]);
+        self::assertSame(Creation::TYPE, $messages[0]->getEntityType());
+        self::assertContains(self::CREATION_ID, $messages[0]->getEntityIds());
+        self::assertSame($user2->getId(), $messages[0]->getUserId());
 
         $repository = static::getEntityManager()->getRepository(View::class);
-        $criteria = ['entityType' => Creation::TYPE, 'entityId' => $messages[0]['entityIds'], 'user' => $user2->getId(), 'kind' => View::KIND_LISTED];
+        $criteria = ['entityType' => Creation::TYPE, 'entityId' => $messages[0]->getEntityIds(), 'user' => $user2->getId(), 'kind' => View::KIND_LISTED];
         self::consume($messages[0]);
-        self::assertCount(\count($messages[0]['entityIds']), $repository->findBy($criteria));
+        self::assertCount(\count($messages[0]->getEntityIds()), $repository->findBy($criteria));
 
         // Once per content
         self::consume($messages[0]);
-        self::assertCount(\count($messages[0]['entityIds']), $repository->findBy($criteria));
+        self::assertCount(\count($messages[0]->getEntityIds()), $repository->findBy($criteria));
     }
 
     public function testListByAnAnonymousVisitor(): void
@@ -111,22 +114,22 @@ final class ViewTest extends InteractionTestCase
     /**
      * The messages sent to the "view" queue by the last request of the client.
      *
-     * @return list<array{kind: int, entityType: int, entityIds: list<int>, userId: ?int}>
+     * @return list<ShownViewMessage|ListedViewMessage>
      */
     private static function getViewMessages(Client $client): array
     {
         return array_map(
-            fn (array $message) => unserialize($message['body']),
-            $client->getContainer()->get('tests.view_producer')->getMessages(),
+            fn (Envelope $envelope) => $envelope->getMessage(),
+            $client->getContainer()->get('tests.view_transport')->getSent(),
         );
     }
 
     /**
-     * @param array{kind: int, entityType: int, entityIds: list<int>, userId: ?int} $message
+     * @param ShownViewMessage|ListedViewMessage $message
      */
-    private static function consume(array $message): void
+    private static function consume(object $message): void
     {
-        self::assertTrue(static::$container->get('tests.view_consumer')->execute(new AMQPMessage(serialize($message))));
+        static::consumeMessage($message, 'view');
     }
 
     private static function findShownView(int $userId): ?View

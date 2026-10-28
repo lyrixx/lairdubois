@@ -5,12 +5,12 @@ namespace Tests\Webpush;
 use Ladb\CoreBundle\DataFixtures\UserFixtures;
 use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Entity\Webpush\UserSubscription;
-use PhpAmqpLib\Message\AMQPMessage;
+use Ladb\CoreBundle\Message\WebpushNotificationMessage;
 use Psr\Http\Message\RequestInterface;
 use Tests\WebTestCase;
 
 /**
- * The webpush_notification consumer sends the notification to each subscription of the recipient,
+ * The handler of the webpush_notification messages sends the notification to each subscription of the recipient,
  * as a push service expects it (RFC 8030): signed with the VAPID key of the site (RFC 8292), the
  * payload encrypted for the subscription in "aesgcm" (draft of RFC 8291), as minishlink/web-push 2.0
  * did. The push service is Tests\Double\InMemoryPushHandler.
@@ -38,13 +38,12 @@ final class NotificationTest extends WebTestCase
         $handler->expire(self::ENDPOINT.'expired');
         $handler->makeUnreachable(self::ENDPOINT.'unreachable');
 
-        $consumed = $container->get('tests.webpush_notification_consumer')->execute(new AMQPMessage(serialize([
-            'userId' => $user->getId(),
-            'body' => 'Nouveau coup de cœur de Personne',
-            'icon' => 'https://lairdubois.test/media/cache/128x128o/avatar.png',
-            'link' => 'https://lairdubois.test/creations/1.html',
-        ])));
-        self::assertTrue($consumed);
+        static::consumeMessage(new WebpushNotificationMessage(
+            $user->getId(),
+            'Nouveau coup de cœur de Personne',
+            'https://lairdubois.test/media/cache/128x128o/avatar.png',
+            'https://lairdubois.test/creations/1.html',
+        ), 'webpush_notification');
 
         $requests = [];
         foreach ($handler->getRequests() as $request) {

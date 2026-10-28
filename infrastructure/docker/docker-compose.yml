@@ -128,11 +128,11 @@ services:
 
     worker_consumer_view:
         <<: *worker_base
-        command: php bin/console rabbitmq:consumer view
+        command: php bin/console messenger:consume view
 
     worker_consumer_webpush_notification:
         <<: *worker_base
-        command: php bin/console rabbitmq:consumer webpush_notification
+        command: php bin/console messenger:consume webpush_notification
 
     # The parameter "websocket_host" is the host the pusher of the frontend connects
     # to, and the address the server listens on: an IP only, hence "--host"

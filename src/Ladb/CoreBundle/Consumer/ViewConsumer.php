@@ -2,17 +2,18 @@
 namespace Ladb\CoreBundle\Consumer;
 
 use Doctrine\Persistence\ManagerRegistry;
+use Ladb\CoreBundle\Message\ListedViewMessage;
+use Ladb\CoreBundle\Message\ShownViewMessage;
 use Ladb\CoreBundle\Model\IndexableInterface;
-use OldSound\RabbitMqBundle\RabbitMq\ConsumerInterface;
-use PhpAmqpLib\Message\AMQPMessage;
 use Psr\Log\LoggerInterface;
 use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Entity\Core\View;
 use Ladb\CoreBundle\Model\AuthoredInterface;
 use Ladb\CoreBundle\Utils\SearchUtils;
 use Ladb\CoreBundle\Utils\TypableUtils;
+use Symfony\Component\Messenger\Handler\MessageSubscriberInterface;
 
-class ViewConsumer implements ConsumerInterface {
+class ViewConsumer implements MessageSubscriberInterface {
 
 	private $logger;
 	private $om;
@@ -110,6 +111,8 @@ class ViewConsumer implements ConsumerInterface {
 
 					// Exclude self contribution view and non public viewables
 					if ($viewable instanceof AuthoredInterface && $viewable->getUser()->getId() == $user->getId()) {
+						// Saved now, not by the flush of a next message: the worker clears the entity manager after each message
+						$this->om->flush();
 						return;
 					}
 
@@ -171,41 +174,17 @@ class ViewConsumer implements ConsumerInterface {
 
 	/////
 
-	public function execute(AMQPMessage $msg) {
+	public static function getHandledMessages(): iterable {
+		yield ListedViewMessage::class => array( 'method' => 'handleListedView' );
+		yield ShownViewMessage::class => array( 'method' => 'handleShownView' );
+	}
 
-		try {
+	public function handleListedView(ListedViewMessage $message) {
+		$this->_executeListedProcess($message->getEntityType(), $message->getEntityIds(), $message->getUserId());
+	}
 
-			$msgBody = unserialize($msg->getBody());
-
-			$kind = $msgBody['kind'];
-			$entityType = $msgBody['entityType'];
-			$entityIds = $msgBody['entityIds'];
-			$userId = $msgBody['userId'];
-
-		} catch (\Exception $e) {
-			$this->logger->error('ViewConsumer/execute', array ( 'exception' => $e));
-			return false;
-		}
-
-		switch ($kind) {
-
-			case View::KIND_LISTED:
-				$this->_executeListedProcess($entityType, $entityIds, $userId);
-				break;
-
-			case View::KIND_SHOWN:
-				if (is_array($entityIds) && count($entityIds) > 0) {
-					$this->_executeShownProcess($entityType, $entityIds[0], $userId);
-				}
-				break;
-
-			default:
-				$this->logger->error('ViewConsumer/execute (Unknow kind='.$kind.')');
-				return false;
-
-		}
-
-		return true;
+	public function handleShownView(ShownViewMessage $message) {
+		$this->_executeShownProcess($message->getEntityType(), $message->getEntityId(), $message->getUserId());
 	}
 
 }

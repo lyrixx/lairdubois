@@ -37,6 +37,38 @@ framework:
         # back; every 2 minutes, a request that changes nothing else (/@me/counters.json) does not.
         metadata_update_threshold: 120
     fragments:       ~
+    # Two queues in RabbitMQ (the rabbitmq_* parameters), each with its exchange of the same name and
+    # its worker: "messenger:consume view", "messenger:consume webpush_notification". The connection
+    # is given as options: in the DSN, the password and the vhost ("/") would have to be URL-encoded.
+    # A message whose handler fails is retried 3 times (after 1, 2 and 4 seconds, by the exchange
+    # "delays" and its "delay_*" queues), then removed with a critical log.
+    messenger:
+        buses:
+            messenger.bus.default:
+                # A worker runs for days: reconnects to the database after a long idle time
+                middleware: [doctrine_ping_connection]
+        transports:
+            view:
+                dsn: 'amqp://'
+                options:
+                    <<: &rabbitmq_connection
+                        host: '%rabbitmq_host%'
+                        port: '%rabbitmq_port%'
+                        vhost: '%rabbitmq_vhost%'
+                        login: '%rabbitmq_user%'
+                        password: '%rabbitmq_password%'
+                    exchange: { name: view }
+                    queues: { view: ~ }
+            webpush_notification:
+                dsn: 'amqp://'
+                options:
+                    <<: *rabbitmq_connection
+                    exchange: { name: webpush_notification }
+                    queues: { webpush_notification: ~ }
+        routing:
+            'Ladb\CoreBundle\Message\ListedViewMessage': view
+            'Ladb\CoreBundle\Message\ShownViewMessage': view
+            'Ladb\CoreBundle\Message\WebpushNotificationMessage': webpush_notification
 
 services:
     _defaults:
@@ -1145,45 +1177,6 @@ gos_web_socket:
         wamp:
             host: '%websocket_host%'
             port: '%websocket_port%'
-
-# OldSoundRabbitMqBundle
-old_sound_rabbit_mq:
-    connections:
-        default:
-            host:     "%rabbitmq_host%"
-            port:     "%rabbitmq_port%"
-            user:     "%rabbitmq_user%"
-            password: "%rabbitmq_password%"
-            vhost:    "%rabbitmq_vhost%"
-            lazy:     false
-    producers:
-        view:
-            connection: default
-            exchange_options:
-                name: 'view_exchange'
-                type: topic
-        webpush_notification:
-            connection: default
-            exchange_options:
-                name: 'webpush_notification_exchange'
-                type: topic
-    consumers:
-        view:
-            connection: default
-            exchange_options:
-                name: 'view_exchange'
-                type: topic
-            queue_options:
-                name: 'view_queue'
-            callback: 'Ladb\CoreBundle\Consumer\ViewConsumer'
-        webpush_notification:
-            connection: default
-            exchange_options:
-                name: 'webpush_notification_exchange'
-                type: topic
-            queue_options:
-                name: 'webpush_notification_queue'
-            callback: 'Ladb\CoreBundle\Consumer\WebpushNotificationConsumer'
 
 # BentoolsWebpushBundle
 bentools_webpush:

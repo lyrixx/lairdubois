@@ -123,9 +123,9 @@ final class ThreadTest extends WebTestCase
         $emails = static::getSentEmails($client);
         self::assertCount(1, $emails);
         self::assertSame([UserFixtures::USER2.'@lairdubois.test'], static::getEmailRecipients($emails[0]));
-        $webpushMessages = $client->getContainer()->get('tests.webpush_notification_producer')->getMessages();
+        $webpushMessages = $client->getContainer()->get('tests.webpush_notification_transport')->getSent();
         self::assertCount(1, $webpushMessages);
-        self::assertStringStartsWith('Nouveau message de ', unserialize($webpushMessages[0]['body'])['body']);
+        self::assertStringStartsWith('Nouveau message de ', $webpushMessages[0]->getMessage()->getBody());
 
         self::assertSame($unreadMessageCount + 1, static::findUser(UserFixtures::USER2)->getMeta()->getUnreadMessageCount());
     }

@@ -4,11 +4,14 @@ namespace Ladb\CoreBundle\Utils;
 
 use Jaybizzle\CrawlerDetect\CrawlerDetect;
 use Ladb\CoreBundle\Entity\Core\View;
+use Ladb\CoreBundle\Message\ListedViewMessage;
+use Ladb\CoreBundle\Message\ShownViewMessage;
 use Ladb\CoreBundle\Model\HiddableInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Ladb\CoreBundle\Model\ViewableInterface;
-use Psr\Container\ContainerInterface as PsrContainerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Messenger\Exception\TransportException;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 class ViewableUtils {
 
@@ -16,14 +19,14 @@ class ViewableUtils {
 
 	private $globalUtils;
 	private $logger;
+	private $messageBus;
 	private $om;
-	private $producerLocator;
 
-	public function __construct(GlobalUtils $globalUtils, LoggerInterface $logger, EntityManagerInterface $om, PsrContainerInterface $producerLocator) {
+	public function __construct(GlobalUtils $globalUtils, LoggerInterface $logger, MessageBusInterface $messageBus, EntityManagerInterface $om) {
 		$this->globalUtils = $globalUtils;
 		$this->logger = $logger;
+		$this->messageBus = $messageBus;
 		$this->om = $om;
-		$this->producerLocator = $producerLocator;
 	}
 
 	/////
@@ -71,15 +74,13 @@ class ViewableUtils {
 		try {
 
 			// Publish a view in queue
-			$producer = $this->producerLocator->get('view');
-			$producer->publish(serialize(array(
-				'kind'       => View::KIND_SHOWN,
-				'entityType' => $viewable->getType(),
-				'entityIds'  => array($viewable->getId()),
-				'userId'     => !is_null($user) ? $user->getId() : null,
-			)));
+			$this->messageBus->dispatch(new ShownViewMessage(
+				$viewable->getType(),
+				$viewable->getId(),
+				!is_null($user) ? $user->getId() : null
+			));
 
-		} catch (\Exception $e) {
+		} catch (TransportException $e) {
 			$this->logger->error('Failed to publish shown view process in queue', array ( 'exception' => $e));
 		}
 
@@ -108,15 +109,13 @@ class ViewableUtils {
 		try {
 
 			// Publish a view in queue
-			$producer = $this->producerLocator->get('view');
-			$producer->publish(serialize(array(
-				'kind'       => View::KIND_LISTED,
-				'entityType' => $entityType,
-				'entityIds'  => $entityIds,
-				'userId'     => !is_null($user) ? $user->getId() : null,
-			)));
+			$this->messageBus->dispatch(new ListedViewMessage(
+				$entityType,
+				$entityIds,
+				$user->getId()
+			));
 
-		} catch (\Exception $e) {
+		} catch (TransportException $e) {
 			$this->logger->error('Failed to publish shown view process in queue.');
 		}
 

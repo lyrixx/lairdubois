@@ -56,7 +56,7 @@ Be sure you activate the following parameters (by uncomment or replace) :
 ### Install [PHP](http://www.php.net/) - *The scripting language*
 
 ``` bash
-    $ sudo apt-get install php7.3 php7.3-cli php7.3-curl php7.3-intl php7.3-gd php7.3-imagick php7.3-mysql php7.3-fpm php7.3-mbstring php7.3-xml php7.3-zip php7.3-bz2 php7.3-gmp php7.3-bcmath
+    $ sudo apt-get install php7.3 php7.3-cli php7.3-curl php7.3-intl php7.3-gd php7.3-imagick php7.3-mysql php7.3-fpm php7.3-mbstring php7.3-xml php7.3-zip php7.3-bz2 php7.3-gmp php7.3-bcmath php7.3-amqp
 ```
 
 You can now configure PHP.
@@ -498,7 +498,7 @@ Description=The RabbitMQ view consumer.
 Type=simple
 User=www-data
 WorkingDirectory=/var/www/www.lairdubois.fr/
-ExecStart=/usr/bin/php bin/console --env=prod rabbitmq:consumer view
+ExecStart=/usr/bin/php bin/console --env=prod messenger:consume view
 Restart=always
 RestartSec=3
 
@@ -522,7 +522,7 @@ Description=The RabbitMQ webpush notification consumer.
 Type=simple
 User=www-data
 WorkingDirectory=/var/www/www.lairdubois.fr/
-ExecStart=/usr/bin/php bin/console --env=prod rabbitmq:consumer webpush_notification
+ExecStart=/usr/bin/php bin/console --env=prod messenger:consume webpush_notification
 Restart=always
 RestartSec=3
 

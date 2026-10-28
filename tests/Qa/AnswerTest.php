@@ -39,7 +39,7 @@ final class AnswerTest extends WebTestCase
         self::assertSame($userAnswerCount + 1, static::findUser(UserFixtures::ADMIN)->getMeta()->getAnswerCount());
         self::assertCount(1, static::getEntityManager()->getRepository(AnswerActivity::class)->findBy(['answer' => $answer]));
         // A web push notification to the author of the question
-        self::assertCount(1, $client->getContainer()->get('tests.webpush_notification_producer')->getMessages());
+        self::assertCount(1, $client->getContainer()->get('tests.webpush_notification_transport')->getSent());
     }
 
     /**
@@ -52,7 +52,7 @@ final class AnswerTest extends WebTestCase
 
         self::assertSame(200, $client->getResponse()->getStatusCode());
         self::assertNotNull($this->findAnswer(UserFixtures::USER));
-        self::assertCount(0, $client->getContainer()->get('tests.webpush_notification_producer')->getMessages());
+        self::assertCount(0, $client->getContainer()->get('tests.webpush_notification_transport')->getSent());
     }
 
     /**

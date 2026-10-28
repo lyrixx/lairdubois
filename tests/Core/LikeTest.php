@@ -63,8 +63,8 @@ final class LikeTest extends InteractionTestCase
 
         $notifications = static::getWebpushNotifications($client);
         self::assertCount(1, $notifications);
-        self::assertSame(static::findUser(UserFixtures::USER)->getId(), $notifications[0]['userId']);
-        self::assertStringStartsWith('Nouveau coup de coeur de ', $notifications[0]['body']);
+        self::assertSame(static::findUser(UserFixtures::USER)->getId(), $notifications[0]->getUserId());
+        self::assertStringStartsWith('Nouveau coup de coeur de ', $notifications[0]->getBody());
     }
 
     /**
