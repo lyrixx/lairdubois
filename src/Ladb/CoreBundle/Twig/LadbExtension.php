@@ -70,12 +70,6 @@ class LadbExtension extends AbstractExtension {
 		);
 	}
 
-	public function getNodeVisitors() {
-		return array(
-			new TransFilterArgumentsNodeVisitor(),
-		);
-	}
-
 	// Filters /////
 
 	public function fileSizeFormatFilter($fileSize, $decimals = 0) {

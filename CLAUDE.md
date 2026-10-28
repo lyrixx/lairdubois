@@ -711,12 +711,10 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   pour HTML : ceux qui affichent des valeurs sont dans un `{% autoescape 'html' %}`, le JS du site
   les insère dans la page.
 - Twig 3 donne à un filtre sans arguments un `EmptyNode`, auquel le
-  `TranslationDefaultDomainNodeVisitor` du TwigBridge de 4.4 ne sait pas ajouter le domaine de
+  `TranslationDefaultDomainNodeVisitor` du TwigBridge de 4.4 ne savait pas ajouter le domaine de
   `{% trans_default_domain %}` (`'x'|trans` des templates de FOSUserBundle) : le template ne
-  compile pas, et le domaine reste aux templates compilés ensuite par le process, dont ceux de
-  `cache:warmup`, qui affichent alors leurs clés (#138). `TransFilterArgumentsNodeVisitor` (de
-  `LadbExtension`) le remplace avant lui par un `Nodes` vide ; le TwigBridge de 5.4 le fait, à
-  retirer. `Tests\Twig\TemplateCacheWarmerTest` compile dans un process tous les templates du
-  warmer, puis vérifie une page et leurs erreurs.
+  compilait pas, et le domaine restait aux templates compilés ensuite par `cache:warmup` (#138).
+  Celui de 5.4 le sait. `Tests\Twig\TemplateCacheWarmerTest` compile dans un process tous les
+  templates du warmer, puis vérifie une page et leurs erreurs.
 - SensioFrameworkExtraBundle est en 5.5 : le `TemplateListener` de la 5.4 demande un
   `Twig_Environment`, qui n'existe plus en Twig 3 (`TypeError` sur toute action à `@Template`).
