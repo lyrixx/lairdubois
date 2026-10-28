@@ -436,6 +436,14 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `e2e-test-results` en CI) : `npx playwright show-trace`, ou trace.playwright.dev.
 - Le navigateur joint le site par le réseau de la stack : `--host-resolver-rules` de Chromium
   envoie le domaine, port du worktree compris, vers `router:443` (`E2E_BASE_URL`, `E2E_ROUTER`).
+- Aucun appel aux CDN (#143) : ce que le site charge de cdnjs.cloudflare.com et cdn.jsdelivr.net
+  (bibliothèques, MathJax, emojione) est servi par `context.route()` (`support/test.ts`) depuis
+  une copie identique au fichier du CDN, sha256 comparé à l'ajout : le fichier du paquet npm à la
+  même version (`package.json`, un alias par version quand le site en charge deux : Chart.js,
+  jsPlumb), sinon une copie dans `cdn/<host>/<chemin>` (paquet sans le fichier, fichier différent
+  ou paquet trop gros). Une URL de ces CDN sans copie fait échouer le test. Aucun autre host n'est
+  appelé : Google Analytics est coupé en debug, Stripe, Google Maps et Facebook sont sur des pages
+  qu'aucun test n'ouvre.
 - `auth.setup.ts` connecte chaque compte une fois par le formulaire et garde ses cookies
   (`var/e2e/auth/`) ; un test les prend avec `test.use({ storageState: storageStateOf(USER) })`.
   Importer `test` de `support/test.ts`, qui cache la barre de debug de Symfony.
