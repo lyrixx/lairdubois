@@ -71,6 +71,51 @@ final class ResettingTest extends WebTestCase
         self::assertCount(0, static::getSentEmails($client));
     }
 
+    public function testResetPasswordLogsIn(): void
+    {
+        $client = static::createClient();
+
+        $this->resetPassword($client, UserFixtures::USER, 'Nouveau-mot-de-passe-1');
+
+        self::assertNotNull(static::findUser(UserFixtures::USER)->getLastLogin());
+        $client->followRedirect();
+        $crawler = $client->followRedirect();
+        self::assertSame('/@user', $client->getRequest()->getPathInfo());
+        self::assertStringContainsString('Le mot de passe a été réinitialisé avec succès.', $crawler->filter('.alert-success')->text(null, false));
+    }
+
+    /**
+     * As FOSUserBundle, for which "enabled" means a proven email address: the new password enables
+     * the account again and logs it in, even when an admin disabled it (#142).
+     */
+    public function testResetPasswordEnablesADisabledAccount(): void
+    {
+        $client = static::createClient();
+        static::getEntityManager()->getConnection()->update('tbl_core_user', ['enabled' => 0], ['username_canonical' => UserFixtures::USER]);
+
+        $this->resetPassword($client, UserFixtures::USER, 'Nouveau-mot-de-passe-1');
+
+        self::assertTrue(static::findUser(UserFixtures::USER)->isEnabled());
+        $client->request('GET', '/@me/parametres');
+        self::assertSame('/@user/parametres', $client->getResponse()->headers->get('Location'));
+    }
+
+    /**
+     * The link of the email is valid 24 hours after the request.
+     */
+    public function testResetPasswordWithExpiredLink(): void
+    {
+        $client = static::createClient();
+        $this->setPasswordRequest(UserFixtures::USER, 'valid-token', new \DateTimeImmutable('-23 hours'));
+        $this->setPasswordRequest(UserFixtures::USER2, 'expired-token', new \DateTimeImmutable('-24 hours -1 minute'));
+
+        $client->request('GET', '/resetting/reset/valid-token');
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+
+        $client->request('GET', '/resetting/reset/expired-token');
+        self::assertSame('/resetting/request', $client->getResponse()->headers->get('Location'));
+    }
+
     public function testResetPasswordWithInvalidToken(): void
     {
         $client = static::createClient();
@@ -97,6 +142,27 @@ final class ResettingTest extends WebTestCase
 
         $client->enableProfiler();
         $client->submit($crawler->filter('form[action="/resetting/send-email"]')->form(['username' => $username]));
+    }
+
+    /**
+     * Requests a reset, then submits the new password through the link of the email.
+     */
+    private function resetPassword(Client $client, string $username, string $password): void
+    {
+        $this->requestReset($client, $username);
+        self::assertSame(1, preg_match('{https://lairdubois\.test(/resetting/reset/[\w-]+)}', static::getSentEmails($client)[0]->getBody(), $matches));
+
+        $crawler = $client->request('GET', $matches[1]);
+        $client->submit($crawler->filter('form[action="'.$matches[1].'"]')->form([
+            'fos_user_resetting_form[plainPassword][first]' => $password,
+            'fos_user_resetting_form[plainPassword][second]' => $password,
+        ]));
+        self::assertSame('/me', $client->getResponse()->headers->get('Location'));
+    }
+
+    private function setPasswordRequest(string $username, string $token, \DateTimeImmutable $requestedAt): void
+    {
+        static::getEntityManager()->getConnection()->update('tbl_core_user', ['confirmation_token' => $token, 'password_requested_at' => $requestedAt->format('Y-m-d H:i:s')], ['username_canonical' => $username]);
     }
 
     private function login(Client $client, string $username, string $password): void

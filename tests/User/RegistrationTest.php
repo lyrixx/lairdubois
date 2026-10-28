@@ -87,6 +87,52 @@ final class RegistrationTest extends WebTestCase
         self::assertStringContainsString('Les deux mots de passe ne sont pas identiques.', $errors);
     }
 
+    public function testRegisterShowsTheConfirmationPage(): void
+    {
+        $client = static::createClient();
+        $crawler = $client->request('GET', '/salut/');
+        $client->submit($crawler->filter('form[action="/salut/"]')->form([
+            'fos_user_registration_form[username]' => 'nouveau',
+            'fos_user_registration_form[email]' => 'nouveau@lairdubois.test',
+            'fos_user_registration_form[plainPassword][first]' => 'Copeaux-de-chene-1',
+            'fos_user_registration_form[plainPassword][second]' => 'Copeaux-de-chene-1',
+        ]));
+        self::assertNotNull(static::findUser('nouveau')->getLastLogin());
+
+        $crawler = $client->followRedirect();
+        self::assertStringContainsString('Félicitations nouveau, votre compte est maintenant activé.', $crawler->filter('.panel-body')->text(null, false));
+
+        // The layout of the pages of FOSUserBundle shows no flash message: the next page does
+        $crawler = $client->request('GET', '/@nouveau');
+        self::assertStringContainsString("L'utilisateur a été créé avec succès.", $crawler->filter('.alert-success')->text(null, false));
+    }
+
+    public function testConfirmedPageAnonymous(): void
+    {
+        $client = static::createClient();
+
+        $client->request('GET', '/salut/confirmed');
+
+        self::assertSame('https://lairdubois.test/login', $client->getResponse()->headers->get('Location'));
+    }
+
+    /**
+     * The email confirmation of FOSUserBundle is off, its routes are gone: the second one enabled the
+     * account of any token, a forgotten password one included (#142).
+     */
+    public function testRegistrationConfirmationRoutesAreGone(): void
+    {
+        $client = static::createClient();
+        static::getEntityManager()->getConnection()->update('tbl_core_user', ['enabled' => 0, 'confirmation_token' => 'token-of-user'], ['username_canonical' => UserFixtures::USER]);
+
+        $client->request('GET', '/salut/confirm/token-of-user');
+        self::assertSame(404, $client->getResponse()->getStatusCode());
+        self::assertFalse(static::findUser(UserFixtures::USER)->isEnabled());
+
+        $client->request('GET', '/salut/check-email');
+        self::assertSame(404, $client->getResponse()->getStatusCode());
+    }
+
     public function testConfirmEmail(): void
     {
         $client = $this->createClientAsUnconfirmed(UserFixtures::USER);

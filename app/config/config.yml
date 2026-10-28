@@ -155,7 +155,8 @@ fos_user:
     user_class: Ladb\CoreBundle\Entity\Core\User
     use_listener: false
     service:
-        mailer: ladb_core.fos.mailer
+        # Unused: MailerUtils sends the forgotten password email (#24)
+        mailer: fos_user.mailer.noop
         user_manager: ladb_core.fos.user_manager
     from_email:
         address:        noreply@lairdubois.fr

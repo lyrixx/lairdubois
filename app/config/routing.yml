@@ -1,18 +1,22 @@
-# FOSUserBundle
+# Login, registration, forgotten password and password change: the routes of FOSUserBundle, with their names (#24)
 
 fos_user_security:
-    resource: "@FOSUserBundle/Resources/config/routing/security.xml"
+    resource: "Ladb\\CoreBundle\\Controller\\Core\\SecurityController"
+    type:     annotation
 
 fos_user_register:
-    resource: "@FOSUserBundle/Resources/config/routing/registration.xml"
+    resource: "Ladb\\CoreBundle\\Controller\\Core\\RegistrationController"
+    type:     annotation
     prefix: /salut
 
 fos_user_resetting:
-    resource: "@FOSUserBundle/Resources/config/routing/resetting.xml"
+    resource: "Ladb\\CoreBundle\\Controller\\Core\\ResettingController"
+    type:     annotation
     prefix: /resetting
 
 fos_user_change_password:
-    resource: "@FOSUserBundle/Resources/config/routing/change_password.xml"
+    resource: "Ladb\\CoreBundle\\Controller\\Core\\ChangePasswordController"
+    type:     annotation
     prefix: /parametres
 
 fos_user_profile_show:
