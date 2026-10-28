@@ -2,12 +2,23 @@
 
 namespace Ladb\CoreBundle\Controller;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Ladb\CoreBundle\Entity\Core\UserWitness;
 use Ladb\CoreBundle\Manager\Core\UserManager;
 
 trait UserControllerTrait {
 
+	// Protected: a controller that uses this trait under a parent that uses it too, or has its own setOm(), replaces
+	// the setter of the parent, which would read its own private property, left null
+	protected $om;
 	private $userManager;
+
+	/**
+	 * @required
+	 */
+	public function setOm(EntityManagerInterface $om) {
+		$this->om = $om;
+	}
 
 	/**
 	 * @required
@@ -21,8 +32,7 @@ trait UserControllerTrait {
 		if (is_null($user)) {
 
 			// Try to load user witness
-			$om = $this->getDoctrine()->getManager();
-			$userWitnessRepository = $om->getRepository(UserWitness::class);
+			$userWitnessRepository = $this->om->getRepository(UserWitness::class);
 			$userWitness = $userWitnessRepository->findOneByUsername($username);
 			if (is_null($userWitness) || is_null($userWitness->getUser())) {
 				throw $this->createNotFoundException('User not found (username='.$username.')');

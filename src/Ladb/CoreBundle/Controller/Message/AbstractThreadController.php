@@ -2,6 +2,7 @@
 
 namespace Ladb\CoreBundle\Controller\Message;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Ladb\CoreBundle\Controller\AbstractController;
 use Ladb\CoreBundle\Entity\Core\Member;
 use Ladb\CoreBundle\Entity\Core\User;
@@ -13,6 +14,8 @@ use Ladb\CoreBundle\Utils\WebpushNotificationUtils;
 abstract class AbstractThreadController extends AbstractController {
 
 	private $mailerUtils;
+	// Protected, like the one of UserControllerTrait, that a subclass can use
+	protected $om;
 	private $webpushNotificationUtils;
 
 	/**
@@ -25,13 +28,19 @@ abstract class AbstractThreadController extends AbstractController {
 	/**
 	 * @required
 	 */
+	public function setOm(EntityManagerInterface $om) {
+		$this->om = $om;
+	}
+
+	/**
+	 * @required
+	 */
 	public function setWebpushNotificationUtils(WebpushNotificationUtils $webpushNotificationUtils) {
 		$this->webpushNotificationUtils = $webpushNotificationUtils;
 	}
 
 	protected function retrieveThread($id) {
-		$om = $this->getDoctrine()->getManager();
-		$threadRepository = $om->getRepository(Thread::CLASS_NAME);
+		$threadRepository = $this->om->getRepository(Thread::CLASS_NAME);
 		$thread = $threadRepository->findOneByIdJoinedOnMetaAndParticipant($id);
 		if (is_null($thread)) {
 			throw $this->createNotFoundException('Unable to find Thread entity (id='.$id.').');
@@ -44,8 +53,7 @@ abstract class AbstractThreadController extends AbstractController {
 	protected function assertShowable(Thread $thread) {
 		if (!$thread->getParticipants()->contains($this->getUser())) {
 
-			$om = $this->getDoctrine()->getManager();
-			$memberRepository = $om->getRepository(Member::CLASS_NAME);
+			$memberRepository = $this->om->getRepository(Member::CLASS_NAME);
 			$allowed = false;
 			foreach ($thread->getParticipants() as $participant) {
 				if ($memberRepository->existsByTeamAndUser($participant, $this->getUser())) {
@@ -70,8 +78,7 @@ abstract class AbstractThreadController extends AbstractController {
 
 	protected function notifyRecipientsForIncomingMessage(array $recipients, User $sender, Thread $thread, Message $message) {
 
-		$om = $this->getDoctrine()->getManager();
-		$memberRepository = $om->getRepository(Member::CLASS_NAME);
+		$memberRepository = $this->om->getRepository(Member::CLASS_NAME);
 		$notifiedRecipients = array();
 		foreach ($recipients as $recipient) {
 

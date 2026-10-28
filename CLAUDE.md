@@ -202,7 +202,7 @@ castor qa:phpunit [-- --filter …]
 castor qa:deprecations       # var/deprecations/report.md, et le résumé du job en CI
 castor qa:install            # outils de tools/ (PHPStan, PHPUnit), installés à la volée sinon
 castor qa:e2e [-- --grep …]  # tests E2E (Playwright) : recharge la base du dev, hors qa:all, job E2E en CI
-castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() des actions → arguments (#16), des utils, managers, listeners et validateurs → constructeur (#118), dépréciations de 4.x (#133)
+castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et getDoctrine() des actions → arguments (#16, #177), des utils, managers, listeners et validateurs → constructeur (#118), dépréciations de 4.x (#133)
 ```
 
 - PHPUnit 9.6, dans `tools/phpunit` et pas dans le `composer.json` de l'application : c'est la
@@ -606,7 +606,12 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   reconnexion automatique (un an après la dernière visite).
 - Controllers : services autowirés (prototype `Ladb\CoreBundle\Controller\`), une action reçoit ses
   services en arguments, un helper de la classe de l'action qui l'appelle (en dernier argument),
-  un trait ou un controller abstrait par un setter `@required`. Les paramètres sont lus par
+  un trait ou un controller abstrait par un setter `@required`. L'entity manager est un service
+  comme les autres (`EntityManagerInterface $om`, plus de `getDoctrine()`, #177). Dans les traits et
+  les controllers abstraits, sa propriété `$om` est protégée, pas privée : un controller qui
+  utilise `PublicationControllerTrait` sous un parent qui l'utilise aussi ou qui a son propre
+  `setOm()` (`HowtoController`, `TaskController`…) remplace le setter du parent, dont le `$om`
+  privé resterait `null`. Les paramètres sont lus par
   `$this->getParameter()` : en 3.4, un `bind` ne s'appliquait à un argument d'action que s'il
   désignait un service ; en 4.4, il s'applique aussi à une valeur (`%param%`). Un service de
   bundle sans alias par type reçoit un alias de son id dans `services.yml`.
