@@ -2,7 +2,8 @@
 
 namespace Tests;
 
-use Symfony\Bridge\PhpUnit\DeprecationErrorHandler;
+use PHPUnit\Framework\TestResult;
+use PHPUnit\Util\ErrorHandler;
 
 /**
  * Counts the deprecations of a PHPUnit run by message, for castor qa:deprecations.
@@ -23,8 +24,7 @@ final class DeprecationCollector
 
         set_error_handler(static function (int $type, string $message, string $errorFile = '', int $line = 0) use (&$deprecations): bool {
             if (\E_DEPRECATED !== $type && \E_USER_DEPRECATED !== $type) {
-                // PHPUnit converts the other errors to exceptions, as with the collector of the bridge
-                return DeprecationErrorHandler::getPhpUnitErrorHandler()($type, $message, $errorFile, $line);
+                return self::getPhpUnitErrorHandler()($type, $message, $errorFile, $line);
             }
 
             $unsilenced = error_reporting() & $type;
@@ -38,5 +38,27 @@ final class DeprecationCollector
         register_shutdown_function(static function () use ($file, &$deprecations): void {
             file_put_contents($file, serialize(array_values($deprecations)));
         });
+    }
+
+    /**
+     * PHPUnit converts the other errors to exceptions, but its handler does not replace this one:
+     * it is built with the settings of the running test, as the collector of the bridge does
+     * (its DeprecationErrorHandler::getPhpUnitErrorHandler(), private since Symfony 4.4).
+     */
+    private static function getPhpUnitErrorHandler(): callable
+    {
+        foreach (debug_backtrace(\DEBUG_BACKTRACE_PROVIDE_OBJECT | \DEBUG_BACKTRACE_IGNORE_ARGS) as $frame) {
+            if (isset($frame['object']) && $frame['object'] instanceof TestResult) {
+                return new ErrorHandler(
+                    $frame['object']->getConvertDeprecationsToExceptions(),
+                    $frame['object']->getConvertErrorsToExceptions(),
+                    $frame['object']->getConvertNoticesToExceptions(),
+                    $frame['object']->getConvertWarningsToExceptions()
+                );
+            }
+        }
+
+        // Outside of a test: left to PHP
+        return static fn (): bool => false;
     }
 }
