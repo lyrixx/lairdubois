@@ -182,6 +182,10 @@ services:
             # Comment the next line to be able to access frontend via HTTP instead of HTTPS
             - "traefik.http.routers.${PROJECT_NAME}-frontend-unsecure.middlewares=redirect-to-https@file"
 
+    worker_consumer_mailer:
+        <<: *worker_base
+        command: php bin/console messenger:consume mailer
+
     worker_consumer_view:
         <<: *worker_base
         command: php bin/console messenger:consume view

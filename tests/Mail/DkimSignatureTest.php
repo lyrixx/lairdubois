@@ -4,12 +4,12 @@ namespace Tests\Mail;
 
 use Ladb\CoreBundle\DataFixtures\UserFixtures;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
-use Symfony\Component\Mailer\Event\MessageEvent;
+use Symfony\Component\Mime\Message;
 use Tests\WebTestCase;
 
 /**
- * Each email is signed with DKIM when the transport sends it (DkimSignedMessageListener): the one that
- * Mailer puts on the message bus, that static::getSentEmails() returns, is not.
+ * Each email is signed with DKIM when the transport sends it (DkimSignedMessageListener), in the worker of the
+ * queue "mailer": the one that Mailer puts in the queue, that static::getSentEmails() returns, is not.
  */
 final class DkimSignatureTest extends WebTestCase
 {
@@ -46,10 +46,15 @@ final class DkimSignatureTest extends WebTestCase
         $emails = static::getSentEmails($client);
         self::assertCount(1, $emails);
         self::assertFalse($emails[0]->getHeaders()->has('DKIM-Signature'));
+        self::assertSame([], self::getSentByTransport());
 
-        $sent = array_values(array_filter($client->getProfile()->getCollector('mailer')->getEvents()->getEvents(), fn (MessageEvent $event): bool => !$event->isQueued()));
+        $queued = static::getContainer()->get('tests.mailer_transport')->getSent();
+        self::assertCount(1, $queued);
+        static::consumeMessage($queued[0]->getMessage(), 'mailer');
+
+        $sent = self::getSentByTransport();
         self::assertCount(1, $sent);
-        $headers = $sent[0]->getMessage()->getHeaders();
+        $headers = $sent[0]->getHeaders();
         self::assertSame($subject, $headers->getHeaderBody('Subject'));
         $tags = [];
         foreach (explode(';', $headers->get('DKIM-Signature')->getBodyAsString()) as $tag) {
@@ -60,5 +65,20 @@ final class DkimSignatureTest extends WebTestCase
         self::assertSame('relaxed/relaxed', $tags['c']);
         self::assertSame('lairdubois.fr', $tags['d']);
         self::assertSame('dkim', $tags['s']);
+    }
+
+    /**
+     * @return list<Message>
+     */
+    private static function getSentByTransport(): array
+    {
+        $sent = [];
+        foreach (static::getContainer()->get('mailer.message_logger_listener')->getEvents()->getEvents() as $event) {
+            if (!$event->isQueued()) {
+                $sent[] = $event->getMessage();
+            }
+        }
+
+        return $sent;
     }
 }

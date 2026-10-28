@@ -5,10 +5,12 @@ namespace Tests\Core;
 use Ladb\CoreBundle\DataFixtures\UserFixtures;
 use Ladb\CoreBundle\Entity\Core\Like;
 use Ladb\CoreBundle\Entity\Wonder\Creation;
+use Symfony\Component\Mailer\Event\MessageEvent;
 
 /**
  * RabbitMQ does not answer when a page sends a message: the page is rendered all the same, and
- * the failure is logged. The transports of Messenger connect to a closed port.
+ * the failure is logged. An email is sent directly rather than lost. The transports of Messenger
+ * connect to a closed port.
  */
 final class UnreachableRabbitMqTest extends InteractionTestCase
 {
@@ -46,6 +48,23 @@ final class UnreachableRabbitMqTest extends InteractionTestCase
         self::assertSame(200, $client->getResponse()->getStatusCode());
         self::assertNotNull(static::getEntityManager()->getRepository(Like::class)->findOneBy(['entityType' => Creation::TYPE, 'entityId' => self::CREATION_ID, 'user' => static::findUser(UserFixtures::ADMIN)]));
         self::assertLogged('app.ERROR: Failed to publish the webpush notification in queue.', $logOffset);
+    }
+
+    public function testEmail(): void
+    {
+        static::getEntityManager()->getConnection()->update('tbl_core_user', ['email_confirmed' => 0], ['username_canonical' => UserFixtures::USER]);
+        $client = static::createClientAs(UserFixtures::USER);
+        $logOffset = self::getLogSize();
+        $client->enableProfiler();
+        $client->request('GET', '/email/check');
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        $sent = array_values(array_filter($client->getProfile()->getCollector('mailer')->getEvents()->getEvents(), fn (MessageEvent $event): bool => !$event->isQueued()));
+        self::assertCount(1, $sent);
+        $headers = $sent[0]->getMessage()->getHeaders();
+        self::assertSame('Confirmation de votre adresse e-mail', $headers->getHeaderBody('Subject'));
+        self::assertTrue($headers->has('DKIM-Signature'));
+        self::assertLogged('app.WARNING: Failed to publish the email in queue, sent directly.', $logOffset);
     }
 
     /**

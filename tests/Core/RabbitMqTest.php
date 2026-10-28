@@ -10,6 +10,7 @@ use Ladb\CoreBundle\Entity\Wonder\Creation;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\BufferedOutput;
+use Symfony\Component\Mailer\Event\MessageEvent;
 
 /**
  * The messages of the pages go through RabbitMQ, and the worker of the stack consumes them
@@ -20,6 +21,7 @@ use Symfony\Component\Console\Output\BufferedOutput;
  */
 final class RabbitMqTest extends InteractionTestCase
 {
+    private const MAILER_QUEUE = 'test_mailer';
     private const VIEW_QUEUE = 'test_view';
     private const WEBPUSH_NOTIFICATION_QUEUE = 'test_webpush_notification';
     private const ENDPOINT = 'https://push.example.test/send/expired';
@@ -43,7 +45,7 @@ final class RabbitMqTest extends InteractionTestCase
             'password' => $container->getParameter('rabbitmq_password'),
         ];
         // The exchanges and the queues, empty: a failed run leaves its message
-        foreach (['view' => self::VIEW_QUEUE, 'webpush_notification' => self::WEBPUSH_NOTIFICATION_QUEUE] as $transportName => $queueName) {
+        foreach (['mailer' => self::MAILER_QUEUE, 'view' => self::VIEW_QUEUE, 'webpush_notification' => self::WEBPUSH_NOTIFICATION_QUEUE] as $transportName => $queueName) {
             $container->get("tests.{$transportName}_transport")->setup();
             self::onQueue($queueName, static fn (\AMQPQueue $queue) => $queue->purge());
         }
@@ -97,6 +99,32 @@ final class RabbitMqTest extends InteractionTestCase
         self::assertCount(1, $pushHandler->getRequests());
         self::assertSame(0, self::countMessages(self::WEBPUSH_NOTIFICATION_QUEUE));
         self::assertNull(static::getEntityManager()->getRepository(UserSubscription::class)->find($subscriptionId));
+    }
+
+    /**
+     * The worker sends the email, signed with DKIM.
+     */
+    public function testEmail(): void
+    {
+        static::getEntityManager()->getConnection()->update('tbl_core_user', ['email_confirmed' => 0], ['username_canonical' => UserFixtures::USER]);
+        $client = static::createClientAs(UserFixtures::USER);
+        $client->request('GET', '/email/check');
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertSame(1, self::countMessages(self::MAILER_QUEUE));
+
+        // The message logger of Mailer is reset after each message (reset_on_message)
+        $sent = [];
+        static::bootKernel()->getContainer()->get('event_dispatcher')->addListener(MessageEvent::class, static function (MessageEvent $event) use (&$sent): void {
+            $sent[] = $event->getMessage();
+        }, -1024);
+        self::consume('mailer');
+
+        self::assertSame(0, self::countMessages(self::MAILER_QUEUE));
+        self::assertCount(1, $sent);
+        $headers = $sent[0]->getHeaders();
+        self::assertSame('Confirmation de votre adresse e-mail', $headers->getHeaderBody('Subject'));
+        self::assertTrue($headers->has('DKIM-Signature'));
     }
 
     /**

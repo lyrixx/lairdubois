@@ -8,17 +8,20 @@ framework:
     # The profiler only collects on demand: $client->enableProfiler()
     profiler:
         collect: false
-    # Nothing is delivered: the tests read the emails in the profiler (collector "mailer") or in
-    # the container (Tests\WebTestCase)
+    # Nothing is delivered: the tests read the emails put in the queue in the profiler (collector
+    # "mailer") or in the container (Tests\WebTestCase); the ones a test consumes go nowhere
     mailer:
         dsn: 'null://null'
     # RabbitMQ gets no messages from the tests: the workers of the dev stack would process them on
-    # the dev database, and the CI does not start them. In memory (tests.view_transport,
-    # tests.webpush_notification_transport), unless a test sets the variable (RabbitMqTest,
-    # UnreachableRabbitMqTest). Then in exchanges and queues of their own, which the workers of the
-    # dev stack do not read.
+    # the dev database, and the CI does not start them. In memory (tests.mailer_transport,
+    # tests.view_transport, tests.webpush_notification_transport), unless a test sets the variable
+    # (RabbitMqTest, UnreachableRabbitMqTest). Then in exchanges and queues of their own, which the
+    # workers of the dev stack do not read.
     messenger:
         transports:
+            mailer:
+                dsn: '%env(LADB_TEST_MESSENGER_TRANSPORT_DSN)%'
+                options: { exchange: { name: test_mailer }, queues: { test_mailer: ~ } }
             view:
                 dsn: '%env(LADB_TEST_MESSENGER_TRANSPORT_DSN)%'
                 options: { exchange: { name: test_view }, queues: { test_view: ~ } }
@@ -67,6 +70,9 @@ services:
         arguments: ['@tests.mercure_hub.inner']
         public: true
     # The messages sent to RabbitMQ: getSent()
+    tests.mailer_transport:
+        alias: messenger.transport.mailer
+        public: true
     tests.view_transport:
         alias: messenger.transport.view
         public: true

@@ -8,8 +8,11 @@ use Ladb\CoreBundle\Entity\Core\Spotlight;
 use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Entity\Message\Thread;
 use Ladb\CoreBundle\Entity\Core\Report;
+use Psr\Log\LoggerInterface;
 use Twig\Environment;
 use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mailer\Transport\TransportInterface;
+use Symfony\Component\Messenger\Exception\TransportException;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -23,14 +26,18 @@ class MailerUtils {
 	const LIST_WEEKNEWS = 'weeknews';
 
 	private $cryptoUtils;
+	private $logger;
 	private $mailer;
 	private $router;
+	private $transport;
 	private $twig;
 
-	public function __construct(CryptoUtils $cryptoUtils, MailerInterface $mailer, RouterInterface $router, Environment $twig) {
+	public function __construct(CryptoUtils $cryptoUtils, LoggerInterface $logger, MailerInterface $mailer, RouterInterface $router, TransportInterface $transport, Environment $twig) {
 		$this->cryptoUtils = $cryptoUtils;
+		$this->logger = $logger;
 		$this->mailer = $mailer;
 		$this->router = $router;
+		$this->transport = $transport;
 		$this->twig = $twig;
 	}
 
@@ -38,6 +45,19 @@ class MailerUtils {
 
 	private function _renderTemplate($name, array $parameters = array()) {
 		return $this->twig->render($name, $parameters);
+	}
+
+	/**
+	 * Puts the email in the queue of RabbitMQ, whose worker sends it. When RabbitMQ does not answer, sends it directly
+	 * rather than losing it.
+	 */
+	private function _send(Email $message): void {
+		try {
+			$this->mailer->send($message);
+		} catch (TransportException $e) {
+			$this->logger->warning('Failed to publish the email in queue, sent directly.', array( 'exception' => $e ));
+			$this->transport->send($message);
+		}
 	}
 
 	/////
@@ -70,7 +90,7 @@ class MailerUtils {
 		if (!is_null($htmlBody)) {
 			$message->html($htmlBody);
 		}
-		$this->mailer->send($message);
+		$this->_send($message);
 	}
 
 	/////
@@ -106,7 +126,7 @@ class MailerUtils {
 			->to((string) $recipientUser->getEmail())
 			->text(implode("\n", $renderedLines))
 		;
-		$this->mailer->send($message);
+		$this->_send($message);
 	}
 
 	public function sendIncomingMessageNotificationEmailMessage(User $originRecipientUser, User $recipientUser, User $actorUser, Thread $thread, Message $message) {
