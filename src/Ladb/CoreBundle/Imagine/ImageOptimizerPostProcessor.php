@@ -31,6 +31,9 @@ class ImageOptimizerPostProcessor implements PostProcessorInterface {
 
 			$factory = new \ImageOptimizer\OptimizerFactory(array(
 				'jpegoptim_options' => array('-m95', '--strip-all', '--all-progressive'),
+				// The default of ps/image-optimizer 1.x. With the --skip-if-larger of 2.x, a PNG that
+				// pngquant (lossy) would make larger goes to optipng (lossless) instead
+				'pngquant_options' => array('--force'),
 			));
 
 			$optimizer = $factory->get($isJPEG ? 'jpegoptim' : 'png');
