@@ -48,17 +48,19 @@ framework:
         default_options:
             timeout: 3
             max_duration: 10
-    # Sent as soon as the mailer gets them: SendEmailMessage has no transport below. Mailer starts
-    # TLS when the SMTP server offers it, and checks its certificate (?verify_peer=0 in mailer_dsn
-    # for a self-signed one). Signed with DKIM when sent (DkimSignedMessageListener)
+    # Put in the queue "mailer" of RabbitMQ (SendEmailMessage, below), and sent by its worker; sent
+    # directly when RabbitMQ does not answer (MailerUtils). Mailer starts TLS when the SMTP server
+    # offers it, and checks its certificate (?verify_peer=0 in mailer_dsn for a self-signed one).
+    # Signed with DKIM when sent, by the worker (DkimSignedMessageListener)
     mailer:
         dsn: '%mailer_dsn%'
 
-    # Two queues in RabbitMQ (the rabbitmq_* parameters), each with its exchange of the same name and
-    # its worker: "messenger:consume view", "messenger:consume webpush_notification". The connection
-    # is given as options: in the DSN, the password and the vhost ("/") would have to be URL-encoded.
-    # A message whose handler fails is retried 3 times (after 1, 2 and 4 seconds, by the exchange
-    # "delays" and its "delay_*" queues), then removed with a critical log.
+    # Three queues in RabbitMQ (the rabbitmq_* parameters), each with its exchange of the same name
+    # and its worker: "messenger:consume mailer", "messenger:consume view", "messenger:consume
+    # webpush_notification". The connection is given as options: in the DSN, the password and the
+    # vhost ("/") would have to be URL-encoded. A message whose handler fails is retried 3 times
+    # (after 1, 2 and 4 seconds, by the exchange "delays" and its "delay_*" queues), an email 5
+    # times, then removed with a critical log.
     messenger:
         reset_on_message: true
         buses:
@@ -66,7 +68,7 @@ framework:
                 # A worker runs for days: reconnects to the database after a long idle time
                 middleware: [doctrine_ping_connection]
         transports:
-            view:
+            mailer:
                 dsn: 'amqp://'
                 options:
                     <<: &rabbitmq_connection
@@ -75,6 +77,14 @@ framework:
                         vhost: '%rabbitmq_vhost%'
                         login: '%rabbitmq_user%'
                         password: '%rabbitmq_password%'
+                    exchange: { name: mailer }
+                    queues: { mailer: ~ }
+                # After 1, 3, 9, 27 and 81 minutes: about 2 hours for the SMTP server to come back
+                retry_strategy: { max_retries: 5, delay: 60000, multiplier: 3 }
+            view:
+                dsn: 'amqp://'
+                options:
+                    <<: *rabbitmq_connection
                     exchange: { name: view }
                     queues: { view: ~ }
             webpush_notification:
@@ -87,6 +97,7 @@ framework:
             'Ladb\CoreBundle\Message\ListedViewMessage': view
             'Ladb\CoreBundle\Message\ShownViewMessage': view
             'Ladb\CoreBundle\Message\WebpushNotificationMessage': webpush_notification
+            'Symfony\Component\Mailer\Messenger\SendEmailMessage': mailer
 
 services:
     _defaults:

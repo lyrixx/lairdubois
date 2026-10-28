@@ -191,7 +191,7 @@ Generate a random secret: the site signs with it the JWT of its updates and of t
     $ openssl rand -base64 48
 ```
 
-Then write the configuration of the hub, read by its service (Step 14.3), readable by `root` only.
+Then write the configuration of the hub, read by its service (Step 14.4), readable by `root` only.
 
 ``` bash
     $ sudo nano /etc/mercure.env
@@ -546,7 +546,33 @@ RestartSec=3
 WantedBy=multi-user.target
 ```
 
-### 14.3 The Mercure hub.
+### 14.3 The RabbitMQ mailer consumer.
+
+It sends the emails of the site, signed with DKIM (Step 7). Without it, they wait in the queue `mailer` of RabbitMQ.
+
+Create service file
+``` bash
+    $ sudo nano /etc/systemd/system/ladb_consumer_mailer.service
+```
+
+And add the following lines
+```
+[Unit]
+Description=The RabbitMQ mailer consumer.
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/www.lairdubois.fr/
+ExecStart=/usr/bin/php bin/console --env=prod messenger:consume mailer
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### 14.4 The Mercure hub.
 
 The workflow editor publishes its changes to the hub, which sends them to the open workspaces. Start it before deploying the site: without it, each change in the editor answers with an error.
 
@@ -574,7 +600,7 @@ RestartSec=3
 WantedBy=multi-user.target
 ```
 
-### 14.4 Enable and start Services
+### 14.5 Enable and start Services
 
 Load these new service files
 ``` bash
@@ -583,6 +609,7 @@ Load these new service files
 
 Enable these services on boot
 ``` bash
+    $ sudo systemctl enable ladb_consumer_mailer.service
     $ sudo systemctl enable ladb_consumer_view.service
     $ sudo systemctl enable ladb_consumer_webpush.service
     $ sudo systemctl enable ladb_mercure.service
@@ -590,6 +617,7 @@ Enable these services on boot
 
 Start these services
 ``` bash
+    $ sudo systemctl start ladb_consumer_mailer.service
     $ sudo systemctl start ladb_consumer_view.service
     $ sudo systemctl start ladb_consumer_webpush.service
     $ sudo systemctl start ladb_mercure.service
