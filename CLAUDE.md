@@ -140,8 +140,9 @@ Contextes : `--context=test` (`SYMFONY_ENV=test`), `--context=ci` (le même, san
   LESS ou un JS, pas de serveur de Vite.
 - MariaDB 10.11 (`root`/`app`), Elasticsearch 7.17 (un nœud, sans sécurité, un volume par version
   majeure), RabbitMQ 3.13 (`app`/`app`), Memcached. Workers
-  (profil `worker`) : les deux de Messenger (`messenger:consume view`, `messenger:consume
-  webpush_notification`). Extension PHP `amqp` dans les images, pour le transport AMQP de Messenger.
+  (profil `worker`) : les trois de Messenger (`messenger:consume mailer`, `messenger:consume view`,
+  `messenger:consume webpush_notification`). Extension PHP `amqp` dans les images, pour le transport
+  AMQP de Messenger.
 - Hub Mercure (service `mercure`, profil `default`, #21) : l'image `dunglas/mercure`, en HTTP
   (`SERVER_NAME=:80`), routé sur `/.well-known/mercure` du domaine et du port du site. Une clé JWT
   de dev fixe (`MERCURE_JWT_SECRET` de `docker-compose.yml`) signe la publication et
@@ -153,9 +154,9 @@ Contextes : `--context=test` (`SYMFONY_ENV=test`), `--context=ci` (le même, san
   mails en SMTP sur `mailpit:1025` et les affiche dans son interface, routée sur `/mailpit/` du
   domaine et du port du site (`MP_WEBROOT`) : `castor about` donne son URL. Base temporaire, sans
   volume : les mails sont perdus quand il redémarre. `MAILER_DSN` (`smtp://mailpit:1025`) est dans
-  l'environnement du builder, pour `mailer_dsn`. Tous les mails du site y arrivent, envoyés à
-  `dev@lairdubois.fr` (`envelope.recipients` de `config_dev.yml`) : seule l'enveloppe SMTP change,
-  l'en-tête `To` garde le destinataire d'origine.
+  l'environnement du builder, pour `mailer_dsn`. Tous les mails du site y arrivent, par le worker
+  `worker_consumer_mailer`, envoyés à `dev@lairdubois.fr` (`envelope.recipients` de
+  `config_dev.yml`) : seule l'enveloppe SMTP change, l'en-tête `To` garde le destinataire d'origine.
 - Playwright (service `playwright`, profil `e2e`, lancé par `castor qa:e2e`) : l'image officielle
   `mcr.microsoft.com/playwright`, avec Node 24 et les navigateurs, à la version de
   `@playwright/test` dans `tests/e2e/package.json`.
@@ -342,8 +343,8 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   reboot suivant). `static::consumeMessage($message, 'view')` passe un message à ses handlers, comme
   le worker. `LADB_TEST_MESSENGER_TRANSPORT_DSN` change de transport : `UnreachableRabbitMqTest` les
   met sur un port fermé, `RabbitMqTest` sur le RabbitMQ de la stack (`amqp://`, qui doit tourner),
-  dans les échanges et files `test_view` et `test_webpush_notification` que les workers du dev ne
-  lisent pas, et les consomme par `messenger:consume` (#168).
+  dans les échanges et files `test_mailer`, `test_view` et `test_webpush_notification` que les
+  workers du dev ne lisent pas, et les consomme par `messenger:consume` (#168).
 - Pas de hub Mercure en test : `mercure.hub.default` est décoré par `Tests\Double\InMemoryHub`, qui
   garde les `Update` publiées (`$client->getContainer()->get('tests.mercure_hub')->getUpdates()`,
   avant le reboot suivant) ; ses URL et son JWT restent ceux de la configuration.
@@ -428,10 +429,13 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   dont un compte au hash sha512 de FOSUserBundle écrit tel quel en base, rehashé à sa connexion, et
   des sessions ouvertes avant #24, au token sérialisé en dur (`LoginTest`).
 - Mails : `static::getSentEmails($client)` (après `$client->enableProfiler()`) et
-  `static::getEmailRecipients($message)` (l'en-tête `To`). Ils lisent les `Email` que Mailer met sur
-  le bus de Messenger (`isQueued()` de `mailer.message_logger_listener`), sans signature : le
-  transport (`null://` en test, rien ne part) envoie une copie signée, un `Message`, que
-  `Tests\Mail\DkimSignatureTest` vérifie.
+  `static::getEmailRecipients($message)` (l'en-tête `To`). Ils lisent les `Email` que Mailer met dans
+  la file `mailer` (`isQueued()` de `mailer.message_logger_listener`), sans signature. Rien ne part
+  pendant la requête : le `SendEmailMessage` reste dans `tests.mailer_transport` (`getSent()`), et
+  `static::consumeMessage($message, 'mailer')` l'envoie comme le worker, par le transport
+  (`null://` en test, rien ne part), qui signe une copie, un `Message`, que
+  `Tests\Mail\DkimSignatureTest` vérifie. Dans le worker, `reset_on_message` vide
+  `mailer.message_logger_listener` après chaque message : `RabbitMqTest` écoute le `MessageEvent`.
 - Commandes (`tests/Command/`) : `static::runCommand('ladb:cron:offers --force')` lance une ligne
   de commande dans la transaction du test et rend son code de sortie et sa sortie ; le kernel
   reste celui de la commande (`static::getEntityManager()`), ses mails sont dans
@@ -616,7 +620,8 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   vérifie le manager de chaque type.
 - Utils : dépendances et paramètres par le constructeur (`Utils/`, sans container). `ViewableUtils`
   et `WebpushNotificationUtils` envoient leurs messages par le bus de Messenger et journalisent un
-  échec d'envoi (`TransportException`, RabbitMQ injoignable) au lieu de le lever. `SearchUtils` reçoit un index par l'id de son service
+  échec d'envoi (`TransportException`, RabbitMQ injoignable) au lieu de le lever ; `MailerUtils`
+  envoie alors le mail en direct. `SearchUtils` reçoit un index par l'id de son service
   (`fos_elastica.index.<type>`) : un index par type de contenu (#31), `ladb_<type>` dans
   Elasticsearch (`elasticsearch_index_prefix`).
 - Managers : dépendances par le constructeur (`Manager/`, sans container). Les classes abstraites
@@ -659,16 +664,21 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   initialisées que sur une entité chargée depuis la base : `FixtureFactory::create()` fait un
   `refresh()` après le premier `flush()`.
 - Symfony Mailer (#19) : `MailerUtils` envoie des `Email`, que Mailer passe au bus de Messenger ;
-  `SendEmailMessage` n'y a pas de transport, son handler les envoie tout de suite, dans la requête
-  ou la commande. Un seul paramètre, `mailer_dsn` (`framework.mailer.dsn`). Mailer lance STARTTLS
-  dès que le serveur SMTP l'annonce et vérifie son certificat, ce que Swiftmailer ne faisait pas
-  sans `encryption` : `?verify_peer=0` pour un Postfix au certificat autosigné (l'option `auto_tls`
-  n'arrive qu'en 7.1).
+  `SendEmailMessage` va dans la file `mailer` de RabbitMQ, et son worker (`messenger:consume
+  mailer`) les envoie. Un envoi en échec (SMTP injoignable) est rejoué 5 fois, après 1, 3, 9, 27 et
+  81 minutes, puis le message est supprimé (log critical). Quand RabbitMQ ne répond pas,
+  `MailerUtils` attrape la `TransportException` de Messenger, journalise un warning et envoie le
+  mail en direct, dans la requête ou la commande (`TransportInterface` de Mailer, le transport de
+  `mailer_dsn`) : le spool fichier de Swiftmailer ne tombait jamais. Les messages de la file sont
+  sérialisés en PHP (`PhpSerializer`) : la vider avant un saut de Symfony. Un seul paramètre,
+  `mailer_dsn` (`framework.mailer.dsn`). Mailer lance STARTTLS dès que le serveur SMTP l'annonce et
+  vérifie son certificat, ce que Swiftmailer ne faisait pas sans `encryption` : `?verify_peer=0`
+  pour un Postfix au certificat autosigné (l'option `auto_tls` n'arrive qu'en 7.1).
 - `Event\DkimSignedMessageListener` signe chaque mail avec la clé DKIM de la prod
   (`keys/private.pem`, hors git, `relaxed/relaxed`) quand le transport l'envoie (`MessageEvent` pas
-  `isQueued()`), pas quand Mailer le met sur le bus : le message en file reste un `Email`, que les
-  tests et le profiler lisent. Symfony 7.3 a le sien (`framework.mailer.dkim_signer`), qui signe
-  aussi le message mis en file. Sans la clé, tout mail du site (confirmation d'adresse,
+  `isQueued()`, dans le worker), pas quand Mailer le met sur le bus : le message en file reste un
+  `Email`, que les tests et le profiler lisent. Symfony 7.3 a le sien
+  (`framework.mailer.dkim_signer`), qui signe aussi le message mis en file. Sans la clé, tout mail du site (confirmation d'adresse,
   notifications…) donne une 500 : `castor app:install` en génère une jetable si elle manque. Le
   mail du mot de passe oublié (`sendResettingEmailMessage()`) est construit comme FOSUserBundle le
   faisait (texte seul, le sujet sur la première ligne de son template), et signé comme les autres.
@@ -691,13 +701,13 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   (`LoginTest`, avec un token capturé sur la vraie 4.4 ; le cookie remember_me capturé avec lui est
   refusé et supprimé depuis l'authenticator manager, qui signe autrement, #177). La 6.0.0 la
   retire, la 6.4 la remet : à revérifier aux sauts suivants (#26).
-- Messenger (#22) : deux transports AMQP (`config.yml`), chacun avec son échange et sa file du
-  même nom, `view` et `webpush_notification`. Les anciennes files de RabbitMqBundle (`view_queue`…)
-  ne servent plus : le `PhpSerializer` lit un de leurs messages comme un array, et le
-  worker s'arrêterait sans le retirer. La connexion est en options : dans le DSN, le mot de passe et
-  le vhost `/` seraient à encoder. Un handler en échec est rejoué 3 fois (échange `delays`), puis le
-  message est supprimé (log critical). Après chaque message, le worker vide l'entity manager et
-  remet à zéro les services (`reset_on_message`, le défaut de 6.0) : un handler flush ce qu'il
+- Messenger (#22) : trois transports AMQP (`config.yml`), chacun avec son échange et sa file du
+  même nom, `mailer` (#19), `view` et `webpush_notification`. Les anciennes files de RabbitMqBundle
+  (`view_queue`…) ne servent plus : le `PhpSerializer` lit un de leurs messages comme un array, et
+  le worker s'arrêterait sans le retirer. La connexion est en options : dans le DSN, le mot de passe
+  et le vhost `/` seraient à encoder. Un handler en échec est rejoué 3 fois (échange `delays`), un
+  mail 5 fois, puis le message est supprimé (log critical). Après chaque message, le worker vide
+  l'entity manager et remet à zéro les services (`reset_on_message`, le défaut de 6.0) : un handler flush ce qu'il
   persiste, sinon c'est perdu, et ne garde rien d'un message à l'autre.
 - Les notifications web push sont signées avec les clés VAPID de la prod (`bentools_webpush.*` de
   `parameters.yml`) : avec celles de `parameters.yml.dist`, le worker `webpush_notification`
