@@ -3,9 +3,10 @@ import { USER, storageStateOf } from '../support/accounts';
 
 test.use({ storageState: storageStateOf(USER) });
 
-// The workspace of workflow 1 of the fixtures, by user. It loads its tasks once connected to the
-// websocket server (Gos WebSocket). An edition answers with JSON: the board only changes on the
-// message the server pushes to every window of the workflow.
+// The workspace of workflow 1 of the fixtures, by user. It loads its tasks once subscribed to the
+// Mercure hub (EventSource, with the cookie of the page). An edition answers with JSON: the board
+// only changes on the update the server publishes to every window of the workflow. The names of
+// the tests still say "websocket": they are those of Gos WebSocket, the same behaviour.
 async function openWorkspace(page: Page): Promise<void> {
     await gotoAndSettle(page, '/processus/1.html?layout=workspace');
     // "Connexion...", then "Chargement des tâches..."

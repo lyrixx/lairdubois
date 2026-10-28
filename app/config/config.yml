@@ -1188,6 +1188,11 @@ gos_web_socket:
 
 # MercureBundle
 mercure:
+    # The cookie and the JWT of the subscription of a workspace (WorkflowController::showAction())
+    # last as long as remember_me (security.yml): the hub closes a subscription when its JWT
+    # expires, and refuses the reconnection of the browser, which sends the same cookie. Deleted
+    # at logout
+    default_cookie_lifetime: 31536000 # 365 days in seconds
     hubs:
         default:
             url: '%mercure_url%'

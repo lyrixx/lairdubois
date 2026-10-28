@@ -119,6 +119,10 @@ final class WorkflowTest extends WebTestCase
         $token = $jwt->parser()->parse($cookies[0]->getValue());
         self::assertTrue($jwt->validator()->validate($token, new SignedWith($jwt->signer(), $jwt->verificationKey())));
         self::assertSame(['publish' => [], 'subscribe' => $subscribe], $token->claims()->get('mercure'));
+        // A year, as remember_me: the hub closes the subscription when the JWT expires. Counted in
+        // local time, as the bundle does: an hour off across a change of daylight saving time
+        self::assertEqualsWithDelta((new \DateTimeImmutable('+31536000 seconds'))->getTimestamp(), $cookies[0]->getExpiresTime(), 60);
+        self::assertSame($cookies[0]->getExpiresTime(), $token->claims()->get('exp')->getTimestamp());
     }
 
     /**
