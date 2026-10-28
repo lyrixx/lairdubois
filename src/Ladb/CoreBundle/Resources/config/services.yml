@@ -679,8 +679,10 @@ services:
   # WebPush
   Ladb\CoreBundle\Manager\Webpush\UserSubscriptionManager:
     arguments: ['@doctrine']
-  # The sender of bentools/webpush-bundle, with the TTL (4 weeks) and the timeout of minishlink/web-push 2.0:
-  # the bundle has a TTL of 0 (dropped if the browser is offline) and a Guzzle client without timeout
+  # The sender of bentools/webpush-bundle, with the TTL of minishlink/web-push 2.0 (4 weeks): the bundle has
+  # a TTL of 0 (dropped if the browser is offline). The timeout is the one of the sender, 30 seconds per
+  # request (PushMessageSender::DEFAULT_TIMEOUT), which takes precedence over the options of the client.
+  # The client is a service of its own for the test environment, which gives it a handler (config_test.yml)
   BenTools\WebPushBundle\Sender\PushMessageSender:
     arguments:
       - VAPID:
@@ -691,4 +693,3 @@ services:
       - '@ladb_core.webpush_http_client'
   ladb_core.webpush_http_client:
     class: GuzzleHttp\Client
-    arguments: [{ timeout: 30 }]

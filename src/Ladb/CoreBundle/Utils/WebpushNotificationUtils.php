@@ -92,7 +92,7 @@ class WebpushNotificationUtils {
 	public function sendNotification(User $user, string $body, string $icon = 'https://www.lairdubois.fr/favicon-144x144.png', string $link = 'https://www.lairdubois.fr') {
 
 		// The payload of the Notification of bentools/webpush-bundle 0.3, that ladb-webpush-sw.js reads:
-		// the PushNotification of the bundle 0.7 has "title" and "options" keys instead
+		// the PushNotification of the bundle (0.7 to 0.12) has "title" and "options" keys instead
 		$message = new PushMessage(json_encode(array(
 			'notification' => array(
 				'title' => 'L\'Air du Bois',

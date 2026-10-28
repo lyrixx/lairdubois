@@ -19,6 +19,9 @@ final class InMemoryPushHandler
     /** @var list<RequestInterface> */
     private array $requests = [];
 
+    /** @var list<array<string, mixed>> The options of each request, in the order of getRequests() */
+    private array $requestOptions = [];
+
     /** @var list<string> */
     private array $expiredEndpoints = [];
 
@@ -28,6 +31,7 @@ final class InMemoryPushHandler
     public function __invoke(RequestInterface $request, array $options): PromiseInterface
     {
         $this->requests[] = $request;
+        $this->requestOptions[] = $options;
         $endpoint = (string) $request->getUri();
 
         if (\in_array($endpoint, $this->unreachableEndpoints, true)) {
@@ -53,5 +57,13 @@ final class InMemoryPushHandler
     public function getRequests(): array
     {
         return $this->requests;
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public function getRequestOptions(): array
+    {
+        return $this->requestOptions;
     }
 }

@@ -50,6 +50,8 @@ final class NotificationTest extends WebTestCase
             $requests[(string) $request->getUri()] = $request;
         }
         self::assertEqualsCanonicalizing([self::ENDPOINT.'active', self::ENDPOINT.'expired', self::ENDPOINT.'unreachable'], array_keys($requests));
+        // The timeout of the sender (PushMessageSender::DEFAULT_TIMEOUT): the client has none (services.yml)
+        self::assertSame([30, 30, 30], array_column($handler->getRequestOptions(), 'timeout'));
 
         $request = $requests[self::ENDPOINT.'active'];
         self::assertSame('POST', $request->getMethod());
