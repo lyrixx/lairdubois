@@ -510,7 +510,7 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   serveur) et la lecture de la session par le serveur (`unserialize()` de Ratchet, PHP 8.3) sont
   remplacés par les classes de `src/Ladb/CoreBundle/WebSocket/`, à retirer avec Gos (#21). Le
   template de `{{ ws_client() }}`, écrit pour Assetic, est remplacé par
-  `app/Resources/GosWebSocketBundle/views/client.html.twig` (groupe `websocket` de Vite), que les
+  `templates/bundles/GosWebSocketBundle/client.html.twig` (groupe `websocket` de Vite), que les
   templates incluent à la place de `ws_client()` : son extension Twig, dépréciée, est retirée de
   Twig (`gos_web_socket.twig.extension` redéfini sans son tag dans `services.yml`).
 - `bin/console` lit `SYMFONY_ENV`, pas `APP_ENV`.
@@ -608,7 +608,7 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   semaines, 30 s). Sa route d'abonnement lit `{"subscription": …}`, alors que le JS du site envoie
   la `PushSubscription` telle quelle : `WebpushController` la remplace (même nom, même chemin).
 - Plus de composant `templating` : les templates se nomment dans la notation de Twig
-  (`@LadbCore/Dir/file.html.twig`, `@FOSUser/…`, `base.html.twig` pour `app/Resources/views`), la
+  (`@LadbCore/Dir/file.html.twig`, `@FOSUser/…`, `base.html.twig` pour `templates/`), la
   notation de bundle (`LadbCoreBundle:Dir:file.html.twig`, `::base.html.twig`) ne les trouve plus.
   Un service reçoit `Twig\Environment`.
 - Twig reste en 3.27 (`~3.27.1`) : depuis la 3.28 (twigphp/Twig#4292), un template qui en étend

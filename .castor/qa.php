@@ -47,7 +47,7 @@ function install(): void
 function lint(): int
 {
     $commands = [
-        ['bin/console', 'lint:twig', 'app/Resources', 'src'],
+        ['bin/console', 'lint:twig', 'templates', 'src'],
         ['bin/console', 'lint:yaml', 'app/config', 'src'],
         // Needs the database and its schema (castor app:db:schema)
         ['bin/console', 'doctrine:schema:validate'],

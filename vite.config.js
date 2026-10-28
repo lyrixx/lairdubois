@@ -192,7 +192,7 @@ const scripts = {
     'values': [
         `${ASSETS}/js/ladb/ladb-values.js`,
     ],
-    // {{ ws_client() }} of GosWebSocketBundle (app/Resources/GosWebSocketBundle/views/client.html.twig)
+    // {{ ws_client() }} of GosWebSocketBundle (templates/bundles/GosWebSocketBundle/client.html.twig)
     'websocket': [
         'vendor/gos/web-socket-bundle/Resources/public/js/vendor/autobahn.min.js',
         'vendor/gos/web-socket-bundle/Resources/public/js/gos_web_socket_client.js',
