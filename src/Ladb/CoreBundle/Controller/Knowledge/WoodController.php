@@ -315,8 +315,8 @@ class WoodController extends AbstractController {
 					case 'rejected':
 
 						$filter = new \Elastica\Query\BoolQuery();
-						$filter->addShould(new \Elastica\Query\Range('nameRejected', array( 'gte' => 1 )));
-						$filter->addShould(new \Elastica\Query\Range('grainRejected', array( 'gte' => 1 )));
+						$filter->addShould(new \Elastica\Query\Range('nameRejected', array( 'gte' => true )));
+						$filter->addShould(new \Elastica\Query\Range('grainRejected', array( 'gte' => true )));
 						$filters[] = $filter;
 
 						$noGlobalFilters = true;
@@ -383,8 +383,8 @@ class WoodController extends AbstractController {
 			},
 			function(&$filters) {
 
-				$filters[] = new \Elastica\Query\Range('nameRejected', array( 'lt' => 1 ));
-				$filters[] = new \Elastica\Query\Range('grainRejected', array( 'lt' => 1 ));
+				$filters[] = new \Elastica\Query\Range('nameRejected', array( 'lt' => true ));
+				$filters[] = new \Elastica\Query\Range('grainRejected', array( 'lt' => true ));
 
 			},
 			'fos_elastica.index.knowledge_wood',

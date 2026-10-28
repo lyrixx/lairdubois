@@ -270,8 +270,8 @@ class ToolController extends AbstractController {
 					case 'rejected':
 
 						$filter = new \Elastica\Query\BoolQuery();
-						$filter->addShould(new \Elastica\Query\Range('nameRejected', array( 'gte' => 1 )));
-						$filter->addShould(new \Elastica\Query\Range('photoRejected', array( 'gte' => 1 )));
+						$filter->addShould(new \Elastica\Query\Range('nameRejected', array( 'gte' => true )));
+						$filter->addShould(new \Elastica\Query\Range('photoRejected', array( 'gte' => true )));
 						$filters[] = $filter;
 
 						$noGlobalFilters = true;
@@ -334,8 +334,8 @@ class ToolController extends AbstractController {
 			},
 			function(&$filters) {
 
-				$filters[] = new \Elastica\Query\Range('nameRejected', array( 'lt' => 1 ));
-				$filters[] = new \Elastica\Query\Range('photoRejected', array( 'lt' => 1 ));
+				$filters[] = new \Elastica\Query\Range('nameRejected', array( 'lt' => true ));
+				$filters[] = new \Elastica\Query\Range('photoRejected', array( 'lt' => true ));
 
 			},
 			'fos_elastica.index.knowledge_tool',

@@ -509,14 +509,14 @@ class HowtoController extends AbstractHowtoBasedController {
 
 					case 'wip':
 
-						$filter = new \Elastica\Query\Range('isWorkInProgress', array( 'gt' => 0 ));
+						$filter = new \Elastica\Query\Range('isWorkInProgress', array( 'gt' => false ));
 						$filters[] = $filter;
 
 						break;
 
 					case 'with-spotlight':
 
-						$filter = new \Elastica\Query\Range('withEnabledSpotlight', array( 'gt' => 0 ));
+						$filter = new \Elastica\Query\Range('withEnabledSpotlight', array( 'gt' => false ));
 						$filters[] = $filter;
 
 						break;

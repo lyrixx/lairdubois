@@ -271,28 +271,28 @@ class ProviderController extends AbstractController {
 
 					case 'in-store-selling':
 
-						$filter = new \Elastica\Query\Range('inStoreSelling', array( 'gte' => 1 ));
+						$filter = new \Elastica\Query\Range('inStoreSelling', array( 'gte' => true ));
 						$filters[] = $filter;
 
 						break;
 
 					case 'mail-order-selling':
 
-						$filter = new \Elastica\Query\Range('mailOrderSelling', array( 'gte' => 1 ));
+						$filter = new \Elastica\Query\Range('mailOrderSelling', array( 'gte' => true ));
 						$filters[] = $filter;
 
 						break;
 
 					case 'sale-to-individuals':
 
-						$filter = new \Elastica\Query\Range('saleToIndividuals', array( 'gte' => 1 ));
+						$filter = new \Elastica\Query\Range('saleToIndividuals', array( 'gte' => true ));
 						$filters[] = $filter;
 
 						break;
 
 					case 'pro-only':
 
-						$filter = new \Elastica\Query\Range('saleToIndividuals', array( 'lt' => 1 ));
+						$filter = new \Elastica\Query\Range('saleToIndividuals', array( 'lt' => true ));
 						$filters[] = $filter;
 
 						break;
@@ -355,7 +355,7 @@ class ProviderController extends AbstractController {
 
 					case 'rejected':
 
-						$filter = new \Elastica\Query\Range('signRejected', array( 'gte' => 1 ));
+						$filter = new \Elastica\Query\Range('signRejected', array( 'gte' => true ));
 						$filters[] = $filter;
 
 						$noGlobalFilters = true;
@@ -414,7 +414,7 @@ class ProviderController extends AbstractController {
 			},
 			function(&$filters) {
 
-				$filters[] = new \Elastica\Query\Range('signRejected', array( 'lt' => 1 ));
+				$filters[] = new \Elastica\Query\Range('signRejected', array( 'lt' => true ));
 
 			},
 			'fos_elastica.index.knowledge_provider',

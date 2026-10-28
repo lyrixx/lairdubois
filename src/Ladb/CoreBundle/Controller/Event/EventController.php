@@ -378,16 +378,16 @@ class EventController extends AbstractController {
 
 					case 'active':
 
-						$filters[] = new \Elastica\Query\Range('cancelled', array('lt' => 1));
+						$filters[] = new \Elastica\Query\Range('cancelled', array('lt' => true));
 
 						break;
 
 					case 'status':
 
 						if ($facet->value == 'cancelled') {
-							$filters[] = new \Elastica\Query\Range('cancelled', array('gte' => 1));
+							$filters[] = new \Elastica\Query\Range('cancelled', array('gte' => true));
 						} else {
-							$filters[] = new \Elastica\Query\Range('cancelled', array('lt' => 1));
+							$filters[] = new \Elastica\Query\Range('cancelled', array('lt' => true));
 							switch ($facet->value) {
 								case 'scheduled':
 									$filters[] = new \Elastica\Query\Range('startAt', array('gte' => 'now'));

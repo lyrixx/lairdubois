@@ -266,8 +266,8 @@ class SoftwareController extends AbstractController {
 					case 'rejected':
 
 						$filter = new \Elastica\Query\BoolQuery();
-						$filter->addShould(new \Elastica\Query\Range('identityRejected', array( 'gte' => 1 )));
-						$filter->addShould(new \Elastica\Query\Range('iconRejected', array( 'gte' => 1 )));
+						$filter->addShould(new \Elastica\Query\Range('identityRejected', array( 'gte' => true )));
+						$filter->addShould(new \Elastica\Query\Range('iconRejected', array( 'gte' => true )));
 						$filters[] = $filter;
 
 						$noGlobalFilters = true;
@@ -326,8 +326,8 @@ class SoftwareController extends AbstractController {
 			},
 			function(&$filters) {
 
-				$filters[] = new \Elastica\Query\Range('identityRejected', array( 'lt' => 1 ));
-				$filters[] = new \Elastica\Query\Range('iconRejected', array( 'lt' => 1 ));
+				$filters[] = new \Elastica\Query\Range('identityRejected', array( 'lt' => true ));
+				$filters[] = new \Elastica\Query\Range('iconRejected', array( 'lt' => true ));
 
 			},
 			'fos_elastica.index.knowledge_software',

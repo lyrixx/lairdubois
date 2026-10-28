@@ -44,7 +44,9 @@ x-templates:
             - worker
 
 volumes:
-    elasticsearch-data: {}
+    # One per major version: Elasticsearch does not start on the data of an older one, the
+    # indexes come from the database (castor app:elasticsearch:populate)
+    elasticsearch-7-data: {}
     mariadb-data: {}
     rabbitmq-data: {}
 
@@ -64,17 +66,19 @@ services:
             - default
 
     elasticsearch:
-        image: elasticsearch:5.6.16-alpine
+        image: elasticsearch:7.17.28
         environment:
-            # Transport bound to the loopback: development mode, the bootstrap checks
-            # (vm.max_map_count...) only warn instead of failing
-            - transport.host=127.0.0.1
-            - http.host=0.0.0.0
+            # A single node: no bootstrap checks (vm.max_map_count...)
+            - discovery.type=single-node
+            # No TLS nor password, as on the production server, where it only listens on 127.0.0.1
+            - xpack.security.enabled=false
+            # No download of the GeoIP databases of the ingest pipelines, which the site does not use
+            - ingest.geoip.downloader.enabled=false
             - ES_JAVA_OPTS=-Xms512m -Xmx512m
         volumes:
-            - elasticsearch-data:/usr/share/elasticsearch/data
+            - elasticsearch-7-data:/usr/share/elasticsearch/data
         healthcheck:
-            test: ["CMD-SHELL", "wget -q -O - 'http://127.0.0.1:9200/_cluster/health?wait_for_status=yellow&timeout=5s' > /dev/null"]
+            test: ["CMD-SHELL", "curl -fs 'http://127.0.0.1:9200/_cluster/health?wait_for_status=yellow&timeout=5s' > /dev/null"]
             interval: 5s
             timeout: 10s
             retries: 30

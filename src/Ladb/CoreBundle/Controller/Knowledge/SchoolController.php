@@ -311,7 +311,7 @@ class SchoolController extends AbstractController {
 
 					case 'rejected':
 
-						$filter = new \Elastica\Query\Range('nameRejected', array( 'gte' => 1 ));
+						$filter = new \Elastica\Query\Range('nameRejected', array( 'gte' => true ));
 						$filters[] = $filter;
 
 						$noGlobalFilters = true;
@@ -366,7 +366,7 @@ class SchoolController extends AbstractController {
 			},
 			function(&$filters) {
 
-				$filters[] = new \Elastica\Query\Range('nameRejected', array( 'lt' => 1 ));
+				$filters[] = new \Elastica\Query\Range('nameRejected', array( 'lt' => true ));
 
 			},
 			'fos_elastica.index.knowledge_school',

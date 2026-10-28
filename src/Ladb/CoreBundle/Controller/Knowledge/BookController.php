@@ -237,7 +237,7 @@ class BookController extends AbstractController {
 
 					case 'public-domain':
 
-						$filter = new \Elastica\Query\Range('publicDomain', array( 'gt' => 0 ));
+						$filter = new \Elastica\Query\Range('publicDomain', array( 'gt' => false ));
 						$filters[] = $filter;
 
 						break;
@@ -252,8 +252,8 @@ class BookController extends AbstractController {
 					case 'rejected':
 
 						$filter = new \Elastica\Query\BoolQuery();
-						$filter->addShould(new \Elastica\Query\Range('identityRejected', array( 'gte' => 1 )));
-						$filter->addShould(new \Elastica\Query\Range('coverRejected', array( 'gte' => 1 )));
+						$filter->addShould(new \Elastica\Query\Range('identityRejected', array( 'gte' => true )));
+						$filter->addShould(new \Elastica\Query\Range('coverRejected', array( 'gte' => true )));
 						$filters[] = $filter;
 
 						$noGlobalFilters = true;
@@ -312,8 +312,8 @@ class BookController extends AbstractController {
 			},
 			function(&$filters) {
 
-				$filters[] = new \Elastica\Query\Range('identityRejected', array( 'lt' => 1 ));
-				$filters[] = new \Elastica\Query\Range('coverRejected', array( 'lt' => 1 ));
+				$filters[] = new \Elastica\Query\Range('identityRejected', array( 'lt' => true ));
+				$filters[] = new \Elastica\Query\Range('coverRejected', array( 'lt' => true ));
 
 			},
 			'fos_elastica.index.knowledge_book',

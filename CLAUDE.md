@@ -88,7 +88,9 @@ Ordre :
    - 5.4 : FOSUserBundle → sécurité native, Gos WebSocket → Mercure, RabbitMqBundle → Messenger,
      Swiftmailer → Mailer (`DkimSigner` de Mime 5.2, spool par Messenger, #19).
    - 6.4 : annotations → attributs, fin de SensioFrameworkExtraBundle.
-   - Elasticsearch 5 → version supportée, à part, quand ça arrange (réindexation depuis la base).
+   - Elasticsearch 5 → 9 (#31), réindexation depuis la base : 7.17 en Docker et en CI dès la 4.4
+     (FOSElasticaBundle 6.3), 9 après le saut en 6.4 (FOSElasticaBundle 7, #161), seul livré en
+     prod. Aucune version de FOSElasticaBundle ne parle ES 8 ou 9 avant Symfony 6.4.
 
 ## Environnement
 
@@ -136,7 +138,8 @@ Contextes : `--context=test` (`SYMFONY_ENV=test`), `--context=ci` (le même, san
   `config.yml`, `json_manifest_path`). Un fichier LESS ou JS ajouté à un groupe va dans
   `vite.config.js`. Le dev sert le build : `castor app:assets:watch` pendant qu'on modifie un
   LESS ou un JS, pas de serveur de Vite.
-- MariaDB 10.11 (`root`/`app`), Elasticsearch 5.6, RabbitMQ 3.13 (`app`/`app`), Memcached. Workers
+- MariaDB 10.11 (`root`/`app`), Elasticsearch 7.17 (un nœud, sans sécurité, un volume par version
+  majeure), RabbitMQ 3.13 (`app`/`app`), Memcached. Workers
   (profil `worker`) : les deux de Messenger (`messenger:consume view`, `messenger:consume
   webpush_notification`). Extension PHP `amqp` dans les images, pour le transport AMQP de Messenger.
 - Hub Mercure (service `mercure`, profil `default`, #21) : l'image `dunglas/mercure`, en HTTP
@@ -621,7 +624,18 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   8.5.
 - `ruflin/elastica` déclare `Elastica\Query\Match` jusqu'en 6.1 : `match` est un mot réservé depuis
   PHP 8, d'où une erreur de parsing (500) dès qu'une page avec des tags cherche des contenus
-  similaires. Passé en 6.2, utiliser `Elastica\Query\MatchQuery`.
+  similaires. Utiliser `Elastica\Query\MatchQuery`.
+- Elasticsearch 7 (#31) :
+  - il ne compte exactement les résultats que jusqu'à 10 000 : `SearchUtils` demande le total exact
+    (`track_total_hits`), dont dépendent les compteurs et la pagination ;
+  - Elastica 7 type ses paramètres : `FunctionScore::setRandomScore()` n'accepte qu'un entier, alors
+    que la graine du tri aléatoire du site est une chaîne (`Math.random().toString(36)`) :
+    `SearchUtils` écrit le `random_score` lui-même ;
+  - le filtre `nGram` s'écrit `ngram`, et un écart de plus de 1 entre `min_gram` et `max_gram`
+    demande `index.max_ngram_diff`.
+- Un index par type (#31) : ES ne trie pas sur un champ absent du mapping de l'index (500), alors
+  que l'index unique d'avant partageait le mapping de tous les types. Un champ de tri va dans le
+  mapping de chaque type qui le propose.
 - `--context=test` et `--context=ci` visent la base et l'index de test (`config_test.yml`), pas ceux
   du dev : la CI charge les fixtures avec `castor app:db:fixtures` dans son contexte.
 - Une action qui finit par `exit(0)` (`PictureController::uploadAction()`,
