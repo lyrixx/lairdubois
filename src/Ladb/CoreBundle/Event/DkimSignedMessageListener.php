@@ -11,12 +11,9 @@ use Symfony\Component\Mime\Crypto\DkimSigner;
  * message stays an Email, that the tests and the profiler read. Symfony 7.3 has its own listener
  * (framework.mailer.dkim_signer), which signs the queued message too.
  */
-final class DkimSignedMessageListener implements EventSubscriberInterface {
+final readonly class DkimSignedMessageListener implements EventSubscriberInterface {
 
-	private $signer;
-
-	public function __construct(DkimSigner $signer) {
-		$this->signer = $signer;
+	public function __construct(private DkimSigner $signer) {
 	}
 
 	public static function getSubscribedEvents(): array {
