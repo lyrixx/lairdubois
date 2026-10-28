@@ -316,7 +316,7 @@ class BookController extends AbstractController {
 				$filters[] = new \Elastica\Query\Range('coverRejected', array( 'lt' => 1 ));
 
 			},
-			'fos_elastica.index.ladb.knowledge_book',
+			'fos_elastica.index.knowledge_book',
 			\Ladb\CoreBundle\Entity\Knowledge\Book::CLASS_NAME,
 			'core_book_list_page'
 		);
@@ -356,7 +356,7 @@ class BookController extends AbstractController {
 		// Dispatch publication event
 		$dispatcher->dispatch(new PublicationEvent($book), PublicationListener::PUBLICATION_SHOWN);
 
-		$searchableVolumeCount = $searchUtils->searchEntitiesCount(array( new \Elastica\Query\MatchQuery('work', $book->getWork()) ), 'fos_elastica.index.ladb.knowledge_book');
+		$searchableVolumeCount = $searchUtils->searchEntitiesCount(array( new \Elastica\Query\MatchQuery('work', $book->getWork()) ), 'fos_elastica.index.knowledge_book');
 
 		return array(
 			'book'                  => $book,

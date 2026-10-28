@@ -369,7 +369,7 @@ class SchoolController extends AbstractController {
 				$filters[] = new \Elastica\Query\Range('nameRejected', array( 'lt' => 1 ));
 
 			},
-			'fos_elastica.index.ladb.knowledge_school',
+			'fos_elastica.index.knowledge_school',
 			\Ladb\CoreBundle\Entity\Knowledge\School::CLASS_NAME,
 			'core_school_list_page',
 			$routeParameters

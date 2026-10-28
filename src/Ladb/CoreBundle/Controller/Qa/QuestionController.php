@@ -530,7 +530,7 @@ class QuestionController extends AbstractController {
 				$this->pushGlobalVisibilityFilter($filters, true, true);
 
 			},
-			'fos_elastica.index.ladb.qa_question',
+			'fos_elastica.index.qa_question',
 			\Ladb\CoreBundle\Entity\Qa\Question::CLASS_NAME,
 			'core_qa_question_list_page',
 			$routeParameters
@@ -726,7 +726,7 @@ class QuestionController extends AbstractController {
 		}
 
 		$userQuestions = $explorableUtils->getPreviousAndNextPublishedUserExplorables($question, $questionRepository, $question->getUser()->getMeta()->getPublicQuestionCount());
-		$similarQuestions = $explorableUtils->getSimilarExplorables($question, 'fos_elastica.index.ladb.qa_question', Question::CLASS_NAME, $userQuestions);
+		$similarQuestions = $explorableUtils->getSimilarExplorables($question, 'fos_elastica.index.qa_question', Question::CLASS_NAME, $userQuestions);
 
 		// Dispatch publication event
 		$dispatcher->dispatch(new PublicationEvent($question), PublicationListener::PUBLICATION_SHOWN);

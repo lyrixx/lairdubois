@@ -298,16 +298,17 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
 (`tests/Smoke/`…), lancés par `castor qa:phpunit [-- --filter …]`.
 
 - Base et index propres à l'environnement `test` (`config_test.yml`) : `db_fr_lairdubois_www_test`
-  et `ladb_test`, chargés avec les fixtures. `qa:phpunit` les charge s'ils sont vides, `castor -c
+  et les index `ladb_test_<type>`, chargés avec les fixtures. `qa:phpunit` les charge s'ils sont vides, `castor -c
   test app:db:fixtures` les recharge. Les données de dev ne bougent pas.
 - Chaque test tourne dans une transaction annulée à sa fin (`dama/doctrine-test-bundle`, extension
   PHPUnit de `phpunit.xml.dist`), y compris à travers les reboots du kernel entre deux requêtes :
   un test crée, modifie et supprime sans nettoyer derrière lui. Les ids créés par un test ne
   reviennent pas (l'`AUTO_INCREMENT` d'InnoDB n'est pas annulé).
 - Ce qui n'est pas en base n'est pas annulé, `Tests\WebTestCase` s'en charge :
-  - l'index : quand les tests d'une classe l'ont modifié (publication, suppression…), il est
-    rempli à nouveau depuis la base après le dernier (`fos:elastica:populate`, quelques secondes).
-    Entre deux tests de la classe, il est seulement rafraîchi (`refresh`) : un test voit les
+  - les index : quand les tests d'une classe en ont modifié un (publication, suppression…), il est
+    rempli à nouveau depuis la base après le dernier (`fos:elastica:populate --index`, une
+    seconde). Entre deux tests de la classe, ils sont seulement rafraîchis (`refresh`,
+    `static::getIndexes()` : tous les index en une requête) : un test voit les
     écritures des précédents, toutes, quel que soit le temps écoulé. Un résultat de recherche peut
     donc dépendre de l'ordre des tests de la classe ;
   - `uploads/`, partagé avec le dev : un fichier qu'un test supprime (images d'un contenu supprimé,
@@ -532,7 +533,7 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   port : dans un worktree, passer directement par le port HTTPS.
 - `web/app_dev.php` refuse les requêtes non locales ou qui passent par un proxy : le nginx de
   Docker les lui présente comme locales, `getClientIp()` vaut donc toujours `127.0.0.1` en dev.
-- Sans index Elasticsearch, la page d'accueil répond 500 (`no such index [ladb]`) :
+- Sans index Elasticsearch, la page d'accueil répond 500 (`no such index [ladb_…]`) :
   `castor app:elasticsearch:populate`.
 - Le hub Mercure reste en 0.24 tant que `symfony/mercure-bundle` est en 0.3 (`symfony/mercure`
   0.6, protocole 0.x : claim `mercure`, cookie `mercureAuthorization`, `topic=`). La 1.x change
@@ -602,8 +603,9 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   vérifie le manager de chaque type.
 - Utils : dépendances et paramètres par le constructeur (`Utils/`, sans container). `ViewableUtils`
   et `WebpushNotificationUtils` envoient leurs messages par le bus de Messenger et journalisent un
-  échec d'envoi (`TransportException`, RabbitMQ injoignable) au lieu de le lever. `SearchUtils` reçoit un type par l'id de son service
-  (`fos_elastica.index.ladb.<type>`) et le demande à l'index.
+  échec d'envoi (`TransportException`, RabbitMQ injoignable) au lieu de le lever. `SearchUtils` reçoit un index par l'id de son service
+  (`fos_elastica.index.<type>`) : un index par type de contenu (#31), `ladb_<type>` dans
+  Elasticsearch (`elasticsearch_index_prefix`).
 - Managers : dépendances par le constructeur (`Manager/`, sans container). Les classes abstraites
   (`AbstractManager`, `AbstractPublicationManager`…) les reçoivent par des setters `@required`,
   dans des propriétés protégées que leurs sous-classes lisent sans les redemander : le

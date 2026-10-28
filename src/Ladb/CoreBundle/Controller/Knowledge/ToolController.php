@@ -338,7 +338,7 @@ class ToolController extends AbstractController {
 				$filters[] = new \Elastica\Query\Range('photoRejected', array( 'lt' => 1 ));
 
 			},
-			'fos_elastica.index.ladb.knowledge_tool',
+			'fos_elastica.index.knowledge_tool',
 			\Ladb\CoreBundle\Entity\Knowledge\Tool::CLASS_NAME,
 			'core_tool_list_page'
 		);
@@ -378,8 +378,8 @@ class ToolController extends AbstractController {
 		// Dispatch publication event
 		$dispatcher->dispatch(new PublicationEvent($tool), PublicationListener::PUBLICATION_SHOWN);
 
-		$searchableBrotherCount = $searchUtils->searchEntitiesCount(array( new \Elastica\Query\MatchQuery('nameKeyword', $tool->getName()) ), 'fos_elastica.index.ladb.knowledge_tool');
-		$searchableCreationCount = $searchUtils->searchEntitiesCount(array( $elasticaQueryUtils->createShouldMatchPhraseQuery('tools.label', $tool->getTitle()) ), 'fos_elastica.index.ladb.wonder_creation');
+		$searchableBrotherCount = $searchUtils->searchEntitiesCount(array( new \Elastica\Query\MatchQuery('nameKeyword', $tool->getName()) ), 'fos_elastica.index.knowledge_tool');
+		$searchableCreationCount = $searchUtils->searchEntitiesCount(array( $elasticaQueryUtils->createShouldMatchPhraseQuery('tools.label', $tool->getTitle()) ), 'fos_elastica.index.wonder_creation');
 
 		return array(
 			'tool'                    => $tool,

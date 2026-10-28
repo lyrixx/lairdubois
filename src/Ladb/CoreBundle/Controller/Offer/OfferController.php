@@ -533,7 +533,7 @@ class OfferController extends AbstractController {
 				$this->pushGlobalVisibilityFilter($filters, true, true);
 
 			},
-			'fos_elastica.index.ladb.offer_offer',
+			'fos_elastica.index.offer_offer',
 			\Ladb\CoreBundle\Entity\Offer\Offer::CLASS_NAME,
 			'core_offer_list_page'
 		);
@@ -610,7 +610,7 @@ class OfferController extends AbstractController {
 		$dispatcher->dispatch(new PublicationEvent($offer), PublicationListener::PUBLICATION_SHOWN);
 
 		$userOffers = $explorableUtils->getPreviousAndNextPublishedUserExplorables($offer, $offerRepository, $offer->getUser()->getMeta()->getPublicOfferCount());
-		$similarOffers = $explorableUtils->getSimilarExplorables($offer, 'fos_elastica.index.ladb.offer_offer', Offer::CLASS_NAME, $userOffers, 2, array( new \Elastica\Query\Term(array( 'kind' => $offer->getKind() )), new \Elastica\Query\Term(array( 'category' => $offer->getCategory() )) ));
+		$similarOffers = $explorableUtils->getSimilarExplorables($offer, 'fos_elastica.index.offer_offer', Offer::CLASS_NAME, $userOffers, 2, array( new \Elastica\Query\Term(array( 'kind' => $offer->getKind() )), new \Elastica\Query\Term(array( 'category' => $offer->getCategory() )) ));
 
 		$hasMap = !is_null($offer->getLatitude()) && !is_null($offer->getLongitude());
 

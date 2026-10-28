@@ -4,7 +4,7 @@ namespace Ladb\CoreBundle\Utils;
 
 use Doctrine\Persistence\ManagerRegistry;
 use Elastica\Document;
-use FOS\ElasticaBundle\Elastica\Index;
+use FOS\ElasticaBundle\Index\IndexManager;
 use FOS\ElasticaBundle\Persister\PersisterRegistry;
 use Ladb\CoreBundle\Entity\Stats\Search;
 use Psr\Log\LoggerInterface;
@@ -18,20 +18,20 @@ class SearchUtils {
 
 	const NAME = 'ladb_core.search_utils';
 
-	// The callers give a type by the id of its service, that the index creates (getType())
-	const TYPE_SERVICE_ID_PREFIX = 'fos_elastica.index.ladb.';
+	// The callers give an index by the id of its service: one index per type of content (#31)
+	const INDEX_SERVICE_ID_PREFIX = 'fos_elastica.index.';
 
 	private $doctrine;
 	private $globalUtils;
-	private $index;
+	private $indexManager;
 	private $logger;
 	private $paginatorUtils;
 	private $persisterRegistry;
 
-	public function __construct(ManagerRegistry $doctrine, GlobalUtils $globalUtils, Index $index, LoggerInterface $logger, PaginatorUtils $paginatorUtils, PersisterRegistry $persisterRegistry) {
+	public function __construct(ManagerRegistry $doctrine, GlobalUtils $globalUtils, IndexManager $indexManager, LoggerInterface $logger, PaginatorUtils $paginatorUtils, PersisterRegistry $persisterRegistry) {
 		$this->doctrine = $doctrine;
 		$this->globalUtils = $globalUtils;
-		$this->index = $index;
+		$this->indexManager = $indexManager;
 		$this->logger = $logger;
 		$this->paginatorUtils = $paginatorUtils;
 		$this->persisterRegistry = $persisterRegistry;
@@ -42,18 +42,19 @@ class SearchUtils {
 	private function _getObjectPersister($entity) {
 		$classname = strtolower(get_class($entity));
 		if (preg_match('@\\\\([\w]+)\\\\([\w]+)$@', $classname, $matches)) {
-			$familyName = $matches[1];
-			$typeName = $matches[2];
-			return $this->persisterRegistry->getPersister('ladb', $familyName.'_'.$typeName);
+			$indexName = $matches[1].'_'.$matches[2];
+			return $this->persisterRegistry->getPersister($indexName, $indexName);
 		}
 		return null;
 	}
 
-	private function _getType($typeName) {
-		if (0 !== strpos($typeName, self::TYPE_SERVICE_ID_PREFIX)) {
-			throw new \LogicException(sprintf('"%s" is not the id of a type of the index.', $typeName));
+	private function _getType($indexServiceId) {
+		if (0 !== strpos($indexServiceId, self::INDEX_SERVICE_ID_PREFIX)) {
+			throw new \LogicException(sprintf('"%s" is not the id of an index.', $indexServiceId));
 		}
-		return $this->index->getType(substr($typeName, strlen(self::TYPE_SERVICE_ID_PREFIX)));
+		// The index has a single type, of its name
+		$name = substr($indexServiceId, strlen(self::INDEX_SERVICE_ID_PREFIX));
+		return $this->indexManager->getIndex($name)->getType($name);
 	}
 
 	private function _logSearch($context, $query, $totalHits) {
@@ -127,7 +128,7 @@ class SearchUtils {
 
 	/////
 
-	public function searchEntitiesCount($filters, $typeName, $excludedIds = null) {
+	public function searchEntitiesCount($filters, $indexServiceId, $excludedIds = null) {
 
 		$sort = null;
 		$elasticaQuery = $this->_buildElasticaQuery($filters, $sort, 0, 0, $excludedIds);
@@ -136,7 +137,7 @@ class SearchUtils {
 		}
 
 		// Count
-		$type = $this->_getType($typeName);
+		$type = $this->_getType($indexServiceId);
 		try {
 			$resultSet = $type->search($elasticaQuery);
 			$count = $resultSet->getTotalHits();
@@ -192,7 +193,7 @@ class SearchUtils {
 		return $elasticaQuery;
 	}
 
-	public function searchPaginedEntities(Request $request, $page, $queryCallback, $defaultsCallBack, $globalFiltersCallBack, $typeName, $entityClassName, $route, $parameters = array(), $excludedIds = null) {
+	public function searchPaginedEntities(Request $request, $page, $queryCallback, $defaultsCallBack, $globalFiltersCallBack, $indexServiceId, $entityClassName, $route, $parameters = array(), $excludedIds = null) {
 
 		// Parse request
 		$queryParameters = $this->_parseQueryRequest($request);
@@ -235,7 +236,7 @@ class SearchUtils {
 		$limit = $this->paginatorUtils->computePaginatorLimit($page);
 
 		// Search entities
-		$searchResult = $this->searchEntities($filters, $sort, $typeName, $entityClassName, $offset, $limit, $excludedIds);
+		$searchResult = $this->searchEntities($filters, $sort, $indexServiceId, $entityClassName, $offset, $limit, $excludedIds);
 
 		if (is_null($route) || is_null($searchResult->resultSet)) {
 			$pageUrls = new \stdClass();
@@ -324,7 +325,7 @@ class SearchUtils {
 		);
 	}
 
-	public function searchEntities(&$filters, &$sort, $typeName, $entityClassName, $offset, $limit, $excludedIds = null) {
+	public function searchEntities(&$filters, &$sort, $indexServiceId, $entityClassName, $offset, $limit, $excludedIds = null) {
 
 		$result = new \stdClass();
 		$result->resultSet = null;
@@ -336,7 +337,7 @@ class SearchUtils {
 		}
 
 		// Search
-		$type = $this->_getType($typeName);
+		$type = $this->_getType($indexServiceId);
 		$resultSet = $type->search($elasticaQuery);
 
 		// Extract Ids

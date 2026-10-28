@@ -408,7 +408,7 @@ class QuestionController extends AbstractController {
 				$this->pushGlobalVisibilityFilter($filters, true, true);
 
 			},
-			'fos_elastica.index.ladb.faq_question',
+			'fos_elastica.index.faq_question',
 			\Ladb\CoreBundle\Entity\Faq\Question::CLASS_NAME,
 			'core_faq_question_list_page'
 		);
@@ -449,7 +449,7 @@ class QuestionController extends AbstractController {
 		}
 		$this->assertShowable($question);
 
-		$similarQuestions = $explorableUtils->getSimilarExplorables($question, 'fos_elastica.index.ladb.faq_question', Question::CLASS_NAME, null, 10);
+		$similarQuestions = $explorableUtils->getSimilarExplorables($question, 'fos_elastica.index.faq_question', Question::CLASS_NAME, null, 10);
 
 		// Dispatch publication event
 		$dispatcher->dispatch(new PublicationEvent($question), PublicationListener::PUBLICATION_SHOWN);

@@ -544,7 +544,7 @@ class EventController extends AbstractController {
 				$this->pushGlobalVisibilityFilter($filters, true, true);
 
 			},
-			'fos_elastica.index.ladb.event_event',
+			'fos_elastica.index.event_event',
 			\Ladb\CoreBundle\Entity\Event\Event::CLASS_NAME,
 			'core_event_list_page'
 		);
@@ -634,7 +634,7 @@ class EventController extends AbstractController {
 		$dispatcher->dispatch(new PublicationEvent($event), PublicationListener::PUBLICATION_SHOWN);
 
 		$userEvents = $explorableUtils->getPreviousAndNextPublishedUserExplorables($event, $eventRepository, $event->getUser()->getMeta()->getPublicEventCount());
-		$similarEvents = $explorableUtils->getSimilarExplorables($event, 'fos_elastica.index.ladb.event_event', Event::CLASS_NAME, $userEvents);
+		$similarEvents = $explorableUtils->getSimilarExplorables($event, 'fos_elastica.index.event_event', Event::CLASS_NAME, $userEvents);
 
 		if ($event instanceof LocalisableInterface) {
 			$hasMap = !is_null($event->getLatitude()) && !is_null($event->getLongitude());

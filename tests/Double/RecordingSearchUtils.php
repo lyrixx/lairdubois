@@ -13,23 +13,23 @@ final class RecordingSearchUtils extends SearchUtils
     /** @var list<array{string, string, list<int>, int}> */
     private array $searches = [];
 
-    public function searchEntitiesCount($filters, $typeName, $excludedIds = null)
+    public function searchEntitiesCount($filters, $indexServiceId, $excludedIds = null)
     {
-        $count = parent::searchEntitiesCount($filters, $typeName, $excludedIds);
-        $this->searches[] = [$this->getTypeName($typeName), 'count', [], $count];
+        $count = parent::searchEntitiesCount($filters, $indexServiceId, $excludedIds);
+        $this->searches[] = [$this->getIndexName($indexServiceId), 'count', [], $count];
 
         return $count;
     }
 
-    public function searchEntities(&$filters, &$sort, $typeName, $entityClassName, $offset, $limit, $excludedIds = null)
+    public function searchEntities(&$filters, &$sort, $indexServiceId, $entityClassName, $offset, $limit, $excludedIds = null)
     {
-        $result = parent::searchEntities($filters, $sort, $typeName, $entityClassName, $offset, $limit, $excludedIds);
+        $result = parent::searchEntities($filters, $sort, $indexServiceId, $entityClassName, $offset, $limit, $excludedIds);
         if (null !== $result->resultSet) {
             $ids = [];
             foreach ($result->resultSet->getResults() as $hit) {
                 $ids[] = (int) $hit->getId();
             }
-            $this->searches[] = [$this->getTypeName($typeName), self::describeSort($sort), $ids, $result->resultSet->getTotalHits()];
+            $this->searches[] = [$this->getIndexName($indexServiceId), self::describeSort($sort), $ids, $result->resultSet->getTotalHits()];
         }
 
         return $result;
@@ -46,9 +46,9 @@ final class RecordingSearchUtils extends SearchUtils
         return $this->searches;
     }
 
-    private function getTypeName(string $typeServiceId): string
+    private function getIndexName(string $indexServiceId): string
     {
-        return substr($typeServiceId, \strlen(self::TYPE_SERVICE_ID_PREFIX));
+        return substr($indexServiceId, \strlen(self::INDEX_SERVICE_ID_PREFIX));
     }
 
     private static function describeSort(?array $sort): string

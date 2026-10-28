@@ -753,7 +753,7 @@ class WorkshopController extends AbstractController {
 				$this->pushGlobalVisibilityFilter($filters, true, true);
 
 			},
-			'fos_elastica.index.ladb.wonder_workshop',
+			'fos_elastica.index.wonder_workshop',
 			\Ladb\CoreBundle\Entity\Wonder\Workshop::CLASS_NAME,
 			'core_workshop_list_page'
 		);
@@ -832,7 +832,7 @@ class WorkshopController extends AbstractController {
 		$dispatcher->dispatch(new PublicationEvent($workshop), PublicationListener::PUBLICATION_SHOWN);
 
 		$userWorkshops = $explorableUtils->getPreviousAndNextPublishedUserExplorables($workshop, $workshopRepository, $workshop->getUser()->getMeta()->getPublicWorkshopCount());
-		$similarWorkshops = $explorableUtils->getSimilarExplorables($workshop, 'fos_elastica.index.ladb.wonder_workshop', Workshop::CLASS_NAME, $userWorkshops);
+		$similarWorkshops = $explorableUtils->getSimilarExplorables($workshop, 'fos_elastica.index.wonder_workshop', Workshop::CLASS_NAME, $userWorkshops);
 
 		return array(
 			'workshop'          => $workshop,

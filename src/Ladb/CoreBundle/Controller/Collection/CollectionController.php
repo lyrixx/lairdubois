@@ -415,7 +415,7 @@ class CollectionController extends AbstractCollectionBasedController {
 				$filters[] = $filter;
 
 			},
-			'fos_elastica.index.ladb.collection_collection',
+			'fos_elastica.index.collection_collection',
 			\Ladb\CoreBundle\Entity\Collection\Collection::CLASS_NAME,
 			'core_collection_list_page'
 		);

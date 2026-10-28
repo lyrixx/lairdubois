@@ -1009,7 +1009,7 @@ class CreationController extends AbstractController {
 				$this->pushGlobalVisibilityFilter($filters, $layout != 'choice', true);
 
 			},
-			'fos_elastica.index.ladb.wonder_creation',
+			'fos_elastica.index.wonder_creation',
 			\Ladb\CoreBundle\Entity\Wonder\Creation::CLASS_NAME,
 			'core_creation_list_page',
 			$routeParameters,
@@ -1136,7 +1136,7 @@ class CreationController extends AbstractController {
 		$dispatcher->dispatch(new PublicationEvent($creation), PublicationListener::PUBLICATION_SHOWN);
 
 		$userCreations = $explorableUtils->getPreviousAndNextPublishedUserExplorables($creation, $creationRepository, $creation->getUser()->getMeta()->getPublicCreationCount());
-		$similarCreations = $explorableUtils->getSimilarExplorables($creation, 'fos_elastica.index.ladb.wonder_creation', Creation::CLASS_NAME, $userCreations);
+		$similarCreations = $explorableUtils->getSimilarExplorables($creation, 'fos_elastica.index.wonder_creation', Creation::CLASS_NAME, $userCreations);
 
 		$woodsLabels = array();
 		foreach ($creation->getWoods() as $wood) {
@@ -1149,8 +1149,8 @@ class CreationController extends AbstractController {
 		}
 		$toolsString = implode(',', $toolsLabels);
 
-		$searchableWoodCount = $searchUtils->searchEntitiesCount(array( $elasticaQueryUtils->createShouldMatchPhraseQuery('name', $woodsString) ), 'fos_elastica.index.ladb.knowledge_wood');
-		$searchableToolCount = $searchUtils->searchEntitiesCount(array( $elasticaQueryUtils->createShouldMatchPhraseQuery('name', $toolsString) ), 'fos_elastica.index.ladb.knowledge_tool');
+		$searchableWoodCount = $searchUtils->searchEntitiesCount(array( $elasticaQueryUtils->createShouldMatchPhraseQuery('name', $woodsString) ), 'fos_elastica.index.knowledge_wood');
+		$searchableToolCount = $searchUtils->searchEntitiesCount(array( $elasticaQueryUtils->createShouldMatchPhraseQuery('name', $toolsString) ), 'fos_elastica.index.knowledge_tool');
 
 		return array(
 			'creation'            => $creation,

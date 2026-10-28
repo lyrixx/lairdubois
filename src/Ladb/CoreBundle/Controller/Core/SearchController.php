@@ -59,7 +59,7 @@ class SearchController extends AbstractController {
 			},
 			null,
 			null,
-			'fos_elastica.index.ladb.core_user',
+			'fos_elastica.index.core_user',
 			\Ladb\CoreBundle\Entity\Core\User::CLASS_NAME,
 			null
 		);
@@ -84,7 +84,7 @@ class SearchController extends AbstractController {
 			},
 			null,
 			null,
-			'fos_elastica.index.ladb.core_tag',
+			'fos_elastica.index.core_tag',
 			\Ladb\CoreBundle\Entity\Core\Tag::CLASS_NAME,
 			null
 		);
@@ -109,7 +109,7 @@ class SearchController extends AbstractController {
 			},
 			null,
 			null,
-			'fos_elastica.index.ladb.input_skill',
+			'fos_elastica.index.input_skill',
 			\Ladb\CoreBundle\Entity\Input\Skill::CLASS_NAME,
 			null
 		);
@@ -134,7 +134,7 @@ class SearchController extends AbstractController {
 			},
 			null,
 			null,
-			'fos_elastica.index.ladb.input_wood',
+			'fos_elastica.index.input_wood',
 			\Ladb\CoreBundle\Entity\Input\Wood::CLASS_NAME,
 			null
 		);
@@ -159,7 +159,7 @@ class SearchController extends AbstractController {
 			},
 			null,
 			null,
-			'fos_elastica.index.ladb.input_tool',
+			'fos_elastica.index.input_tool',
 			\Ladb\CoreBundle\Entity\Input\Tool::CLASS_NAME,
 			null
 		);
@@ -184,7 +184,7 @@ class SearchController extends AbstractController {
 			},
 			null,
 			null,
-			'fos_elastica.index.ladb.input_finish',
+			'fos_elastica.index.input_finish',
 			\Ladb\CoreBundle\Entity\Input\Finish::CLASS_NAME,
 			null
 		);
@@ -209,7 +209,7 @@ class SearchController extends AbstractController {
 			},
 			null,
 			null,
-			'fos_elastica.index.ladb.input_hardware',
+			'fos_elastica.index.input_hardware',
 			\Ladb\CoreBundle\Entity\Input\Hardware::CLASS_NAME,
 			null
 		);
@@ -241,7 +241,7 @@ class SearchController extends AbstractController {
 			},
 			null,
 			null,
-			'fos_elastica.index.ladb.knowledge_software',
+			'fos_elastica.index.knowledge_software',
 			\Ladb\CoreBundle\Entity\Knowledge\Software::CLASS_NAME,
 			null
 		);

@@ -172,7 +172,7 @@ services:
   Ladb\CoreBundle\Utils\FindUtils: '@ladb_core.find_utils'
   ladb_core.search_utils:
     class: Ladb\CoreBundle\Utils\SearchUtils
-    arguments: { $index: '@fos_elastica.index.ladb', $persisterRegistry: '@fos_elastica.persister_registry' }
+    arguments: { $indexManager: '@fos_elastica.index_manager', $persisterRegistry: '@fos_elastica.persister_registry' }
   Ladb\CoreBundle\Utils\SearchUtils: '@ladb_core.search_utils'
   ladb_core.explorable_utils:
     class: Ladb\CoreBundle\Utils\ExplorableUtils

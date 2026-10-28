@@ -568,7 +568,7 @@ class HowtoController extends AbstractHowtoBasedController {
 				$this->pushGlobalVisibilityFilter($filters, $layout != 'choice', true);
 
 			},
-			'fos_elastica.index.ladb.howto_howto',
+			'fos_elastica.index.howto_howto',
 			\Ladb\CoreBundle\Entity\Howto\Howto::CLASS_NAME,
 			'core_howto_list_page',
 			$routeParameters

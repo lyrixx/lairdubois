@@ -516,7 +516,7 @@ class FindController extends AbstractController {
 				$this->pushGlobalVisibilityFilter($filters, true, true);
 
 			},
-			'fos_elastica.index.ladb.find_find',
+			'fos_elastica.index.find_find',
 			\Ladb\CoreBundle\Entity\Find\Find::CLASS_NAME,
 			'core_find_list_page'
 		);
@@ -593,7 +593,7 @@ class FindController extends AbstractController {
 		$dispatcher->dispatch(new PublicationEvent($find), PublicationListener::PUBLICATION_SHOWN);
 
 		$userFinds = $explorableUtils->getPreviousAndNextPublishedUserExplorables($find, $findRepository, $find->getUser()->getMeta()->getPublicFindCount());
-		$similarFinds = $explorableUtils->getSimilarExplorables($find, 'fos_elastica.index.ladb.find_find', Find::CLASS_NAME, $userFinds);
+		$similarFinds = $explorableUtils->getSimilarExplorables($find, 'fos_elastica.index.find_find', Find::CLASS_NAME, $userFinds);
 
 		if ($find->getContent() instanceof LocalisableInterface) {
 			$hasMap = !is_null($find->getContent()->getLatitude()) && !is_null($find->getContent()->getLongitude());
