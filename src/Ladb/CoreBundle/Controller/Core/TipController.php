@@ -23,16 +23,14 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-/**
- * @Route("/astuces")
- */
+#[Route(path: '/astuces')]
 class TipController extends AbstractController {
 
 	/**
-	 * @Route("/new", name="core_tip_new")
 	 * @Template("@LadbCore/Core/Tip/new.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_TIP')", statusCode=404, message="Not allowed (core_tip_new)")
 	 */
+	#[Route(path: '/new', name: 'core_tip_new')]
 	public function newAction() {
 
 		$tip = new Tip();
@@ -44,10 +42,10 @@ class TipController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/create", methods={"POST"}, name="core_tip_create")
 	 * @Template("@LadbCore/Core/Tip/new.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_TIP')", statusCode=404, message="Not allowed (core_tip_create)")
 	 */
+	#[Route(path: '/create', methods: ['POST'], name: 'core_tip_create')]
 	public function createAction(Request $request, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TranslatorInterface $translator) {
 
 		$this->createLock('core_tip_create', false, self::LOCK_TTL_CREATE_ACTION, false);
@@ -81,10 +79,10 @@ class TipController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_tip_edit")
 	 * @Template("@LadbCore/Core/Tip/edit.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_TIP')", statusCode=404, message="Not allowed (core_tip_edit)")
 	 */
+	#[Route(path: '/{id}/edit', requirements: ['id' => '\d+'], name: 'core_tip_edit')]
 	public function editAction($id, EntityManagerInterface $om) {
 		$tipRepository = $om->getRepository(Tip::CLASS_NAME);
 
@@ -102,10 +100,10 @@ class TipController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_tip_update")
 	 * @Template("@LadbCore/Core/Tip/edit.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_TIP')", statusCode=404, message="Not allowed (core_tip_update)")
 	 */
+	#[Route(path: '/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_tip_update')]
 	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TranslatorInterface $translator) {
 		$tipRepository = $om->getRepository(Tip::CLASS_NAME);
 
@@ -146,9 +144,9 @@ class TipController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_tip_delete")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_TIP')", statusCode=404, message="Not allowed (core_tip_delete)")
 	 */
+	#[Route(path: '/{id}/delete', requirements: ['id' => '\d+'], name: 'core_tip_delete')]
 	public function deleteAction($id, EntityManagerInterface $om, TipManager $tipManager, TranslatorInterface $translator) {
 		$tipRepository = $om->getRepository(Tip::CLASS_NAME);
 
@@ -167,10 +165,10 @@ class TipController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/", name="core_tip_list")
-	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_tip_list_page")
 	 * @Template("@LadbCore/Core/Tip/list.html.twig")
 	 */
+	#[Route(path: '/', name: 'core_tip_list')]
+	#[Route(path: '/{page}', requirements: ['page' => '\d+'], name: 'core_tip_list_page')]
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, SearchUtils $searchUtils, $page = 0) {
 
 		// Elasticsearch paginiation limit
@@ -241,9 +239,9 @@ class TipController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}.html", name="core_tip_show")
 	 * @Template("@LadbCore/Core/Tip/show.html.twig")
 	 */
+	#[Route(path: '/{id}.html', name: 'core_tip_show')]
 	public function showAction(Request $request, $id, EventDispatcherInterface $dispatcher, EntityManagerInterface $om, WitnessManager $witnessManager) {
 		$tipRepository = $om->getRepository(Tip::CLASS_NAME);
 

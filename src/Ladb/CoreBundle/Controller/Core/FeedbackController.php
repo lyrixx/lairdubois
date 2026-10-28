@@ -23,9 +23,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-/**
- * @Route("/feedbacks")
- */
+#[Route(path: '/feedbacks')]
 class FeedbackController extends AbstractController {
 
 	private function _retrieveRelatedEntity($entityType, $entityId, TypableUtils $typableUtils) {
@@ -41,11 +39,10 @@ class FeedbackController extends AbstractController {
 	}
 
 	/////
-
 	/**
-	 * @Route("/{entityType}/{entityId}/new", requirements={"entityType" = "\d+", "entityId" = "\d+"}, name="core_feedback_new")
 	 * @Template("@LadbCore/Core/Feedback/new-xhr.html.twig")
 	 */
+	#[Route(path: '/{entityType}/{entityId}/new', requirements: ['entityType' => '\d+', 'entityId' => '\d+'], name: 'core_feedback_new')]
 	public function newAction(Request $request, $entityType, $entityId, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_feedback_new)');
@@ -67,9 +64,9 @@ class FeedbackController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{entityType}/{entityId}/create",requirements={"entityType" = "\d+", "entityId" = "\d+"}, methods={"POST"}, name="core_feedback_create")
 	 * @Template("@LadbCore/Core/Feedback/new-xhr.html.twig")
 	 */
+	#[Route(path: '/{entityType}/{entityId}/create', requirements: ['entityType' => '\d+', 'entityId' => '\d+'], methods: ['POST'], name: 'core_feedback_create')]
 	public function createAction(Request $request, $entityType, $entityId, ActivityUtils $activityUtils, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FeedbackableUtils $feedbackableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, MentionUtils $mentionUtils, EntityManagerInterface $om, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_feedback_create)');
@@ -135,9 +132,9 @@ class FeedbackController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_feedback_edit")
 	 * @Template("@LadbCore/Core/Feedback/edit-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/edit', requirements: ['id' => '\d+'], name: 'core_feedback_edit')]
 	public function editAction(Request $request, $id, EntityManagerInterface $om) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_feedback_edit)');
@@ -162,9 +159,9 @@ class FeedbackController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_feedback_update")
 	 * @Template("@LadbCore/Core/Feedback/edit-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_feedback_update')]
 	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, FeedbackableUtils $feedbackableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, MentionUtils $mentionUtils, EntityManagerInterface $om, SearchUtils $searchUtils, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_feedback_update)');
@@ -217,9 +214,7 @@ class FeedbackController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_feedback_delete")
-	 */
+	#[Route(path: '/{id}/delete', requirements: ['id' => '\d+'], name: 'core_feedback_delete')]
 	public function deleteAction($id, ActivityUtils $activityUtils, FeedbackableUtils $feedbackableUtils, EntityManagerInterface $om, SearchUtils $searchUtils, TranslatorInterface $translator, TypableUtils $typableUtils) {
 		$feedbackRepository = $om->getRepository(Feedback::CLASS_NAME);
 
@@ -250,9 +245,7 @@ class FeedbackController extends AbstractController {
 		return $this->redirect($typableUtils->getUrlAction($entity));
 	}
 
-	/**
-	 * @Route("/{id}", requirements={"id" = "\d+"}, name="core_feedback_show")
-	 */
+	#[Route(path: '/{id}', requirements: ['id' => '\d+'], name: 'core_feedback_show')]
 	public function showAction(Request $request, $id, EntityManagerInterface $om, TypableUtils $typableUtils) {
 		$feedbackRepository = $om->getRepository(Feedback::CLASS_NAME);
 

@@ -35,17 +35,15 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-/**
- * @Route("/xylotheque")
- */
+#[Route(path: '/xylotheque')]
 class WoodController extends AbstractController {
 
 	use PublicationControllerTrait;
 
 	/**
-	 * @Route("/new", name="core_wood_new")
 	 * @Template("@LadbCore/Knowledge/Wood/new.html.twig")
 	 */
+	#[Route(path: '/new', name: 'core_wood_new')]
 	public function newAction(KnowledgeUtils $knowledgeUtils) {
 
 		// Exclude if user is not email confirmed
@@ -63,9 +61,9 @@ class WoodController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/create", methods={"POST"}, name="core_wood_create")
 	 * @Template("@LadbCore/Knowledge/Wood/new.html.twig")
 	 */
+	#[Route(path: '/create', methods: ['POST'], name: 'core_wood_create')]
 	public function createAction(Request $request, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, EntityManagerInterface $om, TranslatorInterface $translator) {
 
 		// Exclude if user is not email confirmed
@@ -140,9 +138,9 @@ class WoodController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_wood_delete")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_wood_delete)")
 	 */
+	#[Route(path: '/{id}/delete', requirements: ['id' => '\d+'], name: 'core_wood_delete')]
 	public function deleteAction($id, TranslatorInterface $translator, WoodManager $woodMananger) {
 
 		$wood = $this->retrievePublication($id, Wood::CLASS_NAME);
@@ -158,11 +156,11 @@ class WoodController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/textures", requirements={"id" = "\d+"}, name="core_wood_texture_list")
-	 * @Route("/{id}/textures/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_wood_texture_list_filter")
-	 * @Route("/{id}/textures/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_wood_texture_list_filter_page")
 	 * @Template("@LadbCore/Knowledge/Wood/texture-list.html.twig")
 	 */
+	#[Route(path: '/{id}/textures', requirements: ['id' => '\d+'], name: 'core_wood_texture_list')]
+	#[Route(path: '/{id}/textures/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_wood_texture_list_filter')]
+	#[Route(path: '/{id}/textures/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_wood_texture_list_filter_page')]
 	public function textureListAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $page = 0, $filter = 'all') {
 		$wood = $this->retrievePublication($id, Wood::CLASS_NAME);
 		$this->assertShowable($wood);
@@ -189,9 +187,7 @@ class WoodController extends AbstractController {
 		return $parameters;
 	}
 
-	/**
-	 * @Route("/textures/{id}/download", requirements={"id" = "\d+"}, name="core_wood_texture_download")
-	 */
+	#[Route(path: '/textures/{id}/download', requirements: ['id' => '\d+'], name: 'core_wood_texture_download')]
 	public function textureDownloadAction($id, EntityManagerInterface $om, TextureUtils $textureUtils) {
 		$textureRepository = $om->getRepository(Wood\Texture::CLASS_NAME);
 
@@ -227,9 +223,9 @@ class WoodController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/textures/{id}", requirements={"id" = "\d+"}, name="core_wood_texture_show")
 	 * @Template("@LadbCore/Knowledge/Wood/texture-show-xhr.html.twig")
 	 */
+	#[Route(path: '/textures/{id}', requirements: ['id' => '\d+'], name: 'core_wood_texture_show')]
 	public function textureShowAction(Request $request, $id, EntityManagerInterface $om) {
 		$textureRepository = $om->getRepository(Wood\Texture::CLASS_NAME);
 
@@ -244,9 +240,9 @@ class WoodController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/widget", requirements={"id" = "\d+"}, name="core_wood_widget")
 	 * @Template("@LadbCore/Knowledge/Wood/widget-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/widget', requirements: ['id' => '\d+'], name: 'core_wood_widget')]
 	public function widgetAction(Request $request, $id) {
 
 		$wood = $this->retrievePublication($id, Wood::CLASS_NAME);
@@ -257,19 +253,17 @@ class WoodController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Route("/{filter}", requirements={"filter" = "[a-z-]+"}, name="core_wood_list_filter")
-	 * @Route("/{filter}/{page}", requirements={"filter" = "[a-z-]+", "page" = "\d+"}, name="core_wood_list_filter_page")
-	 */
+	#[Route(path: '/{filter}', requirements: ['filter' => '[a-z-]+'], name: 'core_wood_list_filter')]
+	#[Route(path: '/{filter}/{page}', requirements: ['filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_wood_list_filter_page')]
 	public function goneListAction(Request $request, $filter, $page = 0) {
 		throw new \Symfony\Component\HttpKernel\Exception\GoneHttpException();
 	}
 
 	/**
-	 * @Route("/", name="core_wood_list")
-	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_wood_list_page")
 	 * @Template("@LadbCore/Knowledge/Wood/list.html.twig")
 	 */
+	#[Route(path: '/', name: 'core_wood_list')]
+	#[Route(path: '/{page}', requirements: ['page' => '\d+'], name: 'core_wood_list_page')]
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, ElasticaQueryUtils $elasticaQueryUtils, SearchUtils $searchUtils, $page = 0) {
 
 		// Elasticsearch paginiation limit
@@ -402,9 +396,9 @@ class WoodController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}.html", name="core_wood_show")
 	 * @Template("@LadbCore/Knowledge/Wood/show.html.twig")
 	 */
+	#[Route(path: '/{id}.html', name: 'core_wood_show')]
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ElasticaQueryUtils $elasticaQueryUtils, LikableUtils $likableUtils, EntityManagerInterface $om, SearchUtils $searchUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$woodRepository = $om->getRepository(Wood::CLASS_NAME);
 

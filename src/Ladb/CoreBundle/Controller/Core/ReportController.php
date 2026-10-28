@@ -12,14 +12,10 @@ use Ladb\CoreBundle\Utils\TypableUtils;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-/**
- * @Route("/reports")
- */
+#[Route(path: '/reports')]
 class ReportController extends AbstractController {
 
-	/**
-	 * @Route("/create", name="core_report_create")
-	 */
+	#[Route(path: '/create', name: 'core_report_create')]
 	public function createAction(Request $request, MailerUtils $mailerUtils, EntityManagerInterface $om, TranslatorInterface $translator, TypableUtils $typableUtils) {
 
 		$this->createLock('core_report_create', false, self::LOCK_TTL_CREATE_ACTION, false);

@@ -37,17 +37,15 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
 
-/**
- * @Route("/fournisseurs")
- */
+#[Route(path: '/fournisseurs')]
 class ProviderController extends AbstractController {
 
 	use PublicationControllerTrait;
 
 	/**
-	 * @Route("/new", name="core_provider_new")
 	 * @Template("@LadbCore/Knowledge/Provider/new.html.twig")
 	 */
+	#[Route(path: '/new', name: 'core_provider_new')]
 	public function newAction(KnowledgeUtils $knowledgeUtils) {
 
 		// Exclude if user is not email confirmed
@@ -65,9 +63,9 @@ class ProviderController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/create", methods={"POST"}, name="core_provider_create")
 	 * @Template("@LadbCore/Knowledge/Provider/new.html.twig")
 	 */
+	#[Route(path: '/create', methods: ['POST'], name: 'core_provider_create')]
 	public function createAction(Request $request, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, EntityManagerInterface $om, TranslatorInterface $translator) {
 
 		// Exclude if user is not email confirmed
@@ -139,9 +137,9 @@ class ProviderController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_provider_delete")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_provider_delete)")
 	 */
+	#[Route(path: '/{id}/delete', requirements: ['id' => '\d+'], name: 'core_provider_delete')]
 	public function deleteAction($id, ProviderManager $providerManager, TranslatorInterface $translator) {
 
 		$provider = $this->retrievePublication($id, Provider::CLASS_NAME);
@@ -157,9 +155,9 @@ class ProviderController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/location.geojson", name="core_provider_location", defaults={"_format" = "json"})
 	 * @Template("@LadbCore/Knowledge/Provider/location.geojson.twig")
 	 */
+	#[Route(path: '/{id}/location.geojson', name: 'core_provider_location', defaults: ['_format' => 'json'])]
 	public function locationAction(Request $request, $id) {
 
 		$provider = $this->retrievePublication($id, Provider::CLASS_NAME);
@@ -184,9 +182,9 @@ class ProviderController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/widget", requirements={"id" = "\d+"}, name="core_provider_widget")
 	 * @Template("@LadbCore/Knowledge/Provider/widget-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/widget', requirements: ['id' => '\d+'], name: 'core_provider_widget')]
 	public function widgetAction(Request $request, $id) {
 
 		$provider = $this->retrievePublication($id, Provider::CLASS_NAME);
@@ -198,11 +196,11 @@ class ProviderController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/", name="core_provider_list")
-	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_provider_list_page")
-	 * @Route(".geojson", defaults={"_format" = "json", "page"=-1, "layout"="geojson"}, name="core_provider_list_geojson")
 	 * @Template("@LadbCore/Knowledge/Provider/list.html.twig")
 	 */
+	#[Route(path: '/', name: 'core_provider_list')]
+	#[Route(path: '/{page}', requirements: ['page' => '\d+'], name: 'core_provider_list_page')]
+	#[Route(path: '.geojson', defaults: ['_format' => 'json', 'page' => -1, 'layout' => 'geojson'], name: 'core_provider_list_geojson')]
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, ElasticaQueryUtils $elasticaQueryUtils, LocalisableUtils $localisableUtils, SearchUtils $searchUtils, $page = 0, $layout = 'view') {
 
 		// Elasticsearch paginiation limit
@@ -472,11 +470,11 @@ class ProviderController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/creations", requirements={"id" = "\d+"}, name="core_provider_creations")
-	 * @Route("/{id}/creations/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_provider_creations_filter")
-	 * @Route("/{id}/creations/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_provider_creations_filter_page")
 	 * @Template("@LadbCore/Knowledge/Provider/creations.html.twig")
 	 */
+	#[Route(path: '/{id}/creations', requirements: ['id' => '\d+'], name: 'core_provider_creations')]
+	#[Route(path: '/{id}/creations/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_provider_creations_filter')]
+	#[Route(path: '/{id}/creations/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_provider_creations_filter_page')]
 	public function creationsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$providerRepository = $om->getRepository(Provider::CLASS_NAME);
 
@@ -511,11 +509,11 @@ class ProviderController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/pas-a-pas", requirements={"id" = "\d+"}, name="core_provider_howtos")
-	 * @Route("/{id}/pas-a-pas/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_provider_howtos_filter")
-	 * @Route("/{id}/pas-a-pas/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_provider_howtos_filter_page")
 	 * @Template("@LadbCore/Knowledge/Provider/howtos.html.twig")
 	 */
+	#[Route(path: '/{id}/pas-a-pas', requirements: ['id' => '\d+'], name: 'core_provider_howtos')]
+	#[Route(path: '/{id}/pas-a-pas/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_provider_howtos_filter')]
+	#[Route(path: '/{id}/pas-a-pas/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_provider_howtos_filter_page')]
 	public function howtosAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$providerRepository = $om->getRepository(Provider::CLASS_NAME);
 
@@ -550,9 +548,9 @@ class ProviderController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/card.xhr", name="core_provider_card")
 	 * @Template("@LadbCore/Knowledge/Provider/card-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/card.xhr', name: 'core_provider_card')]
 	public function cardAction(Request $request, $id, EntityManagerInterface $om) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_provider_card)');
@@ -573,9 +571,9 @@ class ProviderController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}.html", name="core_provider_show")
 	 * @Template("@LadbCore/Knowledge/Provider/show.html.twig")
 	 */
+	#[Route(path: '/{id}.html', name: 'core_provider_show')]
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ElasticaQueryUtils $elasticaQueryUtils, LikableUtils $likableUtils, EntityManagerInterface $om, ReviewableUtils $reviewableUtils, SearchUtils $searchUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$providerRepository = $om->getRepository(Provider::CLASS_NAME);
 

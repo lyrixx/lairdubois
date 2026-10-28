@@ -15,9 +15,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
  */
 final class ChangePasswordController extends AbstractController {
 
-	/**
-	 * @Route("/change-password", methods={"GET", "POST"}, name="fos_user_change_password")
-	 */
+	#[Route(path: '/change-password', methods: ['GET', 'POST'], name: 'fos_user_change_password')]
 	public function changePasswordAction(Request $request, FormFactoryInterface $formFactory, TranslatorInterface $translator, UserManager $userManager) {
 		$this->denyAccessUnlessGranted('IS_AUTHENTICATED_REMEMBERED');
 

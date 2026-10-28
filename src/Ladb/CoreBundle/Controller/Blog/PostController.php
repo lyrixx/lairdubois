@@ -30,18 +30,16 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-/**
- * @Route("/blog")
- */
+#[Route(path: '/blog')]
 class PostController extends AbstractController {
 
 	use PublicationControllerTrait;
 
 	/**
-	 * @Route("/new", name="core_blog_post_new")
 	 * @Template("@LadbCore/Blog/Post/new.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_BLOG')", statusCode=404, message="Not allowed (core_blog_post_new)")
 	 */
+	#[Route(path: '/new', name: 'core_blog_post_new')]
 	public function newAction(TagUtils $tagUtils) {
 
 		$post = new Post();
@@ -55,10 +53,10 @@ class PostController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/create", methods={"POST"}, name="core_blog_post_create")
 	 * @Template("@LadbCore/Blog/Post/new.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_BLOG')", statusCode=404, message="Not allowed (core_blog_post_create)")
 	 */
+	#[Route(path: '/create', methods: ['POST'], name: 'core_blog_post_create')]
 	public function createAction(Request $request, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$this->createLock('core_blog_post_create', false, self::LOCK_TTL_CREATE_ACTION, false);
@@ -96,10 +94,8 @@ class PostController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Route("/{id}/lock", requirements={"id" = "\d+"}, defaults={"lock" = true}, name="core_blog_post_lock")
-	 * @Route("/{id}/unlock", requirements={"id" = "\d+"}, defaults={"lock" = false}, name="core_blog_post_unlock")
-	 */
+	#[Route(path: '/{id}/lock', requirements: ['id' => '\d+'], defaults: ['lock' => true], name: 'core_blog_post_lock')]
+	#[Route(path: '/{id}/unlock', requirements: ['id' => '\d+'], defaults: ['lock' => false], name: 'core_blog_post_unlock')]
 	public function lockUnlockAction($id, $lock, PostManager $postManager, TranslatorInterface $translator) {
 
 		$post = $this->retrievePublication($id, Post::CLASS_NAME);
@@ -119,9 +115,9 @@ class PostController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/publish", requirements={"id" = "\d+"}, name="core_blog_post_publish")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_BLOG')", statusCode=404, message="Not allowed (core_blog_post_publish)")
 	 */
+	#[Route(path: '/{id}/publish', requirements: ['id' => '\d+'], name: 'core_blog_post_publish')]
 	public function publishAction($id, PostManager $postManager, TranslatorInterface $translator) {
 
 		$post = $this->retrievePublication($id, Post::CLASS_NAME);
@@ -136,9 +132,7 @@ class PostController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_blog_post_show', array( 'id' => $post->getSluggedId() )));
 	}
 
-	/**
-	 * @Route("/{id}/unpublish", requirements={"id" = "\d+"}, name="core_blog_post_unpublish")
-	 */
+	#[Route(path: '/{id}/unpublish', requirements: ['id' => '\d+'], name: 'core_blog_post_unpublish')]
 	public function unpublishAction(Request $request, $id, PostManager $postManager, TranslatorInterface $translator) {
 
 		$post = $this->retrievePublication($id, Post::CLASS_NAME);
@@ -160,10 +154,10 @@ class PostController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_blog_post_edit")
 	 * @Template("@LadbCore/Blog/Post/edit.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_BLOG')", statusCode=404, message="Not allowed (core_blog_post_edit)")
 	 */
+	#[Route(path: '/{id}/edit', requirements: ['id' => '\d+'], name: 'core_blog_post_edit')]
 	public function editAction($id, TagUtils $tagUtils) {
 
 		$post = $this->retrievePublication($id, Post::CLASS_NAME);
@@ -179,10 +173,10 @@ class PostController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_blog_post_update")
 	 * @Template("@LadbCore/Blog/Post/edit.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_BLOG')", statusCode=404, message="Not allowed (core_blog_post_update)")
 	 */
+	#[Route(path: '/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_blog_post_update')]
 	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$doUp = $request->get('ladb_do_up', false);
@@ -237,9 +231,7 @@ class PostController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_blog_post_delete")
-	 */
+	#[Route(path: '/{id}/delete', requirements: ['id' => '\d+'], name: 'core_blog_post_delete')]
 	public function deleteAction($id, PostManager $postManager, TranslatorInterface $translator) {
 
 		$post = $this->retrievePublication($id, Post::CLASS_NAME);
@@ -255,9 +247,9 @@ class PostController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/widget", requirements={"id" = "\d+"}, name="core_blog_post_widget")
 	 * @Template("@LadbCore/Blog/Post/widget-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/widget', requirements: ['id' => '\d+'], name: 'core_blog_post_widget')]
 	public function widgetAction($id) {
 
 		$post = $this->retrievePublication($id, Post::CLASS_NAME);
@@ -268,19 +260,17 @@ class PostController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Route("/{filter}", requirements={"filter" = "[a-z-]+"}, name="core_blog_post_list_filter")
-	 * @Route("/{filter}/{page}", requirements={"filter" = "[a-z-]+", "page" = "\d+"}, name="core_blog_post_list_filter_page")
-	 */
+	#[Route(path: '/{filter}', requirements: ['filter' => '[a-z-]+'], name: 'core_blog_post_list_filter')]
+	#[Route(path: '/{filter}/{page}', requirements: ['filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_blog_post_list_filter_page')]
 	public function goneListAction(Request $request, $filter, $page = 0) {
 		throw new \Symfony\Component\HttpKernel\Exception\GoneHttpException();
 	}
 
 	/**
-	 * @Route("/", name="core_blog_post_list")
-	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_blog_post_list_page")
 	 * @Template("@LadbCore/Blog/Post/list.html.twig")
 	 */
+	#[Route(path: '/', name: 'core_blog_post_list')]
+	#[Route(path: '/{page}', requirements: ['page' => '\d+'], name: 'core_blog_post_list_page')]
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, SearchUtils $searchUtils, $page = 0) {
 
 		// Elasticsearch paginiation limit
@@ -418,9 +408,9 @@ class PostController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}.html", name="core_blog_post_show")
 	 * @Template("@LadbCore/Blog/Post/show.html.twig")
 	 */
+	#[Route(path: '/{id}.html', name: 'core_blog_post_show')]
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, EntityManagerInterface $om, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$postRepository = $om->getRepository(\Ladb\CoreBundle\Entity\Blog\Post::CLASS_NAME);
 

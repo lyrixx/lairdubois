@@ -24,9 +24,7 @@ use Ladb\CoreBundle\Event\VotableListener;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-/**
- * @Route("/votes")
- */
+#[Route(path: '/votes')]
 class VoteController extends AbstractController {
 
 	private function _retriveRelatedEntityRepository($entityType, TypableUtils $typableUtils) {
@@ -81,11 +79,10 @@ class VoteController extends AbstractController {
 	}
 
 	/////
-
 	/**
-	 * @Route("/{entityType}/{entityId}/{way}/new", requirements={"entityType" = "\d+", "entityId" = "\d+", "way" = "up|down"}, name="core_vote_new")
 	 * @Template("@LadbCore/Core/Vote/new-xhr.html.twig")
 	 */
+	#[Route(path: '/{entityType}/{entityId}/{way}/new', requirements: ['entityType' => '\d+', 'entityId' => '\d+', 'way' => 'up|down'], name: 'core_vote_new')]
 	public function newAction(Request $request, $entityType, $entityId, $way, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_vote_down_new)');
@@ -121,9 +118,7 @@ class VoteController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Route("/{entityType}/{entityId}/{way}/create", requirements={"entityType" = "\d+", "entityId" = "\d+", "way" = "up|down"}, name="core_vote_create")
-	 */
+	#[Route(path: '/{entityType}/{entityId}/{way}/create', requirements: ['entityType' => '\d+', 'entityId' => '\d+', 'way' => 'up|down'], name: 'core_vote_create')]
 	public function createAction(Request $request, $entityType, $entityId, $way, ActivityUtils $activityUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, EntityManagerInterface $om, TypableUtils $typableUtils, VotableUtils $votableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_vote_create)');
@@ -322,9 +317,7 @@ class VoteController extends AbstractController {
 		return $this->redirect($returnToUrl);
 	}
 
-	/**
-	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_vote_delete")
-	 */
+	#[Route(path: '/{id}/delete', requirements: ['id' => '\d+'], name: 'core_vote_delete')]
 	public function deleteAction(Request $request, $id, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, EntityManagerInterface $om, TypableUtils $typableUtils, VotableUtils $votableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_vote_delete)');
@@ -399,11 +392,11 @@ class VoteController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/p/{entityType}/{entityId}", requirements={"entityType" = "\d+", "entityId" = "\d+"}, name="core_vote_list_parent_entity")
-	 * @Route("/p/{entityType}/{entityId}/{filter}", requirements={"entityType" = "\d+", "entityId" = "\d+", "filter" = "positive|negative"}, name="core_vote_list_parent_entity_filter")
-	 * @Route("/p/{entityType}/{entityId}/{filter}/{page}", requirements={"entityType" = "\d+", "entityId" = "\d+", "filter" = "positive|negative", "page" = "\d+"}, name="core_vote_list_parent_entity_filter_page")
 	 * @Template("@LadbCore/Core/Vote/list-byparent.html.twig")
 	 */
+	#[Route(path: '/p/{entityType}/{entityId}', requirements: ['entityType' => '\d+', 'entityId' => '\d+'], name: 'core_vote_list_parent_entity')]
+	#[Route(path: '/p/{entityType}/{entityId}/{filter}', requirements: ['entityType' => '\d+', 'entityId' => '\d+', 'filter' => 'positive|negative'], name: 'core_vote_list_parent_entity_filter')]
+	#[Route(path: '/p/{entityType}/{entityId}/{filter}/{page}', requirements: ['entityType' => '\d+', 'entityId' => '\d+', 'filter' => 'positive|negative', 'page' => '\d+'], name: 'core_vote_list_parent_entity_filter_page')]
 	public function showParentVotesAction(Request $request, $entityType, $entityId, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, TypableUtils $typableUtils, $filter = 'positive', $page = 0) {
 
 		// Retrieve related parent entity

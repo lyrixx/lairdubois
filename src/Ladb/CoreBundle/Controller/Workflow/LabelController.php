@@ -10,15 +10,13 @@ use Ladb\CoreBundle\Entity\Workflow\Label;
 use Ladb\CoreBundle\Form\Type\Workflow\LabelType;
 use Doctrine\ORM\EntityManagerInterface;
 
-/**
- * @Route("/processus")
- */
+#[Route(path: '/processus')]
 class LabelController extends AbstractWorkflowBasedController {
 
 	/**
-	 * @Route("/{id}/label/new", requirements={"id" = "\d+"}, name="core_workflow_label_new")
 	 * @Template("@LadbCore/Workflow/Label/new-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/label/new', requirements: ['id' => '\d+'], name: 'core_workflow_label_new')]
 	public function newAction(Request $request, $id) {
 
 		// Retrieve Workflow
@@ -36,9 +34,9 @@ class LabelController extends AbstractWorkflowBasedController {
 	}
 
 	/**
-	 * @Route("/{id}/label/create", requirements={"id" = "\d+"}, methods={"POST"}, name="core_workflow_label_create")
 	 * @Template("@LadbCore/Workflow/Label/new-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/label/create', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_workflow_label_create')]
 	public function createAction(Request $request, $id, EntityManagerInterface $om) {
 
 		$this->createLock('core_workflow_label_create', false, self::LOCK_TTL_CREATE_ACTION, false);
@@ -69,9 +67,9 @@ class LabelController extends AbstractWorkflowBasedController {
 	}
 
 	/**
-	 * @Route("/label/{id}/edit", requirements={"id" = "\d+"}, name="core_workflow_label_edit")
 	 * @Template("@LadbCore/Workflow/Label/edit-xhr.html.twig")
 	 */
+	#[Route(path: '/label/{id}/edit', requirements: ['id' => '\d+'], name: 'core_workflow_label_edit')]
 	public function editAction(Request $request, $id, EntityManagerInterface $om) {
 		$labelRepository = $om->getRepository(Label::CLASS_NAME);
 
@@ -90,9 +88,9 @@ class LabelController extends AbstractWorkflowBasedController {
 	}
 
 	/**
-	 * @Route("/label/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_workflow_label_update")
 	 * @Template("@LadbCore/Workflow/Label/edit-xhr.html.twig")
 	 */
+	#[Route(path: '/label/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_workflow_label_update')]
 	public function updateAction(Request $request, $id, EntityManagerInterface $om) {
 		$labelRepository = $om->getRepository(Label::CLASS_NAME);
 
@@ -132,9 +130,9 @@ class LabelController extends AbstractWorkflowBasedController {
 	}
 
 	/**
-	 * @Route("/label/{id}/delete", requirements={"id" = "\d+"}, name="core_workflow_label_delete")
 	 * @Template("@LadbCore/Workflow/Label/delete-xhr.html.twig")
 	 */
+	#[Route(path: '/label/{id}/delete', requirements: ['id' => '\d+'], name: 'core_workflow_label_delete')]
 	public function deleteAction(Request $request, $id, EntityManagerInterface $om) {
 		$labelRepository = $om->getRepository(Label::CLASS_NAME);
 
@@ -166,9 +164,9 @@ class LabelController extends AbstractWorkflowBasedController {
 	}
 
 	/**
-	 * @Route("/{id}/labels", requirements={"id" = "\d+"}, name="core_workflow_label_list")
 	 * @Template("@LadbCore/Workflow/Label/list-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/labels', requirements: ['id' => '\d+'], name: 'core_workflow_label_list')]
 	public function listAction(Request $request, $id) {
 
 		// Retrieve Workflow

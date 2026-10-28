@@ -34,17 +34,15 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-/**
- * @Route("/logiciels")
- */
+#[Route(path: '/logiciels')]
 class SoftwareController extends AbstractController {
 
 	use PublicationControllerTrait;
 
 	/**
-	 * @Route("/new", name="core_software_new")
 	 * @Template("@LadbCore/Knowledge/Software/new.html.twig")
 	 */
+	#[Route(path: '/new', name: 'core_software_new')]
 	public function newAction(KnowledgeUtils $knowledgeUtils) {
 
 		// Exclude if user is not email confirmed
@@ -62,9 +60,9 @@ class SoftwareController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/create", methods={"POST"}, name="core_software_create")
 	 * @Template("@LadbCore/Knowledge/Software/new.html.twig")
 	 */
+	#[Route(path: '/create', methods: ['POST'], name: 'core_software_create')]
 	public function createAction(Request $request, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, EntityManagerInterface $om, TranslatorInterface $translator) {
 
 		// Exclude if user is not email confirmed
@@ -139,9 +137,9 @@ class SoftwareController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_software_delete")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_software_delete)")
 	 */
+	#[Route(path: '/{id}/delete', requirements: ['id' => '\d+'], name: 'core_software_delete')]
 	public function deleteAction($id, SoftwareManager $softwareMananger, TranslatorInterface $translator) {
 
 		$software = $this->retrievePublication($id, Software::CLASS_NAME);
@@ -157,9 +155,9 @@ class SoftwareController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/widget", requirements={"id" = "\d+"}, name="core_software_widget")
 	 * @Template("@LadbCore/Knowledge/Software/widget-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/widget', requirements: ['id' => '\d+'], name: 'core_software_widget')]
 	public function widgetAction(Request $request, $id) {
 
 		$software = $this->retrievePublication($id, Software::CLASS_NAME);
@@ -171,10 +169,10 @@ class SoftwareController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/", name="core_software_list")
-	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_software_list_page")
 	 * @Template("@LadbCore/Knowledge/Software/list.html.twig")
 	 */
+	#[Route(path: '/', name: 'core_software_list')]
+	#[Route(path: '/{page}', requirements: ['page' => '\d+'], name: 'core_software_list_page')]
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, ElasticaQueryUtils $elasticaQueryUtils, SearchUtils $searchUtils, $page = 0) {
 
 		// Elasticsearch paginiation limit
@@ -349,9 +347,9 @@ class SoftwareController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}.html", name="core_software_show")
 	 * @Template("@LadbCore/Knowledge/Software/show.html.twig")
 	 */
+	#[Route(path: '/{id}.html', name: 'core_software_show')]
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, LikableUtils $likableUtils, EntityManagerInterface $om, ReviewableUtils $reviewableUtils, SearchUtils $searchUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$softwareRepository = $om->getRepository(Software::CLASS_NAME);
 

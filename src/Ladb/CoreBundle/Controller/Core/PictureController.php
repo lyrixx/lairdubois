@@ -15,9 +15,7 @@ use Ladb\CoreBundle\Handler\PictureUploadHandler;
 use Ladb\CoreBundle\Form\Type\Core\EditPictureType;
 use Doctrine\ORM\EntityManagerInterface;
 
-/**
- * @Route("/pictures")
- */
+#[Route(path: '/pictures')]
 class PictureController extends AbstractController {
 
 	use PublicationControllerTrait;
@@ -44,10 +42,7 @@ class PictureController extends AbstractController {
 	}
 
 	/////
-
-	/**
-	 * @Route("/{quality}/{postProcessor}/upload", requirements={"quality" = "ld|sd|hd", "postProcessor" = "none|square"}, name="core_picture_upload")
-	 */
+	#[Route(path: '/{quality}/{postProcessor}/upload', requirements: ['quality' => 'ld|sd|hd', 'postProcessor' => 'none|square'], name: 'core_picture_upload')]
 	public function uploadAction(Request $request, $quality, $postProcessor, PictureUploadHandler $uploadHandler) {
 
 		$owner = $this->retrieveOwner($request);
@@ -57,9 +52,9 @@ class PictureController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_picture_edit")
 	 * @Template("@LadbCore/Core/Picture/edit-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/edit', requirements: ['id' => '\d+'], name: 'core_picture_edit')]
 	public function editAction(Request $request, $id, EntityManagerInterface $om) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_picture_edit)');
@@ -91,9 +86,9 @@ class PictureController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_picture_update")
 	 * @Template("@LadbCore/Core/Picture/update-error-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_picture_update')]
 	public function updateAction(Request $request, $id, EntityManagerInterface $om) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_picture_update)');

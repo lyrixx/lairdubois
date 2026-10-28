@@ -15,17 +15,15 @@ use Ladb\CoreBundle\Utils\TypableUtils;
 use Ladb\CoreBundle\Utils\PaginatorUtils;
 use Doctrine\ORM\EntityManagerInterface;
 
-/**
- * @Route("/notifications")
- */
+#[Route(path: '/notifications')]
 class NotificationController extends AbstractController {
 
 	/**
-	 * @Route("/", name="core_notification_list")
-	 * @Route("/{filter}", requirements={"filter" = "[a-z-]+"}, name="core_notification_list_filter")
-	 * @Route("/{filter}/{page}", requirements={"filter" = "[a-z-]+", "page" = "\d+"}, name="core_notification_list_filter_page")
 	 * @Template("@LadbCore/Core/Notification/list-xhr.html.twig")
 	 */
+	#[Route(path: '/', name: 'core_notification_list')]
+	#[Route(path: '/{filter}', requirements: ['filter' => '[a-z-]+'], name: 'core_notification_list_filter')]
+	#[Route(path: '/{filter}/{page}', requirements: ['filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_notification_list_filter_page')]
 	public function listAction(Request $request, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$notificationRepository = $om->getRepository(Notification::CLASS_NAME);
 
@@ -75,9 +73,7 @@ class NotificationController extends AbstractController {
 		return $parameters;
 	}
 
-	/**
-	 * @Route("/{id}", requirements={"id" = "\d+"}, name="core_notification_show")
-	 */
+	#[Route(path: '/{id}', requirements: ['id' => '\d+'], name: 'core_notification_show')]
 	public function showAction(Request $request, $id, EntityManagerInterface $om, TypableUtils $typableUtils) {
 		$notificationRepository = $om->getRepository(Notification::CLASS_NAME);
 

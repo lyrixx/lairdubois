@@ -30,9 +30,7 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-/**
- * @Route("/knowledge")
- */
+#[Route(path: '/knowledge')]
 class KnowledgeController extends AbstractController {
 
 	private function _retrieveRelatedEntityRepository($entityType, TypableUtils $typableUtils) {
@@ -123,12 +121,11 @@ class KnowledgeController extends AbstractController {
 	}
 
 	/////
-
 	/**
-	 * @Route("/{entityType}/{entityId}/contributors", requirements={"entityType" = "\d+","entityId" = "\d+"}, name="core_knowledge_contributors")
-	 * @Route("/{entityType}/{entityId}/contributors/{page}", requirements={"entityType" = "\d+", "entityId" = "\d+", "page" = "\d+"}, name="core_knowledge_contributors_page")
 	 * @Template("@LadbCore/Knowledge/contributors.html.twig")
 	 */
+	#[Route(path: '/{entityType}/{entityId}/contributors', requirements: ['entityType' => '\d+', 'entityId' => '\d+'], name: 'core_knowledge_contributors')]
+	#[Route(path: '/{entityType}/{entityId}/contributors/{page}', requirements: ['entityType' => '\d+', 'entityId' => '\d+', 'page' => '\d+'], name: 'core_knowledge_contributors_page')]
 	public function contributorsAction(Request $request, $entityType, $entityId, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, TypableUtils $typableUtils, $page = 0) {
 		$userRepository = $om->getRepository(User::CLASS_NAME);
 
@@ -159,9 +156,9 @@ class KnowledgeController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{entityType}/{entityId}/{field}/create", requirements={"entityType" = "\d+","entityId" = "\d+", "field" = "\w+"}, methods={"POST"}, name="core_knowledge_value_create")
 	 * @Template("@LadbCore/Knowledge/value-new-xhr.html.twig")
 	 */
+	#[Route(path: '/{entityType}/{entityId}/{field}/create', requirements: ['entityType' => '\d+', 'entityId' => '\d+', 'field' => '\w+'], methods: ['POST'], name: 'core_knowledge_value_create')]
 	public function createFieldValueAction(Request $request, $entityType, $entityId, $field, ActivityUtils $activityUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, KnowledgeUtils $knowledgeUtils, EntityManagerInterface $om, PropertyUtils $propertyUtils, TypableUtils $typableUtils, VotableUtils $votableUtils, WatchableUtils $watchableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_knowledge_value_create)');
@@ -261,9 +258,9 @@ class KnowledgeController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{entityType}/{entityId}/{field}/{id}/edit", requirements={"entityType" = "\d+","entityId" = "\d+", "field" = "\w+","id" = "\d+"}, name="core_knowledge_value_edit")
 	 * @Template("@LadbCore/Knowledge/value-edit-xhr.html.twig")
 	 */
+	#[Route(path: '/{entityType}/{entityId}/{field}/{id}/edit', requirements: ['entityType' => '\d+', 'entityId' => '\d+', 'field' => '\w+', 'id' => '\d+'], name: 'core_knowledge_value_edit')]
 	public function editFieldValueAction(Request $request, $entityType, $entityId, $field, $id, FormFactoryInterface $formFactory, KnowledgeUtils $knowledgeUtils, EntityManagerInterface $om, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_knowledge_value_edit)');
@@ -305,9 +302,9 @@ class KnowledgeController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{entityType}/{entityId}/{field}/{id}/update", requirements={"entityType" = "\d+","entityId" = "\d+", "field" = "\w+","id" = "\d+"}, name="core_knowledge_value_update")
 	 * @Template("@LadbCore/Knowledge/value-edit-xhr.html.twig")
 	 */
+	#[Route(path: '/{entityType}/{entityId}/{field}/{id}/update', requirements: ['entityType' => '\d+', 'entityId' => '\d+', 'field' => '\w+', 'id' => '\d+'], name: 'core_knowledge_value_update')]
 	public function updateFieldValueAction(Request $request, $entityType, $entityId, $field, $id, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, FormFactoryInterface $formFactory, KnowledgeUtils $knowledgeUtils, EntityManagerInterface $om, TypableUtils $typableUtils, VotableUtils $votableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_knowledge_value_update)');
@@ -375,9 +372,9 @@ class KnowledgeController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{entityType}/{entityId}/{field}/{id}/delete", requirements={"entityType" = "\d+","entityId" = "\d+", "field" = "\w+", "id" = "\d+"}, name="core_knowledge_value_delete")
 	 * @Template("@LadbCore/Knowledge/value-delete-xhr.html.twig")
 	 */
+	#[Route(path: '/{entityType}/{entityId}/{field}/{id}/delete', requirements: ['entityType' => '\d+', 'entityId' => '\d+', 'field' => '\w+', 'id' => '\d+'], name: 'core_knowledge_value_delete')]
 	public function deleteFieldValueAction(Request $request, $entityType, $entityId, $field, $id, ActivityUtils $activityUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, EntityManagerInterface $om, PropertyUtils $propertyUtils, TypableUtils $typableUtils, VotableUtils $votableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_knowledge_value_delete)');
@@ -450,9 +447,7 @@ class KnowledgeController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Route("/{entityType}/{entityId}/{field}/{id}/download", requirements={"entityType" = "\d+","entityId" = "\d+", "field" = "\w+","id" = "\d+"}, name="core_knowledge_value_download")
-	 */
+	#[Route(path: '/{entityType}/{entityId}/{field}/{id}/download', requirements: ['entityType' => '\d+', 'entityId' => '\d+', 'field' => '\w+', 'id' => '\d+'], name: 'core_knowledge_value_download')]
 	public function downloadFieldValueAction(Request $request, $entityType, $entityId, $field, $id, EntityManagerInterface $om, TypableUtils $typableUtils) {
 		// Retrieve related entity
 
@@ -489,9 +484,9 @@ class KnowledgeController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{entityType}/{entityId}/{field}/{id}/view", requirements={"entityType" = "\d+","entityId" = "\d+", "field" = "\w+","id" = "\d+"}, name="core_knowledge_value_view")
 	 * @Template("@LadbCore/Knowledge/value-view.html.twig")
 	 */
+	#[Route(path: '/{entityType}/{entityId}/{field}/{id}/view', requirements: ['entityType' => '\d+', 'entityId' => '\d+', 'field' => '\w+', 'id' => '\d+'], name: 'core_knowledge_value_view')]
 	public function viewFieldValueAction(Request $request, $entityType, $entityId, $field, $id, EntityManagerInterface $om, TypableUtils $typableUtils) {
 		// Retrieve related entity
 
@@ -521,9 +516,9 @@ class KnowledgeController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{entityType}/{entityId}/{field}.xhr", requirements={"entityType" = "\d+","entityId" = "\d+", "field" = "[a-z_]+"}, name="core_knowledge_field_show")
 	 * @Template("@LadbCore/Knowledge/field-show.html.twig")
 	 */
+	#[Route(path: '/{entityType}/{entityId}/{field}.xhr', requirements: ['entityType' => '\d+', 'entityId' => '\d+', 'field' => '[a-z_]+'], name: 'core_knowledge_field_show')]
 	public function showFieldAction(Request $request, $entityType, $entityId, $field, CommentableUtils $commentableUtils, KnowledgeUtils $knowledgeUtils, PropertyUtils $propertyUtils, TypableUtils $typableUtils, VotableUtils $votableUtils, $highlightedValueId = null) {
 
 		// Retrieve related entity
@@ -568,9 +563,7 @@ class KnowledgeController extends AbstractController {
 		return $parameters;
 	}
 
-	/**
-	 * @Route("/value/{id}", requirements={"id" = "\d+"}, name="core_knowledge_value_show")
-	 */
+	#[Route(path: '/value/{id}', requirements: ['id' => '\d+'], name: 'core_knowledge_value_show')]
 	public function valueShowAction(Request $request, $id, EntityManagerInterface $om) {
 		$valueRepository = $om->getRepository(BaseValue::CLASS_NAME);
 
@@ -588,10 +581,10 @@ class KnowledgeController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{entityType}/{entityId}/{fieldSrc}/{fieldDest}/{id}/admin/move", requirements={"entityType" = "\d+","entityId" = "\d+", "fieldSrc" = "\w+", "fieldDest" = "\w+", "id" = "\d+"}, name="core_knowledge_value_admin_move")
 	 * @Template("@LadbCore/Knowledge/value-move-xhr.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_knowledge_value_admin_move)")
 	 */
+	#[Route(path: '/{entityType}/{entityId}/{fieldSrc}/{fieldDest}/{id}/admin/move', requirements: ['entityType' => '\d+', 'entityId' => '\d+', 'fieldSrc' => '\w+', 'fieldDest' => '\w+', 'id' => '\d+'], name: 'core_knowledge_value_admin_move')]
 	public function adminMoveFieldValueAction(Request $request, $entityType, $entityId, $fieldSrc, $fieldDest, $id, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, EntityManagerInterface $om, PropertyUtils $propertyUtils, TypableUtils $typableUtils, VotableUtils $votableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_knowledge_value_admin_move)');

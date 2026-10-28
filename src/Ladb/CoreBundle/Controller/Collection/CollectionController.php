@@ -30,17 +30,15 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-/**
- * @Route("/collections")
- */
+#[Route(path: '/collections')]
 class CollectionController extends AbstractCollectionBasedController {
 
 	use PublicationControllerTrait;
 
 	/**
-	 * @Route("/new", name="core_collection_new")
 	 * @Template("@LadbCore/Collection/Collection/new.html.twig")
 	 */
+	#[Route(path: '/new', name: 'core_collection_new')]
 	public function newAction(Request $request, TagUtils $tagUtils) {
 
 		$collection = new Collection();
@@ -55,9 +53,9 @@ class CollectionController extends AbstractCollectionBasedController {
 	}
 
 	/**
-	 * @Route("/create", methods={"POST"}, name="core_collection_create")
 	 * @Template("@LadbCore/Collection/Collection/new.html.twig")
 	 */
+	#[Route(path: '/create', methods: ['POST'], name: 'core_collection_create')]
 	public function createAction(Request $request, CollectionnableUtils $collectionnableUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator, TypableUtils $typableUtils) {
 
 		$this->createLock('core_collection_create', false, self::LOCK_TTL_CREATE_ACTION, false);
@@ -115,10 +113,8 @@ class CollectionController extends AbstractCollectionBasedController {
 		);
 	}
 
-	/**
-	 * @Route("/{id}/lock", requirements={"id" = "\d+"}, defaults={"lock" = true}, name="core_collection_lock")
-	 * @Route("/{id}/unlock", requirements={"id" = "\d+"}, defaults={"lock" = false}, name="core_collection_unlock")
-	 */
+	#[Route(path: '/{id}/lock', requirements: ['id' => '\d+'], defaults: ['lock' => true], name: 'core_collection_lock')]
+	#[Route(path: '/{id}/unlock', requirements: ['id' => '\d+'], defaults: ['lock' => false], name: 'core_collection_unlock')]
 	public function lockUnlockAction($id, $lock, CollectionManager $collectionManager, TranslatorInterface $translator) {
 
 		$collection = $this->retrievePublication($id, Collection::CLASS_NAME);
@@ -141,9 +137,7 @@ class CollectionController extends AbstractCollectionBasedController {
 		return $this->redirect($this->generateUrl('core_collection_show', array( 'id' => $collection->getSluggedId() )));
 	}
 
-	/**
-	 * @Route("/{id}/publish", requirements={"id" = "\d+"}, name="core_collection_publish")
-	 */
+	#[Route(path: '/{id}/publish', requirements: ['id' => '\d+'], name: 'core_collection_publish')]
 	public function publishAction($id, CollectionManager $collectionManager, TranslatorInterface $translator) {
 
 		$collection = $this->retrievePublication($id, Collection::CLASS_NAME);
@@ -158,9 +152,7 @@ class CollectionController extends AbstractCollectionBasedController {
 		return $this->redirect($this->generateUrl('core_collection_show', array( 'id' => $collection->getSluggedId() )));
 	}
 
-	/**
-	 * @Route("/{id}/unpublish", requirements={"id" = "\d+"}, name="core_collection_unpublish")
-	 */
+	#[Route(path: '/{id}/unpublish', requirements: ['id' => '\d+'], name: 'core_collection_unpublish')]
 	public function unpublishAction(Request $request, $id, CollectionManager $collectionManager, TranslatorInterface $translator) {
 
 		$collection = $this->retrievePublication($id, Collection::CLASS_NAME);
@@ -182,9 +174,9 @@ class CollectionController extends AbstractCollectionBasedController {
 	}
 
 	/**
-	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_collection_edit")
 	 * @Template("@LadbCore/Collection/Collection/edit.html.twig")
 	 */
+	#[Route(path: '/{id}/edit', requirements: ['id' => '\d+'], name: 'core_collection_edit')]
 	public function editAction($id, TagUtils $tagUtils) {
 
 		$collection = $this->retrievePublication($id, Collection::CLASS_NAME);
@@ -200,9 +192,9 @@ class CollectionController extends AbstractCollectionBasedController {
 	}
 
 	/**
-	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_collection_update")
 	 * @Template("@LadbCore/Collection/Collection/edit.html.twig")
 	 */
+	#[Route(path: '/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_collection_update')]
 	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 		$collection = $this->retrievePublication($id, Collection::CLASS_NAME);
 		$this->assertEditabable($collection);
@@ -245,9 +237,7 @@ class CollectionController extends AbstractCollectionBasedController {
 		);
 	}
 
-	/**
-	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_collection_delete")
-	 */
+	#[Route(path: '/{id}/delete', requirements: ['id' => '\d+'], name: 'core_collection_delete')]
 	public function deleteAction($id, CollectionManager $collectionManager, TranslatorInterface $translator) {
 
 		$collection = $this->retrievePublication($id, Collection::CLASS_NAME);
@@ -263,9 +253,9 @@ class CollectionController extends AbstractCollectionBasedController {
 	}
 
 	/**
-	 * @Route("/{id}/widget", requirements={"id" = "\d+"}, name="core_collection_widget")
 	 * @Template("@LadbCore/Collection/Collection/widget-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/widget', requirements: ['id' => '\d+'], name: 'core_collection_widget')]
 	public function widgetAction(Request $request, $id) {
 
 		$collection = $this->retrievePublication($id, Collection::CLASS_NAME);
@@ -277,10 +267,10 @@ class CollectionController extends AbstractCollectionBasedController {
 	}
 
 	/**
-	 * @Route("/", name="core_collection_list")
-	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_collection_list_page")
 	 * @Template("@LadbCore/Collection/Collection/list.html.twig")
 	 */
+	#[Route(path: '/', name: 'core_collection_list')]
+	#[Route(path: '/{page}', requirements: ['page' => '\d+'], name: 'core_collection_list_page')]
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, SearchUtils $searchUtils, $page = 0) {
 
 		// Elasticsearch paginiation limit
@@ -432,10 +422,10 @@ class CollectionController extends AbstractCollectionBasedController {
 	}
 
 	/**
-	 * @Route("/available/{entityType}/{entityId}", requirements={"entityType" = "\d+", "entityId" = "\d+"}, name="core_collection_list_available")
-	 * @Route("/available/{entityType}/{entityId}/{page}", requirements={"entityType" = "\d+", "entityId" = "\d+", "page" = "\d+"}, name="core_collection_list_available_page")
 	 * @Template("@LadbCore/Collection/Collection/list-available-xhr.html.twig")
 	 */
+	#[Route(path: '/available/{entityType}/{entityId}', requirements: ['entityType' => '\d+', 'entityId' => '\d+'], name: 'core_collection_list_available')]
+	#[Route(path: '/available/{entityType}/{entityId}/{page}', requirements: ['entityType' => '\d+', 'entityId' => '\d+', 'page' => '\d+'], name: 'core_collection_list_available_page')]
 	public function listAvailableAction($entityType, $entityId, CollectionnableUtils $collectionnableUtils, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $page = 0) {
 		$collectionRepository = $om->getRepository(Collection::CLASS_NAME);
 
@@ -469,10 +459,10 @@ class CollectionController extends AbstractCollectionBasedController {
 	}
 
 	/**
-	 * @Route("/{entityType}/{entityId}", requirements={"entityType" = "\d+", "entityId" = "\d+"}, name="core_collection_list_byentity")
-	 * @Route("/{entityType}/{entityId}/{page}", requirements={"entityType" = "\d+", "entityId" = "\d+", "page" = "\d+"}, name="core_collection_list_byentity_page")
 	 * @Template("@LadbCore/Collection/Collection/list-byentity.html.twig")
 	 */
+	#[Route(path: '/{entityType}/{entityId}', requirements: ['entityType' => '\d+', 'entityId' => '\d+'], name: 'core_collection_list_byentity')]
+	#[Route(path: '/{entityType}/{entityId}/{page}', requirements: ['entityType' => '\d+', 'entityId' => '\d+', 'page' => '\d+'], name: 'core_collection_list_byentity_page')]
 	public function listByEntityAction(Request $request, $entityType, $entityId, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $page = 0) {
 		$collectionRepository = $om->getRepository(Collection::CLASS_NAME);
 
@@ -499,11 +489,11 @@ class CollectionController extends AbstractCollectionBasedController {
 	}
 
 	/**
-	 * @Route("/{id}.html", name="core_collection_show")
-	 * @Route("/{id}/tab/{entityType}", requirements={"id" = "\d+", "entityType" = "\d+"}, name="core_collection_show_type")
-	 * @Route("/{id}/tab/{entityType}/{page}", requirements={"id" = "\d+", "entityType" = "\d+", "page" = "\d+"}, name="core_collection_show_type_page")
 	 * @Template("@LadbCore/Collection/Collection/showAbout.html.twig")
 	 */
+	#[Route(path: '/{id}.html', name: 'core_collection_show')]
+	#[Route(path: '/{id}/tab/{entityType}', requirements: ['id' => '\d+', 'entityType' => '\d+'], name: 'core_collection_show_type')]
+	#[Route(path: '/{id}/tab/{entityType}/{page}', requirements: ['id' => '\d+', 'entityType' => '\d+', 'page' => '\d+'], name: 'core_collection_show_type_page')]
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, FollowerUtils $followerUtils, LikableUtils $likableUtils, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, TypableUtils $typableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager, $entityType = 0, $page = 0) {
 
 		// Retrieve collection

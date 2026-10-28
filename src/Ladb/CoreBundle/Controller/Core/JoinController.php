@@ -23,9 +23,7 @@ use Ladb\CoreBundle\Utils\TypableUtils;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-/**
- * @Route("/joins")
- */
+#[Route(path: '/joins')]
 class JoinController extends AbstractController {
 
 	private function _retrieveRelatedEntity($entityType, $entityId, TypableUtils $typableUtils) {
@@ -41,11 +39,10 @@ class JoinController extends AbstractController {
 	}
 
 	/////
-
 	/**
-	 * @Route("/{entityType}/{entityId}/create", requirements={"entityType" = "\d+", "entityId" = "\d+"}, name="core_join_create")
 	 * @Template("@LadbCore/Core/Join/create-xhr.html.twig")
 	 */
+	#[Route(path: '/{entityType}/{entityId}/create', requirements: ['entityType' => '\d+', 'entityId' => '\d+'], name: 'core_join_create')]
 	public function createAction(Request $request, $entityType, $entityId, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, JoinableUtils $joinableUtils, EntityManagerInterface $om, TypableUtils $typableUtils, WatchableUtils $watchableUtils) {
 
 		$this->createLock('core_join_create', false, self::LOCK_TTL_CREATE_ACTION, false);
@@ -116,9 +113,9 @@ class JoinController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_join_delete")
 	 * @Template("@LadbCore/Core/Join/delete-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/delete', requirements: ['id' => '\d+'], name: 'core_join_delete')]
 	public function deleteAction(Request $request, $id, ActivityUtils $activityUtils, JoinableUtils $joinableUtils, EntityManagerInterface $om, SearchUtils $searchUtils, TypableUtils $typableUtils) {
 		$joinRepository = $om->getRepository(Join::CLASS_NAME);
 
@@ -166,10 +163,10 @@ class JoinController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{entityType}/{entityId}", requirements={"entityType" = "\d+", "entityId" = "\d+"}, name="core_join_list_byentity")
-	 * @Route("/{entityType}/{entityId}/{page}", requirements={"entityType" = "\d+", "entityId" = "\d+", "page" = "\d+"}, name="core_join_list_byentity_page")
 	 * @Template("@LadbCore/Core/Join/list-byentity.html.twig")
 	 */
+	#[Route(path: '/{entityType}/{entityId}', requirements: ['entityType' => '\d+', 'entityId' => '\d+'], name: 'core_join_list_byentity')]
+	#[Route(path: '/{entityType}/{entityId}/{page}', requirements: ['entityType' => '\d+', 'entityId' => '\d+', 'page' => '\d+'], name: 'core_join_list_byentity_page')]
 	public function listByEntityAction(Request $request, $entityType, $entityId, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, TypableUtils $typableUtils, $page = 0) {
 		$joinRepository = $om->getRepository(Join::CLASS_NAME);
 

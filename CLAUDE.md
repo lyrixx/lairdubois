@@ -203,7 +203,7 @@ castor qa:phpunit [-- --filter …]
 castor qa:deprecations       # var/deprecations/report.md, et le résumé du job en CI
 castor qa:install            # outils de tools/ (PHPStan, PHPUnit), installés à la volée sinon
 castor qa:e2e [-- --grep …]  # tests E2E (Playwright) : recharge la base du dev, hors qa:all, job E2E en CI
-castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et getDoctrine() des actions → arguments (#16, #177), des utils, managers, listeners et validateurs → constructeur (#118), dépréciations de 4.x (#133)
+castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et getDoctrine() des actions → arguments (#16, #177), des utils, managers, listeners et validateurs → constructeur (#118), dépréciations de 4.x (#133), routes en attributs (#25)
 ```
 
 - PHPUnit 9.6, dans `tools/phpunit` et pas dans le `composer.json` de l'application : c'est la
@@ -247,6 +247,16 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et get
   une hiérarchie, une passe par niveau, les parentes d'abord. Le cache de Rector
   (`tools/rector/var/`) ignore les modifications d'une règle et des classes parentes : le vider
   avant chaque passe.
+- php-parser compte une tabulation du code d'origine pour 4 colonnes, et Rector écrit un caractère
+  d'indentation par colonne : un nœud qu'il réimprime (une méthode qui reçoit un attribut, son
+  docblock) aurait 4 tabulations par niveau. `rector.php` ramène la tabulation à une colonne
+  (`PrettyPrinterAbstract::$tabWidth`). Une méthode indentée en espaces est alors réimprimée avec
+  une tabulation par espace (`OpencutlistController`) : la remettre en espaces à la main.
+- Annotations → attributs (#25) : une `AnnotationToAttribute` par sorte et par PR dans `rector.php`.
+  Rector 2.7 n'applique plus `withAttributesSets(symfonyRoute: true)` ni `symfonyValidator` seuls,
+  et `symfony: true` convertit d'un coup les routes, les contraintes et `@required`. Les routes sont
+  des `#[Route]` depuis #25 ; `routing.yml` garde `type: annotation`, le seul type de la 5.4 pour
+  un controller, attributs compris.
 - Les règles de rector-symfony (les sets de 4.x ne sont plus dans Rector 2 : une règle à la fois
   dans `rector.php`) ne s'appliquent qu'à partir d'une version d'un paquet de Symfony
   (`symfony/console`…), lue dans `vendor/composer/installed.json`, où `symfony/symfony` les

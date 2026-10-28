@@ -13,9 +13,7 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
  */
 final class SecurityController extends AbstractController {
 
-	/**
-	 * @Route("/login", methods={"GET", "POST"}, name="fos_user_security_login")
-	 */
+	#[Route(path: '/login', methods: ['GET', 'POST'], name: 'fos_user_security_login')]
 	public function loginAction(AuthenticationUtils $authenticationUtils, CsrfTokenManagerInterface $csrfTokenManager) {
 		return $this->render('@FOSUser/Security/login.html.twig', array(
 			'last_username' => $authenticationUtils->getLastUsername(),
@@ -24,16 +22,12 @@ final class SecurityController extends AbstractController {
 		));
 	}
 
-	/**
-	 * @Route("/login_check", methods={"POST"}, name="fos_user_security_check")
-	 */
+	#[Route(path: '/login_check', methods: ['POST'], name: 'fos_user_security_check')]
 	public function checkAction() {
 		throw new \LogicException('The firewall handles the login form: see form_login in security.yml.');
 	}
 
-	/**
-	 * @Route("/logout", methods={"GET", "POST"}, name="fos_user_security_logout")
-	 */
+	#[Route(path: '/logout', methods: ['GET', 'POST'], name: 'fos_user_security_logout')]
 	public function logoutAction() {
 		throw new \LogicException('The firewall handles the logout: see logout in security.yml.');
 	}

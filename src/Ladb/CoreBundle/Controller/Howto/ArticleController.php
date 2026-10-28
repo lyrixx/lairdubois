@@ -40,11 +40,10 @@ class ArticleController extends AbstractHowtoBasedController {
 	}
 
 	/////
-
 	/**
-	 * @Route("/pas-a-pas/{id}/articles/new", requirements={"id" = "\d+"}, name="core_howto_article_new")
 	 * @Template("@LadbCore/Howto/Article/new.html.twig")
 	 */
+	#[Route(path: '/pas-a-pas/{id}/articles/new', requirements: ['id' => '\d+'], name: 'core_howto_article_new')]
 	public function newAction(Request $request, $id) {
 
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
@@ -62,9 +61,9 @@ class ArticleController extends AbstractHowtoBasedController {
 	}
 
 	/**
-	 * @Route("/pas-a-pas/{id}/articles/create", requirements={"id" = "\d+"}, methods={"POST"}, name="core_howto_article_create")
 	 * @Template("@LadbCore/Howto/Article/new.html.twig")
 	 */
+	#[Route(path: '/pas-a-pas/{id}/articles/create', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_howto_article_create')]
 	public function createAction(Request $request, $id, BlockBodiedUtils $blockUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TranslatorInterface $translator) {
 
 		$this->createLock('core_howto_article_create', false, self::LOCK_TTL_CREATE_ACTION, false);
@@ -108,9 +107,7 @@ class ArticleController extends AbstractHowtoBasedController {
 		);
 	}
 
-	/**
-	 * @Route("/pas-a-pas/articles/{id}/publish", requirements={"id" = "\d+"}, name="core_howto_article_publish")
-	 */
+	#[Route(path: '/pas-a-pas/articles/{id}/publish', requirements: ['id' => '\d+'], name: 'core_howto_article_publish')]
 	public function publishAction($id, ArticleManager $articleManager, MentionUtils $mentionUtils, TranslatorInterface $translator) {
 
 		$article = $this->retrievePublication($id, Article::CLASS_NAME);
@@ -132,9 +129,9 @@ class ArticleController extends AbstractHowtoBasedController {
 	}
 
 	/**
-	 * @Route("/pas-a-pas/articles/{id}/unpublish", requirements={"id" = "\d+"}, name="core_howto_article_unpublish")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_howto_article_unpublish)")
 	 */
+	#[Route(path: '/pas-a-pas/articles/{id}/unpublish', requirements: ['id' => '\d+'], name: 'core_howto_article_unpublish')]
 	public function unpublishAction(Request $request, $id, ArticleManager $articleManager, TranslatorInterface $translator) {
 
 		$article = $this->retrievePublication($id, Article::CLASS_NAME);
@@ -156,9 +153,9 @@ class ArticleController extends AbstractHowtoBasedController {
 	}
 
 	/**
-	 * @Route("/pas-a-pas/articles/{id}/edit", requirements={"id" = "\d+"}, name="core_howto_article_edit")
 	 * @Template("@LadbCore/Howto/Article/edit.html.twig")
 	 */
+	#[Route(path: '/pas-a-pas/articles/{id}/edit', requirements: ['id' => '\d+'], name: 'core_howto_article_edit')]
 	public function editAction(Request $request, $id) {
 
 		$article = $this->retrievePublication($id, Article::CLASS_NAME);
@@ -182,9 +179,9 @@ class ArticleController extends AbstractHowtoBasedController {
 	}
 
 	/**
-	 * @Route("/pas-a-pas/articles/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_howto_article_update")
 	 * @Template("@LadbCore/Howto/Article/edit.html.twig")
 	 */
+	#[Route(path: '/pas-a-pas/articles/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_howto_article_update')]
 	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EmbeddableUtils $embaddableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, MentionUtils $mentionUtils, EntityManagerInterface $om, SearchUtils $searchUtils, TranslatorInterface $translator) {
 
 		$article = $this->retrievePublication($id, Article::CLASS_NAME);
@@ -242,9 +239,7 @@ class ArticleController extends AbstractHowtoBasedController {
 		);
 	}
 
-	/**
-	 * @Route("/pas-a-pas/articles/{id}/delete", requirements={"id" = "\d+"}, name="core_howto_article_delete")
-	 */
+	#[Route(path: '/pas-a-pas/articles/{id}/delete', requirements: ['id' => '\d+'], name: 'core_howto_article_delete')]
 	public function deleteAction($id, ArticleManager $articleManager, EntityManagerInterface $om, SearchUtils $searchUtils, TranslatorInterface $translator) {
 		$article = $this->retrievePublication($id, Article::CLASS_NAME);
 		$this->assertDeletable($article->getHowto(), true);
@@ -268,9 +263,9 @@ class ArticleController extends AbstractHowtoBasedController {
 	}
 
 	/**
-	 * @Route("/pas-a-pas/articles/{id}/widget", requirements={"id" = "\d+"}, name="core_howto_article_widget")
 	 * @Template("@LadbCore/Howto/Article/widget-xhr.html.twig")
 	 */
+	#[Route(path: '/pas-a-pas/articles/{id}/widget', requirements: ['id' => '\d+'], name: 'core_howto_article_widget')]
 	public function widgetAction(Request $request, $id) {
 
 		$id = intval($id);
@@ -283,16 +278,12 @@ class ArticleController extends AbstractHowtoBasedController {
 		);
 	}
 
-	/**
-	 * @Route("/pas-a-pas/article/{id}/sticker.png", requirements={"id" = "\d+"}, name="core_howto_article_sticker_bc")
-	 */
+	#[Route(path: '/pas-a-pas/article/{id}/sticker.png', requirements: ['id' => '\d+'], name: 'core_howto_article_sticker_bc')]
 	public function bcStickerAction(Request $request, $id) {
 		return $this->redirect($this->generateUrl('core_howto_article_sticker', array( 'id' => $id )));
 	}
 
-	/**
-	 * @Route("/pas-a-pas/articles/{id}/sticker", requirements={"id" = "\d+"}, name="core_howto_article_sticker")
-	 */
+	#[Route(path: '/pas-a-pas/articles/{id}/sticker', requirements: ['id' => '\d+'], name: 'core_howto_article_sticker')]
 	public function stickerAction(Request $request, $id, EmbeddableUtils $embeddableUtils, ImagineController $imagineController, EntityManagerInterface $om) {
 		$articleRepository = $om->getRepository(Article::CLASS_NAME);
 
@@ -330,17 +321,15 @@ class ArticleController extends AbstractHowtoBasedController {
 
 	}
 
-	/**
-	 * @Route("/pas-a-pas/article/{id}.html", name="core_howto_article_show_bc")
-	 */
+	#[Route(path: '/pas-a-pas/article/{id}.html', name: 'core_howto_article_show_bc')]
 	public function bcShowAction(Request $request, $id) {
 		return $this->redirect($this->generateUrl('core_howto_article_show', array( 'id' => $id )));
 	}
 
 	/**
-	 * @Route("/pas-a-pas/articles/{id}.html", name="core_howto_article_show")
 	 * @Template("@LadbCore/Howto/Article/show.html.twig")
 	 */
+	#[Route(path: '/pas-a-pas/articles/{id}.html', name: 'core_howto_article_show')]
 	public function showAction(Request $request, $id, EventDispatcherInterface $dispatcher, EntityManagerInterface $om, WitnessManager $witnessManager) {
 		$articleRepository = $om->getRepository(Article::CLASS_NAME);
 

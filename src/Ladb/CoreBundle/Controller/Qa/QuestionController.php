@@ -40,17 +40,15 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-/**
- * @Route("/questions")
- */
+#[Route(path: '/questions')]
 class QuestionController extends AbstractController {
 
 	use PublicationControllerTrait;
 
 	/**
-	 * @Route("/new", name="core_qa_question_new")
 	 * @Template("@LadbCore/Qa/Question/new.html.twig")
 	 */
+	#[Route(path: '/new', name: 'core_qa_question_new')]
 	public function newAction(Request $request, TagUtils $tagUtils) {
 
 		$question = new Question();
@@ -65,9 +63,9 @@ class QuestionController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/create", methods={"POST"}, name="core_qa_question_create")
 	 * @Template("@LadbCore/Qa/Question/new.html.twig")
 	 */
+	#[Route(path: '/create', methods: ['POST'], name: 'core_qa_question_create')]
 	public function createAction(Request $request, BlockBodiedUtils $blockBodiedUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$owner = $this->retrieveOwner($request);
@@ -113,10 +111,8 @@ class QuestionController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Route("/{id}/lock", requirements={"id" = "\d+"}, defaults={"lock" = true}, name="core_qa_question_lock")
-	 * @Route("/{id}/unlock", requirements={"id" = "\d+"}, defaults={"lock" = false}, name="core_qa_question_unlock")
-	 */
+	#[Route(path: '/{id}/lock', requirements: ['id' => '\d+'], defaults: ['lock' => true], name: 'core_qa_question_lock')]
+	#[Route(path: '/{id}/unlock', requirements: ['id' => '\d+'], defaults: ['lock' => false], name: 'core_qa_question_unlock')]
 	public function lockUnlockAction($id, $lock, QuestionManager $questionManager, TranslatorInterface $translator) {
 
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
@@ -135,9 +131,7 @@ class QuestionController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_qa_question_show', array( 'id' => $question->getSluggedId() )));
 	}
 
-	/**
-	 * @Route("/{id}/publish", requirements={"id" = "\d+"}, name="core_qa_question_publish")
-	 */
+	#[Route(path: '/{id}/publish', requirements: ['id' => '\d+'], name: 'core_qa_question_publish')]
 	public function publishAction($id, QuestionManager $questionManager, TranslatorInterface $translator) {
 
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
@@ -152,9 +146,7 @@ class QuestionController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_qa_question_show', array( 'id' => $question->getSluggedId() )));
 	}
 
-	/**
-	 * @Route("/{id}/unpublish", requirements={"id" = "\d+"}, name="core_qa_question_unpublish")
-	 */
+	#[Route(path: '/{id}/unpublish', requirements: ['id' => '\d+'], name: 'core_qa_question_unpublish')]
 	public function unpublishAction(Request $request, $id, QuestionManager $questionManager, TranslatorInterface $translator) {
 
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
@@ -176,9 +168,9 @@ class QuestionController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_qa_question_edit")
 	 * @Template("@LadbCore/Qa/Question/edit.html.twig")
 	 */
+	#[Route(path: '/{id}/edit', requirements: ['id' => '\d+'], name: 'core_qa_question_edit')]
 	public function editAction($id, TagUtils $tagUtils) {
 
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
@@ -194,9 +186,9 @@ class QuestionController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_qa_question_update")
 	 * @Template("@LadbCore/Qa/Question/edit.html.twig")
 	 */
+	#[Route(path: '/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_qa_question_update')]
 	public function updateAction(Request $request, $id, BlockBodiedUtils $blockBodiedUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
@@ -249,9 +241,7 @@ class QuestionController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_qa_question_delete")
-	 */
+	#[Route(path: '/{id}/delete', requirements: ['id' => '\d+'], name: 'core_qa_question_delete')]
 	public function deleteAction($id, QuestionManager $questionManager, TranslatorInterface $translator) {
 
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
@@ -266,9 +256,7 @@ class QuestionController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_qa_question_list'));
 	}
 
-	/**
-	 * @Route("/{id}/chown", requirements={"id" = "\d+"}, name="core_qa_question_chown")
-	 */
+	#[Route(path: '/{id}/chown', requirements: ['id' => '\d+'], name: 'core_qa_question_chown')]
 	public function chownAction(Request $request, $id, QuestionManager $questionManager, TranslatorInterface $translator) {
 
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
@@ -286,9 +274,9 @@ class QuestionController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/widget", requirements={"id" = "\d+"}, name="core_qa_question_widget")
 	 * @Template("@LadbCore/Qa/Question/widget-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/widget', requirements: ['id' => '\d+'], name: 'core_qa_question_widget')]
 	public function widgetAction($id) {
 
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
@@ -300,10 +288,10 @@ class QuestionController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/", name="core_qa_question_list")
-	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_qa_question_list_page")
 	 * @Template("@LadbCore/Qa/Question/list.html.twig")
 	 */
+	#[Route(path: '/', name: 'core_qa_question_list')]
+	#[Route(path: '/{page}', requirements: ['page' => '\d+'], name: 'core_qa_question_list_page')]
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, MaybeUtils $maybeUtils, EntityManagerInterface $om, SearchUtils $searchUtils, TranslatorInterface $translator, $page = 0) {
 
 		// Elasticsearch paginiation limit
@@ -572,11 +560,11 @@ class QuestionController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/creations", requirements={"id" = "\d+"}, name="core_qa_question_creations")
-	 * @Route("/{id}/creations/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_qa_question_creations_filter")
-	 * @Route("/{id}/creations/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_qa_question_creations_filter_page")
 	 * @Template("@LadbCore/Qa/Question/creations.html.twig")
 	 */
+	#[Route(path: '/{id}/creations', requirements: ['id' => '\d+'], name: 'core_qa_question_creations')]
+	#[Route(path: '/{id}/creations/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_qa_question_creations_filter')]
+	#[Route(path: '/{id}/creations/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_qa_question_creations_filter_page')]
 	public function creationsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
 		$this->assertShowable($question);
@@ -607,11 +595,11 @@ class QuestionController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/plans", requirements={"id" = "\d+"}, name="core_qa_question_plans")
-	 * @Route("/{id}/plans/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_qa_question_plans_filter")
-	 * @Route("/{id}/plans/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_qa_question_plans_filter_page")
 	 * @Template("@LadbCore/Qa/Question/plans.html.twig")
 	 */
+	#[Route(path: '/{id}/plans', requirements: ['id' => '\d+'], name: 'core_qa_question_plans')]
+	#[Route(path: '/{id}/plans/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_qa_question_plans_filter')]
+	#[Route(path: '/{id}/plans/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_qa_question_plans_filter_page')]
 	public function plansAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
 		$this->assertShowable($question);
@@ -642,11 +630,11 @@ class QuestionController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/pas-a-pas", requirements={"id" = "\d+"}, name="core_qa_question_howtos")
-	 * @Route("/{id}/pas-a-pas/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_qa_question_howtos_filter")
-	 * @Route("/{id}/pas-a-pas/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_qa_question_howtos_filter_page")
 	 * @Template("@LadbCore/Qa/Question/howtos.html.twig")
 	 */
+	#[Route(path: '/{id}/pas-a-pas', requirements: ['id' => '\d+'], name: 'core_qa_question_howtos')]
+	#[Route(path: '/{id}/pas-a-pas/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_qa_question_howtos_filter')]
+	#[Route(path: '/{id}/pas-a-pas/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_qa_question_howtos_filter_page')]
 	public function howtosAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
 		$this->assertShowable($question);
@@ -677,9 +665,9 @@ class QuestionController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}.html", name="core_qa_question_show")
 	 * @Template("@LadbCore/Qa/Question/show.html.twig")
 	 */
+	#[Route(path: '/{id}.html', name: 'core_qa_question_show')]
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, EntityManagerInterface $om, VotableUtils $votableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$questionRepository = $om->getRepository(\Ladb\CoreBundle\Entity\Qa\Question::CLASS_NAME);
 		$answerRepository = $om->getRepository(\Ladb\CoreBundle\Entity\Qa\Answer::CLASS_NAME);
@@ -739,9 +727,9 @@ class QuestionController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/admin/converttooffer", requirements={"id" = "\d+"}, name="core_qa_question_admin_converttooffer")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_qa_question_admin_converttooffer)")
 	 */
+	#[Route(path: '/{id}/admin/converttooffer', requirements: ['id' => '\d+'], name: 'core_qa_question_admin_converttooffer')]
 	public function adminConvertToOfferAction($id, EntityManagerInterface $om, QuestionManager $questionManager, TranslatorInterface $translator) {
 		$questionRepository = $om->getRepository(Question::CLASS_NAME);
 

@@ -41,17 +41,15 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-/**
- * @Route("/ateliers")
- */
+#[Route(path: '/ateliers')]
 class WorkshopController extends AbstractController {
 
 	use PublicationControllerTrait;
 
 	/**
-	 * @Route("/new", name="core_workshop_new")
 	 * @Template("@LadbCore/Wonder/Workshop/new.html.twig")
 	 */
+	#[Route(path: '/new', name: 'core_workshop_new')]
 	public function newAction(Request $request, TagUtils $tagUtils) {
 
 		$workshop = new Workshop();
@@ -66,9 +64,9 @@ class WorkshopController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/create", methods={"POST"}, name="core_workshop_create")
 	 * @Template("@LadbCore/Wonder/Workshop/new.html.twig")
 	 */
+	#[Route(path: '/create', methods: ['POST'], name: 'core_workshop_create')]
 	public function createAction(Request $request, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$owner = $this->retrieveOwner($request);
@@ -110,10 +108,8 @@ class WorkshopController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Route("/{id}/lock", requirements={"id" = "\d+"}, defaults={"lock" = true}, name="core_workshop_lock")
-	 * @Route("/{id}/unlock", requirements={"id" = "\d+"}, defaults={"lock" = false}, name="core_workshop_unlock")
-	 */
+	#[Route(path: '/{id}/lock', requirements: ['id' => '\d+'], defaults: ['lock' => true], name: 'core_workshop_lock')]
+	#[Route(path: '/{id}/unlock', requirements: ['id' => '\d+'], defaults: ['lock' => false], name: 'core_workshop_unlock')]
 	public function lockUnlockAction($id, $lock, TranslatorInterface $translator, WorkshopManager $workshopManager) {
 
 		$workshop = $this->retrievePublication($id, Workshop::CLASS_NAME);
@@ -132,9 +128,7 @@ class WorkshopController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_workshop_show', array( 'id' => $workshop->getSluggedId() )));
 	}
 
-	/**
-	 * @Route("/{id}/publish", requirements={"id" = "\d+"}, name="core_workshop_publish")
-	 */
+	#[Route(path: '/{id}/publish', requirements: ['id' => '\d+'], name: 'core_workshop_publish')]
 	public function publishAction($id, TranslatorInterface $translator, WorkshopManager $workshopManager) {
 
 		$workshop = $this->retrievePublication($id, Workshop::CLASS_NAME);
@@ -149,9 +143,7 @@ class WorkshopController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_workshop_show', array( 'id' => $workshop->getSluggedId() )));
 	}
 
-	/**
-	 * @Route("/{id}/unpublish", requirements={"id" = "\d+"}, name="core_workshop_unpublish")
-	 */
+	#[Route(path: '/{id}/unpublish', requirements: ['id' => '\d+'], name: 'core_workshop_unpublish')]
 	public function unpublishAction(Request $request, $id, TranslatorInterface $translator, WorkshopManager $workshopManager) {
 
 		$workshop = $this->retrievePublication($id, Workshop::CLASS_NAME);
@@ -173,9 +165,9 @@ class WorkshopController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_workshop_edit")
 	 * @Template("@LadbCore/Wonder/Workshop/edit.html.twig")
 	 */
+	#[Route(path: '/{id}/edit', requirements: ['id' => '\d+'], name: 'core_workshop_edit')]
 	public function editAction($id, TagUtils $tagUtils) {
 
 		$workshop = $this->retrievePublication($id, Workshop::CLASS_NAME);
@@ -191,9 +183,9 @@ class WorkshopController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_workshop_update")
 	 * @Template("@LadbCore/Wonder/Workshop/edit.html.twig")
 	 */
+	#[Route(path: '/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_workshop_update')]
 	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, EmbeddableUtils $embaddableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, PicturedUtils $picturedUtils, StripableUtils $stripableUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$workshop = $this->retrievePublication($id, Workshop::CLASS_NAME);
@@ -249,9 +241,7 @@ class WorkshopController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_workshop_delete")
-	 */
+	#[Route(path: '/{id}/delete', requirements: ['id' => '\d+'], name: 'core_workshop_delete')]
 	public function deleteAction($id, TranslatorInterface $translator, WorkshopManager $workshopManager) {
 
 		$workshop = $this->retrievePublication($id, Workshop::CLASS_NAME);
@@ -266,9 +256,7 @@ class WorkshopController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_workshop_list'));
 	}
 
-	/**
-	 * @Route("/{id}/chown", requirements={"id" = "\d+"}, name="core_workshop_chown")
-	 */
+	#[Route(path: '/{id}/chown', requirements: ['id' => '\d+'], name: 'core_workshop_chown')]
 	public function chownAction(Request $request, $id, TranslatorInterface $translator, WorkshopManager $workshopManager) {
 
 		$workshop = $this->retrievePublication($id, Workshop::CLASS_NAME);
@@ -286,11 +274,11 @@ class WorkshopController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/plans", requirements={"id" = "\d+"}, name="core_workshop_plans")
-	 * @Route("/{id}/plans/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_workshop_plans_filter")
-	 * @Route("/{id}/plans/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_workshop_plans_filter_page")
 	 * @Template("@LadbCore/Wonder/Workshop/plans.html.twig")
 	 */
+	#[Route(path: '/{id}/plans', requirements: ['id' => '\d+'], name: 'core_workshop_plans')]
+	#[Route(path: '/{id}/plans/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_workshop_plans_filter')]
+	#[Route(path: '/{id}/plans/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_workshop_plans_filter_page')]
 	public function plansAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$workshop = $this->retrievePublication($id, Workshop::CLASS_NAME);
 		$this->assertShowable($workshop);
@@ -320,19 +308,17 @@ class WorkshopController extends AbstractController {
 		));
 	}
 
-	/**
-	 * @Route("/{id}/projets", requirements={"id" = "\d+"}, name="core_workshop_projects")
-	 */
+	#[Route(path: '/{id}/projets', requirements: ['id' => '\d+'], name: 'core_workshop_projects')]
 	public function projectsAction($id) {
 		return $this->redirect($this->generateUrl('core_workshop_howtos', array( 'id' => $id )));
 	}
 
 	/**
-	 * @Route("/{id}/pas-a-pas", requirements={"id" = "\d+"}, name="core_workshop_howtos")
-	 * @Route("/{id}/pas-a-pas/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_workshop_howtos_filter")
-	 * @Route("/{id}/pas-a-pas/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_workshop_howtos_filter_page")
 	 * @Template("@LadbCore/Wonder/Workshop/howtos.html.twig")
 	 */
+	#[Route(path: '/{id}/pas-a-pas', requirements: ['id' => '\d+'], name: 'core_workshop_howtos')]
+	#[Route(path: '/{id}/pas-a-pas/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_workshop_howtos_filter')]
+	#[Route(path: '/{id}/pas-a-pas/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_workshop_howtos_filter_page')]
 	public function howtosAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$workshop = $this->retrievePublication($id, Workshop::CLASS_NAME);
 		$this->assertShowable($workshop);
@@ -363,11 +349,11 @@ class WorkshopController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/processus", requirements={"id" = "\d+"}, name="core_workshop_workflows")
-	 * @Route("/{id}/processus/{filter}", requirements={"id" = "\d+", "filter" = "[a-z-]+"}, name="core_workshop_workflows_filter")
-	 * @Route("/{id}/processus/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_workshop_workflows_filter_page")
 	 * @Template("@LadbCore/Wonder/Workshop/workflows.html.twig")
 	 */
+	#[Route(path: '/{id}/processus', requirements: ['id' => '\d+'], name: 'core_workshop_workflows')]
+	#[Route(path: '/{id}/processus/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_workshop_workflows_filter')]
+	#[Route(path: '/{id}/processus/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_workshop_workflows_filter_page')]
 	public function workflowsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$workshop = $this->retrievePublication($id, Workshop::CLASS_NAME);
 		$this->assertShowable($workshop);
@@ -397,16 +383,12 @@ class WorkshopController extends AbstractController {
 		));
 	}
 
-	/**
-	 * @Route("/{id}/sticker.png", requirements={"id" = "\d+"}, name="core_workshop_sticker_bc")
-	 */
+	#[Route(path: '/{id}/sticker.png', requirements: ['id' => '\d+'], name: 'core_workshop_sticker_bc')]
 	public function bcStickerAction(Request $request, $id) {
 		return $this->redirect($this->generateUrl('core_workshop_sticker', array( 'id' => $id )));
 	}
 
-	/**
-	 * @Route("/{id}/sticker", requirements={"id" = "\d+"}, name="core_workshop_sticker")
-	 */
+	#[Route(path: '/{id}/sticker', requirements: ['id' => '\d+'], name: 'core_workshop_sticker')]
 	public function stickerAction(Request $request, $id, EmbeddableUtils $embeddableUtils, ImagineController $imagineController, EntityManagerInterface $om) {
 		$workshop = $this->retrievePublication($id, Workshop::CLASS_NAME);
 		$this->assertShowable($workshop, true);
@@ -432,9 +414,7 @@ class WorkshopController extends AbstractController {
 
 	}
 
-	/**
-	 * @Route("/{id}/strip", requirements={"id" = "\d+"}, name="core_workshop_strip")
-	 */
+	#[Route(path: '/{id}/strip', requirements: ['id' => '\d+'], name: 'core_workshop_strip')]
 	public function stripAction(Request $request, $id, ImagineController $imagineController, EntityManagerInterface $om, StripableUtils $stripableUtils) {
 		$workshop = $this->retrievePublication($id, Workshop::CLASS_NAME);
 		$this->assertShowable($workshop, true);
@@ -461,9 +441,9 @@ class WorkshopController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/widget", requirements={"id" = "\d+"}, name="core_workshop_widget")
 	 * @Template("@LadbCore/Wonder/Workshop/widget-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/widget', requirements: ['id' => '\d+'], name: 'core_workshop_widget')]
 	public function widgetAction($id) {
 
 		$workshop = $this->retrievePublication($id, Workshop::CLASS_NAME);
@@ -475,9 +455,9 @@ class WorkshopController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/location.geojson", name="core_workshop_location", defaults={"_format" = "json"})
 	 * @Template("@LadbCore/Wonder/Workshop/location.geojson.twig")
 	 */
+	#[Route(path: '/{id}/location.geojson', name: 'core_workshop_location', defaults: ['_format' => 'json'])]
 	public function locationAction($id) {
 
 		$workshop = $this->retrievePublication($id, Workshop::CLASS_NAME);
@@ -502,9 +482,9 @@ class WorkshopController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/card.xhr", name="core_workshop_card")
 	 * @Template("@LadbCore/Wonder/Workshop/card-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/card.xhr', name: 'core_workshop_card')]
 	public function cardAction(Request $request, $id) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_workshop_card)');
@@ -518,20 +498,18 @@ class WorkshopController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Route("/{filter}", requirements={"filter" = "[a-z-]+"}, name="core_workshop_list_filter")
-	 * @Route("/{filter}/{page}", requirements={"filter" = "[a-z-]+", "page" = "\d+"}, name="core_workshop_list_filter_page")
-	 */
+	#[Route(path: '/{filter}', requirements: ['filter' => '[a-z-]+'], name: 'core_workshop_list_filter')]
+	#[Route(path: '/{filter}/{page}', requirements: ['filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_workshop_list_filter_page')]
 	public function goneListAction(Request $request, $filter, $page = 0) {
 		throw new \Symfony\Component\HttpKernel\Exception\GoneHttpException();
 	}
 
 	/**
-	 * @Route("/", name="core_workshop_list")
-	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_workshop_list_page")
-	 * @Route(".geojson", defaults={"_format" = "json", "page"=-1, "layout"="geojson"}, name="core_workshop_list_geojson")
 	 * @Template("@LadbCore/Wonder/Workshop/list.html.twig")
 	 */
+	#[Route(path: '/', name: 'core_workshop_list')]
+	#[Route(path: '/{page}', requirements: ['page' => '\d+'], name: 'core_workshop_list_page')]
+	#[Route(path: '.geojson', defaults: ['_format' => 'json', 'page' => -1, 'layout' => 'geojson'], name: 'core_workshop_list_geojson')]
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, LocalisableUtils $localisableUtils, SearchUtils $searchUtils, TranslatorInterface $translator, $page = 0, $layout = 'view') {
 
 		// Elasticsearch paginiation limit
@@ -796,9 +774,9 @@ class WorkshopController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}.html", name="core_workshop_show")
 	 * @Template("@LadbCore/Wonder/Workshop/show.html.twig")
 	 */
+	#[Route(path: '/{id}.html', name: 'core_workshop_show')]
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, EmbeddableUtils $embaddableUtils, ExplorableUtils $explorableUtils, FeedbackableUtils $feedbackableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, EntityManagerInterface $om, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$workshopRepository = $om->getRepository(Workshop::CLASS_NAME);
 
@@ -838,9 +816,9 @@ class WorkshopController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/admin/converttocreation", requirements={"id" = "\d+"}, name="core_workshop_admin_converttocreation")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_workshop_admin_converttocreation)")
 	 */
+	#[Route(path: '/{id}/admin/converttocreation', requirements: ['id' => '\d+'], name: 'core_workshop_admin_converttocreation')]
 	public function adminConvertToCreationAction($id, EntityManagerInterface $om, TranslatorInterface $translator, WorkshopManager $workshopManager) {
 		$workshopRepository = $om->getRepository(Workshop::CLASS_NAME);
 
@@ -859,9 +837,9 @@ class WorkshopController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/admin/converttohowto", requirements={"id" = "\d+"}, name="core_workshop_admin_converttohowto")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_workshop_admin_converttohowto)")
 	 */
+	#[Route(path: '/{id}/admin/converttohowto', requirements: ['id' => '\d+'], name: 'core_workshop_admin_converttohowto')]
 	public function adminConvertToHowtoAction($id, EntityManagerInterface $om, TranslatorInterface $translator, WorkshopManager $workshopManager) {
 		$workshopRepository = $om->getRepository(Workshop::CLASS_NAME);
 

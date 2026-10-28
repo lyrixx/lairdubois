@@ -7,15 +7,13 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 
-/**
- * @Route("/api")
- */
+#[Route(path: '/api')]
 class ApiController extends AbstractController {
 
 	/**
-	 * @Route("/{network}/share.count.json", defaults={"_format" = "json"}, name="core_api_network_share_count")
 	 * @Template("@LadbCore/Core/Api/networkShareCount.json.twig")
 	 */
+	#[Route(path: '/{network}/share.count.json', defaults: ['_format' => 'json'], name: 'core_api_network_share_count')]
 	public function networkShareCountAction(Request $request, $network) {
 
 		$url = $request->get('url');

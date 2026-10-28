@@ -46,9 +46,7 @@ use Ladb\CoreBundle\Entity\Find\Find;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-/**
- * @Route("/spotlights")
- */
+#[Route(path: '/spotlights')]
 class SpotlightController extends AbstractController {
 
 	private function _retrieveRelatedEntity($entityType, $entityId, TypableUtils $typableUtils) {
@@ -61,10 +59,7 @@ class SpotlightController extends AbstractController {
 	}
 
 	/////
-
-	/**
-	 * @Route("/feed.xml", name="core_spotlight_feed")
-	 */
+	#[Route(path: '/feed.xml', name: 'core_spotlight_feed')]
 	public function feedAction(EntityManagerInterface $om, TranslatorInterface $translator, TypableUtils $typableUtils) {
 		$spotlightRepository = $om->getRepository(Spotlight::CLASS_NAME);
 

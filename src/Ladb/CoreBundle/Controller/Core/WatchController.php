@@ -14,9 +14,7 @@ use Ladb\CoreBundle\Entity\Core\Watch;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
-/**
- * @Route("/watches")
- */
+#[Route(path: '/watches')]
 class WatchController extends AbstractController {
 
 	private function _retrieveRelatedEntity($entityType, $entityId, TypableUtils $typableUtils) {
@@ -32,11 +30,10 @@ class WatchController extends AbstractController {
 	}
 
 	/////
-
 	/**
-	 * @Route("/{entityType}/{entityId}/create", requirements={"entityType" = "\d+", "entityId" = "\d+"}, name="core_watch_create")
 	 * @Template("@LadbCore/Core/Watch/create-xhr.html.twig")
 	 */
+	#[Route(path: '/{entityType}/{entityId}/create', requirements: ['entityType' => '\d+', 'entityId' => '\d+'], name: 'core_watch_create')]
 	public function createAction(Request $request, $entityType, $entityId, TranslatorInterface $translator, TypableUtils $typableUtils, WatchableUtils $watchableUtils) {
 
 		$this->createLock('core_watch_create', false, self::LOCK_TTL_CREATE_ACTION, false);
@@ -70,9 +67,9 @@ class WatchController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_watch_delete")
 	 * @Template("@LadbCore/Core/Watch/delete-xhr.html.twig")
 	 */
+	#[Route(path: '/{id}/delete', requirements: ['id' => '\d+'], name: 'core_watch_delete')]
 	public function deleteAction(Request $request, $id, EntityManagerInterface $om, TypableUtils $typableUtils, WatchableUtils $watchableUtils) {
 		$watchRepository = $om->getRepository(Watch::CLASS_NAME);
 
@@ -109,10 +106,10 @@ class WatchController extends AbstractController {
 	}
 
 	/**
-	 * @Route("/{entityType}/{entityId}", requirements={"entityType" = "\d+", "entityId" = "\d+"}, name="core_watch_list_byentity")
-	 * @Route("/{entityType}/{entityId}/{page}", requirements={"entityType" = "\d+", "entityId" = "\d+", "page" = "\d+"}, name="core_watch_list_byentity_page")
 	 * @Template("@LadbCore/Core/Watch/list-byentity.html.twig")
 	 */
+	#[Route(path: '/{entityType}/{entityId}', requirements: ['entityType' => '\d+', 'entityId' => '\d+'], name: 'core_watch_list_byentity')]
+	#[Route(path: '/{entityType}/{entityId}/{page}', requirements: ['entityType' => '\d+', 'entityId' => '\d+', 'page' => '\d+'], name: 'core_watch_list_byentity_page')]
 	public function listByEntityAction(Request $request, $entityType, $entityId, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, TypableUtils $typableUtils, $page = 0) {
 		$watchRepository = $om->getRepository(Watch::CLASS_NAME);
 
