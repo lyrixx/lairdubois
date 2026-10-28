@@ -7,6 +7,7 @@ use Ladb\CoreBundle\Controller\AbstractController;
 use Ladb\CoreBundle\Entity\Workflow\Workflow;
 use Symfony\Component\Mercure\HubInterface;
 use Symfony\Component\Mercure\Update;
+use Symfony\Contracts\Service\Attribute\Required;
 
 abstract class AbstractWorkflowBasedController extends AbstractController {
 
@@ -30,16 +31,12 @@ abstract class AbstractWorkflowBasedController extends AbstractController {
 	// Protected, like the one of UserControllerTrait, that a subclass can use
 	protected $om;
 
-	/**
-	 * @required
-	 */
+	#[Required]
 	public function setHub(HubInterface $hub) {
 		$this->hub = $hub;
 	}
 
-	/**
-	 * @required
-	 */
+	#[Required]
 	public function setOm(EntityManagerInterface $om) {
 		$this->om = $om;
 	}

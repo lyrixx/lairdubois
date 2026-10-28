@@ -7,6 +7,7 @@ use Symfony\Component\Validator\Constraint;
 /**
  * @Annotation
  */
+#[\Attribute(\Attribute::TARGET_PROPERTY | \Attribute::TARGET_METHOD | \Attribute::IS_REPEATABLE)]
 class NoMediaLink extends Constraint {
 
 	public $message = 'Les liens du type "http://www.lairdubois.fr/media/cache..." ne sont pas permis.';

@@ -19,10 +19,10 @@ class Decimal extends BaseValue {
 
 	/**
 	 * @ORM\Column(type="decimal", precision=10, scale=3)
-	 * @Assert\NotNull(groups={"mandatory"})
-	 * @Assert\Type(type="numeric")
-	 * @Assert\Range(min=0)
 	 */
+	#[Assert\NotNull(groups: ['mandatory'])]
+	#[Assert\Type(type: 'numeric')]
+	#[Assert\Range(min: 0)]
 	protected $data;
 
 	/////

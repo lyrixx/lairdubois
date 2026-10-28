@@ -53,9 +53,9 @@ abstract class AbstractWonder extends AbstractDraftableAuthoredPublication imple
 
 	/**
 	 * @ORM\Column(type="string", length=100)
-	 * @Assert\NotBlank()
-	 * @Assert\Length(min=4, max=100)
 	 */
+	#[Assert\NotBlank]
+	#[Assert\Length(min: 4, max: 100)]
 	private $title;
 
 	/**
@@ -72,8 +72,8 @@ abstract class AbstractWonder extends AbstractDraftableAuthoredPublication imple
 	/**
 	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
 	 * @ORM\JoinColumn(nullable=false, name="main_picture_id")
-	 * @Assert\Type(type="Ladb\CoreBundle\Entity\Core\Picture")
 	 */
+	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\Picture')]
 	private $mainPicture;
 
 	/**
@@ -87,8 +87,8 @@ abstract class AbstractWonder extends AbstractDraftableAuthoredPublication imple
 	/**
 	 * @ORM\OneToOne(targetEntity="Ladb\CoreBundle\Entity\Core\License", cascade={"persist", "remove"})
 	 * @ORM\JoinColumn(nullable=true, name="license_id")
-	 * @Assert\Type(type="Ladb\CoreBundle\Entity\Core\License")
 	 */
+	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\License')]
 	private $license;
 
 	/**

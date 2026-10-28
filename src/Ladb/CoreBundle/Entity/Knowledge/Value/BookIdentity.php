@@ -10,8 +10,8 @@ use Ladb\CoreBundle\Validator\Constraints as LadbAssert;
 /**
  * @ORM\Table("tbl_knowledge2_value_book_identity")
  * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Knowledge\Value\BookIdentityRepository")
- * @ladbAssert\ValidBookIdentityValue()
  */
+#[LadbAssert\ValidBookIdentityValue]
 class BookIdentity extends BaseValue {
 
 	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Value\BookIdentity';
@@ -26,10 +26,10 @@ class BookIdentity extends BaseValue {
 
 	/**
 	 * @ORM\Column(type="string", length=100)
-	 * @Assert\NotBlank(groups={"mandatory"})
-	 * @Assert\Length(max=100)
-	 * @Assert\Regex("/^[ a-zA-Z0-9ÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿÑñ'’’#,.:«»&+-]+$/")
 	 */
+	#[Assert\NotBlank(groups: ['mandatory'])]
+	#[Assert\Length(max: 100)]
+	#[Assert\Regex("/^[ a-zA-Z0-9ÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿÑñ'’’#,.:«»&+-]+\$/")]
 	private $work;
 
 	/**
@@ -39,9 +39,9 @@ class BookIdentity extends BaseValue {
 
 	/**
 	 * @ORM\Column(type="string", length=100, nullable=true)
-	 * @Assert\Length(max=100)
-	 * @Assert\Regex("/^[ a-zA-Z0-9ÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿÑñ'’’#,.:«»&+-]+$/")
 	 */
+	#[Assert\Length(max: 100)]
+	#[Assert\Regex("/^[ a-zA-Z0-9ÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿÑñ'’’#,.:«»&+-]+\$/")]
 	private $volume;
 
 	/////

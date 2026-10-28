@@ -7,6 +7,7 @@ use Symfony\Component\Validator\Constraint;
 /**
  * @Annotation
  */
+#[\Attribute(\Attribute::TARGET_CLASS | \Attribute::IS_REPEATABLE)]
 class ValidToolIdentityValue extends Constraint {
 
 	public $message = 'Vous devez préciser le nom du produit.';

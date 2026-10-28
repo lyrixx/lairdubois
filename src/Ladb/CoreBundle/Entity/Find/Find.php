@@ -43,9 +43,9 @@ use Ladb\CoreBundle\Entity\Find\Content\Event;
 /**
  * @ORM\Table("tbl_find")
  * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Find\FindRepository")
- * @LadbAssert\UniqueFind()
- * @LadbAssert\BodyBlocks()
  */
+#[LadbAssert\UniqueFind]
+#[LadbAssert\BodyBlocks]
 class Find extends AbstractDraftableAuthoredPublication implements TitledInterface, SluggedInterface, PicturedInterface, BlockBodiedInterface, IndexableInterface, SitemapableInterface, TaggableInterface, ViewableInterface, ScrapableInterface, LikableInterface, WatchableInterface, CommentableInterface, CollectionnableInterface, ReportableInterface, ExplorableInterface {
 
 	use TitledTrait, SluggedTrait, PicturedTrait, BlockBodiedTrait;
@@ -65,9 +65,9 @@ class Find extends AbstractDraftableAuthoredPublication implements TitledInterfa
 
 	/**
 	 * @ORM\Column(type="string", length=100)
-	 * @Assert\NotBlank()
-	 * @Assert\Length(min=4, max=100)
 	 */
+	#[Assert\NotBlank]
+	#[Assert\Length(min: 4, max: 100)]
 	private $title;
 
 	/**
@@ -79,8 +79,8 @@ class Find extends AbstractDraftableAuthoredPublication implements TitledInterfa
 	/**
 	 * @ORM\OneToOne(targetEntity="Ladb\CoreBundle\Entity\Find\Content\AbstractContent", orphanRemoval=true, cascade={"persist", "remove"})
 	 * @ORM\JoinColumn(name="content_id", nullable=false)
-	 * @Assert\Valid
 	 */
+	#[Assert\Valid]
 	private $content;
 
 	/**
@@ -102,8 +102,8 @@ class Find extends AbstractDraftableAuthoredPublication implements TitledInterfa
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Block\AbstractBlock", cascade={"persist", "remove"})
 	 * @ORM\JoinTable(name="tbl_find_body_block", inverseJoinColumns={@ORM\JoinColumn(name="block_id", referencedColumnName="id", unique=true, onDelete="cascade")})
 	 * @ORM\OrderBy({"sortIndex" = "ASC"})
-	 * @Assert\Count(min=1)
 	 */
+	#[Assert\Count(min: 1)]
 	private $bodyBlocks;
 
 	/**
@@ -160,9 +160,7 @@ class Find extends AbstractDraftableAuthoredPublication implements TitledInterfa
 
 	/////
 
-	/**
-	 * @Assert\Range(min=1, max=3, minMessage="Vous devez sélectionner un type.")
-	 */
+	#[Assert\Range(min: 1, max: 3, minMessage: 'Vous devez sélectionner un type.')]
 	private $contentType = Find::CONTENT_TYPE_NONE;
 
 	/////

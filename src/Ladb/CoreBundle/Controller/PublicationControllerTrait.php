@@ -13,6 +13,7 @@ use Ladb\CoreBundle\Model\RepublishableInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpFoundation\Session\Storage\SessionStorageInterface;
+use Symfony\Contracts\Service\Attribute\Required;
 
 trait PublicationControllerTrait {
 
@@ -20,9 +21,7 @@ trait PublicationControllerTrait {
 
 	private $witnessManager;
 
-	/**
-	 * @required
-	 */
+	#[Required]
 	public function setWitnessManager(WitnessManager $witnessManager) {
 		$this->witnessManager = $witnessManager;
 	}

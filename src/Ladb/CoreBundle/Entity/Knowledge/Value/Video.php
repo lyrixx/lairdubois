@@ -11,8 +11,8 @@ use Ladb\CoreBundle\Utils\VideoHostingUtils;
 /**
  * @ORM\Table("tbl_knowledge2_value_video")
  * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Knowledge\Value\VideoRepository")
- * @LadbAssert\SupportedVideoHosting()
  */
+#[LadbAssert\SupportedVideoHosting]
 class Video extends BaseValue {
 
 	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Value\Video';
@@ -22,10 +22,10 @@ class Video extends BaseValue {
 
 	/**
 	 * @ORM\Column(type="string", length=255)
-	 * @Assert\NotBlank(groups={"mandatory"})
-	 * @Assert\Length(max=255)
-	 * @Assert\Url()
 	 */
+	#[Assert\NotBlank(groups: ['mandatory'])]
+	#[Assert\Length(max: 255)]
+	#[Assert\Url]
 	protected $data;
 
 	/**

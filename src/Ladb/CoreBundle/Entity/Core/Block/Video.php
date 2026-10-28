@@ -10,15 +10,15 @@ use Ladb\CoreBundle\Utils\VideoHostingUtils;
 /**
  * @ORM\Table("tbl_core_block_video")
  * @ORM\Entity
- * @LadbAssert\SupportedVideoHosting()
  */
+#[LadbAssert\SupportedVideoHosting]
 class Video extends AbstractBlock {
 
 	/**
 	 * @ORM\Column(type="string", length=255, nullable=false)
-	 * @Assert\NotBlank()
-	 * @Assert\Url
 	 */
+	#[Assert\NotBlank]
+	#[Assert\Url]
 	private $url;
 
 	/**

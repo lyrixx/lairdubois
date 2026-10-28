@@ -25,14 +25,14 @@ class Price extends BaseValue {
 
 	/**
 	 * @ORM\Column(type="float")
-	 * @Assert\NotBlank(groups={"mandatory"})
 	 */
+	#[Assert\NotBlank(groups: ['mandatory'])]
 	protected $rawPrice;
 
 	/**
 	 * @ORM\Column(type="string", length=3)
-	 * @Assert\NotBlank
 	 */
+	#[Assert\NotBlank]
 	protected $currency = 'EUR';
 
 	/////

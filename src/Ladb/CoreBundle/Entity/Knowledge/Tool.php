@@ -101,8 +101,8 @@ class Tool extends AbstractKnowledge implements ReviewableInterface {
 	/**
 	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Resource", cascade={"persist"})
 	 * @ORM\JoinColumn(name="manual_id", nullable=true)
-	 * @Assert\Type(type="Ladb\CoreBundle\Entity\Core\Resource")
 	 */
+	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\Resource')]
 	private $manual;
 
 	/**

@@ -25,10 +25,10 @@ class Isbn extends BaseValue {
 
 	/**
 	 * @ORM\Column(type="string", length=20)
-	 * @Assert\NotBlank(groups={"mandatory"})
-	 * @Assert\Isbn
-	 * @Assert\Length(max=20)
 	 */
+	#[Assert\NotBlank(groups: ['mandatory'])]
+	#[Assert\Isbn]
+	#[Assert\Length(max: 20)]
 	protected $rawIsbn;
 
 	/////

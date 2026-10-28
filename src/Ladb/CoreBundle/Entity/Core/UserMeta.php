@@ -25,15 +25,15 @@ class UserMeta {
 	/**
 	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist", "remove"})
 	 * @ORM\JoinColumn(name="banner_id", nullable=true)
-	 * @Assert\Type(type="Ladb\CoreBundle\Entity\Core\Picture")
 	 */
+	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\Picture')]
 	private $banner;
 
 	/**
 	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Biography", cascade={"persist", "remove"})
 	 * @ORM\JoinColumn(nullable=true, name="biography_id")
-	 * @Assert\Type(type="Ladb\CoreBundle\Entity\Core\Biography")
 	 */
+	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\Biography')]
 	private $biography;
 
 	/**
@@ -45,50 +45,50 @@ class UserMeta {
 
 	/**
 	 * @ORM\Column(type="string", length=255, nullable=true)
-	 * @Assert\Url()
 	 */
+	#[Assert\Url]
 	private $website;
 
 	/**
 	 * @ORM\Column(type="string", length=50, nullable=true)
-	 * @Assert\Regex("/^[a-zA-Z0-9.]+$/")
 	 */
+	#[Assert\Regex('/^[a-zA-Z0-9.]+$/')]
 	private $facebook;
 
 	/**
 	 * @ORM\Column(type="string", length=50, nullable=true)
-	 * @Assert\Regex("/^[a-zA-Z0-9_]{1,15}$/")
 	 */
+	#[Assert\Regex('/^[a-zA-Z0-9_]{1,15}$/')]
 	private $twitter;
 
 	/**
 	 * @ORM\Column(type="string", length=50, nullable=true)
-	 * @Assert\Regex("/^[a-zA-Z0-9-_]+$/")
 	 */
+	#[Assert\Regex('/^[a-zA-Z0-9-_]+$/')]
 	private $youtube;
 
 	/**
 	 * @ORM\Column(type="string", length=24, nullable=true)
-	 * @Assert\Regex("/^[a-zA-Z0-9]+$/")
 	 */
+	#[Assert\Regex('/^[a-zA-Z0-9]+$/')]
 	private $vimeo;
 
 	/**
 	 * @ORM\Column(type="string", length=24, nullable=true)
-	 * @Assert\Regex("/^[a-zA-Z0-9]+$/")
 	 */
+	#[Assert\Regex('/^[a-zA-Z0-9]+$/')]
 	private $dailymotion;
 
 	/**
 	 * @ORM\Column(type="string", length=50, nullable=true)
-	 * @Assert\Regex("/^[a-zA-Z0-9]+$/")
 	 */
+	#[Assert\Regex('/^[a-zA-Z0-9]+$/')]
 	private $pinterest;
 
 	/**
 	 * @ORM\Column(type="string", length=50, nullable=true)
-	 * @Assert\Regex("/^[a-zA-Z0-9_.]+$/")
 	 */
+	#[Assert\Regex('/^[a-zA-Z0-9_.]+$/')]
 	private $instagram;
 
 

@@ -13,8 +13,8 @@ use Ladb\CoreBundle\Model\LocalisableExtendedInterface;
 /**
  * @ORM\Table("tbl_knowledge2_value_location")
  * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Knowledge\Value\LocationRepository")
- * @ladbAssert\ValidLocationValue()
  */
+#[LadbAssert\ValidLocationValue]
 class Location extends BaseValue implements LocalisableExtendedInterface {
 
 	use LocalisableTrait, LocalisableExtendedTrait;
@@ -31,9 +31,9 @@ class Location extends BaseValue implements LocalisableExtendedInterface {
 
 	/**
 	 * @ORM\Column(type="string", length=255, nullable=false)
-	 * @Assert\NotBlank(groups={"mandatory"})
-	 * @Assert\Length(max=255)
 	 */
+	#[Assert\NotBlank(groups: ['mandatory'])]
+	#[Assert\Length(max: 255)]
 	private $location;
 
 	/**

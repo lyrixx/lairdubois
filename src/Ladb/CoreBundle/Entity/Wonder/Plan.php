@@ -15,8 +15,8 @@ use Ladb\CoreBundle\Model\InspirableTrait;
 /**
  * @ORM\Table("tbl_wonder_plan")
  * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Wonder\PlanRepository")
- * @LadbAssert\PlanResourcesMaxSize()
  */
+#[LadbAssert\PlanResourcesMaxSize]
 class Plan extends AbstractWonder implements HtmlBodiedInterface, InspirableInterface {
 
 	use HtmlBodiedTrait;
@@ -28,9 +28,9 @@ class Plan extends AbstractWonder implements HtmlBodiedInterface, InspirableInte
 
 	/**
 	 * @ORM\Column(type="text", nullable=false)
-	 * @Assert\NotBlank()
-	 * @Assert\Length(min=5, max=4000)
 	 */
+	#[Assert\NotBlank]
+	#[Assert\Length(min: 5, max: 4000)]
 	protected $body;
 
 	/**
@@ -47,21 +47,21 @@ class Plan extends AbstractWonder implements HtmlBodiedInterface, InspirableInte
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
 	 * @ORM\JoinTable(name="tbl_wonder_plan_picture")
 	 * @ORM\OrderBy({"sortIndex" = "ASC"})
-	 * @Assert\Count(min=1, max=5)
 	 */
+	#[Assert\Count(min: 1, max: 5)]
 	protected $pictures;
 
 	/**
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Resource", cascade={"persist"})
 	 * @ORM\JoinTable(name="tbl_wonder_plan_resource")
-	 * @Assert\Count(min=1, max=10)
 	 */
+	#[Assert\Count(min: 1, max: 10)]
 	private $resources;
 
 	/**
 	 * @ORM\Column(type="string", length=255, nullable=true, name="sketchup_3d_warehouse_url")
-	 * @Assert\Url()
 	 */
+	#[Assert\Url]
 	private $sketchup3DWarehouseUrl = null;
 
 	/**
@@ -71,9 +71,9 @@ class Plan extends AbstractWonder implements HtmlBodiedInterface, InspirableInte
 
 	/**
 	 * @ORM\Column(type="string", length=255, nullable=true, name="a360_url")
-	 * @Assert\Regex("/^https:\/\/a360\.co\/[a-zA-Z0-9]+$/", message="Lien public non conforme.")
-	 * @Assert\Url()
 	 */
+	#[Assert\Regex('/^https:\/\/a360\.co\/[a-zA-Z0-9]+$/', message: 'Lien public non conforme.')]
+	#[Assert\Url]
 	private $a360Url = null;
 
 	/**
@@ -125,8 +125,8 @@ class Plan extends AbstractWonder implements HtmlBodiedInterface, InspirableInte
 	 *      	joinColumns={ @ORM\JoinColumn(name="plan_id", referencedColumnName="id") },
 	 *      	inverseJoinColumns={ @ORM\JoinColumn(name="rebound_plan_id", referencedColumnName="id") }
 	 *      )
-	 * @Assert\Count(min=0, max=4)
 	 */
+	#[Assert\Count(min: 0, max: 4)]
 	private $inspirations;
 
 	/**
@@ -137,8 +137,8 @@ class Plan extends AbstractWonder implements HtmlBodiedInterface, InspirableInte
 	/**
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Qa\Question", inversedBy="plans", cascade={"persist"})
 	 * @ORM\JoinTable(name="tbl_wonder_plan_question")
-	 * @Assert\Count(min=0, max=4)
 	 */
+	#[Assert\Count(min: 0, max: 4)]
 	private $questions;
 
 	/**
@@ -189,8 +189,8 @@ class Plan extends AbstractWonder implements HtmlBodiedInterface, InspirableInte
 	/**
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\School", inversedBy="plans", cascade={"persist"})
 	 * @ORM\JoinTable(name="tbl_wonder_plan_school")
-	 * @Assert\Count(min=0, max=10)
 	 */
+	#[Assert\Count(min: 0, max: 10)]
 	private $schools;
 
 	/////

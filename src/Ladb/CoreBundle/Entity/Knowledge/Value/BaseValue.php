@@ -24,9 +24,9 @@ use Ladb\CoreBundle\Model\WatchableChildInterface;
  * @ORM\InheritanceType("JOINED")
  * @ORM\DiscriminatorColumn(name="discr", type="integer")
  * @ORM\DiscriminatorMap({1 = "Integer", 2 = "Text", 3 = "Picture", 4 = "Url", 5 = "Location", 6 = "Phone", 7 = "Sign", 8 = "Longtext", 9 = "Language", 10 = "Isbn", 11 = "Price", 12 = "SoftwareIdentity", 13 = "FileExtension", 14 = "LinkableText", 15 = "Video", 16 = "BookIdentity", 17 = "Pdf", 18 = "Decimal"})
- * @LadbAssert\ValueSource()
- * @UniqueEntity(fields={"dataHash", "parentEntityType", "parentEntityId", "parentEntityField"})
  */
+#[LadbAssert\ValueSource]
+#[UniqueEntity(fields: ['dataHash', 'parentEntityType', 'parentEntityId', 'parentEntityField'])]
 abstract class BaseValue implements AuthoredInterface, WatchableChildInterface, CommentableInterface, VotableInterface {
 
 	use AuthoredTrait;
@@ -93,8 +93,8 @@ abstract class BaseValue implements AuthoredInterface, WatchableChildInterface, 
 
 	/**
 	 * @ORM\Column(type="string", length=255, nullable=true)
-	 * @Assert\Length(max=255)
 	 */
+	#[Assert\Length(max: 255)]
 	private $legend;
 
 	/**
@@ -104,10 +104,10 @@ abstract class BaseValue implements AuthoredInterface, WatchableChildInterface, 
 
 	/**
 	 * @ORM\Column(type="string", length=2048, nullable=true)
-	 * @Assert\NotBlank(groups={"website", "other"})
-	 * @Assert\Length(min=2, max=2048, groups={"website", "other"})
-	 * @Assert\Url(groups={"website"})
 	 */
+	#[Assert\NotBlank(groups: ['website', 'other'])]
+	#[Assert\Length(min: 2, max: 2048, groups: ['website', 'other'])]
+	#[Assert\Url(groups: ['website'])]
 	private $source;
 
 	/**

@@ -22,8 +22,8 @@ use Ladb\CoreBundle\Utils\VideoHostingUtils;
 /**
  * @ORM\Table("tbl_youtook_took")
  * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Youtook\TookRepository")
- * @LadbAssert\ValidTook()
  */
+#[LadbAssert\ValidTook]
 class Took extends AbstractAuthoredPublication implements TitledInterface, SluggedInterface, PicturedInterface, HtmlBodiedInterface, ScrapableInterface {
 
 	use TitledTrait, SluggedTrait, PicturedTrait, HtmlBodiedTrait;
@@ -34,9 +34,9 @@ class Took extends AbstractAuthoredPublication implements TitledInterface, Slugg
 
 	/**
 	 * @ORM\Column(type="string", length=255, nullable=false)
-	 * @Assert\NotBlank()
-	 * @Assert\Url()
 	 */
+	#[Assert\NotBlank]
+	#[Assert\Url]
 	private $url;
 
 	/**
@@ -51,8 +51,8 @@ class Took extends AbstractAuthoredPublication implements TitledInterface, Slugg
 
 	/**
 	 * @ORM\Column(type="string", length=255)
-	 * @Assert\NotBlank()
 	 */
+	#[Assert\NotBlank]
 	private $title;
 
 	/**
@@ -79,9 +79,9 @@ class Took extends AbstractAuthoredPublication implements TitledInterface, Slugg
 	/**
 	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
 	 * @ORM\JoinColumn(name="main_picture_id", nullable=true)
-	 * @Assert\Type(type="Ladb\CoreBundle\Entity\Core\Picture")
-	 * @Assert\NotBlank()
 	 */
+	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\Picture')]
+	#[Assert\NotBlank]
 	private $mainPicture;
 
 	/**

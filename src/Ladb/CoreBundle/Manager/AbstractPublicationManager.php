@@ -29,6 +29,7 @@ use Ladb\CoreBundle\Utils\MentionUtils;
 use Ladb\CoreBundle\Utils\ReportableUtils;
 use Ladb\CoreBundle\Utils\WatchableUtils;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\Service\Attribute\Required;
 
 abstract class AbstractPublicationManager extends AbstractManager {
 
@@ -41,58 +42,42 @@ abstract class AbstractPublicationManager extends AbstractManager {
 	protected $watchableUtils;
 	protected $witnessManager;
 
-	/**
-	 * @required
-	 */
+	#[Required]
 	public function setCollectionnableUtils(CollectionnableUtils $collectionnableUtils) {
 		$this->collectionnableUtils = $collectionnableUtils;
 	}
 
-	/**
-	 * @required
-	 */
+	#[Required]
 	public function setCommentableUtils(CommentableUtils $commentableUtils) {
 		$this->commentableUtils = $commentableUtils;
 	}
 
-	/**
-	 * @required
-	 */
+	#[Required]
 	public function setDispatcher(EventDispatcherInterface $dispatcher) {
 		$this->dispatcher = $dispatcher;
 	}
 
-	/**
-	 * @required
-	 */
+	#[Required]
 	public function setLikableUtils(LikableUtils $likableUtils) {
 		$this->likableUtils = $likableUtils;
 	}
 
-	/**
-	 * @required
-	 */
+	#[Required]
 	public function setMentionUtils(MentionUtils $mentionUtils) {
 		$this->mentionUtils = $mentionUtils;
 	}
 
-	/**
-	 * @required
-	 */
+	#[Required]
 	public function setReportableUtils(ReportableUtils $reportableUtils) {
 		$this->reportableUtils = $reportableUtils;
 	}
 
-	/**
-	 * @required
-	 */
+	#[Required]
 	public function setWatchableUtils(WatchableUtils $watchableUtils) {
 		$this->watchableUtils = $watchableUtils;
 	}
 
-	/**
-	 * @required
-	 */
+	#[Required]
 	public function setWitnessManager(WitnessManager $witnessManager) {
 		$this->witnessManager = $witnessManager;
 	}

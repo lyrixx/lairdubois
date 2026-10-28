@@ -68,10 +68,10 @@ class Comment implements TypableInterface, BasicTimestampableInterface, Authored
 
 	/**
 	 * @ORM\Column(type="text", nullable=false)
-	 * @Assert\NotBlank()
-	 * @Assert\Length(min=2, max=10000)
-	 * @LadbAssert\NoMediaLink()
 	 */
+	#[Assert\NotBlank]
+	#[Assert\Length(min: 2, max: 10000)]
+	#[LadbAssert\NoMediaLink]
 	private $body;
 
 	/**
@@ -83,8 +83,8 @@ class Comment implements TypableInterface, BasicTimestampableInterface, Authored
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
 	 * @ORM\JoinTable(name="tbl_core_comment_picture")
 	 * @ORM\OrderBy({"sortIndex" = "ASC"})
-	 * @Assert\Count(min=0, max=4)
 	 */
+	#[Assert\Count(min: 0, max: 4)]
 	protected $pictures;
 
 	/**

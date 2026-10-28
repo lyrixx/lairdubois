@@ -19,10 +19,10 @@ class Integer extends BaseValue {
 
 	/**
 	 * @ORM\Column(type="integer")
-	 * @Assert\NotNull(groups={"mandatory"})
-	 * @Assert\Type(type="numeric")
-	 * @Assert\Range(min=0)
 	 */
+	#[Assert\NotNull(groups: ['mandatory'])]
+	#[Assert\Type(type: 'numeric')]
+	#[Assert\Range(min: 0)]
 	protected $data;
 
 	/////

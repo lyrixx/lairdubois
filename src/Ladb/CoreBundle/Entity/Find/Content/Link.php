@@ -12,16 +12,16 @@ class Link extends AbstractContent {
 
 	/**
 	 * @ORM\Column(type="string", length=255, nullable=false)
-	 * @Assert\NotBlank(groups={"link"})
-	 * @Assert\Url(groups={"link"})
 	 */
+	#[Assert\NotBlank(groups: ['link'])]
+	#[Assert\Url(groups: ['link'])]
 	private $url;
 
 	/**
 	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
 	 * @ORM\JoinColumn(name="thumbnail_id", nullable=true)
-	 * @Assert\Type(type="Ladb\CoreBundle\Entity\Core\Picture")
 	 */
+	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\Picture')]
 	private $thumbnail;
 
 	// Url /////

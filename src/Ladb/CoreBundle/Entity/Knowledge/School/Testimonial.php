@@ -14,8 +14,8 @@ use Ladb\CoreBundle\Model\HtmlBodiedInterface;
 /**
  * @ORM\Table("tbl_knowledge2_school_testimonial")
  * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Knowledge\School\TestimonialRepository")
- * @LadbAssert\SchoolTestimonial()
  */
+#[LadbAssert\SchoolTestimonial]
 class Testimonial implements TypableInterface, HtmlBodiedInterface {
 
 	use AuthoredTrait, HtmlBodiedTrait;
@@ -61,9 +61,9 @@ class Testimonial implements TypableInterface, HtmlBodiedInterface {
 
 	/**
 	 * @ORM\Column(name="from_year", type="integer")
-	 * @Assert\NotNull()
-	 * @Assert\GreaterThanOrEqual(1900)
 	 */
+	#[Assert\NotNull]
+	#[Assert\GreaterThanOrEqual(1900)]
 	private $fromYear;
 
 	/**
@@ -73,10 +73,10 @@ class Testimonial implements TypableInterface, HtmlBodiedInterface {
 
 	/**
 	 * @ORM\Column(type="text", nullable=true)
-	 * @Assert\NotBlank()
-	 * @Assert\Length(min=5, max=5000)
-	 * @LadbAssert\NoMediaLink()
 	 */
+	#[Assert\NotBlank]
+	#[Assert\Length(min: 5, max: 5000)]
+	#[LadbAssert\NoMediaLink]
 	private $body;
 
 	/**

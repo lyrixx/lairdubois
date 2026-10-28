@@ -29,14 +29,14 @@ class Part {
 
 	/**
 	 * @ORM\Column(type="string", length=40)
-	 * @Assert\NotBlank()
 	 */
+	#[Assert\NotBlank]
 	private $name;
 
 	/**
 	 * @ORM\Column(type="integer")
-	 * @Assert\GreaterThan(0)
 	 */
+	#[Assert\GreaterThan(0)]
 	private $count = 1;
 
 	/**

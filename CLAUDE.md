@@ -203,7 +203,7 @@ castor qa:phpunit [-- --filter …]
 castor qa:deprecations       # var/deprecations/report.md, et le résumé du job en CI
 castor qa:install            # outils de tools/ (PHPStan, PHPUnit), installés à la volée sinon
 castor qa:e2e [-- --grep …]  # tests E2E (Playwright) : recharge la base du dev, hors qa:all, job E2E en CI
-castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et getDoctrine() des actions → arguments (#16, #177), des utils, managers, listeners et validateurs → constructeur (#118), dépréciations de 4.x (#133), routes en attributs (#25)
+castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et getDoctrine() des actions → arguments (#16, #177), des utils, managers, listeners et validateurs → constructeur (#118), dépréciations de 4.x (#133), routes, contraintes et `@required` en attributs (#25)
 ```
 
 - PHPUnit 9.6, dans `tools/phpunit` et pas dans le `composer.json` de l'application : c'est la
@@ -256,7 +256,17 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et get
   Rector 2.7 n'applique plus `withAttributesSets(symfonyRoute: true)` ni `symfonyValidator` seuls,
   et `symfony: true` convertit d'un coup les routes, les contraintes et `@required`. Les routes sont
   des `#[Route]` depuis #25 ; `routing.yml` garde `type: annotation`, le seul type de la 5.4 pour
-  un controller, attributs compris.
+  un controller, attributs compris. Les contraintes de validation (`UniqueEntity` comprise) et les
+  setters `#[Required]` aussi ; `enable_annotations` du validateur lit les deux en 5.4.
+- Rector ne convertit une contrainte qu'en attribut existant : les nôtres ont un
+  `#[\Attribute(...)]`, écrit à la main, aux cibles de leur `getTargets()` (classe, ou propriété et
+  getter), répétables comme celles de Symfony. Il saute une annotation dont l'alias n'a pas la
+  casse du `use` (`@ladbAssert\…`, que Doctrine acceptait), recopie le nom complet d'une annotation
+  (`@Ladb\CoreBundle\…`) sans `\` de tête (relatif au namespace : une autre classe), écrit
+  `Required` en nom complet (importé à la main ensuite) et retire la ligne vide entre un
+  commentaire et le docblock qu'il supprime. Le validateur lit les attributs d'un élément avant
+  ses annotations : ne pas mélanger les deux sur une classe, une propriété ou un getter, l'ordre
+  des contraintes (et des messages) changerait.
 - Les règles de rector-symfony (les sets de 4.x ne sont plus dans Rector 2 : une règle à la fois
   dans `rector.php`) ne s'appliquent qu'à partir d'une version d'un paquet de Symfony
   (`symfony/console`…), lue dans `vendor/composer/installed.json`, où `symfony/symfony` les
@@ -622,7 +632,7 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   reconnexion automatique (un an après la dernière visite).
 - Controllers : services autowirés (prototype `Ladb\CoreBundle\Controller\`), une action reçoit ses
   services en arguments, un helper de la classe de l'action qui l'appelle (en dernier argument),
-  un trait ou un controller abstrait par un setter `@required`. L'entity manager est un service
+  un trait ou un controller abstrait par un setter `#[Required]`. L'entity manager est un service
   comme les autres (`EntityManagerInterface $om`, plus de `getDoctrine()`, #177). Dans les traits et
   les controllers abstraits, sa propriété `$om` est protégée, pas privée : un controller qui
   utilise `PublicationControllerTrait` sous un parent qui l'utilise aussi ou qui a son propre
@@ -642,7 +652,7 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   (`fos_elastica.index.<type>`) : un index par type de contenu (#31), `ladb_<type>` dans
   Elasticsearch (`elasticsearch_index_prefix`).
 - Managers : dépendances par le constructeur (`Manager/`, sans container). Les classes abstraites
-  (`AbstractManager`, `AbstractPublicationManager`…) les reçoivent par des setters `@required`,
+  (`AbstractManager`, `AbstractPublicationManager`…) les reçoivent par des setters `#[Required]`,
   dans des propriétés protégées que leurs sous-classes lisent sans les redemander : le
   constructeur reste aux sous-classes. `Qa\AnswerManager` reçoit `Qa\QuestionManager` par un
   setter, qui le reçoit dans son constructeur (le container refuse un cycle de constructeurs).

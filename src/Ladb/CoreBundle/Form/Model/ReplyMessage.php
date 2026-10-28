@@ -6,15 +6,11 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class ReplyMessage {
 
-	/**
-	 * @Assert\Count(min=0, max=4)
-	 */
+	#[Assert\Count(min: 0, max: 4)]
 	protected $pictures;
 
-	/**
-	 * @Assert\NotBlank()
-	 * @Assert\Length(min=2, max=10000)
-	 */
+	#[Assert\NotBlank]
+	#[Assert\Length(min: 2, max: 10000)]
 	private $body;
 
 	/////

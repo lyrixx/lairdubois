@@ -41,8 +41,8 @@ class Task {
 
 	/**
 	 * @ORM\Column(type="string", length=100)
-	 * @Assert\NotBlank()
 	 */
+	#[Assert\NotBlank]
 	private $title;
 
 	/**
@@ -72,14 +72,14 @@ class Task {
 
 	/**
 	 * @ORM\Column(type="integer", name="estimated_duration")
-	 * @Assert\GreaterThanOrEqual(0)
 	 */
+	#[Assert\GreaterThanOrEqual(0)]
 	private $estimatedDuration = 0;
 
 	/**
 	 * @ORM\Column(type="integer")
-	 * @Assert\GreaterThanOrEqual(0)
 	 */
+	#[Assert\GreaterThanOrEqual(0)]
 	private $duration = 0;
 
 	/**

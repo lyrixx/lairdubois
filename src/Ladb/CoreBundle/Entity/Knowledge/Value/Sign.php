@@ -10,8 +10,8 @@ use Ladb\CoreBundle\Validator\Constraints as LadbAssert;
 /**
  * @ORM\Table("tbl_knowledge2_value_sign")
  * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Knowledge\Value\SignRepository")
- * @ladbAssert\ValidSignValue()
  */
+#[LadbAssert\ValidSignValue]
 class Sign extends BaseValue {
 
 	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Value\Sign';
@@ -26,10 +26,10 @@ class Sign extends BaseValue {
 
 	/**
 	 * @ORM\Column(type="string", length=100)
-	 * @Assert\NotBlank(groups={"mandatory"})
-	 * @Assert\Length(max=100)
-	 * @Assert\Regex("/^[ a-zA-Z0-9ÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿÑñ\-.'’’&]+$/")
 	 */
+	#[Assert\NotBlank(groups: ['mandatory'])]
+	#[Assert\Length(max: 100)]
+	#[Assert\Regex("/^[ a-zA-Z0-9ÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿÑñ\\-.'’’&]+\$/")]
 	private $brand;
 
 	/**
@@ -39,9 +39,9 @@ class Sign extends BaseValue {
 
 	/**
 	 * @ORM\Column(type="string", length=100, nullable=true)
-	 * @Assert\Length(max=100)
-	 * @Assert\Regex("/^[ a-zA-Z0-9ÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿÑñ\-.'’’&]+$/")
 	 */
+	#[Assert\Length(max: 100)]
+	#[Assert\Regex("/^[ a-zA-Z0-9ÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿÑñ\\-.'’’&]+\$/")]
 	private $store;
 
 	/////

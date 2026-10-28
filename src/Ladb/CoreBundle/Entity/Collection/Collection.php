@@ -44,9 +44,9 @@ class Collection extends AbstractAuthoredPublication implements IndexableInterfa
 
 	/**
 	 * @ORM\Column(type="string", length=100)
-	 * @Assert\NotBlank()
-	 * @Assert\Length(min=4, max=100)
 	 */
+	#[Assert\NotBlank]
+	#[Assert\Length(min: 4, max: 100)]
 	private $title;
 
 	/**
@@ -63,10 +63,10 @@ class Collection extends AbstractAuthoredPublication implements IndexableInterfa
 
 	/**
 	 * @ORM\Column(type="text", nullable=true)
-	 * @Assert\Length(max=4000)
-	 * @Assert\Length(min=5, groups={"public"})
-	 * @Assert\NotBlank(groups={"public"})
 	 */
+	#[Assert\Length(max: 4000)]
+	#[Assert\Length(min: 5, groups: ['public'])]
+	#[Assert\NotBlank(groups: ['public'])]
 	private $body;
 
 	/**
@@ -93,8 +93,8 @@ class Collection extends AbstractAuthoredPublication implements IndexableInterfa
 	/**
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Tag", cascade={"persist"})
 	 * @ORM\JoinTable(name="tbl_collection_tag")
-	 * @Assert\Count(min=2, groups={"public"})
 	 */
+	#[Assert\Count(min: 2, groups: ['public'])]
 	private $tags;
 
 	/**

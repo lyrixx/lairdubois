@@ -13,6 +13,7 @@ use Ladb\CoreBundle\Utils\FollowerUtils;
 use Ladb\CoreBundle\Utils\GlobalUtils;
 use Ladb\CoreBundle\Utils\LikableUtils;
 use Ladb\CoreBundle\Utils\WatchableUtils;
+use Symfony\Contracts\Service\Attribute\Required;
 
 abstract class AbstractHowtoBasedController extends AbstractController {
 
@@ -27,58 +28,42 @@ abstract class AbstractHowtoBasedController extends AbstractController {
 	private $likableUtils;
 	private $watchableUtils;
 
-	/**
-	 * @required
-	 */
+	#[Required]
 	public function setCollectionnableUtils(CollectionnableUtils $collectionnableUtils) {
 		$this->collectionnableUtils = $collectionnableUtils;
 	}
 
-	/**
-	 * @required
-	 */
+	#[Required]
 	public function setCommentableUtils(CommentableUtils $commentableUtils) {
 		$this->commentableUtils = $commentableUtils;
 	}
 
-	/**
-	 * @required
-	 */
+	#[Required]
 	public function setEmbeddableUtils(EmbeddableUtils $embeddableUtils) {
 		$this->embeddableUtils = $embeddableUtils;
 	}
 
-	/**
-	 * @required
-	 */
+	#[Required]
 	public function setExplorableUtils(ExplorableUtils $explorableUtils) {
 		$this->explorableUtils = $explorableUtils;
 	}
 
-	/**
-	 * @required
-	 */
+	#[Required]
 	public function setFollowerUtils(FollowerUtils $followerUtils) {
 		$this->followerUtils = $followerUtils;
 	}
 
-	/**
-	 * @required
-	 */
+	#[Required]
 	public function setGlobalUtils(GlobalUtils $globalUtils) {
 		$this->globalUtils = $globalUtils;
 	}
 
-	/**
-	 * @required
-	 */
+	#[Required]
 	public function setLikableUtils(LikableUtils $likableUtils) {
 		$this->likableUtils = $likableUtils;
 	}
 
-	/**
-	 * @required
-	 */
+	#[Required]
 	public function setWatchableUtils(WatchableUtils $watchableUtils) {
 		$this->watchableUtils = $watchableUtils;
 	}

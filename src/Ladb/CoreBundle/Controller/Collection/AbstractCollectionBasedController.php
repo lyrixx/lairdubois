@@ -7,6 +7,7 @@ use Ladb\CoreBundle\Controller\AbstractController;
 use Ladb\CoreBundle\Entity\Collection\Collection;
 use Ladb\CoreBundle\Model\CollectionnableInterface;
 use Ladb\CoreBundle\Utils\TypableUtils;
+use Symfony\Contracts\Service\Attribute\Required;
 
 abstract class AbstractCollectionBasedController extends AbstractController {
 
@@ -14,16 +15,12 @@ abstract class AbstractCollectionBasedController extends AbstractController {
 	protected $om;
 	private $typableUtils;
 
-	/**
-	 * @required
-	 */
+	#[Required]
 	public function setOm(EntityManagerInterface $om) {
 		$this->om = $om;
 	}
 
-	/**
-	 * @required
-	 */
+	#[Required]
 	public function setTypableUtils(TypableUtils $typableUtils) {
 		$this->typableUtils = $typableUtils;
 	}

@@ -7,6 +7,7 @@ use Ladb\CoreBundle\Manager\AbstractPublicationManager;
 use Ladb\CoreBundle\Utils\ActivityUtils;
 use Ladb\CoreBundle\Utils\PropertyUtils;
 use Ladb\CoreBundle\Utils\VotableUtils;
+use Symfony\Contracts\Service\Attribute\Required;
 
 abstract class AbstractKnowledgeManager extends AbstractPublicationManager {
 
@@ -14,23 +15,17 @@ abstract class AbstractKnowledgeManager extends AbstractPublicationManager {
 	protected $propertyUtils;
 	protected $votableUtils;
 
-	/**
-	 * @required
-	 */
+	#[Required]
 	public function setActivityUtils(ActivityUtils $activityUtils) {
 		$this->activityUtils = $activityUtils;
 	}
 
-	/**
-	 * @required
-	 */
+	#[Required]
 	public function setPropertyUtils(PropertyUtils $propertyUtils) {
 		$this->propertyUtils = $propertyUtils;
 	}
 
-	/**
-	 * @required
-	 */
+	#[Required]
 	public function setVotableUtils(VotableUtils $votableUtils) {
 		$this->votableUtils = $votableUtils;
 	}
