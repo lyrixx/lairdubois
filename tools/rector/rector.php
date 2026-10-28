@@ -11,9 +11,11 @@ use PHPStan\Type\StringType;
 use PHPStan\Type\UnionType;
 use Rector\Composer\InstalledPackageResolver;
 use Rector\Config\RectorConfig;
+use Rector\Renaming\Rector\Name\RenameClassRector;
 use Rector\Symfony\Symfony42\Rector\New_\RootNodeTreeBuilderRector;
 use Rector\Symfony\Symfony43\Rector\MethodCall\MakeDispatchFirstArgumentEventRector;
 use Rector\Symfony\Symfony44\Rector\ClassMethod\ConsoleExecuteReturnIntRector;
+use Rector\Symfony\Symfony51\Rector\Class_\LogoutSuccessHandlerToLogoutEventSubscriberRector;
 use Rector\TypeDeclaration\Rector\ClassMethod\AddReturnTypeDeclarationRector;
 use Rector\TypeDeclaration\ValueObject\AddReturnTypeDeclaration;
 
@@ -28,6 +30,13 @@ return static function (RectorConfig $rectorConfig): void {
             ConsoleExecuteReturnIntRector::class,
             MakeDispatchFirstArgumentEventRector::class,
             RootNodeTreeBuilderRector::class,
+            // Deprecations of Symfony 5.x (#177)
+            LogoutSuccessHandlerToLogoutEventSubscriberRector::class,
+        ])
+        // Of the renames of symfony/security-core 5.3 (composer-based set of rector-symfony), the
+        // one that the code needs (#177)
+        ->withConfiguredRule(RenameClassRector::class, [
+            'Symfony\\Component\\Security\\Core\\Encoder\\EncoderFactoryInterface' => 'Symfony\\Component\\PasswordHasher\\Hasher\\PasswordHasherFactoryInterface',
         ])
         // Return types that the DebugClassLoader of Symfony 5.4 announces for our classes (#177),
         // as its messages give them ("might add … as a native return type declaration")

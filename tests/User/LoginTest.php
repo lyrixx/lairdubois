@@ -92,6 +92,23 @@ final class LoginTest extends WebTestCase
         self::assertNotLoggedIn($client);
     }
 
+    public function testLoginWithInvalidCsrfToken(): void
+    {
+        $client = static::createClient();
+        $crawler = $client->request('GET', '/login');
+
+        $client->submit($this->getLoginForm($crawler)->form([
+            '_username' => UserFixtures::USER,
+            '_password' => UserFixtures::USER,
+            '_csrf_token' => 'invalid',
+        ]));
+
+        self::assertSame('https://lairdubois.test/login', $client->getResponse()->headers->get('Location'));
+        $crawler = $client->followRedirect();
+        self::assertStringContainsString('Jeton CSRF invalide.', $crawler->filter('.alert-danger')->text(null, false));
+        self::assertNotLoggedIn($client);
+    }
+
     public function testLoginOfDisabledAccount(): void
     {
         $client = static::createClient();
@@ -132,6 +149,25 @@ final class LoginTest extends WebTestCase
         self::assertTrue($cookies[0]->isCleared());
         self::assertSame('/.well-known/mercure', $cookies[0]->getPath());
         self::assertNull($cookies[0]->getDomain());
+    }
+
+    /**
+     * The logout deletes the remember me cookie: the next visit is anonymous.
+     */
+    public function testLogoutDeletesTheRememberMeCookie(): void
+    {
+        $client = $this->login(static::createClient(), UserFixtures::USER, UserFixtures::USER);
+        self::assertNotNull($client->getCookieJar()->get('REMEMBERME'));
+
+        $client->request('GET', '/logout');
+
+        $cookies = array_values(array_filter($client->getResponse()->headers->getCookies(), static function (ResponseCookie $cookie): bool {
+            return 'REMEMBERME' === $cookie->getName();
+        }));
+        self::assertCount(1, $cookies);
+        self::assertTrue($cookies[0]->isCleared());
+        self::assertNull($client->getCookieJar()->get('REMEMBERME'));
+        self::assertNotLoggedIn($client);
     }
 
     public function testRememberMe(): void
@@ -213,6 +249,19 @@ final class LoginTest extends WebTestCase
     {
         $client = $this->login(static::createClient(), UserFixtures::USER, UserFixtures::USER);
         $this->disable(UserFixtures::USER);
+
+        $this->keepOnlyRememberMe($client);
+
+        self::assertNotLoggedIn($client);
+    }
+
+    /**
+     * The remember me cookie signs the password hash: a new password refuses it.
+     */
+    public function testRememberMeAfterAPasswordChange(): void
+    {
+        $client = $this->login(static::createClient(), UserFixtures::USER, UserFixtures::USER);
+        $this->setPasswordHash(UserFixtures::USER, self::SHA512_HASH, self::SALT);
 
         $this->keepOnlyRememberMe($client);
 
@@ -303,7 +352,10 @@ final class LoginTest extends WebTestCase
     }
 
     /**
-     * A remember me cookie set by Symfony 4.4 logs in with Symfony 5.4 (#23).
+     * A remember me cookie set by Symfony 4.4, or by 5.4 before its authenticator manager, logged in
+     * with the remember me services of 5.4 (#23). The remember me handler of the authenticator manager
+     * signs otherwise: the cookie is refused without error and deleted, a login again once after the
+     * delivery (#177, choice 5).
      */
     public function testRememberMeOfSymfony44(): void
     {
@@ -313,7 +365,12 @@ final class LoginTest extends WebTestCase
         // the test does not expire: it signs the expiry date, the user name and the password hash
         $client->getCookieJar()->set(new Cookie('REMEMBERME', 'TGFkYlxDb3JlQnVuZGxlXEVudGl0eVxDb3JlXFVzZXI6ZFhObGNnPT06NDk0NjgxNzgxODpjMDE1NTU2OGExZTc4NGYxMDcwNjY5NDU5YzM4YTJkYmVhMGM3YjZmOGI2NThkODgzNDNhNDBlZWNiOTNmNTE4'));
 
-        self::assertLoggedInAs($client, UserFixtures::USER);
+        self::assertNotLoggedIn($client);
+        $cookies = array_values(array_filter($client->getResponse()->headers->getCookies(), static function (ResponseCookie $cookie): bool {
+            return 'REMEMBERME' === $cookie->getName();
+        }));
+        self::assertCount(1, $cookies);
+        self::assertTrue($cookies[0]->isCleared());
     }
 
     private function login(KernelBrowser $client, string $username, string $password): KernelBrowser

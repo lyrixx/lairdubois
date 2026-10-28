@@ -35,9 +35,7 @@ final class RegistrationController extends AbstractController {
 
 			$response = $this->redirectToRoute('fos_user_registration_confirmed');
 
-			// Last login
-			$loginUtils->logIn($user, $request, $response);
-			$userManager->updateUser($user);
+			$loginUtils->logIn($user, $request);
 
 			// Flashbag
 			$this->addFlash('success', $translator->trans('registration.flash.user_created', array(), 'FOSUserBundle'));

@@ -114,7 +114,7 @@ final class FixtureFactory {
 			$request->setSession(new Session(new MockArraySessionStorage()));
 			$this->requestStack->push($request);
 		}
-		$this->tokenStorage->setToken(new UsernamePasswordToken($user, null, 'main', $user->getRoles()));
+		$this->tokenStorage->setToken(new UsernamePasswordToken($user, 'main', $user->getRoles()));
 	}
 
 	// Files /////

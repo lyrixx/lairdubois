@@ -9,7 +9,6 @@ use Ladb\CoreBundle\Entity\Core\User;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase as BaseWebTestCase;
-use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\BufferedOutput;
@@ -19,7 +18,6 @@ use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Stamp\ReceivedStamp;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
-use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 
 /**
  * Base class of the functional tests: a client on the host of the site, logged in or not, and
@@ -130,15 +128,7 @@ abstract class WebTestCase extends BaseWebTestCase
      */
     protected static function createClientAs(string $username, array $options = [], array $server = []): KernelBrowser
     {
-        $client = static::createClient($options, $server);
-        $user = static::findUser($username);
-
-        $session = $client->getContainer()->get('session');
-        $session->set('_security_'.self::FIREWALL, serialize(new UsernamePasswordToken($user, null, self::FIREWALL, $user->getRoles())));
-        $session->save();
-        $client->getCookieJar()->set(new Cookie($session->getName(), $session->getId()));
-
-        return $client;
+        return static::createClient($options, $server)->loginUser(static::findUser($username), self::FIREWALL);
     }
 
     /**

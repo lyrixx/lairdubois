@@ -16,7 +16,7 @@ class CanonicalFieldsUpdater {
 
 	/**
 	 * The canonical username or email: the Canonicalizer of FOSUserBundle (#24). Static for
-	 * UserRepository::loadUserByUsername(), a repository being no service.
+	 * UserRepository::loadUserByIdentifier(), a repository being no service.
 	 */
 	public static function canonicalize($string) {
 		if (null === $string) {

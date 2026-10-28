@@ -5,7 +5,7 @@ namespace Ladb\CoreBundle\Manager\Core;
 use Doctrine\ORM\EntityManagerInterface;
 use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Utils\CanonicalFieldsUpdater;
-use Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface;
+use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactoryInterface;
 
 /**
  * The user manager of FOSUserBundle (#24).
@@ -15,12 +15,12 @@ class UserManager {
 	const NAME = 'ladb_core.core_user_manager';
 
 	private $canonicalFieldsUpdater;
-	private $encoderFactory;
+	private $passwordHasherFactory;
 	private $om;
 
-	public function __construct(CanonicalFieldsUpdater $canonicalFieldsUpdater, EncoderFactoryInterface $encoderFactory, EntityManagerInterface $om) {
+	public function __construct(CanonicalFieldsUpdater $canonicalFieldsUpdater, PasswordHasherFactoryInterface $passwordHasherFactory, EntityManagerInterface $om) {
 		$this->canonicalFieldsUpdater = $canonicalFieldsUpdater;
-		$this->encoderFactory = $encoderFactory;
+		$this->passwordHasherFactory = $passwordHasherFactory;
 		$this->om = $om;
 	}
 
@@ -43,7 +43,7 @@ class UserManager {
 	}
 
 	public function findUserByUsernameOrEmail($usernameOrEmail) {
-		return $this->om->getRepository(User::class)->loadUserByUsername($usernameOrEmail);
+		return $this->om->getRepository(User::class)->loadUserByIdentifier($usernameOrEmail);
 	}
 
 	public function findUserByConfirmationToken($token) {
@@ -73,7 +73,7 @@ class UserManager {
 	/////
 
 	/**
-	 * The encoder of security.yml (native) salts the hash itself.
+	 * The hasher of security.yml (native) salts the hash itself.
 	 */
 	private function hashPassword(User $user) {
 		$plainPassword = $user->getPlainPassword();
@@ -82,7 +82,7 @@ class UserManager {
 		}
 
 		$user->setSalt(null);
-		$user->setPassword($this->encoderFactory->getEncoder($user)->encodePassword($plainPassword, null));
+		$user->setPassword($this->passwordHasherFactory->getPasswordHasher($user)->hash($plainPassword));
 		$user->eraseCredentials();
 	}
 
