@@ -39,6 +39,7 @@ use Ladb\CoreBundle\Utils\LocalisableUtils;
 use Liip\ImagineBundle\Controller\ImagineController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/ateliers")
@@ -68,13 +69,11 @@ class WorkshopController extends AbstractController {
 	 * @Route("/create", methods={"POST"}, name="core_workshop_create")
 	 * @Template("@LadbCore/Wonder/Workshop/new.html.twig")
 	 */
-	public function createAction(Request $request, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
+	public function createAction(Request $request, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$owner = $this->retrieveOwner($request);
 
 		$this->createLock('core_workshop_create', false, self::LOCK_TTL_CREATE_ACTION, false);
-
-		$om = $this->getDoctrine()->getManager();
 
 		$workshop = new Workshop();
 		$form = $this->createForm(WorkshopType::class, $workshop);
@@ -195,7 +194,7 @@ class WorkshopController extends AbstractController {
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_workshop_update")
 	 * @Template("@LadbCore/Wonder/Workshop/edit.html.twig")
 	 */
-	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, EmbeddableUtils $embaddableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, PicturedUtils $picturedUtils, StripableUtils $stripableUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
+	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, EmbeddableUtils $embaddableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, PicturedUtils $picturedUtils, StripableUtils $stripableUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$workshop = $this->retrievePublication($id, Workshop::CLASS_NAME);
 		$this->assertEditabable($workshop);
@@ -225,7 +224,6 @@ class WorkshopController extends AbstractController {
 				$workshop->setUpdatedAt(new \DateTime());
 			}
 
-			$om = $this->getDoctrine()->getManager();
 			$om->flush();
 
 			// Dispatch publication event
@@ -293,9 +291,7 @@ class WorkshopController extends AbstractController {
 	 * @Route("/{id}/plans/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_workshop_plans_filter_page")
 	 * @Template("@LadbCore/Wonder/Workshop/plans.html.twig")
 	 */
-	public function plansAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
-		$om = $this->getDoctrine()->getManager();
-
+	public function plansAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$workshop = $this->retrievePublication($id, Workshop::CLASS_NAME);
 		$this->assertShowable($workshop);
 
@@ -337,9 +333,7 @@ class WorkshopController extends AbstractController {
 	 * @Route("/{id}/pas-a-pas/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_workshop_howtos_filter_page")
 	 * @Template("@LadbCore/Wonder/Workshop/howtos.html.twig")
 	 */
-	public function howtosAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
-		$om = $this->getDoctrine()->getManager();
-
+	public function howtosAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$workshop = $this->retrievePublication($id, Workshop::CLASS_NAME);
 		$this->assertShowable($workshop);
 
@@ -374,9 +368,7 @@ class WorkshopController extends AbstractController {
 	 * @Route("/{id}/processus/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_workshop_workflows_filter_page")
 	 * @Template("@LadbCore/Wonder/Workshop/workflows.html.twig")
 	 */
-	public function workflowsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
-		$om = $this->getDoctrine()->getManager();
-
+	public function workflowsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$workshop = $this->retrievePublication($id, Workshop::CLASS_NAME);
 		$this->assertShowable($workshop);
 
@@ -415,9 +407,7 @@ class WorkshopController extends AbstractController {
 	/**
 	 * @Route("/{id}/sticker", requirements={"id" = "\d+"}, name="core_workshop_sticker")
 	 */
-	public function stickerAction(Request $request, $id, EmbeddableUtils $embeddableUtils, ImagineController $imagineController) {
-		$om = $this->getDoctrine()->getManager();
-
+	public function stickerAction(Request $request, $id, EmbeddableUtils $embeddableUtils, ImagineController $imagineController, EntityManagerInterface $om) {
 		$workshop = $this->retrievePublication($id, Workshop::CLASS_NAME);
 		$this->assertShowable($workshop, true);
 
@@ -445,9 +435,7 @@ class WorkshopController extends AbstractController {
 	/**
 	 * @Route("/{id}/strip", requirements={"id" = "\d+"}, name="core_workshop_strip")
 	 */
-	public function stripAction(Request $request, $id, ImagineController $imagineController, StripableUtils $stripableUtils) {
-		$om = $this->getDoctrine()->getManager();
-
+	public function stripAction(Request $request, $id, ImagineController $imagineController, EntityManagerInterface $om, StripableUtils $stripableUtils) {
 		$workshop = $this->retrievePublication($id, Workshop::CLASS_NAME);
 		$this->assertShowable($workshop, true);
 
@@ -811,8 +799,7 @@ class WorkshopController extends AbstractController {
 	 * @Route("/{id}.html", name="core_workshop_show")
 	 * @Template("@LadbCore/Wonder/Workshop/show.html.twig")
 	 */
-	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, EmbeddableUtils $embaddableUtils, ExplorableUtils $explorableUtils, FeedbackableUtils $feedbackableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
-		$om = $this->getDoctrine()->getManager();
+	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, EmbeddableUtils $embaddableUtils, ExplorableUtils $explorableUtils, FeedbackableUtils $feedbackableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, EntityManagerInterface $om, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$workshopRepository = $om->getRepository(Workshop::CLASS_NAME);
 
 		$id = intval($id);
@@ -854,8 +841,7 @@ class WorkshopController extends AbstractController {
 	 * @Route("/{id}/admin/converttocreation", requirements={"id" = "\d+"}, name="core_workshop_admin_converttocreation")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_workshop_admin_converttocreation)")
 	 */
-	public function adminConvertToCreationAction($id, TranslatorInterface $translator, WorkshopManager $workshopManager) {
-		$om = $this->getDoctrine()->getManager();
+	public function adminConvertToCreationAction($id, EntityManagerInterface $om, TranslatorInterface $translator, WorkshopManager $workshopManager) {
 		$workshopRepository = $om->getRepository(Workshop::CLASS_NAME);
 
 		$workshop = $workshopRepository->findOneById($id);
@@ -876,8 +862,7 @@ class WorkshopController extends AbstractController {
 	 * @Route("/{id}/admin/converttohowto", requirements={"id" = "\d+"}, name="core_workshop_admin_converttohowto")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_workshop_admin_converttohowto)")
 	 */
-	public function adminConvertToHowtoAction($id, TranslatorInterface $translator, WorkshopManager $workshopManager) {
-		$om = $this->getDoctrine()->getManager();
+	public function adminConvertToHowtoAction($id, EntityManagerInterface $om, TranslatorInterface $translator, WorkshopManager $workshopManager) {
 		$workshopRepository = $om->getRepository(Workshop::CLASS_NAME);
 
 		$workshop = $workshopRepository->findOneById($id);

@@ -13,6 +13,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Ladb\CoreBundle\Entity\Core\Notification;
 use Ladb\CoreBundle\Utils\TypableUtils;
 use Ladb\CoreBundle\Utils\PaginatorUtils;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/notifications")
@@ -25,8 +26,7 @@ class NotificationController extends AbstractController {
 	 * @Route("/{filter}/{page}", requirements={"filter" = "[a-z-]+", "page" = "\d+"}, name="core_notification_list_filter_page")
 	 * @Template("@LadbCore/Core/Notification/list-xhr.html.twig")
 	 */
-	public function listAction(Request $request, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
-		$om = $this->getDoctrine()->getManager();
+	public function listAction(Request $request, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$notificationRepository = $om->getRepository(Notification::CLASS_NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page, 9, 5);
@@ -78,8 +78,7 @@ class NotificationController extends AbstractController {
 	/**
 	 * @Route("/{id}", requirements={"id" = "\d+"}, name="core_notification_show")
 	 */
-	public function showAction(Request $request, $id, TypableUtils $typableUtils) {
-		$om = $this->getDoctrine()->getManager();
+	public function showAction(Request $request, $id, EntityManagerInterface $om, TypableUtils $typableUtils) {
 		$notificationRepository = $om->getRepository(Notification::CLASS_NAME);
 
 		$notification = $notificationRepository->findOneByIdJoinedOnActivity($id);

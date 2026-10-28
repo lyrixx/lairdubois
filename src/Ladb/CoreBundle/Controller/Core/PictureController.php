@@ -13,6 +13,7 @@ use Ladb\CoreBundle\Entity\Core\Picture;
 use Ladb\CoreBundle\Form\Model\EditPicture;
 use Ladb\CoreBundle\Handler\PictureUploadHandler;
 use Ladb\CoreBundle\Form\Type\Core\EditPictureType;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/pictures")
@@ -21,14 +22,13 @@ class PictureController extends AbstractController {
 
 	use PublicationControllerTrait;
 
-	private function assertEditableGranted(Picture $picture, $context = '') {
+	private function assertEditableGranted(Picture $picture, EntityManagerInterface $om, $context = '') {
 
 		if ($this->isGranted('ROLE_ADMIN')) {
 			$allowed = true;
 		} else if ($picture->getUser()->getIsTeam() && !is_null($this->getUser())) {
 
 			// Only members allowed
-			$om = $this->getDoctrine()->getManager();
 			$memberRepository = $om->getRepository(Member::class);
 			$allowed = $memberRepository->existsByTeamAndUser($picture->getUser(), $this->getUser());
 
@@ -60,19 +60,18 @@ class PictureController extends AbstractController {
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_picture_edit")
 	 * @Template("@LadbCore/Core/Picture/edit-xhr.html.twig")
 	 */
-	public function editAction(Request $request, $id) {
+	public function editAction(Request $request, $id, EntityManagerInterface $om) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_picture_edit)');
 		}
 
-		$om = $this->getDoctrine()->getManager();
 		$pictureRepository = $om->getRepository(Picture::CLASS_NAME);
 
 		$picture = $pictureRepository->findOneById($id);
 		if (is_null($picture)) {
 			throw $this->createNotFoundException('Unable to find Picture entity (id='.$id.').');
 		}
-		$this->assertEditableGranted($picture, 'core_picture_edit');
+		$this->assertEditableGranted($picture, $om, 'core_picture_edit');
 
 		$editPicture = new EditPicture();
 		$editPicture->setLegend($picture->getLegend());
@@ -95,19 +94,18 @@ class PictureController extends AbstractController {
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_picture_update")
 	 * @Template("@LadbCore/Core/Picture/update-error-xhr.html.twig")
 	 */
-	public function updateAction(Request $request, $id) {
+	public function updateAction(Request $request, $id, EntityManagerInterface $om) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_picture_update)');
 		}
 
-		$om = $this->getDoctrine()->getManager();
 		$pictureRepository = $om->getRepository(Picture::CLASS_NAME);
 
 		$picture = $pictureRepository->findOneById($id);
 		if (is_null($picture)) {
 			throw $this->createNotFoundException('Unable to find Picture entity (id='.$id.').');
 		}
-		$this->assertEditableGranted($picture, 'core_picture_edit');
+		$this->assertEditableGranted($picture, $om, 'core_picture_edit');
 
 		$editPicture = new EditPicture();
 

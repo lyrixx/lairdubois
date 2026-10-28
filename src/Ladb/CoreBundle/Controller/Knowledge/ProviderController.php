@@ -34,6 +34,7 @@ use Ladb\CoreBundle\Utils\WatchableUtils;
 use Ladb\CoreBundle\Utils\ReviewableUtils;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 
 /**
@@ -67,7 +68,7 @@ class ProviderController extends AbstractController {
 	 * @Route("/create", methods={"POST"}, name="core_provider_create")
 	 * @Template("@LadbCore/Knowledge/Provider/new.html.twig")
 	 */
-	public function createAction(Request $request, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, TranslatorInterface $translator) {
+	public function createAction(Request $request, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, EntityManagerInterface $om, TranslatorInterface $translator) {
 
 		// Exclude if user is not email confirmed
 		if (!$this->getUser()->getEmailConfirmed()) {
@@ -75,8 +76,6 @@ class ProviderController extends AbstractController {
 		}
 
 		$this->createLock('core_provider_create', false, self::LOCK_TTL_CREATE_ACTION, false);
-
-		$om = $this->getDoctrine()->getManager();
 
 		$newProvider = new NewProvider();
 		$form = $this->createForm(NewProviderType::class, $newProvider);
@@ -478,8 +477,7 @@ class ProviderController extends AbstractController {
 	 * @Route("/{id}/creations/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_provider_creations_filter_page")
 	 * @Template("@LadbCore/Knowledge/Provider/creations.html.twig")
 	 */
-	public function creationsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
-		$om = $this->getDoctrine()->getManager();
+	public function creationsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$providerRepository = $om->getRepository(Provider::CLASS_NAME);
 
 		$provider = $providerRepository->findOneByIdJoinedOnOptimized($id);
@@ -518,8 +516,7 @@ class ProviderController extends AbstractController {
 	 * @Route("/{id}/pas-a-pas/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_provider_howtos_filter_page")
 	 * @Template("@LadbCore/Knowledge/Provider/howtos.html.twig")
 	 */
-	public function howtosAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
-		$om = $this->getDoctrine()->getManager();
+	public function howtosAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$providerRepository = $om->getRepository(Provider::CLASS_NAME);
 
 		$provider = $providerRepository->findOneByIdJoinedOnOptimized($id);
@@ -556,12 +553,11 @@ class ProviderController extends AbstractController {
 	 * @Route("/{id}/card.xhr", name="core_provider_card")
 	 * @Template("@LadbCore/Knowledge/Provider/card-xhr.html.twig")
 	 */
-	public function cardAction(Request $request, $id) {
+	public function cardAction(Request $request, $id, EntityManagerInterface $om) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_provider_card)');
 		}
 
-		$om = $this->getDoctrine()->getManager();
 		$providerRepository = $om->getRepository(Provider::CLASS_NAME);
 
 		$id = intval($id);
@@ -580,8 +576,7 @@ class ProviderController extends AbstractController {
 	 * @Route("/{id}.html", name="core_provider_show")
 	 * @Template("@LadbCore/Knowledge/Provider/show.html.twig")
 	 */
-	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ElasticaQueryUtils $elasticaQueryUtils, LikableUtils $likableUtils, ReviewableUtils $reviewableUtils, SearchUtils $searchUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
-		$om = $this->getDoctrine()->getManager();
+	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ElasticaQueryUtils $elasticaQueryUtils, LikableUtils $likableUtils, EntityManagerInterface $om, ReviewableUtils $reviewableUtils, SearchUtils $searchUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$providerRepository = $om->getRepository(Provider::CLASS_NAME);
 
 		$id = intval($id);

@@ -38,6 +38,7 @@ use Ladb\CoreBundle\Manager\Core\WitnessManager;
 use Ladb\CoreBundle\Model\HiddableInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/questions")
@@ -67,13 +68,11 @@ class QuestionController extends AbstractController {
 	 * @Route("/create", methods={"POST"}, name="core_qa_question_create")
 	 * @Template("@LadbCore/Qa/Question/new.html.twig")
 	 */
-	public function createAction(Request $request, BlockBodiedUtils $blockBodiedUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
+	public function createAction(Request $request, BlockBodiedUtils $blockBodiedUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$owner = $this->retrieveOwner($request);
 
 		$this->createLock('core_qa_question_create', false, self::LOCK_TTL_CREATE_ACTION, false);
-
-		$om = $this->getDoctrine()->getManager();
 
 		$question = new Question();
 		$form = $this->createForm(QuestionType::class, $question);
@@ -198,7 +197,7 @@ class QuestionController extends AbstractController {
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_qa_question_update")
 	 * @Template("@LadbCore/Qa/Question/edit.html.twig")
 	 */
-	public function updateAction(Request $request, $id, BlockBodiedUtils $blockBodiedUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
+	public function updateAction(Request $request, $id, BlockBodiedUtils $blockBodiedUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
 		$this->assertEditabable($question);
@@ -225,7 +224,6 @@ class QuestionController extends AbstractController {
 				$question->setUpdatedAt(new \DateTime());
 			}
 
-			$om = $this->getDoctrine()->getManager();
 			$om->flush();
 
 			// Dispatch publication event
@@ -306,7 +304,7 @@ class QuestionController extends AbstractController {
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_qa_question_list_page")
 	 * @Template("@LadbCore/Qa/Question/list.html.twig")
 	 */
-	public function listAction(Request $request, EventDispatcherInterface $dispatcher, MaybeUtils $maybeUtils, SearchUtils $searchUtils, TranslatorInterface $translator, $page = 0) {
+	public function listAction(Request $request, EventDispatcherInterface $dispatcher, MaybeUtils $maybeUtils, EntityManagerInterface $om, SearchUtils $searchUtils, TranslatorInterface $translator, $page = 0) {
 
 		// Elasticsearch paginiation limit
 		if ($page > 624) {
@@ -323,8 +321,6 @@ class QuestionController extends AbstractController {
 		/////
 
 		if ($page == 0 && $layout == 'view') {
-			$om = $this->getDoctrine()->getManager();
-
 			// Tip & Offer highlight
 
 			if ($maybeUtils->canDoIt(0, 10, 'tip')) {
@@ -581,9 +577,7 @@ class QuestionController extends AbstractController {
 	 * @Route("/{id}/creations/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_qa_question_creations_filter_page")
 	 * @Template("@LadbCore/Qa/Question/creations.html.twig")
 	 */
-	public function creationsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
-		$om = $this->getDoctrine()->getManager();
-
+	public function creationsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
 		$this->assertShowable($question);
 
@@ -618,9 +612,7 @@ class QuestionController extends AbstractController {
 	 * @Route("/{id}/plans/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_qa_question_plans_filter_page")
 	 * @Template("@LadbCore/Qa/Question/plans.html.twig")
 	 */
-	public function plansAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
-		$om = $this->getDoctrine()->getManager();
-
+	public function plansAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
 		$this->assertShowable($question);
 
@@ -655,9 +647,7 @@ class QuestionController extends AbstractController {
 	 * @Route("/{id}/pas-a-pas/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_qa_question_howtos_filter_page")
 	 * @Template("@LadbCore/Qa/Question/howtos.html.twig")
 	 */
-	public function howtosAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
-		$om = $this->getDoctrine()->getManager();
-
+	public function howtosAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
 		$this->assertShowable($question);
 
@@ -690,8 +680,7 @@ class QuestionController extends AbstractController {
 	 * @Route("/{id}.html", name="core_qa_question_show")
 	 * @Template("@LadbCore/Qa/Question/show.html.twig")
 	 */
-	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, VotableUtils $votableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
-		$om = $this->getDoctrine()->getManager();
+	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, EntityManagerInterface $om, VotableUtils $votableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$questionRepository = $om->getRepository(\Ladb\CoreBundle\Entity\Qa\Question::CLASS_NAME);
 		$answerRepository = $om->getRepository(\Ladb\CoreBundle\Entity\Qa\Answer::CLASS_NAME);
 
@@ -753,8 +742,7 @@ class QuestionController extends AbstractController {
 	 * @Route("/{id}/admin/converttooffer", requirements={"id" = "\d+"}, name="core_qa_question_admin_converttooffer")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_qa_question_admin_converttooffer)")
 	 */
-	public function adminConvertToOfferAction($id, QuestionManager $questionManager, TranslatorInterface $translator) {
-		$om = $this->getDoctrine()->getManager();
+	public function adminConvertToOfferAction($id, EntityManagerInterface $om, QuestionManager $questionManager, TranslatorInterface $translator) {
 		$questionRepository = $om->getRepository(Question::CLASS_NAME);
 
 		$question = $questionRepository->findOneByIdJoinedOnOptimized($id);

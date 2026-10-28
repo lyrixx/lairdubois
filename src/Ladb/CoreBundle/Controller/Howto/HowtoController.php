@@ -31,6 +31,7 @@ use Ladb\CoreBundle\Manager\Core\WitnessManager;
 use Liip\ImagineBundle\Controller\ImagineController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/pas-a-pas")
@@ -59,13 +60,11 @@ class HowtoController extends AbstractHowtoBasedController {
 	 * @Route("/create", methods={"POST"}, name="core_howto_create")
 	 * @Template("@LadbCore/Howto/Howto/new.html.twig")
 	 */
-	public function createAction(Request $request, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
+	public function createAction(Request $request, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$owner = $this->retrieveOwner($request);
 
 		$this->createLock('core_howto_create', false, self::LOCK_TTL_CREATE_ACTION, false);
-
-		$om = $this->getDoctrine()->getManager();
 
 		$howto = new Howto();
 		$form = $this->createForm(HowtoType::class, $howto);
@@ -185,7 +184,7 @@ class HowtoController extends AbstractHowtoBasedController {
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_howto_update")
 	 * @Template("@LadbCore/Howto/Howto/edit.html.twig")
 	 */
-	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, EmbeddableUtils $embaddableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
+	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, EmbeddableUtils $embaddableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
 		$this->assertEditabable($howto);
@@ -207,7 +206,6 @@ class HowtoController extends AbstractHowtoBasedController {
 				$howto->setUpdatedAt(new \DateTime());
 			}
 
-			$om = $this->getDoctrine()->getManager();
 			$om->flush();
 
 			// Dispatch publication event
@@ -273,9 +271,7 @@ class HowtoController extends AbstractHowtoBasedController {
 	 * @Route("/{id}/sticker.png", requirements={"id" = "\d+"}, name="core_howto_sticker_png")
 	 * @Route("/{id}/sticker", requirements={"id" = "\d+"}, name="core_howto_sticker")
 	 */
-	public function stickerAction(Request $request, $id, EmbeddableUtils $embeddableUtils, ImagineController $imagineController) {
-		$om = $this->getDoctrine()->getManager();
-
+	public function stickerAction(Request $request, $id, EmbeddableUtils $embeddableUtils, ImagineController $imagineController, EntityManagerInterface $om) {
 		$id = intval($id);
 
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
@@ -305,9 +301,7 @@ class HowtoController extends AbstractHowtoBasedController {
 	/**
 	 * @Route("/{id}/strip", requirements={"id" = "\d+"}, name="core_howto_strip")
 	 */
-	public function stripAction(Request $request, $id, ImagineController $imagineController, StripableUtils $stripableUtils) {
-		$om = $this->getDoctrine()->getManager();
-
+	public function stripAction(Request $request, $id, ImagineController $imagineController, EntityManagerInterface $om, StripableUtils $stripableUtils) {
 		$id = intval($id);
 
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
@@ -614,9 +608,7 @@ class HowtoController extends AbstractHowtoBasedController {
 	 * @Route("/{id}/creations/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_howto_creations_filter_page")
 	 * @Template("@LadbCore/Howto/Howto/creations.html.twig")
 	 */
-	public function creationsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
-		$om = $this->getDoctrine()->getManager();
-
+	public function creationsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
 		$this->assertShowable($howto);
 
@@ -651,9 +643,7 @@ class HowtoController extends AbstractHowtoBasedController {
 	 * @Route("/{id}/ateliers/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_howto_workshops_filter_page")
 	 * @Template("@LadbCore/Howto/Howto/workshops.html.twig")
 	 */
-	public function workshopsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
-		$om = $this->getDoctrine()->getManager();
-
+	public function workshopsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
 		$this->assertShowable($howto);
 
@@ -688,9 +678,7 @@ class HowtoController extends AbstractHowtoBasedController {
 	 * @Route("/{id}/plans/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_howto_plans_filter_page")
 	 * @Template("@LadbCore/Howto/Howto/plans.html.twig")
 	 */
-	public function plansAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
-		$om = $this->getDoctrine()->getManager();
-
+	public function plansAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
 		$this->assertShowable($howto);
 
@@ -725,9 +713,7 @@ class HowtoController extends AbstractHowtoBasedController {
 	 * @Route("/{id}/questions/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_howto_questions_filter_page")
 	 * @Template("@LadbCore/Howto/Howto/questions.html.twig")
 	 */
-	public function questionsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
-		$om = $this->getDoctrine()->getManager();
-
+	public function questionsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
 		$this->assertShowable($howto);
 
@@ -762,9 +748,7 @@ class HowtoController extends AbstractHowtoBasedController {
 	 * @Route("/{id}/processus/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_howto_workflows_filter_page")
 	 * @Template("@LadbCore/Howto/Howto/workflows.html.twig")
 	 */
-	public function workflowsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
-		$om = $this->getDoctrine()->getManager();
-
+	public function workflowsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
 		$this->assertShowable($howto);
 
@@ -799,9 +783,7 @@ class HowtoController extends AbstractHowtoBasedController {
 	 * @Route("/{id}/fournisseurs/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_howto_providers_filter_page")
 	 * @Template("@LadbCore/Howto/Howto/providers.html.twig")
 	 */
-	public function providersAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
-		$om = $this->getDoctrine()->getManager();
-
+	public function providersAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
 		$this->assertShowable($howto);
 
@@ -836,9 +818,7 @@ class HowtoController extends AbstractHowtoBasedController {
 	 * @Route("/{id}/ecoles/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_howto_schools_filter_page")
 	 * @Template("@LadbCore/Howto/Howto/schools.html.twig")
 	 */
-	public function schoolsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
-		$om = $this->getDoctrine()->getManager();
-
+	public function schoolsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
 		$this->assertShowable($howto);
 
@@ -871,8 +851,7 @@ class HowtoController extends AbstractHowtoBasedController {
 	 * @Route("/{id}.html", name="core_howto_show")
 	 * @Template("@LadbCore/Howto/Howto/show.html.twig")
 	 */
-	public function showAction(Request $request, $id, EventDispatcherInterface $dispatcher, WitnessManager $witnessManager) {
-		$om = $this->getDoctrine()->getManager();
+	public function showAction(Request $request, $id, EventDispatcherInterface $dispatcher, EntityManagerInterface $om, WitnessManager $witnessManager) {
 		$howtoRepository = $om->getRepository(Howto::CLASS_NAME);
 
 		$id = intval($id);

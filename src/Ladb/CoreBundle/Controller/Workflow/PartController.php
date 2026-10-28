@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Ladb\CoreBundle\Entity\Workflow\Task;
 use Ladb\CoreBundle\Entity\Workflow\Part;
 use Ladb\CoreBundle\Form\Type\Workflow\PartType;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/processus")
@@ -37,11 +38,9 @@ class PartController extends AbstractWorkflowBasedController {
 	 * @Route("/{id}/part/create", requirements={"id" = "\d+"}, methods={"POST"}, name="core_workflow_part_create")
 	 * @Template("@LadbCore/Workflow/Part/new-xhr.html.twig")
 	 */
-	public function createAction(Request $request, $id) {
+	public function createAction(Request $request, $id, EntityManagerInterface $om) {
 
 		$this->createLock('core_workflow_part_create', false, self::LOCK_TTL_CREATE_ACTION, false);
-
-		$om = $this->getDoctrine()->getManager();
 
 		// Retrieve Workflow
 		$workflow = $this->_retrieveWorkflow($id);
@@ -72,8 +71,7 @@ class PartController extends AbstractWorkflowBasedController {
 	 * @Route("/part/{id}/edit", requirements={"id" = "\d+"}, name="core_workflow_part_edit")
 	 * @Template("@LadbCore/Workflow/Part/edit-xhr.html.twig")
 	 */
-	public function editAction(Request $request, $id) {
-		$om = $this->getDoctrine()->getManager();
+	public function editAction(Request $request, $id, EntityManagerInterface $om) {
 		$partRepository = $om->getRepository(Part::CLASS_NAME);
 
 		$part = $partRepository->findOneById($id);
@@ -94,8 +92,7 @@ class PartController extends AbstractWorkflowBasedController {
 	 * @Route("/part/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_workflow_part_update")
 	 * @Template("@LadbCore/Workflow/Part/edit-xhr.html.twig")
 	 */
-	public function updateAction(Request $request, $id) {
-		$om = $this->getDoctrine()->getManager();
+	public function updateAction(Request $request, $id, EntityManagerInterface $om) {
 		$partRepository = $om->getRepository(Part::CLASS_NAME);
 
 		$part = $partRepository->findOneById($id);
@@ -148,8 +145,7 @@ class PartController extends AbstractWorkflowBasedController {
 	 * @Route("/part/{id}/delete", requirements={"id" = "\d+"}, name="core_workflow_part_delete")
 	 * @Template("@LadbCore/Workflow/Part/delete-xhr.html.twig")
 	 */
-	public function deleteAction(Request $request, $id) {
-		$om = $this->getDoctrine()->getManager();
+	public function deleteAction(Request $request, $id, EntityManagerInterface $om) {
 		$partRepository = $om->getRepository(Part::CLASS_NAME);
 
 		$part = $partRepository->findOneById($id);

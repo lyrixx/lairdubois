@@ -17,6 +17,7 @@ use Ladb\CoreBundle\Event\PublicationEvent;
 use Ladb\CoreBundle\Event\PublicationListener;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/ecoles")
@@ -27,12 +28,11 @@ class TestimonialController extends AbstractController {
 	 * @Route("/{id}/temoignages/new", requirements={"id" = "\d+"}, name="core_knowledge_school_testimonial_new")
 	 * @Template("@LadbCore/Knowledge/School/Testimonial/new-xhr.html.twig")
 	 */
-	public function newAction(Request $request, $id) {
+	public function newAction(Request $request, $id, EntityManagerInterface $om) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_review_new)');
 		}
 
-		$om = $this->getDoctrine()->getManager();
 		$schoolRepository = $om->getRepository(School::CLASS_NAME);
 
 		$school = $schoolRepository->findOneById($id);
@@ -53,7 +53,7 @@ class TestimonialController extends AbstractController {
 	 * @Route("/{id}/temoignages/create", requirements={"id" = "\d+"}, methods={"POST"}, name="core_knowledge_school_testimonial_create")
 	 * @Template("@LadbCore/Knowledge/School/Testimonial/new-xhr.html.twig")
 	 */
-	public function createAction(Request $request, $id, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, WatchableUtils $watchableUtils) {
+	public function createAction(Request $request, $id, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, WatchableUtils $watchableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_review_create)');
 		}
@@ -65,7 +65,6 @@ class TestimonialController extends AbstractController {
 
 		$this->createLock('core_knowledge_school_testimonial_create', false, self::LOCK_TTL_CREATE_ACTION, false);
 
-		$om = $this->getDoctrine()->getManager();
 		$schoolRepository = $om->getRepository(School::CLASS_NAME);
 		$testimonialRepository = $om->getRepository(School\Testimonial::CLASS_NAME);
 
@@ -123,8 +122,7 @@ class TestimonialController extends AbstractController {
 	 * @Route("/temoignages/{id}/edit", requirements={"id" = "\d+"}, name="core_knowledge_school_testimonial_edit")
 	 * @Template("@LadbCore/Knowledge/School/Testimonial/edit-xhr.html.twig")
 	 */
-	public function editAction(Request $request, $id) {
-		$om = $this->getDoctrine()->getManager();
+	public function editAction(Request $request, $id, EntityManagerInterface $om) {
 		$testimonialRepository = $om->getRepository(School\Testimonial::CLASS_NAME);
 
 		$testimonial = $testimonialRepository->findOneById($id);
@@ -147,8 +145,7 @@ class TestimonialController extends AbstractController {
 	 * @Route("/temoignages/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_knowledge_school_testimonial_update")
 	 * @Template("@LadbCore/Knowledge/School/Testimonial/edit-xhr.html.twig")
 	 */
-	public function updateAction(Request $request, $id, FieldPreprocessorUtils $fieldPreprocessorUtils) {
-		$om = $this->getDoctrine()->getManager();
+	public function updateAction(Request $request, $id, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om) {
 		$testimonialRepository = $om->getRepository(School\Testimonial::CLASS_NAME);
 
 		$testimonial = $testimonialRepository->findOneById($id);
@@ -187,8 +184,7 @@ class TestimonialController extends AbstractController {
 	/**
 	 * @Route("/temoignages/{id}/delete", requirements={"id" = "\d+"}, name="core_knowledge_school_testimonial_delete")
 	 */
-	public function deleteAction(Request $request, $id, SearchUtils $searchUtils, TestimonialManager $testimonialManager, TranslatorInterface $translator) {
-		$om = $this->getDoctrine()->getManager();
+	public function deleteAction(Request $request, $id, EntityManagerInterface $om, SearchUtils $searchUtils, TestimonialManager $testimonialManager, TranslatorInterface $translator) {
 		$testimonialRepository = $om->getRepository(School\Testimonial::CLASS_NAME);
 
 		$testimonial = $testimonialRepository->findOneById($id);
@@ -218,8 +214,7 @@ class TestimonialController extends AbstractController {
 	/**
 	 * @Route("/temoignages/{id}", requirements={"id" = "\d+"}, name="core_knowledge_school_testimonial_show")
 	 */
-	public function showAction(Request $request, $id) {
-		$om = $this->getDoctrine()->getManager();
+	public function showAction(Request $request, $id, EntityManagerInterface $om) {
 		$testimonialRepository = $om->getRepository(School\Testimonial::CLASS_NAME);
 
 		$testimonial = $testimonialRepository->findOneById($id);

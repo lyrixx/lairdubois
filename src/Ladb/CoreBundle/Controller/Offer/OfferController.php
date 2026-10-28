@@ -36,6 +36,7 @@ use Ladb\CoreBundle\Utils\JoinableUtils;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/annonces")
@@ -65,13 +66,11 @@ class OfferController extends AbstractController {
 	 * @Route("/create", methods={"POST"}, name="core_offer_create")
 	 * @Template("@LadbCore/Offer/Offer/new.html.twig")
 	 */
-	public function createAction(Request $request, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
+	public function createAction(Request $request, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$owner = $this->retrieveOwner($request);
 
 		$this->createLock('core_offer_create', false, self::LOCK_TTL_CREATE_ACTION, false);
-
-		$om = $this->getDoctrine()->getManager();
 
 		$offer = new Offer();
 		$form = $this->createForm(OfferType::class, $offer);
@@ -192,7 +191,7 @@ class OfferController extends AbstractController {
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_offer_update")
 	 * @Template("@LadbCore/Offer/Offer/edit.html.twig")
 	 */
-	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, PicturedUtils $picturedUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
+	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, PicturedUtils $picturedUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$offer = $this->retrievePublication($id, Offer::CLASS_NAME);
 		$this->assertEditabable($offer);
@@ -216,7 +215,6 @@ class OfferController extends AbstractController {
 				$offer->setUpdatedAt(new \DateTime());
 			}
 
-			$om = $this->getDoctrine()->getManager();
 			$om->flush();
 
 			// Dispatch publication event
@@ -591,8 +589,7 @@ class OfferController extends AbstractController {
 	 * @Route("/{id}.html", name="core_offer_show")
 	 * @Template("@LadbCore/Offer/Offer/show.html.twig")
 	 */
-	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
-		$om = $this->getDoctrine()->getManager();
+	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, EntityManagerInterface $om, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$offerRepository = $om->getRepository(Offer::CLASS_NAME);
 
 		$id = intval($id);
@@ -632,8 +629,7 @@ class OfferController extends AbstractController {
 	 * @Route("/{id}/admin/converttoquestion", requirements={"id" = "\d+"}, name="core_offer_offer_admin_converttoquestion")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_offer_offer_admin_converttoquestion)")
 	 */
-	public function adminConvertToQuestionAction($id, OfferManager $offerManager, TranslatorInterface $translator) {
-		$om = $this->getDoctrine()->getManager();
+	public function adminConvertToQuestionAction($id, OfferManager $offerManager, EntityManagerInterface $om, TranslatorInterface $translator) {
 		$offerRepository = $om->getRepository(Offer::CLASS_NAME);
 
 		$offer = $offerRepository->findOneByIdJoinedOnOptimized($id);

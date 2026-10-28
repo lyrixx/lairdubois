@@ -12,6 +12,7 @@ use Ladb\CoreBundle\Form\Type\Message\ReplyMessageType;
 use Ladb\CoreBundle\Utils\MailerUtils;
 use Ladb\CoreBundle\Utils\WebpushNotificationUtils;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/messagerie")
@@ -47,7 +48,7 @@ class MessageController extends AbstractThreadController {
 	 * @Route("/thread/{threadId}/create", requirements={"threadId" = "\d+"}, name="core_message_create")
 	 * @Template("@LadbCore/Message/new-xhr.html.twig")
 	 */
-	public function createAction(Request $request, $threadId, FieldPreprocessorUtils $fieldPreprocessorUtils, TranslatorInterface $translator) {
+	public function createAction(Request $request, $threadId, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TranslatorInterface $translator) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_message_create)');
 		}
@@ -65,8 +66,6 @@ class MessageController extends AbstractThreadController {
 		$form->handleRequest($request);
 
 		if ($form->isSubmitted() && $form->isValid()) {
-
-			$om = $this->getDoctrine()->getManager();
 
 			$sender = $this->getUser();
 			$participants = $thread->getParticipants();
@@ -118,12 +117,11 @@ class MessageController extends AbstractThreadController {
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_message_edit")
 	 * @Template("@LadbCore/Message/edit-xhr.html.twig")
 	 */
-	public function editAction(Request $request, $id) {
+	public function editAction(Request $request, $id, EntityManagerInterface $om) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_message_edit)');
 		}
 
-		$om = $this->getDoctrine()->getManager();
 		$messageRepository = $om->getRepository(Message::CLASS_NAME);
 
 		$message = $messageRepository->findOneById($id);
@@ -146,12 +144,11 @@ class MessageController extends AbstractThreadController {
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, name="core_message_update")
 	 * @Template("@LadbCore/Message/edit-xhr.html.twig")
 	 */
-	public function updateAction(Request $request, $id, FieldPreprocessorUtils $fieldPreprocessorUtils) {
+	public function updateAction(Request $request, $id, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_message_update)');
 		}
 
-		$om = $this->getDoctrine()->getManager();
 		$messageRepository = $om->getRepository(Message::CLASS_NAME);
 
 		$message = $messageRepository->findOneById($id);
@@ -166,8 +163,6 @@ class MessageController extends AbstractThreadController {
 		$form->handleRequest($request);
 
 		if ($form->isSubmitted() && $form->isValid()) {
-
-			$om = $this->getDoctrine()->getManager();
 
 			$fieldPreprocessorUtils->preprocessFields($message);
 

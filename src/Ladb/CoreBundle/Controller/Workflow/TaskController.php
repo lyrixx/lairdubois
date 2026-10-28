@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Ladb\CoreBundle\Entity\Workflow\Workflow;
 use Ladb\CoreBundle\Entity\Workflow\Task;
 use Ladb\CoreBundle\Form\Type\Workflow\TaskType;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/processus")
@@ -30,8 +31,7 @@ class TaskController extends AbstractWorkflowBasedController {
 		return true;
 	}
 
-	private function _retrieveTaskFromTaskIdParam(Request $request, $param = 'taskId', $notFoundException = true) {
-		$om = $this->getDoctrine()->getManager();
+	private function _retrieveTaskFromTaskIdParam(Request $request, EntityManagerInterface $om, $param = 'taskId', $notFoundException = true) {
 		$taskRepository = $om->getRepository(Task::CLASS_NAME);
 
 		$taskId = intval($request->get($param, 0));
@@ -144,11 +144,9 @@ class TaskController extends AbstractWorkflowBasedController {
 	 * @Route("/{id}/task/create", requirements={"id" = "\d+"}, name="core_workflow_task_create")
 	 * @Template("@LadbCore/Workflow/Task/new-xhr.html.twig")
 	 */
-	public function createAction(Request $request, $id) {
+	public function createAction(Request $request, $id, EntityManagerInterface $om) {
 
 		$this->createLock('core_workflow_task_create', false, self::LOCK_TTL_CREATE_ACTION, false);
-
-		$om = $this->getDoctrine()->getManager();
 
 		// Retrieve workflow
 		$workflow = $this->_retrieveWorkflow($id);
@@ -169,7 +167,7 @@ class TaskController extends AbstractWorkflowBasedController {
 			$workflow->setUpdatedAt(new \DateTime());
 
 			// Link to source task if defined
-			$sourceTask = $this->_retrieveTaskFromTaskIdParam($request, 'sourceTaskId', false);
+			$sourceTask = $this->_retrieveTaskFromTaskIdParam($request, $om, 'sourceTaskId', false);
 			if (!is_null($sourceTask) && !$this->_assertValidWorkflow($sourceTask, $workflow, false)) {
 				$sourceTask = null;
 			}
@@ -241,14 +239,14 @@ class TaskController extends AbstractWorkflowBasedController {
 	 * @Route("/{id}/task/edit", requirements={"id" = "\d+"}, name="core_workflow_task_edit")
 	 * @Template("@LadbCore/Workflow/Task/edit-xhr.html.twig")
 	 */
-	public function editAction(Request $request, $id) {
+	public function editAction(Request $request, $id, EntityManagerInterface $om) {
 
 		// Retrieve workflow
 		$workflow = $this->_retrieveWorkflow($id);
 		$this->_assertAuthorizedWorkflow($workflow);
 
 		// Retieve Task
-		$task = $this->_retrieveTaskFromTaskIdParam($request);
+		$task = $this->_retrieveTaskFromTaskIdParam($request, $om);
 		$this->_assertValidWorkflow($task, $workflow);
 
 		$form = $this->createForm(TaskType::class, $task, array( 'label_choices' => $this->_computeLabelChoices($workflow) ));
@@ -264,15 +262,13 @@ class TaskController extends AbstractWorkflowBasedController {
 	 * @Route("/{id}/task/update", requirements={"id" = "\d+"}, name="core_workflow_task_update")
 	 * @Template("@LadbCore/Workflow/Task/edit-xhr.html.twig")
 	 */
-	public function updateAction(Request $request, $id) {
-		$om = $this->getDoctrine()->getManager();
-
+	public function updateAction(Request $request, $id, EntityManagerInterface $om) {
 		// Retrieve workflow
 		$workflow = $this->_retrieveWorkflow($id);
 		$this->_assertAuthorizedWorkflow($workflow);
 
 		// Retieve Task
-		$task = $this->_retrieveTaskFromTaskIdParam($request);
+		$task = $this->_retrieveTaskFromTaskIdParam($request, $om);
 		$this->_assertValidWorkflow($task, $workflow);
 
 		$previousEstimatedDuration = $task->getEstimatedDuration();
@@ -336,8 +332,7 @@ class TaskController extends AbstractWorkflowBasedController {
 	/**
 	 * @Route("/{id}/task/position/update", requirements={"id" = "\d+"}, name="core_workflow_task_position_update")
 	 */
-	public function positionUpdateAction(Request $request, $id) {
-		$om = $this->getDoctrine()->getManager();
+	public function positionUpdateAction(Request $request, $id, EntityManagerInterface $om) {
 		$taskRepository = $om->getRepository(Task::CLASS_NAME);
 
 		// Retrieve Workflow
@@ -351,7 +346,7 @@ class TaskController extends AbstractWorkflowBasedController {
 			try {
 
 				// Retieve Task
-				$task = $this->_retrieveTaskFromTaskIdParam($request, 'taskId'.$index);
+				$task = $this->_retrieveTaskFromTaskIdParam($request, $om, 'taskId'.$index);
 				$this->_assertValidWorkflow($task, $workflow);
 
 				$tasks[] = $task;
@@ -399,15 +394,13 @@ class TaskController extends AbstractWorkflowBasedController {
 	/**
 	 * @Route("/{id}/task/status/update", requirements={"id" = "\d+"}, name="core_workflow_task_status_update")
 	 */
-	public function statusUpdateAction(Request $request, $id) {
-		$om = $this->getDoctrine()->getManager();
-
+	public function statusUpdateAction(Request $request, $id, EntityManagerInterface $om) {
 		// Retrieve Workflow
 		$workflow = $this->_retrieveWorkflow($id);
 		$this->_assertAuthorizedWorkflow($workflow);
 
 		// Retieve Task
-		$task = $this->_retrieveTaskFromTaskIdParam($request);
+		$task = $this->_retrieveTaskFromTaskIdParam($request, $om);
 		$this->_assertValidWorkflow($task, $workflow);
 
 		// Status
@@ -503,15 +496,13 @@ class TaskController extends AbstractWorkflowBasedController {
 	/**
 	 * @Route("/{id}/task/delete", requirements={"id" = "\d+"}, name="core_workflow_task_delete")
 	 */
-	public function deleteAction(Request $request, $id) {
-		$om = $this->getDoctrine()->getManager();
-
+	public function deleteAction(Request $request, $id, EntityManagerInterface $om) {
 		// Retrieve Workflow
 		$workflow = $this->_retrieveWorkflow($id);
 		$this->_assertAuthorizedWorkflow($workflow);
 
 		// Retieve Task
-		$task = $this->_retrieveTaskFromTaskIdParam($request);
+		$task = $this->_retrieveTaskFromTaskIdParam($request, $om);
 		$this->_assertValidWorkflow($task, $workflow);
 
 		$taskId = $task->getId();
@@ -587,19 +578,17 @@ class TaskController extends AbstractWorkflowBasedController {
 	/**
 	 * @Route("/{id}/task/connection/create", requirements={"id" = "\d+"}, name="core_workflow_task_connection_create")
 	 */
-	public function createTaskConnectionAction(Request $request, $id) {
-		$om = $this->getDoctrine()->getManager();
-
+	public function createTaskConnectionAction(Request $request, $id, EntityManagerInterface $om) {
 		// Retrieve Workflow
 		$workflow = $this->_retrieveWorkflow($id);
 		$this->_assertAuthorizedWorkflow($workflow);
 
 		// Retieve source Task
-		$sourceTask = $this->_retrieveTaskFromTaskIdParam($request, 'sourceTaskId');
+		$sourceTask = $this->_retrieveTaskFromTaskIdParam($request, $om, 'sourceTaskId');
 		$this->_assertValidWorkflow($sourceTask, $workflow);
 
 		// Retieve target Task
-		$targetTask = $this->_retrieveTaskFromTaskIdParam($request, 'targetTaskId');
+		$targetTask = $this->_retrieveTaskFromTaskIdParam($request, $om, 'targetTaskId');
 		$this->_assertValidWorkflow($targetTask, $workflow);
 
 		// Check if connection exists
@@ -638,19 +627,17 @@ class TaskController extends AbstractWorkflowBasedController {
 	/**
 	 * @Route("/{id}/task/connection/delete", requirements={"id" = "\d+"}, name="core_workflow_task_connection_delete")
 	 */
-	public function deleteTaskConnectionAction(Request $request, $id) {
-		$om = $this->getDoctrine()->getManager();
-
+	public function deleteTaskConnectionAction(Request $request, $id, EntityManagerInterface $om) {
 		// Retrieve Workflow
 		$workflow = $this->_retrieveWorkflow($id);
 		$this->_assertAuthorizedWorkflow($workflow);
 
 		// Retieve source Task
-		$sourceTask = $this->_retrieveTaskFromTaskIdParam($request, 'sourceTaskId');
+		$sourceTask = $this->_retrieveTaskFromTaskIdParam($request, $om, 'sourceTaskId');
 		$this->_assertValidWorkflow($sourceTask, $workflow);
 
 		// Retieve target Task
-		$targetTask = $this->_retrieveTaskFromTaskIdParam($request, 'targetTaskId');
+		$targetTask = $this->_retrieveTaskFromTaskIdParam($request, $om, 'targetTaskId');
 		$this->_assertValidWorkflow($targetTask, $workflow);
 
 		$deletedConnections = array(

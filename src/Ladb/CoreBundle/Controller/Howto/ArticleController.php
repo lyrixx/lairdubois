@@ -22,6 +22,7 @@ use Ladb\CoreBundle\Manager\Core\WitnessManager;
 use Liip\ImagineBundle\Controller\ImagineController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 class ArticleController extends AbstractHowtoBasedController {
 
@@ -64,11 +65,9 @@ class ArticleController extends AbstractHowtoBasedController {
 	 * @Route("/pas-a-pas/{id}/articles/create", requirements={"id" = "\d+"}, methods={"POST"}, name="core_howto_article_create")
 	 * @Template("@LadbCore/Howto/Article/new.html.twig")
 	 */
-	public function createAction(Request $request, $id, BlockBodiedUtils $blockUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, TranslatorInterface $translator) {
+	public function createAction(Request $request, $id, BlockBodiedUtils $blockUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TranslatorInterface $translator) {
 
 		$this->createLock('core_howto_article_create', false, self::LOCK_TTL_CREATE_ACTION, false);
-
-		$om = $this->getDoctrine()->getManager();
 
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
 		$this->assertEditabable($howto);
@@ -186,7 +185,7 @@ class ArticleController extends AbstractHowtoBasedController {
 	 * @Route("/pas-a-pas/articles/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_howto_article_update")
 	 * @Template("@LadbCore/Howto/Article/edit.html.twig")
 	 */
-	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EmbeddableUtils $embaddableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, MentionUtils $mentionUtils, SearchUtils $searchUtils, TranslatorInterface $translator) {
+	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EmbeddableUtils $embaddableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, MentionUtils $mentionUtils, EntityManagerInterface $om, SearchUtils $searchUtils, TranslatorInterface $translator) {
 
 		$article = $this->retrievePublication($id, Article::CLASS_NAME);
 		$this->assertEditabable($article->getHowto());
@@ -214,7 +213,6 @@ class ArticleController extends AbstractHowtoBasedController {
 			}
 			$this->_updateHowtoBlockVideoCount($howto);
 
-			$om = $this->getDoctrine()->getManager();
 			$om->flush();
 
 			// Process mentions
@@ -247,9 +245,7 @@ class ArticleController extends AbstractHowtoBasedController {
 	/**
 	 * @Route("/pas-a-pas/articles/{id}/delete", requirements={"id" = "\d+"}, name="core_howto_article_delete")
 	 */
-	public function deleteAction($id, ArticleManager $articleManager, SearchUtils $searchUtils, TranslatorInterface $translator) {
-		$om = $this->getDoctrine()->getManager();
-
+	public function deleteAction($id, ArticleManager $articleManager, EntityManagerInterface $om, SearchUtils $searchUtils, TranslatorInterface $translator) {
 		$article = $this->retrievePublication($id, Article::CLASS_NAME);
 		$this->assertDeletable($article->getHowto(), true);
 
@@ -297,8 +293,7 @@ class ArticleController extends AbstractHowtoBasedController {
 	/**
 	 * @Route("/pas-a-pas/articles/{id}/sticker", requirements={"id" = "\d+"}, name="core_howto_article_sticker")
 	 */
-	public function stickerAction(Request $request, $id, EmbeddableUtils $embeddableUtils, ImagineController $imagineController) {
-		$om = $this->getDoctrine()->getManager();
+	public function stickerAction(Request $request, $id, EmbeddableUtils $embeddableUtils, ImagineController $imagineController, EntityManagerInterface $om) {
 		$articleRepository = $om->getRepository(Article::CLASS_NAME);
 
 		$id = intval($id);
@@ -346,8 +341,7 @@ class ArticleController extends AbstractHowtoBasedController {
 	 * @Route("/pas-a-pas/articles/{id}.html", name="core_howto_article_show")
 	 * @Template("@LadbCore/Howto/Article/show.html.twig")
 	 */
-	public function showAction(Request $request, $id, EventDispatcherInterface $dispatcher, WitnessManager $witnessManager) {
-		$om = $this->getDoctrine()->getManager();
+	public function showAction(Request $request, $id, EventDispatcherInterface $dispatcher, EntityManagerInterface $om, WitnessManager $witnessManager) {
 		$articleRepository = $om->getRepository(Article::CLASS_NAME);
 
 		$id = intval($id);

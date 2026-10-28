@@ -28,6 +28,7 @@ use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Form\Type\Collection\CollectionType;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/collections")
@@ -57,11 +58,9 @@ class CollectionController extends AbstractCollectionBasedController {
 	 * @Route("/create", methods={"POST"}, name="core_collection_create")
 	 * @Template("@LadbCore/Collection/Collection/new.html.twig")
 	 */
-	public function createAction(Request $request, CollectionnableUtils $collectionnableUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator, TypableUtils $typableUtils) {
+	public function createAction(Request $request, CollectionnableUtils $collectionnableUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator, TypableUtils $typableUtils) {
 
 		$this->createLock('core_collection_create', false, self::LOCK_TTL_CREATE_ACTION, false);
-
-		$om = $this->getDoctrine()->getManager();
 
 		$collection = new Collection();
 		$form = $this->createForm(CollectionType::class, $collection);
@@ -204,9 +203,7 @@ class CollectionController extends AbstractCollectionBasedController {
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_collection_update")
 	 * @Template("@LadbCore/Collection/Collection/edit.html.twig")
 	 */
-	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
-		$om = $this->getDoctrine()->getManager();
-
+	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 		$collection = $this->retrievePublication($id, Collection::CLASS_NAME);
 		$this->assertEditabable($collection);
 
@@ -439,8 +436,7 @@ class CollectionController extends AbstractCollectionBasedController {
 	 * @Route("/available/{entityType}/{entityId}/{page}", requirements={"entityType" = "\d+", "entityId" = "\d+", "page" = "\d+"}, name="core_collection_list_available_page")
 	 * @Template("@LadbCore/Collection/Collection/list-available-xhr.html.twig")
 	 */
-	public function listAvailableAction($entityType, $entityId, CollectionnableUtils $collectionnableUtils, PaginatorUtils $paginatorUtils, $page = 0) {
-		$om = $this->getDoctrine()->getManager();
+	public function listAvailableAction($entityType, $entityId, CollectionnableUtils $collectionnableUtils, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $page = 0) {
 		$collectionRepository = $om->getRepository(Collection::CLASS_NAME);
 
 		// Retrieve related entity
@@ -477,8 +473,7 @@ class CollectionController extends AbstractCollectionBasedController {
 	 * @Route("/{entityType}/{entityId}/{page}", requirements={"entityType" = "\d+", "entityId" = "\d+", "page" = "\d+"}, name="core_collection_list_byentity_page")
 	 * @Template("@LadbCore/Collection/Collection/list-byentity.html.twig")
 	 */
-	public function listByEntityAction(Request $request, $entityType, $entityId, PaginatorUtils $paginatorUtils, $page = 0) {
-		$om = $this->getDoctrine()->getManager();
+	public function listByEntityAction(Request $request, $entityType, $entityId, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $page = 0) {
 		$collectionRepository = $om->getRepository(Collection::CLASS_NAME);
 
 		// Retrieve related entity
@@ -509,7 +504,7 @@ class CollectionController extends AbstractCollectionBasedController {
 	 * @Route("/{id}/tab/{entityType}/{page}", requirements={"id" = "\d+", "entityType" = "\d+", "page" = "\d+"}, name="core_collection_show_type_page")
 	 * @Template("@LadbCore/Collection/Collection/showAbout.html.twig")
 	 */
-	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, FollowerUtils $followerUtils, LikableUtils $likableUtils, PaginatorUtils $paginatorUtils, TypableUtils $typableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager, $entityType = 0, $page = 0) {
+	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, FollowerUtils $followerUtils, LikableUtils $likableUtils, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, TypableUtils $typableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager, $entityType = 0, $page = 0) {
 
 		// Retrieve collection
 		$collection = $this->_retrieveCollection($id);
@@ -539,7 +534,6 @@ class CollectionController extends AbstractCollectionBasedController {
 
 		if ($entityType > 0) {
 
-			$om = $this->getDoctrine()->getManager();
 			$entryRepository = $om->getRepository(Entry::CLASS_NAME);
 
 			$offset = $paginatorUtils->computePaginatorOffset($page);

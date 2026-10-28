@@ -24,6 +24,7 @@ use Ladb\CoreBundle\Utils\TypableUtils;
 use Ladb\CoreBundle\Utils\MentionUtils;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/commentaires")
@@ -82,7 +83,7 @@ class CommentController extends AbstractController {
 	 * @Route("/{entityType}/{entityId}/{parentId}/create", requirements={"entityType" = "\d+", "entityId" = "\d+", "parentId" = "\d+"}, methods={"POST"}, name="core_comment_create")
 	 * @Template("@LadbCore/Core/Comment/new-xhr.html.twig")
 	 */
-	public function createAction(Request $request, $entityType, $entityId, CommentableUtils $commentUtils, CommentableUtils $commentableUtils, FormFactoryInterface $formFactory, TypableUtils $typableUtils, $parentId = 0) {
+	public function createAction(Request $request, $entityType, $entityId, CommentableUtils $commentUtils, CommentableUtils $commentableUtils, FormFactoryInterface $formFactory, EntityManagerInterface $om, TypableUtils $typableUtils, $parentId = 0) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_comment_create)');
 		}
@@ -96,7 +97,6 @@ class CommentController extends AbstractController {
 			throw $this->createNotFoundException('Hidden entity could not be commented.');
 		}
 
-		$om = $this->getDoctrine()->getManager();
 		$commentRepository = $om->getRepository(Comment::CLASS_NAME);
 
 		$comment = new Comment();
@@ -150,12 +150,11 @@ class CommentController extends AbstractController {
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_comment_edit")
 	 * @Template("@LadbCore/Core/Comment/edit-xhr.html.twig")
 	 */
-	public function editAction(Request $request, $id, CommentableUtils $commentUtils, FormFactoryInterface $formFactory, TypableUtils $typableUtils) {
+	public function editAction(Request $request, $id, CommentableUtils $commentUtils, FormFactoryInterface $formFactory, EntityManagerInterface $om, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_comment_edit)');
 		}
 
-		$om = $this->getDoctrine()->getManager();
 		$commentRepository = $om->getRepository(Comment::CLASS_NAME);
 
 		$comment = $commentRepository->findOneById($id);
@@ -182,12 +181,11 @@ class CommentController extends AbstractController {
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_comment_update")
 	 * @Template("@LadbCore/Core/Comment/edit-xhr.html.twig")
 	 */
-	public function updateAction(Request $request, $id, CommentableUtils $commentUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, FormFactoryInterface $formFactory, MentionUtils $mentionUtils, PicturedUtils $picturedUtils, TypableUtils $typableUtils) {
+	public function updateAction(Request $request, $id, CommentableUtils $commentUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, FormFactoryInterface $formFactory, MentionUtils $mentionUtils, EntityManagerInterface $om, PicturedUtils $picturedUtils, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_comment_update)');
 		}
 
-		$om = $this->getDoctrine()->getManager();
 		$commentRepository = $om->getRepository(Comment::CLASS_NAME);
 
 		$comment = $commentRepository->findOneById($id);
@@ -238,8 +236,7 @@ class CommentController extends AbstractController {
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_comment_delete")
 	 * @Template("@LadbCore/Core/Comment/delete-xhr.html.twig")
 	 */
-	public function deleteAction($id, CommentableUtils $commentableUtils, SearchUtils $searchUtils, TypableUtils $typableUtils) {
-		$om = $this->getDoctrine()->getManager();
+	public function deleteAction($id, CommentableUtils $commentableUtils, EntityManagerInterface $om, SearchUtils $searchUtils, TypableUtils $typableUtils) {
 		$commentRepository = $om->getRepository(Comment::CLASS_NAME);
 
 		$comment = $commentRepository->findOneById($id);
@@ -271,8 +268,7 @@ class CommentController extends AbstractController {
 	/**
 	 * @Route("/{id}", requirements={"id" = "\d+"}, name="core_comment_show")
 	 */
-	public function showAction($id, TypableUtils $typableUtils) {
-		$om = $this->getDoctrine()->getManager();
+	public function showAction($id, EntityManagerInterface $om, TypableUtils $typableUtils) {
 		$commentRepository = $om->getRepository(Comment::CLASS_NAME);
 
 		$comment = $commentRepository->findOneById($id);
@@ -295,8 +291,7 @@ class CommentController extends AbstractController {
 	 * @Template("@LadbCore/Core/Comment/moveup-xhr.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_comment_admin_moveup)")
 	 */
-	public function adminMoveupAction($id) {
-		$om = $this->getDoctrine()->getManager();
+	public function adminMoveupAction($id, EntityManagerInterface $om) {
 		$commentRepository = $om->getRepository(Comment::CLASS_NAME);
 
 		$comment = $commentRepository->findOneById($id);
@@ -321,8 +316,7 @@ class CommentController extends AbstractController {
 	 * @Route("/{id}/{questionId}/admin/converttoanswer", requirements={"id" = "\d+", "questionId" = "\d+"}, name="core_comment_admin_converttoanswer")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_comment_admin_converttoanswer)")
 	 */
-	public function adminConvertToAnswerAction($id, $questionId, CommentManager $commentManager, TranslatorInterface $translator) {
-		$om = $this->getDoctrine()->getManager();
+	public function adminConvertToAnswerAction($id, $questionId, CommentManager $commentManager, EntityManagerInterface $om, TranslatorInterface $translator) {
 		$commentRepository = $om->getRepository(Comment::CLASS_NAME);
 		$questionRepository = $om->getRepository(Question::CLASS_NAME);
 
