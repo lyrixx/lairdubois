@@ -11,7 +11,7 @@ use Ladb\CoreBundle\Entity\Qa\Answer;
 use Ladb\CoreBundle\Entity\Qa\Question;
 use Ladb\CoreBundle\Entity\Wonder\Creation;
 use Ladb\CoreBundle\Utils\CryptoUtils;
-use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\Route;
@@ -162,7 +162,7 @@ final class RouteSmokeTest extends WebTestCase
         }
     }
 
-    private function createClientFor(string $role): Client
+    private function createClientFor(string $role): KernelBrowser
     {
         return null === self::ROLES[$role] ? static::createClient() : static::createClientAs(self::ROLES[$role]);
     }
@@ -173,7 +173,7 @@ final class RouteSmokeTest extends WebTestCase
      *
      * @param array<string, string> $server
      */
-    private function request(Client $client, string $url, array $server = []): ?string
+    private function request(KernelBrowser $client, string $url, array $server = []): ?string
     {
         $this->exception = null;
         $client->getContainer()->get('event_dispatcher')->addListener(KernelEvents::EXCEPTION, function (ExceptionEvent $event): void {

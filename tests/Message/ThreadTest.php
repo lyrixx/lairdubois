@@ -6,7 +6,7 @@ use Ladb\CoreBundle\DataFixtures\UserFixtures;
 use Ladb\CoreBundle\Entity\Message\Message;
 use Ladb\CoreBundle\Entity\Message\Thread;
 use Ladb\CoreBundle\Utils\MessageUtils;
-use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\DomCrawler\Form;
 use Tests\WebTestCase;
@@ -331,7 +331,7 @@ final class ThreadTest extends WebTestCase
     /**
      * Fills the form of a new thread to $recipient and submits it, with the profiler.
      */
-    private function submitNewThread(Client $client, string $recipient, string $subject, string $body): void
+    private function submitNewThread(KernelBrowser $client, string $recipient, string $subject, string $body): void
     {
         $crawler = $client->request('GET', static::generatePath('core_message_thread_new'));
         self::assertSame(200, $client->getResponse()->getStatusCode());
@@ -349,7 +349,7 @@ final class ThreadTest extends WebTestCase
     /**
      * Replies $body to the thread of the fixtures, from the form of the site, with the profiler.
      */
-    private function reply(Client $client, string $body): void
+    private function reply(KernelBrowser $client, string $body): void
     {
         $parameters = ['threadId' => self::THREAD_ID];
         $crawler = static::xhr($client, 'GET', static::generatePath('core_message_new', $parameters));

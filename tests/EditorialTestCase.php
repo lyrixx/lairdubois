@@ -6,7 +6,7 @@ use Ladb\CoreBundle\DataFixtures\UserFixtures;
 use Ladb\CoreBundle\Entity\AbstractDraftableAuthoredPublication;
 use Ladb\CoreBundle\Entity\Core\Activity\Publish;
 use PHPUnit\Framework\AssertionFailedError;
-use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\DomCrawler\Form;
 
@@ -289,7 +289,7 @@ abstract class EditorialTestCase extends WebTestCase
     /**
      * Unpublishes the content of the fixtures, as an admin.
      */
-    protected function unpublish(): Client
+    protected function unpublish(): KernelBrowser
     {
         $client = static::createClientAs(UserFixtures::ADMIN);
         $client->request('GET', $this->path('unpublish', ['id' => static::ID, 'rtu' => '/']));

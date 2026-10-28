@@ -3,7 +3,7 @@
 namespace Tests\User;
 
 use Ladb\CoreBundle\DataFixtures\UserFixtures;
-use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Tests\WebTestCase;
 use Tests\XhrTrait;
 
@@ -53,7 +53,7 @@ final class CountersTest extends WebTestCase
     /**
      * In test, the session is a file (session.storage.mock_file of config_test.yml).
      */
-    private function getSessionFile(Client $client): string
+    private function getSessionFile(KernelBrowser $client): string
     {
         $session = $client->getContainer()->get('session');
 

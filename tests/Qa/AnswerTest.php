@@ -8,7 +8,7 @@ use Ladb\CoreBundle\Entity\Core\Comment;
 use Ladb\CoreBundle\Entity\Core\Vote;
 use Ladb\CoreBundle\Entity\Qa\Answer;
 use Ladb\CoreBundle\Entity\Qa\Question;
-use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\DomCrawler\Form;
 use Tests\WebTestCase;
 use Tests\XhrTrait;
@@ -426,7 +426,7 @@ final class AnswerTest extends WebTestCase
         self::assertNotNull($this->findAnswer(UserFixtures::USER2));
     }
 
-    private function submitNewForm(Client $client, string $body): void
+    private function submitNewForm(KernelBrowser $client, string $body): void
     {
         $form = $this->getNewForm($client);
         $form['ladb_qa_answer[bodyBlocks][0][body]'] = $body;
@@ -434,7 +434,7 @@ final class AnswerTest extends WebTestCase
         static::xhr($client, 'POST', $form->getUri(), $form->getPhpValues());
     }
 
-    private function getNewForm(Client $client): Form
+    private function getNewForm(KernelBrowser $client): Form
     {
         $crawler = static::xhr($client, 'GET', static::generatePath('core_qa_answer_new', ['id' => self::QUESTION_ID]));
         self::assertSame(200, $client->getResponse()->getStatusCode());
@@ -442,7 +442,7 @@ final class AnswerTest extends WebTestCase
         return $crawler->filter(\sprintf('form[action="%s"]', static::generatePath('core_qa_answer_create', ['id' => self::QUESTION_ID])))->form();
     }
 
-    private function getEditForm(Client $client, int $id): Form
+    private function getEditForm(KernelBrowser $client, int $id): Form
     {
         $crawler = static::xhr($client, 'GET', static::generatePath('core_qa_answer_edit', ['id' => $id]));
         self::assertSame(200, $client->getResponse()->getStatusCode());
@@ -453,7 +453,7 @@ final class AnswerTest extends WebTestCase
     /**
      * Votes as the dialog of the vote widget does: its form, then its submission.
      */
-    private function vote(Client $client, int $answerId, string $way, string $reason = ''): void
+    private function vote(KernelBrowser $client, int $answerId, string $way, string $reason = ''): void
     {
         $crawler = static::xhr($client, 'GET', static::generatePath('core_vote_new', ['entityType' => Answer::TYPE, 'entityId' => $answerId, 'way' => $way]));
         self::assertSame(200, $client->getResponse()->getStatusCode());

@@ -4,7 +4,7 @@ namespace Tests\Webpush;
 
 use Ladb\CoreBundle\DataFixtures\UserFixtures;
 use Ladb\CoreBundle\Entity\Webpush\UserSubscription;
-use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Tests\WebTestCase;
 
 /**
@@ -76,7 +76,7 @@ final class SubscriptionTest extends WebTestCase
         self::assertCount(0, self::findSubscriptions());
     }
 
-    private static function send(Client $client, string $method, string $content): void
+    private static function send(KernelBrowser $client, string $method, string $content): void
     {
         $client->request($method, '/webpush/', [], [], ['CONTENT_TYPE' => 'application/json', 'HTTP_ACCEPT' => 'application/json'], $content);
     }

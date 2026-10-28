@@ -5,7 +5,7 @@ namespace Tests\Core;
 use Ladb\CoreBundle\DataFixtures\UserFixtures;
 use Ladb\CoreBundle\Entity\Wonder\Creation;
 use Ladb\CoreBundle\Message\WebpushNotificationMessage;
-use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\Messenger\Envelope;
 use Tests\WebTestCase;
 use Tests\XhrTrait;
@@ -36,12 +36,12 @@ abstract class InteractionTestCase extends WebTestCase
         self::assertSame(302, $client->getResponse()->getStatusCode());
     }
 
-    protected static function createClientFor(?string $username): Client
+    protected static function createClientFor(?string $username): KernelBrowser
     {
         return null === $username ? static::createClient() : static::createClientAs($username);
     }
 
-    protected static function assertRedirectsToLogin(Client $client): void
+    protected static function assertRedirectsToLogin(KernelBrowser $client): void
     {
         self::assertTrue($client->getResponse()->isRedirect());
         self::assertStringEndsWith('/login', $client->getResponse()->headers->get('Location'));
@@ -53,7 +53,7 @@ abstract class InteractionTestCase extends WebTestCase
      *
      * @return list<WebpushNotificationMessage>
      */
-    protected static function getWebpushNotifications(Client $client): array
+    protected static function getWebpushNotifications(KernelBrowser $client): array
     {
         return array_map(
             fn (Envelope $envelope) => $envelope->getMessage(),

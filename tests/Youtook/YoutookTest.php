@@ -5,7 +5,7 @@ namespace Tests\Youtook;
 use Ladb\CoreBundle\DataFixtures\UserFixtures;
 use Ladb\CoreBundle\Entity\Youtook\Took;
 use Ladb\CoreBundle\Utils\VideoHostingUtils;
-use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Tests\WebTestCase;
 use Tests\XhrTrait;
 
@@ -299,7 +299,7 @@ final class YoutookTest extends WebTestCase
         return static::generatePath('core_youtook_'.$action, $parameters);
     }
 
-    private function createClientFor(?string $username): Client
+    private function createClientFor(?string $username): KernelBrowser
     {
         return null === $username ? static::createClient() : static::createClientAs($username);
     }
@@ -317,7 +317,7 @@ final class YoutookTest extends WebTestCase
     /**
      * Posts a new took from the form of the list of the user, as its JS does (XHR).
      */
-    private function submitNewForm(Client $client, string $url)
+    private function submitNewForm(KernelBrowser $client, string $url)
     {
         $crawler = $client->request('GET', $this->path('user_list'));
         $form = $crawler->filter(\sprintf('form[action="%s"]', $this->path('create')))->form(['ladb_youtook_new_took[url]' => $url]);

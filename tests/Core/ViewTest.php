@@ -7,7 +7,7 @@ use Ladb\CoreBundle\Entity\Core\View;
 use Ladb\CoreBundle\Entity\Wonder\Creation;
 use Ladb\CoreBundle\Message\ListedViewMessage;
 use Ladb\CoreBundle\Message\ShownViewMessage;
-use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\Messenger\Envelope;
 
 /**
@@ -116,7 +116,7 @@ final class ViewTest extends InteractionTestCase
      *
      * @return list<ShownViewMessage|ListedViewMessage>
      */
-    private static function getViewMessages(Client $client): array
+    private static function getViewMessages(KernelBrowser $client): array
     {
         return array_map(
             fn (Envelope $envelope) => $envelope->getMessage(),

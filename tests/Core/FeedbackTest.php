@@ -6,7 +6,7 @@ use Ladb\CoreBundle\DataFixtures\UserFixtures;
 use Ladb\CoreBundle\Entity\Core\Activity\Feedback as FeedbackActivity;
 use Ladb\CoreBundle\Entity\Core\Feedback;
 use Ladb\CoreBundle\Entity\Wonder\Creation;
-use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\DomCrawler\Form;
 
@@ -174,7 +174,7 @@ final class FeedbackTest extends InteractionTestCase
     /**
      * Fills the form of a new feedback on the creation and submits it.
      */
-    private function submitNewForm(Client $client): void
+    private function submitNewForm(KernelBrowser $client): void
     {
         $crawler = static::xhr($client, 'GET', static::generatePath('core_feedback_new', $this->getNewParameters()));
         self::assertSame(200, $client->getResponse()->getStatusCode());

@@ -17,7 +17,7 @@ use Ladb\CoreBundle\Entity\Wonder\Plan;
 use Ladb\CoreBundle\Entity\Wonder\Workshop;
 use Ladb\CoreBundle\Entity\Workflow\Workflow;
 use Ladb\CoreBundle\Utils\TypableUtils;
-use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Tests\WebTestCase;
 use Tests\XhrTrait;
 
@@ -227,7 +227,7 @@ final class SearchTest extends WebTestCase
     /**
      * Whether the list of $route, searched with $query, links to the page of $entity.
      */
-    private function isListed(Client $client, string $route, string $query, object $entity): bool
+    private function isListed(KernelBrowser $client, string $route, string $query, object $entity): bool
     {
         $showPath = static::$container->get(TypableUtils::NAME)->getUrlAction($entity, 'show', false);
         $crawler = $client->request('GET', static::generatePath($route, ['q' => $query]));

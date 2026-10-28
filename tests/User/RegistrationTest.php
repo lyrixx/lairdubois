@@ -5,7 +5,7 @@ namespace Tests\User;
 use Ladb\CoreBundle\DataFixtures\UserFixtures;
 use Ladb\CoreBundle\Entity\Core\Registration;
 use Ladb\CoreBundle\Entity\Message\ThreadMeta;
-use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Tests\WebTestCase;
 
 /**
@@ -188,7 +188,7 @@ final class RegistrationTest extends WebTestCase
     /**
      * The accounts of the fixtures have a confirmed email address.
      */
-    private function createClientAsUnconfirmed(string $username): Client
+    private function createClientAsUnconfirmed(string $username): KernelBrowser
     {
         static::getEntityManager()->getConnection()->update('tbl_core_user', ['email_confirmed' => 0], ['username_canonical' => $username]);
 

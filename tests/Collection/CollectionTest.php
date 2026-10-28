@@ -7,7 +7,7 @@ use Ladb\CoreBundle\Entity\Collection\Collection;
 use Ladb\CoreBundle\Entity\Collection\Entry;
 use Ladb\CoreBundle\Entity\Find\Find;
 use Ladb\CoreBundle\Entity\Wonder\Creation;
-use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\DomCrawler\Form;
 use Tests\WebTestCase;
 use Tests\XhrTrait;
@@ -424,7 +424,7 @@ final class CollectionTest extends WebTestCase
         return static::generatePath('core_collection_'.$action, $parameters);
     }
 
-    private function createClientFor(?string $username): Client
+    private function createClientFor(?string $username): KernelBrowser
     {
         return null === $username ? static::createClient() : static::createClientAs($username);
     }
@@ -468,7 +468,7 @@ final class CollectionTest extends WebTestCase
         ];
     }
 
-    private function getNewForm(Client $client): Form
+    private function getNewForm(KernelBrowser $client): Form
     {
         $crawler = $client->request('GET', $this->path('new'));
         self::assertSame(200, $client->getResponse()->getStatusCode());

@@ -9,7 +9,7 @@ use Ladb\CoreBundle\Entity\Core\Mention;
 use Ladb\CoreBundle\Entity\Qa\Answer;
 use Ladb\CoreBundle\Entity\Qa\Question;
 use Ladb\CoreBundle\Entity\Wonder\Creation;
-use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 
 /**
  * The comments of a content, in XHR as on the site. On the creation of the fixtures, which has
@@ -283,7 +283,7 @@ final class CommentTest extends InteractionTestCase
     /**
      * Comments $body on the creation, from the form of a new comment, as the site does.
      */
-    private function comment(Client $client, string $body, int $parentId = 0): void
+    private function comment(KernelBrowser $client, string $body, int $parentId = 0): void
     {
         $parameters = $this->getNewParameters($parentId);
         $crawler = static::xhr($client, 'GET', static::generatePath('core_comment_new', $parameters));

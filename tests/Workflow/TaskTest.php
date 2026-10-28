@@ -5,7 +5,7 @@ namespace Tests\Workflow;
 use Ladb\CoreBundle\DataFixtures\UserFixtures;
 use Ladb\CoreBundle\Entity\Workflow\Task;
 use Ladb\CoreBundle\Entity\Workflow\Workflow;
-use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Tests\WebTestCase;
 use Tests\XhrTrait;
 
@@ -388,7 +388,7 @@ final class TaskTest extends WebTestCase
      *
      * @return array<string, mixed>
      */
-    private function getPushedData(Client $client): array
+    private function getPushedData(KernelBrowser $client): array
     {
         $updates = $client->getContainer()->get('tests.mercure_hub')->getUpdates();
         self::assertCount(1, $updates);

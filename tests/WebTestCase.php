@@ -6,8 +6,8 @@ use DAMA\DoctrineTestBundle\Doctrine\DBAL\StaticDriver;
 use Doctrine\ORM\EntityManagerInterface;
 use Elastica\Index;
 use Ladb\CoreBundle\Entity\Core\User;
-use Symfony\Bundle\FrameworkBundle\Client;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase as BaseWebTestCase;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -112,7 +112,7 @@ abstract class WebTestCase extends BaseWebTestCase
     /**
      * An anonymous client, on HTTPS and on the host of the site.
      */
-    protected static function createClient(array $options = [], array $server = []): Client
+    protected static function createClient(array $options = [], array $server = []): KernelBrowser
     {
         // The kernel booted before, if any (fixtures read before the client, another client):
         // the parent shuts it down too, but deprecates it and throws from Symfony 5.0
@@ -125,7 +125,7 @@ abstract class WebTestCase extends BaseWebTestCase
      * A client logged in as one of the accounts of the fixtures (UserFixtures::ADMIN, USER, USER2),
      * without going through the login form.
      */
-    protected static function createClientAs(string $username, array $options = [], array $server = []): Client
+    protected static function createClientAs(string $username, array $options = [], array $server = []): KernelBrowser
     {
         $client = static::createClient($options, $server);
         $user = static::findUser($username);
@@ -168,7 +168,7 @@ abstract class WebTestCase extends BaseWebTestCase
      *
      * @return list<\Swift_Message>
      */
-    protected static function getSentEmails(Client $client): array
+    protected static function getSentEmails(KernelBrowser $client): array
     {
         return array_values($client->getProfile()->getCollector('swiftmailer')->getMessages());
     }
