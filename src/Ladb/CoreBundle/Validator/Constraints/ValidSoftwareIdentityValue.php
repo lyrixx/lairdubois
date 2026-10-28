@@ -11,11 +11,11 @@ class ValidSoftwareIdentityValue extends Constraint {
 
 	public $message = 'Vous devez préciser le nom du logiciel hôte.';
 
-	public function validatedBy() {
+	public function validatedBy(): string {
 		return 'ladb_core.valid_software_identity_value_validator';
 	}
 
-	public function getTargets() {
+	public function getTargets(): string|array {
 		return self::CLASS_CONSTRAINT;
 	}
 

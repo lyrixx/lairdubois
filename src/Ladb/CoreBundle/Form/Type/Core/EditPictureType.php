@@ -25,7 +25,7 @@ class EditPictureType extends AbstractType {
 		));
 	}
 
-	public function getBlockPrefix() {
+	public function getBlockPrefix(): string {
 		return 'ladb_editpicture';
 	}
 

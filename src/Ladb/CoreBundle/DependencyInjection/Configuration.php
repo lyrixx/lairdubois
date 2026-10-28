@@ -15,7 +15,7 @@ class Configuration implements ConfigurationInterface {
 	/**
 	 * {@inheritDoc}
 	 */
-	public function getConfigTreeBuilder() {
+	public function getConfigTreeBuilder(): TreeBuilder {
 		$treeBuilder = new TreeBuilder('ladb_core');
 		$rootNode = $treeBuilder->getRootNode();
 

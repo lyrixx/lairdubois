@@ -78,7 +78,7 @@ class NewTookType extends AbstractType {
 		));
 	}
 
-	public function getBlockPrefix() {
+	public function getBlockPrefix(): string {
 		return 'ladb_youtook_new_took';
 	}
 

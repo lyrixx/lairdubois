@@ -16,7 +16,7 @@ class ArticlesToIdsTransformer implements DataTransformerInterface {
 		$this->om = $om;
 	}
 
-	public function transform($articles) {
+	public function transform($articles): mixed {
 		if (null === $articles) {
 			return '';
 		}
@@ -32,7 +32,7 @@ class ArticlesToIdsTransformer implements DataTransformerInterface {
 		return implode(',', $idsArray);
 	}
 
-	public function reverseTransform($idsString) {
+	public function reverseTransform($idsString): mixed {
 		if (!$idsString) {
 			return array();
 		}

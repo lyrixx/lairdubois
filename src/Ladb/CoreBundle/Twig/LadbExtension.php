@@ -33,7 +33,7 @@ class LadbExtension extends AbstractExtension {
 		$this->urlUtils = $urlUtils;
 	}
 
-	public function getFilters() {
+	public function getFilters(): array {
 		return array(
 			new TwigFilter('ladb_file_size_format', array( $this, 'fileSizeFormatFilter' )),
 			new TwigFilter('ladb_truncate_at', array( $this, 'truncateAtFilter' )),
@@ -51,7 +51,7 @@ class LadbExtension extends AbstractExtension {
 		);
 	}
 
-	public function getFunctions() {
+	public function getFunctions(): array {
 		return array(
 			new TwigFunction('ladb_entity', array( $this, 'entityFunction' )),
 			new TwigFunction('ladb_entity_url_action', array( $this, 'entityUrlActionFunction' )),
@@ -64,7 +64,7 @@ class LadbExtension extends AbstractExtension {
 		);
 	}
 
-	public function getTests() {
+	public function getTests(): array {
 		return array(
 			new TwigTest('ladb_instanceof', array( $this, 'isInstanceof' )),
 		);

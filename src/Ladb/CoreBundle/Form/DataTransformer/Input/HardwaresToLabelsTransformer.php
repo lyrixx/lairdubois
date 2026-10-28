@@ -15,7 +15,7 @@ class HardwaresToLabelsTransformer implements DataTransformerInterface {
 		$this->om = $om;
 	}
 
-	public function transform($hardwares) {
+	public function transform($hardwares): mixed {
 		if (null === $hardwares) {
 			return '';
 		}
@@ -31,7 +31,7 @@ class HardwaresToLabelsTransformer implements DataTransformerInterface {
 		return implode(',', $labelsArray);
 	}
 
-	public function reverseTransform($labelsString) {
+	public function reverseTransform($labelsString): mixed {
 		if (!$labelsString) {
 			return array();
 		}

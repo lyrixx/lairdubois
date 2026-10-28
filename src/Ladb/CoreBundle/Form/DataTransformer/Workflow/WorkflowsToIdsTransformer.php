@@ -16,7 +16,7 @@ class WorkflowsToIdsTransformer implements DataTransformerInterface {
 		$this->om = $om;
 	}
 
-	public function transform($workflows) {
+	public function transform($workflows): mixed {
 		if (null === $workflows) {
 			return '';
 		}
@@ -32,7 +32,7 @@ class WorkflowsToIdsTransformer implements DataTransformerInterface {
 		return implode(',', $idsArray);
 	}
 
-	public function reverseTransform($idsString) {
+	public function reverseTransform($idsString): mixed {
 		if (!$idsString) {
 			return array();
 		}

@@ -33,7 +33,7 @@ class ReplyMessageType extends AbstractType {
 		));
 	}
 
-	public function getBlockPrefix() {
+	public function getBlockPrefix(): string {
 		return 'ladb_message_replymessage';
 	}
 

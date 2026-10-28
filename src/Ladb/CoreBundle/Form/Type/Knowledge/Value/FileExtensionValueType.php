@@ -35,7 +35,7 @@ class FileExtensionValueType extends AbstractValueType {
 		));
 	}
 
-	public function getBlockPrefix() {
+	public function getBlockPrefix(): string {
 		return 'ladb_knowledge_value_file_extension';
 	}
 

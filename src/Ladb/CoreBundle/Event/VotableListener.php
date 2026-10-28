@@ -26,7 +26,7 @@ class VotableListener implements EventSubscriberInterface {
 		$this->textureUtils = $textureUtils;
 	}
 
-	public static function getSubscribedEvents() {
+	public static function getSubscribedEvents(): array {
 		return array(
 			VotableListener::VOTE_UPDATED   => 'onVoteUpdated',
 		);

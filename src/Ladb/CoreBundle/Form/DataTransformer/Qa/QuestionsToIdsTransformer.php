@@ -16,7 +16,7 @@ class QuestionsToIdsTransformer implements DataTransformerInterface {
 		$this->om = $om;
 	}
 
-	public function transform($questions) {
+	public function transform($questions): mixed {
 		if (null === $questions) {
 			return '';
 		}
@@ -32,7 +32,7 @@ class QuestionsToIdsTransformer implements DataTransformerInterface {
 		return implode(',', $idsArray);
 	}
 
-	public function reverseTransform($idsString) {
+	public function reverseTransform($idsString): mixed {
 		if (!$idsString) {
 			return array();
 		}

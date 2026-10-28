@@ -15,7 +15,7 @@ class HowtosToIdsTransformer implements DataTransformerInterface {
 		$this->om = $om;
 	}
 
-	public function transform($howtos) {
+	public function transform($howtos): mixed {
 		if (null === $howtos) {
 			return '';
 		}
@@ -31,7 +31,7 @@ class HowtosToIdsTransformer implements DataTransformerInterface {
 		return implode(',', $idsArray);
 	}
 
-	public function reverseTransform($idsString) {
+	public function reverseTransform($idsString): mixed {
 		if (!$idsString) {
 			return array();
 		}

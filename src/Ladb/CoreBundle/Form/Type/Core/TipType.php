@@ -21,7 +21,7 @@ class TipType extends AbstractType {
 		));
 	}
 
-	public function getBlockPrefix() {
+	public function getBlockPrefix(): string {
 		return 'ladb_core_tip';
 	}
 

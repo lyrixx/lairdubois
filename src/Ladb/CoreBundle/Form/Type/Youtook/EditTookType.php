@@ -33,7 +33,7 @@ class EditTookType extends AbstractType {
 		));
 	}
 
-	public function getBlockPrefix() {
+	public function getBlockPrefix(): string {
 		return 'ladb_youtook_edit_took';
 	}
 

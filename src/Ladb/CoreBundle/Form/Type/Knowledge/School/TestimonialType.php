@@ -24,7 +24,7 @@ class TestimonialType extends AbstractType {
 		));
 	}
 
-	public function getBlockPrefix() {
+	public function getBlockPrefix(): string {
 		return 'ladb_knowledge_school_testimonial';
 	}
 

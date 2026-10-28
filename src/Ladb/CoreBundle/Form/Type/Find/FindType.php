@@ -157,7 +157,7 @@ class FindType extends AbstractType {
 		));
 	}
 
-	public function getBlockPrefix() {
+	public function getBlockPrefix(): string {
 		return 'ladb_find_find';
 	}
 

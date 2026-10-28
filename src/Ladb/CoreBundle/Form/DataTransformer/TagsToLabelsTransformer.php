@@ -18,7 +18,7 @@ class TagsToLabelsTransformer implements DataTransformerInterface {
 	/**
 	 * Transforms an object (tag) to a string (label).
 	 */
-	public function transform($tags) {
+	public function transform($tags): mixed {
 		if (null === $tags) {
 			return '';
 		}
@@ -37,7 +37,7 @@ class TagsToLabelsTransformer implements DataTransformerInterface {
 	/**
 	 * Transforms a string (label) to an object (tag).
 	 */
-	public function reverseTransform($labelsString) {
+	public function reverseTransform($labelsString): mixed {
 		if (!$labelsString) {
 			return array();
 		}

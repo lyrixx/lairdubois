@@ -16,7 +16,7 @@ class PicturesToIdsTransformer implements DataTransformerInterface {
 		$this->om = $om;
 	}
 
-	public function transform($pictures) {
+	public function transform($pictures): mixed {
 		if (null === $pictures) {
 			return '';
 		}
@@ -32,7 +32,7 @@ class PicturesToIdsTransformer implements DataTransformerInterface {
 		return implode(',', $idsArray);
 	}
 
-	public function reverseTransform($idsString) {
+	public function reverseTransform($idsString): mixed {
 		if (!$idsString) {
 			return array();
 		}

@@ -39,7 +39,7 @@ class NewWoodType extends AbstractType {
 		));
 	}
 
-	public function getBlockPrefix() {
+	public function getBlockPrefix(): string {
 		return 'ladb_knowledge_newwood';
 	}
 

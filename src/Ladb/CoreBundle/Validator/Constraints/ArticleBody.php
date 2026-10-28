@@ -9,11 +9,11 @@ use Symfony\Component\Validator\Constraint;
  */
 class ArticleBody extends Constraint {
 
-	public function validatedBy() {
+	public function validatedBy(): string {
 		return 'ladb_core.article_body_validator';
 	}
 
-	public function getTargets() {
+	public function getTargets(): string|array {
 		return self::CLASS_CONSTRAINT;
 	}
 

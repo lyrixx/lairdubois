@@ -16,7 +16,7 @@ class ResourceToIdTransformer implements DataTransformerInterface {
 		$this->om = $om;
 	}
 
-	public function transform($resource) {
+	public function transform($resource): mixed {
 		if (null === $resource) {
 			return '';
 		}
@@ -28,7 +28,7 @@ class ResourceToIdTransformer implements DataTransformerInterface {
 		return $resource->getId();
 	}
 
-	public function reverseTransform($idString) {
+	public function reverseTransform($idString): mixed {
 		if (!$idString) {
 			return null;
 		}

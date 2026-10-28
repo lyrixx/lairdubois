@@ -9,11 +9,11 @@ use Symfony\Component\Validator\Constraint;
  */
 class ValidUserEmail extends Constraint {
 
-	public function validatedBy() {
+	public function validatedBy(): string {
 		return 'ladb_core.valid_user_email_validator';
 	}
 
-	public function getTargets() {
+	public function getTargets(): string|array {
 		return self::CLASS_CONSTRAINT;
 	}
 

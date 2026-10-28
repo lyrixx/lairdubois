@@ -140,7 +140,7 @@ class LadbMarkdown extends Parser {
 	 *
 	 * Allow headlines, lists and code to break paragraphs
 	 */
-	protected function consumeParagraph($lines, $current) {
+	protected function consumeParagraph($lines, $current): array {
 		// consume until newline
 		$content = [];
 		for ($i = $current, $count = count($lines); $i < $count; $i++) {

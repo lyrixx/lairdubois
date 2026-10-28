@@ -49,7 +49,7 @@ final class ChangePasswordType extends AbstractType {
 		));
 	}
 
-	public function getBlockPrefix() {
+	public function getBlockPrefix(): string {
 		return 'fos_user_change_password';
 	}
 

@@ -35,7 +35,7 @@ class CommentType extends AbstractType {
 		));
 	}
 
-	public function getBlockPrefix() {
+	public function getBlockPrefix(): string {
 		return self::DEFAULT_BLOCK_PREFIX;
 	}
 

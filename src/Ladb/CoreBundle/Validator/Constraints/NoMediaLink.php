@@ -11,11 +11,11 @@ class NoMediaLink extends Constraint {
 
 	public $message = 'Les liens du type "http://www.lairdubois.fr/media/cache..." ne sont pas permis.';
 
-	public function validatedBy() {
+	public function validatedBy(): string {
 		return 'ladb_core.no_media_link_validator';
 	}
 
-	public function getTargets() {
+	public function getTargets(): string|array {
 		return self::PROPERTY_CONSTRAINT;
 	}
 

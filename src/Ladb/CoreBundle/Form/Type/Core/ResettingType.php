@@ -37,7 +37,7 @@ final class ResettingType extends AbstractType {
 		));
 	}
 
-	public function getBlockPrefix() {
+	public function getBlockPrefix(): string {
 		return 'fos_user_resetting';
 	}
 

@@ -63,7 +63,7 @@ class PostType extends AbstractType {
 		));
 	}
 
-	public function getBlockPrefix() {
+	public function getBlockPrefix(): string {
 		return 'ladb_blog_post';
 	}
 

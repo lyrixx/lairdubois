@@ -15,7 +15,7 @@ class TextBlockType extends BlockType {
 		;
 	}
 
-	public function getBlockPrefix() {
+	public function getBlockPrefix(): string {
 		return 'ladb_block_text';
 	}
 

@@ -15,7 +15,7 @@ class SkillsToLabelsTransformer implements DataTransformerInterface {
 		$this->om = $om;
 	}
 
-	public function transform($skills) {
+	public function transform($skills): mixed {
 		if (null === $skills) {
 			return '';
 		}
@@ -31,7 +31,7 @@ class SkillsToLabelsTransformer implements DataTransformerInterface {
 		return implode(',', $labelsArray);
 	}
 
-	public function reverseTransform($labelsString) {
+	public function reverseTransform($labelsString): mixed {
 		if (!$labelsString) {
 			return array();
 		}

@@ -33,7 +33,7 @@ class PictureValueType extends AbstractValueType {
 		));
 	}
 
-	public function getBlockPrefix() {
+	public function getBlockPrefix(): string {
 		return 'ladb_knowledge_value_picture';
 	}
 

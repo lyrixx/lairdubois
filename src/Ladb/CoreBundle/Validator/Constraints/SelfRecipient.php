@@ -11,11 +11,11 @@ class SelfRecipient extends Constraint {
 
 	public $message = 'Vous ne pouvez pas être le destinataire de votre propre message';
 
-	public function validatedBy() {
+	public function validatedBy(): string {
 		return 'ladb_core.self_recipient_validator';
 	}
 
-	public function getTargets() {
+	public function getTargets(): string|array {
 		return self::PROPERTY_CONSTRAINT;
 	}
 
