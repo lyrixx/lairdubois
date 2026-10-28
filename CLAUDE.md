@@ -188,11 +188,12 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() des ac
 
 - PHPUnit 9.6, dans `tools/phpunit` et pas dans le `composer.json` de l'application : c'est la
   dernière version qui marche à la fois avec le `WebTestCase` de Symfony 4.4 (setUp/tearDown
-  `void` via `ForwardCompatTestTrait`) et avec `symfony/phpunit-bridge` (`TestListener` et
-  `ErrorHandler` de PHPUnit, supprimés en 10). Le bridge reste en 3.4, que `symfony/symfony` ne
-  remplace pas : `Tests\DeprecationCollector` appelle son `getPhpUnitErrorHandler()`, privé en
-  4.4. Le `simple-phpunit` du bridge 3.4 ne sait pas installer PHPUnit 9.6 (il garde le
-  `composer.lock` du paquet et n'installe pas le bridge).
+  `void` via `ForwardCompatTestTrait`) et avec `Tests\DeprecationCollector` (`TestResult` et
+  `ErrorHandler` de PHPUnit, supprimés en 10). `symfony/phpunit-bridge`, que `symfony/symfony` ne
+  remplace pas, est en 8.1 : il ne dépend d'aucun composant de Symfony, n'exige que PHP 8.1 et
+  marche encore avec PHPUnit 9.6, rien à y changer aux sauts de version. Le collecteur ne
+  l'appelle plus : il construit lui-même le gestionnaire d'erreurs de PHPUnit du test en cours,
+  comme le `getPhpUnitErrorHandler()` du bridge, privé depuis 4.4.
 - `qa:phpunit` lance PHP avec OPcache (`opcache.enable_cli=1`, `file_update_protection=0`, #113) :
   chaque requête d'un test démarre un nouveau container, qui recharge ses fichiers de services, et
   sans OPcache la compilation de celui d'`argument_resolver.service` (une closure par action) garde

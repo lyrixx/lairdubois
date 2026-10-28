@@ -109,9 +109,8 @@ function phpunit(#[AsRawTokens] array $rawTokens = []): int
 
     // The deprecations handler of symfony/phpunit-bridge (summary at the end of the run, exit
     // code) is disabled: tests/bootstrap.php registers Tests\DeprecationCollector, which counts
-    // the deprecations by message in the given file. The bridge of Symfony 3.4 has no structured
-    // output but SYMFONY_DEPRECATIONS_SERIALIZE, which keeps every occurrence in memory: too many
-    // for the smoke test.
+    // the deprecations by message in the given file. The SYMFONY_DEPRECATIONS_SERIALIZE of the
+    // bridge keeps every occurrence in memory: too many for the smoke test.
     // OPcache (#113): each request of a test boots a new container, which requires its service
     // files again. Compiled without OPcache, the file of argument_resolver.service (a closure per
     // controller action) keeps 143K at each require until the end of the process: 708M for the
