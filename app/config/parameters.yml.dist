@@ -18,10 +18,6 @@ parameters:
     memcached_host:                 localhost
     memcached_port:                 11211
 
-    websocket_host:                 127.0.0.1
-    websocket_port:                 8080
-    websocket_uri:                  wss://www.lairdubois.fr/ws
-
     mercure_url:                    http://127.0.0.1:3000/.well-known/mercure
     mercure_public_url:             https://www.lairdubois.fr/.well-known/mercure
     mercure_jwt_secret:             YOUR_MERCURE_JWT_SECRET

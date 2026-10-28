@@ -69,7 +69,7 @@ function about(): void
             if ("frontend-{$projectName}" === $router['service']) {
                 continue;
             }
-            // The websocket router also matches a path (/ws): it adds no URL
+            // The Mercure router also matches a path (/.well-known/mercure): it adds no URL
             if (str_contains($router['rule'], '&&')) {
                 continue;
             }

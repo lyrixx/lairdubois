@@ -21,8 +21,6 @@ class AppKernel extends Kernel
 			new Stof\DoctrineExtensionsBundle\StofDoctrineExtensionsBundle(),
 			new Liip\ImagineBundle\LiipImagineBundle(),
 
-			new Gos\Bundle\WebSocketBundle\GosWebSocketBundle(),
-			new Gos\Bundle\PubSubRouterBundle\GosPubSubRouterBundle(),
 			new Symfony\Bundle\MercureBundle\MercureBundle(),
 
 			new BenTools\WebPushBundle\WebPushBundle(),

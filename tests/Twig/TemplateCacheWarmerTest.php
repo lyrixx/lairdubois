@@ -16,7 +16,6 @@ final class TemplateCacheWarmerTest extends WebTestCase
     private const UNCOMPILABLE = [
         '@email/zurb_2/notification/body.html.twig', // inky_to_html, twig/inky-extra
         '@email/zurb_2/notification/content_markdown.html.twig', // markdown_to_html, twig/markdown-extra
-        '@GosWebSocket/client.html.twig', // javascripts, Assetic; the workflow editor uses Mercure, goes with Gos (#21)
     ];
 
     /**

@@ -57,13 +57,10 @@ jobs:
                           build:
                               cache_from: ["type=gha,scope=frontend"]
                               cache_to: ["type=gha,scope=frontend,mode=max,ignore-error=true"]
-                      websocket:
-                          build:
-                              cache_from: ["type=gha,scope=worker"]
-                              cache_to: ["type=gha,scope=worker,mode=max,ignore-error=true"]
                       worker_consumer_view:
                           build:
                               cache_from: ["type=gha,scope=worker"]
+                              cache_to: ["type=gha,scope=worker,mode=max,ignore-error=true"]
                       worker_consumer_webpush_notification:
                           build:
                               cache_from: ["type=gha,scope=worker"]
@@ -140,8 +137,7 @@ jobs:
                   if-no-files-found: ignore
 
     # The end-to-end tests (tests/e2e) beside the QA: same setup (YAML anchors of the job "ci"),
-    # then castor qa:e2e resets the database of the site, starts the websocket server and runs
-    # Playwright in its container
+    # then castor qa:e2e resets the database of the site and runs Playwright in its container
     e2e:
         name: E2E
         runs-on: ubuntu-latest

@@ -646,38 +646,6 @@ services:
     class: Ladb\CoreBundle\Form\Type\Youtook\EditTookType
     arguments: ['@doctrine.orm.entity_manager']
 
-  # Topics
-  ladb_workflow_topic:
-    class: Ladb\CoreBundle\Topic\WorkflowTopic
-    tags:
-      - { name: gos_web_socket.topic }
-
-  # Gos WebSocket in PHP 8 (to remove with it, #21)
-  gos_web_socket.wamp.pusher:  # Redefined: LadbCoreBundle is registered after GosWebSocketBundle, its definition wins
-    parent: gos_web_socket.abstract.pusher
-    class: Ladb\CoreBundle\WebSocket\WampPusher
-    # A child definition does not inherit _defaults: explicit, autowire and autoconfigure as in its parent
-    autowire: false
-    autoconfigure: false
-    public: false
-    tags:
-      - { name: gos_web_socket.pusher, alias: wamp }
-  # Gos has no alias by type for it (AbstractWorkflowBasedController::setPusher()). An alias of the id,
-  # not of the class: it follows the decorators (Tests\Double\InMemoryPusher, PusherDecorator in debug)
-  Gos\Bundle\WebSocketBundle\Pusher\PusherInterface: '@gos_web_socket.wamp.pusher'
-  ladb_core.websocket.session_listener:
-    class: Ladb\CoreBundle\WebSocket\SessionListener
-    arguments: ['@gos_web_socket.session_handler']
-    tags:
-      - { name: kernel.event_listener, event: gos_web_socket.client_connected, method: onClientConnect, priority: 10 }  # Before the authentication of Gos
-  # Deprecated, as its ws_client() (Assetic): the templates include its template instead. Redefined
-  # abstract, without its tag twig.extension, it is removed from the container, and the autowiring does not
-  # load its deprecated class (to remove with Gos, #21)
-  gos_web_socket.twig.extension:
-    class: Gos\Bundle\WebSocketBundle\Twig\GosWebSocketServerExtension
-    abstract: true
-    autoconfigure: false
-
   # Handlers of the messages of Messenger (tagged messenger.message_handler by autoconfigure)
   Ladb\CoreBundle\Consumer\ViewConsumer: ~
   Ladb\CoreBundle\Consumer\WebpushNotificationConsumer: ~
