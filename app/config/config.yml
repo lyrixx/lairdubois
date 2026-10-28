@@ -160,8 +160,10 @@ doctrine:
 
 # DoctrineMigrationsBundle
 doctrine_migrations:
-    # The same directory as the default, which reads kernel.root_dir, removed in Symfony 5.0
-    dir_name: "%kernel.project_dir%/app/DoctrineMigrations"
+    # The namespace and the directory of the defaults of dir_name and namespace, deprecated: the
+    # default of dir_name reads kernel.root_dir, removed in Symfony 5.0
+    migrations_paths:
+        'Application\Migrations': "%kernel.project_dir%/app/DoctrineMigrations"
 
 # Swiftmailer Configuration
 swiftmailer:
