@@ -307,7 +307,8 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
 (`tests/Smoke/`…), lancés par `castor qa:phpunit [-- --filter …]`.
 
 - Base et index propres à l'environnement `test` (`config_test.yml`) : `db_fr_lairdubois_www_test`
-  et les index `ladb_test_<type>`, chargés avec les fixtures. `qa:phpunit` les charge s'ils sont vides, `castor -c
+  et les index `ladb_test_<type>`, chargés avec les fixtures. `qa:phpunit` les charge s'ils sont
+  vides, et `qa:lint` en contexte `test` ou `ci`, avant `doctrine:schema:validate` ; `castor -c
   test app:db:fixtures` les recharge. Les données de dev ne bougent pas.
 - Chaque test tourne dans une transaction annulée à sa fin (`dama/doctrine-test-bundle`, extension
   PHPUnit de `phpunit.xml.dist`), y compris à travers les reboots du kernel entre deux requêtes :

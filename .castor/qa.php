@@ -45,10 +45,15 @@ function install(): void
 #[AsTask(description: 'Lints the Twig templates, the YAML files, the Doctrine mapping, the prod container and composer.json', aliases: ['lint'])]
 function lint(): int
 {
+    // doctrine:schema:validate needs the database of the context: on a new copy, the one of the
+    // tests only exists once qa:phpunit has loaded it
+    if (!db_has_users()) {
+        db_fixtures();
+    }
+
     $commands = [
         ['bin/console', 'lint:twig', 'templates', 'src'],
         ['bin/console', 'lint:yaml', 'app/config', 'src'],
-        // Needs the database and its schema (castor app:db:schema)
         ['bin/console', 'doctrine:schema:validate'],
         ['bin/console', 'cache:warmup', '--env=prod'],
         // In prod: the doubles of the test environment are not of the type of the services they decorate
