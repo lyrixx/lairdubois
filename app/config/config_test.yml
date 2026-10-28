@@ -120,6 +120,13 @@ services:
         tags:
             - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest, priority: 4096 }
 
+    # What each search of a request found in the index: getSearches() (Tests\Search\FacetTest)
+    tests.search_utils:
+        class: Tests\Double\RecordingSearchUtils
+        decorates: ladb_core.search_utils
+        arguments: { $index: '@fos_elastica.index.ladb', $persisterRegistry: '@fos_elastica.persister_registry' }
+        public: true
+
     # The factory of the fixtures, to create the pictures and resources of a new content
     tests.fixture_factory:
         alias: Ladb\CoreBundle\DataFixtures\FixtureFactory

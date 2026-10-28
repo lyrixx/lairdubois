@@ -398,6 +398,14 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   `getWebpushNotifications($client)` désérialise les notifications webpush de la dernière requête.
   Le premier de deux votes d'un même compte passe par `tests.fixture_factory` (`vote()`), pas par
   le controller et son verrou. Messagerie dans `tests/Message/`, recherche dans `tests/Search/`.
+- Ce que trouve chaque recherche (`Tests\Search\FacetTest`) : chaque facette de chaque liste, la
+  recherche sans facette, les typeaheads et les recherches des pages de contenu (contenus
+  similaires, compteurs), relevés sur Elasticsearch 5.6 avant #31. Pour chaque recherche d'une
+  requête : type, tri (`score` : par pertinence), ids de la page dans leur ordre, total, que garde
+  `tests.search_utils` (`Tests\Double\RecordingSearchUtils`, `getSearches()`). Une différence est
+  un changement de comportement de la recherche : à expliquer, jamais à recopier. Le tri par défaut
+  des listes du bois et de la FAQ dépend du compteur de nouveautés du compte : chaque test repart de
+  celui des fixtures, des requêtes précédentes dans le même test le changent.
 - Une entité lue avant la première requête d'un client est celle que la requête modifie (même
   entity manager) : lire avant la requête les valeurs à comparer ; une entité supprimée n'a plus
   d'id.
