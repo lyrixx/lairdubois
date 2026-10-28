@@ -400,7 +400,7 @@ class PostController extends AbstractController {
 				$this->pushGlobalVisibilityFilter($filters, true, false);
 
 			},
-			'fos_elastica.index.ladb.blog_post',
+			'fos_elastica.index.blog_post',
 			\Ladb\CoreBundle\Entity\Blog\Post::CLASS_NAME,
 			'core_blog_post_list_page'
 		);
@@ -438,7 +438,7 @@ class PostController extends AbstractController {
 		}
 		$this->assertShowable($post);
 
-		$similarPosts = $explorableUtils->getSimilarExplorables($post, 'fos_elastica.index.ladb.blog_post', Post::CLASS_NAME);
+		$similarPosts = $explorableUtils->getSimilarExplorables($post, 'fos_elastica.index.blog_post', Post::CLASS_NAME);
 
 		// Dispatch publication event
 		$dispatcher->dispatch(new PublicationEvent($post), PublicationListener::PUBLICATION_SHOWN);

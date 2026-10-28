@@ -933,7 +933,7 @@ class PlanController extends AbstractController {
 				$this->pushGlobalVisibilityFilter($filters, $layout != 'choice', true);
 
 			},
-			'fos_elastica.index.ladb.wonder_plan',
+			'fos_elastica.index.wonder_plan',
 			\Ladb\CoreBundle\Entity\Wonder\Plan::CLASS_NAME,
 			'core_plan_list_page',
 			$routeParameters
@@ -999,10 +999,10 @@ class PlanController extends AbstractController {
 
 		$searchableSoftwareCount = $searchUtils->searchEntitiesCount(array(
 			new \Elastica\Query\MatchQuery('supportedFiles', implode(',', $plan->getResourceFileExtensions()))
-		), 'fos_elastica.index.ladb.knowledge_software');
+		), 'fos_elastica.index.knowledge_software');
 
 		$userPlans = $explorableUtils->getPreviousAndNextPublishedUserExplorables($plan, $planRepository, $plan->getUser()->getMeta()->getPublicPlanCount());
-		$similarPlans = $explorableUtils->getSimilarExplorables($plan, 'fos_elastica.index.ladb.wonder_plan', Plan::CLASS_NAME, $userPlans);
+		$similarPlans = $explorableUtils->getSimilarExplorables($plan, 'fos_elastica.index.wonder_plan', Plan::CLASS_NAME, $userPlans);
 
 		return array(
 			'plan'                    => $plan,

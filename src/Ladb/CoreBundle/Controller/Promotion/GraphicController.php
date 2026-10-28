@@ -465,7 +465,7 @@ class GraphicController extends AbstractController {
 				$this->pushGlobalVisibilityFilter($filters, true, true);
 
 			},
-			'fos_elastica.index.ladb.promotion_graphic',
+			'fos_elastica.index.promotion_graphic',
 			\Ladb\CoreBundle\Entity\Promotion\Graphic::CLASS_NAME,
 			'core_promotion_graphic_list_page',
 			$routeParameters
@@ -520,7 +520,7 @@ class GraphicController extends AbstractController {
 		$dispatcher->dispatch(new PublicationEvent($graphic), PublicationListener::PUBLICATION_SHOWN);
 
 		$userGraphics = $explorableUtils->getPreviousAndNextPublishedUserExplorables($graphic, $graphicRepository, $graphic->getUser()->getMeta()->getPublicGraphicCount());
-		$similarGraphics = $explorableUtils->getSimilarExplorables($graphic, 'fos_elastica.index.ladb.promotion_graphic', Graphic::CLASS_NAME, $userGraphics);
+		$similarGraphics = $explorableUtils->getSimilarExplorables($graphic, 'fos_elastica.index.promotion_graphic', Graphic::CLASS_NAME, $userGraphics);
 
 		return array(
 			'graphic'           => $graphic,

@@ -387,7 +387,7 @@ class WoodController extends AbstractController {
 				$filters[] = new \Elastica\Query\Range('grainRejected', array( 'lt' => 1 ));
 
 			},
-			'fos_elastica.index.ladb.knowledge_wood',
+			'fos_elastica.index.knowledge_wood',
 			\Ladb\CoreBundle\Entity\Knowledge\Wood::CLASS_NAME,
 			'core_wood_list_page'
 		);
@@ -427,8 +427,8 @@ class WoodController extends AbstractController {
 		// Dispatch publication event
 		$dispatcher->dispatch(new PublicationEvent($wood), PublicationListener::PUBLICATION_SHOWN);
 
-		$searchableCreationCount = $searchUtils->searchEntitiesCount(array( $elasticaQueryUtils->createShouldMatchPhraseQuery('woods.label', $wood->getName()) ), 'fos_elastica.index.ladb.wonder_creation');
-		$searchableProviderCount = $searchUtils->searchEntitiesCount(array( $elasticaQueryUtils->createShouldMatchPhraseQuery('woodsWorkaround', $wood->getName()) ), 'fos_elastica.index.ladb.knowledge_provider');
+		$searchableCreationCount = $searchUtils->searchEntitiesCount(array( $elasticaQueryUtils->createShouldMatchPhraseQuery('woods.label', $wood->getName()) ), 'fos_elastica.index.wonder_creation');
+		$searchableProviderCount = $searchUtils->searchEntitiesCount(array( $elasticaQueryUtils->createShouldMatchPhraseQuery('woodsWorkaround', $wood->getName()) ), 'fos_elastica.index.knowledge_provider');
 
 		return array(
 			'wood'                    => $wood,

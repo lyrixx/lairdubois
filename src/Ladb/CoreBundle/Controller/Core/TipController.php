@@ -225,7 +225,7 @@ class TipController extends AbstractController {
 
 			},
 			null,
-			'fos_elastica.index.ladb.core_tip',
+			'fos_elastica.index.core_tip',
 			\Ladb\CoreBundle\Entity\Core\Tip::CLASS_NAME,
 			'core_tip_list_page'
 		);

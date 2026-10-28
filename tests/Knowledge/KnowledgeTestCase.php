@@ -291,7 +291,7 @@ abstract class KnowledgeTestCase extends WebTestCase
     private function isListed(string $showPath): bool
     {
         $client = static::createClient();
-        $client->getContainer()->get('fos_elastica.index.ladb')->refresh();
+        static::getIndexes()->refresh();
         $client->request('GET', $this->path('list'));
         self::assertSame(200, $client->getResponse()->getStatusCode());
 

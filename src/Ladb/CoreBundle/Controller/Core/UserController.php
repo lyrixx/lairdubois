@@ -360,7 +360,7 @@ class UserController extends AbstractController {
 					$filters[] = $filter;
 				}
 			},
-			'fos_elastica.index.ladb.core_user',
+			'fos_elastica.index.core_user',
 			\Ladb\CoreBundle\Entity\Core\User::CLASS_NAME,
 			$family == 'team' ? 'core_user_team_list_page' : 'core_user_list_page'
 		);

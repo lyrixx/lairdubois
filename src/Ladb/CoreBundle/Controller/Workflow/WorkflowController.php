@@ -817,7 +817,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 				$this->pushGlobalVisibilityFilter($filters, $layout != 'choice', true);
 
 			},
-			'fos_elastica.index.ladb.workflow_workflow',
+			'fos_elastica.index.workflow_workflow',
 			\Ladb\CoreBundle\Entity\Workflow\Workflow::CLASS_NAME,
 			'core_workflow_list_page',
 			$routeParameters

@@ -330,7 +330,7 @@ class SoftwareController extends AbstractController {
 				$filters[] = new \Elastica\Query\Range('iconRejected', array( 'lt' => 1 ));
 
 			},
-			'fos_elastica.index.ladb.knowledge_software',
+			'fos_elastica.index.knowledge_software',
 			\Ladb\CoreBundle\Entity\Knowledge\Software::CLASS_NAME,
 			'core_software_list_page'
 		);
@@ -375,11 +375,11 @@ class SoftwareController extends AbstractController {
 		$searchableAddonCount = $software->getIsAddOn() ? 0 : $searchUtils->searchEntitiesCount(array(
 			new \Elastica\Query\Term(['isAddOn' => ['value' => true, 'boost' => 1.0]]),
 			new \Elastica\Query\Term(['hostSoftwareName' => ['value' => strtolower($software->getName()), 'boost' => 1.0]])
-		), 'fos_elastica.index.ladb.knowledge_software');
+		), 'fos_elastica.index.knowledge_software');
 		$searchablePlanCount = is_null($software->getSupportedFiles()) ? 0 : $searchUtils->searchEntitiesCount(array(
 			new \Elastica\Query\Range('visibility', array( 'gte' => HiddableInterface::VISIBILITY_PUBLIC )),
 			new \Elastica\Query\MatchQuery('resources.fileExtension', $software->getSupportedFiles())
-		), 'fos_elastica.index.ladb.wonder_plan');
+		), 'fos_elastica.index.wonder_plan');
 
 		return array(
 			'software'             => $software,

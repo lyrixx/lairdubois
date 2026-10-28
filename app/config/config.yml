@@ -373,14 +373,21 @@ liip_imagine:
                 ladb_imageoptimizer: {}
 
 # FOSElasticaBundle
+parameters:
+    # Prefix of the names of the indexes (config_test.yml: their own in test)
+    elasticsearch_index_prefix: ladb_
+
 fos_elastica:
     clients:
         default: { host: "%elasticsearch_host%", port: "%elasticsearch_port%" }
+    # One index per type of content: Elasticsearch 6 allows one type per index, 7 none (#31). All
+    # of them with the settings of the first one.
     indexes:
-        ladb:
-            client: default
-            settings:
+        core_user:
+            index_name: "%elasticsearch_index_prefix%core_user"
+            settings: &index_settings
                 index:
+                    number_of_shards: 1
                     analysis:
                         analyzer:
                             title_analyzer:
@@ -450,6 +457,10 @@ fos_elastica:
                             query_builder_method: "createIsEnabledQueryBuilder"
                         listener:
                             update: false
+        core_tip:
+            index_name: "%elasticsearch_index_prefix%core_tip"
+            settings: *index_settings
+            types:
                 core_tip:
                     properties:
                         title: { type: text, boost: 3, analyzer: title_analyzer }
@@ -463,6 +474,10 @@ fos_elastica:
                         provider: ~
                         listener:
                             update: false
+        wonder_creation:
+            index_name: "%elasticsearch_index_prefix%wonder_creation"
+            settings: *index_settings
+            types:
                 wonder_creation:
                     properties:
                         visibility: { type: integer }
@@ -522,6 +537,10 @@ fos_elastica:
                             insert: false
                             update: false
                             delete: false
+        wonder_workshop:
+            index_name: "%elasticsearch_index_prefix%wonder_workshop"
+            settings: *index_settings
+            types:
                 wonder_workshop:
                     properties:
                         visibility: { type: integer }
@@ -561,6 +580,10 @@ fos_elastica:
                             insert: false
                             update: false
                             delete: false
+        wonder_plan:
+            index_name: "%elasticsearch_index_prefix%wonder_plan"
+            settings: *index_settings
+            types:
                 wonder_plan:
                     properties:
                         visibility: { type: integer }
@@ -608,6 +631,10 @@ fos_elastica:
                             insert: false
                             update: false
                             delete: false
+        qa_question:
+            index_name: "%elasticsearch_index_prefix%qa_question"
+            settings: *index_settings
+            types:
                 qa_question:
                     properties:
                         visibility: { type: integer }
@@ -617,6 +644,7 @@ fos_elastica:
                         changedAt: { type: date }
                         viewCount: { type: integer }
                         likeCount: { type: integer }
+                        commentCount: { type: integer }
                         answerCount: { type: integer }
                         positiveAnswerCount: { type: integer }
                         nullAnswerCount: { type: integer }
@@ -651,6 +679,10 @@ fos_elastica:
                             insert: false
                             update: false
                             delete: false
+        howto_howto:
+            index_name: "%elasticsearch_index_prefix%howto_howto"
+            settings: *index_settings
+            types:
                 howto_howto:
                     properties:
                         visibility: { type: integer }
@@ -698,6 +730,10 @@ fos_elastica:
                             insert: false
                             update: false
                             delete: false
+        find_find:
+            index_name: "%elasticsearch_index_prefix%find_find"
+            settings: *index_settings
+            types:
                 find_find:
                     properties:
                         visibility: { type: integer }
@@ -728,6 +764,10 @@ fos_elastica:
                             insert: false
                             update: false
                             delete: false
+        event_event:
+            index_name: "%elasticsearch_index_prefix%event_event"
+            settings: *index_settings
+            types:
                 event_event:
                     properties:
                         visibility: { type: integer }
@@ -762,6 +802,10 @@ fos_elastica:
                             insert: false
                             update: false
                             delete: false
+        workflow_workflow:
+            index_name: "%elasticsearch_index_prefix%workflow_workflow"
+            settings: *index_settings
+            types:
                 workflow_workflow:
                     properties:
                         visibility: { type: integer }
@@ -795,6 +839,10 @@ fos_elastica:
                             insert: false
                             update: false
                             delete: false
+        collection_collection:
+            index_name: "%elasticsearch_index_prefix%collection_collection"
+            settings: *index_settings
+            types:
                 collection_collection:
                     properties:
                         visibility: { type: integer }
@@ -824,6 +872,10 @@ fos_elastica:
                             insert: false
                             update: false
                             delete: false
+        promotion_graphic:
+            index_name: "%elasticsearch_index_prefix%promotion_graphic"
+            settings: *index_settings
+            types:
                 promotion_graphic:
                     properties:
                         visibility: { type: integer }
@@ -834,6 +886,7 @@ fos_elastica:
                         viewCount: { type: integer }
                         likeCount: { type: integer }
                         commentCount: { type: integer }
+                        downloadCount: { type: integer }
                         user:
                             type: "object"
                             properties:
@@ -852,6 +905,10 @@ fos_elastica:
                             insert: false
                             update: false
                             delete: false
+        blog_post:
+            index_name: "%elasticsearch_index_prefix%blog_post"
+            settings: *index_settings
+            types:
                 blog_post:
                     properties:
                         visibility: { type: integer }
@@ -880,6 +937,10 @@ fos_elastica:
                             insert: false
                             update: false
                             delete: false
+        faq_question:
+            index_name: "%elasticsearch_index_prefix%faq_question"
+            settings: *index_settings
+            types:
                 faq_question:
                     properties:
                         visibility: { type: integer }
@@ -909,6 +970,10 @@ fos_elastica:
                             insert: false
                             update: false
                             delete: false
+        offer_offer:
+            index_name: "%elasticsearch_index_prefix%offer_offer"
+            settings: *index_settings
+            types:
                 offer_offer:
                     properties:
                         visibility: { type: integer }
@@ -941,6 +1006,10 @@ fos_elastica:
                             insert: false
                             update: false
                             delete: false
+        knowledge_wood:
+            index_name: "%elasticsearch_index_prefix%knowledge_wood"
+            settings: *index_settings
+            types:
                 knowledge_wood:
                     properties:
                         titleWorkaround: { type: keyword, normalizer: title_normalizer }
@@ -967,6 +1036,10 @@ fos_elastica:
                             insert: false
                             update: false
                             delete: false
+        knowledge_provider:
+            index_name: "%elasticsearch_index_prefix%knowledge_provider"
+            settings: *index_settings
+            types:
                 knowledge_provider:
                     properties:
                         sign: { type: text, boost: 2, analyzer: name_analyzer }
@@ -1001,6 +1074,10 @@ fos_elastica:
                             insert: false
                             update: false
                             delete: false
+        knowledge_school:
+            index_name: "%elasticsearch_index_prefix%knowledge_school"
+            settings: *index_settings
+            types:
                 knowledge_school:
                     properties:
                         name: { type: text, boost: 3, analyzer: name_analyzer }
@@ -1029,6 +1106,10 @@ fos_elastica:
                             insert: false
                             update: false
                             delete: false
+        knowledge_book:
+            index_name: "%elasticsearch_index_prefix%knowledge_book"
+            settings: *index_settings
+            types:
                 knowledge_book:
                     properties:
                         identity: { type: text, boost: 2, analyzer: name_analyzer }
@@ -1059,6 +1140,10 @@ fos_elastica:
                             insert: false
                             update: false
                             delete: false
+        knowledge_software:
+            index_name: "%elasticsearch_index_prefix%knowledge_software"
+            settings: *index_settings
+            types:
                 knowledge_software:
                     properties:
                         name: { type: text, boost: 3, analyzer: name_analyzer }
@@ -1090,6 +1175,10 @@ fos_elastica:
                             insert: false
                             update: false
                             delete: false
+        knowledge_tool:
+            index_name: "%elasticsearch_index_prefix%knowledge_tool"
+            settings: *index_settings
+            types:
                 knowledge_tool:
                     properties:
                         name: { type: text, boost: 3, analyzer: name_analyzer }
@@ -1119,6 +1208,10 @@ fos_elastica:
                             insert: false
                             update: false
                             delete: false
+        core_tag:
+            index_name: "%elasticsearch_index_prefix%core_tag"
+            settings: *index_settings
+            types:
                 core_tag:
                     properties:
                         label: { analyzer: autocomplete_analyzer }
@@ -1127,6 +1220,10 @@ fos_elastica:
                         model: Ladb\CoreBundle\Entity\Core\Tag
                         provider: ~
                         listener: ~
+        input_skill:
+            index_name: "%elasticsearch_index_prefix%input_skill"
+            settings: *index_settings
+            types:
                 input_skill:
                     properties:
                         label: { analyzer: autocomplete_analyzer }
@@ -1135,6 +1232,10 @@ fos_elastica:
                         model: Ladb\CoreBundle\Entity\Input\Skill
                         provider: ~
                         listener: ~
+        input_wood:
+            index_name: "%elasticsearch_index_prefix%input_wood"
+            settings: *index_settings
+            types:
                 input_wood:
                     properties:
                         label: { analyzer: autocomplete_analyzer }
@@ -1143,6 +1244,10 @@ fos_elastica:
                         model: Ladb\CoreBundle\Entity\Input\Wood
                         provider: ~
                         listener: ~
+        input_tool:
+            index_name: "%elasticsearch_index_prefix%input_tool"
+            settings: *index_settings
+            types:
                 input_tool:
                     properties:
                         label: { analyzer: autocomplete_analyzer }
@@ -1151,6 +1256,10 @@ fos_elastica:
                         model: Ladb\CoreBundle\Entity\Input\Tool
                         provider: ~
                         listener: ~
+        input_finish:
+            index_name: "%elasticsearch_index_prefix%input_finish"
+            settings: *index_settings
+            types:
                 input_finish:
                     properties:
                         label: { analyzer: autocomplete_analyzer }
@@ -1159,6 +1268,10 @@ fos_elastica:
                         model: Ladb\CoreBundle\Entity\Input\Finish
                         provider: ~
                         listener: ~
+        input_hardware:
+            index_name: "%elasticsearch_index_prefix%input_hardware"
+            settings: *index_settings
+            types:
                 input_hardware:
                     properties:
                         label: { analyzer: autocomplete_analyzer }

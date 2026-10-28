@@ -417,7 +417,7 @@ class ProviderController extends AbstractController {
 				$filters[] = new \Elastica\Query\Range('signRejected', array( 'lt' => 1 ));
 
 			},
-			'fos_elastica.index.ladb.knowledge_provider',
+			'fos_elastica.index.knowledge_provider',
 			\Ladb\CoreBundle\Entity\Knowledge\Provider::CLASS_NAME,
 			'core_provider_list_page',
 			$routeParameters
@@ -597,8 +597,8 @@ class ProviderController extends AbstractController {
 		// Dispatch publication event
 		$dispatcher->dispatch(new PublicationEvent($provider), PublicationListener::PUBLICATION_SHOWN);
 
-		$searchableStoreCount = $searchUtils->searchEntitiesCount(array( new \Elastica\Query\MatchQuery('brand', $provider->getBrand()) ), 'fos_elastica.index.ladb.knowledge_provider');
-		$searchableWoodCount = $searchUtils->searchEntitiesCount(array( $elasticaQueryUtils->createShouldMatchPhraseQuery('name', $provider->getWoods()) ), 'fos_elastica.index.ladb.knowledge_wood');
+		$searchableStoreCount = $searchUtils->searchEntitiesCount(array( new \Elastica\Query\MatchQuery('brand', $provider->getBrand()) ), 'fos_elastica.index.knowledge_provider');
+		$searchableWoodCount = $searchUtils->searchEntitiesCount(array( $elasticaQueryUtils->createShouldMatchPhraseQuery('name', $provider->getWoods()) ), 'fos_elastica.index.knowledge_wood');
 
 		return array(
 			'provider'             => $provider,

@@ -37,18 +37,15 @@ monolog:
 parameters:
     mastodon_instance: 'offline://mastodon'
     env(LADB_TEST_MESSENGER_TRANSPORT_DSN): 'in-memory://'
+    # Their own indexes, as their own database below
+    elasticsearch_index_prefix: ladb_test_
 
-# Their own database and index, loaded with the fixtures (castor -c test app:db:fixtures): the
+# Their own database and indexes, loaded with the fixtures (castor -c test app:db:fixtures): the
 # tests do not overwrite the data of the dev environment. Each test runs in a transaction rolled
 # back at its end (dama/doctrine-test-bundle).
 doctrine:
     dbal:
         dbname: "%database_name%_test"
-
-fos_elastica:
-    indexes:
-        ladb:
-            index_name: ladb_test
 
 services:
     # Public only for the doubles that the tests read from the container
@@ -124,7 +121,7 @@ services:
     tests.search_utils:
         class: Tests\Double\RecordingSearchUtils
         decorates: ladb_core.search_utils
-        arguments: { $index: '@fos_elastica.index.ladb', $persisterRegistry: '@fos_elastica.persister_registry' }
+        arguments: { $indexManager: '@fos_elastica.index_manager', $persisterRegistry: '@fos_elastica.persister_registry' }
         public: true
 
     # The factory of the fixtures, to create the pictures and resources of a new content

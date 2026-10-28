@@ -4,6 +4,7 @@ namespace Tests;
 
 use DAMA\DoctrineTestBundle\Doctrine\DBAL\StaticDriver;
 use Doctrine\ORM\EntityManagerInterface;
+use Elastica\Index;
 use Ladb\CoreBundle\Entity\Core\User;
 use Symfony\Bundle\FrameworkBundle\Client;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
@@ -22,8 +23,8 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
  * the database of the fixtures. Each test runs in a transaction rolled back at its end
  * (dama/doctrine-test-bundle), even across the kernel reboots of the client.
  *
- * The rollback reaches neither the Elasticsearch index nor uploads/ (shared with the dev
- * environment). When the tests of a class changed the index (publication, deletion...), it is
+ * The rollback reaches neither the Elasticsearch indexes nor uploads/ (shared with the dev
+ * environment). When the tests of a class changed an index (publication, deletion...), it is
  * filled again from the database after the last one. The files a test deletes from uploads/ (the
  * pictures of a deleted content...) are put back after it; the ones it creates stay.
  */
@@ -40,13 +41,14 @@ abstract class WebTestCase extends BaseWebTestCase
     // Hard links to the files of uploads/, on the same filesystem: they keep a deleted file
     private const UPLOADS_BACKUP_DIR = __DIR__.'/../var/tests/uploads';
 
-    private static ?int $indexWriteCount = null;
+    /** @var array<string, int> */
+    private static array $indexWriteCounts = [];
 
     public static function setUpBeforeClass(): void
     {
         parent::setUpBeforeClass();
 
-        self::$indexWriteCount = self::countIndexWrites();
+        self::$indexWriteCounts = self::countIndexWrites();
 
         $fs = new Filesystem();
         $fs->remove(self::UPLOADS_BACKUP_DIR);
@@ -64,7 +66,7 @@ abstract class WebTestCase extends BaseWebTestCase
         // test sees all of them, whatever the time between the two
         $container = static::$booted ? static::$kernel->getContainer() : null;
         if (null !== $container) {
-            $container->get('fos_elastica.index.ladb')->refresh();
+            static::getIndexes()->refresh();
 
             // AbstractController::createLock() keeps a lock per action and user for a few
             // seconds, against double submissions: the next test would get a 404. Memcached
@@ -88,14 +90,20 @@ abstract class WebTestCase extends BaseWebTestCase
     {
         (new Filesystem())->remove(self::UPLOADS_BACKUP_DIR);
 
-        if (self::countIndexWrites() !== self::$indexWriteCount) {
+        // Only the indexes the tests changed: filling the 27 takes much longer
+        $changedIndexes = array_keys(array_diff_assoc(self::countIndexWrites(), self::$indexWriteCounts));
+        if ([] !== $changedIndexes) {
             $application = new Application(static::bootKernel());
             $application->setAutoExit(false);
-            $exitCode = $application->run(new ArrayInput(['command' => 'fos:elastica:populate']), $output = new BufferedOutput());
-            static::ensureKernelShutdown();
-            if (0 !== $exitCode) {
-                throw new \RuntimeException("The index could not be filled again:\n".$output->fetch());
+            foreach ($changedIndexes as $index) {
+                $exitCode = $application->run(new ArrayInput(['command' => 'fos:elastica:populate', '--index' => $index]), $output = new BufferedOutput());
+                if (0 !== $exitCode) {
+                    static::ensureKernelShutdown();
+
+                    throw new \RuntimeException(\sprintf("The index %s could not be filled again:\n%s", $index, $output->fetch()));
+                }
             }
+            static::ensureKernelShutdown();
         }
 
         parent::tearDownAfterClass();
@@ -221,9 +229,20 @@ abstract class WebTestCase extends BaseWebTestCase
     }
 
     /**
-     * Documents indexed and deleted since the creation of the index.
+     * The indexes of the environment, one per type of content (config.yml), as a single one: a
+     * single request refreshes or reads all of them.
      */
-    private static function countIndexWrites(): int
+    protected static function getIndexes(): Index
+    {
+        return static::$container->get('fos_elastica.client.default')->getIndex(static::$container->getParameter('elasticsearch_index_prefix').'*');
+    }
+
+    /**
+     * Documents indexed and deleted since the creation of each index, by its name in config.yml.
+     *
+     * @return array<string, int>
+     */
+    private static function countIndexWrites(): array
     {
         // Out of a test, a plain connection: when this boot rebuilds the container, its cache
         // warmers connect to the database, and the connection dama/doctrine-test-bundle keeps
@@ -231,12 +250,18 @@ abstract class WebTestCase extends BaseWebTestCase
         $keepStaticConnections = StaticDriver::isKeepStaticConnections();
         StaticDriver::setKeepStaticConnections(false);
         try {
-            $indexing = static::bootKernel()->getContainer()->get('fos_elastica.index.ladb')->getStats()->get('_all', 'primaries', 'indexing');
+            static::bootKernel();
+            $prefix = static::$container->getParameter('elasticsearch_index_prefix');
+            $counts = [];
+            foreach (static::getIndexes()->getStats()->getData()['indices'] as $name => $stats) {
+                $indexing = $stats['primaries']['indexing'];
+                $counts[substr($name, \strlen($prefix))] = $indexing['index_total'] + $indexing['delete_total'];
+            }
             static::ensureKernelShutdown();
         } finally {
             StaticDriver::setKeepStaticConnections($keepStaticConnections);
         }
 
-        return $indexing['index_total'] + $indexing['delete_total'];
+        return $counts;
     }
 }

@@ -88,7 +88,7 @@ abstract class AbstractHowtoBasedController extends AbstractController {
 		$howtoRepository = $om->getRepository(Howto::CLASS_NAME);
 
 		$userHowtos = $this->explorableUtils->getPreviousAndNextPublishedUserExplorables($howto, $howtoRepository, $howto->getUser()->getMeta()->getPublicHowtoCount());
-		$similarHowtos = $this->explorableUtils->getSimilarExplorables($howto, 'fos_elastica.index.ladb.howto_howto', Howto::CLASS_NAME, $userHowtos);
+		$similarHowtos = $this->explorableUtils->getSimilarExplorables($howto, 'fos_elastica.index.howto_howto', Howto::CLASS_NAME, $userHowtos);
 
 		$user = $this->globalUtils->getUser();
 
