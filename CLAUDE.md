@@ -647,15 +647,17 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `parameters.yml`) : avec celles de `parameters.yml.dist`, le worker `webpush_notification`
   échoue sur chaque message. `castor app:install` y écrit une paire jetable, que les `composer
   install` suivants gardent.
-- `guzzlehttp/psr7` est encore en 1.x, sans fabrique PSR-17 : `http-interop/http-factory-guzzle` la
-  fournit au géocodage (`geocoder-php/common-http`, par `php-http/discovery`, dont le plugin
-  Composer est coupé dans `allow-plugins`). Plus rien n'exige la 1.x depuis le retrait de Gos : à
-  passer en 2.x, en retirant `http-factory-guzzle` (#21, PR 4).
-- `bentools/webpush-bundle` (0.7 à 0.9) appelle `GuzzleHttp\Promise\settle()`, supprimée de
-  `guzzlehttp/promises` 2 : `composer.json` le garde en `^1.5`. Son `PushMessageSender` envoie
-  avec un TTL de 0 et sans timeout : `services.yml` le redéfinit avec ceux de web-push 2.0 (4
-  semaines, 30 s). Sa route d'abonnement lit `{"subscription": …}`, alors que le JS du site envoie
-  la `PushSubscription` telle quelle : `WebpushController` la remplace (même nom, même chemin).
+- Le géocodage (`geocoder-php/common-http`) trouve sa fabrique PSR-17 par `php-http/discovery`, à
+  l'exécution : `GuzzleHttp\Psr7\HttpFactory` de `guzzlehttp/psr7` 2. Le plugin Composer de
+  discovery est coupé dans `allow-plugins`.
+- `bentools/webpush-bundle` 0.7 appelle `GuzzleHttp\Psr7\stream_for()`, supprimée de
+  `guzzlehttp/psr7` 2 : il est en 0.8. Jusqu'à la 0.10, il appelle `GuzzleHttp\Promise\settle()`,
+  supprimée de `guzzlehttp/promises` 2 : `composer.json` le garde en `^1.5`, ce qui bloque Guzzle
+  en 7.9 (la 7.10 exige promises 2), avec des advisories ouvertes (#159). Son
+  `PushMessageSender` envoie avec un TTL de 0 et sans timeout : `services.yml` le redéfinit avec
+  ceux de web-push 2.0 (4 semaines, 30 s). Sa route d'abonnement lit `{"subscription": …}`, alors
+  que le JS du site envoie la `PushSubscription` telle quelle : `WebpushController` la remplace
+  (même nom, même chemin).
 - Plus de composant `templating` : les templates se nomment dans la notation de Twig
   (`@LadbCore/Dir/file.html.twig`, `@FOSUser/…`, `base.html.twig` pour `templates/`), la
   notation de bundle (`LadbCoreBundle:Dir:file.html.twig`, `::base.html.twig`) ne les trouve plus.
