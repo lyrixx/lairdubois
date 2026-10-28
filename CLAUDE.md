@@ -568,20 +568,21 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   l'ancien `MEDIUMINT` (500 sur toute page qui écrit la session) :
   `docs/database/schema-sessions.sql` passe aussi une table plus ancienne en `INTEGER UNSIGNED`, et
   `castor app:db:schema` le rejoue.
-- `display_errors = Off` dans le FPM (`app-fpm.ini`), comme en prod : le Routing de 4.4 ne
-  connaissait pas le message de PCRE2 10.43 et plus (PHP 8.5) pour un lookbehind, et chaque
-  construction du cache du routeur donnait quelque 350 warnings PHP, affichés avant les en-têtes
-  (500). Le Routing de 5.4 le connaît. Les erreurs natives de PHP d'une requête sont dans les logs
-  du frontend (`castor logs --service=frontend`) ; après le boot, celles de Symfony ont leurs pages
-  d'erreur.
-- Le kernel (4.4 comme 5.4) passe `error_reporting` à `E_ALL ^ E_WARNING` pendant qu'il inclut le container
-  en cache, avant tout gestionnaire d'erreurs de Symfony : PHP 8.4+ afficherait les dépréciations
-  de compilation des fichiers chargés à ce moment (paramètres implicitement nullables de Symfony
-  4.4) en tête de la première page après un démarrage de FPM, et à chaque commande en prod.
-  `AppKernel::initializeContainer()` ignore alors ce que le niveau de l'appelant cache (php.ini,
-  `bin/console`) et passe le reste au gestionnaire précédent : sous PHPUnit (`error_reporting=-1`),
-  `Tests\DeprecationCollector` les compte toujours. À revoir : les fichiers de Symfony 5.4.55 n'ont
-  plus de paramètre implicitement nullable.
+- Le kernel passe `error_reporting` à `E_ALL ^ E_WARNING` pendant qu'il inclut le container en
+  cache, avant tout gestionnaire d'erreurs de Symfony : PHP 8.4+ y afficherait les dépréciations
+  des fichiers chargés à ce moment. `AppKernel::initializeContainer()` ignore alors ce que le
+  niveau de l'appelant cache (php.ini, `bin/console`) et passe le reste au gestionnaire précédent :
+  sous PHPUnit (`error_reporting=-1`), `Tests\DeprecationCollector` les compte toujours. Toujours
+  utile en 5.4 : sans lui, la première page du FPM de dev après un démarrage affiche quelque 70
+  dépréciations, celles des paramètres implicitement nullables de SensioFrameworkExtraBundle, Stof,
+  Liip, DoctrineBundle et SwiftmailerBundle (chargés en même temps que le container de debug) et
+  `SplObjectStorage::attach()`. En CLI, rien : `bin/console` a son gestionnaire en dev, et le
+  container de prod ne charge plus que des fichiers de Symfony, propres depuis 5.4.55 (la 4.4
+  affichait 6 dépréciations par commande). À revoir quand ces bundles monteront.
+- Le FPM affiche les erreurs natives de PHP (`display_errors` du php.ini des images), la prod non.
+  La 4.4 les coupait (#128) : son Routing ne connaissait pas le message de PCRE2 10.43+ (PHP 8.5)
+  pour un lookbehind, et chaque construction du cache du routeur par une requête donnait quelque
+  350 warnings avant les en-têtes (500). Le Routing de 5.4 le connaît.
 - Jusqu'en 5.4, `HttpKernel` n'attrape que les `\Exception` : une `\Error` PHP (appel sur `null`,
   `TypeError`) sort du kernel au lieu de donner une 500.
 - Pages d'erreur : contrôleur d'erreur de FrameworkBundle (`twig.exception_controller: null`).
