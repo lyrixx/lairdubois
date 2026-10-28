@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Ladb\CoreBundle\Entity\Workflow\Task;
 use Ladb\CoreBundle\Entity\Workflow\Label;
 use Ladb\CoreBundle\Form\Type\Workflow\LabelType;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/processus")
@@ -38,11 +39,9 @@ class LabelController extends AbstractWorkflowBasedController {
 	 * @Route("/{id}/label/create", requirements={"id" = "\d+"}, methods={"POST"}, name="core_workflow_label_create")
 	 * @Template("@LadbCore/Workflow/Label/new-xhr.html.twig")
 	 */
-	public function createAction(Request $request, $id) {
+	public function createAction(Request $request, $id, EntityManagerInterface $om) {
 
 		$this->createLock('core_workflow_label_create', false, self::LOCK_TTL_CREATE_ACTION, false);
-
-		$om = $this->getDoctrine()->getManager();
 
 		// Retrieve Workflow
 		$workflow = $this->_retrieveWorkflow($id);
@@ -73,8 +72,7 @@ class LabelController extends AbstractWorkflowBasedController {
 	 * @Route("/label/{id}/edit", requirements={"id" = "\d+"}, name="core_workflow_label_edit")
 	 * @Template("@LadbCore/Workflow/Label/edit-xhr.html.twig")
 	 */
-	public function editAction(Request $request, $id) {
-		$om = $this->getDoctrine()->getManager();
+	public function editAction(Request $request, $id, EntityManagerInterface $om) {
 		$labelRepository = $om->getRepository(Label::CLASS_NAME);
 
 		$label = $labelRepository->findOneById($id);
@@ -95,8 +93,7 @@ class LabelController extends AbstractWorkflowBasedController {
 	 * @Route("/label/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_workflow_label_update")
 	 * @Template("@LadbCore/Workflow/Label/edit-xhr.html.twig")
 	 */
-	public function updateAction(Request $request, $id) {
-		$om = $this->getDoctrine()->getManager();
+	public function updateAction(Request $request, $id, EntityManagerInterface $om) {
 		$labelRepository = $om->getRepository(Label::CLASS_NAME);
 
 		$label = $labelRepository->findOneById($id);
@@ -138,8 +135,7 @@ class LabelController extends AbstractWorkflowBasedController {
 	 * @Route("/label/{id}/delete", requirements={"id" = "\d+"}, name="core_workflow_label_delete")
 	 * @Template("@LadbCore/Workflow/Label/delete-xhr.html.twig")
 	 */
-	public function deleteAction(Request $request, $id) {
-		$om = $this->getDoctrine()->getManager();
+	public function deleteAction(Request $request, $id, EntityManagerInterface $om) {
 		$labelRepository = $om->getRepository(Label::CLASS_NAME);
 
 		$label = $labelRepository->findOneById($id);

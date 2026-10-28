@@ -31,6 +31,7 @@ use Ladb\CoreBundle\Event\KnowledgeEvent;
 use Ladb\CoreBundle\Event\KnowledgeListener;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/livres")
@@ -63,7 +64,7 @@ class BookController extends AbstractController {
 	 * @Route("/create", methods={"POST"}, name="core_book_create")
 	 * @Template("@LadbCore/Knowledge/Book/new.html.twig")
 	 */
-	public function createAction(Request $request, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, TranslatorInterface $translator) {
+	public function createAction(Request $request, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, EntityManagerInterface $om, TranslatorInterface $translator) {
 
 		// Exclude if user is not email confirmed
 		if (!$this->getUser()->getEmailConfirmed()) {
@@ -71,8 +72,6 @@ class BookController extends AbstractController {
 		}
 
 		$this->createLock('core_book_create', false, self::LOCK_TTL_CREATE_ACTION, false);
-
-		$om = $this->getDoctrine()->getManager();
 
 		$newBook = new NewBook();
 		$form = $this->createForm(NewBookType::class, $newBook);
@@ -339,8 +338,7 @@ class BookController extends AbstractController {
 	 * @Route("/{id}.html", name="core_book_show")
 	 * @Template("@LadbCore/Knowledge/Book/show.html.twig")
 	 */
-	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, LikableUtils $likableUtils, ReviewableUtils $reviewableUtils, SearchUtils $searchUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
-		$om = $this->getDoctrine()->getManager();
+	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, LikableUtils $likableUtils, EntityManagerInterface $om, ReviewableUtils $reviewableUtils, SearchUtils $searchUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$bookRepository = $om->getRepository(Book::CLASS_NAME);
 
 		$id = intval($id);

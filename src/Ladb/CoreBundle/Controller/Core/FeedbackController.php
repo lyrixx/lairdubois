@@ -21,6 +21,7 @@ use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Utils\FeedbackableUtils;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/feedbacks")
@@ -69,14 +70,12 @@ class FeedbackController extends AbstractController {
 	 * @Route("/{entityType}/{entityId}/create",requirements={"entityType" = "\d+", "entityId" = "\d+"}, methods={"POST"}, name="core_feedback_create")
 	 * @Template("@LadbCore/Core/Feedback/new-xhr.html.twig")
 	 */
-	public function createAction(Request $request, $entityType, $entityId, ActivityUtils $activityUtils, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FeedbackableUtils $feedbackableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, MentionUtils $mentionUtils, TypableUtils $typableUtils) {
+	public function createAction(Request $request, $entityType, $entityId, ActivityUtils $activityUtils, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FeedbackableUtils $feedbackableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, MentionUtils $mentionUtils, EntityManagerInterface $om, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_feedback_create)');
 		}
 
 		$this->createLock('core_feedback_create', false, self::LOCK_TTL_CREATE_ACTION, false);
-
-		$om = $this->getDoctrine()->getManager();
 
 		// Retrieve related entity
 
@@ -139,12 +138,11 @@ class FeedbackController extends AbstractController {
 	 * @Route("/{id}/edit", requirements={"id" = "\d+"}, name="core_feedback_edit")
 	 * @Template("@LadbCore/Core/Feedback/edit-xhr.html.twig")
 	 */
-	public function editAction(Request $request, $id) {
+	public function editAction(Request $request, $id, EntityManagerInterface $om) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_feedback_edit)');
 		}
 
-		$om = $this->getDoctrine()->getManager();
 		$feedbackRepository = $om->getRepository(Feedback::CLASS_NAME);
 
 		$feedback = $feedbackRepository->findOneById($id);
@@ -167,12 +165,11 @@ class FeedbackController extends AbstractController {
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_feedback_update")
 	 * @Template("@LadbCore/Core/Feedback/edit-xhr.html.twig")
 	 */
-	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, FeedbackableUtils $feedbackableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, MentionUtils $mentionUtils, SearchUtils $searchUtils, TypableUtils $typableUtils) {
+	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, FeedbackableUtils $feedbackableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, MentionUtils $mentionUtils, EntityManagerInterface $om, SearchUtils $searchUtils, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_feedback_update)');
 		}
 
-		$om = $this->getDoctrine()->getManager();
 		$feedbackRepository = $om->getRepository(Feedback::CLASS_NAME);
 
 		$feedback = $feedbackRepository->findOneById($id);
@@ -223,8 +220,7 @@ class FeedbackController extends AbstractController {
 	/**
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_feedback_delete")
 	 */
-	public function deleteAction($id, ActivityUtils $activityUtils, FeedbackableUtils $feedbackableUtils, SearchUtils $searchUtils, TranslatorInterface $translator, TypableUtils $typableUtils) {
-		$om = $this->getDoctrine()->getManager();
+	public function deleteAction($id, ActivityUtils $activityUtils, FeedbackableUtils $feedbackableUtils, EntityManagerInterface $om, SearchUtils $searchUtils, TranslatorInterface $translator, TypableUtils $typableUtils) {
 		$feedbackRepository = $om->getRepository(Feedback::CLASS_NAME);
 
 		$feedback = $feedbackRepository->findOneById($id);
@@ -257,8 +253,7 @@ class FeedbackController extends AbstractController {
 	/**
 	 * @Route("/{id}", requirements={"id" = "\d+"}, name="core_feedback_show")
 	 */
-	public function showAction(Request $request, $id, TypableUtils $typableUtils) {
-		$om = $this->getDoctrine()->getManager();
+	public function showAction(Request $request, $id, EntityManagerInterface $om, TypableUtils $typableUtils) {
 		$feedbackRepository = $om->getRepository(Feedback::CLASS_NAME);
 
 		$feedback = $feedbackRepository->findOneById($id);

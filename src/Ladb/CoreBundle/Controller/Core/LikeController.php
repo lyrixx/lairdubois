@@ -19,6 +19,7 @@ use Ladb\CoreBundle\Utils\LikableUtils;
 use Ladb\CoreBundle\Utils\PaginatorUtils;
 use Ladb\CoreBundle\Utils\ActivityUtils;
 use Ladb\CoreBundle\Utils\TypableUtils;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/likes")
@@ -43,7 +44,7 @@ class LikeController extends AbstractController {
 	 * @Route("/{entityType}/{entityId}/create", requirements={"entityType" = "\d+", "entityId" = "\d+"}, name="core_like_create")
 	 * @Template("@LadbCore/Core/Like/create-xhr.html.twig")
 	 */
-	public function createAction(Request $request, $entityType, $entityId, ActivityUtils $activityUtils, LikableUtils $likableUtils, SearchUtils $searchUtils, TypableUtils $typableUtils, WatchableUtils $watchableUtils, WebpushNotificationUtils $webpushNotificationUtils) {
+	public function createAction(Request $request, $entityType, $entityId, ActivityUtils $activityUtils, LikableUtils $likableUtils, EntityManagerInterface $om, SearchUtils $searchUtils, TypableUtils $typableUtils, WatchableUtils $watchableUtils, WebpushNotificationUtils $webpushNotificationUtils) {
 
 		$this->createLock('core_like_create', false, self::LOCK_TTL_CREATE_ACTION, false);
 
@@ -59,7 +60,6 @@ class LikeController extends AbstractController {
 			throw $this->createNotFoundException('Hidden entity could not be liked.');
 		}
 
-		$om = $this->getDoctrine()->getManager();
 		$likeRepository = $om->getRepository(Like::CLASS_NAME);
 
 		if (!$likeRepository->existsByEntityTypeAndEntityIdAndUser($entityType, $entityId, $this->getUser())) {
@@ -129,8 +129,7 @@ class LikeController extends AbstractController {
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_like_delete")
 	 * @Template("@LadbCore/Core/Like/delete-xhr.html.twig")
 	 */
-	public function deleteAction(Request $request, $id, ActivityUtils $activityUtils, LikableUtils $likableUtils, SearchUtils $searchUtils, TypableUtils $typableUtils) {
-		$om = $this->getDoctrine()->getManager();
+	public function deleteAction(Request $request, $id, ActivityUtils $activityUtils, LikableUtils $likableUtils, EntityManagerInterface $om, SearchUtils $searchUtils, TypableUtils $typableUtils) {
 		$likeRepository = $om->getRepository(Like::CLASS_NAME);
 
 		$like = $likeRepository->findOneById($id);
@@ -190,8 +189,7 @@ class LikeController extends AbstractController {
 	 * @Route("/{entityType}/{entityId}/{page}", requirements={"entityType" = "\d+", "entityId" = "\d+", "page" = "\d+"}, name="core_like_list_byentity_page")
 	 * @Template("@LadbCore/Core/Like/list-byentity.html.twig")
 	 */
-	public function listByEntityAction(Request $request, $entityType, $entityId, PaginatorUtils $paginatorUtils, TypableUtils $typableUtils, $page = 0) {
-		$om = $this->getDoctrine()->getManager();
+	public function listByEntityAction(Request $request, $entityType, $entityId, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, TypableUtils $typableUtils, $page = 0) {
 		$likeRepository = $om->getRepository(Like::CLASS_NAME);
 
 		// Retrieve related entity

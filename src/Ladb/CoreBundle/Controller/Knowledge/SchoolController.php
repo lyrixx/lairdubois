@@ -34,6 +34,7 @@ use Ladb\CoreBundle\Event\KnowledgeEvent;
 use Ladb\CoreBundle\Event\KnowledgeListener;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/ecoles")
@@ -66,7 +67,7 @@ class SchoolController extends AbstractController {
 	 * @Route("/create", methods={"POST"}, name="core_school_create")
 	 * @Template("@LadbCore/Knowledge/School/new.html.twig")
 	 */
-	public function createAction(Request $request, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, TranslatorInterface $translator) {
+	public function createAction(Request $request, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, EntityManagerInterface $om, TranslatorInterface $translator) {
 
 		// Exclude if user is not email confirmed
 		if (!$this->getUser()->getEmailConfirmed()) {
@@ -74,8 +75,6 @@ class SchoolController extends AbstractController {
 		}
 
 		$this->createLock('core_school_create', false, self::LOCK_TTL_CREATE_ACTION, false);
-
-		$om = $this->getDoctrine()->getManager();
 
 		$newSchool = new NewSchool();
 		$form = $this->createForm(NewSchoolType::class, $newSchool);
@@ -430,8 +429,7 @@ class SchoolController extends AbstractController {
 	 * @Route("/{id}/creations/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_school_creations_filter_page")
 	 * @Template("@LadbCore/Knowledge/School/creations.html.twig")
 	 */
-	public function creationsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
-		$om = $this->getDoctrine()->getManager();
+	public function creationsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$schoolRepository = $om->getRepository(School::CLASS_NAME);
 
 		$school = $schoolRepository->findOneByIdJoinedOnOptimized($id);
@@ -470,8 +468,7 @@ class SchoolController extends AbstractController {
 	 * @Route("/{id}/plans/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_school_plans_filter_page")
 	 * @Template("@LadbCore/Knowledge/School/plans.html.twig")
 	 */
-	public function plansAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
-		$om = $this->getDoctrine()->getManager();
+	public function plansAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$schoolRepository = $om->getRepository(School::CLASS_NAME);
 
 		$school = $schoolRepository->findOneByIdJoinedOnOptimized($id);
@@ -510,8 +507,7 @@ class SchoolController extends AbstractController {
 	 * @Route("/{id}/pas-a-pas/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_school_howtos_filter_page")
 	 * @Template("@LadbCore/Knowledge/School/howtos.html.twig")
 	 */
-	public function howtosAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
-		$om = $this->getDoctrine()->getManager();
+	public function howtosAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$schoolRepository = $om->getRepository(School::CLASS_NAME);
 
 		$school = $schoolRepository->findOneByIdJoinedOnOptimized($id);
@@ -548,12 +544,11 @@ class SchoolController extends AbstractController {
 	 * @Route("/{id}/card.xhr", name="core_school_card")
 	 * @Template("@LadbCore/Knowledge/School/card-xhr.html.twig")
 	 */
-	public function cardAction(Request $request, $id) {
+	public function cardAction(Request $request, $id, EntityManagerInterface $om) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_school_card)');
 		}
 
-		$om = $this->getDoctrine()->getManager();
 		$schoolRepository = $om->getRepository(School::CLASS_NAME);
 
 		$id = intval($id);
@@ -572,8 +567,7 @@ class SchoolController extends AbstractController {
 	 * @Route("/{id}.html", name="core_school_show")
 	 * @Template("@LadbCore/Knowledge/School/show.html.twig")
 	 */
-	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, LikableUtils $likableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
-		$om = $this->getDoctrine()->getManager();
+	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, LikableUtils $likableUtils, EntityManagerInterface $om, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$schoolRepository = $om->getRepository(School::CLASS_NAME);
 
 		$id = intval($id);

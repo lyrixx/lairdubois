@@ -33,6 +33,7 @@ use Ladb\CoreBundle\Event\KnowledgeEvent;
 use Ladb\CoreBundle\Event\KnowledgeListener;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/xylotheque")
@@ -65,7 +66,7 @@ class WoodController extends AbstractController {
 	 * @Route("/create", methods={"POST"}, name="core_wood_create")
 	 * @Template("@LadbCore/Knowledge/Wood/new.html.twig")
 	 */
-	public function createAction(Request $request, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, TranslatorInterface $translator) {
+	public function createAction(Request $request, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, EntityManagerInterface $om, TranslatorInterface $translator) {
 
 		// Exclude if user is not email confirmed
 		if (!$this->getUser()->getEmailConfirmed()) {
@@ -73,8 +74,6 @@ class WoodController extends AbstractController {
 		}
 
 		$this->createLock('core_wood_create', false, self::LOCK_TTL_CREATE_ACTION, false);
-
-		$om = $this->getDoctrine()->getManager();
 
 		$newWood = new NewWood();
 		$form = $this->createForm(NewWoodType::class, $newWood);
@@ -164,9 +163,7 @@ class WoodController extends AbstractController {
 	 * @Route("/{id}/textures/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_wood_texture_list_filter_page")
 	 * @Template("@LadbCore/Knowledge/Wood/texture-list.html.twig")
 	 */
-	public function textureListAction(Request $request, $id, PaginatorUtils $paginatorUtils, $page = 0, $filter = 'all') {
-		$om = $this->getDoctrine()->getManager();
-
+	public function textureListAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $page = 0, $filter = 'all') {
 		$wood = $this->retrievePublication($id, Wood::CLASS_NAME);
 		$this->assertShowable($wood);
 
@@ -195,8 +192,7 @@ class WoodController extends AbstractController {
 	/**
 	 * @Route("/textures/{id}/download", requirements={"id" = "\d+"}, name="core_wood_texture_download")
 	 */
-	public function textureDownloadAction($id, TextureUtils $textureUtils) {
-		$om = $this->getDoctrine()->getManager();
+	public function textureDownloadAction($id, EntityManagerInterface $om, TextureUtils $textureUtils) {
 		$textureRepository = $om->getRepository(Wood\Texture::CLASS_NAME);
 
 		$texture = $textureRepository->findOneById($id);
@@ -234,8 +230,7 @@ class WoodController extends AbstractController {
 	 * @Route("/textures/{id}", requirements={"id" = "\d+"}, name="core_wood_texture_show")
 	 * @Template("@LadbCore/Knowledge/Wood/texture-show-xhr.html.twig")
 	 */
-	public function textureShowAction(Request $request, $id) {
-		$om = $this->getDoctrine()->getManager();
+	public function textureShowAction(Request $request, $id, EntityManagerInterface $om) {
 		$textureRepository = $om->getRepository(Wood\Texture::CLASS_NAME);
 
 		$texture = $textureRepository->findOneById($id);
@@ -410,8 +405,7 @@ class WoodController extends AbstractController {
 	 * @Route("/{id}.html", name="core_wood_show")
 	 * @Template("@LadbCore/Knowledge/Wood/show.html.twig")
 	 */
-	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ElasticaQueryUtils $elasticaQueryUtils, LikableUtils $likableUtils, SearchUtils $searchUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
-		$om = $this->getDoctrine()->getManager();
+	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ElasticaQueryUtils $elasticaQueryUtils, LikableUtils $likableUtils, EntityManagerInterface $om, SearchUtils $searchUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$woodRepository = $om->getRepository(Wood::CLASS_NAME);
 
 		$id = intval($id);

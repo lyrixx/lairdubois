@@ -2,6 +2,7 @@
 
 namespace Ladb\CoreBundle\Controller\Workflow;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Ladb\CoreBundle\Controller\AbstractController;
 use Ladb\CoreBundle\Entity\Workflow\Workflow;
 use Symfony\Component\Mercure\HubInterface;
@@ -26,6 +27,8 @@ abstract class AbstractWorkflowBasedController extends AbstractController {
 	private const MERCURE_OWNER_TOPIC = 'https://lairdubois.fr/users/{userId}/workflows/{id}';
 
 	private $hub;
+	// Protected, like the one of UserControllerTrait, that a subclass can use
+	protected $om;
 
 	/**
 	 * @required
@@ -34,11 +37,17 @@ abstract class AbstractWorkflowBasedController extends AbstractController {
 		$this->hub = $hub;
 	}
 
+	/**
+	 * @required
+	 */
+	public function setOm(EntityManagerInterface $om) {
+		$this->om = $om;
+	}
+
 	/////
 
 	protected function _retrieveWorkflow($id) {
-		$om = $this->getDoctrine()->getManager();
-		$workshopRepository = $om->getRepository(Workflow::CLASS_NAME);
+		$workshopRepository = $this->om->getRepository(Workflow::CLASS_NAME);
 
 		$id = intval($id);
 

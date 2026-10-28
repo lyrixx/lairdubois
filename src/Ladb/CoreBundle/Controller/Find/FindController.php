@@ -34,6 +34,7 @@ use Ladb\CoreBundle\Utils\BlockBodiedUtils;
 use Ladb\CoreBundle\Utils\FindUtils;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/trouvailles")
@@ -63,13 +64,11 @@ class FindController extends AbstractController {
 	 * @Route("/create", methods={"POST"}, name="core_find_create")
 	 * @Template("@LadbCore/Find/Find/new.html.twig")
 	 */
-	public function createAction(Request $request, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, FindUtils $findUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
+	public function createAction(Request $request, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, FindUtils $findUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$owner = $this->retrieveOwner($request);
 
 		$this->createLock('core_find_create', false, self::LOCK_TTL_CREATE_ACTION, false);
-
-		$om = $this->getDoctrine()->getManager();
 
 		$find = new Find();
 		$form = $this->createForm(FindType::class, $find);
@@ -191,7 +190,7 @@ class FindController extends AbstractController {
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_find_update")
 	 * @Template("@LadbCore/Find/Find/edit.html.twig")
 	 */
-	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, FindUtils $findUtils, PicturedUtils $picturedUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
+	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, FindUtils $findUtils, EntityManagerInterface $om, PicturedUtils $picturedUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$doUp = $request->get('ladb_do_up', false) && $this->isGranted('ROLE_ADMIN');
 
@@ -223,7 +222,6 @@ class FindController extends AbstractController {
 				$find->setUpdatedAt(new \DateTime());
 			}
 
-			$om = $this->getDoctrine()->getManager();
 			$om->flush();
 
 			// Dispatch publication event
@@ -574,8 +572,7 @@ class FindController extends AbstractController {
 	 * @Route("/{id}.html", name="core_find_show")
 	 * @Template("@LadbCore/Find/Find/show.html.twig")
 	 */
-	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
-		$om = $this->getDoctrine()->getManager();
+	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, EntityManagerInterface $om, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$findRepository = $om->getRepository(Find::CLASS_NAME);
 
 		$id = intval($id);

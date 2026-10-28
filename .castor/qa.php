@@ -222,7 +222,7 @@ function e2e(#[AsRawTokens] array $rawTokens = []): int
 /**
  * @param list<string> $paths
  */
-#[AsTask(description: 'Rewrites the given paths with Rector (tools/rector): $this->get() of the controller actions to arguments (#16)')]
+#[AsTask(description: 'Rewrites the given paths with Rector (tools/rector): $this->get() and getDoctrine() of the controller actions to arguments (#16, #177)')]
 function rector(
     #[AsArgument(description: 'Files or directories, relative to the root directory')]
     array $paths,

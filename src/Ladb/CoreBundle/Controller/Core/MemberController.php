@@ -21,14 +21,14 @@ use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Controller\AbstractController;
 use Ladb\CoreBundle\Entity\Core\MemberInvitation;
 use Ladb\CoreBundle\Utils\PaginatorUtils;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/members")
  */
 class MemberController extends AbstractController {
 
-	private function _retrieveTeam($teamId) {
-		$om = $this->getDoctrine()->getManager();
+	private function _retrieveTeam($teamId, EntityManagerInterface $om) {
 		$userRepository = $om->getRepository(User::CLASS_NAME);
 
 		$team = $userRepository->findOneById($teamId);
@@ -48,11 +48,10 @@ class MemberController extends AbstractController {
 	 * @Route("/{teamId}/invitation/new", requirements={"teamId" = "\d+"}, name="core_member_invitation_new")
 	 * @Template("@LadbCore/Core/Member/invitation-new.html.twig")
 	 */
-	public function newInvitationAction($teamId) {
+	public function newInvitationAction($teamId, EntityManagerInterface $om) {
 
-		$team = $this->_retrieveTeam($teamId);
+		$team = $this->_retrieveTeam($teamId, $om);
 
-		$om = $this->getDoctrine()->getManager();
 		$memberRepository = $om->getRepository(Member::CLASS_NAME);
 
 		if (!$memberRepository->existsByTeamAndUser($team, $this->getUser())) {
@@ -67,13 +66,12 @@ class MemberController extends AbstractController {
 	/**
 	 * @Route("/{teamId}/invitation/create", requirements={"teamId" = "\d+"}, name="core_member_invitation_create")
 	 */
-	public function createInvitationAction(Request $request, $teamId, MemberInvitationManager $memberInvitationManager, UserManager $userManager, WebpushNotificationUtils $webpushNotificationUtils) {
+	public function createInvitationAction(Request $request, $teamId, MemberInvitationManager $memberInvitationManager, EntityManagerInterface $om, UserManager $userManager, WebpushNotificationUtils $webpushNotificationUtils) {
 
-		$team = $this->_retrieveTeam($teamId);
+		$team = $this->_retrieveTeam($teamId, $om);
 
 		$this->createLock('core_member_invitation_create', false, self::LOCK_TTL_CREATE_ACTION, false);
 
-		$om = $this->getDoctrine()->getManager();
 		$memberInvitationRepository = $om->getRepository(MemberInvitation::CLASS_NAME);
 		$memberRequestRepository = $om->getRepository(MemberRequest::CLASS_NAME);
 		$memberRepository = $om->getRepository(Member::CLASS_NAME);
@@ -133,8 +131,7 @@ class MemberController extends AbstractController {
 	/**
 	 * @Route("/invitation/{id}/accept", requirements={"id" = "\d+"}, name="core_member_invitation_accept")
 	 */
-	public function acceptInvitationAction($id, FollowerUtils $followerUtils, MemberInvitationManager $memberInvitationManager, MemberManager $memberManager, SearchUtils $searchUtils) {
-		$om = $this->getDoctrine()->getManager();
+	public function acceptInvitationAction($id, FollowerUtils $followerUtils, MemberInvitationManager $memberInvitationManager, MemberManager $memberManager, EntityManagerInterface $om, SearchUtils $searchUtils) {
 		$memberInvitationRepository = $om->getRepository(MemberInvitation::CLASS_NAME);
 
 		$memberInvitation = $memberInvitationRepository->findOneById($id);
@@ -154,8 +151,7 @@ class MemberController extends AbstractController {
 	/**
 	 * @Route("/invitation/{id}/delete", requirements={"id" = "\d+"}, name="core_member_invitation_delete")
 	 */
-	public function deleteInvitationAction(Request $request, $id, MemberInvitationManager $memberInvitationManager) {
-		$om = $this->getDoctrine()->getManager();
+	public function deleteInvitationAction(Request $request, $id, MemberInvitationManager $memberInvitationManager, EntityManagerInterface $om) {
 		$memberInvitationRepository = $om->getRepository(MemberInvitation::CLASS_NAME);
 		$memberRepository = $om->getRepository(Member::CLASS_NAME);
 
@@ -191,14 +187,13 @@ class MemberController extends AbstractController {
 	 * @Route("/{teamId}/request/new", requirements={"teamId" = "\d+"}, name="core_member_request_new")
 	 * @Template("@LadbCore/Core/Member/request-new.html.twig")
 	 */
-	public function newRequestAction($teamId) {
+	public function newRequestAction($teamId, EntityManagerInterface $om) {
 
-		$team = $this->_retrieveTeam($teamId);
+		$team = $this->_retrieveTeam($teamId, $om);
 		if (!$team->getMeta()->getRequestEnabled()) {
 			throw $this->createNotFoundException('Not allowed - Request disabled (core_member_request_new)');
 		}
 
-		$om = $this->getDoctrine()->getManager();
 		$memberRepository = $om->getRepository(Member::CLASS_NAME);
 
 		if ($memberRepository->existsByTeamAndUser($team, $this->getUser())) {
@@ -213,16 +208,15 @@ class MemberController extends AbstractController {
 	/**
 	 * @Route("/{teamId}/request/create", requirements={"teamId" = "\d+"}, name="core_member_request_create")
 	 */
-	public function createRequestAction(Request $request, $teamId, MemberRequestManager $memberRequestManager) {
+	public function createRequestAction(Request $request, $teamId, MemberRequestManager $memberRequestManager, EntityManagerInterface $om) {
 
-		$team = $this->_retrieveTeam($teamId);
+		$team = $this->_retrieveTeam($teamId, $om);
 		if (!$team->getMeta()->getRequestEnabled()) {
 			throw $this->createNotFoundException('Not allowed - Request disabled (core_member_request_create)');
 		}
 
 		$this->createLock('core_member_request_create', false, self::LOCK_TTL_CREATE_ACTION, false);
 
-		$om = $this->getDoctrine()->getManager();
 		$memberInvitationRepository = $om->getRepository(MemberInvitation::CLASS_NAME);
 		$memberRequestRepository = $om->getRepository(MemberRequest::CLASS_NAME);
 		$memberRepository = $om->getRepository(Member::CLASS_NAME);
@@ -248,8 +242,7 @@ class MemberController extends AbstractController {
 	/**
 	 * @Route("/request/{id}/accept", requirements={"id" = "\d+"}, name="core_member_request_accept")
 	 */
-	public function acceptRequestAction($id, FollowerUtils $followerUtils, MemberManager $memberManager, MemberRequestManager $memberRequestManager, SearchUtils $searchUtils) {
-		$om = $this->getDoctrine()->getManager();
+	public function acceptRequestAction($id, FollowerUtils $followerUtils, MemberManager $memberManager, MemberRequestManager $memberRequestManager, EntityManagerInterface $om, SearchUtils $searchUtils) {
 		$memberRequestRepository = $om->getRepository(MemberRequest::CLASS_NAME);
 		$memberRepository = $om->getRepository(Member::CLASS_NAME);
 
@@ -270,8 +263,7 @@ class MemberController extends AbstractController {
 	/**
 	 * @Route("/request/{id}/delete", requirements={"id" = "\d+"}, name="core_member_request_delete")
 	 */
-	public function deleteRequestAction(Request $request, $id, MemberRequestManager $memberRequestManager) {
-		$om = $this->getDoctrine()->getManager();
+	public function deleteRequestAction(Request $request, $id, MemberRequestManager $memberRequestManager, EntityManagerInterface $om) {
 		$memberRequestRepository = $om->getRepository(MemberRequest::CLASS_NAME);
 		$memberRepository = $om->getRepository(Member::CLASS_NAME);
 
@@ -332,14 +324,13 @@ class MemberController extends AbstractController {
 	/**
 	 * @Route("/{teamId}/delete", requirements={"teamId" = "\d+"}, name="core_member_delete")
 	 */
-	public function deleteAction(Request $request, $teamId, MemberManager $memberManager, SearchUtils $searchUtils) {
+	public function deleteAction(Request $request, $teamId, MemberManager $memberManager, EntityManagerInterface $om, SearchUtils $searchUtils) {
 
-		$team = $this->_retrieveTeam($teamId);
+		$team = $this->_retrieveTeam($teamId, $om);
 		if ($team->getMeta()->getMemberCount() <= 1 ) {
 			throw $this->createNotFoundException('Not allowed - last survivor (core_member_delete)');
 		}
 
-		$om = $this->getDoctrine()->getManager();
 		$memberRepository = $om->getRepository(Member::CLASS_NAME);
 
 		$member = $memberRepository->findOneByTeamAndUser($team, $this->getUser());
@@ -364,7 +355,7 @@ class MemberController extends AbstractController {
 	 * @Route("/{page}", requirements={"page" = "\d+"}, name="core_member_list_session_teams_page")
 	 * @Template("@LadbCore/Core/Member/list-session-teams-xhr.html.twig")
 	 */
-	public function listSessionTeamsAction(Request $request, PaginatorUtils $paginatorUtils, $page = 0) {
+	public function listSessionTeamsAction(Request $request, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $page = 0) {
 
 		$titleTransKey = $request->get('title-trans-key');
 		$route = $request->get('route');
@@ -378,7 +369,6 @@ class MemberController extends AbstractController {
 			throw $this->createNotFoundException('Invalid route (core_member_list_session_teams)');
 		}
 
-		$om = $this->getDoctrine()->getManager();
 		$memberRepository = $om->getRepository(Member::class);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);

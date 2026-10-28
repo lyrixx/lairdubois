@@ -2,6 +2,7 @@
 
 namespace Ladb\CoreBundle\Controller\Collection;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Ladb\CoreBundle\Controller\AbstractController;
 use Ladb\CoreBundle\Entity\Collection\Collection;
 use Ladb\CoreBundle\Model\CollectionnableInterface;
@@ -9,7 +10,16 @@ use Ladb\CoreBundle\Utils\TypableUtils;
 
 abstract class AbstractCollectionBasedController extends AbstractController {
 
+	// Protected, like the one of UserControllerTrait, that a subclass can use
+	protected $om;
 	private $typableUtils;
+
+	/**
+	 * @required
+	 */
+	public function setOm(EntityManagerInterface $om) {
+		$this->om = $om;
+	}
 
 	/**
 	 * @required
@@ -19,8 +29,7 @@ abstract class AbstractCollectionBasedController extends AbstractController {
 	}
 
 	protected function _retrieveCollection($id) {
-		$om = $this->getDoctrine()->getManager();
-		$collectionRepository = $om->getRepository(Collection::CLASS_NAME);
+		$collectionRepository = $this->om->getRepository(Collection::CLASS_NAME);
 
 		$id = intval($id);
 

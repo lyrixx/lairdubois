@@ -8,6 +8,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Ladb\CoreBundle\Entity\Core\Referer\Referral;
 use Ladb\CoreBundle\Utils\TypableUtils;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/referer")
@@ -17,8 +18,7 @@ class RefererController extends AbstractController {
 	/**
 	 * @Route("/referral/{id}/delete", requirements={"id" = "\d+"}, name="core_referer_referral_delete")
 	 */
-	public function referralDeleteAction($id, TranslatorInterface $translator, TypableUtils $typableUtils) {
-		$om = $this->getDoctrine()->getManager();
+	public function referralDeleteAction($id, EntityManagerInterface $om, TranslatorInterface $translator, TypableUtils $typableUtils) {
 		$referralRepository = $om->getRepository(Referral::CLASS_NAME);
 
 		$referral = $referralRepository->findOneById($id);

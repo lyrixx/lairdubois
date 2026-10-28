@@ -11,6 +11,7 @@ use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Utils\CollectionnableUtils;
 use Ladb\CoreBundle\Entity\Collection\Entry;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/collections")
@@ -53,8 +54,7 @@ class EntryController extends AbstractCollectionBasedController {
 	 * @Route("/{id}/entry/{entityType}/{entityId}/delete", requirements={"id" = "\d+", "entityType" = "\d+", "entityId" = "\d+"}, name="core_collection_entry_delete")
 	 * @Template("@LadbCore/Collection/Entry/delete-xhr.html.twig")
 	 */
-	public function deleteAction($id, $entityType, $entityId, CollectionnableUtils $collectionnableUtils, EventDispatcherInterface $dispatcher) {
-		$om = $this->getDoctrine()->getManager();
+	public function deleteAction($id, $entityType, $entityId, CollectionnableUtils $collectionnableUtils, EventDispatcherInterface $dispatcher, EntityManagerInterface $om) {
 		$entryRepository = $om->getRepository(Entry::CLASS_NAME);
 
 		// Retrieve collection

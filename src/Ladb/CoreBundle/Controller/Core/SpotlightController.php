@@ -44,6 +44,7 @@ use Ladb\CoreBundle\Entity\Wonder\Creation;
 use Ladb\CoreBundle\Entity\Core\View;
 use Ladb\CoreBundle\Entity\Find\Find;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/spotlights")
@@ -64,8 +65,7 @@ class SpotlightController extends AbstractController {
 	/**
 	 * @Route("/feed.xml", name="core_spotlight_feed")
 	 */
-	public function feedAction(TranslatorInterface $translator, TypableUtils $typableUtils) {
-		$om = $this->getDoctrine()->getManager();
+	public function feedAction(EntityManagerInterface $om, TranslatorInterface $translator, TypableUtils $typableUtils) {
 		$spotlightRepository = $om->getRepository(Spotlight::CLASS_NAME);
 
 		$feed = new \Suin\RSSWriter\Feed();

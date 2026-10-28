@@ -14,6 +14,7 @@ use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * The registration of FOSUserBundle without its email confirmation (#24), with the names of its routes.
@@ -23,7 +24,7 @@ final class RegistrationController extends AbstractController {
 	/**
 	 * @Route("/", methods={"GET", "POST"}, name="fos_user_registration_register")
 	 */
-	public function registerAction(Request $request, FormFactoryInterface $formFactory, LoginUtils $loginUtils, MailerUtils $mailerUtils, MessageUtils $messageUtils, TranslatorInterface $translator, UserManager $userManager, UserUtils $userUtils) {
+	public function registerAction(Request $request, FormFactoryInterface $formFactory, LoginUtils $loginUtils, MailerUtils $mailerUtils, MessageUtils $messageUtils, EntityManagerInterface $om, TranslatorInterface $translator, UserManager $userManager, UserUtils $userUtils) {
 		$user = $userManager->createUser();
 		$user->setEnabled(true);
 
@@ -52,7 +53,6 @@ final class RegistrationController extends AbstractController {
 			$registration->setClientIp4($request->getClientIp());
 			$registration->setClientUserAgent($request->server->get('HTTP_USER_AGENT'));
 
-			$om = $this->getDoctrine()->getManager();
 			$om->persist($registration);
 			$om->flush();
 

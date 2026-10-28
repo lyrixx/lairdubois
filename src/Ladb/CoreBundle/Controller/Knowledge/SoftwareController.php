@@ -32,6 +32,7 @@ use Ladb\CoreBundle\Event\KnowledgeEvent;
 use Ladb\CoreBundle\Event\KnowledgeListener;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/logiciels")
@@ -64,7 +65,7 @@ class SoftwareController extends AbstractController {
 	 * @Route("/create", methods={"POST"}, name="core_software_create")
 	 * @Template("@LadbCore/Knowledge/Software/new.html.twig")
 	 */
-	public function createAction(Request $request, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, TranslatorInterface $translator) {
+	public function createAction(Request $request, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, EntityManagerInterface $om, TranslatorInterface $translator) {
 
 		// Exclude if user is not email confirmed
 		if (!$this->getUser()->getEmailConfirmed()) {
@@ -72,8 +73,6 @@ class SoftwareController extends AbstractController {
 		}
 
 		$this->createLock('core_software_create', false, self::LOCK_TTL_CREATE_ACTION, false);
-
-		$om = $this->getDoctrine()->getManager();
 
 		$newSoftware = new NewSoftware();
 		$form = $this->createForm(NewSoftwareType::class, $newSoftware);
@@ -353,8 +352,7 @@ class SoftwareController extends AbstractController {
 	 * @Route("/{id}.html", name="core_software_show")
 	 * @Template("@LadbCore/Knowledge/Software/show.html.twig")
 	 */
-	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, LikableUtils $likableUtils, ReviewableUtils $reviewableUtils, SearchUtils $searchUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
-		$om = $this->getDoctrine()->getManager();
+	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, LikableUtils $likableUtils, EntityManagerInterface $om, ReviewableUtils $reviewableUtils, SearchUtils $searchUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$softwareRepository = $om->getRepository(Software::CLASS_NAME);
 
 		$id = intval($id);

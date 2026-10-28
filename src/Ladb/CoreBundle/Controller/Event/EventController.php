@@ -36,6 +36,7 @@ use Ladb\CoreBundle\Utils\EventUtils;
 use Ladb\CoreBundle\Utils\JoinableUtils;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/evenements")
@@ -65,13 +66,11 @@ class EventController extends AbstractController {
 	 * @Route("/create", methods={"POST"}, name="core_event_create")
 	 * @Template("@LadbCore/Event/Event/new.html.twig")
 	 */
-	public function createAction(Request $request, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
+	public function createAction(Request $request, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$owner = $this->retrieveOwner($request);
 
 		$this->createLock('core_event_create', false, self::LOCK_TTL_CREATE_ACTION, false);
-
-		$om = $this->getDoctrine()->getManager();
 
 		$event = new Event();
 		$form = $this->createForm(EventType::class, $event);
@@ -192,7 +191,7 @@ class EventController extends AbstractController {
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_event_update")
 	 * @Template("@LadbCore/Event/Event/edit.html.twig")
 	 */
-	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
+	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$event = $this->retrievePublication($id, Event::CLASS_NAME);
 		$this->assertEditabable($event);
@@ -214,7 +213,6 @@ class EventController extends AbstractController {
 				$event->setUpdatedAt(new \DateTime());
 			}
 
-			$om = $this->getDoctrine()->getManager();
 			$om->flush();
 
 			// Dispatch publication event
@@ -615,8 +613,7 @@ class EventController extends AbstractController {
 	 * @Route("/{id}.html", name="core_event_show")
 	 * @Template("@LadbCore/Event/Event/show.html.twig")
 	 */
-	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FeedbackableUtils $feedbackableUtils, FollowerUtils $followerUtils, JoinableUtils $joinableUtils, LikableUtils $likableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
-		$om = $this->getDoctrine()->getManager();
+	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FeedbackableUtils $feedbackableUtils, FollowerUtils $followerUtils, JoinableUtils $joinableUtils, LikableUtils $likableUtils, EntityManagerInterface $om, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$eventRepository = $om->getRepository(Event::CLASS_NAME);
 
 		$id = intval($id);

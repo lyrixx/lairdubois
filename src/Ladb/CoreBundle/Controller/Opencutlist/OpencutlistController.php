@@ -10,6 +10,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Ladb\CoreBundle\Controller\AbstractController;
 use Ladb\CoreBundle\Entity\Opencutlist\Access;
 use Ladb\CoreBundle\Utils\PaginatorUtils;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/opencutlist")
@@ -21,9 +22,7 @@ class OpencutlistController extends AbstractController {
 
     const DEV_LANGUAGES = [ 'fr' ];
 
-	private function _createAccess(Request $request, $env, $kind) {
-		$om = $this->getDoctrine()->getManager();
-
+	private function _createAccess(Request $request, $env, $kind, EntityManagerInterface $om) {
 		$oclVersion = $request->get('v');
 		$oclBuild = $request->get('build');
 		$oclLanguage = $request->get('language');
@@ -65,9 +64,9 @@ class OpencutlistController extends AbstractController {
 	 * @Route("/manifest", name="core_opencutlist_manifest")
 	 * @Route("/manifest-{env}", requirements={"env" = "dev|lab|prod"}, name="core_opencutlist_manifest_env")
 	 */
-	public function manifestAction(Request $request, $env = 'prod') {
+	public function manifestAction(Request $request, EntityManagerInterface $om, $env = 'prod') {
 
-		$access = $this->_createAccess($request, $env, Access::KIND_MANIFEST);
+		$access = $this->_createAccess($request, $env, Access::KIND_MANIFEST, $om);
 
         if ($access->getIsEnvDev()) { // && $access->getClientOclVersion() == self::BRANCH_DEV.'-dev') { //} && in_array($access->getClientSketchupLocale(), self::DEV_LANGUAGES)) {
             $branch = self::BRANCH_LAB;
@@ -83,9 +82,9 @@ class OpencutlistController extends AbstractController {
 	 * @Route("/download", name="core_opencutlist_download")
 	 * @Route("/download-{env}", requirements={"env" = "dev|lab|prod"}, name="core_opencutlist_download_env")
 	 */
-	public function downloadAction(Request $request, $env = 'prod') {
+	public function downloadAction(Request $request, EntityManagerInterface $om, $env = 'prod') {
 
-		$access = $this->_createAccess($request, $env, Access::KIND_DOWNLOAD);
+		$access = $this->_createAccess($request, $env, Access::KIND_DOWNLOAD, $om);
 
         if ($access->getIsEnvDev()) {// && $access->getClientOclVersion() == '7.0.0-dev') { // && in_array($access->getClientSketchupLocale(), self::DEV_LANGUAGES)) {
             $branch = self::BRANCH_LAB;
@@ -101,9 +100,9 @@ class OpencutlistController extends AbstractController {
 	 * @Route("/tutorials", name="core_opencutlist_tutorials")
 	 * @Route("/tutorials-{env}", requirements={"env" = "dev|lab|prod"}, name="core_opencutlist_tutorials_env")
 	 */
-	public function tutorialsAction(Request $request, $env = 'prod') {
+	public function tutorialsAction(Request $request, EntityManagerInterface $om, $env = 'prod') {
 
-		$access = $this->_createAccess($request, $env, Access::KIND_TUTORIALS);
+		$access = $this->_createAccess($request, $env, Access::KIND_TUTORIALS, $om);
 
         if ($access->getIsEnvDev()) {
             $branch = self::BRANCH_LAB;
@@ -118,9 +117,9 @@ class OpencutlistController extends AbstractController {
 	 * @Route("/docs", name="core_opencutlist_docs")
 	 * @Route("/docs-{env}", requirements={"env" = "dev|lab|prod"}, name="core_opencutlist_docs_env")
 	 */
-	public function docsAction(Request $request, $env = 'prod') {
+	public function docsAction(Request $request, EntityManagerInterface $om, $env = 'prod') {
 
-		$access = $this->_createAccess($request, $env, Access::KIND_DOCS);
+		$access = $this->_createAccess($request, $env, Access::KIND_DOCS, $om);
 
 		$path = '';
 		switch ($request->get('page', '')) {
@@ -229,9 +228,9 @@ class OpencutlistController extends AbstractController {
      * @Route("/changelog", name="core_opencutlist_changelog")
      * @Route("/changelog-{env}", requirements={"env" = "dev|lab|prod"}, name="core_opencutlist_changelog_env")
      */
-    public function changelogAction(Request $request, $env = 'prod') {
+    public function changelogAction(Request $request, EntityManagerInterface $om, $env = 'prod') {
 
-        $access = $this->_createAccess($request, $env, Access::KIND_CHANGELOG);
+        $access = $this->_createAccess($request, $env, Access::KIND_CHANGELOG, $om);
 
         if ($access->getIsEnvDev()) {
             $branch = self::BRANCH_LAB;
@@ -255,7 +254,7 @@ class OpencutlistController extends AbstractController {
 	 * @Template("@LadbCore/Opencutlist/stats.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_OPENCUTLIST')", statusCode=404, message="Not allowed (core_opencutlist_stats)")
 	 */
-	public function statsAction(Request $request, PaginatorUtils $paginatorUtils, $page = 0) {
+	public function statsAction(Request $request, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $page = 0) {
 
         set_time_limit(300); // Et time limit to 5 min
 
@@ -265,7 +264,6 @@ class OpencutlistController extends AbstractController {
 		$language = $request->get('language', null);
 		$locale = $request->get('locale', null);
 
-		$om = $this->getDoctrine()->getManager();
 		$accessRepository = $om->getRepository(Access::CLASS_NAME);
 
 		$offset = $paginatorUtils->computePaginatorOffset($page);

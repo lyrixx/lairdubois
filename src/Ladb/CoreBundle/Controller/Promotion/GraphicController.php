@@ -31,6 +31,7 @@ use Ladb\CoreBundle\Event\PublicationListener;
 use Ladb\CoreBundle\Event\PublicationsEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/promouvoir")
@@ -59,13 +60,11 @@ class GraphicController extends AbstractController {
 	 * @Route("/create", methods={"POST"}, name="core_promotion_graphic_create")
 	 * @Template("@LadbCore/Promotion/Graphic/new.html.twig")
 	 */
-	public function createAction(Request $request, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, GraphicUtils $graphicUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
+	public function createAction(Request $request, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, GraphicUtils $graphicUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$owner = $this->retrieveOwner($request);
 
 		$this->createLock('core_promotion_graphic_create', false, self::LOCK_TTL_CREATE_ACTION, false);
-
-		$om = $this->getDoctrine()->getManager();
 
 		$graphic = new Graphic();
 		$form = $this->createForm(GraphicType::class, $graphic);
@@ -189,7 +188,7 @@ class GraphicController extends AbstractController {
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_promotion_graphic_update")
 	 * @Template("@LadbCore/Promotion/Graphic/edit.html.twig")
 	 */
-	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, GraphicUtils $graphicUtils, PicturedUtils $picturedUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
+	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, GraphicUtils $graphicUtils, EntityManagerInterface $om, PicturedUtils $picturedUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$graphic = $this->retrievePublication($id, Graphic::CLASS_NAME);
 		$this->assertEditabable($graphic);
@@ -212,7 +211,6 @@ class GraphicController extends AbstractController {
 				$graphic->setUpdatedAt(new \DateTime());
 			}
 
-			$om = $this->getDoctrine()->getManager();
 			$om->flush();
 
 			// Dispatch publication event
@@ -291,9 +289,7 @@ class GraphicController extends AbstractController {
 	/**
 	 * @Route("/{id}/download", requirements={"id" = "\d+"}, name="core_promotion_graphic_download")
 	 */
-	public function downloadAction($id, GraphicUtils $graphicUtils, SearchUtils $searchUtils) {
-		$om = $this->getDoctrine()->getManager();
-
+	public function downloadAction($id, GraphicUtils $graphicUtils, EntityManagerInterface $om, SearchUtils $searchUtils) {
 		$graphic = $this->retrievePublication($id, Graphic::CLASS_NAME);
 		$this->assertShowable($graphic);
 
@@ -501,8 +497,7 @@ class GraphicController extends AbstractController {
 	 * @Route("/{id}.html", name="core_promotion_graphic_show")
 	 * @Template("@LadbCore/Promotion/Graphic/show.html.twig")
 	 */
-	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
-		$om = $this->getDoctrine()->getManager();
+	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, EntityManagerInterface $om, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$graphicRepository = $om->getRepository(Graphic::CLASS_NAME);
 
 		$id = intval($id);

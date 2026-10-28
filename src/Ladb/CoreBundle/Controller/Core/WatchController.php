@@ -12,6 +12,7 @@ use Ladb\CoreBundle\Utils\PaginatorUtils;
 use Ladb\CoreBundle\Model\WatchableInterface;
 use Ladb\CoreBundle\Entity\Core\Watch;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/watches")
@@ -72,8 +73,7 @@ class WatchController extends AbstractController {
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_watch_delete")
 	 * @Template("@LadbCore/Core/Watch/delete-xhr.html.twig")
 	 */
-	public function deleteAction(Request $request, $id, TypableUtils $typableUtils, WatchableUtils $watchableUtils) {
-		$om = $this->getDoctrine()->getManager();
+	public function deleteAction(Request $request, $id, EntityManagerInterface $om, TypableUtils $typableUtils, WatchableUtils $watchableUtils) {
 		$watchRepository = $om->getRepository(Watch::CLASS_NAME);
 
 		$watch = $watchRepository->findOneById($id);
@@ -113,8 +113,7 @@ class WatchController extends AbstractController {
 	 * @Route("/{entityType}/{entityId}/{page}", requirements={"entityType" = "\d+", "entityId" = "\d+", "page" = "\d+"}, name="core_watch_list_byentity_page")
 	 * @Template("@LadbCore/Core/Watch/list-byentity.html.twig")
 	 */
-	public function listByEntityAction(Request $request, $entityType, $entityId, PaginatorUtils $paginatorUtils, TypableUtils $typableUtils, $page = 0) {
-		$om = $this->getDoctrine()->getManager();
+	public function listByEntityAction(Request $request, $entityType, $entityId, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, TypableUtils $typableUtils, $page = 0) {
 		$watchRepository = $om->getRepository(Watch::CLASS_NAME);
 
 		// Retrieve related entity

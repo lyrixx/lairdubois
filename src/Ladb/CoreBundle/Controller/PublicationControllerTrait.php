@@ -34,7 +34,7 @@ trait PublicationControllerTrait {
 		$isGrantedUser = $this->isGranted('ROLE_USER');
 		$isGrantedAdmin = $this->isGranted('ROLE_ADMIN');
 		$isOwner = $publication instanceof AuthoredInterface && $publication->getUser() == $this->getUser();
-		$isOwnerMember = $isGrantedUser && $publication instanceof AuthoredInterface && $this->getDoctrine()->getManager()->getRepository(Member::class)->existsByTeamAndUser($publication->getUser(), $this->getUser());
+		$isOwnerMember = $isGrantedUser && $publication instanceof AuthoredInterface && $this->om->getRepository(Member::class)->existsByTeamAndUser($publication->getUser(), $this->getUser());
 		$isGrantedOwner = $isOwner || $isOwnerMember;
 		$isPublic = $publication instanceof HiddableInterface && $publication->getIsPublic() || !($publication instanceof HiddableInterface);
 
@@ -67,8 +67,7 @@ trait PublicationControllerTrait {
 				if ($user->getIsTeam()) {
 
 					// Only members allowed
-					$om = $this->getDoctrine()->getManager();
-					$memberRepository = $om->getRepository(Member::class);
+					$memberRepository = $this->om->getRepository(Member::class);
 					if (!$memberRepository->existsByTeamAndUser($user, $this->getUser())) {
 						throw $this->createNotFoundException('Access denied');
 					}
@@ -86,8 +85,7 @@ trait PublicationControllerTrait {
 	}
 
 	protected function retrievePublication($id, $className) {
-		$om = $this->getDoctrine()->getManager();
-		$publicationRepository = $om->getRepository($className);
+		$publicationRepository = $this->om->getRepository($className);
 		$publication = $publicationRepository->findOneById(intval($id));
 		if (is_null($publication)) {
 			throw $this->createNotFoundException('Unable to find '.$className.' entity (id='.$id.').');
@@ -110,8 +108,7 @@ trait PublicationControllerTrait {
 		} else if ($publication->getUser()->getIsTeam() && !is_null($this->getUser())) {
 
 			// Only members allowed
-			$om = $this->getDoctrine()->getManager();
-			$memberRepository = $om->getRepository(Member::class);
+			$memberRepository = $this->om->getRepository(Member::class);
 			$allowed = $memberRepository->existsByTeamAndUser($publication->getUser(), $this->getUser());
 
 		} else {
@@ -186,7 +183,7 @@ trait PublicationControllerTrait {
 
 			$isGrantedUser = $this->isGranted('ROLE_USER');
 			$isOwner = $publication instanceof AuthoredInterface && $publication->getUser() == $this->getUser();
-			$isOwnerMember = $isGrantedUser && $publication instanceof AuthoredInterface && $this->getDoctrine()->getManager()->getRepository(Member::class)->existsByTeamAndUser($publication->getUser(), $this->getUser());
+			$isOwnerMember = $isGrantedUser && $publication instanceof AuthoredInterface && $this->om->getRepository(Member::class)->existsByTeamAndUser($publication->getUser(), $this->getUser());
 			$isGrantedOwner = $isOwner || $isOwnerMember;
 
 			if (!(($publication instanceof HiddableInterface && $publication->getIsPrivate() === true || $ownerAllowed) && $isGrantedOwner)) {
@@ -230,7 +227,7 @@ trait PublicationControllerTrait {
 
 			if ($includeTeamsPrivates && $this->getUser()->getMeta()->getTeamCount() > 0) {
 
-				$memberRepository = $this->getDoctrine()->getRepository(Member::CLASS_NAME);
+				$memberRepository = $this->om->getRepository(Member::CLASS_NAME);
 				$members = $memberRepository->findPaginedByUser($this->getUser(), 0, 20);
 
 				foreach ($members as $member) {

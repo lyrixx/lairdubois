@@ -21,6 +21,7 @@ use Ladb\CoreBundle\Event\PublicationListener;
 use Ladb\CoreBundle\Event\PublicationsEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/astuces")
@@ -47,11 +48,9 @@ class TipController extends AbstractController {
 	 * @Template("@LadbCore/Core/Tip/new.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_TIP')", statusCode=404, message="Not allowed (core_tip_create)")
 	 */
-	public function createAction(Request $request, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TranslatorInterface $translator) {
+	public function createAction(Request $request, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TranslatorInterface $translator) {
 
 		$this->createLock('core_tip_create', false, self::LOCK_TTL_CREATE_ACTION, false);
-
-		$om = $this->getDoctrine()->getManager();
 
 		$tip = new Tip();
 		$form = $this->createForm(TipType::class, $tip);
@@ -86,8 +85,7 @@ class TipController extends AbstractController {
 	 * @Template("@LadbCore/Core/Tip/edit.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_TIP')", statusCode=404, message="Not allowed (core_tip_edit)")
 	 */
-	public function editAction($id) {
-		$om = $this->getDoctrine()->getManager();
+	public function editAction($id, EntityManagerInterface $om) {
 		$tipRepository = $om->getRepository(Tip::CLASS_NAME);
 
 		$tip = $tipRepository->findOneById($id);
@@ -108,8 +106,7 @@ class TipController extends AbstractController {
 	 * @Template("@LadbCore/Core/Tip/edit.html.twig")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_TIP')", statusCode=404, message="Not allowed (core_tip_update)")
 	 */
-	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TranslatorInterface $translator) {
-		$om = $this->getDoctrine()->getManager();
+	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TranslatorInterface $translator) {
 		$tipRepository = $om->getRepository(Tip::CLASS_NAME);
 
 		$tip = $tipRepository->findOneById($id);
@@ -152,8 +149,7 @@ class TipController extends AbstractController {
 	 * @Route("/{id}/delete", requirements={"id" = "\d+"}, name="core_tip_delete")
 	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_TIP')", statusCode=404, message="Not allowed (core_tip_delete)")
 	 */
-	public function deleteAction($id, TipManager $tipManager, TranslatorInterface $translator) {
-		$om = $this->getDoctrine()->getManager();
+	public function deleteAction($id, EntityManagerInterface $om, TipManager $tipManager, TranslatorInterface $translator) {
 		$tipRepository = $om->getRepository(Tip::CLASS_NAME);
 
 		$tip = $tipRepository->findOneById($id);
@@ -248,8 +244,7 @@ class TipController extends AbstractController {
 	 * @Route("/{id}.html", name="core_tip_show")
 	 * @Template("@LadbCore/Core/Tip/show.html.twig")
 	 */
-	public function showAction(Request $request, $id, EventDispatcherInterface $dispatcher, WitnessManager $witnessManager) {
-		$om = $this->getDoctrine()->getManager();
+	public function showAction(Request $request, $id, EventDispatcherInterface $dispatcher, EntityManagerInterface $om, WitnessManager $witnessManager) {
 		$tipRepository = $om->getRepository(Tip::CLASS_NAME);
 
 		$id = intval($id);

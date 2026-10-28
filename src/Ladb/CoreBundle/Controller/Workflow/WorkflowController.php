@@ -33,6 +33,7 @@ use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Utils\PaginatorUtils;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/processus")
@@ -61,13 +62,11 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	 * @Route("/create", methods={"POST"}, name="core_workflow_create")
 	 * @Template("@LadbCore/Workflow/Workflow/new.html.twig")
 	 */
-	public function createAction(Request $request, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
+	public function createAction(Request $request, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$owner = $this->retrieveOwner($request);
 
 		$this->createLock('core_workflow_create', false, self::LOCK_TTL_CREATE_ACTION, false);
-
-		$om = $this->getDoctrine()->getManager();
 
 		$workflow = new Workflow();
 		$form = $this->createForm(WorkflowType::class, $workflow);
@@ -191,7 +190,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	 * @Route("/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_workflow_update")
 	 * @Template("@LadbCore/Workflow/Workflow/edit.html.twig")
 	 */
-	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
+	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$workflow = $this->retrievePublication($id, Workflow::CLASS_NAME);
 		$this->assertEditabable($workflow);
@@ -209,7 +208,6 @@ class WorkflowController extends AbstractWorkflowBasedController {
 				$workflow->setUpdatedAt(new \DateTime());
 			}
 
-			$om = $this->getDoctrine()->getManager();
 			$om->flush();
 
 			// Dispatch publication event
@@ -291,9 +289,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	 * @Route("/{id}/pas-a-pas/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_workflow_howtos_filter_page")
 	 * @Template("@LadbCore/Workflow/Workflow/howtos.html.twig")
 	 */
-	public function howtosAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
-		$om = $this->getDoctrine()->getManager();
-
+	public function howtosAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$workflow = $this->retrievePublication($id, Workflow::CLASS_NAME);
 		$this->assertShowable($workflow);
 
@@ -328,9 +324,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	 * @Route("/{id}/creations/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_workflow_creations_filter_page")
 	 * @Template("@LadbCore/Workflow/Workflow/creations.html.twig")
 	 */
-	public function creationsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
-		$om = $this->getDoctrine()->getManager();
-
+	public function creationsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$workflow = $this->retrievePublication($id, Workflow::CLASS_NAME);
 		$this->assertShowable($workflow);
 
@@ -365,9 +359,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	 * @Route("/{id}/plans/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_workflow_plans_filter_page")
 	 * @Template("@LadbCore/Workflow/Workflow/plans.html.twig")
 	 */
-	public function plansAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
-		$om = $this->getDoctrine()->getManager();
-
+	public function plansAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$workflow = $this->retrievePublication($id, Workflow::CLASS_NAME);
 		$this->assertShowable($workflow);
 
@@ -402,9 +394,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	 * @Route("/{id}/ateliers/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_workflow_workshops_filter_page")
 	 * @Template("@LadbCore/Workflow/Workflow/workshops.html.twig")
 	 */
-	public function workshopsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
-		$om = $this->getDoctrine()->getManager();
-
+	public function workshopsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$workflow = $this->retrievePublication($id, Workflow::CLASS_NAME);
 		$this->assertShowable($workflow);
 
@@ -439,8 +429,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	 * @Route("/{id}/inspirations/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_workflow_inspirations_filter_page")
 	 * @Template("@LadbCore/Workflow/Workflow/inspirations.html.twig")
 	 */
-	public function inspirationsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
-		$om = $this->getDoctrine()->getManager();
+	public function inspirationsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$workflowRepository = $om->getRepository(Workflow::CLASS_NAME);
 
 		$workflow = $this->retrievePublication($id, Workflow::CLASS_NAME);
@@ -475,8 +464,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	 * @Route("/{id}/rebonds/{filter}/{page}", requirements={"id" = "\d+", "filter" = "[a-z-]+", "page" = "\d+"}, name="core_workflow_rebounds_filter_page")
 	 * @Template("@LadbCore/Workflow/Workflow/rebounds.html.twig")
 	 */
-	public function reboundsAction(Request $request, $id, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
-		$om = $this->getDoctrine()->getManager();
+	public function reboundsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$workflowRepository = $om->getRepository(Workflow::CLASS_NAME);
 
 		$workflow = $this->retrievePublication($id, Workflow::CLASS_NAME);
@@ -559,8 +547,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	 * @Route("/{id}/statistics", requirements={"id" = "\d+"}, name="core_workflow_statistics")
 	 * @Template("@LadbCore/Workflow/Workflow/statistics-xhr.html.twig")
 	 */
-	public function statisticsAction(Request $request, $id) {
-		$om = $this->getDoctrine()->getManager();
+	public function statisticsAction(Request $request, $id, EntityManagerInterface $om) {
 		$taskRepository = $om->getRepository(Task::CLASS_NAME);
 
 		$workflow = $this->retrievePublication($id, Workflow::CLASS_NAME);
@@ -590,8 +577,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	 * @Route("/{id}.html", name="core_workflow_show")
 	 * @Template("@LadbCore/Workflow/Workflow/show.html.twig")
 	 */
-	public function showAction(Request $request, $id, Authorization $authorization, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, FollowerUtils $followerUtils, LikableUtils $likableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
-		$om = $this->getDoctrine()->getManager();
+	public function showAction(Request $request, $id, Authorization $authorization, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, FollowerUtils $followerUtils, LikableUtils $likableUtils, EntityManagerInterface $om, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$workflowRepository = $om->getRepository(Workflow::CLASS_NAME);
 
 		$layout = $request->get('layout', 'page');

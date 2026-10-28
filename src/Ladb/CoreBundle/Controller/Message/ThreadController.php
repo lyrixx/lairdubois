@@ -16,6 +16,7 @@ use Ladb\CoreBundle\Form\Type\Message\NewThreadMessageType;
 use Ladb\CoreBundle\Form\Model\NewThreadMessage;
 use Ladb\CoreBundle\Utils\MailerUtils;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/messagerie")
@@ -62,7 +63,7 @@ class ThreadController extends AbstractThreadController {
 	 * @Route("/thread/create", methods={"POST"}, name="core_message_thread_create")
 	 * @Template("@LadbCore/Message/newThread.html.twig")
 	 */
-	public function createAction(Request $request, MailerUtils $mailerUtils, MessageUtils $messageUtils, TranslatorInterface $translator) {
+	public function createAction(Request $request, MailerUtils $mailerUtils, MessageUtils $messageUtils, EntityManagerInterface $om, TranslatorInterface $translator) {
 //		if (!is_null($this->getUser()) && $this->getUser()->getIsTeam()) {
 //			throw $this->createNotFoundException('Team not allowed (core_message_thread_create)');
 //		}
@@ -79,7 +80,6 @@ class ThreadController extends AbstractThreadController {
 			$recipients = $newThreadMessage->getRecipients()->toArray();
 
 			// Exclude "SPAM" threads
-			$om = $this->getDoctrine()->getManager();
 			$threadRepository = $om->getRepository(Thread::CLASS_NAME);
 			if ($threadRepository->existsBySenderAndSubjectAndBody($sender, $newThreadMessage->getSubject(), $newThreadMessage->getBody())) {
 
@@ -121,8 +121,7 @@ class ThreadController extends AbstractThreadController {
 	 * @Route("/thread/{id}/delete", requirements={"id" = "\d+"}, name="core_message_thread_delete")
 	 * @Template("@LadbCore/Message/deleteThread.html.twig")
 	 */
-	public function deleteAction($id) {
-		$om = $this->getDoctrine()->getManager();
+	public function deleteAction($id, EntityManagerInterface $om) {
 		$threadRepository = $om->getRepository(Thread::CLASS_NAME);
 
 		$thread = $this->retrieveThread($id);
@@ -154,11 +153,10 @@ class ThreadController extends AbstractThreadController {
 	 * @Route("/thread/{id}", requirements={"id" = "\d+"}, name="core_message_thread_show")
 	 * @Template("@LadbCore/Message/showThread.html.twig")
 	 */
-	public function showAction($id) {
+	public function showAction($id, EntityManagerInterface $om) {
 
 		$this->createLock('core_message_thread_show', true, 3, false);
 
-		$om = $this->getDoctrine()->getManager();
 		$messageMetaRepository = $om->getRepository(MessageMeta::CLASS_NAME);
 
 		$thread = $this->retrieveThread($id);
@@ -213,8 +211,7 @@ class ThreadController extends AbstractThreadController {
 	 * @Route("/{filter}/{page}", requirements={"filter" = "\w+", "page" = "\d+"}, name="core_message_mailbox_filter_page")
 	 * @Template("@LadbCore/Message/mailbox.html.twig")
 	 */
-	public function mailboxAction(Request $request, PaginatorUtils $paginatorUtils, $filter = 'all', $page = 0) {
-		$om = $this->getDoctrine()->getManager();
+	public function mailboxAction(Request $request, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = 'all', $page = 0) {
 		$threadRepository = $om->getRepository(Thread::CLASS_NAME);
 
 		// Compute allowed user list by adding user's teams

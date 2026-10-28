@@ -26,6 +26,7 @@ use Ladb\CoreBundle\Utils\ActivityUtils;
 use Ladb\CoreBundle\Utils\WatchableUtils;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Doctrine\ORM\EntityManagerInterface;
 
 /**
  * @Route("/questions")
@@ -63,7 +64,7 @@ class AnswerController extends AbstractController {
 	 * @Route("/{id}/reponses/create", requirements={"id" = "\d+"}, methods={"POST"}, name="core_qa_answer_create")
 	 * @Template("@LadbCore/Qa/Answer/new-xhr.html.twig")
 	 */
-	public function createAction(Request $request, $id, ActivityUtils $activityUtils, BlockBodiedUtils $blockUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, MentionUtils $mentionUtils, QuestionManager $questionManager, VotableUtils $votableUtils, WatchableUtils $watchableUtils, WebpushNotificationUtils $webpushNotificationUtils) {
+	public function createAction(Request $request, $id, ActivityUtils $activityUtils, BlockBodiedUtils $blockUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, MentionUtils $mentionUtils, EntityManagerInterface $om, QuestionManager $questionManager, VotableUtils $votableUtils, WatchableUtils $watchableUtils, WebpushNotificationUtils $webpushNotificationUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_qa_answer_create)');
 		}
@@ -79,7 +80,6 @@ class AnswerController extends AbstractController {
 			throw $this->createNotFoundException('Can\'t create answer on locked question (id='.$id.', core_qa_answer_create).');
 		}
 
-		$om = $this->getDoctrine()->getManager();
 		$answerRepository = $om->getRepository(Answer::CLASS_NAME);
 		if ($answerRepository->existsByQuestionAndUser($question, $this->getUser())) {
 			throw $this->createNotFoundException('Only one answer allowed (id='.$id.').');
@@ -149,12 +149,11 @@ class AnswerController extends AbstractController {
 	 * @Route("/reponses/{id}/edit", requirements={"id" = "\d+"}, name="core_qa_answer_edit")
 	 * @Template("@LadbCore/Qa/Answer/edit-xhr.html.twig")
 	 */
-	public function editAction(Request $request, $id) {
+	public function editAction(Request $request, $id, EntityManagerInterface $om) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_qa_answer_edit)');
 		}
 
-		$om = $this->getDoctrine()->getManager();
 		$answerRepository = $om->getRepository(Answer::CLASS_NAME);
 
 		$answer = $answerRepository->findOneById($id);
@@ -177,12 +176,11 @@ class AnswerController extends AbstractController {
 	 * @Route("/reponses/{id}/update", requirements={"id" = "\d+"}, methods={"POST"}, name="core_qa_answer_update")
 	 * @Template("@LadbCore/Qa/Answer/edit-xhr.html.twig")
 	 */
-	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, MentionUtils $mentionUtils, VotableUtils $votableUtils) {
+	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, MentionUtils $mentionUtils, EntityManagerInterface $om, VotableUtils $votableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_qa_answer_update)');
 		}
 
-		$om = $this->getDoctrine()->getManager();
 		$answerRepository = $om->getRepository(Answer::CLASS_NAME);
 
 		$answer = $answerRepository->findOneById($id);
@@ -236,8 +234,7 @@ class AnswerController extends AbstractController {
 	 * @Route("/reponses/{id}/best/create", requirements={"id" = "\d+"}, defaults={"action" = "create"}, name="core_qa_answer_best_create")
 	 * @Route("/reponses/{id}/best/delete", requirements={"id" = "\d+"}, defaults={"action" = "delete"}, name="core_qa_answer_best_delete")
 	 */
-	public function bestToggleAction(Request $request, $id, $action, EventDispatcherInterface $dispatcher) {
-		$om = $this->getDoctrine()->getManager();
+	public function bestToggleAction(Request $request, $id, $action, EventDispatcherInterface $dispatcher, EntityManagerInterface $om) {
 		$answerRepository = $om->getRepository(Answer::CLASS_NAME);
 
 		$answer = $answerRepository->findOneById($id);
@@ -275,8 +272,7 @@ class AnswerController extends AbstractController {
 	/**
 	 * @Route("/reponses/{id}/delete", requirements={"id" = "\d+"}, name="core_qa_answer_delete")
 	 */
-	public function deleteAction(Request $request, $id, AnswerManager $answerManager, SearchUtils $searchUtils, TranslatorInterface $translator) {
-		$om = $this->getDoctrine()->getManager();
+	public function deleteAction(Request $request, $id, AnswerManager $answerManager, EntityManagerInterface $om, SearchUtils $searchUtils, TranslatorInterface $translator) {
 		$answerRepository = $om->getRepository(Answer::CLASS_NAME);
 
 		$answer = $answerRepository->findOneById($id);
@@ -304,8 +300,7 @@ class AnswerController extends AbstractController {
 	/**
 	 * @Route("/reponses/{id}", requirements={"id" = "\d+"}, name="core_qa_answer_show")
 	 */
-	public function showAction($id) {
-		$om = $this->getDoctrine()->getManager();
+	public function showAction($id, EntityManagerInterface $om) {
 		$answerRepository = $om->getRepository(Answer::CLASS_NAME);
 
 		$answer = $answerRepository->findOneById($id);
@@ -328,12 +323,11 @@ class AnswerController extends AbstractController {
 	 * @Route("/{id}/reponses/{sorter}", requirements={"id" = "\d+", "sorter" = "[a-z-]+"}, name="core_qa_answer_list_sorter")
 	 * @Template("@LadbCore/Qa/Answer/list-xhr.html.twig")
 	 */
-	public function listAction(Request $request, $id, CommentableUtils $commentableUtils, VotableUtils $votableUtils, $sorter = 'score') {
+	public function listAction(Request $request, $id, CommentableUtils $commentableUtils, EntityManagerInterface $om, VotableUtils $votableUtils, $sorter = 'score') {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_qa_answer_list_sorter)');
 		}
 
-		$om = $this->getDoctrine()->getManager();
 		$questionRepository = $om->getRepository(\Ladb\CoreBundle\Entity\Qa\Question::CLASS_NAME);
 		$answerRepository = $om->getRepository(\Ladb\CoreBundle\Entity\Qa\Answer::CLASS_NAME);
 
@@ -359,8 +353,7 @@ class AnswerController extends AbstractController {
 	 * @Route("/{id}/reponses/admin/converttocomment", requirements={"id" = "\d+"}, name="core_qa_answer_admin_converttocomment")
 	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_qa_answer_admin_converttocomment)")
 	 */
-	public function adminConvertToCommentAction($id, AnswerManager $answerManager, TranslatorInterface $translator) {
-		$om = $this->getDoctrine()->getManager();
+	public function adminConvertToCommentAction($id, AnswerManager $answerManager, EntityManagerInterface $om, TranslatorInterface $translator) {
 		$answerRepository = $om->getRepository(Answer::CLASS_NAME);
 
 		$answer = $answerRepository->findOneByIdJoinedOnOptimized($id);
