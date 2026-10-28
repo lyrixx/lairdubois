@@ -160,7 +160,7 @@ class Find extends AbstractDraftableAuthoredPublication implements TitledInterfa
 
 	/////
 
-	#[Assert\Range(min: 1, max: 3, minMessage: 'Vous devez sélectionner un type.')]
+	#[Assert\Range(min: 1, max: 3, notInRangeMessage: 'Vous devez sélectionner un type.')]
 	private $contentType = Find::CONTENT_TYPE_NONE;
 
 	/////

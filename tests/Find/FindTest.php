@@ -5,6 +5,7 @@ namespace Tests\Find;
 use Ladb\CoreBundle\DataFixtures\UserFixtures;
 use Ladb\CoreBundle\Entity\Find\Find;
 use Ladb\CoreBundle\Utils\VideoHostingUtils;
+use Symfony\Component\DomCrawler\Crawler;
 use Tests\Double\OfflineLocalisableUtils;
 use Tests\Double\OfflineOpenGraphUtils;
 use Tests\PublicationTestCase;
@@ -117,6 +118,24 @@ final class FindTest extends PublicationTestCase
         self::assertSame(Find::KIND_GALLERY, $find->getKind());
         self::assertSame((int) $pictureId, $find->getMainPicture()->getId());
         self::assertEqualsWithDelta(OfflineLocalisableUtils::ADDRESSES['Bordeaux, France']['latitude'], $find->getContent()->getLatitude(), 0.000001);
+    }
+
+    /**
+     * Without a link or a gallery chosen, the form keeps its type (Find::CONTENT_TYPE_NONE): refused,
+     * with the message of the Range constraint.
+     */
+    public function testCreateWithoutContentType(): void
+    {
+        $client = static::createClientAs(UserFixtures::USER);
+        $form = $this->getNewForm($client, UserFixtures::USER);
+        self::assertSame((string) Find::CONTENT_TYPE_NONE, $form->get('ladb_find_find[contentType]')->getValue());
+        $values = $this->getLinkFormValues(OfflineOpenGraphUtils::URL);
+        unset($values['ladb_find_find[contentType]']);
+
+        $client->submit($form->setValues($values));
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertSame(['Vous devez sélectionner un type.'], $client->getCrawler()->filter('.alert-danger li')->each(fn (Crawler $node) => $node->text(null, false)));
     }
 
     /**

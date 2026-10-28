@@ -267,6 +267,10 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et get
   commentaire et le docblock qu'il supprime. Le validateur lit les attributs d'un élément avant
   ses annotations : ne pas mélanger les deux sur une classe, une propriété ou un getter, l'ordre
   des contraintes (et des messages) changerait.
+  Une annotation était construite une fois, puis relue dans le cache d'annotations (fichiers de
+  `var/cache/`) : le rapport ne voyait pas les dépréciations de son constructeur. Un attribut est
+  construit à chaque chargement des métadonnées, elles sortent en test (`Range` de `Find`, à `min`,
+  `max` et `minMessage`, passé en `notInRangeMessage`).
 - Les règles de rector-symfony (les sets de 4.x ne sont plus dans Rector 2 : une règle à la fois
   dans `rector.php`) ne s'appliquent qu'à partir d'une version d'un paquet de Symfony
   (`symfony/console`…), lue dans `vendor/composer/installed.json`, où `symfony/symfony` les
