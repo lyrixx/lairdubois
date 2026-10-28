@@ -608,9 +608,10 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   des fichiers chargés à ce moment. `AppKernel::initializeContainer()` ignore alors ce que le
   niveau de l'appelant cache (php.ini, `bin/console`) et passe le reste au gestionnaire précédent :
   sous PHPUnit (`error_reporting=-1`), `Tests\DeprecationCollector` les compte toujours. Toujours
-  utile en 5.4 : sans lui, la première page du FPM de dev après un démarrage affiche quelque 70
-  dépréciations, celles des paramètres implicitement nullables de SensioFrameworkExtraBundle, Stof,
-  Liip, DoctrineBundle et SwiftmailerBundle (chargés en même temps que le container de debug) et
+  utile en 5.4 : sans lui, la première page du FPM de dev après un démarrage affiche des
+  dépréciations, celles des paramètres implicitement nullables de SensioFrameworkExtraBundle, Liip et
+  SwiftmailerBundle (chargés en même temps que le container de debug ; Stof et DoctrineBundle n'en
+  ont plus depuis #177) et
   `SplObjectStorage::attach()`. En CLI, rien : `bin/console` a son gestionnaire en dev, et le
   container de prod ne charge plus que des fichiers de Symfony, propres depuis 5.4.55 (la 4.4
   affichait 6 dépréciations par commande). À revoir quand ces bundles monteront.
@@ -698,6 +699,41 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
 - Les managers (`publish()`…) parcourent les collections inverses (créations d'un plan…), qui ne sont
   initialisées que sur une entité chargée depuis la base : `FixtureFactory::create()` fait un
   `refresh()` après le premier `flush()`.
+- Doctrine (#177) : ORM 2.20, DBAL 3, DoctrineBundle 2.13 (la dernière pour 5.4). `doctrine/persistence`
+  reste en 2.5 : la 3 refuse les alias `LadbCoreBundle:…` (`getRepository()`, DQL), dont les 107
+  constantes `CLASS_NAME` des entités et les `from('LadbCoreBundle:…')` des commandes ; c'est pour
+  l'ORM 3 (#178). Symfony 6.4 l'accepte, la 7.4 non. `enable_lazy_ghost_objects` reste donc à
+  `false` (il exige persistence 3.1 et `symfony/var-exporter` 6.2) : sa dépréciation, celle de
+  DoctrineBundle 2.11, reste jusqu'à #178.
+- Bornes de `composer.json` : `gedmo/doctrine-extensions` `~3.20.1` (depuis la 3.21, Sluggable et
+  `Urlizer` passent par `symfony/string` : les slugs et les labels de tags peuvent changer) ;
+  `dama/doctrine-test-bundle` `~8.2.2` (la 8.3 veut PHPUnit 10, que Composer ne voit pas, dans
+  `tools/phpunit`) ; `doctrine/data-fixtures` `^1.8` (la 2.0 impose les types natifs et la classe
+  dans `getReference()`). `doctrine/migrations` est en 3.5 : à partir de la 3.6, il exige
+  `symfony/var-exporter` 6.2, que `symfony/symfony` 5.4 remplace.
+- doctrine/migrations 3 lit la table des 1.x et 2.x (`storage.table_storage.table_name:
+  migration_versions`) : la sienne par défaut, `doctrine_migration_versions`, lui ferait rejouer
+  toutes les migrations de la prod. Le premier `doctrine:migrations:migrate` (ou
+  `sync-metadata-storage`) la convertit : `version` en `VARCHAR(191)`, qui porte le nom de la
+  classe, et les colonnes `executed_at` et `execution_time` ; avant, `status` échoue (« The
+  metadata storage is not up to date »). Il ajoute à chaque migration qu'il joue le diff de DBAL
+  entre le schéma de la base et celui que décrit la migration.
+- DBAL 3 déclare une colonne `json` en `JSON` sur MariaDB (`LONGTEXT … utf8mb4_bin CHECK
+  (json_valid(…))`) et voit celle de DBAL 2, un `LONGTEXT`, comme différente
+  (`declarationMismatch`) : `Version20261028235655` convertit
+  `tbl_webpush_user_subscription.subscription`.
+- `use_savepoints: true` en test (`config_test.yml`) : dama 8 l'exige, sa transaction contient
+  celles des flush. Le site n'imbrique jamais de transaction.
+- Les annotations de l'ORM 2.20 ont un constructeur typé (`NamedArgumentConstructor`) : un tableau
+  ne prend plus une valeur seule, ce que DocParser acceptait (`cascade={"persist"}`, pas
+  `cascade="persist"`).
+- Depuis l'ORM 2.16, un flush ordonne ses INSERT entité par entité (persist et clés étrangères), plus
+  classe par classe : les lignes de classes différentes créées ensemble (blocs texte et galerie
+  d'un contenu, valeurs d'une fiche de la xylothèque, avatar et bannière d'un compte) prennent leurs
+  ids dans un autre ordre, fixtures comprises. Les contenus d'id 1 ne bougent pas.
+- `doctrine:schema:update` sans `--complete` : un avertissement de l'ORM 2.20, l'option sera
+  obligatoire avec DBAL 4. Avec elle, il supprimerait les tables hors mapping (`sessions`) : un
+  `schema_filter` avant DBAL 4. `doctrine:query:sql` est déprécié, `dbal:run-sql` le remplace.
 - Symfony Mailer (#19) : `MailerUtils` envoie des `Email`, que Mailer passe au bus de Messenger ;
   `SendEmailMessage` va dans la file `mailer` de RabbitMQ, et son worker (`messenger:consume
   mailer`) les envoie. Un envoi en échec (SMTP injoignable) est rejoué 5 fois, après 1, 3, 9, 27 et
@@ -727,10 +763,10 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   utilisées sont dans les domaines `FOSUserBundle` et `validators` du bundle.
 - symfony/symfony 5.4 ne livre pas les ponts de Messenger, de Mailer, de Notifier ni de Translation
   (`export-ignore`) : ils s'installent à part. `symfony/amqp-messenger` porte nos transports.
-  `symfony/doctrine-messenger` ne sert à rien chez nous, mais sans lui DoctrineBundle 2.1 casse la
-  compilation du container en debug : il teste l'ancienne classe du transport Doctrine, que 5.4 ne
+  `symfony/doctrine-messenger` ne sert à rien chez nous : sans lui, DoctrineBundle 2.1 cassait la
+  compilation du container en debug (il testait l'ancienne classe du transport Doctrine, que 5.4 ne
   garde que comme un fichier qui charge celle du pont, et DebugClassLoader refuse un fichier sans
-  sa classe.
+  sa classe). DoctrineBundle 2.13 teste celle du pont : il peut partir.
 - Les sessions ouvertes en 3.4 et 4.4 ont des objets `Security\Core\Role\Role` dans leur token :
   Symfony 5.4 garde une classe `Role` interne pour les relire, et elles restent connectées
   (`LoginTest`, avec un token capturé sur la vraie 4.4 ; le cookie remember_me capturé avec lui est
