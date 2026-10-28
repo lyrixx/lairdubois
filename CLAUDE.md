@@ -269,7 +269,7 @@ Jeu de données de dev et de test, sans donnée de prod : `src/Ladb/CoreBundle/D
   copiés dans `uploads/` sous un nom stable (`fixture-<nom>.jpg`), avec les placeholders
   (`empty.png`, `avatar.png`…) que les templates demandent à Liip Imagine.
 
-Comptes (mot de passe = identifiant, hashé par l'encodeur `native` de `security.yml`, connexion par le
+Comptes (mot de passe = identifiant, hashé par le hasher `native` de `security.yml`, connexion par le
 formulaire `/login`) :
 
 | Identifiant | Id | Rôle |
@@ -328,7 +328,7 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
 - `Tests\WebTestCase` :
   - `static::createClient()` : anonyme, en HTTPS sur `lairdubois.test` (`trusted_hosts`) ;
   - `static::createClientAs(UserFixtures::USER)` : connecté (`ADMIN`, `USER`, `USER2`) sans passer
-    par le formulaire de connexion, en mettant le token dans la session ;
+    par le formulaire de connexion, par `loginUser()` du client ;
   - `static::getEntityManager()`, `static::findUser()` : les données des fixtures. Le client
     reboote le kernel avant chaque requête sauf la première, et l'entity manager avec : relire une
     entité après une requête plutôt que de garder celle d'avant. L'entity manager d'une requête
@@ -592,16 +592,18 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   (`@Twig/Exception/error.json.twig`). En debug, la page d'exception de Symfony, en HTML.
 - Les comptes de la prod ont le hash de FOSUserBundle (sha512, 5000 itérations, base64, sel du
   compte) : ils doivent continuer à se connecter sans reset, d'un bout à l'autre de la migration.
-  `security.yml` le garde en `migrate_from` de l'encodeur `native` (`auto` l'ignore en 4.4) : la
-  première connexion par le formulaire refait le hash (`UserRepository::upgradePassword()`, sel à
-  `null`), ce qui déconnecte les autres sessions du compte et invalide ses cookies `remember_me`.
-- Sécurité sans FOSUserBundle (#24) : provider `entity` (`UserRepository::loadUserByUsername()`,
+  `security.yml` le garde en `migrate_from` du hasher `native` (`auto` l'ignore, en 4.4 comme en
+  5.4) : la première connexion par le formulaire refait le hash (`UserRepository::upgradePassword()`,
+  sel à `null`), ce qui déconnecte les autres sessions du compte et invalide ses cookies `remember_me`.
+- Sécurité sans FOSUserBundle (#24) : provider `entity` (`UserRepository::loadUserByIdentifier()`,
   nom d'utilisateur ou e-mail), `Security\UserChecker` (compte désactivé refusé à la connexion),
   `Event\LastLoginListener`, `Manager\Core\UserManager` (canonisation, hash du mot de passe). Une
   session est déconnectée quand `User::isEqualTo()` voit changer le mot de passe, le sel, les rôles,
   le nom ou `enabled` : ce que comparait `hasUserChanged()` de 4.4. Les sessions ouvertes avant #24
   ont un `User` sérialisé par FOSUserBundle (format `C:` de `\Serializable`, sans les rôles) :
-  `User::unserialize()` les lit, et `isEqualTo()` ne compare pas leurs rôles.
+  `User::unserialize()` les lit, et `isEqualTo()` ne compare pas leurs rôles. Authenticator manager
+  depuis #177 : un anonyme n'a plus de token (`null`), et le cookie remember_me est reposé à chaque
+  reconnexion automatique (un an après la dernière visite).
 - Controllers : services autowirés (prototype `Ladb\CoreBundle\Controller\`), une action reçoit ses
   services en arguments, un helper de la classe de l'action qui l'appelle (en dernier argument),
   un trait ou un controller abstrait par un setter `@required`. Les paramètres sont lus par
@@ -674,9 +676,10 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   (`SecurityController`, `RegistrationController`, `ResettingController`,
   `ChangePasswordController`), qui gardent les routes, les noms de formulaires et les templates
   (`@FOSUser/…`) de FOSUserBundle (#24). `LoginUtils` connecte un compte après son inscription ou
-  un nouveau mot de passe, comme le `LoginManager` de FOSUserBundle. Le namespace `@FOSUser` est un
-  chemin Twig de `config.yml` (`templates/bundles/FOSUserBundle/`), les traductions utilisées sont
-  dans les domaines `FOSUserBundle` et `validators` du bundle.
+  un nouveau mot de passe, comme le `LoginManager` de FOSUserBundle, par `authenticateUser()` avec
+  l'authenticator du formulaire (`LastLoginListener` pose la dernière connexion). Le namespace
+  `@FOSUser` est un chemin Twig de `config.yml` (`templates/bundles/FOSUserBundle/`), les traductions
+  utilisées sont dans les domaines `FOSUserBundle` et `validators` du bundle.
 - symfony/symfony 5.4 ne livre pas les ponts de Messenger, de Mailer, de Notifier ni de Translation
   (`export-ignore`) : ils s'installent à part. `symfony/amqp-messenger` porte nos transports.
   `symfony/doctrine-messenger` ne sert à rien chez nous, mais sans lui DoctrineBundle 2.1 casse la
@@ -685,7 +688,8 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   sa classe.
 - Les sessions ouvertes en 3.4 et 4.4 ont des objets `Security\Core\Role\Role` dans leur token :
   Symfony 5.4 garde une classe `Role` interne pour les relire, et elles restent connectées
-  (`LoginTest`, avec un token et un cookie remember_me capturés sur la vraie 4.4). La 6.0.0 la
+  (`LoginTest`, avec un token capturé sur la vraie 4.4 ; le cookie remember_me capturé avec lui est
+  refusé et supprimé depuis l'authenticator manager, qui signe autrement, #177). La 6.0.0 la
   retire, la 6.4 la remet : à revérifier aux sauts suivants (#26).
 - Messenger (#22) : deux transports AMQP (`config.yml`), chacun avec son échange et sa file du
   même nom, `view` et `webpush_notification`. Les anciennes files de RabbitMqBundle (`view_queue`…)
@@ -728,5 +732,9 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   compilait pas, et le domaine restait aux templates compilés ensuite par `cache:warmup` (#138).
   Celui de 5.4 le sait. `Tests\Twig\TemplateCacheWarmerTest` compile dans un process tous les
   templates du warmer, puis vérifie une page et leurs erreurs.
+- Sans token pour un anonyme (#177), le `SecurityListener` de SensioFrameworkExtraBundle refuserait
+  l'accès avant d'évaluer `@Security` : une redirection vers `/login` au lieu du 404 de son
+  `statusCode`. `Security\NullTokenStorage` lui donne un `NullToken` (`services.yml`), à retirer
+  avec le bundle (#27).
 - SensioFrameworkExtraBundle est en 5.5 : le `TemplateListener` de la 5.4 demande un
   `Twig_Environment`, qui n'existe plus en Twig 3 (`TypeError` sur toute action à `@Template`).

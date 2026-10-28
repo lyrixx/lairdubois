@@ -9,8 +9,8 @@ use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use Symfony\Component\Security\Http\SecurityEvents;
 
 /**
- * The last login of the user at each interactive login (login form, remember me), as the
- * LastLoginListener of FOSUserBundle (#24). LoginUtils sets it itself.
+ * The last login of the user at each interactive login (login form, remember me, LoginUtils), as the
+ * LastLoginListener of FOSUserBundle (#24).
  */
 final class LastLoginListener implements EventSubscriberInterface {
 

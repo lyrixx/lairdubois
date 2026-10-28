@@ -1099,15 +1099,6 @@ parameters:
 			path: src/Ladb/CoreBundle/Form/Type/Offer/OfferType.php
 
 		-
-			message: '''
-				#^Class Ladb\\CoreBundle\\Handler\\AuthenticationHandler implements deprecated interface Symfony\\Component\\Security\\Http\\Logout\\LogoutSuccessHandlerInterface\:
-				since Symfony 5\.1$#
-			'''
-			identifier: class.implementsDeprecatedInterface
-			count: 1
-			path: src/Ladb/CoreBundle/Handler/AuthenticationHandler.php
-
-		-
 			message: '#^Deprecated in PHP 8\.4\: Parameter \#3 \$owner \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
 			identifier: parameter.implicitlyNullable
 			count: 1
@@ -1119,15 +1110,6 @@ parameters:
 				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
 			'''
 			identifier: method.deprecated
-			count: 1
-			path: src/Ladb/CoreBundle/Manager/Core/UserManager.php
-
-		-
-			message: '''
-				#^Parameter \$encoderFactory of method Ladb\\CoreBundle\\Manager\\Core\\UserManager\:\:__construct\(\) has typehint with deprecated interface Symfony\\Component\\Security\\Core\\Encoder\\EncoderFactoryInterface\:
-				since Symfony 5\.3, use \{@link PasswordHasherFactoryInterface\} instead$#
-			'''
-			identifier: parameter.deprecatedInterface
 			count: 1
 			path: src/Ladb/CoreBundle/Manager/Core/UserManager.php
 
@@ -1247,15 +1229,6 @@ parameters:
 			identifier: parameter.implicitlyNullable
 			count: 1
 			path: src/Ladb/CoreBundle/Utils/LikableUtils.php
-
-		-
-			message: '''
-				#^Parameter \$rememberMeServices of method Ladb\\CoreBundle\\Utils\\LoginUtils\:\:__construct\(\) has typehint with deprecated interface Symfony\\Component\\Security\\Http\\RememberMe\\RememberMeServicesInterface\:
-				since Symfony 5\.4, use \{@see RememberMeHandlerInterface\} instead$#
-			'''
-			identifier: parameter.deprecatedInterface
-			count: 1
-			path: src/Ladb/CoreBundle/Utils/LoginUtils.php
 
 		-
 			message: '#^Call to deprecated function curl_close\(\)\.$#'

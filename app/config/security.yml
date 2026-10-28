@@ -1,13 +1,15 @@
 security:
-    encoders:
+    enable_authenticator_manager: true
+
+    password_hashers:
         # The hash of FOSUserBundle, the one of the accounts that have not logged in since #24: hashed
-        # again by the native encoder at their next login (UserRepository::upgradePassword())
+        # again by the native hasher at their next login (UserRepository::upgradePassword())
         fos_user_sha512:
             algorithm: sha512
             encode_as_base64: true
             iterations: 5000
         Ladb\CoreBundle\Entity\Core\User:
-            # Not "auto": in Symfony 4.4, it ignores migrate_from
+            # Not "auto": it ignores migrate_from (Symfony 4.4 and 5.4)
             algorithm: native
             migrate_from: [fos_user_sha512]
 
@@ -16,7 +18,7 @@ security:
         ROLE_SUPER_ADMIN: ROLE_ADMIN
 
     providers:
-        # By username or email (UserRepository::loadUserByUsername())
+        # By username or email (UserRepository::loadUserByIdentifier())
         users:
             entity:
                 class: Ladb\CoreBundle\Entity\Core\User
@@ -27,14 +29,13 @@ security:
             user_checker: ladb_core.user_checker
             form_login:
                 provider: users
-                csrf_token_generator: security.csrf.token_manager
+                enable_csrf: true
                 use_referer: true
+            # Redirected to the referer by AuthenticationHandler (LogoutEvent)
             logout:
-                success_handler: ladb_core.authentification_handler
                 # The subscription cookie of the workspaces (Mercure, a year as remember_me)
                 delete_cookies:
                     mercureAuthorization: { path: /.well-known/mercure, secure: true, samesite: strict }
-            anonymous: true
             remember_me:
                 secret:   "%secret%"
                 lifetime: 31536000 # 365 days in seconds
@@ -47,12 +48,12 @@ security:
             security: false
 
     access_control:
-        - { path: ^/login$, role: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/connexion$, role: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/salut$, role: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/resetting$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/login$, role: PUBLIC_ACCESS }
+        - { path: ^/connexion$, role: PUBLIC_ACCESS }
+        - { path: ^/salut$, role: PUBLIC_ACCESS }
+        - { path: ^/resetting$, role: PUBLIC_ACCESS }
 
-        - { path: ^/media/cache/resolve/, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/media/cache/resolve/, role: PUBLIC_ACCESS }
 
         - { path: ^/email/check$, role: ROLE_USER }
         - { path: ^/email/confirm, role: ROLE_USER }
@@ -83,6 +84,6 @@ security:
         - { path: /accept, role: ROLE_USER }
         - { path: /upload$, role: ROLE_USER }
 
-        - { path: /internal/, role: IS_AUTHENTICATED_ANONYMOUSLY, ips: [127.0.0.1, ::1] }
+        - { path: /internal/, role: PUBLIC_ACCESS, ips: [127.0.0.1, ::1] }
         - { path: /internal/, role: ROLE_ADMIN }
 

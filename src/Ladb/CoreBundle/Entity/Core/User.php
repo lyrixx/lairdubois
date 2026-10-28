@@ -14,6 +14,7 @@ use Ladb\CoreBundle\Model\LocalisableTrait;
 use Ladb\CoreBundle\Model\SitemapableInterface;
 use Ladb\CoreBundle\Model\SitemapableTrait;
 use Symfony\Component\Security\Core\User\EquatableInterface;
+use Symfony\Component\Security\Core\User\LegacyPasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
@@ -27,7 +28,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * @UniqueEntity(fields="usernameCanonical", errorPath="username", message="fos_user.username.already_used", groups={"Registration", "Profile"})
  * @UniqueEntity(fields="emailCanonical", errorPath="email", message="fos_user.email.already_used", groups={"Registration", "Profile"})
  */
-class User implements UserInterface, EquatableInterface, \Serializable, IndexableInterface, SitemapableInterface, LocalisableInterface {
+class User implements UserInterface, LegacyPasswordAuthenticatedUserInterface, EquatableInterface, \Serializable, IndexableInterface, SitemapableInterface, LocalisableInterface {
 
 	use IndexableTrait, SitemapableTrait, LocalisableTrait;
 
@@ -259,7 +260,7 @@ class User implements UserInterface, EquatableInterface, \Serializable, Indexabl
 	 * Symfony 4.4 compared of the User of FOSUserBundle (AbstractToken::hasUserChanged()), with the
 	 * roles of the user in the session in place of those of its token.
 	 */
-	public function isEqualTo(UserInterface $user) {
+	public function isEqualTo(UserInterface $user): bool {
 		if (!$user instanceof self) {
 			return false;
 		}
@@ -307,7 +308,11 @@ class User implements UserInterface, EquatableInterface, \Serializable, Indexabl
 	 * @Assert\NotBlank(message="fos_user.username.blank", groups={"Registration", "Profile"})
 	 * @Assert\Length(min=2, minMessage="fos_user.username.short", max=180, maxMessage="fos_user.username.long", groups={"Registration", "Profile"})
 	 */
-	public function getUsername() {
+	public function getUsername(): ?string {
+		return $this->username;
+	}
+
+	public function getUserIdentifier(): string {
 		return $this->username;
 	}
 
@@ -372,7 +377,10 @@ class User implements UserInterface, EquatableInterface, \Serializable, Indexabl
 		return $this;
 	}
 
-	public function getSalt() {
+	/**
+	 * The salt of the sha512 hash of FOSUserBundle (#24): null once the native hasher hashed the password again.
+	 */
+	public function getSalt(): ?string {
 		return $this->salt;
 	}
 
@@ -381,7 +389,7 @@ class User implements UserInterface, EquatableInterface, \Serializable, Indexabl
 		return $this;
 	}
 
-	public function getPassword() {
+	public function getPassword(): ?string {
 		return $this->password;
 	}
 
@@ -474,7 +482,7 @@ class User implements UserInterface, EquatableInterface, \Serializable, Indexabl
 		return $this;
 	}
 
-	public function getRoles() {
+	public function getRoles(): array {
 		$roles = $this->roles;
 
 		// we need to make sure to have at least one role

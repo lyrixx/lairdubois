@@ -4,12 +4,10 @@ namespace Ladb\CoreBundle\Utils;
 
 use Ladb\CoreBundle\Entity\Core\User;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\User\UserCheckerInterface;
-use Symfony\Component\Security\Http\RememberMe\RememberMeServicesInterface;
-use Symfony\Component\Security\Http\Session\SessionAuthenticationStrategyInterface;
+use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
+use Symfony\Component\Security\Http\Authenticator\AuthenticatorInterface;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\RememberMeBadge;
 
 /**
  * Logs a user in without its password, after its registration or a new password: as the LoginManager
@@ -17,38 +15,30 @@ use Symfony\Component\Security\Http\Session\SessionAuthenticationStrategyInterfa
  */
 final class LoginUtils {
 
-	private const FIREWALL = 'main';
-
-	private $rememberMeServices;
-	private $sessionStrategy;
-	private $tokenStorage;
+	private $authenticator;
+	private $userAuthenticator;
 	private $userChecker;
 
-	public function __construct(RememberMeServicesInterface $rememberMeServices, SessionAuthenticationStrategyInterface $sessionStrategy, TokenStorageInterface $tokenStorage, UserCheckerInterface $userChecker) {
-		$this->rememberMeServices = $rememberMeServices;
-		$this->sessionStrategy = $sessionStrategy;
-		$this->tokenStorage = $tokenStorage;
+	public function __construct(AuthenticatorInterface $authenticator, UserAuthenticatorInterface $userAuthenticator, UserCheckerInterface $userChecker) {
+		$this->authenticator = $authenticator;
+		$this->userAuthenticator = $userAuthenticator;
 		$this->userChecker = $userChecker;
 	}
 
 	/////
 
 	/**
-	 * Sets the last login of the user: the caller saves it. A disabled account throws an
-	 * AccountStatusException, that the firewall turns into a redirection to the login form.
+	 * As a login by the form, whose authenticator creates the token: LastLoginListener sets and saves
+	 * the last login, the session migrates. The response of the authenticator is not used, the caller
+	 * returns its own. A disabled account throws an AccountStatusException, that the firewall turns
+	 * into a redirection to the login form.
 	 */
-	public function logIn(User $user, Request $request, Response $response) {
+	public function logIn(User $user, Request $request) {
+		// authenticateUser() does not call the user checker
 		$this->userChecker->checkPreAuth($user);
 
-		$token = new UsernamePasswordToken($user, null, self::FIREWALL, $user->getRoles());
-		$this->sessionStrategy->onAuthentication($request, $token);
-
-		// No "_remember_me" in the forms, thus no cookie: removes the one of a previous login
-		$this->rememberMeServices->loginSuccess($request, $response, $token);
-
-		$this->tokenStorage->setToken($token);
-
-		$user->setLastLogin(new \DateTime());
+		// No "_remember_me" in the forms, thus no cookie: the badge removes the one of a previous login
+		$this->userAuthenticator->authenticateUser($user, $this->authenticator, $request, array( new RememberMeBadge() ));
 	}
 
 }

@@ -352,7 +352,10 @@ final class LoginTest extends WebTestCase
     }
 
     /**
-     * A remember me cookie set by Symfony 4.4 logs in with Symfony 5.4 (#23).
+     * A remember me cookie set by Symfony 4.4, or by 5.4 before its authenticator manager, logged in
+     * with the remember me services of 5.4 (#23). The remember me handler of the authenticator manager
+     * signs otherwise: the cookie is refused without error and deleted, a login again once after the
+     * delivery (#177, choice 5).
      */
     public function testRememberMeOfSymfony44(): void
     {
@@ -362,7 +365,12 @@ final class LoginTest extends WebTestCase
         // the test does not expire: it signs the expiry date, the user name and the password hash
         $client->getCookieJar()->set(new Cookie('REMEMBERME', 'TGFkYlxDb3JlQnVuZGxlXEVudGl0eVxDb3JlXFVzZXI6ZFhObGNnPT06NDk0NjgxNzgxODpjMDE1NTU2OGExZTc4NGYxMDcwNjY5NDU5YzM4YTJkYmVhMGM3YjZmOGI2NThkODgzNDNhNDBlZWNiOTNmNTE4'));
 
-        self::assertLoggedInAs($client, UserFixtures::USER);
+        self::assertNotLoggedIn($client);
+        $cookies = array_values(array_filter($client->getResponse()->headers->getCookies(), static function (ResponseCookie $cookie): bool {
+            return 'REMEMBERME' === $cookie->getName();
+        }));
+        self::assertCount(1, $cookies);
+        self::assertTrue($cookies[0]->isCleared());
     }
 
     private function login(KernelBrowser $client, string $username, string $password): KernelBrowser

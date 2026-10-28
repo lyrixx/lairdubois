@@ -9,6 +9,7 @@ use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Repository\AbstractEntityRepository;
 use Ladb\CoreBundle\Utils\CanonicalFieldsUpdater;
 use Symfony\Bridge\Doctrine\Security\User\UserLoaderInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -18,23 +19,32 @@ class UserRepository extends AbstractEntityRepository implements UserLoaderInter
 	 * The user of the login form and of the remember me cookie, by its username or its email: the
 	 * provider fos_user.user_provider.username_email of FOSUserBundle (#24).
 	 */
-	public function loadUserByUsername($username) {
-		if (preg_match('/^.+\@\S+\.\S+$/', $username)) {
-			$user = $this->findOneBy(array( 'emailCanonical' => CanonicalFieldsUpdater::canonicalize($username) ));
+	public function loadUserByIdentifier($identifier): ?UserInterface {
+		if (preg_match('/^.+\@\S+\.\S+$/', $identifier)) {
+			$user = $this->findOneBy(array( 'emailCanonical' => CanonicalFieldsUpdater::canonicalize($identifier) ));
 			if (null !== $user) {
 				return $user;
 			}
 		}
 
-		return $this->findOneBy(array( 'usernameCanonical' => CanonicalFieldsUpdater::canonicalize($username) ));
+		return $this->findOneBy(array( 'usernameCanonical' => CanonicalFieldsUpdater::canonicalize($identifier) ));
 	}
 
 	/**
-	 * At the login, when the hash is not the one of the encoder of security.yml (the sha512 of
-	 * FOSUserBundle): the new hash holds its salt. Flushed here, no action handles the login form.
+	 * Declared by UserLoaderInterface until Symfony 6.0: Symfony 5.4 calls loadUserByIdentifier().
 	 */
-	public function upgradePassword(UserInterface $user, string $newEncodedPassword): void {
-		$user->setPassword($newEncodedPassword);
+	public function loadUserByUsername($username): ?UserInterface {
+		return $this->loadUserByIdentifier($username);
+	}
+
+	/**
+	 * At the login, when the hash is not the one of the hasher of security.yml (the sha512 of
+	 * FOSUserBundle): the new hash holds its salt. Flushed here, no action handles the login form.
+	 *
+	 * @param User $user
+	 */
+	public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void {
+		$user->setPassword($newHashedPassword);
 		$user->setSalt(null);
 		$this->getEntityManager()->flush();
 	}
