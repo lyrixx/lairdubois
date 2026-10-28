@@ -170,7 +170,7 @@ final class ThreadTest extends WebTestCase
     {
         $client = static::createClientAs(UserFixtures::USER);
         $user = static::findUser(UserFixtures::USER);
-        static::$container->get(MessageUtils::NAME)->composeThread($user, [static::findUser(UserFixtures::ADMIN)], 'Du chêne', 'Je l\'ai acheté à la scierie du lac.');
+        static::getContainer()->get(MessageUtils::NAME)->composeThread($user, [static::findUser(UserFixtures::ADMIN)], 'Du chêne', 'Je l\'ai acheté à la scierie du lac.');
         $lastId = $this->findLastThread()->getId();
 
         $this->submitNewThread($client, UserFixtures::USER2, 'Du chêne', 'Je l\'ai acheté à la scierie du lac.');

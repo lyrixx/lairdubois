@@ -276,7 +276,7 @@ final class RouteSmokeTest extends WebTestCase
             case 'core_user_email_unsubscribe':
                 $user = $em->getRepository(User::class)->findOneBy(['usernameCanonical' => UserFixtures::USER]);
 
-                return ['encryptedEmail' => static::$container->get(CryptoUtils::NAME)->encryptString($user->getEmailCanonical())];
+                return ['encryptedEmail' => static::getContainer()->get(CryptoUtils::NAME)->encryptString($user->getEmailCanonical())];
         }
 
         return [];

@@ -39,11 +39,11 @@ final class TemplateCacheWarmerTest extends WebTestCase
         // The kernel of cache:warmup, whose templates stay in memory: the cache of the other tests
         // stays as it is
         static::bootKernel();
-        $twig = static::$container->get('twig');
+        $twig = static::getContainer()->get('twig');
         $twig->setCache(false);
         // The loop of TemplateCacheWarmer::warmUp(), which does not tell its errors
         $errors = [];
-        foreach (static::$container->get('tests.twig_template_iterator') as $template) {
+        foreach (static::getContainer()->get('tests.twig_template_iterator') as $template) {
             try {
                 $twig->load($template);
             } catch (Error $e) {

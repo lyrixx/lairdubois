@@ -190,7 +190,7 @@ abstract class WebTestCase extends BaseWebTestCase
      */
     protected static function consumeMessage(object $message, string $transportName): void
     {
-        static::$container->get('messenger.default_bus')->dispatch(new Envelope($message, [new ReceivedStamp($transportName)]));
+        static::getContainer()->get('messenger.default_bus')->dispatch(new Envelope($message, [new ReceivedStamp($transportName)]));
     }
 
     /**
@@ -238,7 +238,7 @@ abstract class WebTestCase extends BaseWebTestCase
      */
     protected static function getIndexes(): Index
     {
-        return static::$container->get('fos_elastica.client.default')->getIndex(static::$container->getParameter('elasticsearch_index_prefix').'*');
+        return static::getContainer()->get('fos_elastica.client.default')->getIndex(static::getContainer()->getParameter('elasticsearch_index_prefix').'*');
     }
 
     /**
@@ -255,7 +255,7 @@ abstract class WebTestCase extends BaseWebTestCase
         StaticDriver::setKeepStaticConnections(false);
         try {
             static::bootKernel();
-            $prefix = static::$container->getParameter('elasticsearch_index_prefix');
+            $prefix = static::getContainer()->getParameter('elasticsearch_index_prefix');
             $counts = [];
             foreach (static::getIndexes()->getStats()->getData()['indices'] as $name => $stats) {
                 $indexing = $stats['primaries']['indexing'];
