@@ -19,7 +19,7 @@ final class DkimSignedMessageListener implements EventSubscriberInterface {
 		$this->signer = $signer;
 	}
 
-	public static function getSubscribedEvents() {
+	public static function getSubscribedEvents(): array {
 		return array(
 			// As the one of Symfony 7.3: after the listeners that change the message, before MessageLoggerListener (-255)
 			MessageEvent::class => array( 'onMessage', -128 ),
@@ -28,7 +28,7 @@ final class DkimSignedMessageListener implements EventSubscriberInterface {
 
 	/////
 
-	public function onMessage(MessageEvent $event) {
+	public function onMessage(MessageEvent $event): void {
 		if ($event->isQueued()) {
 			return;
 		}
