@@ -4,7 +4,7 @@ namespace Ladb\CoreBundle\Form\DataTransformer;
 
 use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\Form\Exception\UnexpectedTypeException;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectManager;
 use Ladb\CoreBundle\Entity\Core\Tag;
 
 class TagsToLabelsTransformer implements DataTransformerInterface {

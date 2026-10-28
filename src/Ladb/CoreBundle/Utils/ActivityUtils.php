@@ -2,7 +2,7 @@
 
 namespace Ladb\CoreBundle\Utils;
 
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectManager;
 
 class ActivityUtils {
 

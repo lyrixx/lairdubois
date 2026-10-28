@@ -2,7 +2,7 @@
 
 namespace Ladb\CoreBundle\Utils;
 
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectManager;
 use Ladb\CoreBundle\Entity\Message\Message;
 use Ladb\CoreBundle\Entity\Message\MessageMeta;
 use Ladb\CoreBundle\Entity\Message\Thread;

@@ -449,6 +449,15 @@ parameters:
 
 		-
 			message: '''
+				#^Call to deprecated method execute\(\) of class Doctrine\\DBAL\\Statement\:
+				Statement\:\:execute\(\) is deprecated, use Statement\:\:executeQuery\(\) or executeStatement\(\) instead$#
+			'''
+			identifier: method.deprecated
+			count: 2
+			path: src/Ladb/CoreBundle/Repository/Opencutlist/AccessRepository.php
+
+		-
+			message: '''
 				#^Call to deprecated method fetchAll\(\) of class Doctrine\\DBAL\\Statement\:
 				Use fetchAllNumeric\(\), fetchAllAssociative\(\) or fetchFirstColumn\(\) instead\.$#
 			'''

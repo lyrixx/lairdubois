@@ -2,7 +2,7 @@
 
 namespace Ladb\CoreBundle\Utils;
 
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectManager;
 use Ladb\CoreBundle\Model\TaggableInterface;
 use Ladb\CoreBundle\Entity\Core\TagUsage;
 

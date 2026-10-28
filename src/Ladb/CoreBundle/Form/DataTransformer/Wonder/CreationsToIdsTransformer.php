@@ -5,7 +5,7 @@ namespace Ladb\CoreBundle\Form\DataTransformer\Wonder;
 use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\Form\Exception\TransformationFailedException;
 use Symfony\Component\Form\Exception\UnexpectedTypeException;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectManager;
 use Ladb\CoreBundle\Entity\Wonder\Creation;
 
 class CreationsToIdsTransformer implements DataTransformerInterface {

@@ -2,7 +2,7 @@
 
 namespace Ladb\CoreBundle\Handler;
 
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectManager;
 use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Manager\Core\PictureManager;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;

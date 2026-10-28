@@ -4,7 +4,7 @@ namespace Ladb\CoreBundle\Form\DataTransformer\Input;
 
 use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\Form\Exception\UnexpectedTypeException;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectManager;
 use Ladb\CoreBundle\Entity\Input\Skill;
 
 class SkillsToLabelsTransformer implements DataTransformerInterface {

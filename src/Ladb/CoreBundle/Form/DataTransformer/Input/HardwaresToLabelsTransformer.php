@@ -5,7 +5,7 @@ namespace Ladb\CoreBundle\Form\DataTransformer\Input;
 use Ladb\CoreBundle\Entity\Input\Hardware;
 use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\Form\Exception\UnexpectedTypeException;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectManager;
 
 class HardwaresToLabelsTransformer implements DataTransformerInterface {
 

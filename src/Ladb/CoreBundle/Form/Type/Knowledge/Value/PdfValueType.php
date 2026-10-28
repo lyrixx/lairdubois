@@ -5,7 +5,7 @@ namespace Ladb\CoreBundle\Form\Type\Knowledge\Value;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectManager;
 use Ladb\CoreBundle\Form\DataTransformer\ResourceToIdTransformer;
 
 class PdfValueType extends AbstractValueType {
