@@ -6,7 +6,7 @@ framework:
     translator:      { fallback: "%locale%" }
     secret:          "%secret%"
     router:
-        resource: "%kernel.root_dir%/config/routing.yml"
+        resource: "%kernel.project_dir%/app/config/routing.yml"
         strict_requirements: "%kernel.debug%"
     form:            true
     csrf_protection: true
@@ -20,7 +20,7 @@ framework:
              # The CSS and JS of Vite (vite.config.js, castor app:assets:build): the manifest gives
              # the hashed file of each one, e.g. asset('build/base.css', 'build')
              build:
-                json_manifest_path: "%kernel.root_dir%/../web/build/manifest.json"
+                json_manifest_path: "%kernel.project_dir%/web/build/manifest.json"
                 base_urls:  ["%router.request_context.scheme%://%router.request_context.host%"]
              sitemaps:
                 version:    ""
@@ -28,7 +28,7 @@ framework:
     default_locale:  "%locale%"
     session:
         handler_id: session.handler.pdo
-        save_path: "%kernel.root_dir%/sessions"
+        save_path: "%kernel.project_dir%/app/sessions"
         cookie_lifetime: 0
         cookie_samesite: 'strict'
         # The sessions have no lock (lock_mode below): a request that writes the session back can
@@ -135,13 +135,13 @@ doctrine:
             gedmo_loggable:
                 type: annotation
                 prefix: Gedmo\Loggable\Entity
-                dir: "%kernel.root_dir%/../vendor/gedmo/doctrine-extensions/src/Loggable/Entity"
+                dir: "%kernel.project_dir%/vendor/gedmo/doctrine-extensions/src/Loggable/Entity"
                 alias: GedmoLoggable # this one is optional and will default to the name set for the mapping
                 is_bundle: false
             gedmo_tree:
                 type: annotation
                 prefix: Gedmo\Tree\Entity
-                dir: "%kernel.root_dir%/../vendor/gedmo/doctrine-extensions/src/Tree/Entity"
+                dir: "%kernel.project_dir%/vendor/gedmo/doctrine-extensions/src/Tree/Entity"
                 alias: GedmoTree # this one is optional and will default to the name set for the mapping
                 is_bundle: false
         filters:
@@ -158,6 +158,13 @@ doctrine:
             numeric_functions:
                 RAND: DoctrineExtensions\Query\Mysql\Rand
 
+# DoctrineMigrationsBundle
+doctrine_migrations:
+    # The namespace and the directory of the defaults of dir_name and namespace, deprecated: the
+    # default of dir_name reads kernel.root_dir, removed in Symfony 5.0
+    migrations_paths:
+        'Application\Migrations': "%kernel.project_dir%/app/DoctrineMigrations"
+
 # Swiftmailer Configuration
 swiftmailer:
     transport: "%mailer_transport%"
@@ -166,7 +173,7 @@ swiftmailer:
     password:  "%mailer_password%"
     spool:
         type: file
-        path: "%kernel.root_dir%/spool"
+        path: "%kernel.project_dir%/app/spool"
 
 # StofDoctrineExtensions
 stof_doctrine_extensions:
@@ -175,7 +182,7 @@ stof_doctrine_extensions:
     # Only used if you activated the Uploadable extension
     uploadable:
         # Default file path: This is one of the three ways you can configure the path for the Uploadable extension
-        default_file_path:       "%kernel.root_dir%/../web/uploads"
+        default_file_path:       "%kernel.project_dir%/web/uploads"
 
         # Mime type guesser class: Optional. By default, we provide an adapter for the one present in the HttpFoundation component of Symfony
         mime_type_guesser_class: Stof\DoctrineExtensionsBundle\Uploadable\MimeTypeGuesserAdapter
@@ -197,13 +204,13 @@ liip_imagine:
     resolvers:
         default:
             web_path:
-                web_root: "%kernel.root_dir%/../web"
+                web_root: "%kernel.project_dir%/web"
                 cache_prefix: media/cache
 
     loaders:
         default:
             filesystem:
-                data_root: "%kernel.root_dir%/../uploads"
+                data_root: "%kernel.project_dir%/uploads"
 
     driver:               imagick
     cache:                default
