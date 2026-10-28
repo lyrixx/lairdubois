@@ -1,15 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '''
-				#^Call to deprecated method getRootDir\(\) of class AppKernel\:
-				since Symfony 4\.2, use getProjectDir\(\) instead$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: app/AppKernel.php
-
-		-
 			message: '#^Call to deprecated function curl_close\(\)\.$#'
 			identifier: function.deprecated
 			count: 1
