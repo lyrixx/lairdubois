@@ -18,8 +18,8 @@ use Ladb\CoreBundle\Model\ViewableInterface;
 /**
  * @ORM\Table("tbl_core_tip")
  * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Core\TipRepository")
- * @LadbAssert\BodyBlocks()
  */
+#[LadbAssert\BodyBlocks]
 class Tip extends AbstractPublication implements TitledInterface, HtmlBodiedInterface, IndexableInterface, ViewableInterface {
 
 	use HtmlBodiedTrait;
@@ -40,9 +40,9 @@ class Tip extends AbstractPublication implements TitledInterface, HtmlBodiedInte
 
 	/**
 	 * @ORM\Column(type="string", length=255, nullable=false)
-	 * @Assert\NotBlank()
-	 * @Assert\Url()
 	 */
+	#[Assert\NotBlank]
+	#[Assert\Url]
 	private $url;
 
 	/**

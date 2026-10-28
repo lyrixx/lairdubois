@@ -21,13 +21,13 @@ use Symfony\Component\Security\Core\User\UserInterface;
  * @ORM\Table("tbl_core_user")
  * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Core\UserRepository")
  * @ORM\HasLifecycleCallbacks
- * @UniqueEntity("email")
- * @LadbAssert\ValidUserUsername()
- * @LadbAssert\ValidUserDisplayname()
- * @LadbAssert\ValidUserEmail()
- * @UniqueEntity(fields="usernameCanonical", errorPath="username", message="fos_user.username.already_used", groups={"Registration", "Profile"})
- * @UniqueEntity(fields="emailCanonical", errorPath="email", message="fos_user.email.already_used", groups={"Registration", "Profile"})
  */
+#[UniqueEntity('email')]
+#[LadbAssert\ValidUserUsername]
+#[LadbAssert\ValidUserDisplayname]
+#[LadbAssert\ValidUserEmail]
+#[UniqueEntity(fields: 'usernameCanonical', errorPath: 'username', message: 'fos_user.username.already_used', groups: ['Registration', 'Profile'])]
+#[UniqueEntity(fields: 'emailCanonical', errorPath: 'email', message: 'fos_user.email.already_used', groups: ['Registration', 'Profile'])]
 class User implements UserInterface, LegacyPasswordAuthenticatedUserInterface, EquatableInterface, \Serializable, IndexableInterface, SitemapableInterface, LocalisableInterface {
 
 	use IndexableTrait, SitemapableTrait, LocalisableTrait;
@@ -69,8 +69,8 @@ class User implements UserInterface, LegacyPasswordAuthenticatedUserInterface, E
 
 	/**
 	 * @ORM\Column(type="string", length=180)
-	 * @Assert\Length(min=3, max=25)
 	 */
+	#[Assert\Length(min: 3, max: 25)]
 	protected $username;
 
 	/**
@@ -80,9 +80,9 @@ class User implements UserInterface, LegacyPasswordAuthenticatedUserInterface, E
 
 	/**
 	 * @ORM\Column(type="string", length=180)
-	 * @Assert\NotBlank(groups={"settings"})
-	 * @Assert\Email(mode="strict", groups={"settings"})
 	 */
+	#[Assert\NotBlank(groups: ['settings'])]
+	#[Assert\Email(mode: 'strict', groups: ['settings'])]
 	protected $email;
 
 	/**
@@ -133,10 +133,10 @@ class User implements UserInterface, LegacyPasswordAuthenticatedUserInterface, E
 
 	/**
 	 * @ORM\Column(type="string", length=25, unique=true)
-	 * @Assert\Length(min=3, max=25, groups={"settings"})
-	 * @Assert\NotBlank(groups={"settings"})
-	 * @Assert\Regex("/^[ a-zA-Z0-9ÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿÑñ'°’’-]+$/")
 	 */
+	#[Assert\Length(min: 3, max: 25, groups: ['settings'])]
+	#[Assert\NotBlank(groups: ['settings'])]
+	#[Assert\Regex("/^[ a-zA-Z0-9ÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿÑñ'°’’-]+\$/")]
 	private $displayname;
 
 	/**
@@ -146,16 +146,16 @@ class User implements UserInterface, LegacyPasswordAuthenticatedUserInterface, E
 
 	/**
 	 * @ORM\Column(type="string", length=100, nullable=true)
-	 * @Assert\Length(min=3, max=100, groups={"settings"})
-	 * @Assert\Regex("/^[A-Za-z][ a-zA-Z0-9ÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿÑñ'°’’-]+$/")
 	 */
+	#[Assert\Length(min: 3, max: 100, groups: ['settings'])]
+	#[Assert\Regex("/^[A-Za-z][ a-zA-Z0-9ÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿÑñ'°’’-]+\$/")]
 	private $fullname;
 
 	/**
 	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist", "remove"})
 	 * @ORM\JoinColumn(name="avatar_id", nullable=true)
-	 * @Assert\Type(type="Ladb\CoreBundle\Entity\Core\Picture")
 	 */
+	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\Picture')]
 	private $avatar;
 
 	/**
@@ -304,10 +304,9 @@ class User implements UserInterface, LegacyPasswordAuthenticatedUserInterface, E
 	/**
 	 * The constraints of FOSUserBundle (#24), on the getter: validated after those of the property, as
 	 * when they were on its parent class.
-	 *
-	 * @Assert\NotBlank(message="fos_user.username.blank", groups={"Registration", "Profile"})
-	 * @Assert\Length(min=2, minMessage="fos_user.username.short", max=180, maxMessage="fos_user.username.long", groups={"Registration", "Profile"})
 	 */
+	#[Assert\NotBlank(message: 'fos_user.username.blank', groups: ['Registration', 'Profile'])]
+	#[Assert\Length(min: 2, minMessage: 'fos_user.username.short', max: 180, maxMessage: 'fos_user.username.long', groups: ['Registration', 'Profile'])]
 	public function getUsername(): ?string {
 		return $this->username;
 	}
@@ -337,11 +336,10 @@ class User implements UserInterface, LegacyPasswordAuthenticatedUserInterface, E
 
 	/**
 	 * The constraints of FOSUserBundle (#24), on the getter as those of the username.
-	 *
-	 * @Assert\NotBlank(message="fos_user.email.blank", groups={"Registration", "Profile"})
-	 * @Assert\Length(min=2, minMessage="fos_user.email.short", max=180, maxMessage="fos_user.email.long", groups={"Registration", "Profile"})
-	 * @Assert\Email(message="fos_user.email.invalid", groups={"Registration", "Profile"})
 	 */
+	#[Assert\NotBlank(message: 'fos_user.email.blank', groups: ['Registration', 'Profile'])]
+	#[Assert\Length(min: 2, minMessage: 'fos_user.email.short', max: 180, maxMessage: 'fos_user.email.long', groups: ['Registration', 'Profile'])]
+	#[Assert\Email(message: 'fos_user.email.invalid', groups: ['Registration', 'Profile'])]
 	public function getEmail() {
 		return $this->email;
 	}
@@ -400,10 +398,9 @@ class User implements UserInterface, LegacyPasswordAuthenticatedUserInterface, E
 
 	/**
 	 * The constraints of FOSUserBundle (#24), on the getter as those of the username.
-	 *
-	 * @Assert\NotBlank(message="fos_user.password.blank", groups={"Registration", "ResetPassword", "ChangePassword"})
-	 * @Assert\Length(min=2, minMessage="fos_user.password.short", max=4096, groups={"Registration", "Profile", "ResetPassword", "ChangePassword"})
 	 */
+	#[Assert\NotBlank(message: 'fos_user.password.blank', groups: ['Registration', 'ResetPassword', 'ChangePassword'])]
+	#[Assert\Length(min: 2, minMessage: 'fos_user.password.short', max: 4096, groups: ['Registration', 'Profile', 'ResetPassword', 'ChangePassword'])]
 	public function getPlainPassword() {
 		return $this->plainPassword;
 	}

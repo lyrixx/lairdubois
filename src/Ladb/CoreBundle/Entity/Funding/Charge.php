@@ -33,8 +33,8 @@ class Charge {
 
 	/**
 	 * @ORM\Column(type="string")
-	 * @Assert\NotBlank()
 	 */
+	#[Assert\NotBlank]
 	private $label = '';
 
 	/**

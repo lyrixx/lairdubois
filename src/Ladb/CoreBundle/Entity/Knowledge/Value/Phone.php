@@ -10,8 +10,8 @@ use Ladb\CoreBundle\Validator\Constraints as LadbAssert;
 /**
  * @ORM\Table("tbl_knowledge2_value_phone")
  * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Knowledge\Value\PhoneRepository")
- * @ladbAssert\ValidPhoneValue()
  */
+#[LadbAssert\ValidPhoneValue]
 class Phone extends BaseValue {
 
 	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Value\Phone';
@@ -26,15 +26,15 @@ class Phone extends BaseValue {
 
 	/**
 	 * @ORM\Column(type="string", length=20)
-	 * @Assert\NotBlank(groups={"mandatory"})
-	 * @Assert\Length(max=20)
 	 */
+	#[Assert\NotBlank(groups: ['mandatory'])]
+	#[Assert\Length(max: 20)]
 	protected $rawPhoneNumber;
 
 	/**
 	 * @ORM\Column(type="string", length=2)
-	 * @Assert\NotBlank
 	 */
+	#[Assert\NotBlank]
 	protected $country = 'FR';
 
 	/////

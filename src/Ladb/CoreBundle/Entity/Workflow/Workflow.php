@@ -51,9 +51,9 @@ class Workflow extends AbstractAuthoredPublication implements IndexableInterface
 
 	/**
 	 * @ORM\Column(type="string", length=100)
-	 * @Assert\NotBlank()
-	 * @Assert\Length(min=4, max=100)
 	 */
+	#[Assert\NotBlank]
+	#[Assert\Length(min: 4, max: 100)]
 	private $title;
 
 	/**
@@ -70,10 +70,10 @@ class Workflow extends AbstractAuthoredPublication implements IndexableInterface
 
 	/**
 	 * @ORM\Column(type="text", nullable=true)
-	 * @Assert\Length(max=4000)
-	 * @Assert\Length(min=5, groups={"public"})
-	 * @Assert\NotBlank(groups={"public"})
 	 */
+	#[Assert\Length(max: 4000)]
+	#[Assert\Length(min: 5, groups: ['public'])]
+	#[Assert\NotBlank(groups: ['public'])]
 	private $body;
 
 	/**
@@ -131,8 +131,8 @@ class Workflow extends AbstractAuthoredPublication implements IndexableInterface
 	/**
 	 * @ORM\OneToOne(targetEntity="Ladb\CoreBundle\Entity\Core\License", cascade={"all"})
 	 * @ORM\JoinColumn(nullable=true, name="license_id")
-	 * @Assert\Type(type="Ladb\CoreBundle\Entity\Core\License")
 	 */
+	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\License')]
 	private $license;
 
 	/**
@@ -212,8 +212,8 @@ class Workflow extends AbstractAuthoredPublication implements IndexableInterface
 	/**
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Wonder\Plan", inversedBy="workflows", cascade={"persist"})
 	 * @ORM\JoinTable(name="tbl_workflow_plan")
-	 * @Assert\Count(min=0, max=4)
 	 */
+	#[Assert\Count(min: 0, max: 4)]
 	private $plans;
 
 	/**

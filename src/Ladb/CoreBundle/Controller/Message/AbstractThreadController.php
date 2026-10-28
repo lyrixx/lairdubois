@@ -10,6 +10,7 @@ use Ladb\CoreBundle\Entity\Message\Message;
 use Ladb\CoreBundle\Entity\Message\Thread;
 use Ladb\CoreBundle\Utils\MailerUtils;
 use Ladb\CoreBundle\Utils\WebpushNotificationUtils;
+use Symfony\Contracts\Service\Attribute\Required;
 
 abstract class AbstractThreadController extends AbstractController {
 
@@ -18,23 +19,17 @@ abstract class AbstractThreadController extends AbstractController {
 	protected $om;
 	private $webpushNotificationUtils;
 
-	/**
-	 * @required
-	 */
+	#[Required]
 	public function setMailerUtils(MailerUtils $mailerUtils) {
 		$this->mailerUtils = $mailerUtils;
 	}
 
-	/**
-	 * @required
-	 */
+	#[Required]
 	public function setOm(EntityManagerInterface $om) {
 		$this->om = $om;
 	}
 
-	/**
-	 * @required
-	 */
+	#[Required]
 	public function setWebpushNotificationUtils(WebpushNotificationUtils $webpushNotificationUtils) {
 		$this->webpushNotificationUtils = $webpushNotificationUtils;
 	}

@@ -16,8 +16,8 @@ use Ladb\CoreBundle\Model\LocalisableInterface;
 /**
  * @ORM\Table("tbl_wonder_workshop")
  * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Wonder\WorkshopRepository")
- * @LadbAssert\BodyBlocks()
  */
+#[LadbAssert\BodyBlocks]
 class Workshop extends AbstractWonder implements BlockBodiedInterface, LocalisableInterface, FeedbackableInterface {
 
 	use BlockBodiedTrait, LocalisableTrait, FeedbackableTrait;
@@ -49,8 +49,8 @@ class Workshop extends AbstractWonder implements BlockBodiedInterface, Localisab
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
 	 * @ORM\JoinTable(name="tbl_wonder_workshop_picture")
 	 * @ORM\OrderBy({"sortIndex" = "ASC"})
-	 * @Assert\Count(min=1, max=5)
 	 */
+	#[Assert\Count(min: 1, max: 5)]
 	protected $pictures;
 
 	/**
@@ -62,8 +62,8 @@ class Workshop extends AbstractWonder implements BlockBodiedInterface, Localisab
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Block\AbstractBlock", cascade={"persist", "remove"})
 	 * @ORM\JoinTable(name="tbl_wonder_workshop_body_block", inverseJoinColumns={@ORM\JoinColumn(name="block_id", referencedColumnName="id", unique=true, onDelete="cascade")})
 	 * @ORM\OrderBy({"sortIndex" = "ASC"})
-	 * @Assert\Count(min=1)
 	 */
+	#[Assert\Count(min: 1)]
 	private $bodyBlocks;
 
 	/**
@@ -102,8 +102,8 @@ class Workshop extends AbstractWonder implements BlockBodiedInterface, Localisab
 	/**
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Wonder\Plan", inversedBy="workshops", cascade={"persist"})
 	 * @ORM\JoinTable(name="tbl_wonder_workshop_plan")
-	 * @Assert\Count(min=0, max=4)
 	 */
+	#[Assert\Count(min: 0, max: 4)]
 	private $plans;
 
 	/**
@@ -114,8 +114,8 @@ class Workshop extends AbstractWonder implements BlockBodiedInterface, Localisab
 	/**
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Howto\Howto", inversedBy="workshops", cascade={"persist"})
 	 * @ORM\JoinTable(name="tbl_wonder_workshop_howto")
-	 * @Assert\Count(min=0, max=4)
 	 */
+	#[Assert\Count(min: 0, max: 4)]
 	private $howtos;
 
 	/**
@@ -126,8 +126,8 @@ class Workshop extends AbstractWonder implements BlockBodiedInterface, Localisab
 	/**
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Workflow\Workflow", inversedBy="workshops", cascade={"persist"})
 	 * @ORM\JoinTable(name="tbl_wonder_workshop_workflow")
-	 * @Assert\Count(min=0, max=4)
 	 */
+	#[Assert\Count(min: 0, max: 4)]
 	private $workflows;
 
 	/////

@@ -10,8 +10,8 @@ use Ladb\CoreBundle\Validator\Constraints as LadbAssert;
 /**
  * @ORM\Table("tbl_knowledge2_value_software_identity")
  * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Knowledge\Value\SoftwareIdentityRepository")
- * @ladbAssert\ValidSoftwareIdentityValue()
  */
+#[LadbAssert\ValidSoftwareIdentityValue]
 class SoftwareIdentity extends BaseValue {
 
 	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Value\SoftwareIdentity';
@@ -26,10 +26,10 @@ class SoftwareIdentity extends BaseValue {
 
 	/**
 	 * @ORM\Column(type="string", length=100)
-	 * @Assert\NotBlank(groups={"mandatory"})
-	 * @Assert\Length(max=100)
-	 * @Assert\Regex("/^[ a-zA-Z0-9ÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿÑñ\-.'’’&]+$/")
 	 */
+	#[Assert\NotBlank(groups: ['mandatory'])]
+	#[Assert\Length(max: 100)]
+	#[Assert\Regex("/^[ a-zA-Z0-9ÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿÑñ\\-.'’’&]+\$/")]
 	private $name;
 
 	/**
@@ -39,9 +39,9 @@ class SoftwareIdentity extends BaseValue {
 
 	/**
 	 * @ORM\Column(type="string", length=100, nullable=true, name="host_software_name")
-	 * @Assert\Length(max=100)
-	 * @Assert\Regex("/^[ a-zA-Z0-9ÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿÑñ\-.'’’&]+$/")
 	 */
+	#[Assert\Length(max: 100)]
+	#[Assert\Regex("/^[ a-zA-Z0-9ÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿÑñ\\-.'’’&]+\$/")]
 	private $hostSoftwareName;
 
 	/////

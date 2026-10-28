@@ -71,9 +71,9 @@ class Feedback implements TypableInterface, BasicTimestampableInterface, Authore
 
 	/**
 	 * @ORM\Column(type="string", length=100, nullable=false)
-	 * @Assert\NotBlank()
-	 * @Assert\Length(min=2, max=100)
 	 */
+	#[Assert\NotBlank]
+	#[Assert\Length(min: 2, max: 100)]
 	protected $title;
 
 	/**
@@ -90,8 +90,8 @@ class Feedback implements TypableInterface, BasicTimestampableInterface, Authore
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Block\AbstractBlock", cascade={"persist", "remove"})
 	 * @ORM\JoinTable(name="tbl_core_feedback_body_block", inverseJoinColumns={@ORM\JoinColumn(name="block_id", referencedColumnName="id", unique=true, onDelete="cascade")})
 	 * @ORM\OrderBy({"sortIndex" = "ASC"})
-	 * @Assert\Count(min=1)
 	 */
+	#[Assert\Count(min: 1)]
 	private $bodyBlocks;
 
 	/**

@@ -93,8 +93,8 @@ class School extends AbstractKnowledge implements LocalisableInterface {
 	/**
 	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
 	 * @ORM\JoinColumn(name="photo_id", nullable=true)
-	 * @Assert\Type(type="Ladb\CoreBundle\Entity\Core\Picture")
 	 */
+	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\Picture')]
 	private $photo;
 
 	/**

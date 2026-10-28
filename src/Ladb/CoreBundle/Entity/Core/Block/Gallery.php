@@ -19,8 +19,8 @@ class Gallery extends AbstractBlock implements MultiPicturedInterface {
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"}, fetch="EAGER")
 	 * @ORM\JoinTable(name="tbl_core_block_gallery_picture")
 	 * @ORM\OrderBy({"sortIndex" = "ASC"})
-	 * @Assert\Count(min=1, max=20)
 	 */
+	#[Assert\Count(min: 1, max: 20)]
 	private $pictures;
 
 	/////

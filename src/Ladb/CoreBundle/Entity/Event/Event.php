@@ -47,9 +47,9 @@ use Ladb\CoreBundle\Model\ExplorableInterface;
 /**
  * @ORM\Table("tbl_event")
  * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Event\EventRepository")
- * @LadbAssert\BodyBlocks()
- * @ladbAssert\ValidEvent()
  */
+#[LadbAssert\BodyBlocks]
+#[LadbAssert\ValidEvent]
 class Event extends AbstractDraftableAuthoredPublication implements TitledInterface, SluggedInterface, PicturedInterface, MultiPicturedInterface, BlockBodiedInterface, IndexableInterface, SitemapableInterface, TaggableInterface, ViewableInterface, ScrapableInterface, LikableInterface, WatchableInterface, CommentableInterface, CollectionnableInterface, ReportableInterface, ExplorableInterface, LocalisableInterface, JoinableInterface, FeedbackableInterface {
 
 	use TitledTrait, SluggedTrait, PicturedTrait, MultiPicturedTrait, BlockBodiedTrait;
@@ -68,9 +68,9 @@ class Event extends AbstractDraftableAuthoredPublication implements TitledInterf
 
 	/**
 	 * @ORM\Column(type="string", length=100)
-	 * @Assert\NotBlank()
-	 * @Assert\Length(min=4, max=100)
 	 */
+	#[Assert\NotBlank]
+	#[Assert\Length(min: 4, max: 100)]
 	private $title;
 
 	/**
@@ -93,8 +93,8 @@ class Event extends AbstractDraftableAuthoredPublication implements TitledInterf
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Block\AbstractBlock", cascade={"persist", "remove"})
 	 * @ORM\JoinTable(name="tbl_event_body_block", inverseJoinColumns={@ORM\JoinColumn(name="block_id", referencedColumnName="id", unique=true, onDelete="cascade")})
 	 * @ORM\OrderBy({"sortIndex" = "ASC"})
-	 * @Assert\Count(min=1)
 	 */
+	#[Assert\Count(min: 1)]
 	private $bodyBlocks;
 
 	/**
@@ -117,8 +117,8 @@ class Event extends AbstractDraftableAuthoredPublication implements TitledInterf
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
 	 * @ORM\JoinTable(name="tbl_event_picture")
 	 * @ORM\OrderBy({"sortIndex" = "ASC"})
-	 * @Assert\Count(min=1, max=5)
 	 */
+	#[Assert\Count(min: 1, max: 5)]
 	private $pictures;
 
 	/**
@@ -143,15 +143,15 @@ class Event extends AbstractDraftableAuthoredPublication implements TitledInterf
 
 	/**
 	 * @ORM\Column(name="start_date", type="date")
-	 * @Assert\Type("\DateTimeInterface")
-	 * @Assert\NotBlank()
 	 */
+	#[Assert\Type('\DateTimeInterface')]
+	#[Assert\NotBlank]
 	private $startDate;
 
 	/**
 	 * @ORM\Column(name="start_time", type="time", nullable=true)
-	 * @Assert\Type("\DateTimeInterface")
 	 */
+	#[Assert\Type('\DateTimeInterface')]
 	private $startTime;
 
 	/**
@@ -161,20 +161,20 @@ class Event extends AbstractDraftableAuthoredPublication implements TitledInterf
 
 	/**
 	 * @ORM\Column(name="end_date", type="date", nullable=true)
-	 * @Assert\Type("\DateTimeInterface")
 	 */
+	#[Assert\Type('\DateTimeInterface')]
 	private $endDate;
 
 	/**
 	 * @ORM\Column(name="end_time", type="time", nullable=true)
-	 * @Assert\Type("\DateTimeInterface")
 	 */
+	#[Assert\Type('\DateTimeInterface')]
 	private $endTime;
 
 	/**
 	 * @ORM\Column(type="string", length=255, nullable=true)
-	 * @Assert\Url()
 	 */
+	#[Assert\Url]
 	private $url;
 
 	/**

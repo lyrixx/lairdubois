@@ -14,14 +14,13 @@ use Ladb\CoreBundle\Model\IndexableInterface;
 use Ladb\CoreBundle\Model\MultiPicturedInterface;
 use Ladb\CoreBundle\Model\PicturedInterface;
 use Ladb\CoreBundle\Utils\SearchUtils;
+use Symfony\Contracts\Service\Attribute\Required;
 
 abstract class AbstractAuthoredPublicationManager extends AbstractPublicationManager {
 
 	protected $searchUtils;
 
-	/**
-	 * @required
-	 */
+	#[Required]
 	public function setSearchUtils(SearchUtils $searchUtils) {
 		$this->searchUtils = $searchUtils;
 	}

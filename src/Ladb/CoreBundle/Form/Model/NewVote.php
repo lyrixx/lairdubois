@@ -7,11 +7,9 @@ use Ladb\CoreBundle\Validator\Constraints as LadbAssert;
 
 class NewVote {
 
-	/**
-	 * @Assert\NotBlank(groups={"down"})
-	 * @Assert\Length(min=10, max=10000, groups={"down"})
-	 * @LadbAssert\NoMediaLink()
-	 */
+	#[Assert\NotBlank(groups: ['down'])]
+	#[Assert\Length(min: 10, max: 10000, groups: ['down'])]
+	#[LadbAssert\NoMediaLink]
 	private $body;
 
 	// Body /////

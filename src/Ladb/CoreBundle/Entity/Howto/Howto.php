@@ -64,9 +64,9 @@ class Howto extends AbstractDraftableAuthoredPublication implements TitledInterf
 
 	/**
 	 * @ORM\Column(type="string", length=100)
-	 * @Assert\NotBlank()
-	 * @Assert\Length(min=4, max=100)
 	 */
+	#[Assert\NotBlank]
+	#[Assert\Length(min: 4, max: 100)]
 	private $title;
 
 	/**
@@ -82,9 +82,9 @@ class Howto extends AbstractDraftableAuthoredPublication implements TitledInterf
 
 	/**
 	 * @ORM\Column(type="text", nullable=false)
-	 * @Assert\NotBlank()
-	 * @Assert\Length(min=2, max=2000)
 	 */
+	#[Assert\NotBlank]
+	#[Assert\Length(min: 2, max: 2000)]
 	private $body;
 
 	/**
@@ -100,9 +100,9 @@ class Howto extends AbstractDraftableAuthoredPublication implements TitledInterf
 	/**
 	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
 	 * @ORM\JoinColumn(name="main_picture_id", nullable=false)
-	 * @Assert\Type(type="Ladb\CoreBundle\Entity\Core\Picture")
-	 * @Assert\NotBlank()
 	 */
+	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\Picture')]
+	#[Assert\NotBlank]
 	private $mainPicture;
 
 	/**
@@ -135,8 +135,8 @@ class Howto extends AbstractDraftableAuthoredPublication implements TitledInterf
 	/**
 	 * @ORM\OneToOne(targetEntity="Ladb\CoreBundle\Entity\Core\License", cascade={"persist", "remove"})
 	 * @ORM\JoinColumn(nullable=true, name="license_id")
-	 * @Assert\Type(type="Ladb\CoreBundle\Entity\Core\License")
 	 */
+	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\License')]
 	private $license;
 
 	/**
@@ -207,8 +207,8 @@ class Howto extends AbstractDraftableAuthoredPublication implements TitledInterf
 	/**
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Qa\Question", inversedBy="howtos", cascade={"persist"})
 	 * @ORM\JoinTable(name="tbl_wonder_howto_question")
-	 * @Assert\Count(min=0, max=4)
 	 */
+	#[Assert\Count(min: 0, max: 4)]
 	private $questions;
 
 	/**
@@ -239,8 +239,8 @@ class Howto extends AbstractDraftableAuthoredPublication implements TitledInterf
 	/**
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Wonder\Plan", inversedBy="howtos", cascade={"persist"})
 	 * @ORM\JoinTable(name="tbl_wonder_howto_plan")
-	 * @Assert\Count(min=0, max=4)
 	 */
+	#[Assert\Count(min: 0, max: 4)]
 	private $plans;
 
 	/**
@@ -251,8 +251,8 @@ class Howto extends AbstractDraftableAuthoredPublication implements TitledInterf
 	/**
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Workflow\Workflow", inversedBy="howtos", cascade={"persist"})
 	 * @ORM\JoinTable(name="tbl_howto_workflow")
-	 * @Assert\Count(min=0, max=4)
 	 */
+	#[Assert\Count(min: 0, max: 4)]
 	private $workflows;
 
 	/**
@@ -263,8 +263,8 @@ class Howto extends AbstractDraftableAuthoredPublication implements TitledInterf
 	/**
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Provider", inversedBy="howtos", cascade={"persist"})
 	 * @ORM\JoinTable(name="tbl_howto_provider")
-	 * @Assert\Count(min=0, max=10)
 	 */
+	#[Assert\Count(min: 0, max: 10)]
 	private $providers;
 
 	/**
@@ -275,8 +275,8 @@ class Howto extends AbstractDraftableAuthoredPublication implements TitledInterf
 	/**
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\School", inversedBy="howtos", cascade={"persist"})
 	 * @ORM\JoinTable(name="tbl_howto_school")
-	 * @Assert\Count(min=0, max=4)
 	 */
+	#[Assert\Count(min: 0, max: 4)]
 	private $schools;
 
 	/////

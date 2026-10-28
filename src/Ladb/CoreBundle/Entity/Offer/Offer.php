@@ -47,9 +47,9 @@ use Ladb\CoreBundle\Model\ExplorableInterface;
 /**
  * @ORM\Table("tbl_offer")
  * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Offer\OfferRepository")
- * @LadbAssert\BodyBlocks()
- * @LadbAssert\ValidOffer()
  */
+#[LadbAssert\BodyBlocks]
+#[LadbAssert\ValidOffer]
 class Offer extends AbstractDraftableAuthoredPublication implements TitledInterface, SluggedInterface, PicturedInterface, MultiPicturedInterface, BlockBodiedInterface, RepublishableInterface, IndexableInterface, SitemapableInterface, TaggableInterface, ViewableInterface, ScrapableInterface, LikableInterface, WatchableInterface, CommentableInterface, CollectionnableInterface, ReportableInterface, ExplorableInterface, LocalisableInterface, LocalisableExtendedInterface {
 
 	use TitledTrait, SluggedTrait, PicturedTrait, MultiPicturedTrait, BlockBodiedTrait;
@@ -76,9 +76,9 @@ class Offer extends AbstractDraftableAuthoredPublication implements TitledInterf
 
 	/**
 	 * @ORM\Column(type="string", length=100)
-	 * @Assert\NotBlank()
-	 * @Assert\Length(min=4, max=100)
 	 */
+	#[Assert\NotBlank]
+	#[Assert\Length(min: 4, max: 100)]
 	private $title;
 
 	/**
@@ -101,8 +101,8 @@ class Offer extends AbstractDraftableAuthoredPublication implements TitledInterf
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Block\AbstractBlock", cascade={"persist", "remove"})
 	 * @ORM\JoinTable(name="tbl_offer_body_block", inverseJoinColumns={@ORM\JoinColumn(name="block_id", referencedColumnName="id", unique=true, onDelete="cascade")})
 	 * @ORM\OrderBy({"sortIndex" = "ASC"})
-	 * @Assert\Count(min=1)
 	 */
+	#[Assert\Count(min: 1)]
 	private $bodyBlocks;
 
 	/**
@@ -125,23 +125,23 @@ class Offer extends AbstractDraftableAuthoredPublication implements TitledInterf
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
 	 * @ORM\JoinTable(name="tbl_offer_picture")
 	 * @ORM\OrderBy({"sortIndex" = "ASC"})
-	 * @Assert\Count(min=1, max=5, groups={"offer"})
-	 * @Assert\Count(min=0, max=5, groups={"request"})
 	 */
+	#[Assert\Count(min: 1, max: 5, groups: ['offer'])]
+	#[Assert\Count(min: 0, max: 5, groups: ['request'])]
 	protected $pictures;
 
 	/**
 	 * @ORM\Column(type="smallint")
-	 * @Assert\NotBlank(message="Vous devez définir un type.")
-	 * @Assert\Choice(callback="getKinds", strict=true, message="Ce type est invalide.")
 	 */
+	#[Assert\NotBlank(message: 'Vous devez définir un type.')]
+	#[Assert\Choice(callback: 'getKinds', strict: true, message: 'Ce type est invalide.')]
 	private $kind = self::KIND_NONE;
 
 	/**
 	 * @ORM\Column(type="smallint")
-	 * @Assert\NotBlank(message="Vous devez définir une catégorie.")
-	 * @Assert\Choice(callback="getCategories", strict=true, message="Cette catégorie est invalide.")
 	 */
+	#[Assert\NotBlank(message: 'Vous devez définir une catégorie.')]
+	#[Assert\Choice(callback: 'getCategories', strict: true, message: 'Cette catégorie est invalide.')]
 	private $category = self::CATEGORY_NONE;
 
 	/**
@@ -151,8 +151,8 @@ class Offer extends AbstractDraftableAuthoredPublication implements TitledInterf
 
 	/**
 	 * @ORM\Column(type="integer", name="raw_price")
-	 * @Assert\GreaterThanOrEqual(0)
 	 */
+	#[Assert\GreaterThanOrEqual(0)]
 	protected $rawPrice = 0;
 
 	/**
@@ -162,14 +162,14 @@ class Offer extends AbstractDraftableAuthoredPublication implements TitledInterf
 
 	/**
 	 * @ORM\Column(type="string", length=10, name="price_suffix", nullable=true)
-	 * @Assert\Length(max=10)
 	 */
+	#[Assert\Length(max: 10)]
 	protected $priceSuffix;
 
 	/**
 	 * @ORM\Column(type="string", length=100, nullable=true)
-	 * @Assert\Length(max=100)
 	 */
+	#[Assert\Length(max: 100)]
 	private $location;
 
 	/**

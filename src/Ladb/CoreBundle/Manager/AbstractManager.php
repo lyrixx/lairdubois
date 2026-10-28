@@ -3,14 +3,13 @@
 namespace Ladb\CoreBundle\Manager;
 
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Contracts\Service\Attribute\Required;
 
 abstract class AbstractManager {
 
 	protected $doctrine;
 
-	/**
-	 * @required
-	 */
+	#[Required]
 	public function setDoctrine(ManagerRegistry $doctrine) {
 		$this->doctrine = $doctrine;
 	}

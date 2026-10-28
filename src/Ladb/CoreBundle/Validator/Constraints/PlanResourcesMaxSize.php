@@ -7,6 +7,7 @@ use Symfony\Component\Validator\Constraint;
 /**
  * @Annotation
  */
+#[\Attribute(\Attribute::TARGET_CLASS | \Attribute::IS_REPEATABLE)]
 class PlanResourcesMaxSize extends Constraint {
 
 	public $maxSize = 62914560;	// 60 Mo

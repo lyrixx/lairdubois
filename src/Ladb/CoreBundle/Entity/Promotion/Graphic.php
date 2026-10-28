@@ -40,8 +40,8 @@ use Ladb\CoreBundle\Model\ScrapableInterface;
 /**
  * @ORM\Table("tbl_promotion_graphic")
  * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Promotion\GraphicRepository")
- * @LadbAssert\BodyBlocks()
  */
+#[LadbAssert\BodyBlocks]
 class Graphic extends AbstractDraftableAuthoredPublication implements TitledInterface, SluggedInterface, PicturedInterface, HtmlBodiedInterface, IndexableInterface, SitemapableInterface, TaggableInterface, ViewableInterface, ScrapableInterface, LikableInterface, WatchableInterface, CommentableInterface, CollectionnableInterface, ReportableInterface, ExplorableInterface {
 
 	use TitledTrait, SluggedTrait, PicturedTrait, HtmlBodiedTrait, LicensedTrait;
@@ -54,9 +54,9 @@ class Graphic extends AbstractDraftableAuthoredPublication implements TitledInte
 
 	/**
 	 * @ORM\Column(type="string", length=100)
-	 * @Assert\NotBlank()
-	 * @Assert\Length(min=4, max=100)
 	 */
+	#[Assert\NotBlank]
+	#[Assert\Length(min: 4, max: 100)]
 	private $title;
 
 	/**
@@ -68,8 +68,8 @@ class Graphic extends AbstractDraftableAuthoredPublication implements TitledInte
 	/**
 	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
 	 * @ORM\JoinColumn(nullable=true, name="main_picture_id")
-	 * @Assert\Type(type="Ladb\CoreBundle\Entity\Core\Picture")
 	 */
+	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\Picture')]
 	private $mainPicture;
 
 	/**
@@ -91,16 +91,16 @@ class Graphic extends AbstractDraftableAuthoredPublication implements TitledInte
 	/**
 	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Resource", cascade={"persist"})
 	 * @ORM\JoinColumn(nullable=false, name="resource_id")
-	 * @Assert\Type(type="Ladb\CoreBundle\Entity\Core\Resource")
-	 * @Assert\NotNull()
 	 */
+	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\Resource')]
+	#[Assert\NotNull]
 	private $resource;
 
 	/**
 	 * @ORM\OneToOne(targetEntity="Ladb\CoreBundle\Entity\Core\License", cascade={"persist", "remove"})
 	 * @ORM\JoinColumn(nullable=true, name="license_id")
-	 * @Assert\Type(type="Ladb\CoreBundle\Entity\Core\License")
 	 */
+	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\License')]
 	private $license;
 
 	/**

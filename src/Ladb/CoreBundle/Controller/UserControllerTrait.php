@@ -5,6 +5,7 @@ namespace Ladb\CoreBundle\Controller;
 use Doctrine\ORM\EntityManagerInterface;
 use Ladb\CoreBundle\Entity\Core\UserWitness;
 use Ladb\CoreBundle\Manager\Core\UserManager;
+use Symfony\Contracts\Service\Attribute\Required;
 
 trait UserControllerTrait {
 
@@ -13,16 +14,12 @@ trait UserControllerTrait {
 	protected $om;
 	private $userManager;
 
-	/**
-	 * @required
-	 */
+	#[Required]
 	public function setOm(EntityManagerInterface $om) {
 		$this->om = $om;
 	}
 
-	/**
-	 * @required
-	 */
+	#[Required]
 	public function setUserManager(UserManager $userManager) {
 		$this->userManager = $userManager;
 	}

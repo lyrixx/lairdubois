@@ -25,9 +25,9 @@ class Language extends BaseValue {
 
 	/**
 	 * @ORM\Column(type="string")
-	 * @Assert\NotBlank(groups={"mandatory"})
-	 * @Assert\Language
 	 */
+	#[Assert\NotBlank(groups: ['mandatory'])]
+	#[Assert\Language]
 	protected $rawLanguage = 'fr';
 
 	/////

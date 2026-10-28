@@ -14,6 +14,7 @@ use Ladb\CoreBundle\Utils\FieldPreprocessorUtils;
 use Ladb\CoreBundle\Utils\MentionUtils;
 use Ladb\CoreBundle\Utils\SearchUtils;
 use Ladb\CoreBundle\Utils\VotableUtils;
+use Symfony\Contracts\Service\Attribute\Required;
 
 class AnswerManager extends AbstractManager {
 
@@ -38,9 +39,8 @@ class AnswerManager extends AbstractManager {
 
 	/**
 	 * Not in the constructor: QuestionManager receives this manager in its own.
-	 *
-	 * @required
 	 */
+	#[Required]
 	public function setQuestionManager(QuestionManager $questionManager) {
 		$this->questionManager = $questionManager;
 	}

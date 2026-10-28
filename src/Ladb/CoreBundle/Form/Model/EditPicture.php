@@ -6,27 +6,19 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class EditPicture {
 
-	/**
-	 * @Assert\Length(max=255)
-	 */
+	#[Assert\Length(max: 255)]
 	private $legend;
 
-	/**
-	 * @Assert\Length(max=255)
-	 * @Assert\Url()
-	 */
+	#[Assert\Length(max: 255)]
+	#[Assert\Url]
 	private $sourceUrl;
 
 	private $rotation = 0;
 
-	/**
-	 * @Assert\Range(min=0, max=100)
-	 */
+	#[Assert\Range(min: 0, max: 100)]
 	private $centerX100 = 50;
 
-	/**
-	 * @Assert\Range(min=0, max=100)
-	 */
+	#[Assert\Range(min: 0, max: 100)]
 	private $centerY100 = 50;
 
 	// Legend /////

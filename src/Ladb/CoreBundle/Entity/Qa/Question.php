@@ -41,8 +41,8 @@ use Ladb\CoreBundle\Model\ScrapableInterface;
 /**
  * @ORM\Table("tbl_qa_question")
  * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Qa\QuestionRepository")
- * @LadbAssert\BodyBlocks()
  */
+#[LadbAssert\BodyBlocks]
 class Question extends AbstractDraftableAuthoredPublication implements TitledInterface, SluggedInterface, PicturedInterface, BlockBodiedInterface, IndexableInterface, SitemapableInterface, TaggableInterface, ViewableInterface, ScrapableInterface, LikableInterface, WatchableInterface, CommentableInterface, CollectionnableInterface, VotableParentInterface, ReportableInterface, ExplorableInterface {
 
 	use TitledTrait, SluggedTrait, PicturedTrait, BlockBodiedTrait;
@@ -53,9 +53,9 @@ class Question extends AbstractDraftableAuthoredPublication implements TitledInt
 
 	/**
 	 * @ORM\Column(type="string", length=100)
-	 * @Assert\NotBlank()
-	 * @Assert\Length(min=4, max=100)
 	 */
+	#[Assert\NotBlank]
+	#[Assert\Length(min: 4, max: 100)]
 	private $title;
 
 	/**
@@ -67,8 +67,8 @@ class Question extends AbstractDraftableAuthoredPublication implements TitledInt
 	/**
 	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
 	 * @ORM\JoinColumn(nullable=true, name="main_picture_id")
-	 * @Assert\Type(type="Ladb\CoreBundle\Entity\Core\Picture")
 	 */
+	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\Picture')]
 	private $mainPicture;
 
 	/**
@@ -85,8 +85,8 @@ class Question extends AbstractDraftableAuthoredPublication implements TitledInt
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Block\AbstractBlock", cascade={"persist", "remove"})
 	 * @ORM\JoinTable(name="tbl_qa_question_body_block", inverseJoinColumns={@ORM\JoinColumn(name="block_id", referencedColumnName="id", unique=true, onDelete="cascade")})
 	 * @ORM\OrderBy({"sortIndex" = "ASC"})
-	 * @Assert\Count(min=1)
 	 */
+	#[Assert\Count(min: 1)]
 	private $bodyBlocks;
 
 	/**

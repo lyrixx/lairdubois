@@ -122,8 +122,8 @@ class Software extends AbstractKnowledge implements ReviewableInterface {
 	/**
 	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
 	 * @ORM\JoinColumn(name="screenshot_id", nullable=true)
-	 * @Assert\Type(type="Ladb\CoreBundle\Entity\Core\Picture")
 	 */
+	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\Picture')]
 	private $screenshot;
 
 	/**

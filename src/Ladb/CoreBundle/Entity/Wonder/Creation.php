@@ -18,8 +18,8 @@ use Ladb\CoreBundle\Model\SpotlightableTrait;
 /**
  * @ORM\Table("tbl_wonder_creation")
  * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Wonder\CreationRepository")
- * @LadbAssert\BodyBlocks()
  */
+#[LadbAssert\BodyBlocks]
 class Creation extends AbstractWonder implements BlockBodiedInterface, InspirableInterface, FeedbackableInterface, SpotlightableInterface {
 
 	use BlockBodiedTrait;
@@ -32,8 +32,8 @@ class Creation extends AbstractWonder implements BlockBodiedInterface, Inspirabl
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
 	 * @ORM\JoinTable(name="tbl_wonder_creation_picture")
 	 * @ORM\OrderBy({"sortIndex" = "ASC"})
-	 * @Assert\Count(min=1, max=5)
 	 */
+	#[Assert\Count(min: 1, max: 5)]
 	protected $pictures;
 
 	/**
@@ -45,8 +45,8 @@ class Creation extends AbstractWonder implements BlockBodiedInterface, Inspirabl
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Block\AbstractBlock", cascade={"persist", "remove"})
 	 * @ORM\JoinTable(name="tbl_wonder_creation_body_block", inverseJoinColumns={@ORM\JoinColumn(name="block_id", referencedColumnName="id", unique=true, onDelete="cascade")})
 	 * @ORM\OrderBy({"sortIndex" = "ASC"})
-	 * @Assert\Count(min=1)
 	 */
+	#[Assert\Count(min: 1)]
 	private $bodyBlocks;
 
 	/**
@@ -128,8 +128,8 @@ class Creation extends AbstractWonder implements BlockBodiedInterface, Inspirabl
 	 *      	joinColumns={ @ORM\JoinColumn(name="creation_id", referencedColumnName="id") },
 	 *      	inverseJoinColumns={ @ORM\JoinColumn(name="rebound_creation_id", referencedColumnName="id") }
 	 *      )
-	 * @Assert\Count(min=0, max=4)
 	 */
+	#[Assert\Count(min: 0, max: 4)]
 	private $inspirations;
 
 	/**
@@ -140,8 +140,8 @@ class Creation extends AbstractWonder implements BlockBodiedInterface, Inspirabl
 	/**
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Qa\Question", inversedBy="creations", cascade={"persist"})
 	 * @ORM\JoinTable(name="tbl_wonder_creation_question")
-	 * @Assert\Count(min=0, max=4)
 	 */
+	#[Assert\Count(min: 0, max: 4)]
 	private $questions;
 
 	/**
@@ -152,8 +152,8 @@ class Creation extends AbstractWonder implements BlockBodiedInterface, Inspirabl
 	/**
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Wonder\Plan", inversedBy="creations", cascade={"persist"})
 	 * @ORM\JoinTable(name="tbl_wonder_creation_plan")
-	 * @Assert\Count(min=0, max=4)
 	 */
+	#[Assert\Count(min: 0, max: 4)]
 	private $plans;
 
 	/**
@@ -164,8 +164,8 @@ class Creation extends AbstractWonder implements BlockBodiedInterface, Inspirabl
     /**
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Howto\Howto", inversedBy="creations", cascade={"persist"})
 	 * @ORM\JoinTable(name="tbl_wonder_creation_howto")
-	 * @Assert\Count(min=0, max=4)
 	 */
+	#[Assert\Count(min: 0, max: 4)]
 	private $howtos;
 
 	/**
@@ -176,8 +176,8 @@ class Creation extends AbstractWonder implements BlockBodiedInterface, Inspirabl
     /**
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Workflow\Workflow", inversedBy="creations", cascade={"persist"})
 	 * @ORM\JoinTable(name="tbl_wonder_creation_workflow")
-	 * @Assert\Count(min=0, max=4)
 	 */
+	#[Assert\Count(min: 0, max: 4)]
 	private $workflows;
 
 	/**
@@ -188,8 +188,8 @@ class Creation extends AbstractWonder implements BlockBodiedInterface, Inspirabl
 	/**
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Provider", inversedBy="creations", cascade={"persist"})
 	 * @ORM\JoinTable(name="tbl_wonder_creation_provider")
-	 * @Assert\Count(min=0, max=10)
 	 */
+	#[Assert\Count(min: 0, max: 10)]
 	private $providers;
 
 	/**
@@ -200,8 +200,8 @@ class Creation extends AbstractWonder implements BlockBodiedInterface, Inspirabl
 	/**
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\School", inversedBy="creations", cascade={"persist"})
 	 * @ORM\JoinTable(name="tbl_wonder_creation_school")
-	 * @Assert\Count(min=0, max=4)
 	 */
+	#[Assert\Count(min: 0, max: 4)]
 	private $schools;
 
 	/////

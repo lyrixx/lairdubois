@@ -27,9 +27,9 @@ use Ladb\CoreBundle\Model\ChildInterface;
 /**
  * @ORM\Table("tbl_howto_article")
  * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Howto\ArticleRepository")
- * @LadbAssert\ArticleBody()
- * @LadbAssert\BodyBlocks()
  */
+#[LadbAssert\ArticleBody]
+#[LadbAssert\BodyBlocks]
 class Article extends AbstractPublication implements AuthoredInterface, TitledInterface, SluggedInterface, BlockBodiedInterface, DraftableInterface, WatchableChildInterface, BasicEmbeddableInterface, ChildInterface, MentionSourceInterface {
 
 	use AuthoredTrait, TitledTrait, SluggedTrait, BlockBodiedTrait;
@@ -46,9 +46,9 @@ class Article extends AbstractPublication implements AuthoredInterface, TitledIn
 
 	/**
 	 * @ORM\Column(type="string", length=100)
-	 * @Assert\NotBlank()
-	 * @Assert\Length(min=4, max=100)
 	 */
+	#[Assert\NotBlank]
+	#[Assert\Length(min: 4, max: 100)]
 	private $title;
 
 	/**
@@ -71,8 +71,8 @@ class Article extends AbstractPublication implements AuthoredInterface, TitledIn
 	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Block\AbstractBlock", cascade={"persist", "remove"})
 	 * @ORM\JoinTable(name="tbl_howto_article_body_block", inverseJoinColumns={@ORM\JoinColumn(name="block_id", referencedColumnName="id", unique=true, onDelete="cascade")})
 	 * @ORM\OrderBy({"sortIndex" = "ASC"})
-	 * @Assert\Count(min=1)
 	 */
+	#[Assert\Count(min: 1)]
 	private $bodyBlocks;
 
 	/**

@@ -57,9 +57,9 @@ class Picture {
 
 	/**
 	 * @ORM\Column(type="string", length=255, nullable=true, name="source_url")
-	 * @Assert\Length(max=255)
-	 * @Assert\Url()
 	 */
+	#[Assert\Length(max: 255)]
+	#[Assert\Url]
 	private $sourceUrl;
 
 	/**

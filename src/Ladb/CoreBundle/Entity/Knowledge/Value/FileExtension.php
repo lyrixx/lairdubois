@@ -19,16 +19,16 @@ class FileExtension extends BaseValue {
 
 	/**
 	 * @ORM\Column(type="string", length=10)
-	 * @Assert\NotBlank(groups={"mandatory"})
-	 * @Assert\Length(max=10)
-	 * @Assert\Regex("/^[a-zA-Z0-9]+$/")
 	 */
+	#[Assert\NotBlank(groups: ['mandatory'])]
+	#[Assert\Length(max: 10)]
+	#[Assert\Regex('/^[a-zA-Z0-9]+$/')]
 	protected $data;
 
 	/**
 	 * @ORM\Column(type="string", length=100, nullable=true)
-	 * @Assert\Length(max=100)
 	 */
+	#[Assert\Length(max: 100)]
 	private $label;
 
 	/////

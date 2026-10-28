@@ -10,27 +10,19 @@ class NewThreadMessage {
 	 * Assert\NotBlank(message="Aucun membre n'a ce nom d'utilisateur")
 	 */
 
-	/**
-	 * @Ladb\CoreBundle\Validator\Constraints\SelfRecipient()
-	 * @Assert\Count(min=1, max=20)
-	 */
+	#[\Ladb\CoreBundle\Validator\Constraints\SelfRecipient]
+	#[Assert\Count(min: 1, max: 20)]
 	private $recipients;
 
-	/**
-	 * @Assert\NotBlank()
-	 * @Assert\Length(min=2, max=255)
-	 */
+	#[Assert\NotBlank]
+	#[Assert\Length(min: 2, max: 255)]
 	private $subject;
 
-	/**
-	 * @Assert\NotBlank()
-	 * @Assert\Length(min=2, max=10000)
-	 */
+	#[Assert\NotBlank]
+	#[Assert\Length(min: 2, max: 10000)]
 	private $body;
 
-	/**
-	 * @Assert\Count(min=0, max=4)
-	 */
+	#[Assert\Count(min: 0, max: 4)]
 	protected $pictures;
 
 	/////
