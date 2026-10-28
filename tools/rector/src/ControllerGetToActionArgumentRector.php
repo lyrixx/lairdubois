@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ladb\Rector;
 
 use PhpParser\Node;
+use PhpParser\Node\Arg;
 use PhpParser\Node\ClosureUse;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\ArrowFunction;
@@ -43,12 +44,16 @@ use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
  * - A closure of the action that uses one of these variables imports it (use).
  * - The reads that a shortcut of ControllerTrait already does ($this->addFlash(), isGranted(), generateUrl(),
  *   renderView()) become that shortcut, in every method.
- * - The new arguments are sorted by name, before the first argument with a default value.
+ * - Issue #177: the default entity manager ($this->getDoctrine()->getManager(), deprecated in Symfony 5.4) is read
+ *   the same way, as "EntityManagerInterface $om". A helper of a class that is not abstract (a method that is not
+ *   an action) gets it the same way, and its callers pass it: the actions take it as an argument.
+ * - The new arguments are sorted by name with the services already in arguments, before the first argument with a
+ *   default value.
  *
  * A read whose id is neither a class constant nor in SERVICES stays. An action is left untouched (except for the
  * shortcuts) when the rewrite would not be mechanical: a read in an anonymous class, a variable that also gets
- * another value or that is already an argument of another type, an action that the class calls itself. Methods
- * that are not actions (helpers, traits, abstract controllers) only get the shortcuts: their services are
+ * another value or that is already an argument of another type, an action that the class calls itself. Otherwise,
+ * methods that are not actions (helpers, traits, abstract controllers) only get the shortcuts: their services are
  * injected by hand.
  */
 final class ControllerGetToActionArgumentRector extends AbstractRector
@@ -75,6 +80,18 @@ final class ControllerGetToActionArgumentRector extends AbstractRector
         'templating' => ['Symfony\\Bundle\\FrameworkBundle\\Templating\\EngineInterface', 'templating'],
         'translator' => ['Symfony\\Component\\Translation\\TranslatorInterface', 'translator'],
     ];
+
+    /**
+     * $this->getDoctrine()->getManager(): its type, and the name of the variable of an inline read (the one of the
+     * controllers, commands and validators).
+     */
+    private const ENTITY_MANAGER = ['Doctrine\\ORM\\EntityManagerInterface', 'om'];
+
+    /**
+     * Arguments typed by a class that are not services: the request of an action, the entities of a helper.
+     */
+    private const REQUEST = 'Symfony\\Component\\HttpFoundation\\Request';
+    private const ENTITY_NAMESPACE_PREFIX = 'Ladb\\CoreBundle\\Entity\\';
 
     /**
      * $this->get(<id>)-><method>(...) that ControllerTrait does with $this-><shortcut>(...).
@@ -137,14 +154,26 @@ CODE_SAMPLE
                 return null;
             });
 
+            // The helpers of a class that is not abstract that read the entity manager, or call such a helper: name =>
+            // position of the argument they get
+            $helpers = [];
+            if ($stmt instanceof Class_ && !$stmt->isAbstract()) {
+                $helpers = $this->findEntityManagerHelpers($stmt, $calledMethods);
+            }
+
             foreach ($stmt->getMethods() as $method) {
                 if (null === $method->stmts) {
                     continue;
                 }
                 $changed = $this->refactorShortcuts($method) || $changed;
                 $name = $method->name->toString();
-                if ($stmt instanceof Class_ && $method->isPublic() && str_ends_with($name, 'Action') && !isset($calledMethods[$name])) {
-                    $changed = $this->refactorAction($method, $imports) || $changed;
+                if ($this->isAction($stmt, $method, $calledMethods)) {
+                    $changed = $this->refactorAction($method, $imports, $helpers) || $changed;
+                } elseif (isset($helpers[$name])) {
+                    if (!$this->refactorAction($method, $imports, $helpers)) {
+                        throw new \LogicException(sprintf('The helper %s::%s() reads the entity manager, but its rewrite is not mechanical.', $className, $name));
+                    }
+                    $changed = true;
                 }
             }
         }
@@ -219,9 +248,106 @@ CODE_SAMPLE
     }
 
     /**
-     * @param array<string, string> $fileImports
+     * @param array<string, true> $calledMethods
      */
-    private function refactorAction(ClassMethod $method, array &$fileImports): bool
+    private function isAction(Class_|Trait_ $class, ClassMethod $method, array $calledMethods): bool
+    {
+        $name = $method->name->toString();
+
+        return $class instanceof Class_ && $method->isPublic() && str_ends_with($name, 'Action') && !isset($calledMethods[$name]);
+    }
+
+    /**
+     * The methods of the class that are not actions and read the entity manager, or call such a method: they get it
+     * as an argument, sorted like the services of an action, that their callers pass.
+     *
+     * @param array<string, true> $calledMethods
+     *
+     * @return array<string, int> Name => position of the argument
+     */
+    private function findEntityManagerHelpers(Class_ $class, array $calledMethods): array
+    {
+        $helpers = [];
+        foreach ($class->getMethods() as $method) {
+            if (null !== $method->stmts && !$this->isAction($class, $method, $calledMethods)) {
+                $helpers[$method->name->toString()] = $method;
+            }
+        }
+
+        $found = [];
+        do {
+            $added = false;
+            foreach ($helpers as $name => $method) {
+                if (isset($found[$name])) {
+                    continue;
+                }
+                $reads = false;
+                $this->traverseNodesWithCallable($method->stmts, function (Node $node) use (&$reads, $found): ?Node {
+                    if ($node instanceof MethodCall && (self::ENTITY_MANAGER[0] === ($this->matchRead($node)['type'] ?? null) || null !== $this->matchHelperCall($node, $found))) {
+                        $reads = true;
+                    }
+
+                    return null;
+                });
+                if ($reads) {
+                    $found[$name] = true;
+                    $added = true;
+                }
+            }
+        } while ($added);
+
+        $positions = [];
+        foreach (array_keys($found) as $name) {
+            $positions[$name] = $this->findParamPosition($helpers[$name], self::ENTITY_MANAGER[1]);
+        }
+
+        return $positions;
+    }
+
+    /**
+     * $this-><helper>(...), for one of the given helpers.
+     *
+     * @param array<string, mixed> $helpers
+     */
+    private function matchHelperCall(MethodCall $methodCall, array $helpers): ?string
+    {
+        if (!$methodCall->var instanceof Variable || !$this->isName($methodCall->var, 'this') || !$methodCall->name instanceof Identifier || !isset($helpers[$methodCall->name->toString()])) {
+            return null;
+        }
+
+        return $methodCall->name->toString();
+    }
+
+    /**
+     * Where a new argument goes: sorted by name with the services already in arguments (typed by a class, except the
+     * Request and the entities), before the first one with a default value.
+     */
+    private function findParamPosition(ClassMethod $method, string $name): int
+    {
+        foreach ($method->params as $i => $param) {
+            if (null !== $param->default || $param->variadic) {
+                return $i;
+            }
+            if (!$param->type instanceof Name) {
+                continue;
+            }
+            $type = (string) $this->getName($param->type);
+            if (self::REQUEST !== $type && !str_starts_with($type, self::ENTITY_NAMESPACE_PREFIX) && strcmp((string) $this->getName($param->var), $name) > 0) {
+                return $i;
+            }
+        }
+
+        return \count($method->params);
+    }
+
+    /**
+     * Rewrites an action, or a helper that gets the entity manager.
+     *
+     * @param array<string, string> $fileImports
+     * @param array<string, int>    $helpers     Helpers of the class that get the entity manager => position of the
+     *                                           argument
+     */
+    private function refactorAction(ClassMethod $method, array &$fileImports, array $helpers = []): bool
     {
         // Variable name => type (as written in the file), for the arguments to add
         $services = [];
@@ -235,9 +361,14 @@ CODE_SAMPLE
 
         $isMechanical = true;
         $removedAssigns = [];
+        $callsHelpers = false;
 
         // 1. Collect the reads, and check that the rewrite is mechanical
-        $this->traverseNodesWithCallable($method->stmts, function (Node $node) use (&$services, &$imports, &$isMechanical, &$removedAssigns, $existingParams): ?int {
+        $this->traverseNodesWithCallable($method->stmts, function (Node $node) use (&$services, &$imports, &$isMechanical, &$removedAssigns, &$callsHelpers, $existingParams, $helpers): ?int {
+            if ($node instanceof MethodCall && null !== $this->matchHelperCall($node, $helpers)) {
+                $callsHelpers = true;
+            }
+
             // In an anonymous class, $this is another object
             if ($node instanceof Class_) {
                 $this->traverseNodesWithCallable($node, function (Node $inner) use (&$isMechanical): ?Node {
@@ -271,6 +402,15 @@ CODE_SAMPLE
             return null;
         });
 
+        // A call to a helper that gets the entity manager passes it
+        $entityManagerRead = $this->createEntityManagerRead();
+        if ($callsHelpers) {
+            $name = $this->findServiceName($services, $entityManagerRead) ?? $entityManagerRead['variable'];
+            if (!$this->addService($services, $imports, $existingParams, $name, $entityManagerRead)) {
+                $isMechanical = false;
+            }
+        }
+
         if ([] === $services) {
             return false;
         }
@@ -297,6 +437,10 @@ CODE_SAMPLE
         });
 
         if (!$isMechanical) {
+            if ($callsHelpers) {
+                throw new \LogicException(sprintf('%s() calls a helper that gets the entity manager, but its rewrite is not mechanical.', $method->name->toString()));
+            }
+
             return false;
         }
 
@@ -309,27 +453,35 @@ CODE_SAMPLE
 
             return new Variable($this->findServiceName($services, $read));
         });
+        if ($callsHelpers) {
+            $variable = $this->findServiceName($services, $entityManagerRead);
+            $this->traverseNodesWithCallable($method->stmts, function (Node $node) use ($helpers, $variable): int|Node|null {
+                if ($node instanceof Class_) {
+                    return \PhpParser\NodeVisitor::DONT_TRAVERSE_CHILDREN;
+                }
+                if (!$node instanceof MethodCall || null === $helper = $this->matchHelperCall($node, $helpers)) {
+                    return null;
+                }
+                if (\count($node->args) < $helpers[$helper]) {
+                    throw new \LogicException(sprintf('A call to %s() passes fewer arguments than the position of the entity manager.', $helper));
+                }
+                array_splice($node->args, $helpers[$helper], 0, [new Arg(new Variable($variable))]);
+
+                return $node;
+            });
+        }
         $this->addClosureUses($method, $services);
 
-        // 3. Add the arguments, sorted by name, before the first one with a default value
+        // 3. Add the arguments
         ksort($services);
-        $newParams = [];
         foreach ($services as $name => $service) {
             if (\array_key_exists($name, $existingParams)) {
                 continue;
             }
             $written = $service['written'];
-            $newParams[] = new Param(new Variable($name), null, $written instanceof FullyQualified ? new FullyQualified($written->toString()) : new Name($written->toString()));
+            $newParam = new Param(new Variable($name), null, $written instanceof FullyQualified ? new FullyQualified($written->toString()) : new Name($written->toString()));
+            array_splice($method->params, $this->findParamPosition($method, $name), 0, [$newParam]);
         }
-        $position = \count($method->params);
-        foreach ($method->params as $i => $param) {
-            if (null !== $param->default || $param->variadic) {
-                $position = $i;
-
-                break;
-            }
-        }
-        array_splice($method->params, $position, 0, $newParams);
 
         $fileImports += $imports;
 
@@ -429,6 +581,11 @@ CODE_SAMPLE
      */
     private function matchRead(MethodCall $methodCall): ?array
     {
+        // $this->getDoctrine()->getManager()
+        if ($this->isName($methodCall->name, 'getManager') && [] === $methodCall->args && $methodCall->var instanceof MethodCall && $this->isName($methodCall->var->name, 'getDoctrine') && [] === $methodCall->var->args && $methodCall->var->var instanceof Variable && $this->isName($methodCall->var->var, 'this')) {
+            return $this->createEntityManagerRead();
+        }
+
         if (!$this->isThisOrContainer($methodCall->var) || !$this->isName($methodCall->name, 'get') || 1 !== \count($methodCall->args)) {
             return null;
         }
@@ -453,6 +610,17 @@ CODE_SAMPLE
         }
 
         return null;
+    }
+
+    /**
+     * @return array{type: string, written: Name, import: string, variable: string}
+     */
+    private function createEntityManagerRead(): array
+    {
+        [$type, $variable] = self::ENTITY_MANAGER;
+        $shortName = substr((string) strrchr('\\'.$type, '\\'), 1);
+
+        return ['type' => $type, 'written' => new Name($shortName), 'import' => $type, 'variable' => $variable];
     }
 
     private function matchServiceId(Expr $expr): ?string
