@@ -70,6 +70,9 @@ services:
     tests.webpush_notification_consumer:
         alias: Ladb\CoreBundle\Consumer\WebpushNotificationConsumer
         public: true
+    tests.view_consumer:
+        alias: Ladb\CoreBundle\Consumer\ViewConsumer
+        public: true
     tests.webpush_push_handler:
         class: Tests\Double\InMemoryPushHandler
         public: true
