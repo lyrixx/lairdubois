@@ -957,7 +957,7 @@ class CreationController extends AbstractController {
 
 					case 'with-spotlight':
 
-						$filter = new \Elastica\Query\Range('withEnabledSpotlight', array( 'gt' => 0 ));
+						$filter = new \Elastica\Query\Range('withEnabledSpotlight', array( 'gt' => false ));
 						$filters[] = $filter;
 
 						break;

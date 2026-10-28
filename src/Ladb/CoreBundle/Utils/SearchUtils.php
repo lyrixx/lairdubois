@@ -42,19 +42,16 @@ class SearchUtils {
 	private function _getObjectPersister($entity) {
 		$classname = strtolower(get_class($entity));
 		if (preg_match('@\\\\([\w]+)\\\\([\w]+)$@', $classname, $matches)) {
-			$indexName = $matches[1].'_'.$matches[2];
-			return $this->persisterRegistry->getPersister($indexName, $indexName);
+			return $this->persisterRegistry->getPersister($matches[1].'_'.$matches[2]);
 		}
 		return null;
 	}
 
-	private function _getType($indexServiceId) {
+	private function _getIndex($indexServiceId) {
 		if (0 !== strpos($indexServiceId, self::INDEX_SERVICE_ID_PREFIX)) {
 			throw new \LogicException(sprintf('"%s" is not the id of an index.', $indexServiceId));
 		}
-		// The index has a single type, of its name
-		$name = substr($indexServiceId, strlen(self::INDEX_SERVICE_ID_PREFIX));
-		return $this->indexManager->getIndex($name)->getType($name);
+		return $this->indexManager->getIndex(substr($indexServiceId, strlen(self::INDEX_SERVICE_ID_PREFIX)));
 	}
 
 	private function _logSearch($context, $query, $totalHits) {
@@ -137,9 +134,9 @@ class SearchUtils {
 		}
 
 		// Count
-		$type = $this->_getType($indexServiceId);
+		$index = $this->_getIndex($indexServiceId);
 		try {
-			$resultSet = $type->search($elasticaQuery);
+			$resultSet = $index->search($elasticaQuery);
 			$count = $resultSet->getTotalHits();
 		} catch (\Exception $e) {
 			return 0;
@@ -176,12 +173,15 @@ class SearchUtils {
 			$wrapperQuery = new \Elastica\Query\FunctionScore();
 			$wrapperQuery->setQuery($query);
 			if (!empty($sort['randomSeed'])) {
-				$wrapperQuery->setRandomScore($sort['randomSeed']);
+				// The seed is a string (smartsearch.js), that Elasticsearch hashes: setRandomScore() only takes an integer
+				$wrapperQuery->setParam('random_score', array( 'seed' => $sort['randomSeed'] ));
 			}
 			$query = $wrapperQuery;
 		}
 
 		$elasticaQuery = Query::create($query);
+		// Elasticsearch 7 counts the hits exactly up to 10,000 only: the counters and the pagination need them all
+		$elasticaQuery->setTrackTotalHits(true);
 		if (!is_null($sort) && !isset($sort['randomSeed'])) {
 			$elasticaQuery->addSort($sort);
 		}
@@ -337,8 +337,8 @@ class SearchUtils {
 		}
 
 		// Search
-		$type = $this->_getType($indexServiceId);
-		$resultSet = $type->search($elasticaQuery);
+		$index = $this->_getIndex($indexServiceId);
+		$resultSet = $index->search($elasticaQuery);
 
 		// Extract Ids
 		$ids = array();

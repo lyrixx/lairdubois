@@ -387,7 +387,8 @@ fos_elastica:
             index_name: "%elasticsearch_index_prefix%core_user"
             settings: &index_settings
                 index:
-                    number_of_shards: 1
+                    # autocomplete_ngram, from 3 to 20 characters
+                    max_ngram_diff: 17
                     analysis:
                         analyzer:
                             title_analyzer:
@@ -425,861 +426,807 @@ fos_elastica:
                                 type: elision
                                 articles: [l, m, t, qu, n, s, j, d]
                             autocomplete_ngram:
-                                type: nGram
+                                type: ngram
                                 min_gram: 3
                                 max_gram: 20
-            types:
-                core_user:
+            properties:
+                isTeam: { type: boolean }
+                displayname: { type: text, boost: 2, analyzer: name_analyzer }
+                fullname: { type: text, boost: 1, analyzer: name_analyzer }
+                username: { analyzer: exact_lowercase_analyzer }
+                createdAt: { type: date }
+                accountType: { type: short }
+                location:
+                geoPoint: { type: geo_point }
+                meta:
+                    type: "object"
                     properties:
-                        isTeam: { type: boolean }
-                        displayname: { type: text, boost: 2, analyzer: name_analyzer }
-                        fullname: { type: text, boost: 1, analyzer: name_analyzer }
-                        username: { analyzer: exact_lowercase_analyzer }
-                        createdAt: { type: date }
-                        accountType: { type: short }
-                        location:
-                        geoPoint: { type: geo_point }
-                        meta:
+                        contributionCount: { type: integer }
+                        followerCount: { type: integer }
+                        recievedLikeCount: { type: integer }
+                        memberCount: { type: integer }
+                        skills:
                             type: "object"
                             properties:
-                                contributionCount: { type: integer }
-                                followerCount: { type: integer }
-                                recievedLikeCount: { type: integer }
-                                memberCount: { type: integer }
-                                skills:
-                                    type: "object"
-                                    properties:
-                                        label:
-                    persistence:
-                        driver: orm
-                        model: Ladb\CoreBundle\Entity\Core\User
-                        provider:
-                            query_builder_method: "createIsEnabledQueryBuilder"
-                        listener:
-                            update: false
+                                label:
+            persistence:
+                driver: orm
+                model: Ladb\CoreBundle\Entity\Core\User
+                provider:
+                    query_builder_method: "createIsEnabledQueryBuilder"
+                listener:
+                    update: false
         core_tip:
             index_name: "%elasticsearch_index_prefix%core_tip"
             settings: *index_settings
-            types:
-                core_tip:
-                    properties:
-                        title: { type: text, boost: 3, analyzer: title_analyzer }
-                        body: { analyzer: body_analyzer }
-                        createdAt: { type: date }
-                        changedAt: { type: date }
-                        viewCount: { type: integer }
-                    persistence:
-                        driver: orm
-                        model: Ladb\CoreBundle\Entity\Core\Tip
-                        provider: ~
-                        listener:
-                            update: false
+            properties:
+                title: { type: text, boost: 3, analyzer: title_analyzer }
+                body: { analyzer: body_analyzer }
+                createdAt: { type: date }
+                changedAt: { type: date }
+                viewCount: { type: integer }
+            persistence:
+                driver: orm
+                model: Ladb\CoreBundle\Entity\Core\Tip
+                provider: ~
+                listener:
+                    update: false
         wonder_creation:
             index_name: "%elasticsearch_index_prefix%wonder_creation"
             settings: *index_settings
-            types:
-                wonder_creation:
+            properties:
+                visibility: { type: integer }
+                title: { type: text, boost: 3, analyzer: title_analyzer }
+                body: { analyzer: body_analyzer }
+                createdAt: { type: date }
+                changedAt: { type: date }
+                viewCount: { type: integer }
+                likeCount: { type: integer }
+                commentCount: { type: integer }
+                bodyBlockVideoCount: { type: integer }
+                feedbackCount: { type: integer }
+                questionCount: { type: integer }
+                planCount: { type: integer }
+                howtoCount: { type: integer }
+                workflowCount: { type: integer }
+                providerCount: { type: integer }
+                schoolCount: { type: integer }
+                inspirationCount: { type: integer }
+                reboundCount: { type: integer }
+                withEnabledSpotlight: { type: boolean }
+                user:
+                    type: "object"
                     properties:
-                        visibility: { type: integer }
-                        title: { type: text, boost: 3, analyzer: title_analyzer }
-                        body: { analyzer: body_analyzer }
-                        createdAt: { type: date }
-                        changedAt: { type: date }
-                        viewCount: { type: integer }
-                        likeCount: { type: integer }
-                        commentCount: { type: integer }
-                        bodyBlockVideoCount: { type: integer }
-                        feedbackCount: { type: integer }
-                        questionCount: { type: integer }
-                        planCount: { type: integer }
-                        howtoCount: { type: integer }
-                        workflowCount: { type: integer }
-                        providerCount: { type: integer }
-                        schoolCount: { type: integer }
-                        inspirationCount: { type: integer }
-                        reboundCount: { type: integer }
-                        withEnabledSpotlight: { type: boolean }
-                        user:
-                            type: "object"
-                            properties:
-                                username: { analyzer: name_analyzer }
-                                displayname: { analyzer: name_analyzer }
-                                fullname: { analyzer: name_analyzer }
-                        tags:
-                            type: "object"
-                            properties:
-                                label: { type: text, boost: 2 }
-                        woods:
-                            type: "object"
-                            properties:
-                                label: { analyzer: body_analyzer }
-                        tools:
-                            type: "object"
-                            properties:
-                                label: { analyzer: body_analyzer }
-                        finishes:
-                            type: "object"
-                            properties:
-                                label: { analyzer: body_analyzer }
-                        hardwares:
-                            type: "object"
-                            properties:
-                                label: { analyzer: body_analyzer }
-                        license:
-                            type: "object"
-                            properties:
-                                strippedname: { analyzer: exact_lowercase_analyzer }
-                    persistence:
-                        driver: orm
-                        model: Ladb\CoreBundle\Entity\Wonder\Creation
-                        provider: ~
-                        listener:
-                            insert: false
-                            update: false
-                            delete: false
+                        username: { analyzer: name_analyzer }
+                        displayname: { analyzer: name_analyzer }
+                        fullname: { analyzer: name_analyzer }
+                tags:
+                    type: "object"
+                    properties:
+                        label: { type: text, boost: 2 }
+                woods:
+                    type: "object"
+                    properties:
+                        label: { analyzer: body_analyzer }
+                tools:
+                    type: "object"
+                    properties:
+                        label: { analyzer: body_analyzer }
+                finishes:
+                    type: "object"
+                    properties:
+                        label: { analyzer: body_analyzer }
+                hardwares:
+                    type: "object"
+                    properties:
+                        label: { analyzer: body_analyzer }
+                license:
+                    type: "object"
+                    properties:
+                        strippedname: { analyzer: exact_lowercase_analyzer }
+            persistence:
+                driver: orm
+                model: Ladb\CoreBundle\Entity\Wonder\Creation
+                provider: ~
+                listener:
+                    insert: false
+                    update: false
+                    delete: false
         wonder_workshop:
             index_name: "%elasticsearch_index_prefix%wonder_workshop"
             settings: *index_settings
-            types:
-                wonder_workshop:
+            properties:
+                visibility: { type: integer }
+                title: { type: text, boost: 3, analyzer: title_analyzer }
+                body: { analyzer: body_analyzer }
+                createdAt: { type: date }
+                changedAt: { type: date }
+                area: { type: integer }
+                geoPoint: { type: geo_point }
+                viewCount: { type: integer }
+                likeCount: { type: integer }
+                commentCount: { type: integer }
+                bodyBlockVideoCount: { type: integer }
+                feedbackCount: { type: integer }
+                planCount: { type: integer }
+                howtoCount: { type: integer }
+                workflowCount: { type: integer }
+                user:
+                    type: "object"
                     properties:
-                        visibility: { type: integer }
-                        title: { type: text, boost: 3, analyzer: title_analyzer }
-                        body: { analyzer: body_analyzer }
-                        createdAt: { type: date }
-                        changedAt: { type: date }
-                        area: { type: integer }
-                        geoPoint: { type: geo_point }
-                        viewCount: { type: integer }
-                        likeCount: { type: integer }
-                        commentCount: { type: integer }
-                        bodyBlockVideoCount: { type: integer }
-                        feedbackCount: { type: integer }
-                        planCount: { type: integer }
-                        howtoCount: { type: integer }
-                        workflowCount: { type: integer }
-                        user:
-                            type: "object"
-                            properties:
-                                username: { analyzer: name_analyzer }
-                                displayname: { analyzer: name_analyzer }
-                                fullname: { analyzer: name_analyzer }
-                        tags:
-                            type: "object"
-                            properties:
-                                label: { type: text, boost: 2 }
-                        license:
-                            type: "object"
-                            properties:
-                                strippedname: { analyzer: exact_lowercase_analyzer }
-                    persistence:
-                        driver: orm
-                        model: Ladb\CoreBundle\Entity\Wonder\Workshop
-                        provider: ~
-                        listener:
-                            insert: false
-                            update: false
-                            delete: false
+                        username: { analyzer: name_analyzer }
+                        displayname: { analyzer: name_analyzer }
+                        fullname: { analyzer: name_analyzer }
+                tags:
+                    type: "object"
+                    properties:
+                        label: { type: text, boost: 2 }
+                license:
+                    type: "object"
+                    properties:
+                        strippedname: { analyzer: exact_lowercase_analyzer }
+            persistence:
+                driver: orm
+                model: Ladb\CoreBundle\Entity\Wonder\Workshop
+                provider: ~
+                listener:
+                    insert: false
+                    update: false
+                    delete: false
         wonder_plan:
             index_name: "%elasticsearch_index_prefix%wonder_plan"
             settings: *index_settings
-            types:
-                wonder_plan:
+            properties:
+                visibility: { type: integer }
+                title: { type: text, boost: 3, analyzer: title_analyzer }
+                body: { analyzer: body_analyzer }
+                createdAt: { type: date }
+                changedAt: { type: date }
+                viewCount: { type: integer }
+                likeCount: { type: integer }
+                commentCount: { type: integer }
+                downloadCount: { type: integer }
+                questionCount: { type: integer }
+                creationCount: { type: integer }
+                workshopCount: { type: integer }
+                howtoCount: { type: integer }
+                workflowCount: { type: integer }
+                schoolCount: { type: integer }
+                inspirationCount: { type: integer }
+                reboundCount: { type: integer }
+                kinds:
+                    type: "integer"
+                resources:
+                    type: "object"
                     properties:
-                        visibility: { type: integer }
-                        title: { type: text, boost: 3, analyzer: title_analyzer }
-                        body: { analyzer: body_analyzer }
-                        createdAt: { type: date }
-                        changedAt: { type: date }
-                        viewCount: { type: integer }
-                        likeCount: { type: integer }
-                        commentCount: { type: integer }
-                        downloadCount: { type: integer }
-                        questionCount: { type: integer }
-                        creationCount: { type: integer }
-                        workshopCount: { type: integer }
-                        howtoCount: { type: integer }
-                        workflowCount: { type: integer }
-                        schoolCount: { type: integer }
-                        inspirationCount: { type: integer }
-                        reboundCount: { type: integer }
-                        kinds:
-                            type: "integer"
-                        resources:
-                            type: "object"
-                            properties:
-                                fileExtension: { type: string }
-                        user:
-                            type: "object"
-                            properties:
-                                username: { analyzer: name_analyzer }
-                                displayname: { analyzer: name_analyzer }
-                                fullname: { analyzer: name_analyzer }
-                        tags:
-                            type: "object"
-                            properties:
-                                label: { type: text, boost: 2 }
-                        license:
-                            type: "object"
-                            properties:
-                                strippedname: { analyzer: exact_lowercase_analyzer }
-                    persistence:
-                        driver: orm
-                        model: Ladb\CoreBundle\Entity\Wonder\Plan
-                        provider: ~
-                        listener:
-                            insert: false
-                            update: false
-                            delete: false
+                        fileExtension: { type: text }
+                user:
+                    type: "object"
+                    properties:
+                        username: { analyzer: name_analyzer }
+                        displayname: { analyzer: name_analyzer }
+                        fullname: { analyzer: name_analyzer }
+                tags:
+                    type: "object"
+                    properties:
+                        label: { type: text, boost: 2 }
+                license:
+                    type: "object"
+                    properties:
+                        strippedname: { analyzer: exact_lowercase_analyzer }
+            persistence:
+                driver: orm
+                model: Ladb\CoreBundle\Entity\Wonder\Plan
+                provider: ~
+                listener:
+                    insert: false
+                    update: false
+                    delete: false
         qa_question:
             index_name: "%elasticsearch_index_prefix%qa_question"
             settings: *index_settings
-            types:
-                qa_question:
+            properties:
+                visibility: { type: integer }
+                title: { type: text, boost: 3, analyzer: title_analyzer }
+                body: { analyzer: body_analyzer }
+                createdAt: { type: date }
+                changedAt: { type: date }
+                viewCount: { type: integer }
+                likeCount: { type: integer }
+                commentCount: { type: integer }
+                answerCount: { type: integer }
+                positiveAnswerCount: { type: integer }
+                nullAnswerCount: { type: integer }
+                undeterminedAnswerCount: { type: integer }
+                negativeAnswerCount: { type: integer }
+                creationCount: { type: integer }
+                planCount: { type: integer }
+                howtoCount: { type: integer }
+                user:
+                    type: "object"
                     properties:
-                        visibility: { type: integer }
-                        title: { type: text, boost: 3, analyzer: title_analyzer }
+                        username: { analyzer: name_analyzer }
+                        displayname: { analyzer: name_analyzer }
+                        fullname: { analyzer: name_analyzer }
+                answers:
+                    type: "object"
+                    properties:
                         body: { analyzer: body_analyzer }
-                        createdAt: { type: date }
-                        changedAt: { type: date }
-                        viewCount: { type: integer }
-                        likeCount: { type: integer }
-                        commentCount: { type: integer }
-                        answerCount: { type: integer }
-                        positiveAnswerCount: { type: integer }
-                        nullAnswerCount: { type: integer }
-                        undeterminedAnswerCount: { type: integer }
-                        negativeAnswerCount: { type: integer }
-                        creationCount: { type: integer }
-                        planCount: { type: integer }
-                        howtoCount: { type: integer }
-                        user:
-                            type: "object"
-                            properties:
-                                username: { analyzer: name_analyzer }
-                                displayname: { analyzer: name_analyzer }
-                                fullname: { analyzer: name_analyzer }
-                        answers:
-                            type: "object"
-                            properties:
-                                body: { analyzer: body_analyzer }
-                        bestAnswer:
-                            type: "object"
-                            properties:
-                                body: { analyzer: body_analyzer }
-                        tags:
-                            type: "object"
-                            properties:
-                                label: { type: text, boost: 2 }
-                    persistence:
-                        driver: orm
-                        model: Ladb\CoreBundle\Entity\Qa\Question
-                        provider: ~
-                        listener:
-                            insert: false
-                            update: false
-                            delete: false
+                bestAnswer:
+                    type: "object"
+                    properties:
+                        body: { analyzer: body_analyzer }
+                tags:
+                    type: "object"
+                    properties:
+                        label: { type: text, boost: 2 }
+            persistence:
+                driver: orm
+                model: Ladb\CoreBundle\Entity\Qa\Question
+                provider: ~
+                listener:
+                    insert: false
+                    update: false
+                    delete: false
         howto_howto:
             index_name: "%elasticsearch_index_prefix%howto_howto"
             settings: *index_settings
-            types:
-                howto_howto:
+            properties:
+                visibility: { type: integer }
+                title: { type: text, boost: 3, analyzer: title_analyzer }
+                createdAt: { type: date }
+                changedAt: { type: date }
+                viewCount: { type: integer }
+                likeCount: { type: integer }
+                commentCount: { type: integer }
+                bodyBlockVideoCount: { type: integer }
+                questionCount: { type: integer }
+                creationCount: { type: integer }
+                planCount: { type: integer }
+                workflowCount: { type: integer }
+                workshopCount: { type: integer }
+                providerCount: { type: integer }
+                schoolCount: { type: integer }
+                kind: { type: short }
+                isWorkInProgress: { type: boolean }
+                withEnabledSpotlight: { type: boolean }
+                articles:
+                    type: "object"
                     properties:
-                        visibility: { type: integer }
                         title: { type: text, boost: 3, analyzer: title_analyzer }
-                        createdAt: { type: date }
-                        changedAt: { type: date }
-                        viewCount: { type: integer }
-                        likeCount: { type: integer }
-                        commentCount: { type: integer }
-                        bodyBlockVideoCount: { type: integer }
-                        questionCount: { type: integer }
-                        creationCount: { type: integer }
-                        planCount: { type: integer }
-                        workflowCount: { type: integer }
-                        workshopCount: { type: integer }
-                        providerCount: { type: integer }
-                        schoolCount: { type: integer }
-                        kind: { type: short }
-                        isWorkInProgress: { type: boolean }
-                        withEnabledSpotlight: { type: boolean }
-                        articles:
-                            type: "object"
-                            properties:
-                                title: { type: text, boost: 3, analyzer: title_analyzer }
-                                body: { analyzer: body_analyzer }
-                        user:
-                            type: "object"
-                            properties:
-                                username: { analyzer: name_analyzer }
-                                displayname: { analyzer: name_analyzer }
-                                fullname: { analyzer: name_analyzer }
-                        tags:
-                            type: "object"
-                            properties:
-                                label: { type: text, boost: 2 }
-                        license:
-                            type: "object"
-                            properties:
-                                strippedname: { analyzer: exact_lowercase_analyzer }
-                    persistence:
-                        driver: orm
-                        model: Ladb\CoreBundle\Entity\Howto\Howto
-                        provider: ~
-                        listener:
-                            insert: false
-                            update: false
-                            delete: false
+                        body: { analyzer: body_analyzer }
+                user:
+                    type: "object"
+                    properties:
+                        username: { analyzer: name_analyzer }
+                        displayname: { analyzer: name_analyzer }
+                        fullname: { analyzer: name_analyzer }
+                tags:
+                    type: "object"
+                    properties:
+                        label: { type: text, boost: 2 }
+                license:
+                    type: "object"
+                    properties:
+                        strippedname: { analyzer: exact_lowercase_analyzer }
+            persistence:
+                driver: orm
+                model: Ladb\CoreBundle\Entity\Howto\Howto
+                provider: ~
+                listener:
+                    insert: false
+                    update: false
+                    delete: false
         find_find:
             index_name: "%elasticsearch_index_prefix%find_find"
             settings: *index_settings
-            types:
-                find_find:
+            properties:
+                visibility: { type: integer }
+                title: { type: text, boost: 3, analyzer: title_analyzer }
+                body: { analyzer: body_analyzer }
+                createdAt: { type: date }
+                changedAt: { type: date }
+                geoPoint: { type: geo_point }
+                viewCount: { type: integer }
+                likeCount: { type: integer }
+                commentCount: { type: integer }
+                kind: { type: short }
+                user:
+                    type: "object"
                     properties:
-                        visibility: { type: integer }
-                        title: { type: text, boost: 3, analyzer: title_analyzer }
-                        body: { analyzer: body_analyzer }
-                        createdAt: { type: date }
-                        changedAt: { type: date }
-                        geoPoint: { type: geo_point }
-                        viewCount: { type: integer }
-                        likeCount: { type: integer }
-                        commentCount: { type: integer }
-                        kind: { type: short }
-                        user:
-                            type: "object"
-                            properties:
-                                username: { analyzer: name_analyzer }
-                                displayname: { analyzer: name_analyzer }
-                                fullname: { analyzer: name_analyzer }
-                        tags:
-                            type: "object"
-                            properties:
-                                label: { type: text, boost: 2 }
-                    persistence:
-                        driver: orm
-                        model: Ladb\CoreBundle\Entity\Find\Find
-                        provider: ~
-                        listener:
-                            insert: false
-                            update: false
-                            delete: false
+                        username: { analyzer: name_analyzer }
+                        displayname: { analyzer: name_analyzer }
+                        fullname: { analyzer: name_analyzer }
+                tags:
+                    type: "object"
+                    properties:
+                        label: { type: text, boost: 2 }
+            persistence:
+                driver: orm
+                model: Ladb\CoreBundle\Entity\Find\Find
+                provider: ~
+                listener:
+                    insert: false
+                    update: false
+                    delete: false
         event_event:
             index_name: "%elasticsearch_index_prefix%event_event"
             settings: *index_settings
-            types:
-                event_event:
+            properties:
+                visibility: { type: integer }
+                title: { type: text, boost: 3, analyzer: title_analyzer }
+                body: { analyzer: body_analyzer }
+                createdAt: { type: date }
+                changedAt: { type: date }
+                startAt: { type: date }
+                endAt: { type: date }
+                cancelled: { type: boolean }
+                geoPoint: { type: geo_point }
+                viewCount: { type: integer }
+                likeCount: { type: integer }
+                commentCount: { type: integer }
+                joinCount: { type: integer }
+                feedbackCount: { type: integer }
+                user:
+                    type: "object"
                     properties:
-                        visibility: { type: integer }
-                        title: { type: text, boost: 3, analyzer: title_analyzer }
-                        body: { analyzer: body_analyzer }
-                        createdAt: { type: date }
-                        changedAt: { type: date }
-                        startAt: { type: date }
-                        endAt: { type: date }
-                        cancelled: { type: boolean }
-                        geoPoint: { type: geo_point }
-                        viewCount: { type: integer }
-                        likeCount: { type: integer }
-                        commentCount: { type: integer }
-                        joinCount: { type: integer }
-                        feedbackCount: { type: integer }
-                        user:
-                            type: "object"
-                            properties:
-                                username: { analyzer: name_analyzer }
-                                displayname: { analyzer: name_analyzer }
-                                fullname: { analyzer: name_analyzer }
-                        tags:
-                            type: "object"
-                            properties:
-                                label: { type: text, boost: 2 }
-                    persistence:
-                        driver: orm
-                        model: Ladb\CoreBundle\Entity\Event\Event
-                        provider: ~
-                        listener:
-                            insert: false
-                            update: false
-                            delete: false
+                        username: { analyzer: name_analyzer }
+                        displayname: { analyzer: name_analyzer }
+                        fullname: { analyzer: name_analyzer }
+                tags:
+                    type: "object"
+                    properties:
+                        label: { type: text, boost: 2 }
+            persistence:
+                driver: orm
+                model: Ladb\CoreBundle\Entity\Event\Event
+                provider: ~
+                listener:
+                    insert: false
+                    update: false
+                    delete: false
         workflow_workflow:
             index_name: "%elasticsearch_index_prefix%workflow_workflow"
             settings: *index_settings
-            types:
-                workflow_workflow:
+            properties:
+                visibility: { type: integer }
+                title: { type: text, boost: 3, analyzer: title_analyzer }
+                body: { analyzer: body_analyzer }
+                createdAt: { type: date }
+                changedAt: { type: date }
+                viewCount: { type: integer }
+                likeCount: { type: integer }
+                commentCount: { type: integer }
+                copyCount: { type: integer }
+                creationCount: { type: integer }
+                planCount: { type: integer }
+                howtoCount: { type: integer }
+                workshopCount: { type: integer }
+                user:
+                    type: "object"
                     properties:
-                        visibility: { type: integer }
-                        title: { type: text, boost: 3, analyzer: title_analyzer }
-                        body: { analyzer: body_analyzer }
-                        createdAt: { type: date }
-                        changedAt: { type: date }
-                        viewCount: { type: integer }
-                        likeCount: { type: integer }
-                        commentCount: { type: integer }
-                        copyCount: { type: integer }
-                        creationCount: { type: integer }
-                        planCount: { type: integer }
-                        howtoCount: { type: integer }
-                        workshopCount: { type: integer }
-                        user:
-                            type: "object"
-                            properties:
-                                username: { analyzer: name_analyzer }
-                                displayname: { analyzer: name_analyzer }
-                                fullname: { analyzer: name_analyzer }
-                        tags:
-                            type: "object"
-                            properties:
-                                label: { type: text, boost: 2 }
-                    persistence:
-                        driver: orm
-                        model: Ladb\CoreBundle\Entity\Workflow\Workflow
-                        provider: ~
-                        listener:
-                            insert: false
-                            update: false
-                            delete: false
+                        username: { analyzer: name_analyzer }
+                        displayname: { analyzer: name_analyzer }
+                        fullname: { analyzer: name_analyzer }
+                tags:
+                    type: "object"
+                    properties:
+                        label: { type: text, boost: 2 }
+            persistence:
+                driver: orm
+                model: Ladb\CoreBundle\Entity\Workflow\Workflow
+                provider: ~
+                listener:
+                    insert: false
+                    update: false
+                    delete: false
         collection_collection:
             index_name: "%elasticsearch_index_prefix%collection_collection"
             settings: *index_settings
-            types:
-                collection_collection:
+            properties:
+                visibility: { type: integer }
+                title: { type: text, boost: 3, analyzer: title_analyzer }
+                body: { analyzer: body_analyzer }
+                createdAt: { type: date }
+                changedAt: { type: date }
+                viewCount: { type: integer }
+                likeCount: { type: integer }
+                commentCount: { type: integer }
+                entryCount: { type: integer }
+                user:
+                    type: "object"
                     properties:
-                        visibility: { type: integer }
-                        title: { type: text, boost: 3, analyzer: title_analyzer }
-                        body: { analyzer: body_analyzer }
-                        createdAt: { type: date }
-                        changedAt: { type: date }
-                        viewCount: { type: integer }
-                        likeCount: { type: integer }
-                        commentCount: { type: integer }
-                        entryCount: { type: integer }
-                        user:
-                            type: "object"
-                            properties:
-                                username: { analyzer: name_analyzer }
-                                displayname: { analyzer: name_analyzer }
-                                fullname: { analyzer: name_analyzer }
-                        tags:
-                            type: "object"
-                            properties:
-                                label: { type: text, boost: 2 }
-                    persistence:
-                        driver: orm
-                        model: Ladb\CoreBundle\Entity\Collection\Collection
-                        provider: ~
-                        listener:
-                            insert: false
-                            update: false
-                            delete: false
+                        username: { analyzer: name_analyzer }
+                        displayname: { analyzer: name_analyzer }
+                        fullname: { analyzer: name_analyzer }
+                tags:
+                    type: "object"
+                    properties:
+                        label: { type: text, boost: 2 }
+            persistence:
+                driver: orm
+                model: Ladb\CoreBundle\Entity\Collection\Collection
+                provider: ~
+                listener:
+                    insert: false
+                    update: false
+                    delete: false
         promotion_graphic:
             index_name: "%elasticsearch_index_prefix%promotion_graphic"
             settings: *index_settings
-            types:
-                promotion_graphic:
+            properties:
+                visibility: { type: integer }
+                title: { type: text, boost: 3, analyzer: title_analyzer }
+                body: { analyzer: body_analyzer }
+                createdAt: { type: date }
+                changedAt: { type: date }
+                viewCount: { type: integer }
+                likeCount: { type: integer }
+                commentCount: { type: integer }
+                downloadCount: { type: integer }
+                user:
+                    type: "object"
                     properties:
-                        visibility: { type: integer }
-                        title: { type: text, boost: 3, analyzer: title_analyzer }
-                        body: { analyzer: body_analyzer }
-                        createdAt: { type: date }
-                        changedAt: { type: date }
-                        viewCount: { type: integer }
-                        likeCount: { type: integer }
-                        commentCount: { type: integer }
-                        downloadCount: { type: integer }
-                        user:
-                            type: "object"
-                            properties:
-                                username: { analyzer: name_analyzer }
-                                displayname: { analyzer: name_analyzer }
-                                fullname: { analyzer: name_analyzer }
-                        tags:
-                            type: "object"
-                            properties:
-                                label: { type: text, boost: 2 }
-                    persistence:
-                        driver: orm
-                        model: Ladb\CoreBundle\Entity\Promotion\Graphic
-                        provider: ~
-                        listener:
-                            insert: false
-                            update: false
-                            delete: false
+                        username: { analyzer: name_analyzer }
+                        displayname: { analyzer: name_analyzer }
+                        fullname: { analyzer: name_analyzer }
+                tags:
+                    type: "object"
+                    properties:
+                        label: { type: text, boost: 2 }
+            persistence:
+                driver: orm
+                model: Ladb\CoreBundle\Entity\Promotion\Graphic
+                provider: ~
+                listener:
+                    insert: false
+                    update: false
+                    delete: false
         blog_post:
             index_name: "%elasticsearch_index_prefix%blog_post"
             settings: *index_settings
-            types:
-                blog_post:
+            properties:
+                visibility: { type: integer }
+                title: { type: text, boost: 3, analyzer: title_analyzer }
+                body: { analyzer: body_analyzer }
+                createdAt: { type: date }
+                changedAt: { type: date }
+                viewCount: { type: integer }
+                likeCount: { type: integer }
+                commentCount: { type: integer }
+                user:
+                    type: "object"
                     properties:
-                        visibility: { type: integer }
-                        title: { type: text, boost: 3, analyzer: title_analyzer }
-                        body: { analyzer: body_analyzer }
-                        createdAt: { type: date }
-                        changedAt: { type: date }
-                        viewCount: { type: integer }
-                        likeCount: { type: integer }
-                        commentCount: { type: integer }
-                        user:
-                            type: "object"
-                            properties:
-                                username: { analyzer: name_analyzer }
-                                displayname: { analyzer: name_analyzer }
-                                fullname: { analyzer: name_analyzer }
-                        tags:
-                            type: "object"
-                            properties:
-                                label: { type: text, boost: 2 }
-                    persistence:
-                        driver: orm
-                        model: Ladb\CoreBundle\Entity\Blog\Post
-                        provider: ~
-                        listener:
-                            insert: false
-                            update: false
-                            delete: false
+                        username: { analyzer: name_analyzer }
+                        displayname: { analyzer: name_analyzer }
+                        fullname: { analyzer: name_analyzer }
+                tags:
+                    type: "object"
+                    properties:
+                        label: { type: text, boost: 2 }
+            persistence:
+                driver: orm
+                model: Ladb\CoreBundle\Entity\Blog\Post
+                provider: ~
+                listener:
+                    insert: false
+                    update: false
+                    delete: false
         faq_question:
             index_name: "%elasticsearch_index_prefix%faq_question"
             settings: *index_settings
-            types:
-                faq_question:
+            properties:
+                visibility: { type: integer }
+                title: { type: text, boost: 3, analyzer: title_analyzer }
+                body: { analyzer: body_analyzer }
+                createdAt: { type: date }
+                changedAt: { type: date }
+                viewCount: { type: integer }
+                likeCount: { type: integer }
+                commentCount: { type: integer }
+                weight: { type: integer }
+                user:
+                    type: "object"
                     properties:
-                        visibility: { type: integer }
-                        title: { type: text, boost: 3, analyzer: title_analyzer }
-                        body: { analyzer: body_analyzer }
-                        createdAt: { type: date }
-                        changedAt: { type: date }
-                        viewCount: { type: integer }
-                        likeCount: { type: integer }
-                        commentCount: { type: integer }
-                        weight: { type: integer }
-                        user:
-                            type: "object"
-                            properties:
-                                username: { analyzer: name_analyzer }
-                                displayname: { analyzer: name_analyzer }
-                                fullname: { analyzer: name_analyzer }
-                        tags:
-                            type: "object"
-                            properties:
-                                label: { type: text, boost: 2 }
-                    persistence:
-                        driver: orm
-                        model: Ladb\CoreBundle\Entity\Faq\Question
-                        provider: ~
-                        listener:
-                            insert: false
-                            update: false
-                            delete: false
+                        username: { analyzer: name_analyzer }
+                        displayname: { analyzer: name_analyzer }
+                        fullname: { analyzer: name_analyzer }
+                tags:
+                    type: "object"
+                    properties:
+                        label: { type: text, boost: 2 }
+            persistence:
+                driver: orm
+                model: Ladb\CoreBundle\Entity\Faq\Question
+                provider: ~
+                listener:
+                    insert: false
+                    update: false
+                    delete: false
         offer_offer:
             index_name: "%elasticsearch_index_prefix%offer_offer"
             settings: *index_settings
-            types:
-                offer_offer:
+            properties:
+                visibility: { type: integer }
+                title: { type: text, boost: 3, analyzer: title_analyzer }
+                body: { analyzer: body_analyzer }
+                createdAt: { type: date }
+                changedAt: { type: date }
+                kind: { type: short }
+                category: { type: integer }
+                rawPrice: { type: float }
+                geoPoint: { type: geo_point }
+                viewCount: { type: integer }
+                likeCount: { type: integer }
+                commentCount: { type: integer }
+                user:
+                    type: "object"
                     properties:
-                        visibility: { type: integer }
-                        title: { type: text, boost: 3, analyzer: title_analyzer }
-                        body: { analyzer: body_analyzer }
-                        createdAt: { type: date }
-                        changedAt: { type: date }
-                        kind: { type: short }
-                        category: { type: integer }
-                        rawPrice: { type: float }
-                        geoPoint: { type: geo_point }
-                        viewCount: { type: integer }
-                        likeCount: { type: integer }
-                        commentCount: { type: integer }
-                        user:
-                            type: "object"
-                            properties:
-                                username: { analyzer: name_analyzer }
-                                displayname: { analyzer: name_analyzer }
-                                fullname: { analyzer: name_analyzer }
-                        tags:
-                            type: "object"
-                            properties:
-                                label: { type: text, boost: 2 }
-                    persistence:
-                        driver: orm
-                        model: Ladb\CoreBundle\Entity\Offer\Offer
-                        provider: ~
-                        listener:
-                            insert: false
-                            update: false
-                            delete: false
+                        username: { analyzer: name_analyzer }
+                        displayname: { analyzer: name_analyzer }
+                        fullname: { analyzer: name_analyzer }
+                tags:
+                    type: "object"
+                    properties:
+                        label: { type: text, boost: 2 }
+            persistence:
+                driver: orm
+                model: Ladb\CoreBundle\Entity\Offer\Offer
+                provider: ~
+                listener:
+                    insert: false
+                    update: false
+                    delete: false
         knowledge_wood:
             index_name: "%elasticsearch_index_prefix%knowledge_wood"
             settings: *index_settings
-            types:
-                knowledge_wood:
-                    properties:
-                        titleWorkaround: { type: keyword, normalizer: title_normalizer }
-                        title: { type: text, boost: 3, analyzer: title_analyzer }
-                        name: { type: text, boost: 3, analyzer: name_analyzer }
-                        nameRejected: { type: boolean }
-                        grainRejected: { type: boolean }
-                        scientificname: { analyzer: name_analyzer }
-                        englishname: { analyzer: name_analyzer }
-                        density: { type: integer }
-                        origin: { analyzer: name_analyzer }
-                        utilization: { analyzer: name_analyzer }
-                        createdAt: { type: date }
-                        changedAt: { type: date }
-                        completion100: { type: integer }
-                        viewCount: { type: integer }
-                        likeCount: { type: integer }
-                        commentCount: { type: integer }
-                    persistence:
-                        driver: orm
-                        model: Ladb\CoreBundle\Entity\Knowledge\Wood
-                        provider: ~
-                        listener:
-                            insert: false
-                            update: false
-                            delete: false
+            properties:
+                titleWorkaround: { type: keyword, normalizer: title_normalizer }
+                title: { type: text, boost: 3, analyzer: title_analyzer }
+                name: { type: text, boost: 3, analyzer: name_analyzer }
+                nameRejected: { type: boolean }
+                grainRejected: { type: boolean }
+                scientificname: { analyzer: name_analyzer }
+                englishname: { analyzer: name_analyzer }
+                density: { type: integer }
+                origin: { analyzer: name_analyzer }
+                utilization: { analyzer: name_analyzer }
+                createdAt: { type: date }
+                changedAt: { type: date }
+                completion100: { type: integer }
+                viewCount: { type: integer }
+                likeCount: { type: integer }
+                commentCount: { type: integer }
+            persistence:
+                driver: orm
+                model: Ladb\CoreBundle\Entity\Knowledge\Wood
+                provider: ~
+                listener:
+                    insert: false
+                    update: false
+                    delete: false
         knowledge_provider:
             index_name: "%elasticsearch_index_prefix%knowledge_provider"
             settings: *index_settings
-            types:
-                knowledge_provider:
-                    properties:
-                        sign: { type: text, boost: 2, analyzer: name_analyzer }
-                        signRejected: { type: boolean }
-                        brand: { type: text, analyzer: exact_lowercase_analyzer }
-                        address: { analyzer: body_analyzer }
-                        geographicalAreas: { analyzer: body_analyzer }
-                        description: { analyzer: body_analyzer }
-                        products: { analyzer: body_analyzer }
-                        services: { analyzer: body_analyzer }
-                        woodsWorkaround: { analyzer: body_analyzer }
-                        branches: { analyzer: body_analyzer }
-                        geoPoint: { type: geo_point }
-                        createdAt: { type: date }
-                        changedAt: { type: date }
-                        completion100: { type: integer }
-                        viewCount: { type: integer }
-                        likeCount: { type: integer }
-                        commentCount: { type: integer }
-                        reviewCount: { type: integer }
-                        creationCount: { type: integer }
-                        howtoCount: { type: integer }
-                        averageRating: { type: float }
-                        inStoreSelling: { type: boolean }
-                        mailOrderSelling: { type: boolean }
-                        saleToIndividuals: { type: boolean }
-                    persistence:
-                        driver: orm
-                        model: Ladb\CoreBundle\Entity\Knowledge\Provider
-                        provider: ~
-                        listener:
-                            insert: false
-                            update: false
-                            delete: false
+            properties:
+                sign: { type: text, boost: 2, analyzer: name_analyzer }
+                signRejected: { type: boolean }
+                brand: { type: text, analyzer: exact_lowercase_analyzer }
+                address: { analyzer: body_analyzer }
+                geographicalAreas: { analyzer: body_analyzer }
+                description: { analyzer: body_analyzer }
+                products: { analyzer: body_analyzer }
+                services: { analyzer: body_analyzer }
+                woodsWorkaround: { analyzer: body_analyzer }
+                branches: { analyzer: body_analyzer }
+                geoPoint: { type: geo_point }
+                createdAt: { type: date }
+                changedAt: { type: date }
+                completion100: { type: integer }
+                viewCount: { type: integer }
+                likeCount: { type: integer }
+                commentCount: { type: integer }
+                reviewCount: { type: integer }
+                creationCount: { type: integer }
+                howtoCount: { type: integer }
+                averageRating: { type: float }
+                inStoreSelling: { type: boolean }
+                mailOrderSelling: { type: boolean }
+                saleToIndividuals: { type: boolean }
+            persistence:
+                driver: orm
+                model: Ladb\CoreBundle\Entity\Knowledge\Provider
+                provider: ~
+                listener:
+                    insert: false
+                    update: false
+                    delete: false
         knowledge_school:
             index_name: "%elasticsearch_index_prefix%knowledge_school"
             settings: *index_settings
-            types:
-                knowledge_school:
-                    properties:
-                        name: { type: text, boost: 3, analyzer: name_analyzer }
-                        nameRejected: { type: boolean }
-                        diplomas: { type: text, analyzer: name_analyzer }
-                        trainingTypes: { analyzer: body_analyzer }
-                        address: { analyzer: body_analyzer }
-                        geographicalAreas: { analyzer: body_analyzer }
-                        description: { analyzer: body_analyzer }
-                        geoPoint: { type: geo_point }
-                        createdAt: { type: date }
-                        changedAt: { type: date }
-                        completion100: { type: integer }
-                        viewCount: { type: integer }
-                        likeCount: { type: integer }
-                        commentCount: { type: integer }
-                        testimonialCount: { type: integer }
-                        creationCount: { type: integer }
-                        planCount: { type: integer }
-                        howtoCount: { type: integer }
-                    persistence:
-                        driver: orm
-                        model: Ladb\CoreBundle\Entity\Knowledge\School
-                        provider: ~
-                        listener:
-                            insert: false
-                            update: false
-                            delete: false
+            properties:
+                name: { type: text, boost: 3, analyzer: name_analyzer }
+                nameRejected: { type: boolean }
+                diplomas: { type: text, analyzer: name_analyzer }
+                trainingTypes: { analyzer: body_analyzer }
+                address: { analyzer: body_analyzer }
+                geographicalAreas: { analyzer: body_analyzer }
+                description: { analyzer: body_analyzer }
+                geoPoint: { type: geo_point }
+                createdAt: { type: date }
+                changedAt: { type: date }
+                completion100: { type: integer }
+                viewCount: { type: integer }
+                likeCount: { type: integer }
+                commentCount: { type: integer }
+                testimonialCount: { type: integer }
+                creationCount: { type: integer }
+                planCount: { type: integer }
+                howtoCount: { type: integer }
+            persistence:
+                driver: orm
+                model: Ladb\CoreBundle\Entity\Knowledge\School
+                provider: ~
+                listener:
+                    insert: false
+                    update: false
+                    delete: false
         knowledge_book:
             index_name: "%elasticsearch_index_prefix%knowledge_book"
             settings: *index_settings
-            types:
-                knowledge_book:
-                    properties:
-                        identity: { type: text, boost: 2, analyzer: name_analyzer }
-                        identityRejected: { type: boolean }
-                        work: { type: text, analyzer: exact_lowercase_analyzer }
-                        coverRejected: { type: boolean }
-                        authors: { analyzer: name_analyzer }
-                        editor: { analyzer: name_analyzer }
-                        collection: { type: text, analyzer: name_analyzer }
-                        publicDomain: { type: boolean }
-                        subjects: { analyzer: body_analyzer }
-                        summary: { analyzer: body_analyzer }
-                        toc: { analyzer: body_analyzer }
-                        language: { type: text, analyzer: name_analyzer }
-                        createdAt: { type: date }
-                        changedAt: { type: date }
-                        completion100: { type: integer }
-                        viewCount: { type: integer }
-                        likeCount: { type: integer }
-                        commentCount: { type: integer }
-                        reviewCount: { type: integer }
-                        averageRating: { type: float }
-                    persistence:
-                        driver: orm
-                        model: Ladb\CoreBundle\Entity\Knowledge\Book
-                        provider: ~
-                        listener:
-                            insert: false
-                            update: false
-                            delete: false
+            properties:
+                identity: { type: text, boost: 2, analyzer: name_analyzer }
+                identityRejected: { type: boolean }
+                work: { type: text, analyzer: exact_lowercase_analyzer }
+                coverRejected: { type: boolean }
+                authors: { analyzer: name_analyzer }
+                editor: { analyzer: name_analyzer }
+                collection: { type: text, analyzer: name_analyzer }
+                publicDomain: { type: boolean }
+                subjects: { analyzer: body_analyzer }
+                summary: { analyzer: body_analyzer }
+                toc: { analyzer: body_analyzer }
+                language: { type: text, analyzer: name_analyzer }
+                createdAt: { type: date }
+                changedAt: { type: date }
+                completion100: { type: integer }
+                viewCount: { type: integer }
+                likeCount: { type: integer }
+                commentCount: { type: integer }
+                reviewCount: { type: integer }
+                averageRating: { type: float }
+            persistence:
+                driver: orm
+                model: Ladb\CoreBundle\Entity\Knowledge\Book
+                provider: ~
+                listener:
+                    insert: false
+                    update: false
+                    delete: false
         knowledge_software:
             index_name: "%elasticsearch_index_prefix%knowledge_software"
             settings: *index_settings
-            types:
-                knowledge_software:
-                    properties:
-                        name: { type: text, boost: 3, analyzer: name_analyzer }
-                        identityRejected: { type: boolean }
-                        isAddOn: { type: boolean }
-                        hostSoftwareName: { type: string, analyzer: exact_lowercase_analyzer }
-                        iconRejected: { type: boolean }
-                        authors: { analyzer: name_analyzer }
-                        publisher: { analyzer: name_analyzer }
-                        openSource: { type: boolean }
-                        operatingSystems: { type: text, analyzer: name_analyzer }
-                        pricings: { type: text, analyzer: name_analyzer }
-                        features: { type: text, analyzer: name_analyzer }
-                        languages: { type: text, analyzer: name_analyzer }
-                        supportedFiles: { type: text }
-                        createdAt: { type: date }
-                        changedAt: { type: date }
-                        completion100: { type: integer }
-                        viewCount: { type: integer }
-                        likeCount: { type: integer }
-                        commentCount: { type: integer }
-                        reviewCount: { type: integer }
-                        averageRating: { type: float }
-                    persistence:
-                        driver: orm
-                        model: Ladb\CoreBundle\Entity\Knowledge\Software
-                        provider: ~
-                        listener:
-                            insert: false
-                            update: false
-                            delete: false
+            properties:
+                name: { type: text, boost: 3, analyzer: name_analyzer }
+                identityRejected: { type: boolean }
+                isAddOn: { type: boolean }
+                hostSoftwareName: { type: text, analyzer: exact_lowercase_analyzer }
+                iconRejected: { type: boolean }
+                authors: { analyzer: name_analyzer }
+                publisher: { analyzer: name_analyzer }
+                openSource: { type: boolean }
+                operatingSystems: { type: text, analyzer: name_analyzer }
+                pricings: { type: text, analyzer: name_analyzer }
+                features: { type: text, analyzer: name_analyzer }
+                languages: { type: text, analyzer: name_analyzer }
+                supportedFiles: { type: text }
+                createdAt: { type: date }
+                changedAt: { type: date }
+                completion100: { type: integer }
+                viewCount: { type: integer }
+                likeCount: { type: integer }
+                commentCount: { type: integer }
+                reviewCount: { type: integer }
+                averageRating: { type: float }
+            persistence:
+                driver: orm
+                model: Ladb\CoreBundle\Entity\Knowledge\Software
+                provider: ~
+                listener:
+                    insert: false
+                    update: false
+                    delete: false
         knowledge_tool:
             index_name: "%elasticsearch_index_prefix%knowledge_tool"
             settings: *index_settings
-            types:
-                knowledge_tool:
-                    properties:
-                        name: { type: text, boost: 3, analyzer: name_analyzer }
-                        nameKeyword: { type: keyword }
-                        nameRejected: { type: boolean }
-                        photoRejected: { type: boolean }
-                        manualCount: { type: integer }
-                        brand: { type: string, analyzer: exact_lowercase_analyzer }
-                        englishName: { type: text, analyzer: name_analyzer }
-                        productName: { type: text, analyzer: name_analyzer }
-                        description: { type: text, analyzer: body_analyzer }
-                        family: { type: string, analyzer: exact_lowercase_analyzer }
-                        utilization: { analyzer: name_analyzer }
-                        createdAt: { type: date }
-                        changedAt: { type: date }
-                        completion100: { type: integer }
-                        viewCount: { type: integer }
-                        likeCount: { type: integer }
-                        commentCount: { type: integer }
-                        reviewCount: { type: integer }
-                        averageRating: { type: float }
-                    persistence:
-                        driver: orm
-                        model: Ladb\CoreBundle\Entity\Knowledge\Tool
-                        provider: ~
-                        listener:
-                            insert: false
-                            update: false
-                            delete: false
+            properties:
+                name: { type: text, boost: 3, analyzer: name_analyzer }
+                nameKeyword: { type: keyword }
+                nameRejected: { type: boolean }
+                photoRejected: { type: boolean }
+                manualCount: { type: integer }
+                brand: { type: text, analyzer: exact_lowercase_analyzer }
+                englishName: { type: text, analyzer: name_analyzer }
+                productName: { type: text, analyzer: name_analyzer }
+                description: { type: text, analyzer: body_analyzer }
+                family: { type: text, analyzer: exact_lowercase_analyzer }
+                utilization: { analyzer: name_analyzer }
+                createdAt: { type: date }
+                changedAt: { type: date }
+                completion100: { type: integer }
+                viewCount: { type: integer }
+                likeCount: { type: integer }
+                commentCount: { type: integer }
+                reviewCount: { type: integer }
+                averageRating: { type: float }
+            persistence:
+                driver: orm
+                model: Ladb\CoreBundle\Entity\Knowledge\Tool
+                provider: ~
+                listener:
+                    insert: false
+                    update: false
+                    delete: false
         core_tag:
             index_name: "%elasticsearch_index_prefix%core_tag"
             settings: *index_settings
-            types:
-                core_tag:
-                    properties:
-                        label: { analyzer: autocomplete_analyzer }
-                    persistence:
-                        driver: orm
-                        model: Ladb\CoreBundle\Entity\Core\Tag
-                        provider: ~
-                        listener: ~
+            properties:
+                label: { analyzer: autocomplete_analyzer }
+            persistence:
+                driver: orm
+                model: Ladb\CoreBundle\Entity\Core\Tag
+                provider: ~
+                listener: ~
         input_skill:
             index_name: "%elasticsearch_index_prefix%input_skill"
             settings: *index_settings
-            types:
-                input_skill:
-                    properties:
-                        label: { analyzer: autocomplete_analyzer }
-                    persistence:
-                        driver: orm
-                        model: Ladb\CoreBundle\Entity\Input\Skill
-                        provider: ~
-                        listener: ~
+            properties:
+                label: { analyzer: autocomplete_analyzer }
+            persistence:
+                driver: orm
+                model: Ladb\CoreBundle\Entity\Input\Skill
+                provider: ~
+                listener: ~
         input_wood:
             index_name: "%elasticsearch_index_prefix%input_wood"
             settings: *index_settings
-            types:
-                input_wood:
-                    properties:
-                        label: { analyzer: autocomplete_analyzer }
-                    persistence:
-                        driver: orm
-                        model: Ladb\CoreBundle\Entity\Input\Wood
-                        provider: ~
-                        listener: ~
+            properties:
+                label: { analyzer: autocomplete_analyzer }
+            persistence:
+                driver: orm
+                model: Ladb\CoreBundle\Entity\Input\Wood
+                provider: ~
+                listener: ~
         input_tool:
             index_name: "%elasticsearch_index_prefix%input_tool"
             settings: *index_settings
-            types:
-                input_tool:
-                    properties:
-                        label: { analyzer: autocomplete_analyzer }
-                    persistence:
-                        driver: orm
-                        model: Ladb\CoreBundle\Entity\Input\Tool
-                        provider: ~
-                        listener: ~
+            properties:
+                label: { analyzer: autocomplete_analyzer }
+            persistence:
+                driver: orm
+                model: Ladb\CoreBundle\Entity\Input\Tool
+                provider: ~
+                listener: ~
         input_finish:
             index_name: "%elasticsearch_index_prefix%input_finish"
             settings: *index_settings
-            types:
-                input_finish:
-                    properties:
-                        label: { analyzer: autocomplete_analyzer }
-                    persistence:
-                        driver: orm
-                        model: Ladb\CoreBundle\Entity\Input\Finish
-                        provider: ~
-                        listener: ~
+            properties:
+                label: { analyzer: autocomplete_analyzer }
+            persistence:
+                driver: orm
+                model: Ladb\CoreBundle\Entity\Input\Finish
+                provider: ~
+                listener: ~
         input_hardware:
             index_name: "%elasticsearch_index_prefix%input_hardware"
             settings: *index_settings
-            types:
-                input_hardware:
-                    properties:
-                        label: { analyzer: autocomplete_analyzer }
-                    persistence:
-                        driver: orm
-                        model: Ladb\CoreBundle\Entity\Input\Hardware
-                        provider: ~
-                        listener: ~
+            properties:
+                label: { analyzer: autocomplete_analyzer }
+            persistence:
+                driver: orm
+                model: Ladb\CoreBundle\Entity\Input\Hardware
+                provider: ~
+                listener: ~
 
 # MercureBundle
 mercure:
