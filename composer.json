@@ -52,6 +52,7 @@
         "liip/imagine-bundle": "~2.3",
         "gos/web-socket-bundle": "1.10.4",
         "bentools/webpush-bundle": "^0.7.1",
+        "symfony/mercure-bundle": "~0.3.9",
         "guzzlehttp/promises": "^1.5",
 
         "facebook/graph-sdk": "~5.0",
@@ -128,6 +129,9 @@
                 "database_user": "DATABASE_USER",
                 "elasticsearch_host": "ELASTICSEARCH_HOST",
                 "memcached_host": "MEMCACHED_HOST",
+                "mercure_jwt_secret": "MERCURE_JWT_SECRET",
+                "mercure_public_url": "MERCURE_PUBLIC_URL",
+                "mercure_url": "MERCURE_URL",
                 "rabbitmq_host": "RABBITMQ_HOST",
                 "rabbitmq_password": "RABBITMQ_PASSWORD",
                 "rabbitmq_user": "RABBITMQ_USER",

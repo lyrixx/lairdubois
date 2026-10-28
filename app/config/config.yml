@@ -1178,6 +1178,16 @@ gos_web_socket:
             host: '%websocket_host%'
             port: '%websocket_port%'
 
+# MercureBundle
+mercure:
+    hubs:
+        default:
+            url: '%mercure_url%'
+            public_url: '%mercure_public_url%'
+            jwt:
+                secret: '%mercure_jwt_secret%'
+                publish: '*'
+
 # BentoolsWebpushBundle
 bentools_webpush:
     settings:
