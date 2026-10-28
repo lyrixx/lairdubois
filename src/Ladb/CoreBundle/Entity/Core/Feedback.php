@@ -72,7 +72,7 @@ class Feedback implements TypableInterface, BasicTimestampableInterface, Authore
 	/**
 	 * @ORM\Column(type="string", length=100, nullable=false)
 	 * @Assert\NotBlank()
-	 * @Assert\Length(min=2, max=100, allowEmptyString=true)
+	 * @Assert\Length(min=2, max=100)
 	 */
 	protected $title;
 

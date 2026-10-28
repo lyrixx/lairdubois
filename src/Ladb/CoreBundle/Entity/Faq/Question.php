@@ -57,7 +57,7 @@ class Question extends AbstractDraftableAuthoredPublication implements TitledInt
 	/**
 	 * @ORM\Column(type="string", length=100)
 	 * @Assert\NotBlank()
-	 * @Assert\Length(min=4, max=100, allowEmptyString=true)
+	 * @Assert\Length(min=4, max=100)
 	 */
 	private $title;
 

@@ -69,7 +69,7 @@ class User implements UserInterface, LegacyPasswordAuthenticatedUserInterface, E
 
 	/**
 	 * @ORM\Column(type="string", length=180)
-	 * @Assert\Length(min=3, max=25, allowEmptyString=true)
+	 * @Assert\Length(min=3, max=25)
 	 */
 	protected $username;
 
@@ -133,7 +133,7 @@ class User implements UserInterface, LegacyPasswordAuthenticatedUserInterface, E
 
 	/**
 	 * @ORM\Column(type="string", length=25, unique=true)
-	 * @Assert\Length(min=3, max=25, allowEmptyString=true, groups={"settings"})
+	 * @Assert\Length(min=3, max=25, groups={"settings"})
 	 * @Assert\NotBlank(groups={"settings"})
 	 * @Assert\Regex("/^[ a-zA-Z0-9ÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿÑñ'°’’-]+$/")
 	 */
@@ -146,7 +146,7 @@ class User implements UserInterface, LegacyPasswordAuthenticatedUserInterface, E
 
 	/**
 	 * @ORM\Column(type="string", length=100, nullable=true)
-	 * @Assert\Length(min=3, max=100, allowEmptyString=true, groups={"settings"})
+	 * @Assert\Length(min=3, max=100, groups={"settings"})
 	 * @Assert\Regex("/^[A-Za-z][ a-zA-Z0-9ÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿÑñ'°’’-]+$/")
 	 */
 	private $fullname;
