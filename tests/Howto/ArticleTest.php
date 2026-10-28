@@ -5,7 +5,7 @@ namespace Tests\Howto;
 use Ladb\CoreBundle\DataFixtures\UserFixtures;
 use Ladb\CoreBundle\Entity\Howto\Article;
 use Ladb\CoreBundle\Entity\Howto\Howto;
-use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Tests\WebTestCase;
 
 /**
@@ -300,7 +300,7 @@ final class ArticleTest extends WebTestCase
         self::assertSame(302, $client->getResponse()->getStatusCode());
     }
 
-    private function submitNewForm(Client $client): void
+    private function submitNewForm(KernelBrowser $client): void
     {
         $crawler = $client->request('GET', $this->path('core_howto_article_new', ['id' => self::HOWTO_ID]));
         $form = $crawler->filter(\sprintf('form[action="%s"]', $this->path('core_howto_article_create', ['id' => self::HOWTO_ID])))->form();

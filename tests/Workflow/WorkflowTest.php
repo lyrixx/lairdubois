@@ -11,7 +11,7 @@ use Lcobucci\JWT\Configuration;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
 use Lcobucci\JWT\Signer\Key\InMemory;
 use Lcobucci\JWT\Validation\Constraint\SignedWith;
-use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\DomCrawler\Form;
 use Symfony\Component\HttpFoundation\Cookie;
@@ -724,7 +724,7 @@ final class WorkflowTest extends WebTestCase
         return static::generatePath('core_workflow_'.$action, $parameters);
     }
 
-    private function createClientFor(?string $username): Client
+    private function createClientFor(?string $username): KernelBrowser
     {
         return null === $username ? static::createClient() : static::createClientAs($username);
     }
@@ -766,7 +766,7 @@ final class WorkflowTest extends WebTestCase
         return static::getEntityManager()->getRepository(Creation::class)->find(1);
     }
 
-    private function submitNewForm(Client $client, string $owner): void
+    private function submitNewForm(KernelBrowser $client, string $owner): void
     {
         $client->submit($this->getNewForm($client, $owner)->setValues([
             'ladb_workflow_workflow[title]' => 'fabrication d\'un tabouret',
@@ -778,7 +778,7 @@ final class WorkflowTest extends WebTestCase
         self::assertSame(302, $client->getResponse()->getStatusCode(), implode("\n", $client->getCrawler()->filter('.help-block')->each(fn (Crawler $node) => $node->text(null, false))));
     }
 
-    private function getNewForm(Client $client, string $owner): Form
+    private function getNewForm(KernelBrowser $client, string $owner): Form
     {
         $crawler = $client->request('GET', $this->path('new', UserFixtures::TEAM === $owner ? ['owner' => $owner] : []));
         self::assertSame(200, $client->getResponse()->getStatusCode());
@@ -806,7 +806,7 @@ final class WorkflowTest extends WebTestCase
         return \count(static::getEntityManager()->getRepository(Publish::class)->findBy(['entityType' => Workflow::TYPE, 'entityId' => self::ID]));
     }
 
-    private function unpublish(): Client
+    private function unpublish(): KernelBrowser
     {
         $client = static::createClientAs(UserFixtures::ADMIN);
         $client->request('GET', $this->path('unpublish', ['id' => self::ID, 'rtu' => '/']));

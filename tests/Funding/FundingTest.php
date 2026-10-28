@@ -7,7 +7,7 @@ use Ladb\CoreBundle\DataFixtures\UserFixtures;
 use Ladb\CoreBundle\Entity\Funding\Charge;
 use Ladb\CoreBundle\Entity\Funding\Donation;
 use Ladb\CoreBundle\Entity\Funding\Funding;
-use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\DomCrawler\Form;
 use Tests\Double\OfflineStripeClient;
 use Tests\WebTestCase;
@@ -423,7 +423,7 @@ final class FundingTest extends WebTestCase
         yield 'admin' => [UserFixtures::ADMIN, 200];
     }
 
-    private function getChargeForm(Client $client, string $path): Form
+    private function getChargeForm(KernelBrowser $client, string $path): Form
     {
         $crawler = static::xhr($client, 'GET', $path);
         self::assertSame(200, $client->getResponse()->getStatusCode());
@@ -440,7 +440,7 @@ final class FundingTest extends WebTestCase
         return static::generatePath($route, ['id' => $this->findCurrent()->getCharges()->first()->getId()]);
     }
 
-    private function createClientFor(?string $username): Client
+    private function createClientFor(?string $username): KernelBrowser
     {
         return null === $username ? static::createClient() : static::createClientAs($username);
     }

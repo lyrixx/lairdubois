@@ -3,7 +3,7 @@
 namespace Tests\User;
 
 use Ladb\CoreBundle\DataFixtures\UserFixtures;
-use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\Cookie as ResponseCookie;
@@ -283,7 +283,7 @@ final class LoginTest extends WebTestCase
         yield 'admin' => [UserFixtures::ADMIN, 'O:74:"Symfony\\Component\\Security\\Core\\Authentication\\Token\\UsernamePasswordToken":3:{i:0;N;i:1;s:4:"main";i:2;a:5:{i:0;C:32:"Ladb\\CoreBundle\\Entity\\Core\\User":275:{a:8:{i:0;s:88:"/r+tTBYXOOfHdCRUDwJuesex6ZpOpafKuYRyXvNtY4RK7S7Qm97lWAr4U8SC/O/IGuxFMoxvooYgaqiTy6kCYA==";i:1;s:43:"Vq7k3ZbN0pXe9yLr2TfHs6Wm1JcAuGd5Qo8iEnKx4Bw";i:2;s:5:"admin";i:3;s:5:"admin";i:4;b:1;i:5;i:1;i:6;s:21:"admin@lairdubois.test";i:7;s:21:"admin@lairdubois.test";}}i:1;b:1;i:2;a:2:{i:0;O:41:"Symfony\\Component\\Security\\Core\\Role\\Role":1:{s:47:"'."\0".'Symfony\\Component\\Security\\Core\\Role\\Role'."\0".'role";s:10:"ROLE_ADMIN";}i:1;O:41:"Symfony\\Component\\Security\\Core\\Role\\Role":1:{s:47:"'."\0".'Symfony\\Component\\Security\\Core\\Role\\Role'."\0".'role";s:9:"ROLE_USER";}}i:3;a:0:{}i:4;a:2:{i:0;s:10:"ROLE_ADMIN";i:1;s:9:"ROLE_USER";}}}', 200];
     }
 
-    private function login(Client $client, string $username, string $password): Client
+    private function login(KernelBrowser $client, string $username, string $password): KernelBrowser
     {
         $crawler = $client->request('GET', '/login');
         self::assertSame(200, $client->getResponse()->getStatusCode());
@@ -320,7 +320,7 @@ final class LoginTest extends WebTestCase
     /**
      * A new session, as after closing the browser: only the remember me cookie is left.
      */
-    private function keepOnlyRememberMe(Client $client): void
+    private function keepOnlyRememberMe(KernelBrowser $client): void
     {
         $rememberMe = $client->getCookieJar()->get('REMEMBERME');
         self::assertNotNull($rememberMe);
@@ -331,13 +331,13 @@ final class LoginTest extends WebTestCase
     /**
      * A page for ROLE_USER only: /@me/parametres redirects to the settings of the logged in user.
      */
-    private static function assertLoggedInAs(Client $client, string $username): void
+    private static function assertLoggedInAs(KernelBrowser $client, string $username): void
     {
         $client->request('GET', '/@me/parametres');
         self::assertSame("/@{$username}/parametres", $client->getResponse()->headers->get('Location'));
     }
 
-    private static function assertNotLoggedIn(Client $client): void
+    private static function assertNotLoggedIn(KernelBrowser $client): void
     {
         $client->request('GET', '/@me/parametres');
         self::assertSame('https://lairdubois.test/login', $client->getResponse()->headers->get('Location'));

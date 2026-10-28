@@ -3,7 +3,7 @@
 namespace Tests\User;
 
 use Ladb\CoreBundle\DataFixtures\UserFixtures;
-use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Tests\WebTestCase;
 
 /**
@@ -135,7 +135,7 @@ final class ResettingTest extends WebTestCase
         self::assertStringContainsString('Un e-mail a été envoyé.', $crawler->filter('.panel-body')->text(null, false));
     }
 
-    private function requestReset(Client $client, string $username): void
+    private function requestReset(KernelBrowser $client, string $username): void
     {
         $crawler = $client->request('GET', '/resetting/request');
         self::assertSame(200, $client->getResponse()->getStatusCode());
@@ -147,7 +147,7 @@ final class ResettingTest extends WebTestCase
     /**
      * Requests a reset, then submits the new password through the link of the email.
      */
-    private function resetPassword(Client $client, string $username, string $password): void
+    private function resetPassword(KernelBrowser $client, string $username, string $password): void
     {
         $this->requestReset($client, $username);
         self::assertSame(1, preg_match('{https://lairdubois\.test(/resetting/reset/[\w-]+)}', static::getSentEmails($client)[0]->getBody(), $matches));
@@ -165,7 +165,7 @@ final class ResettingTest extends WebTestCase
         static::getEntityManager()->getConnection()->update('tbl_core_user', ['confirmation_token' => $token, 'password_requested_at' => $requestedAt->format('Y-m-d H:i:s')], ['username_canonical' => $username]);
     }
 
-    private function login(Client $client, string $username, string $password): void
+    private function login(KernelBrowser $client, string $username, string $password): void
     {
         $crawler = $client->request('GET', '/login');
         $client->submit($crawler->filter('form[action$="/login_check"]')->form([

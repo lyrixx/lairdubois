@@ -7,7 +7,7 @@ use Ladb\CoreBundle\Entity\Workflow\Label;
 use Ladb\CoreBundle\Entity\Workflow\Part;
 use Ladb\CoreBundle\Entity\Workflow\Task;
 use Ladb\CoreBundle\Entity\Workflow\Workflow;
-use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Tests\WebTestCase;
 use Tests\XhrTrait;
 
@@ -175,7 +175,7 @@ final class LabelAndPartTest extends WebTestCase
         return static::getEntityManager()->getRepository(Task::class)->findOneBy(['workflow' => self::WORKFLOW_ID, 'title' => self::TASK]);
     }
 
-    private function assertPushedBoxOfTheTask(Client $client): void
+    private function assertPushedBoxOfTheTask(KernelBrowser $client): void
     {
         $updates = $client->getContainer()->get('tests.mercure_hub')->getUpdates();
         self::assertCount(1, $updates);

@@ -2,7 +2,7 @@
 
 namespace Tests;
 
-use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\DomCrawler\Crawler;
 
 /**
@@ -14,7 +14,7 @@ trait XhrTrait
     /**
      * A request with the header of XHR: the client of Symfony 3.4 has no xmlHttpRequest().
      */
-    protected static function xhr(Client $client, string $method, string $uri, array $parameters = []): Crawler
+    protected static function xhr(KernelBrowser $client, string $method, string $uri, array $parameters = []): Crawler
     {
         return $client->request($method, $uri, $parameters, [], ['HTTP_X_REQUESTED_WITH' => 'XMLHttpRequest']);
     }

@@ -4,7 +4,7 @@ namespace Tests\Knowledge;
 
 use Ladb\CoreBundle\Entity\Knowledge\AbstractKnowledge;
 use Ladb\CoreBundle\Entity\Knowledge\Value\BaseValue;
-use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\DomCrawler\Form;
 use Tests\XhrTrait;
@@ -23,7 +23,7 @@ trait ValueTrait
      *
      * @param array<string, string> $values by full field name: "ladb_knowledge_value_text[data]"...
      */
-    protected static function proposeValue(Client $client, AbstractKnowledge $knowledge, string $field, array $values): void
+    protected static function proposeValue(KernelBrowser $client, AbstractKnowledge $knowledge, string $field, array $values): void
     {
         $crawler = $client->request('GET', static::generatePath('core_knowledge_field_show', self::getFieldParameters($knowledge, $field)));
         self::assertSame(200, $client->getResponse()->getStatusCode());
@@ -38,7 +38,7 @@ trait ValueTrait
     /**
      * The form of the value $value of $field, as its author or an admin edits it.
      */
-    protected static function getValueEditForm(Client $client, AbstractKnowledge $knowledge, string $field, BaseValue $value): Form
+    protected static function getValueEditForm(KernelBrowser $client, AbstractKnowledge $knowledge, string $field, BaseValue $value): Form
     {
         $parameters = self::getFieldParameters($knowledge, $field) + ['id' => $value->getId()];
         $crawler = static::xhr($client, 'GET', static::generatePath('core_knowledge_value_edit', $parameters));
@@ -52,7 +52,7 @@ trait ValueTrait
      *
      * @param 'up'|'down' $way
      */
-    protected static function vote(Client $client, BaseValue $value, string $way, string $reason = ''): void
+    protected static function vote(KernelBrowser $client, BaseValue $value, string $way, string $reason = ''): void
     {
         $parameters = ['entityType' => $value->getType(), 'entityId' => $value->getId(), 'way' => $way];
         $crawler = static::xhr($client, 'GET', static::generatePath('core_vote_new', $parameters));

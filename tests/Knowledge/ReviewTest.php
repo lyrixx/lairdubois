@@ -7,7 +7,7 @@ use Ladb\CoreBundle\Entity\Core\Activity\Review as ReviewActivity;
 use Ladb\CoreBundle\Entity\Core\Review;
 use Ladb\CoreBundle\Entity\Knowledge\Book;
 use Ladb\CoreBundle\Entity\Knowledge\Software;
-use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\DomCrawler\Form;
 use Tests\WebTestCase;
 use Tests\XhrTrait;
@@ -188,7 +188,7 @@ final class ReviewTest extends WebTestCase
     /**
      * Only the accounts of more than 7 days review: the ones of the fixtures are just created.
      */
-    private function createClientOfOldAccount(string $username): Client
+    private function createClientOfOldAccount(string $username): KernelBrowser
     {
         $client = static::createClientAs($username);
         static::findUser($username)->setCreatedAt(new \DateTime('-8 days'));
@@ -202,7 +202,7 @@ final class ReviewTest extends WebTestCase
         return static::generatePath('core_review_new', ['entityType' => $entityType, 'entityId' => self::ID]);
     }
 
-    private function getEditForm(Client $client, int $id): Form
+    private function getEditForm(KernelBrowser $client, int $id): Form
     {
         $crawler = static::xhr($client, 'GET', static::generatePath('core_review_edit', ['id' => $id]));
         self::assertSame(200, $client->getResponse()->getStatusCode());

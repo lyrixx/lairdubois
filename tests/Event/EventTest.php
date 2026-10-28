@@ -5,7 +5,7 @@ namespace Tests\Event;
 use Ladb\CoreBundle\DataFixtures\UserFixtures;
 use Ladb\CoreBundle\Entity\Core\Join;
 use Ladb\CoreBundle\Entity\Event\Event;
-use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Tests\Double\OfflineLocalisableUtils;
 use Tests\PublicationTestCase;
 use Tests\XhrTrait;
@@ -173,7 +173,7 @@ final class EventTest extends PublicationTestCase
         yield 'admin' => [UserFixtures::ADMIN, 404];
     }
 
-    private function join(Client $client): void
+    private function join(KernelBrowser $client): void
     {
         static::xhr($client, 'GET', static::generatePath('core_join_create', ['entityType' => Event::TYPE, 'entityId' => static::ID]));
     }

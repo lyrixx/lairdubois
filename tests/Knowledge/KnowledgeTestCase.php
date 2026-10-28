@@ -7,7 +7,7 @@ use Ladb\CoreBundle\Entity\Core\Activity\Contribute;
 use Ladb\CoreBundle\Entity\Core\Watch;
 use Ladb\CoreBundle\Entity\Knowledge\AbstractKnowledge;
 use Ladb\CoreBundle\Entity\Knowledge\Value\BaseValue;
-use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\DomCrawler\Form;
 use Symfony\Component\PropertyAccess\PropertyAccess;
@@ -298,7 +298,7 @@ abstract class KnowledgeTestCase extends WebTestCase
         return 0 < $client->getCrawler()->filter(\sprintf('a[href$="%s"]', $showPath))->count();
     }
 
-    private function getNewForm(Client $client): Form
+    private function getNewForm(KernelBrowser $client): Form
     {
         $crawler = $client->request('GET', $this->path('new'));
         self::assertSame(200, $client->getResponse()->getStatusCode());

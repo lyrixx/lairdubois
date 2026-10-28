@@ -5,7 +5,7 @@ namespace Tests\User;
 use Ladb\CoreBundle\DataFixtures\UserFixtures;
 use Ladb\CoreBundle\Entity\Core\UserWitness;
 use Ladb\CoreBundle\Utils\CryptoUtils;
-use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\DomCrawler\Crawler;
 use Tests\Double\OfflineLocalisableUtils;
 use Tests\WebTestCase;
@@ -188,7 +188,7 @@ final class SettingsTest extends WebTestCase
     /**
      * @param array<string, string> $values
      */
-    private function submitSettings(Client $client, string $username, array $values): Crawler
+    private function submitSettings(KernelBrowser $client, string $username, array $values): Crawler
     {
         $crawler = $client->request('GET', "/@{$username}/parametres");
         self::assertSame(200, $client->getResponse()->getStatusCode());

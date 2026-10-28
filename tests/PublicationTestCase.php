@@ -7,7 +7,7 @@ use Ladb\CoreBundle\DataFixtures\UserFixtures;
 use Ladb\CoreBundle\Entity\AbstractDraftableAuthoredPublication;
 use Ladb\CoreBundle\Entity\Core\Activity\Publish;
 use PHPUnit\Framework\AssertionFailedError;
-use Symfony\Bundle\FrameworkBundle\Client;
+use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\DomCrawler\Form;
 
@@ -471,7 +471,7 @@ abstract class PublicationTestCase extends WebTestCase
         return static::$kernel->getContainer()->get('router')->generate(static::getRoutePrefix().'_'.$action, $parameters);
     }
 
-    protected function createClientFor(?string $username): Client
+    protected function createClientFor(?string $username): KernelBrowser
     {
         return null === $username ? static::createClient() : static::createClientAs($username);
     }
@@ -492,7 +492,7 @@ abstract class PublicationTestCase extends WebTestCase
      *
      * @param array<string, string> $values
      */
-    protected function submitNewForm(Client $client, string $owner, array $values): void
+    protected function submitNewForm(KernelBrowser $client, string $owner, array $values): void
     {
         $client->submit($this->getNewForm($client, $owner)->setValues($values));
 
@@ -503,7 +503,7 @@ abstract class PublicationTestCase extends WebTestCase
     /**
      * The form of a new content as $owner: a user, or a team of the user of $client.
      */
-    protected function getNewForm(Client $client, string $owner): Form
+    protected function getNewForm(KernelBrowser $client, string $owner): Form
     {
         $crawler = $client->request('GET', $this->path('new', UserFixtures::TEAM === $owner ? ['owner' => $owner] : []));
         self::assertSame(200, $client->getResponse()->getStatusCode());
@@ -541,7 +541,7 @@ abstract class PublicationTestCase extends WebTestCase
     /**
      * Unpublishes the content of the fixtures, as an admin.
      */
-    protected function unpublish(): Client
+    protected function unpublish(): KernelBrowser
     {
         $client = static::createClientAs(UserFixtures::ADMIN);
         $client->request('GET', $this->path('unpublish', ['id' => static::ID, 'rtu' => '/']));
@@ -592,7 +592,7 @@ abstract class PublicationTestCase extends WebTestCase
         self::assertSame($status, $client->getResponse()->getStatusCode(), \sprintf('Show of #%d as %s.', $id, $username ?? 'anonymous'));
     }
 
-    protected static function assertRedirectsToLogin(Client $client): void
+    protected static function assertRedirectsToLogin(KernelBrowser $client): void
     {
         self::assertTrue($client->getResponse()->isRedirect());
         self::assertStringEndsWith('/login', $client->getResponse()->headers->get('Location'));
