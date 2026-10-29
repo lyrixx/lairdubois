@@ -59,7 +59,7 @@ class ExplorableUtils {
 			}
 
 			$filters = array();
-			$similarFilter = new \Elastica\Query\MatchQuery('tags.label', $tagsString);
+			$similarFilter = new \Elastica\Query\MatchQuery('tags.label', array( 'query' => $tagsString, 'boost' => 2 ));
 			if ($explorable instanceof HiddableInterface) {
 
 				$filter = (new \Elastica\Query\BoolQuery())

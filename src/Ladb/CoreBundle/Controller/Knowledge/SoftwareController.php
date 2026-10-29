@@ -297,7 +297,7 @@ class SoftwareController extends AbstractController {
 						if (is_null($facet->name)) {
 
 							$filter = new \Elastica\Query\QueryString($facet->value);
-							$filter->setFields(array( 'name^100', 'hostSoftwareName^50', 'publisher', 'description', 'features' ));
+							$filter->setFields(array( 'name^300', 'hostSoftwareName^50', 'publisher', 'description', 'features' ));
 							$filters[] = $filter;
 
 							$couldUseDefaultSort = false;

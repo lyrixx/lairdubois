@@ -205,7 +205,7 @@ class ToolController extends AbstractController {
 					case 'name':
 
 						if (strpos($facet->value, ',')) {
-							$filter = new \Elastica\Query\MatchQuery('name', $facet->value);
+							$filter = new \Elastica\Query\MatchQuery('name', array( 'query' => $facet->value, 'boost' => 3 ));
 						} else {
 							$filter = new \Elastica\Query\MatchQuery('nameKeyword', $facet->value);
 						}
@@ -305,7 +305,7 @@ class ToolController extends AbstractController {
 						if (is_null($facet->name)) {
 
 							$filter = new \Elastica\Query\QueryString($facet->value);
-							$filter->setFields(array( 'name^100', 'englishName^50', 'productName^50', 'brand', 'description' ));
+							$filter->setFields(array( 'name^300', 'englishName^50', 'productName^50', 'brand', 'description' ));
 							$filters[] = $filter;
 
 							$couldUseDefaultSort = false;

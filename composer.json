@@ -69,12 +69,12 @@
         "symfony/validator": "6.4.*",
         "symfony/yaml": "6.4.*",
         "twig/twig": "~3.27.1",
-        "monolog/monolog": "^1.0",
+        "monolog/monolog": "^3.0",
 
         "doctrine/doctrine-migrations-bundle": "^3.7",
         "beberlei/doctrineextensions": "^1.2",
 
-        "friendsofsymfony/elastica-bundle": "^6.3",
+        "friendsofsymfony/elastica-bundle": "^7.2",
         "stof/doctrine-extensions-bundle": "^1.13",
         "gedmo/doctrine-extensions": "~3.20.1",
         "liip/imagine-bundle": "^2.18",

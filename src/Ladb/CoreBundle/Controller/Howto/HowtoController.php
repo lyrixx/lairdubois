@@ -386,7 +386,7 @@ class HowtoController extends AbstractHowtoBasedController {
 					case 'tag':
 
 						$filter = new \Elastica\Query\QueryString($facet->value);
-						$filter->setFields(array( 'tags.label' ));
+						$filter->setFields(array( 'tags.label^2' ));
 						$filters[] = $filter;
 
 						break;
@@ -511,7 +511,7 @@ class HowtoController extends AbstractHowtoBasedController {
 						if (is_null($facet->name)) {
 
 							$filter = new \Elastica\Query\QueryString($facet->value);
-							$filter->setFields(array( 'title^100', 'body', 'articles.title^50', 'articles.body', 'tags.label' ));
+							$filter->setFields(array( 'title^300', 'body', 'articles.title^150', 'articles.body', 'tags.label^2' ));
 							$filters[] = $filter;
 
 							$couldUseDefaultSort = false;

@@ -89,8 +89,8 @@ Ordre :
      Swiftmailer → Mailer (`DkimSigner` de Mime 5.2, spool par Messenger, #19).
    - 6.4 : annotations → attributs, fin de SensioFrameworkExtraBundle.
    - Elasticsearch 5 → 9 (#31), réindexation depuis la base : 7.17 en Docker et en CI dès la 4.4
-     (FOSElasticaBundle 6.3), 9 après le saut en 6.4 (FOSElasticaBundle 7, #161), seul livré en
-     prod. Aucune version de FOSElasticaBundle ne parle ES 8 ou 9 avant Symfony 6.4.
+     (FOSElasticaBundle 6.3), 9 après le saut en 6.4 (FOSElasticaBundle 7.2, Elastica 9, #161),
+     seul livré en prod. Aucune version de FOSElasticaBundle ne parle ES 8 ou 9 avant Symfony 6.4.
 
 ## Environnement
 
@@ -138,7 +138,7 @@ Contextes : `--context=test` (`SYMFONY_ENV=test`), `--context=ci` (le même, san
   `config.yml`, `json_manifest_path`). Un fichier LESS ou JS ajouté à un groupe va dans
   `vite.config.js`. Le dev sert le build : `castor app:assets:watch` pendant qu'on modifie un
   LESS ou un JS, pas de serveur de Vite.
-- MariaDB 10.11 (`root`/`app`), Elasticsearch 7.17 (un nœud, sans sécurité, un volume par version
+- MariaDB 10.11 (`root`/`app`), Elasticsearch 9.5 (un nœud, sans sécurité, un volume par version
   majeure), RabbitMQ 3.13 (`app`/`app`), Memcached. Workers
   (profil `worker`) : les trois de Messenger (`messenger:consume mailer`, `messenger:consume view`,
   `messenger:consume webpush_notification`). Extension PHP `amqp` dans les images, pour le transport
@@ -686,6 +686,20 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
     `SearchUtils` écrit le `random_score` lui-même ;
   - le filtre `nGram` s'écrit `ngram`, et un écart de plus de 1 entre `min_gram` et `max_gram`
     demande `index.max_ngram_diff`.
+- Elasticsearch 9 (#161) :
+  - ES 8 refuse le `boost` d'un champ dans le mapping : les requêtes le donnent au champ
+    (`title^300` = `title^100` × 3, `tags.label^2`, `boost` d'un `match`). ES 7 ne l'appliquait
+    qu'aux mots seuls, ni aux jokers, ni aux mots flous (`~`), ni aux phrases : les typeaheads, tout
+    en jokers, n'en ont pas. Dans une recherche tapée avec des guillemets, `*` ou `~`, ces mots ont
+    maintenant aussi le poids du champ : l'ordre par pertinence peut y changer ;
+  - le `random_score` hache `_seq_no` avec la graine (`field`, sa valeur par défaut en 9 ; ES 7
+    hachait `_id`), qui change quand le document est réindexé ;
+  - la liste de mots vides `_french_` de Lucene 10 a 10 mots de moins que celle de Lucene 8 :
+    `fr_stop_elasticsearch_7` les remet, pour les mêmes tokens ;
+  - le client passe par PSR-18 (`hosts` dans `fos_elastica.clients`), découvert par
+    `php-http/discovery` : le `Psr18Client` de HttpClient, avec le `timeout` de 30 s du bundle. Le
+    profiler garde le corps des requêtes décodé en tableau : un `match_all` y apparaît en `[]`,
+    envoyé `{}`.
 - Un index par type (#31) : ES ne trie pas sur un champ absent du mapping de l'index (500), alors
   que l'index unique d'avant partageait le mapping de tous les types. Un champ de tri va dans le
   mapping de chaque type qui le propose.

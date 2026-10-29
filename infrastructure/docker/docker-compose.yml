@@ -48,7 +48,7 @@ x-templates:
 volumes:
     # One per major version: Elasticsearch does not start on the data of an older one, the
     # indexes come from the database (castor app:elasticsearch:populate)
-    elasticsearch-7-data: {}
+    elasticsearch-9-data: {}
     mariadb-data: {}
     rabbitmq-data: {}
 
@@ -68,7 +68,7 @@ services:
             - default
 
     elasticsearch:
-        image: elasticsearch:7.17.28
+        image: elasticsearch:9.5.5
         environment:
             # A single node: no bootstrap checks (vm.max_map_count...)
             - discovery.type=single-node
@@ -78,7 +78,7 @@ services:
             - ingest.geoip.downloader.enabled=false
             - ES_JAVA_OPTS=-Xms512m -Xmx512m
         volumes:
-            - elasticsearch-7-data:/usr/share/elasticsearch/data
+            - elasticsearch-9-data:/usr/share/elasticsearch/data
         healthcheck:
             test: ["CMD-SHELL", "curl -fs 'http://127.0.0.1:9200/_cluster/health?wait_for_status=yellow&timeout=5s' > /dev/null"]
             interval: 5s

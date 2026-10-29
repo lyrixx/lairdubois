@@ -385,9 +385,12 @@ parameters:
 
 fos_elastica:
     clients:
-        default: { host: "%elasticsearch_host%", port: "%elasticsearch_port%" }
+        default: { hosts: [ "http://%elasticsearch_host%:%elasticsearch_port%" ] }
     # One index per type of content: Elasticsearch 6 allows one type per index, 7 none (#31). All
-    # of them with the settings of the first one.
+    # of them with the settings of the first one. No boost in the mapping, which Elasticsearch 8
+    # refuses: the queries give it to the field (title^300...), except the typeaheads, all in
+    # wildcards. Elasticsearch 7 applied it to the words alone, not to the wildcards, the fuzzy
+    # words nor the phrases (#161).
     indexes:
         core_user:
             index_name: "%elasticsearch_index_prefix%core_user"
@@ -408,7 +411,7 @@ fos_elastica:
                             body_analyzer:
                                 type: custom
                                 tokenizer: standard
-                                filter : [lowercase, asciifolding, fr_stemmer, fr_stop, fr_elision]
+                                filter : [lowercase, asciifolding, fr_stemmer, fr_stop, fr_stop_elasticsearch_7, fr_elision]
                             exact_lowercase_analyzer:
                                 type: custom
                                 tokenizer: keyword
@@ -425,6 +428,11 @@ fos_elastica:
                             fr_stop:
                                 type: stop
                                 stopwords: _french_
+                            # The words of the French list of Elasticsearch 7 (Lucene 8) that the one of 9
+                            # (Lucene 10) no longer has: the same tokens as before (#161)
+                            fr_stop_elasticsearch_7:
+                                type: stop
+                                stopwords: [as, aura, auras, avions, est, fût, sommes, son, été, étés]
                             fr_stemmer:
                                 type: stemmer
                                 name: light_french
@@ -437,8 +445,8 @@ fos_elastica:
                                 max_gram: 20
             properties:
                 isTeam: { type: boolean }
-                displayname: { type: text, boost: 2, analyzer: name_analyzer }
-                fullname: { type: text, boost: 1, analyzer: name_analyzer }
+                displayname: { type: text, analyzer: name_analyzer }
+                fullname: { type: text, analyzer: name_analyzer }
                 username: { analyzer: exact_lowercase_analyzer }
                 createdAt: { type: date }
                 accountType: { type: short }
@@ -466,7 +474,7 @@ fos_elastica:
             index_name: "%elasticsearch_index_prefix%core_tip"
             settings: *index_settings
             properties:
-                title: { type: text, boost: 3, analyzer: title_analyzer }
+                title: { type: text, analyzer: title_analyzer }
                 body: { analyzer: body_analyzer }
                 createdAt: { type: date }
                 changedAt: { type: date }
@@ -482,7 +490,7 @@ fos_elastica:
             settings: *index_settings
             properties:
                 visibility: { type: integer }
-                title: { type: text, boost: 3, analyzer: title_analyzer }
+                title: { type: text, analyzer: title_analyzer }
                 body: { analyzer: body_analyzer }
                 createdAt: { type: date }
                 changedAt: { type: date }
@@ -509,7 +517,7 @@ fos_elastica:
                 tags:
                     type: "object"
                     properties:
-                        label: { type: text, boost: 2 }
+                        label: { type: text }
                 woods:
                     type: "object"
                     properties:
@@ -543,7 +551,7 @@ fos_elastica:
             settings: *index_settings
             properties:
                 visibility: { type: integer }
-                title: { type: text, boost: 3, analyzer: title_analyzer }
+                title: { type: text, analyzer: title_analyzer }
                 body: { analyzer: body_analyzer }
                 createdAt: { type: date }
                 changedAt: { type: date }
@@ -566,7 +574,7 @@ fos_elastica:
                 tags:
                     type: "object"
                     properties:
-                        label: { type: text, boost: 2 }
+                        label: { type: text }
                 license:
                     type: "object"
                     properties:
@@ -584,7 +592,7 @@ fos_elastica:
             settings: *index_settings
             properties:
                 visibility: { type: integer }
-                title: { type: text, boost: 3, analyzer: title_analyzer }
+                title: { type: text, analyzer: title_analyzer }
                 body: { analyzer: body_analyzer }
                 createdAt: { type: date }
                 changedAt: { type: date }
@@ -615,7 +623,7 @@ fos_elastica:
                 tags:
                     type: "object"
                     properties:
-                        label: { type: text, boost: 2 }
+                        label: { type: text }
                 license:
                     type: "object"
                     properties:
@@ -633,7 +641,7 @@ fos_elastica:
             settings: *index_settings
             properties:
                 visibility: { type: integer }
-                title: { type: text, boost: 3, analyzer: title_analyzer }
+                title: { type: text, analyzer: title_analyzer }
                 body: { analyzer: body_analyzer }
                 createdAt: { type: date }
                 changedAt: { type: date }
@@ -665,7 +673,7 @@ fos_elastica:
                 tags:
                     type: "object"
                     properties:
-                        label: { type: text, boost: 2 }
+                        label: { type: text }
             persistence:
                 driver: orm
                 model: Ladb\CoreBundle\Entity\Qa\Question
@@ -679,7 +687,7 @@ fos_elastica:
             settings: *index_settings
             properties:
                 visibility: { type: integer }
-                title: { type: text, boost: 3, analyzer: title_analyzer }
+                title: { type: text, analyzer: title_analyzer }
                 createdAt: { type: date }
                 changedAt: { type: date }
                 viewCount: { type: integer }
@@ -699,7 +707,7 @@ fos_elastica:
                 articles:
                     type: "object"
                     properties:
-                        title: { type: text, boost: 3, analyzer: title_analyzer }
+                        title: { type: text, analyzer: title_analyzer }
                         body: { analyzer: body_analyzer }
                 user:
                     type: "object"
@@ -710,7 +718,7 @@ fos_elastica:
                 tags:
                     type: "object"
                     properties:
-                        label: { type: text, boost: 2 }
+                        label: { type: text }
                 license:
                     type: "object"
                     properties:
@@ -728,7 +736,7 @@ fos_elastica:
             settings: *index_settings
             properties:
                 visibility: { type: integer }
-                title: { type: text, boost: 3, analyzer: title_analyzer }
+                title: { type: text, analyzer: title_analyzer }
                 body: { analyzer: body_analyzer }
                 createdAt: { type: date }
                 changedAt: { type: date }
@@ -746,7 +754,7 @@ fos_elastica:
                 tags:
                     type: "object"
                     properties:
-                        label: { type: text, boost: 2 }
+                        label: { type: text }
             persistence:
                 driver: orm
                 model: Ladb\CoreBundle\Entity\Find\Find
@@ -760,7 +768,7 @@ fos_elastica:
             settings: *index_settings
             properties:
                 visibility: { type: integer }
-                title: { type: text, boost: 3, analyzer: title_analyzer }
+                title: { type: text, analyzer: title_analyzer }
                 body: { analyzer: body_analyzer }
                 createdAt: { type: date }
                 changedAt: { type: date }
@@ -782,7 +790,7 @@ fos_elastica:
                 tags:
                     type: "object"
                     properties:
-                        label: { type: text, boost: 2 }
+                        label: { type: text }
             persistence:
                 driver: orm
                 model: Ladb\CoreBundle\Entity\Event\Event
@@ -796,7 +804,7 @@ fos_elastica:
             settings: *index_settings
             properties:
                 visibility: { type: integer }
-                title: { type: text, boost: 3, analyzer: title_analyzer }
+                title: { type: text, analyzer: title_analyzer }
                 body: { analyzer: body_analyzer }
                 createdAt: { type: date }
                 changedAt: { type: date }
@@ -817,7 +825,7 @@ fos_elastica:
                 tags:
                     type: "object"
                     properties:
-                        label: { type: text, boost: 2 }
+                        label: { type: text }
             persistence:
                 driver: orm
                 model: Ladb\CoreBundle\Entity\Workflow\Workflow
@@ -831,7 +839,7 @@ fos_elastica:
             settings: *index_settings
             properties:
                 visibility: { type: integer }
-                title: { type: text, boost: 3, analyzer: title_analyzer }
+                title: { type: text, analyzer: title_analyzer }
                 body: { analyzer: body_analyzer }
                 createdAt: { type: date }
                 changedAt: { type: date }
@@ -848,7 +856,7 @@ fos_elastica:
                 tags:
                     type: "object"
                     properties:
-                        label: { type: text, boost: 2 }
+                        label: { type: text }
             persistence:
                 driver: orm
                 model: Ladb\CoreBundle\Entity\Collection\Collection
@@ -862,7 +870,7 @@ fos_elastica:
             settings: *index_settings
             properties:
                 visibility: { type: integer }
-                title: { type: text, boost: 3, analyzer: title_analyzer }
+                title: { type: text, analyzer: title_analyzer }
                 body: { analyzer: body_analyzer }
                 createdAt: { type: date }
                 changedAt: { type: date }
@@ -879,7 +887,7 @@ fos_elastica:
                 tags:
                     type: "object"
                     properties:
-                        label: { type: text, boost: 2 }
+                        label: { type: text }
             persistence:
                 driver: orm
                 model: Ladb\CoreBundle\Entity\Promotion\Graphic
@@ -893,7 +901,7 @@ fos_elastica:
             settings: *index_settings
             properties:
                 visibility: { type: integer }
-                title: { type: text, boost: 3, analyzer: title_analyzer }
+                title: { type: text, analyzer: title_analyzer }
                 body: { analyzer: body_analyzer }
                 createdAt: { type: date }
                 changedAt: { type: date }
@@ -909,7 +917,7 @@ fos_elastica:
                 tags:
                     type: "object"
                     properties:
-                        label: { type: text, boost: 2 }
+                        label: { type: text }
             persistence:
                 driver: orm
                 model: Ladb\CoreBundle\Entity\Blog\Post
@@ -923,7 +931,7 @@ fos_elastica:
             settings: *index_settings
             properties:
                 visibility: { type: integer }
-                title: { type: text, boost: 3, analyzer: title_analyzer }
+                title: { type: text, analyzer: title_analyzer }
                 body: { analyzer: body_analyzer }
                 createdAt: { type: date }
                 changedAt: { type: date }
@@ -940,7 +948,7 @@ fos_elastica:
                 tags:
                     type: "object"
                     properties:
-                        label: { type: text, boost: 2 }
+                        label: { type: text }
             persistence:
                 driver: orm
                 model: Ladb\CoreBundle\Entity\Faq\Question
@@ -954,7 +962,7 @@ fos_elastica:
             settings: *index_settings
             properties:
                 visibility: { type: integer }
-                title: { type: text, boost: 3, analyzer: title_analyzer }
+                title: { type: text, analyzer: title_analyzer }
                 body: { analyzer: body_analyzer }
                 createdAt: { type: date }
                 changedAt: { type: date }
@@ -974,7 +982,7 @@ fos_elastica:
                 tags:
                     type: "object"
                     properties:
-                        label: { type: text, boost: 2 }
+                        label: { type: text }
             persistence:
                 driver: orm
                 model: Ladb\CoreBundle\Entity\Offer\Offer
@@ -988,8 +996,8 @@ fos_elastica:
             settings: *index_settings
             properties:
                 titleWorkaround: { type: keyword, normalizer: title_normalizer }
-                title: { type: text, boost: 3, analyzer: title_analyzer }
-                name: { type: text, boost: 3, analyzer: name_analyzer }
+                title: { type: text, analyzer: title_analyzer }
+                name: { type: text, analyzer: name_analyzer }
                 nameRejected: { type: boolean }
                 grainRejected: { type: boolean }
                 scientificname: { analyzer: name_analyzer }
@@ -1015,7 +1023,7 @@ fos_elastica:
             index_name: "%elasticsearch_index_prefix%knowledge_provider"
             settings: *index_settings
             properties:
-                sign: { type: text, boost: 2, analyzer: name_analyzer }
+                sign: { type: text, analyzer: name_analyzer }
                 signRejected: { type: boolean }
                 brand: { type: text, analyzer: exact_lowercase_analyzer }
                 address: { analyzer: body_analyzer }
@@ -1051,7 +1059,7 @@ fos_elastica:
             index_name: "%elasticsearch_index_prefix%knowledge_school"
             settings: *index_settings
             properties:
-                name: { type: text, boost: 3, analyzer: name_analyzer }
+                name: { type: text, analyzer: name_analyzer }
                 nameRejected: { type: boolean }
                 diplomas: { type: text, analyzer: name_analyzer }
                 trainingTypes: { analyzer: body_analyzer }
@@ -1081,7 +1089,7 @@ fos_elastica:
             index_name: "%elasticsearch_index_prefix%knowledge_book"
             settings: *index_settings
             properties:
-                identity: { type: text, boost: 2, analyzer: name_analyzer }
+                identity: { type: text, analyzer: name_analyzer }
                 identityRejected: { type: boolean }
                 work: { type: text, analyzer: exact_lowercase_analyzer }
                 coverRejected: { type: boolean }
@@ -1113,7 +1121,7 @@ fos_elastica:
             index_name: "%elasticsearch_index_prefix%knowledge_software"
             settings: *index_settings
             properties:
-                name: { type: text, boost: 3, analyzer: name_analyzer }
+                name: { type: text, analyzer: name_analyzer }
                 identityRejected: { type: boolean }
                 isAddOn: { type: boolean }
                 hostSoftwareName: { type: text, analyzer: exact_lowercase_analyzer }
@@ -1146,7 +1154,7 @@ fos_elastica:
             index_name: "%elasticsearch_index_prefix%knowledge_tool"
             settings: *index_settings
             properties:
-                name: { type: text, boost: 3, analyzer: name_analyzer }
+                name: { type: text, analyzer: name_analyzer }
                 nameKeyword: { type: keyword }
                 nameRejected: { type: boolean }
                 photoRejected: { type: boolean }

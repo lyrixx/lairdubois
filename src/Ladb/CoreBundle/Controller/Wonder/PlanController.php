@@ -717,7 +717,7 @@ class PlanController extends AbstractController {
 					case 'tag':
 
 						$filter = new \Elastica\Query\QueryString($facet->value);
-						$filter->setFields(array( 'tags.label' ));
+						$filter->setFields(array( 'tags.label^2' ));
 						$filters[] = $filter;
 
 						break;
@@ -839,7 +839,7 @@ class PlanController extends AbstractController {
 						if (is_null($facet->name)) {
 
 							$filter = new \Elastica\Query\QueryString($facet->value);
-							$filter->setFields(array( 'title^100', 'body', 'tags.label' ));
+							$filter->setFields(array( 'title^300', 'body', 'tags.label^2' ));
 							$filters[] = $filter;
 
 							$couldUseDefaultSort = false;

@@ -228,7 +228,7 @@ final class LocalisableUtilsTest extends TestCase
         $logger = new class() extends AbstractLogger {
             public $levels = [];
 
-            public function log($level, $message, array $context = [])
+            public function log($level, \Stringable|string $message, array $context = []): void
             {
                 $this->levels[] = $level;
             }
