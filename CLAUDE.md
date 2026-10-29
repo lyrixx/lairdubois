@@ -617,8 +617,8 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   sous PHPUnit (`error_reporting=-1`), `Tests\DeprecationCollector` les compte toujours. Toujours
   utile en 5.4 : sans lui, la première page du FPM de dev après un démarrage affiche des
   dépréciations, celles des paramètres implicitement nullables de SensioFrameworkExtraBundle (chargé
-  en même temps que le container de debug ; Stof, DoctrineBundle et Liip n'en ont plus depuis #177,
-  SwiftmailerBundle est parti avec #19) et
+  en même temps que le container de debug, sa 6.2 en a encore, jusqu'à #27 ; Stof, DoctrineBundle et
+  Liip n'en ont plus depuis #177, SwiftmailerBundle est parti avec #19) et
   `SplObjectStorage::attach()`. En CLI, rien : `bin/console` a son gestionnaire en dev, et le
   container de prod ne charge plus que des fichiers de Symfony, propres depuis 5.4.55 (la 4.4
   affichait 6 dépréciations par commande). À revoir quand ces bundles monteront.
@@ -840,8 +840,12 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   l'accès avant d'évaluer `@Security` : une redirection vers `/login` au lieu du 404 de son
   `statusCode`. `Security\NullTokenStorage` lui donne un `NullToken` (`services.yml`), à retirer
   avec le bundle (#27).
-- SensioFrameworkExtraBundle est en 5.5 : le `TemplateListener` de la 5.4 demande un
-  `Twig_Environment`, qui n'existe plus en Twig 3 (`TypeError` sur toute action à `@Template`).
+- SensioFrameworkExtraBundle est en 6.2 (#177), la dernière, abandonnée, qui accepte Symfony 6.4 :
+  il part avec #27. Avant la 5.5, son `TemplateListener` demandait un `Twig_Environment`, qui
+  n'existe plus en Twig 3 (`TypeError` sur toute action à `@Template`).
+- symfony/monolog-bundle 3.10 (#177) passe au container les niveaux des handlers tels qu'écrits
+  (`notice`, que Monolog convertit) et le `action_level` du `fingers_crossed` en
+  `ErrorLevelActivationStrategy` : mêmes niveaux et mêmes fichiers que la 3.6.
 - `Length` n'a plus `allowEmptyString` (#177, retiré en 6.0) : elle refuse `''` avec `min`, mais
   ignore `null`, ce que donne un champ de formulaire vide (`TextType` sans `empty_data`). Une valeur
   validée qui vaudrait `''` (`empty_data: ''`, écrite par le code) serait « trop courte », en plus

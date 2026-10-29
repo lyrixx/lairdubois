@@ -24,7 +24,8 @@ class ReturnToUrlListener implements EventSubscriberInterface {
 	public function onKernelRequest(RequestEvent $event) {
 		$request = $event->getRequest();
 		foreach (array( $request->query, $request->request ) as $parameters) {
-			if ($parameters->has('rtu') && !$this->isSiteUrl($parameters->get('rtu'), $request->getHost())) {
+			// all(): get() refuses a non-scalar value (rtu[]=…, forged), a 400 since Symfony 6.0
+			if ($parameters->has('rtu') && !$this->isSiteUrl($parameters->all()['rtu'], $request->getHost())) {
 				$parameters->remove('rtu');
 			}
 		}
