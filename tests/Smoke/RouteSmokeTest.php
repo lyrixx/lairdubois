@@ -50,6 +50,7 @@ final class RouteSmokeTest extends WebTestCase
         '_profiler' =>'Web profiler (dev tool), not a page of the site.',
         '_profiler_exception' => 'Web profiler (dev tool), not a page of the site.',
         '_profiler_exception_css' => 'Web profiler (dev tool), not a page of the site.',
+        '_profiler_font' => 'Web profiler (dev tool), not a page of the site.',
         '_profiler_home' => 'Web profiler (dev tool), not a page of the site.',
         '_profiler_open_file' => 'Web profiler (dev tool), not a page of the site.',
         '_profiler_phpinfo' => 'Web profiler (dev tool), not a page of the site.',

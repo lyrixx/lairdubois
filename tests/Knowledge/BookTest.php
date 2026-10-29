@@ -67,7 +67,7 @@ final class BookTest extends KnowledgeTestCase
      */
     public static function provideInvalidLanguages(): iterable
     {
-        yield 'unknown' => ['xx', 'Veuillez sélectionner une langue valide.'];
+        yield 'unknown' => ['xx', 'Cette langue n\'est pas valide.'];
         yield 'empty' => ['', 'Cette valeur ne doit pas être vide.'];
     }
 }

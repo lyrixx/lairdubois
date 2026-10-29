@@ -208,9 +208,9 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et get
 
 - PHPUnit 9.6, dans `tools/phpunit` et pas dans le `composer.json` de l'application : c'est la
   dernière version qui marche avec `Tests\DeprecationCollector` (`TestResult` et `ErrorHandler`
-  de PHPUnit, supprimés en 10). `symfony/phpunit-bridge`, que `symfony/symfony` ne
-  remplace pas, est en 8.1 : il ne dépend d'aucun composant de Symfony, n'exige que PHP 8.1 et
-  marche encore avec PHPUnit 9.6, rien à y changer aux sauts de version. Le collecteur ne
+  de PHPUnit, supprimés en 10). `symfony/phpunit-bridge`, qui n'est pas un des composants en
+  `6.4.*` de `composer.json`, est en 8.1 : il ne dépend d'aucun composant de Symfony, n'exige que
+  PHP 8.1 et marche encore avec PHPUnit 9.6, rien à y changer aux sauts de version. Le collecteur ne
   l'appelle plus : il construit lui-même le gestionnaire d'erreurs de PHPUnit du test en cours,
   comme le `getPhpUnitErrorHandler()` du bridge, privé depuis 4.4.
 - `qa:phpunit` lance PHP avec OPcache (`opcache.enable_cli=1`, `file_update_protection=0`, #113) :
@@ -280,12 +280,9 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et get
   `max` et `minMessage`, passé en `notInRangeMessage`).
 - Les règles de rector-symfony (les sets de 4.x ne sont plus dans Rector 2 : une règle à la fois
   dans `rector.php`) ne s'appliquent qu'à partir d'une version d'un paquet de Symfony
-  (`symfony/console`…), lue dans `vendor/composer/installed.json`, où `symfony/symfony` les
-  remplace : `rector.php` donne à Rector la version de `symfony/symfony` pour chacun, sinon il
-  les ignore sans rien dire. Sauf `symfony/console`, en 6.1 : les deux règles de `#[AsCommand]`
-  (`CommandPropertyToAttributeRector` pour `$defaultName`, `CommandConfigureToAttributeRector`
-  pour le `setDescription()` de `configure()`) attendent la 6.1, qui déprécie `$defaultName`,
-  alors que l'attribut existe depuis 5.3. Elles typent par PHPStan :
+  (`symfony/console`…), et l'ignorent sans rien dire avant : `rector.php` donne à Rector les
+  versions installées dans l'application (`vendor/composer/installed.json`), pas celles de
+  `tools/rector`. Elles typent par PHPStan :
   `MakeDispatchFirstArgumentEventRector` ne reconnaît pas le dispatcher d'une propriété sans type
   (`$this->dispatcher` des managers).
 
@@ -411,8 +408,9 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   celles de PHP (comme `ClockMock` du bridge). Il connaît le compteur de partages de
   `OfflineFacebookGraph::URL`, répond une erreur pour `ERROR_URL` et pour toute autre requête, et
   rend les URL appelées (`popRequests()`).
-- Une `\Error` PHP sort du kernel (jusqu'en 5.4) : elle remonte de `$client->request()` au lieu
-  de donner une 500. Un warning PHP devient une exception (gestionnaire d'erreurs de PHPUnit) : 500.
+- Une `\Error` PHP sort du kernel (`framework.handle_all_throwables` à `false`, le défaut de 6.4) :
+  elle remonte de `$client->request()` au lieu de donner une 500. Un warning PHP devient une
+  exception (gestionnaire d'erreurs de PHPUnit) : 500.
 - Smoke test (`tests/Smoke/RouteSmokeTest.php`) : chaque route GET en anonyme, `user` et `admin`,
   rien en 5xx ni en `\Error`. Une action qui refuse
   une requête hors XHR (« Only XML request allowed ») est rappelée en XHR. Paramètres des routes :
@@ -610,24 +608,13 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   l'ancien `MEDIUMINT` (500 sur toute page qui écrit la session) :
   `docs/database/schema-sessions.sql` passe aussi une table plus ancienne en `INTEGER UNSIGNED`, et
   `castor app:db:schema` le rejoue.
-- Le kernel passe `error_reporting` à `E_ALL ^ E_WARNING` pendant qu'il inclut le container en
-  cache, avant tout gestionnaire d'erreurs de Symfony : PHP 8.4+ y afficherait les dépréciations
-  des fichiers chargés à ce moment. `AppKernel::initializeContainer()` ignore alors ce que le
-  niveau de l'appelant cache (php.ini, `bin/console`) et passe le reste au gestionnaire précédent :
-  sous PHPUnit (`error_reporting=-1`), `Tests\DeprecationCollector` les compte toujours. Toujours
-  utile en 5.4 : sans lui, la première page du FPM de dev après un démarrage affiche des
-  dépréciations, celles des paramètres implicitement nullables de SensioFrameworkExtraBundle (chargé
-  en même temps que le container de debug, sa 6.2 en a encore, jusqu'à #27 ; Stof, DoctrineBundle et
-  Liip n'en ont plus depuis #177, SwiftmailerBundle est parti avec #19) et
-  `SplObjectStorage::attach()`. En CLI, rien : `bin/console` a son gestionnaire en dev, et le
-  container de prod ne charge plus que des fichiers de Symfony, propres depuis 5.4.55 (la 4.4
-  affichait 6 dépréciations par commande). À revoir quand ces bundles monteront.
 - Le FPM affiche les erreurs natives de PHP (`display_errors` du php.ini des images), la prod non.
   La 4.4 les coupait (#128) : son Routing ne connaissait pas le message de PCRE2 10.43+ (PHP 8.5)
   pour un lookbehind, et chaque construction du cache du routeur par une requête donnait quelque
   350 warnings avant les en-têtes (500). Le Routing de 5.4 le connaît.
-- Jusqu'en 5.4, `HttpKernel` n'attrape que les `\Exception` : une `\Error` PHP (appel sur `null`,
-  `TypeError`) sort du kernel au lieu de donner une 500.
+- Tant que `framework.handle_all_throwables` n'est pas à `true` (le défaut de 7.0), `HttpKernel`
+  n'attrape que les `\Exception` : une `\Error` PHP (appel sur `null`, `TypeError`) sort du kernel
+  au lieu de donner une 500.
 - Pages d'erreur : contrôleur d'erreur de FrameworkBundle (`twig.exception_controller: null`).
   `TwigErrorRenderer` ne rend que le HTML (`@Twig/Exception/error.html.twig`) ; les routes au
   `_format` json (`.json`, `.geojson`) gardent leur erreur en JSON par `RequestFormatErrorRenderer`
@@ -714,14 +701,14 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   reste en 2.5 : la 3 refuse les alias `LadbCoreBundle:…` (`getRepository()`, DQL), dont les 107
   constantes `CLASS_NAME` des entités et les `from('LadbCoreBundle:…')` des commandes ; c'est pour
   l'ORM 3 (#178). Symfony 6.4 l'accepte, la 7.4 non. `enable_lazy_ghost_objects` reste donc à
-  `false` (il exige persistence 3.1 et `symfony/var-exporter` 6.2) : sa dépréciation, celle de
-  DoctrineBundle 2.11, reste jusqu'à #178.
+  `false` (il exige persistence 3.1) : sa dépréciation, celle de DoctrineBundle 2.11, reste
+  jusqu'à #178.
 - Bornes de `composer.json` : `gedmo/doctrine-extensions` `~3.20.1` (depuis la 3.21, Sluggable et
   `Urlizer` passent par `symfony/string` : les slugs et les labels de tags peuvent changer) ;
   `dama/doctrine-test-bundle` `~8.2.2` (la 8.3 veut PHPUnit 10, que Composer ne voit pas, dans
   `tools/phpunit`) ; `doctrine/data-fixtures` `^1.8` (la 2.0 impose les types natifs et la classe
   dans `getReference()`). `doctrine/migrations` est en 3.5 : à partir de la 3.6, il exige
-  `symfony/var-exporter` 6.2, que `symfony/symfony` 5.4 remplace.
+  `symfony/var-exporter` 6.2, que la 5.4 n'avait pas.
 - doctrine/migrations 3 lit la table des 1.x et 2.x (`storage.table_storage.table_name:
   migration_versions`) : la sienne par défaut, `doctrine_migration_versions`, lui ferait rejouer
   toutes les migrations de la prod. Le premier `doctrine:migrations:migrate` (ou
@@ -771,17 +758,39 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   l'authenticator du formulaire (`LastLoginListener` pose la dernière connexion). Le namespace
   `@FOSUser` est un chemin Twig de `config.yml` (`templates/bundles/FOSUserBundle/`), les traductions
   utilisées sont dans les domaines `FOSUserBundle` et `validators` du bundle.
-- symfony/symfony 5.4 ne livre pas les ponts de Messenger, de Mailer, de Notifier ni de Translation
-  (`export-ignore`) : ils s'installent à part. `symfony/amqp-messenger` porte nos transports.
-  `symfony/doctrine-messenger` ne sert à rien chez nous : sans lui, DoctrineBundle 2.1 cassait la
-  compilation du container en debug (il testait l'ancienne classe du transport Doctrine, que 5.4 ne
-  garde que comme un fichier qui charge celle du pont, et DebugClassLoader refuse un fichier sans
-  sa classe). DoctrineBundle 2.13 teste celle du pont : il peut partir.
+- Symfony 6.4 en composants séparés (#26) : plus de `symfony/symfony`, que Symfony 7 refuse.
+  `composer.json` exige en `6.4.*` les bundles (framework, security, twig ; debug et web-profiler
+  en dev) et les composants dont le site se sert lui-même : les `use` de `src/`, `app/`, `tests/`
+  et `bin/`, et ce que la config demande (`yaml`, `translation`, `asset`, `http-client`,
+  `expression-language` pour `@Security`). En dev, ceux des tests (`browser-kit`, `css-selector`,
+  `dom-crawler`, `finder`) et `stopwatch` (services de debug et timeline du profiler, comme le
+  `profiler-pack` de Symfony). Le reste vient des dépendances. Celles qui acceptent aussi la 7.x
+  (`cache`, `clock`, `process`, `property-info`, `string`, `twig-bridge`, `var-dumper`,
+  `var-exporter`, `web-link`) sont bornées par le `conflict` de `composer.json`, à monter avec
+  les composants. Les contrats sont en 3.x, séparés (`service-contracts`…).
+- Sans `symfony/symfony` (sa classe `FullStack`), FrameworkBundle active d'office chaque fonction
+  dont le composant est installé : `lock`, `property_info` et `web_link`, que tirent des
+  dépendances, sont coupés dans `config.yml`, comme avant. Un paquet ajouté peut en allumer une
+  autre : comparer `debug:container` et `debug:config` avant et après.
+- Services lazy (l'entity manager de DoctrineBundle) : la 6.4 fait ses proxys elle-même
+  (`symfony/var-exporter`, `EntityManagerGhost…` dans le container), plus de
+  `symfony/proxy-manager-bridge` (déprécié en 6.3). `Registry::reset()` (le worker,
+  `reset_on_message`) remet à zéro un entity manager fermé par une erreur.
+- `symfony/messenger` 6 n'exige plus ses ponts : `amqp-messenger` porte nos transports,
+  `doctrine-messenger` et `redis-messenger` sont partis.
+- La table `sessions` reste hors du schéma de Doctrine (`docs/database/schema-sessions.sql`) :
+  `RemoveSessionSchemaListenerPass` retire le `PdoSessionHandlerSchemaListener` de DoctrineBridge
+  6.3+, que DoctrineBundle active pour un `PdoSessionHandler`. Avec lui, chaque commande de schéma
+  (`schema:update`, `schema:validate`, `migrations:diff`) proposerait de modifier la table, et
+  créerait puis supprimerait une table pour vérifier qu'elle est dans la même base : MariaDB
+  valide la transaction sur ce DDL, celle de dama disparaît, et PHPUnit s'arrête (« There is no
+  active transaction », `ladb:init`). À revoir avec DBAL 4 (#178) : avec le listener, la table
+  ferait partie du schéma, et `--complete` ne la supprimerait pas.
 - Les sessions ouvertes en 3.4 et 4.4 ont des objets `Security\Core\Role\Role` dans leur token :
-  Symfony 5.4 garde une classe `Role` interne pour les relire, et elles restent connectées
-  (`LoginTest`, avec un token capturé sur la vraie 4.4 ; le cookie remember_me capturé avec lui est
-  refusé et supprimé depuis l'authenticator manager, qui signe autrement, #177). La 6.0.0 la
-  retire, la 6.4 la remet : à revérifier aux sauts suivants (#26).
+  Symfony 5.4 et 6.4 gardent une classe `Role` pour les relire (vide en 6.4, « Allows migrating
+  session payloads from v4 »), et elles restent connectées (`LoginTest`, avec un token capturé
+  sur la vraie 4.4 ; le cookie remember_me capturé avec lui est refusé et supprimé depuis
+  l'authenticator manager, qui signe autrement, #177). À revérifier en 7.4 et en 8.2.
 - Messenger (#22) : trois transports AMQP (`config.yml`), chacun avec son échange et sa file du
   même nom, `mailer` (#19), `view` et `webpush_notification`. Les anciennes files de RabbitMqBundle
   (`view_queue`…) ne servent plus : le `PhpSerializer` lit un de leurs messages comme un array, et
@@ -851,10 +860,12 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
 - symfony/monolog-bundle 3.10 (#177) passe au container les niveaux des handlers tels qu'écrits
   (`notice`, que Monolog convertit) et le `action_level` du `fingers_crossed` en
   `ErrorLevelActivationStrategy` : mêmes niveaux et mêmes fichiers que la 3.6.
-- `framework.form.legacy_error_messages: false` (#26) : le comportement de Symfony 6, qui retire
-  l'option. Une valeur qu'un type de formulaire ne peut pas transformer (langue inconnue, nombre mal
-  écrit, choix hors liste) donne le message du type (« Veuillez sélectionner une langue valide. »)
-  au lieu de « Cette valeur n'est pas valide. ».
+- Depuis Symfony 6 (`framework.form.legacy_error_messages`, sans effet), une valeur qu'un type de
+  formulaire ne peut pas transformer (langue inconnue, nombre mal écrit, choix hors liste) donne le
+  message du type (« Cette langue n'est pas valide. ») au lieu de « Cette valeur n'est pas
+  valide. ». Les messages traduits du validateur suivent ceux de Symfony 6.4 (« Elle doit contenir
+  au minimum 4 caractères. »). Un `NumberType` sans `html5` a un `inputmode` (`decimal`, ou
+  `numeric` avec `scale` à 0) : le clavier numérique sur mobile.
 - `Length` n'a plus `allowEmptyString` (#177, retiré en 6.0) : elle refuse `''` avec `min`, mais
   ignore `null`, ce que donne un champ de formulaire vide (`TextType` sans `empty_data`). Une valeur
   validée qui vaudrait `''` (`empty_data: ''`, écrite par le code) serait « trop courte », en plus
