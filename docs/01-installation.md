@@ -233,10 +233,10 @@ and restart php-fpm:
     $ sudo systemctl restart php7.3-fpm
 ```
 
-### Install [pngquant](https://pngquant.org/), [optipng](http://optipng.sourceforge.net/) and [jpegoptim](https://github.com/tjko/jpegoptim) - *The image optimizers*
+### Install [pngquant](https://pngquant.org/) and [jpegoptim](https://github.com/tjko/jpegoptim) - *The image optimizers*
 
 ``` bash
-    $ sudo apt-get install pngquant optipng jpegoptim
+    $ sudo apt-get install pngquant jpegoptim
 ```
 
 ### Install [Chromium](https://www.chromium.org/) - *To capture external websites*

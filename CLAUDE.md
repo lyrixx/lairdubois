@@ -616,9 +616,9 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   niveau de l'appelant cache (php.ini, `bin/console`) et passe le reste au gestionnaire précédent :
   sous PHPUnit (`error_reporting=-1`), `Tests\DeprecationCollector` les compte toujours. Toujours
   utile en 5.4 : sans lui, la première page du FPM de dev après un démarrage affiche des
-  dépréciations, celles des paramètres implicitement nullables de SensioFrameworkExtraBundle, Liip et
-  SwiftmailerBundle (chargés en même temps que le container de debug ; Stof et DoctrineBundle n'en
-  ont plus depuis #177) et
+  dépréciations, celles des paramètres implicitement nullables de SensioFrameworkExtraBundle (chargé
+  en même temps que le container de debug ; Stof, DoctrineBundle et Liip n'en ont plus depuis #177,
+  SwiftmailerBundle est parti avec #19) et
   `SplObjectStorage::attach()`. En CLI, rien : `bin/console` a son gestionnaire en dev, et le
   container de prod ne charge plus que des fichiers de Symfony, propres depuis 5.4.55 (la 4.4
   affichait 6 dépréciations par commande). À revoir quand ces bundles monteront.
@@ -803,6 +803,23 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   de `guzzlehttp/psr7` 2.11 à chaque envoi (une erreur en psr7 3), jusqu'à la 0.14 comprise. Sa
   route d'abonnement lit `{"subscription": …}`, alors que le JS du site envoie la
   `PushSubscription` telle quelle : `WebpushController` la remplace (même nom, même chemin).
+- Liip Imagine 2.18 et Imagine 1.5 (#177). Les variantes passent par les post-processors `jpegoptim`
+  et `pngquant` du bundle (`config.yml`, une ancre YAML pour tous les filter sets), avec les options
+  de ps/image-optimizer, parti (il s'arrêtait à Symfony 5) : `jpegoptim --strip-all --max=95
+  --all-progressive` et `pngquant --quality 0-100` (`quality: 100`, le défaut de pngquant ; celui de
+  Liip, 80-100, changerait les PNG). ps/image-optimizer ne lançait que le premier optimiseur PNG qui
+  réussissait, pngquant : optipng ne sert plus. Liip attend les binaires dans `/usr/bin` et lève une
+  exception quand l'un manque ou échoue (500 sur `/media/cache/resolve/…`), là où ps/image-optimizer
+  servait l'image sans l'optimiser.
+  - Imagine 1.3+ ajoute un canal alpha à chaque image qu'il charge (`Imagick\Image::setColorspace()`) :
+    avec ImageMagick 7, le redimensionnement calcule un peu autrement, et les variantes filtrées des
+    images des fixtures ont changé d'octets à la montée (invisible : RMSE au pire de 3,1/255 en JPEG,
+    de 0,8/255 en PNG). Sans ce canal, elles étaient identiques octet pour octet.
+  - Un PNG sans post-processor (filter set `cache`) porte les dates d'ImageMagick (chunks `tIME` et
+    `date:*`) : deux générations de la même variante ne sont pas identiques octet pour octet.
+  - Le contrôleur redirige en 301 (`controller.redirect_response_code`), le défaut d'avant Liip 2.7
+    (302 depuis). `twig.mode: lazy` (le mode `legacy` est déprécié) : `imagine_filter` exige une
+    chaîne (un chemin `null` donne une `TypeError`) et ne retire plus la query string du chemin.
 - Plus de composant `templating` : les templates se nomment dans la notation de Twig
   (`@LadbCore/Dir/file.html.twig`, `@FOSUser/…`, `base.html.twig` pour `templates/`), la
   notation de bundle (`LadbCoreBundle:Dir:file.html.twig`, `::base.html.twig`) ne les trouve plus.

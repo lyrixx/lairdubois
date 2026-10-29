@@ -60,8 +60,8 @@ RUN apt-get update \
 # Binaries called by the application: Chromium (screenshots of the shared links, see
 # Utils/WebScreenshotUtils.php), ImageMagick with its delegates, Ghostscript to read the
 # PDF (the policy of Debian 13 does not block them, unlike the one of
-# docs/01-installation.md) and rsvg-convert the SVG, and the image optimizers of
-# ps/image-optimizer
+# docs/01-installation.md) and rsvg-convert the SVG, and the image optimizers of the
+# post-processors of Liip (app/config/config.yml)
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         chromium \
@@ -69,7 +69,6 @@ RUN apt-get update \
         imagemagick \
         jpegoptim \
         librsvg2-bin \
-        optipng \
         pngquant \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
