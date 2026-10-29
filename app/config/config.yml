@@ -11,7 +11,10 @@ framework:
         # Not the default of Symfony 6 (true): the requirements of the routes keep matching bytes,
         # not UTF-8 characters
         utf8: false
-    form:            true
+    # As in Symfony 6, which removes the option: a value that a type cannot transform gives the
+    # message of the type ("Please select a valid language."), not "This value is not valid."
+    form:
+        legacy_error_messages: false
     csrf_protection: true
     validation:      { enable_annotations: true }
     trusted_hosts: ['^(dev|www)\.lairdubois\.fr$']
