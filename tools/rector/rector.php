@@ -26,6 +26,8 @@ use Rector\Symfony\Symfony44\Rector\ClassMethod\ConsoleExecuteReturnIntRector;
 use Rector\Symfony\Symfony51\Rector\Class_\LogoutSuccessHandlerToLogoutEventSubscriberRector;
 use Rector\Symfony\Symfony61\Rector\Class_\CommandConfigureToAttributeRector;
 use Rector\Symfony\Symfony61\Rector\Class_\CommandPropertyToAttributeRector;
+use Rector\Symfony\Symfony62\Rector\Class_\MessageHandlerInterfaceToAttributeRector;
+use Rector\Symfony\Symfony62\Rector\Class_\MessageSubscriberInterfaceToAttributeRector;
 use Rector\Symfony\Symfony62\Rector\Class_\SecurityAttributeToIsGrantedAttributeRector;
 use Rector\TypeDeclaration\Rector\ClassMethod\AddReturnTypeDeclarationRector;
 use Rector\TypeDeclaration\ValueObject\AddReturnTypeDeclaration;
@@ -50,6 +52,10 @@ return static function (RectorConfig $rectorConfig): void {
             // #[Security] of SensioFrameworkExtraBundle → #[IsGranted] of Symfony 6.2 (#27), after
             // the @Security annotations become attributes (a first pass)
             SecurityAttributeToIsGrantedAttributeRector::class,
+            // MessageHandlerInterface and MessageSubscriberInterface of Messenger (deprecated in
+            // 6.2) → #[AsMessageHandler] (#205)
+            MessageHandlerInterfaceToAttributeRector::class,
+            MessageSubscriberInterfaceToAttributeRector::class,
         ])
         // Of the renames of symfony/security-core 5.3 (composer-based set of rector-symfony), the
         // one that the code needs (#177). The #[Template] of SensioFrameworkExtraBundle → that of
