@@ -81,7 +81,7 @@ final class ResettingController extends AbstractController {
 
 			$response = $this->redirectToRoute('fos_user_profile_show');
 
-			$loginUtils->logIn($user, $request);
+			$loginUtils->logIn($user);
 
 			// Flashbag
 			$this->addFlash('success', $translator->trans('resetting.flash.success', array(), 'FOSUserBundle'));
