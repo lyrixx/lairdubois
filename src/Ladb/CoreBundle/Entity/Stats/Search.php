@@ -9,7 +9,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 #[ORM\Entity]
 class Search {
 
-	const CLASS_NAME = 'LadbCoreBundle:Stats\Search';
+	const CLASS_NAME = self::class;
 
 	#[ORM\Column(name: 'id', type: 'integer')]
 	#[ORM\Id]

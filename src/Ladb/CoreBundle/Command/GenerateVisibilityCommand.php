@@ -64,15 +64,15 @@ EOT
 
 		$entityCount = 0;
 
-		$entityCount += $this->_process('LadbCoreBundle:Blog\Post', $em, $output);
-		$entityCount += $this->_process('LadbCoreBundle:Faq\Question', $em, $output);
-		$entityCount += $this->_process('LadbCoreBundle:Find\Find', $em, $output);
-		$entityCount += $this->_process('LadbCoreBundle:Howto\Howto', $em, $output);
-		$entityCount += $this->_process('LadbCoreBundle:Wonder\Creation', $em, $output);
-		$entityCount += $this->_process('LadbCoreBundle:Wonder\Plan', $em, $output);
-		$entityCount += $this->_process('LadbCoreBundle:Wonder\Workshop', $em, $output);
-		$entityCount += $this->_process('LadbCoreBundle:Qa\Question', $em, $output);
-		$entityCount += $this->_process('LadbCoreBundle:Promotion\Graphic', $em, $output);
+		$entityCount += $this->_process(\Ladb\CoreBundle\Entity\Blog\Post::class, $em, $output);
+		$entityCount += $this->_process(\Ladb\CoreBundle\Entity\Faq\Question::class, $em, $output);
+		$entityCount += $this->_process(\Ladb\CoreBundle\Entity\Find\Find::class, $em, $output);
+		$entityCount += $this->_process(\Ladb\CoreBundle\Entity\Howto\Howto::class, $em, $output);
+		$entityCount += $this->_process(\Ladb\CoreBundle\Entity\Wonder\Creation::class, $em, $output);
+		$entityCount += $this->_process(\Ladb\CoreBundle\Entity\Wonder\Plan::class, $em, $output);
+		$entityCount += $this->_process(\Ladb\CoreBundle\Entity\Wonder\Workshop::class, $em, $output);
+		$entityCount += $this->_process(\Ladb\CoreBundle\Entity\Qa\Question::class, $em, $output);
+		$entityCount += $this->_process(\Ladb\CoreBundle\Entity\Promotion\Graphic::class, $em, $output);
 
 		if ($forced) {
 			$em->flush();

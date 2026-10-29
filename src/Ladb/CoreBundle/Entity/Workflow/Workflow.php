@@ -44,7 +44,7 @@ class Workflow extends AbstractAuthoredPublication implements IndexableInterface
 	use TitledTrait, SluggedTrait, PicturedTrait, HtmlBodiedTrait, LicensedTrait;
 	use IndexableTrait, SitemapableTrait, LikableTrait, WatchableTrait, CommentableTrait, TaggableTrait, ViewableTrait, InspirableTrait, CollectionnableTrait;
 
-	const CLASS_NAME = 'LadbCoreBundle:Workflow\Workflow';
+	const CLASS_NAME = self::class;
 	const TYPE = 118;
 
 	#[Assert\NotBlank]

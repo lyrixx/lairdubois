@@ -27,7 +27,7 @@ class Took extends AbstractAuthoredPublication implements TitledInterface, Slugg
 	use TitledTrait, SluggedTrait, PicturedTrait, HtmlBodiedTrait;
 	use ScrapableTrait;
 
-	const CLASS_NAME = 'LadbCoreBundle:Youtook\Took';
+	const CLASS_NAME = self::class;
 	const TYPE = 112;
 
 	#[Assert\NotBlank]

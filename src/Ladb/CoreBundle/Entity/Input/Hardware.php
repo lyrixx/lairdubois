@@ -8,6 +8,6 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Input\HardwareRepository::class)]
 class Hardware extends AbstractInput {
 
-	const CLASS_NAME = 'LadbCoreBundle:Input\Hardware';
+	const CLASS_NAME = self::class;
 
 }

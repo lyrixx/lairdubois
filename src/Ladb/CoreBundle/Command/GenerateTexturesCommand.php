@@ -49,7 +49,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'w' ))
-			->from('LadbCoreBundle:Knowledge\Wood', 'w')
+			->from(\Ladb\CoreBundle\Entity\Knowledge\Wood::class, 'w')
 		;
 
 		try {

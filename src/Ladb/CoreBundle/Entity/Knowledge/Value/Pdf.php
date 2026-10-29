@@ -10,7 +10,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Knowledge\Value\PdfRepository::class)]
 class Pdf extends BaseValue {
 
-	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Value\Pdf';
+	const CLASS_NAME = self::class;
 	const TYPE = 26;
 
 	const TYPE_STRIPPED_NAME = 'pdf';

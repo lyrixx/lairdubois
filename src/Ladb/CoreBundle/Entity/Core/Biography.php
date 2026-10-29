@@ -16,7 +16,7 @@ class Biography implements IdentifiableInterface, HtmlBodiedInterface {
 
 	use HtmlBodiedTrait;
 
-	const CLASS_NAME = 'LadbCoreBundle:Core\Biography';
+	const CLASS_NAME = self::class;
 
 	#[ORM\Column(name: 'id', type: 'integer')]
 	#[ORM\Id]

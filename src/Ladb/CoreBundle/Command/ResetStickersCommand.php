@@ -47,7 +47,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'c', 's' ))
-			->from('LadbCoreBundle:Wonder\Creation', 'c')
+			->from(\Ladb\CoreBundle\Entity\Wonder\Creation::class, 'c')
 			->innerJoin('c.sticker', 's')
 		;
 
@@ -70,7 +70,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'p', 's' ))
-			->from('LadbCoreBundle:Wonder\Plan', 'p')
+			->from(\Ladb\CoreBundle\Entity\Wonder\Plan::class, 'p')
 			->innerJoin('p.sticker', 's')
 		;
 
@@ -93,7 +93,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'w', 's' ))
-			->from('LadbCoreBundle:Wonder\Workshop', 'w')
+			->from(\Ladb\CoreBundle\Entity\Wonder\Workshop::class, 'w')
 			->innerJoin('w.sticker', 's')
 		;
 
@@ -116,7 +116,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'h', 's' ))
-			->from('LadbCoreBundle:Howto\Howto', 'h')
+			->from(\Ladb\CoreBundle\Entity\Howto\Howto::class, 'h')
 			->innerJoin('h.sticker', 's')
 		;
 
@@ -139,7 +139,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'a', 's' ))
-			->from('LadbCoreBundle:Howto\Article', 'a')
+			->from(\Ladb\CoreBundle\Entity\Howto\Article::class, 'a')
 			->innerJoin('a.sticker', 's')
 		;
 

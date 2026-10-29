@@ -9,7 +9,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\Activity\WriteRepository::class)]
 class Write extends AbstractActivity {
 
-	const CLASS_NAME = 'LadbCoreBundle:Core\Activity\Write';
+	const CLASS_NAME = self::class;
 	const STRIPPED_NAME = 'write';
 
 	#[ORM\JoinColumn(nullable: false)]

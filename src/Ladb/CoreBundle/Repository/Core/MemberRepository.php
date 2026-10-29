@@ -13,7 +13,7 @@ class MemberRepository extends AbstractEntityRepository {
 	public function existsByTeamAndUser(User $team, User $user) {
 		$query = $this->getEntityManager()
 			->createQuery('
-                SELECT count(e.id) FROM LadbCoreBundle:Core\Member e
+                SELECT count(e.id) FROM Ladb\CoreBundle\Entity\Core\Member e
                 WHERE e.team = :team AND e.user = :user
             ')
 			->setParameter('team', $team)
@@ -31,7 +31,7 @@ class MemberRepository extends AbstractEntityRepository {
 	public function findOneByTeamAndUser(User $team, User $user) {
 		$query = $this->getEntityManager()
 			->createQuery('
-                SELECT e FROM LadbCoreBundle:Core\Member e
+                SELECT e FROM Ladb\CoreBundle\Entity\Core\Member e
                 WHERE e.team = :team AND e.user = :user
             ')
 			->setParameter('team', $team)

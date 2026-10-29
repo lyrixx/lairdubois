@@ -131,7 +131,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'u' ))
-			->from('LadbCoreBundle:Core\User', 'u')
+			->from(\Ladb\CoreBundle\Entity\Core\User::class, 'u')
 		;
 
 		try {

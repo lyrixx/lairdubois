@@ -10,7 +10,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\RegistrationRepository::class)]
 class Registration {
 
-	const CLASS_NAME = 'LadbCoreBundle:Core\Registration';
+	const CLASS_NAME = self::class;
 
 	#[ORM\Column(name: 'id', type: 'integer')]
 	#[ORM\Id]

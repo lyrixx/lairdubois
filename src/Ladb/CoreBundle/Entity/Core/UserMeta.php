@@ -10,7 +10,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity]
 class UserMeta {
 
-	const CLASS_NAME = 'LadbCoreBundle:Core\UserMeta';
+	const CLASS_NAME = self::class;
 
 	#[ORM\Column(name: 'id', type: 'integer')]
 	#[ORM\Id]

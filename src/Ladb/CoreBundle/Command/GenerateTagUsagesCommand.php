@@ -42,7 +42,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'c', 't' ))
-			->from('LadbCoreBundle:Wonder\Creation', 'c')
+			->from(\Ladb\CoreBundle\Entity\Wonder\Creation::class, 'c')
 			->leftJoin('c.tags', 't')
 		;
 
@@ -63,7 +63,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'p', 't' ))
-			->from('LadbCoreBundle:Wonder\Plan', 'p')
+			->from(\Ladb\CoreBundle\Entity\Wonder\Plan::class, 'p')
 			->leftJoin('p.tags', 't')
 		;
 
@@ -84,7 +84,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'w', 't' ))
-			->from('LadbCoreBundle:Wonder\Workshop', 'w')
+			->from(\Ladb\CoreBundle\Entity\Wonder\Workshop::class, 'w')
 			->leftJoin('w.tags', 't')
 		;
 
@@ -105,7 +105,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'h', 't' ))
-			->from('LadbCoreBundle:Howto\Howto', 'h')
+			->from(\Ladb\CoreBundle\Entity\Howto\Howto::class, 'h')
 			->leftJoin('h.tags', 't')
 		;
 
@@ -126,7 +126,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'f', 't' ))
-			->from('LadbCoreBundle:Find\Find', 'f')
+			->from(\Ladb\CoreBundle\Entity\Find\Find::class, 'f')
 			->leftJoin('f.tags', 't')
 		;
 
@@ -147,7 +147,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'p', 't' ))
-			->from('LadbCoreBundle:Blog\Post', 'p')
+			->from(\Ladb\CoreBundle\Entity\Blog\Post::class, 'p')
 			->leftJoin('p.tags', 't')
 		;
 

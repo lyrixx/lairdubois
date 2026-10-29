@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Workflow\RunRepository::class)]
 class Run {
 
-	const CLASS_NAME = 'LadbCoreBundle:Workflow\Run';
+	const CLASS_NAME = self::class;
 
 	#[ORM\Column(name: 'id', type: 'integer')]
 	#[ORM\Id]

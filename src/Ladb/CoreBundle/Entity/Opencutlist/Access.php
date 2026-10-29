@@ -14,7 +14,7 @@ class Access implements LocalisableInterface {
 
 	use LocalisableTrait;
 
-	const CLASS_NAME = 'LadbCoreBundle:Opencutlist\Access';
+	const CLASS_NAME = self::class;
 
 	const KIND_UNKNOW = 0;
 	const KIND_MANIFEST = 1;

@@ -37,7 +37,7 @@ class Collection extends AbstractAuthoredPublication implements IndexableInterfa
 	use TitledTrait, SluggedTrait, PicturedTrait, HtmlBodiedTrait;
 	use IndexableTrait, LikableTrait, WatchableTrait, CommentableTrait, TaggableTrait, ViewableTrait, CollectionnableTrait;
 
-	const CLASS_NAME = 'LadbCoreBundle:Collection\Collection';
+	const CLASS_NAME = self::class;
 	const TYPE = 120;
 
 	#[Assert\NotBlank]

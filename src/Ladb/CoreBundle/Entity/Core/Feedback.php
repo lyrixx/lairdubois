@@ -27,7 +27,7 @@ class Feedback implements TypableInterface, BasicTimestampableInterface, Authore
 	use BasicTimestampableTrait;
 	use AuthoredTrait, TitledTrait, BlockBodiedTrait;
 
-	const CLASS_NAME = 'LadbCoreBundle:Core\Feedback';
+	const CLASS_NAME = self::class;
 	const TYPE = 6;
 
 	#[ORM\Column(name: 'id', type: 'integer')]

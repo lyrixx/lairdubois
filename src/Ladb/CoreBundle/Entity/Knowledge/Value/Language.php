@@ -11,7 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Knowledge\Value\LanguageRepository::class)]
 class Language extends BaseValue {
 
-	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Value\Language';
+	const CLASS_NAME = self::class;
 	const TYPE = 18;
 
 	const TYPE_STRIPPED_NAME = 'language';

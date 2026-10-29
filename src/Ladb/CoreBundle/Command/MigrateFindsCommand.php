@@ -49,7 +49,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'f' ))
-			->from('LadbCoreBundle:Find\Find', 'f')
+			->from(\Ladb\CoreBundle\Entity\Find\Find::class, 'f')
 		;
 
 		try {

@@ -52,7 +52,7 @@ class Howto extends AbstractDraftableAuthoredPublication implements TitledInterf
 	use TitledTrait, SluggedTrait, PicturedTrait, HtmlBodiedTrait, LicensedTrait;
 	use IndexableTrait, SitemapableTrait, TaggableTrait, ViewableTrait, ScrapableTrait, LikableTrait, WatchableTrait, CommentableTrait, CollectionnableTrait, EmbeddableTrait, StripableTrait, SpotlightableTrait;
 
-	const CLASS_NAME = 'LadbCoreBundle:Howto\Howto';
+	const CLASS_NAME = self::class;
 	const TYPE = 106;
 
 	const KIND_NONE = 0;

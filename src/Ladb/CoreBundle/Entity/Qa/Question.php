@@ -46,7 +46,7 @@ class Question extends AbstractDraftableAuthoredPublication implements TitledInt
 	use TitledTrait, SluggedTrait, PicturedTrait, BlockBodiedTrait;
 	use IndexableTrait, SitemapableTrait, TaggableTrait, ViewableTrait, ScrapableTrait, LikableTrait, WatchableTrait, CommentableTrait, CollectionnableTrait, VotableParentTrait;
 
-	const CLASS_NAME = 'LadbCoreBundle:Qa\Question';
+	const CLASS_NAME = self::class;
 	const TYPE = 113;
 
 	#[Assert\NotBlank]

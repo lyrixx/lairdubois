@@ -15,7 +15,7 @@ class Mention implements AuthoredInterface {
 
 	use AuthoredTrait;
 
-	const CLASS_NAME = 'LadbCoreBundle:Core\Mention';
+	const CLASS_NAME = self::class;
 
 	#[ORM\Column(name: 'id', type: 'integer')]
 	#[ORM\Id]

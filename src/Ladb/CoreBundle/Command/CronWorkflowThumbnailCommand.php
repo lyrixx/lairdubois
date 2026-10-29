@@ -67,7 +67,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'w', 'mp' ))
-			->from('LadbCoreBundle:Workflow\Workflow', 'w')
+			->from(\Ladb\CoreBundle\Entity\Workflow\Workflow::class, 'w')
 			->leftJoin('w.mainPicture', 'mp')
 			->where('w.mainPicture IS NULL')
 			->orWhere('w.updatedAt > mp.createdAt')

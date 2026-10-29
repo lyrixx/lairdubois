@@ -30,7 +30,7 @@ class User implements UserInterface, LegacyPasswordAuthenticatedUserInterface, E
 
 	use IndexableTrait, SitemapableTrait, LocalisableTrait;
 
-	const CLASS_NAME = 'LadbCoreBundle:Core\User';
+	const CLASS_NAME = self::class;
 
 	const ROLE_DEFAULT = 'ROLE_USER';
 	const ROLE_SUPER_ADMIN = 'ROLE_SUPER_ADMIN';

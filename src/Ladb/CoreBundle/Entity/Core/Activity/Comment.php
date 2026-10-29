@@ -9,7 +9,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\Activity\CommentRepository::class)]
 class Comment extends AbstractActivity {
 
-	const CLASS_NAME = 'LadbCoreBundle:Core\Activity\Comment';
+	const CLASS_NAME = self::class;
 	const STRIPPED_NAME = 'comment';
 
 	#[ORM\JoinColumn(nullable: false)]

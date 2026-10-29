@@ -28,7 +28,7 @@ abstract class BaseValue implements AuthoredInterface, WatchableChildInterface, 
 	use AuthoredTrait;
 	use CommentableTrait, VotableTrait;
 
-	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Value\BaseValue';
+	const CLASS_NAME = self::class;
 
 	const SOURCE_TYPE_PERSONAL = 1;
 	const SOURCE_TYPE_WEBSITE = 2;

@@ -11,7 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Knowledge\Value\IsbnRepository::class)]
 class Isbn extends BaseValue {
 
-	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Value\Isbn';
+	const CLASS_NAME = self::class;
 	const TYPE = 19;
 
 	const TYPE_STRIPPED_NAME = 'isbn';

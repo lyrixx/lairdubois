@@ -9,7 +9,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\TagUsageRepository::class)]
 class TagUsage {
 
-	const CLASS_NAME = 'LadbCoreBundle:Core\TagUsage';
+	const CLASS_NAME = self::class;
 
 	#[ORM\Id]
 	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Tag::class, inversedBy: 'usages')]

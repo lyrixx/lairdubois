@@ -70,7 +70,7 @@ EOT
 				$queryBuilder = $om->createQueryBuilder();
 				$queryBuilder
 					->select(array( 'l' ))
-					->from('LadbCoreBundle:Core\Vote', 'l')
+					->from(\Ladb\CoreBundle\Entity\Core\Vote::class, 'l')
 					->where('l.entityType = :entityType')
 					->andWhere('l.entityId = :entityId')
 					->andWhere('l.user = :user')

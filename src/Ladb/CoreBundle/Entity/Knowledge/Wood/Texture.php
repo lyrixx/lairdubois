@@ -9,7 +9,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Knowledge\Wood\TextureRepository::class)]
 class Texture {
 
-	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Wood\Texture';
+	const CLASS_NAME = self::class;
 
 	#[ORM\Column(name: 'id', type: 'integer')]
 	#[ORM\Id]

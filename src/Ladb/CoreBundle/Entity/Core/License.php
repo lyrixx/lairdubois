@@ -9,7 +9,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 #[ORM\Entity]
 class License {
 
-	const CLASS_NAME = 'LadbCoreBundle:Core\License';
+	const CLASS_NAME = self::class;
 
 	const SUPPORTED_VERSIONS = [ '3.0', '4.0' ];
 	const DEFAULT_VERSION = '4.0';

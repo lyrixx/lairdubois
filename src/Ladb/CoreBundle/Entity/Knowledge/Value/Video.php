@@ -13,7 +13,7 @@ use Ladb\CoreBundle\Utils\VideoHostingUtils;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Knowledge\Value\VideoRepository::class)]
 class Video extends BaseValue {
 
-	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Value\Video';
+	const CLASS_NAME = self::class;
 	const TYPE = 24;
 
 	const TYPE_STRIPPED_NAME = 'video';

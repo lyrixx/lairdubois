@@ -25,7 +25,7 @@ class Review implements TypableInterface, BasicTimestampableInterface, AuthoredI
 	use BasicTimestampableTrait;
 	use AuthoredTrait, TitledTrait, HtmlBodiedTrait;
 
-	const CLASS_NAME = 'LadbCoreBundle:Core\Review';
+	const CLASS_NAME = self::class;
 	const TYPE = 4;
 
 	#[ORM\Column(name: 'id', type: 'integer')]

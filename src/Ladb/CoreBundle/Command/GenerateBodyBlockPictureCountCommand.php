@@ -70,11 +70,11 @@ EOT
 
 		$entityCount = 0;
 
-		$entityCount += $this->_process('LadbCoreBundle:Blog\Post', $om, $output, $blockBodiedUtils);
-		$entityCount += $this->_process('LadbCoreBundle:Faq\Question', $om, $output, $blockBodiedUtils);
-		$entityCount += $this->_process('LadbCoreBundle:Howto\Article', $om, $output, $blockBodiedUtils);
-		$entityCount += $this->_process('LadbCoreBundle:Wonder\Creation', $om, $output, $blockBodiedUtils);
-		$entityCount += $this->_process('LadbCoreBundle:Wonder\Workshop', $om, $output, $blockBodiedUtils);
+		$entityCount += $this->_process(\Ladb\CoreBundle\Entity\Blog\Post::class, $om, $output, $blockBodiedUtils);
+		$entityCount += $this->_process(\Ladb\CoreBundle\Entity\Faq\Question::class, $om, $output, $blockBodiedUtils);
+		$entityCount += $this->_process(\Ladb\CoreBundle\Entity\Howto\Article::class, $om, $output, $blockBodiedUtils);
+		$entityCount += $this->_process(\Ladb\CoreBundle\Entity\Wonder\Creation::class, $om, $output, $blockBodiedUtils);
+		$entityCount += $this->_process(\Ladb\CoreBundle\Entity\Wonder\Workshop::class, $om, $output, $blockBodiedUtils);
 
 		if ($forced) {
 			$om->flush();

@@ -17,7 +17,7 @@ class Vote implements AuthoredInterface {
 
 	use AuthoredTrait;
 
-	const CLASS_NAME = 'LadbCoreBundle:Core\Vote';
+	const CLASS_NAME = self::class;
 
 	const TYPE = 2;
 

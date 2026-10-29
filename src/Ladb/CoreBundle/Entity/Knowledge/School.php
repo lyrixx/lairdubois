@@ -25,7 +25,7 @@ class School extends AbstractKnowledge implements LocalisableInterface {
 
 	use LocalisableTrait;
 
-	const CLASS_NAME = 'LadbCoreBundle:Knowledge\School';
+	const CLASS_NAME = self::class;
 	const TYPE = 115;
 
 	const STRIPPED_NAME = 'school';

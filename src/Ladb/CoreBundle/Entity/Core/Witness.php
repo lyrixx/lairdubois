@@ -10,7 +10,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\WitnessRepository::class)]
 class Witness {
 
-	const CLASS_NAME = 'LadbCoreBundle:Core\Witness';
+	const CLASS_NAME = self::class;
 
 	const KIND_NONE = 0;
 	const KIND_UNPUBLISHED = 1;

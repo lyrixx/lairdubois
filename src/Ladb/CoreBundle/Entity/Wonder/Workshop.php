@@ -20,7 +20,7 @@ class Workshop extends AbstractWonder implements BlockBodiedInterface, Localisab
 
 	use BlockBodiedTrait, LocalisableTrait, FeedbackableTrait;
 
-	const CLASS_NAME = 'LadbCoreBundle:Wonder\Workshop';
+	const CLASS_NAME = self::class;
 	const TYPE = 101;
 
 	#[ORM\Column(type: 'string', length: 100, nullable: true)]

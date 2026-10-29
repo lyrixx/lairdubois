@@ -9,7 +9,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Message\ThreadMetaRepository::class)]
 class ThreadMeta {
 
-	const CLASS_NAME = 'LadbCoreBundle:Message\ThreadMeta';
+	const CLASS_NAME = self::class;
 
 	#[ORM\Column(name: 'id', type: 'integer')]
 	#[ORM\Id]

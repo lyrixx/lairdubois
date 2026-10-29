@@ -39,7 +39,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'f' ))
-			->from('LadbCoreBundle:Input\Tool', 'f')
+			->from(\Ladb\CoreBundle\Entity\Input\Tool::class, 'f')
 		;
 
 		try {
@@ -60,7 +60,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'c', 'f' ))
-			->from('LadbCoreBundle:Wonder\Creation', 'c')
+			->from(\Ladb\CoreBundle\Entity\Wonder\Creation::class, 'c')
 			->leftJoin('c.tools', 'f')
 		;
 

@@ -698,6 +698,10 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   du dev : la CI charge les fixtures avec `castor app:db:fixtures` dans son contexte.
 - Une action qui finit par `exit(0)` (`PictureController::uploadAction()`,
   `ResourceController::uploadAction()`) arrête PHPUnit, sans erreur : ne pas l'appeler dans un test.
+- Une entité se désigne par sa classe : `X::class` en PHP, le nom complet dans le DQL (`FROM
+  Ladb\CoreBundle\Entity\Core\Member e`), jamais par l'alias `LadbCoreBundle:X`, que
+  `doctrine/persistence` 3 ne connaît plus (#178). Les constantes `CLASS_NAME` des entités valent
+  `self::class`.
 - `doctrine:fixtures:load` sans `--append` vide les tables par `DELETE`, qui ne remet pas les
   `AUTO_INCREMENT` à zéro : `castor app:db:fixtures` supprime la base à la place.
 - Hors requête HTTP (fixtures, commandes), les listeners et utils qui lisent l'utilisateur ou la

@@ -146,7 +146,7 @@ EOT
 			$queryBuilder = $om->createQueryBuilder();
 			$queryBuilder
 				->select(array( 'c', 's', '(c.likeCount * 100 + c.commentCount * 10 + c.viewCount + c.planCount * 10 + c.howtoCount * 10) as score' ))
-				->from('LadbCoreBundle:Wonder\Creation', 'c')
+				->from(\Ladb\CoreBundle\Entity\Wonder\Creation::class, 'c')
 				->leftJoin('c.spotlight', 's')
 				->where('c.isDraft = false')
 				->andWhere('c.likeCount >= 15')		// 15 or more likes
@@ -172,7 +172,7 @@ EOT
 			$queryBuilder = $om->createQueryBuilder();
 			$queryBuilder
 				->select(array( 'h', 's', '(h.likeCount * 100 + h.commentCount * 10 + h.viewCount + h.creationCount * 10 + h.planCount * 10 + h.workshopCount * 10) as score' ))
-				->from('LadbCoreBundle:Howto\Howto', 'h')
+				->from(\Ladb\CoreBundle\Entity\Howto\Howto::class, 'h')
 				->leftJoin('h.spotlight', 's')
 				->where('h.isDraft = false')
 				->andWhere('h.likeCount >= 15')		// 15 or more likes

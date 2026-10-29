@@ -29,7 +29,7 @@ class Answer implements TypableInterface, AuthoredInterface, BlockBodiedInterfac
 	use BasicTimestampableTrait, AuthoredTrait, BlockBodiedTrait;
 	use CommentableTrait, VotableTrait;
 
-	const CLASS_NAME = 'LadbCoreBundle:Qa\Answer';
+	const CLASS_NAME = self::class;
 	const TYPE = 114;
 
 	#[ORM\Column(name: 'id', type: 'integer')]

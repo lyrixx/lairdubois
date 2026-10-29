@@ -27,7 +27,7 @@ class Software extends AbstractKnowledge implements ReviewableInterface {
 
 	use ReviewableTrait;
 
-	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Software';
+	const CLASS_NAME = self::class;
 	const TYPE = 121;
 
 	const STRIPPED_NAME = 'software';

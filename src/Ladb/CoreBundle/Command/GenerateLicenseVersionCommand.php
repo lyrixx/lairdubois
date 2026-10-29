@@ -42,7 +42,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'l' ))
-			->from('LadbCoreBundle:Core\License', 'l')
+			->from(\Ladb\CoreBundle\Entity\Core\License::class, 'l')
 		;
 
 		try {

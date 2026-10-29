@@ -17,7 +17,7 @@ use Ladb\CoreBundle\Entity\Knowledge\Value\Picture;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Knowledge\WoodRepository::class)]
 class Wood extends AbstractKnowledge {
 
-	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Wood';
+	const CLASS_NAME = self::class;
 	const TYPE = 109;
 
 	const STRIPPED_NAME = 'wood';

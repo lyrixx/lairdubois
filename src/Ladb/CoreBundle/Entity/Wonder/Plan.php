@@ -20,7 +20,7 @@ class Plan extends AbstractWonder implements HtmlBodiedInterface, InspirableInte
 	use HtmlBodiedTrait;
 	use InspirableTrait;
 
-	const CLASS_NAME = 'LadbCoreBundle:Wonder\Plan';
+	const CLASS_NAME = self::class;
 	const STRIPPED_NAME = 'plan';
 	const TYPE = 105;
 

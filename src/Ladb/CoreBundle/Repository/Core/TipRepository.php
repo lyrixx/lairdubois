@@ -23,7 +23,7 @@ class TipRepository extends AbstractEntityRepository {
 		// Do not retrieve user viewed tips
 		if (!is_null($user)) {
 			$queryBuilder
-				->leftJoin('LadbCoreBundle:Core\View', 'v', 'WITH', 'v.entityId = t.id AND v.entityType = '.Tip::TYPE.' AND v.kind = :kind AND v.user = :user')
+				->leftJoin(View::class, 'v', 'WITH', 'v.entityId = t.id AND v.entityType = '.Tip::TYPE.' AND v.kind = :kind AND v.user = :user')
 				->where('v.id IS NULL')
 				->setParameter('user', $user)
 				->setParameter('kind', View::KIND_SHOWN)

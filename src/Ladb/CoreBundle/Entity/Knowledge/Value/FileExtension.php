@@ -10,7 +10,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Knowledge\Value\FileExtensionRepository::class)]
 class FileExtension extends BaseValue {
 
-	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Value\FileExtension';
+	const CLASS_NAME = self::class;
 	const TYPE = 22;
 
 	const TYPE_STRIPPED_NAME = 'file-extension';

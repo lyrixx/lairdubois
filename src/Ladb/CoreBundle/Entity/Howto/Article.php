@@ -33,7 +33,7 @@ class Article extends AbstractPublication implements AuthoredInterface, TitledIn
 	use AuthoredTrait, TitledTrait, SluggedTrait, BlockBodiedTrait;
 	use DraftableTrait, BasicEmbeddableTrait;
 
-	const CLASS_NAME = 'LadbCoreBundle:Howto\Article';
+	const CLASS_NAME = self::class;
 	const TYPE = 107;
 
 	#[ORM\JoinColumn(nullable: false)]

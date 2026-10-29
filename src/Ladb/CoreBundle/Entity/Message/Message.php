@@ -19,7 +19,7 @@ class Message implements TypableInterface, MultiPicturedInterface, HtmlBodiedInt
 	use BasicTimestampableTrait;
 	use MultiPicturedTrait, HtmlBodiedTrait;
 
-	const CLASS_NAME = 'LadbCoreBundle:Message\Message';
+	const CLASS_NAME = self::class;
 	const TYPE = 3;
 
 	#[ORM\Column(name: 'id', type: 'integer')]

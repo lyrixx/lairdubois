@@ -43,7 +43,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'v' ))
-			->from('LadbCoreBundle:Knowledge\Value\BaseValue', 'v')
+			->from(\Ladb\CoreBundle\Entity\Knowledge\Value\BaseValue::class, 'v')
 		;
 
 		try {

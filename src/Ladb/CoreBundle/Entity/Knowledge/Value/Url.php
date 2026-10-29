@@ -10,7 +10,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Knowledge\Value\UrlRepository::class)]
 class Url extends BaseValue {
 
-	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Value\Url';
+	const CLASS_NAME = self::class;
 	const TYPE = 13;
 
 	const TYPE_STRIPPED_NAME = 'url';

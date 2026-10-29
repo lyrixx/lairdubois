@@ -22,7 +22,7 @@ class FindRepository extends AbstractEntityRepository {
 		$queryBuilder = $this->getEntityManager()->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'count(w.id)' ))
-			->from('LadbCoreBundle:Find\Content\Website', 'w')
+			->from(\Ladb\CoreBundle\Entity\Find\Content\Website::class, 'w')
 			->where('w.url = :url')
 			->setParameter('url', $url)
 		;
@@ -48,7 +48,7 @@ class FindRepository extends AbstractEntityRepository {
 		$queryBuilder = $this->getEntityManager()->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'count(v.id)' ))
-			->from('LadbCoreBundle:Find\Content\Video', 'v')
+			->from(\Ladb\CoreBundle\Entity\Find\Content\Video::class, 'v')
 			->where('v.kind = :kind')
 			->andWhere('v.embedIdentifier = :embedIdentifier')
 			->setParameter('kind', $kind)

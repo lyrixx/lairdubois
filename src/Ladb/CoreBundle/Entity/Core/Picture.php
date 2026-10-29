@@ -11,7 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\HasLifecycleCallbacks]
 class Picture {
 
-	const CLASS_NAME = 'LadbCoreBundle:Core\Picture';
+	const CLASS_NAME = self::class;
 
 	const ACCEPTED_FILE_TYPE = '/\.(jpe?g|png)$/i';
 	const LOAD_MAX_FILE_SIZE = 8388608; // 8Mo

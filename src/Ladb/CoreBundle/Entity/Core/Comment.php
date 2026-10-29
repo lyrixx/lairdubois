@@ -25,7 +25,7 @@ class Comment implements TypableInterface, BasicTimestampableInterface, Authored
 	use BasicTimestampableTrait;
 	use AuthoredTrait, HtmlBodiedTrait, MultiPicturedTrait;
 
-	const CLASS_NAME = 'LadbCoreBundle:Core\Comment';
+	const CLASS_NAME = self::class;
 	const TYPE = 1;
 
 	#[ORM\Column(name: 'id', type: 'integer')]

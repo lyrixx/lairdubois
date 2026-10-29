@@ -10,7 +10,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\ReportRepository::class)]
 class Report {
 
-	const CLASS_NAME = 'LadbCoreBundle:Core\Report';
+	const CLASS_NAME = self::class;
 
 	const REASON_NUDITY = 1;
 	const REASON_VIOLENCE = 2;

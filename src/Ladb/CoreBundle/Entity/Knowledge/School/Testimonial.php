@@ -18,7 +18,7 @@ class Testimonial implements TypableInterface, HtmlBodiedInterface {
 
 	use AuthoredTrait, HtmlBodiedTrait;
 
-	const CLASS_NAME = 'LadbCoreBundle:Knowledge\School\Testimonial';
+	const CLASS_NAME = self::class;
 	const TYPE = 116;
 
 	#[ORM\Column(name: 'id', type: 'integer')]

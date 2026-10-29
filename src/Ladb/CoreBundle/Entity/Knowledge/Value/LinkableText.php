@@ -10,7 +10,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Knowledge\Value\LinkableTextRepository::class)]
 class LinkableText extends Text {
 
-	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Value\LinkableText';
+	const CLASS_NAME = self::class;
 	const TYPE = 23;
 
 	const TYPE_STRIPPED_NAME = 'linkable-text';

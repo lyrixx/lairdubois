@@ -45,7 +45,7 @@ class Graphic extends AbstractDraftableAuthoredPublication implements TitledInte
 	use TitledTrait, SluggedTrait, PicturedTrait, HtmlBodiedTrait, LicensedTrait;
 	use IndexableTrait, SitemapableTrait, TaggableTrait, ViewableTrait, ScrapableTrait, LikableTrait, WatchableTrait, CommentableTrait, CollectionnableTrait;
 
-	const CLASS_NAME = 'LadbCoreBundle:Promotion\Graphic';
+	const CLASS_NAME = self::class;
 	const TYPE = 117;
 
 	const ACCEPTED_FILE_TYPE = '/(\.|\/)(pdf|svg)$/i';
