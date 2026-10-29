@@ -1245,9 +1245,20 @@ mercure:
         default:
             url: '%mercure_url%'
             public_url: '%mercure_public_url%'
+            # The one of the hub, in all environments: in debug, the bundle would take
+            # "mercure_access_token"
+            cookie_name: __Secure-mercure_access_token
             jwt:
                 secret: '%mercure_jwt_secret%'
                 publish: '*'
+                # Required in the access tokens of Mercure 1.0 ("aud", the URL of the hub, comes from
+                # the bundle). "iss": a fixed identifier, whatever the host of the site, as the
+                # topics (AbstractWorkflowBasedController). Keep in sync with MERCURE_TRUSTED_ISSUERS
+                # of the hub (infrastructure/docker/docker-compose.yml, docs/01-installation.md)
+                claims:
+                    iss: https://lairdubois.fr
+                    sub: lairdubois
+                    client_id: lairdubois
 
 # BentoolsWebpushBundle
 bentools_webpush:

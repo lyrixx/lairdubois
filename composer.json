@@ -79,7 +79,7 @@
         "gedmo/doctrine-extensions": "~3.20.1",
         "liip/imagine-bundle": "^2.18",
         "bentools/webpush-bundle": "^0.14",
-        "symfony/mercure-bundle": "~0.3.9",
+        "symfony/mercure-bundle": "~0.6.1",
 
         "facebook/graph-sdk": "~5.0",
         "willdurand/geocoder": "^4.6",

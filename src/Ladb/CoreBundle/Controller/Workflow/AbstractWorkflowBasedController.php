@@ -20,12 +20,12 @@ abstract class AbstractWorkflowBasedController extends AbstractController {
 	const TASKINFO_WIDGET 			= 0b0100000;
 	const TASKINFO_BOX 				= 0b1000000;
 
-	// The topics of a workflow on the Mercure hub: fixed IRIs, whatever the host of the site. Its
-	// workspaces subscribe to the first one. The second one, by owner, is for the subscription
-	// cookie: its claim allows all the workflows of the account, so that two workspaces of
-	// different workflows do not overwrite each other's cookie.
-	private const MERCURE_TOPIC = 'https://lairdubois.fr/workflows/{id}';
-	private const MERCURE_OWNER_TOPIC = 'https://lairdubois.fr/users/{userId}/workflows/{id}';
+	// The topics of a workflow on the Mercure hub: fixed IRIs, whatever the host of the site, as
+	// URL patterns. Its workspaces subscribe to the first one. The second one, by owner, is for the
+	// subscription cookie: its claim allows all the workflows of the account, so that two
+	// workspaces of different workflows do not overwrite each other's cookie.
+	private const MERCURE_TOPIC = 'https://lairdubois.fr/workflows/:id';
+	private const MERCURE_OWNER_TOPIC = 'https://lairdubois.fr/users/:userId/workflows/:id';
 
 	private $hub;
 	// Protected, like the one of UserControllerTrait, that a subclass can use
@@ -106,24 +106,24 @@ abstract class AbstractWorkflowBasedController extends AbstractController {
 	protected function _push($workflow, $response) {
 		$topics = array(
 			$this->_getMercureTopic($workflow),
-			strtr(self::MERCURE_OWNER_TOPIC, array( '{userId}' => $workflow->getUser()->getId(), '{id}' => $workflow->getId() )),
+			strtr(self::MERCURE_OWNER_TOPIC, array( ':userId' => $workflow->getUser()->getId(), ':id' => $workflow->getId() )),
 		);
 		$this->hub->publish(new Update($topics, json_encode($response), true));
 	}
 
 	protected function _getMercureTopic(Workflow $workflow) {
-		return strtr(self::MERCURE_TOPIC, array( '{id}' => $workflow->getId() ));
+		return strtr(self::MERCURE_TOPIC, array( ':id' => $workflow->getId() ));
 	}
 
 	/**
-	 * The topics the subscription cookie allows, as a URI template: the workflows of the current
+	 * The topics the subscription cookie allows, as a URL pattern: the workflows of the current
 	 * user, all of them for an admin.
 	 */
 	protected function _getMercureSubscribeTopic() {
 		if ($this->isGranted('ROLE_ADMIN')) {
 			return self::MERCURE_TOPIC;
 		}
-		return strtr(self::MERCURE_OWNER_TOPIC, array( '{userId}' => $this->getUser()->getId() ));
+		return strtr(self::MERCURE_OWNER_TOPIC, array( ':userId' => $this->getUser()->getId() ));
 	}
 
 }

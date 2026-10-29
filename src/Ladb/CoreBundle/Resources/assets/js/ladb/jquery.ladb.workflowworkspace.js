@@ -1416,7 +1416,7 @@
 
             // Subscribe to the changes of the workflow on the Mercure hub, with the cookie of the page
             var connected = false;
-            var eventSource = new EventSource(this.options.mercureHubUrl + '?topic=' + encodeURIComponent(this.options.mercureTopic));
+            var eventSource = new EventSource(this.options.mercureHubUrl + '?match=' + encodeURIComponent(this.options.mercureTopic));
             eventSource.onopen = function () {
 
                 connected = true;
