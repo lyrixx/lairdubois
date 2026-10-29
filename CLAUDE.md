@@ -203,7 +203,7 @@ castor qa:phpunit [-- --filter …]
 castor qa:deprecations       # var/deprecations/report.md, et le résumé du job en CI
 castor qa:install            # outils de tools/ (PHPStan, PHPUnit), installés à la volée sinon
 castor qa:e2e [-- --grep …]  # tests E2E (Playwright) : recharge la base du dev, hors qa:all, job E2E en CI
-castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et getDoctrine() des actions → arguments (#16, #177), des utils, managers, listeners et validateurs → constructeur (#118), dépréciations de 4.x (#133), routes, contraintes et `@required` en attributs (#25)
+castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et getDoctrine() des actions → arguments (#16, #177), des utils, managers, listeners et validateurs → constructeur (#118), dépréciations de 4.x (#133), routes, contraintes et `@required` en attributs (#25), commandes en `#[AsCommand]` (#28)
 ```
 
 - PHPUnit 9.6, dans `tools/phpunit` et pas dans le `composer.json` de l'application : c'est la
@@ -275,8 +275,12 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et get
   dans `rector.php`) ne s'appliquent qu'à partir d'une version d'un paquet de Symfony
   (`symfony/console`…), lue dans `vendor/composer/installed.json`, où `symfony/symfony` les
   remplace : `rector.php` donne à Rector la version de `symfony/symfony` pour chacun, sinon il
-  les ignore sans rien dire. Elles typent par PHPStan : `MakeDispatchFirstArgumentEventRector` ne
-  reconnaît pas le dispatcher d'une propriété sans type (`$this->dispatcher` des managers).
+  les ignore sans rien dire. Sauf `symfony/console`, en 6.1 : les deux règles de `#[AsCommand]`
+  (`CommandPropertyToAttributeRector` pour `$defaultName`, `CommandConfigureToAttributeRector`
+  pour le `setDescription()` de `configure()`) attendent la 6.1, qui déprécie `$defaultName`,
+  alors que l'attribut existe depuis 5.3. Elles typent par PHPStan :
+  `MakeDispatchFirstArgumentEventRector` ne reconnaît pas le dispatcher d'une propriété sans type
+  (`$this->dispatcher` des managers).
 
 ## Fixtures
 

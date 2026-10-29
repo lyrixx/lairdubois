@@ -3,6 +3,7 @@
 namespace Ladb\CoreBundle\Command;
 
 use Ladb\CoreBundle\Utils\FieldPreprocessorUtils;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputInterface;
@@ -10,9 +11,8 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Ladb\CoreBundle\Entity\Core\Block\Text;
 
+#[AsCommand(name: 'ladb:migrate:finds', description: 'Migrate find body to body blocks')]
 class MigrateFindsCommand extends Command {
-
-	protected static $defaultName = 'ladb:migrate:finds';
 
 	private $fieldPreprocessorUtils;
 	private $om;
@@ -29,7 +29,6 @@ class MigrateFindsCommand extends Command {
 	protected function configure() {
 		$this
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
-			->setDescription('Migrate find body to body blocks')
 			->setHelp(<<<EOT
 The <info>ladb:migrate:providers</info> command migrate find body to body blocks
 EOT

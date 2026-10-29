@@ -2,6 +2,7 @@
 
 namespace Ladb\CoreBundle\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputArgument;
@@ -11,9 +12,8 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Ladb\CoreBundle\Entity\Core\Vote;
 
+#[AsCommand(name: 'ladb:migrate:signs', description: 'Migrate signs')]
 class MigrateSignsCommand extends Command {
-
-	protected static $defaultName = 'ladb:migrate:signs';
 
 	private $om;
 
@@ -25,7 +25,6 @@ class MigrateSignsCommand extends Command {
 	protected function configure() {
 		$this
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
-			->setDescription('Migrate signs')
 			->setHelp(<<<EOT
 The <info>ladb:migrate:signs</info> command generate textures
 EOT

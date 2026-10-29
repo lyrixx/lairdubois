@@ -6,6 +6,7 @@ use Ladb\CoreBundle\Entity\Core\Member;
 use Ladb\CoreBundle\Model\IdentifiableInterface;
 use Ladb\CoreBundle\Model\MentionSourceInterface;
 use Ladb\CoreBundle\Model\TypableInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputInterface;
@@ -22,9 +23,8 @@ use Ladb\CoreBundle\Model\WatchableChildInterface;
 use Ladb\CoreBundle\Model\PublicationInterface;
 use Ladb\CoreBundle\Utils\TypableUtils;
 
+#[AsCommand(name: 'ladb:cron:notification:populate', description: 'Process activities to populate notifications')]
 class CronNotificationPopulateCommand extends Command {
-
-	protected static $defaultName = 'ladb:cron:notification:populate';
 
 	private $om;
 	private $secret;
@@ -44,7 +44,6 @@ class CronNotificationPopulateCommand extends Command {
 	protected function configure() {
 		$this
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
-			->setDescription('Process activities to populate notifications')
 			->setHelp(<<<EOT
 The <info>ladb:cron:notification:populate</info> process activities to populate notifications
 EOT

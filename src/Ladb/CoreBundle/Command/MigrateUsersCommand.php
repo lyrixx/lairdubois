@@ -5,6 +5,7 @@ namespace Ladb\CoreBundle\Command;
 use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Utils\DisplaynameCanonicalizer;
 use Ladb\CoreBundle\Manager\Core\UserManager;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
@@ -14,9 +15,8 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 
+#[AsCommand(name: 'ladb:migrate:users', description: 'Migrate users')]
 class MigrateUsersCommand extends Command {
-
-	protected static $defaultName = 'ladb:migrate:users';
 
 	private $displaynameCanonicalizer;
 	private $om;
@@ -36,7 +36,6 @@ class MigrateUsersCommand extends Command {
 	protected function configure() {
 		$this
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
-			->setDescription('Migrate users')
 			->setHelp(<<<EOT
 The <info>ladb:migrate:users</info> command migrate users
 EOT

@@ -4,6 +4,7 @@ namespace Ladb\CoreBundle\Command;
 
 use Ladb\CoreBundle\Entity\Core\TagUsage;
 use Ladb\CoreBundle\Model\TaggableInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputArgument;
@@ -12,9 +13,8 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 
+#[AsCommand(name: 'ladb:generate:tagusages', description: 'Generate TagUsages')]
 class GenerateTagUsagesCommand extends Command {
-
-	protected static $defaultName = 'ladb:generate:tagusages';
 
 	private $om;
 
@@ -25,7 +25,6 @@ class GenerateTagUsagesCommand extends Command {
 
 	protected function configure() {
 		$this
-			->setDescription('Generate TagUsages')
 			->setHelp(<<<EOT
 The <info>ladb:generate:tagusages</info> command generate tag usages
 EOT

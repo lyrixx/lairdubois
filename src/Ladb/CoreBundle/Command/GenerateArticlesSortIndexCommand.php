@@ -2,6 +2,7 @@
 
 namespace Ladb\CoreBundle\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputInterface;
@@ -9,9 +10,8 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Ladb\CoreBundle\Entity\Core\Vote;
 
+#[AsCommand(name: 'ladb:generate:articlessortindex', description: 'Generate articles sortindex')]
 class GenerateArticlesSortIndexCommand extends Command {
-
-	protected static $defaultName = 'ladb:generate:articlessortindex';
 
 	private $om;
 
@@ -23,7 +23,6 @@ class GenerateArticlesSortIndexCommand extends Command {
 	protected function configure() {
 		$this
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
-			->setDescription('Generate articles sortindex')
 			->setHelp(<<<EOT
 The <info>ladb:generate:articlessortindex</info> command generate articles sortindex
 EOT

@@ -2,6 +2,7 @@
 
 namespace Ladb\CoreBundle\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputArgument;
@@ -10,9 +11,8 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 
+#[AsCommand(name: 'ladb:cleanup:woods', description: 'Cleanup woods')]
 class CleanupWoodsCommand extends Command {
-
-	protected static $defaultName = 'ladb:cleanup:woods';
 
 	private $om;
 
@@ -24,7 +24,6 @@ class CleanupWoodsCommand extends Command {
 	protected function configure() {
 		$this
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force removing')
-			->setDescription('Cleanup woods')
 			->setHelp(<<<EOT
 The <info>ladb:cleanup:woods</info> command remove unused woods
 EOT

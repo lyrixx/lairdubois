@@ -7,6 +7,7 @@ use Ladb\CoreBundle\Entity\Howto\Howto;
 use Ladb\CoreBundle\Entity\Wonder\Creation;
 use Ladb\CoreBundle\Model\StripableInterface;
 use Ladb\CoreBundle\Utils\WebScreenshotUtils;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputInterface;
@@ -19,9 +20,8 @@ use Ladb\CoreBundle\Utils\TypableUtils;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\Router;
 
+#[AsCommand(name: 'ladb:cron:workflow:thumbnails', description: 'Update workflow thumbnails')]
 class CronWorkflowThumbnailCommand extends Command {
-
-	protected static $defaultName = 'ladb:cron:workflow:thumbnails';
 
 	private $om;
 	private $router;
@@ -41,7 +41,6 @@ class CronWorkflowThumbnailCommand extends Command {
 	protected function configure() {
 		$this
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
-			->setDescription('Update workflow thumbnails')
 			->setHelp(<<<EOT
 The <info>ladb:cron:workflow:thumbnails</info> update workflow thumbnails
 EOT

@@ -2,6 +2,7 @@
 
 namespace Ladb\CoreBundle\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputInterface;
@@ -10,9 +11,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Utils\ActivityUtils;
 
+#[AsCommand(name: 'ladb:cleanup:likes', description: 'Cleanup likes by removing doubles')]
 class CleanupLikesCommand extends Command {
-
-	protected static $defaultName = 'ladb:cleanup:likes';
 
 	private $activityUtils;
 	private $om;
@@ -26,7 +26,6 @@ class CleanupLikesCommand extends Command {
 	protected function configure() {
 		$this
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force removing')
-			->setDescription('Cleanup likes by removing doubles')
 			->setHelp(<<<EOT
 The <info>ladb:cleanup:blocks</info> Cleanup likes by removing doubles
 EOT

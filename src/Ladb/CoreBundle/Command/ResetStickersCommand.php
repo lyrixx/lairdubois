@@ -3,6 +3,7 @@
 namespace Ladb\CoreBundle\Command;
 
 use Ladb\CoreBundle\Utils\EmbeddableUtils;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputArgument;
@@ -11,9 +12,8 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 
+#[AsCommand(name: 'ladb:reset:stickers', description: 'Reset stickers')]
 class ResetStickersCommand extends Command {
-
-	protected static $defaultName = 'ladb:reset:stickers';
 
 	private $embeddableUtils;
 	private $om;
@@ -27,7 +27,6 @@ class ResetStickersCommand extends Command {
 	protected function configure() {
 		$this
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force reseting')
-			->setDescription('Reset stickers')
 			->setHelp(<<<EOT
 The <info>ladb:reset:stickers</info> command clear all stickers
 EOT

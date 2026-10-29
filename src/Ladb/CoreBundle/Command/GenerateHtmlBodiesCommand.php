@@ -5,6 +5,7 @@ namespace Ladb\CoreBundle\Command;
 use Ladb\CoreBundle\Model\BlockBodiedInterface;
 use Ladb\CoreBundle\Model\BodiedInterface;
 use Ladb\CoreBundle\Utils\FieldPreprocessorUtils;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputInterface;
@@ -12,9 +13,8 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Ladb\CoreBundle\Utils\BlockBodiedUtils;
 
+#[AsCommand(name: 'ladb:generate:htmlbodies', description: 'Generate htmlbodies')]
 class GenerateHtmlBodiesCommand extends Command {
-
-	protected static $defaultName = 'ladb:generate:htmlbodies';
 
 	private $fieldPreprocessorUtils;
 	private $om;
@@ -28,7 +28,6 @@ class GenerateHtmlBodiesCommand extends Command {
 	protected function configure() {
 		$this
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
-			->setDescription('Generate htmlbodies')
 			->setHelp(<<<EOT
 The <info>ladb:generate:htmlbodies</info> command generate htmlbodies
 EOT

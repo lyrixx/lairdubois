@@ -3,6 +3,7 @@
 namespace Ladb\CoreBundle\Command;
 
 use Ladb\CoreBundle\Entity\Opencutlist\Access;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputInterface;
@@ -11,9 +12,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\Router;
 
+#[AsCommand(name: 'ladb:cron:opencutlist:access:analyze', description: 'Analyze OpenCutList access')]
 class CronOpencutlistAccessAnalyzeCommand extends Command {
-
-	protected static $defaultName = 'ladb:cron:opencutlist:access:analyze';
 
 	private $om;
 
@@ -25,7 +25,6 @@ class CronOpencutlistAccessAnalyzeCommand extends Command {
 	protected function configure() {
 		$this
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
-			->setDescription('Analyze OpenCutList access')
 			->setHelp(<<<EOT
 The <info>ladb:cron:opencutlist:access:analyze</info> Analyze OpenCutList access
 EOT

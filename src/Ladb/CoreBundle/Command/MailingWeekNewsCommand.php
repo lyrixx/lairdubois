@@ -2,6 +2,7 @@
 
 namespace Ladb\CoreBundle\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\LockableTrait;
@@ -11,9 +12,8 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Ladb\CoreBundle\Utils\MailerUtils;
 
+#[AsCommand(name: 'ladb:mailing:weeknews', description: 'Send week news')]
 class MailingWeekNewsCommand extends Command {
-
-	protected static $defaultName = 'ladb:mailing:weeknews';
 
 	private $mailerUtils;
 	private $om;
@@ -30,7 +30,6 @@ class MailingWeekNewsCommand extends Command {
 		$this
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force sending')
 			->addOption('limit', null, InputOption::VALUE_REQUIRED, 'Limit the number of users')
-			->setDescription('Send week news')
 			->setHelp(<<<EOT
 The <info>ladb:mailing:newsletter</info> send week news
 EOT

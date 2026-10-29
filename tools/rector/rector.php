@@ -20,6 +20,8 @@ use Rector\Symfony\Symfony42\Rector\New_\RootNodeTreeBuilderRector;
 use Rector\Symfony\Symfony43\Rector\MethodCall\MakeDispatchFirstArgumentEventRector;
 use Rector\Symfony\Symfony44\Rector\ClassMethod\ConsoleExecuteReturnIntRector;
 use Rector\Symfony\Symfony51\Rector\Class_\LogoutSuccessHandlerToLogoutEventSubscriberRector;
+use Rector\Symfony\Symfony61\Rector\Class_\CommandConfigureToAttributeRector;
+use Rector\Symfony\Symfony61\Rector\Class_\CommandPropertyToAttributeRector;
 use Rector\TypeDeclaration\Rector\ClassMethod\AddReturnTypeDeclarationRector;
 use Rector\TypeDeclaration\ValueObject\AddReturnTypeDeclaration;
 
@@ -36,6 +38,10 @@ return static function (RectorConfig $rectorConfig): void {
             RootNodeTreeBuilderRector::class,
             // Deprecations of Symfony 5.x (#177)
             LogoutSuccessHandlerToLogoutEventSubscriberRector::class,
+            // $defaultName of the commands (deprecated in 6.1) and the setDescription() of their
+            // configure() → #[AsCommand] (#28)
+            CommandPropertyToAttributeRector::class,
+            CommandConfigureToAttributeRector::class,
         ])
         // Of the renames of symfony/security-core 5.3 (composer-based set of rector-symfony), the
         // one that the code needs (#177)
@@ -124,7 +130,11 @@ return static function (RectorConfig $rectorConfig): void {
         if ('symfony/symfony' === $package['name']) {
             $packagesFile = __DIR__.'/var/symfony-packages.json';
             @mkdir(dirname($packagesFile), 0777, true);
-            file_put_contents($packagesFile, json_encode(['require' => array_fill_keys(array_keys($package['replace']), $package['version_normalized'])]));
+            $versions = array_fill_keys(array_keys($package['replace']), $package['version_normalized']);
+            // The rules of #[AsCommand] (#28) wait for symfony/console 6.1, which deprecates
+            // $defaultName: the attribute exists since 5.3
+            $versions['symfony/console'] = '6.1.0.0';
+            file_put_contents($packagesFile, json_encode(['require' => $versions]));
             $rectorConfig->singleton(InstalledPackageResolver::class, static fn (): InstalledPackageResolver => new InstalledPackageResolver(null, $packagesFile));
         }
     }

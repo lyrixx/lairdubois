@@ -2,6 +2,7 @@
 
 namespace Ladb\CoreBundle\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputArgument;
@@ -10,9 +11,8 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 
+#[AsCommand(name: 'ladb:cleanup:tools', description: 'Cleanup tools')]
 class CleanupToolsCommand extends Command {
-
-	protected static $defaultName = 'ladb:cleanup:tools';
 
 	private $om;
 
@@ -24,7 +24,6 @@ class CleanupToolsCommand extends Command {
 	protected function configure() {
 		$this
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force removing')
-			->setDescription('Cleanup tools')
 			->setHelp(<<<EOT
 The <info>ladb:cleanup:tools</info> command remove unused tools
 EOT

@@ -9,6 +9,7 @@ use Ladb\CoreBundle\Entity\Wonder\Creation;
 use Ladb\CoreBundle\Manager\Offer\OfferManager;
 use Ladb\CoreBundle\Model\StripableInterface;
 use Ladb\CoreBundle\Utils\WebScreenshotUtils;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputInterface;
@@ -21,9 +22,8 @@ use Ladb\CoreBundle\Utils\TypableUtils;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\Router;
 
+#[AsCommand(name: 'ladb:cron:offers', description: 'Check offers lifetime')]
 class CronOffersCommand extends Command {
-
-	protected static $defaultName = 'ladb:cron:offers';
 
 	private $mailerUtils;
 	private $offerManager;
@@ -43,7 +43,6 @@ class CronOffersCommand extends Command {
 	protected function configure() {
 		$this
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
-			->setDescription('Check offers lifetime')
 			->setHelp(<<<EOT
 The <info>ladb:cron:offers</info> check offers lifetime
 EOT

@@ -2,6 +2,7 @@
 
 namespace Ladb\CoreBundle\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
@@ -11,9 +12,8 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 
+#[AsCommand(name: 'ladb:generate:heightratio100', description: 'Generate pictures heightratio100')]
 class GenerateHeightRatio100Command extends Command {
-
-	protected static $defaultName = 'ladb:generate:heightratio100';
 
 	private $om;
 
@@ -25,7 +25,6 @@ class GenerateHeightRatio100Command extends Command {
 	protected function configure() {
 		$this
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
-			->setDescription('Generate pictures heightratio100')
 			->setHelp(<<<EOT
 The <info>ladb:generate:heightratio100</info> command generate pictures heightratio100
 EOT
