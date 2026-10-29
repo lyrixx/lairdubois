@@ -7,8 +7,7 @@ use Ladb\CoreBundle\Controller\PublicationControllerTrait;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Ladb\CoreBundle\Controller\AbstractController;
 use Ladb\CoreBundle\Entity\Knowledge\School;
 use Ladb\CoreBundle\Entity\Qa\Question;
@@ -49,10 +48,8 @@ class PlanController extends AbstractController {
 
 	use PublicationControllerTrait;
 
-	/**
-	 * @Template("@LadbCore/Wonder/Plan/new.html.twig")
-	 */
 	#[Route(path: '/new', name: 'core_plan_new')]
+	#[Template('@LadbCore/Wonder/Plan/new.html.twig')]
 	public function newAction(Request $request, TagUtils $tagUtils) {
 
 		$plan = new Plan();
@@ -65,10 +62,8 @@ class PlanController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Wonder/Plan/new.html.twig")
-	 */
 	#[Route(path: '/create', methods: ['POST'], name: 'core_plan_create')]
+	#[Template('@LadbCore/Wonder/Plan/new.html.twig')]
 	public function createAction(Request $request, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, PlanUtils $planUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$owner = $this->retrieveOwner($request);
@@ -173,10 +168,8 @@ class PlanController extends AbstractController {
 		return $this->redirect($returnToUrl);
 	}
 
-	/**
-	 * @Template("@LadbCore/Wonder/Plan/edit.html.twig")
-	 */
 	#[Route(path: '/{id}/edit', requirements: ['id' => '\d+'], name: 'core_plan_edit')]
+	#[Template('@LadbCore/Wonder/Plan/edit.html.twig')]
 	public function editAction($id, TagUtils $tagUtils) {
 
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
@@ -191,10 +184,8 @@ class PlanController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Wonder/Plan/edit.html.twig")
-	 */
 	#[Route(path: '/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_plan_update')]
+	#[Template('@LadbCore/Wonder/Plan/edit.html.twig')]
 	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, EmbeddableUtils $embaddableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, PicturedUtils $picturedUtils, PlanUtils $planUtils, StripableUtils $stripableUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
@@ -316,12 +307,10 @@ class PlanController extends AbstractController {
 		return $response;
 	}
 
-	/**
-	 * @Template("@LadbCore/Wonder/Plan/questions.html.twig")
-	 */
 	#[Route(path: '/{id}/questions', requirements: ['id' => '\d+'], name: 'core_plan_questions')]
 	#[Route(path: '/{id}/questions/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_plan_questions_filter')]
 	#[Route(path: '/{id}/questions/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_plan_questions_filter_page')]
+	#[Template('@LadbCore/Wonder/Plan/questions.html.twig')]
 	public function questionsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
 		$this->assertShowable($plan);
@@ -351,12 +340,10 @@ class PlanController extends AbstractController {
 		));
 	}
 
-	/**
-	 * @Template("@LadbCore/Wonder/Plan/howtos.html.twig")
-	 */
 	#[Route(path: '/{id}/pas-a-pas', requirements: ['id' => '\d+'], name: 'core_plan_howtos')]
 	#[Route(path: '/{id}/pas-a-pas/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_plan_howtos_filter')]
 	#[Route(path: '/{id}/pas-a-pas/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_plan_howtos_filter_page')]
+	#[Template('@LadbCore/Wonder/Plan/howtos.html.twig')]
 	public function howtosAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
 		$this->assertShowable($plan);
@@ -386,12 +373,10 @@ class PlanController extends AbstractController {
 		));
 	}
 
-	/**
-	 * @Template("@LadbCore/Wonder/Plan/creations.html.twig")
-	 */
 	#[Route(path: '/{id}/creations', requirements: ['id' => '\d+'], name: 'core_plan_creations')]
 	#[Route(path: '/{id}/creations/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_plan_creations_filter')]
 	#[Route(path: '/{id}/creations/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_plan_creations_filter_page')]
+	#[Template('@LadbCore/Wonder/Plan/creations.html.twig')]
 	public function creationsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
 		$this->assertShowable($plan);
@@ -421,12 +406,10 @@ class PlanController extends AbstractController {
 		));
     }
 
-	/**
-	 * @Template("@LadbCore/Wonder/Plan/workflows.html.twig")
-	 */
 	#[Route(path: '/{id}/processus', requirements: ['id' => '\d+'], name: 'core_plan_workflows')]
 	#[Route(path: '/{id}/processus/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_plan_workflows_filter')]
 	#[Route(path: '/{id}/processus/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_plan_workflows_filter_page')]
+	#[Template('@LadbCore/Wonder/Plan/workflows.html.twig')]
 	public function workflowsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
 		$this->assertShowable($plan);
@@ -456,12 +439,10 @@ class PlanController extends AbstractController {
 		));
 	}
 
-	/**
-	 * @Template("@LadbCore/Wonder/Plan/workshops.html.twig")
-	 */
 	#[Route(path: '/{id}/ateliers', requirements: ['id' => '\d+'], name: 'core_plan_workshops')]
 	#[Route(path: '/{id}/ateliers/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_plan_workshops_filter')]
 	#[Route(path: '/{id}/ateliers/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_plan_workshops_filter_page')]
+	#[Template('@LadbCore/Wonder/Plan/workshops.html.twig')]
 	public function workshopsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
 		$this->assertShowable($plan);
@@ -491,12 +472,10 @@ class PlanController extends AbstractController {
 		));
     }
 
-	/**
-	 * @Template("@LadbCore/Wonder/Plan/schools.html.twig")
-	 */
 	#[Route(path: '/{id}/ecoles', requirements: ['id' => '\d+'], name: 'core_plan_schools')]
 	#[Route(path: '/{id}/ecoles/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_plan_schools_filter')]
 	#[Route(path: '/{id}/ecoles/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_plan_schools_filter_page')]
+	#[Template('@LadbCore/Wonder/Plan/schools.html.twig')]
 	public function schoolsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$plan = $this->retrievePublication($id, Plan::CLASS_NAME);
 		$this->assertShowable($plan);
@@ -526,12 +505,10 @@ class PlanController extends AbstractController {
 		));
 	}
 
-	/**
-	 * @Template("@LadbCore/Wonder/Plan/inspirations.html.twig")
-	 */
 	#[Route(path: '/{id}/inspirations', requirements: ['id' => '\d+'], name: 'core_plan_inspirations')]
 	#[Route(path: '/{id}/inspirations/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_plan_inspirations_filter')]
 	#[Route(path: '/{id}/inspirations/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_plan_inspirations_filter_page')]
+	#[Template('@LadbCore/Wonder/Plan/inspirations.html.twig')]
 	public function inspirationsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$planRepository = $om->getRepository(Plan::CLASS_NAME);
 
@@ -561,12 +538,10 @@ class PlanController extends AbstractController {
 		));
 	}
 
-	/**
-	 * @Template("@LadbCore/Wonder/Plan/rebounds.html.twig")
-	 */
 	#[Route(path: '/{id}/rebonds', requirements: ['id' => '\d+'], name: 'core_plan_rebounds')]
 	#[Route(path: '/{id}/rebonds/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_plan_rebounds_filter')]
 	#[Route(path: '/{id}/rebonds/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_plan_rebounds_filter_page')]
+	#[Template('@LadbCore/Wonder/Plan/rebounds.html.twig')]
 	public function reboundsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$planRepository = $om->getRepository(Plan::CLASS_NAME);
 
@@ -657,10 +632,8 @@ class PlanController extends AbstractController {
 
 	}
 
-	/**
-	 * @Template("@LadbCore/Wonder/Plan/widget-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/widget', requirements: ['id' => '\d+'], name: 'core_plan_widget')]
+	#[Template('@LadbCore/Wonder/Plan/widget-xhr.html.twig')]
 	public function widgetAction(Request $request, $id, EntityManagerInterface $om) {
 		$id = intval($id);
 
@@ -678,11 +651,9 @@ class PlanController extends AbstractController {
 		throw new \Symfony\Component\HttpKernel\Exception\GoneHttpException();
 	}
 
-	/**
-	 * @Template("@LadbCore/Wonder/Plan/list.html.twig")
-	 */
 	#[Route(path: '/', name: 'core_plan_list')]
 	#[Route(path: '/{page}', requirements: ['page' => '\d+'], name: 'core_plan_list_page')]
+	#[Template('@LadbCore/Wonder/Plan/list.html.twig')]
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, ResourceUtils $resourceUtils, SearchUtils $searchUtils, TranslatorInterface $translator, $page = 0) {
 
 		// Elasticsearch paginiation limit
@@ -927,10 +898,8 @@ class PlanController extends AbstractController {
 		return $parameters;
 	}
 
-	/**
-	 * @Template("@LadbCore/Wonder/Plan/show.html.twig")
-	 */
 	#[Route(path: '/{id}.html', name: 'core_plan_show')]
+	#[Template('@LadbCore/Wonder/Plan/show.html.twig')]
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, EmbeddableUtils $embaddableUtils, ExplorableUtils $explorableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, EntityManagerInterface $om, SearchUtils $searchUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$planRepository = $om->getRepository(Plan::CLASS_NAME);
 

@@ -5,8 +5,8 @@ namespace Ladb\CoreBundle\Controller\Wonder;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Bridge\Twig\Attribute\Template;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Ladb\CoreBundle\Controller\AbstractController;
 use Ladb\CoreBundle\Controller\CustomOwnerControllerTrait;
 use Ladb\CoreBundle\Controller\PublicationControllerTrait;
@@ -60,10 +60,8 @@ class CreationController extends AbstractController {
 
 	use PublicationControllerTrait;
 
-	/**
-	 * @Template("@LadbCore/Wonder/Creation/new.html.twig")
-	 */
 	#[Route(path: '/new', name: 'core_creation_new')]
+	#[Template('@LadbCore/Wonder/Creation/new.html.twig')]
 	public function newAction(Request $request, TagUtils $tagUtils) {
 
 		$creation = new Creation();
@@ -77,10 +75,8 @@ class CreationController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Wonder/Creation/new.html.twig")
-	 */
 	#[Route(path: '/create', methods: ['POST'], name: 'core_creation_create')]
+	#[Template('@LadbCore/Wonder/Creation/new.html.twig')]
 	public function createAction(Request $request, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$owner = $this->retrieveOwner($request);
@@ -178,10 +174,8 @@ class CreationController extends AbstractController {
 		return $this->redirect($returnToUrl);
 	}
 
-	/**
-	 * @Template("@LadbCore/Wonder/Creation/edit.html.twig")
-	 */
 	#[Route(path: '/{id}/edit', requirements: ['id' => '\d+'], name: 'core_creation_edit')]
+	#[Template('@LadbCore/Wonder/Creation/edit.html.twig')]
 	public function editAction($id, TagUtils $tagUtils) {
 
 		$creation = $this->retrievePublication($id, Creation::CLASS_NAME);
@@ -196,10 +190,8 @@ class CreationController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Wonder/Creation/edit.html.twig")
-	 */
 	#[Route(path: '/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_creation_update')]
+	#[Template('@LadbCore/Wonder/Creation/edit.html.twig')]
 	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, EmbeddableUtils $embeddableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, PicturedUtils $picturedUtils, StripableUtils $stripableUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$doUp = $request->get('ladb_do_up', false) && $this->isGranted('ROLE_ADMIN');
@@ -295,12 +287,10 @@ class CreationController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_creation_show', array( 'id' => $creation->getSluggedId() )));
 	}
 
-	/**
-	 * @Template("@LadbCore/Wonder/Creation/questions.html.twig")
-	 */
 	#[Route(path: '/{id}/questions', requirements: ['id' => '\d+'], name: 'core_creation_questions')]
 	#[Route(path: '/{id}/questions/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_creation_questions_filter')]
 	#[Route(path: '/{id}/questions/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_creation_questions_filter_page')]
+	#[Template('@LadbCore/Wonder/Creation/questions.html.twig')]
 	public function questionsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$creation = $this->retrievePublication($id, Creation::CLASS_NAME);
 		$this->assertShowable($creation);
@@ -330,12 +320,10 @@ class CreationController extends AbstractController {
 		));
 	}
 
-	/**
-	 * @Template("@LadbCore/Wonder/Creation/plans.html.twig")
-	 */
 	#[Route(path: '/{id}/plans', requirements: ['id' => '\d+'], name: 'core_creation_plans')]
 	#[Route(path: '/{id}/plans/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_creation_plans_filter')]
 	#[Route(path: '/{id}/plans/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_creation_plans_filter_page')]
+	#[Template('@LadbCore/Wonder/Creation/plans.html.twig')]
 	public function plansAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$creation = $this->retrievePublication($id, Creation::CLASS_NAME);
 		$this->assertShowable($creation);
@@ -370,12 +358,10 @@ class CreationController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_creation_howtos', array( 'id' => $id )));
 	}
 
-	/**
-	 * @Template("@LadbCore/Wonder/Creation/howtos.html.twig")
-	 */
 	#[Route(path: '/{id}/pas-a-pas', requirements: ['id' => '\d+'], name: 'core_creation_howtos')]
 	#[Route(path: '/{id}/pas-a-pas/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_creation_howtos_filter')]
 	#[Route(path: '/{id}/pas-a-pas/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_creation_howtos_filter_page')]
+	#[Template('@LadbCore/Wonder/Creation/howtos.html.twig')]
 	public function howtosAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$creation = $this->retrievePublication($id, Creation::CLASS_NAME);
 		$this->assertShowable($creation);
@@ -405,12 +391,10 @@ class CreationController extends AbstractController {
 		));
 	}
 
-	/**
-	 * @Template("@LadbCore/Wonder/Creation/workflows.html.twig")
-	 */
 	#[Route(path: '/{id}/processus', requirements: ['id' => '\d+'], name: 'core_creation_workflows')]
 	#[Route(path: '/{id}/processus/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_creation_workflows_filter')]
 	#[Route(path: '/{id}/processus/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_creation_workflows_filter_page')]
+	#[Template('@LadbCore/Wonder/Creation/workflows.html.twig')]
 	public function workflowsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$creation = $this->retrievePublication($id, Creation::CLASS_NAME);
 		$this->assertShowable($creation);
@@ -440,12 +424,10 @@ class CreationController extends AbstractController {
 		));
 	}
 
-	/**
-	 * @Template("@LadbCore/Wonder/Creation/providers.html.twig")
-	 */
 	#[Route(path: '/{id}/fournisseurs', requirements: ['id' => '\d+'], name: 'core_creation_providers')]
 	#[Route(path: '/{id}/fournisseurs/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_creation_providers_filter')]
 	#[Route(path: '/{id}/fournisseurs/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_creation_providers_filter_page')]
+	#[Template('@LadbCore/Wonder/Creation/providers.html.twig')]
 	public function providersAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$creation = $this->retrievePublication($id, Creation::CLASS_NAME);
 		$this->assertShowable($creation);
@@ -475,12 +457,10 @@ class CreationController extends AbstractController {
 		));
 	}
 
-	/**
-	 * @Template("@LadbCore/Wonder/Creation/schools.html.twig")
-	 */
 	#[Route(path: '/{id}/ecoles', requirements: ['id' => '\d+'], name: 'core_creation_schools')]
 	#[Route(path: '/{id}/ecoles/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_creation_schools_filter')]
 	#[Route(path: '/{id}/ecoles/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_creation_schools_filter_page')]
+	#[Template('@LadbCore/Wonder/Creation/schools.html.twig')]
 	public function schoolsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$creation = $this->retrievePublication($id, Creation::CLASS_NAME);
 		$this->assertShowable($creation);
@@ -510,12 +490,10 @@ class CreationController extends AbstractController {
 		));
 	}
 
-	/**
-	 * @Template("@LadbCore/Wonder/Creation/inspirations.html.twig")
-	 */
 	#[Route(path: '/{id}/inspirations', requirements: ['id' => '\d+'], name: 'core_creation_inspirations')]
 	#[Route(path: '/{id}/inspirations/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_creation_inspirations_filter')]
 	#[Route(path: '/{id}/inspirations/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_creation_inspirations_filter_page')]
+	#[Template('@LadbCore/Wonder/Creation/inspirations.html.twig')]
 	public function inspirationsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$creationRepository = $om->getRepository(Creation::CLASS_NAME);
 
@@ -545,12 +523,10 @@ class CreationController extends AbstractController {
 		));
 	}
 
-	/**
-	 * @Template("@LadbCore/Wonder/Creation/rebounds.html.twig")
-	 */
 	#[Route(path: '/{id}/rebonds', requirements: ['id' => '\d+'], name: 'core_creation_rebounds')]
 	#[Route(path: '/{id}/rebonds/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_creation_rebounds_filter')]
 	#[Route(path: '/{id}/rebonds/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_creation_rebounds_filter_page')]
+	#[Template('@LadbCore/Wonder/Creation/rebounds.html.twig')]
 	public function reboundsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$creationRepository = $om->getRepository(Creation::CLASS_NAME);
 
@@ -637,10 +613,8 @@ class CreationController extends AbstractController {
 
 	}
 
-	/**
-	 * @Template("@LadbCore/Wonder/Creation/widget-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/widget', requirements: ['id' => '\d+'], name: 'core_creation_widget')]
+	#[Template('@LadbCore/Wonder/Creation/widget-xhr.html.twig')]
 	public function widgetAction($id) {
 
 		$creation = $this->retrievePublication($id, Creation::CLASS_NAME);
@@ -657,11 +631,9 @@ class CreationController extends AbstractController {
 		throw new \Symfony\Component\HttpKernel\Exception\GoneHttpException();
 	}
 
-	/**
-	 * @Template("@LadbCore/Wonder/Creation/list.html.twig")
-	 */
 	#[Route(path: '/', name: 'core_creation_list')]
 	#[Route(path: '/{page}', requirements: ['page' => '\d+'], name: 'core_creation_list_page')]
+	#[Template('@LadbCore/Wonder/Creation/list.html.twig')]
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, ElasticaQueryUtils $elasticaQueryUtils, MaybeUtils $maybeUtils, EntityManagerInterface $om, SearchUtils $searchUtils, TranslatorInterface $translator, TypableUtils $typableUtils, $page = 0) {
 
 		// Elasticsearch paginiation limit
@@ -1064,10 +1036,8 @@ class CreationController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Wonder/Creation/show.html.twig")
-	 */
 	#[Route(path: '/{id}.html', name: 'core_creation_show')]
+	#[Template('@LadbCore/Wonder/Creation/show.html.twig')]
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ElasticaQueryUtils $elasticaQueryUtils, EmbeddableUtils $embaddableUtils, ExplorableUtils $explorableUtils, FeedbackableUtils $feedbackableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, EntityManagerInterface $om, SearchUtils $searchUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$creationRepository = $om->getRepository(Creation::CLASS_NAME);
 
@@ -1123,10 +1093,8 @@ class CreationController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_creation_admin_converttoworkshop)")
-	 */
 	#[Route(path: '/{id}/admin/converttoworkshop', requirements: ['id' => '\d+'], name: 'core_creation_admin_converttoworkshop')]
+	#[IsGranted('ROLE_ADMIN', statusCode: 404, message: 'Not allowed (core_creation_admin_converttoworkshop)')]
 	public function adminConvertToWorkshopAction($id, CreationManager $creationManager, EntityManagerInterface $om, TranslatorInterface $translator) {
 		$creationRepository = $om->getRepository(Creation::CLASS_NAME);
 
@@ -1144,10 +1112,8 @@ class CreationController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_workshop_show', array( 'id' => $workshop->getSluggedId() )));
 	}
 
-	/**
-	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_creation_admin_converttohowto)")
-	 */
 	#[Route(path: '/{id}/admin/converttohowto', requirements: ['id' => '\d+'], name: 'core_creation_admin_converttohowto')]
+	#[IsGranted('ROLE_ADMIN', statusCode: 404, message: 'Not allowed (core_creation_admin_converttohowto)')]
 	public function adminConvertToHowtoAction($id, CreationManager $creationManager, EntityManagerInterface $om, TranslatorInterface $translator) {
 		$creationRepository = $om->getRepository(Creation::CLASS_NAME);
 
@@ -1165,10 +1131,8 @@ class CreationController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_howto_show', array( 'id' => $howto->getSluggedId() )));
 	}
 
-	/**
-	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_creation_admin_converttofind)")
-	 */
 	#[Route(path: '/{id}/admin/converttofind', requirements: ['id' => '\d+'], name: 'core_creation_admin_converttofind')]
+	#[IsGranted('ROLE_ADMIN', statusCode: 404, message: 'Not allowed (core_creation_admin_converttofind)')]
 	public function adminConvertToFindAction($id, CreationManager $creationManager, EntityManagerInterface $om, TranslatorInterface $translator) {
 		$creationRepository = $om->getRepository(Creation::CLASS_NAME);
 
@@ -1186,10 +1150,8 @@ class CreationController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_find_show', array( 'id' => $find->getSluggedId() )));
 	}
 
-	/**
-	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_creation_admin_converttoquestion)")
-	 */
 	#[Route(path: '/{id}/admin/converttoquestion', requirements: ['id' => '\d+'], name: 'core_creation_admin_converttoquestion')]
+	#[IsGranted('ROLE_ADMIN', statusCode: 404, message: 'Not allowed (core_creation_admin_converttoquestion)')]
 	public function adminConvertToQuestionAction($id, CreationManager $creationManager, EntityManagerInterface $om, TranslatorInterface $translator) {
 		$creationRepository = $om->getRepository(Creation::CLASS_NAME);
 
@@ -1207,10 +1169,8 @@ class CreationController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_qa_question_show', array( 'id' => $question->getSluggedId() )));
 	}
 
-	/**
-	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_creation_admin_converttooffer)")
-	 */
 	#[Route(path: '/{id}/admin/converttooffer', requirements: ['id' => '\d+'], name: 'core_creation_admin_converttooffer')]
+	#[IsGranted('ROLE_ADMIN', statusCode: 404, message: 'Not allowed (core_creation_admin_converttooffer)')]
 	public function adminConvertToOfferAction($id, CreationManager $creationManager, EntityManagerInterface $om, TranslatorInterface $translator) {
 		$creationRepository = $om->getRepository(Creation::CLASS_NAME);
 

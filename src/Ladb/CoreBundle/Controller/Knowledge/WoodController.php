@@ -7,8 +7,8 @@ use Ladb\CoreBundle\Entity\Knowledge\Value\Picture;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Bridge\Twig\Attribute\Template;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Ladb\CoreBundle\Controller\AbstractController;
 use Ladb\CoreBundle\Form\Type\Knowledge\NewWoodType;
 use Ladb\CoreBundle\Form\Model\NewWood;
@@ -40,10 +40,8 @@ class WoodController extends AbstractController {
 
 	use PublicationControllerTrait;
 
-	/**
-	 * @Template("@LadbCore/Knowledge/Wood/new.html.twig")
-	 */
 	#[Route(path: '/new', name: 'core_wood_new')]
+	#[Template('@LadbCore/Knowledge/Wood/new.html.twig')]
 	public function newAction(KnowledgeUtils $knowledgeUtils) {
 
 		// Exclude if user is not email confirmed
@@ -60,10 +58,8 @@ class WoodController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Knowledge/Wood/new.html.twig")
-	 */
 	#[Route(path: '/create', methods: ['POST'], name: 'core_wood_create')]
+	#[Template('@LadbCore/Knowledge/Wood/new.html.twig')]
 	public function createAction(Request $request, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, EntityManagerInterface $om, TranslatorInterface $translator) {
 
 		// Exclude if user is not email confirmed
@@ -137,10 +133,8 @@ class WoodController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_wood_delete)")
-	 */
 	#[Route(path: '/{id}/delete', requirements: ['id' => '\d+'], name: 'core_wood_delete')]
+	#[IsGranted('ROLE_ADMIN', statusCode: 404, message: 'Not allowed (core_wood_delete)')]
 	public function deleteAction($id, TranslatorInterface $translator, WoodManager $woodMananger) {
 
 		$wood = $this->retrievePublication($id, Wood::CLASS_NAME);
@@ -155,12 +149,10 @@ class WoodController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_wood_list'));
 	}
 
-	/**
-	 * @Template("@LadbCore/Knowledge/Wood/texture-list.html.twig")
-	 */
 	#[Route(path: '/{id}/textures', requirements: ['id' => '\d+'], name: 'core_wood_texture_list')]
 	#[Route(path: '/{id}/textures/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_wood_texture_list_filter')]
 	#[Route(path: '/{id}/textures/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_wood_texture_list_filter_page')]
+	#[Template('@LadbCore/Knowledge/Wood/texture-list.html.twig')]
 	public function textureListAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $page = 0, $filter = 'all') {
 		$wood = $this->retrievePublication($id, Wood::CLASS_NAME);
 		$this->assertShowable($wood);
@@ -222,10 +214,8 @@ class WoodController extends AbstractController {
 		return $response;
 	}
 
-	/**
-	 * @Template("@LadbCore/Knowledge/Wood/texture-show-xhr.html.twig")
-	 */
 	#[Route(path: '/textures/{id}', requirements: ['id' => '\d+'], name: 'core_wood_texture_show')]
+	#[Template('@LadbCore/Knowledge/Wood/texture-show-xhr.html.twig')]
 	public function textureShowAction(Request $request, $id, EntityManagerInterface $om) {
 		$textureRepository = $om->getRepository(Wood\Texture::CLASS_NAME);
 
@@ -239,10 +229,8 @@ class WoodController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Knowledge/Wood/widget-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/widget', requirements: ['id' => '\d+'], name: 'core_wood_widget')]
+	#[Template('@LadbCore/Knowledge/Wood/widget-xhr.html.twig')]
 	public function widgetAction(Request $request, $id) {
 
 		$wood = $this->retrievePublication($id, Wood::CLASS_NAME);
@@ -259,11 +247,9 @@ class WoodController extends AbstractController {
 		throw new \Symfony\Component\HttpKernel\Exception\GoneHttpException();
 	}
 
-	/**
-	 * @Template("@LadbCore/Knowledge/Wood/list.html.twig")
-	 */
 	#[Route(path: '/', name: 'core_wood_list')]
 	#[Route(path: '/{page}', requirements: ['page' => '\d+'], name: 'core_wood_list_page')]
+	#[Template('@LadbCore/Knowledge/Wood/list.html.twig')]
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, ElasticaQueryUtils $elasticaQueryUtils, SearchUtils $searchUtils, $page = 0) {
 
 		// Elasticsearch paginiation limit
@@ -395,10 +381,8 @@ class WoodController extends AbstractController {
 		return $parameters;
 	}
 
-	/**
-	 * @Template("@LadbCore/Knowledge/Wood/show.html.twig")
-	 */
 	#[Route(path: '/{id}.html', name: 'core_wood_show')]
+	#[Template('@LadbCore/Knowledge/Wood/show.html.twig')]
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ElasticaQueryUtils $elasticaQueryUtils, LikableUtils $likableUtils, EntityManagerInterface $om, SearchUtils $searchUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$woodRepository = $om->getRepository(Wood::CLASS_NAME);
 

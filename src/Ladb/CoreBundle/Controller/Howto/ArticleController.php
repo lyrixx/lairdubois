@@ -4,8 +4,8 @@ namespace Ladb\CoreBundle\Controller\Howto;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Bridge\Twig\Attribute\Template;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Ladb\CoreBundle\Controller\PublicationControllerTrait;
 use Ladb\CoreBundle\Entity\Howto\Howto;
 use Ladb\CoreBundle\Entity\Howto\Article;
@@ -40,10 +40,8 @@ class ArticleController extends AbstractHowtoBasedController {
 	}
 
 	/////
-	/**
-	 * @Template("@LadbCore/Howto/Article/new.html.twig")
-	 */
 	#[Route(path: '/pas-a-pas/{id}/articles/new', requirements: ['id' => '\d+'], name: 'core_howto_article_new')]
+	#[Template('@LadbCore/Howto/Article/new.html.twig')]
 	public function newAction(Request $request, $id) {
 
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
@@ -60,10 +58,8 @@ class ArticleController extends AbstractHowtoBasedController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Howto/Article/new.html.twig")
-	 */
 	#[Route(path: '/pas-a-pas/{id}/articles/create', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_howto_article_create')]
+	#[Template('@LadbCore/Howto/Article/new.html.twig')]
 	public function createAction(Request $request, $id, BlockBodiedUtils $blockUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TranslatorInterface $translator) {
 
 		$this->createLock('core_howto_article_create', false, self::LOCK_TTL_CREATE_ACTION, false);
@@ -128,10 +124,8 @@ class ArticleController extends AbstractHowtoBasedController {
 		return $this->redirect($this->generateUrl('core_howto_show', array( 'id' => $article->getHowto()->getSluggedId() )).'#'.$article->getSluggedId());
 	}
 
-	/**
-	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_howto_article_unpublish)")
-	 */
 	#[Route(path: '/pas-a-pas/articles/{id}/unpublish', requirements: ['id' => '\d+'], name: 'core_howto_article_unpublish')]
+	#[IsGranted('ROLE_ADMIN', statusCode: 404, message: 'Not allowed (core_howto_article_unpublish)')]
 	public function unpublishAction(Request $request, $id, ArticleManager $articleManager, TranslatorInterface $translator) {
 
 		$article = $this->retrievePublication($id, Article::CLASS_NAME);
@@ -152,10 +146,8 @@ class ArticleController extends AbstractHowtoBasedController {
 		return $this->redirect($returnToUrl);
 	}
 
-	/**
-	 * @Template("@LadbCore/Howto/Article/edit.html.twig")
-	 */
 	#[Route(path: '/pas-a-pas/articles/{id}/edit', requirements: ['id' => '\d+'], name: 'core_howto_article_edit')]
+	#[Template('@LadbCore/Howto/Article/edit.html.twig')]
 	public function editAction(Request $request, $id) {
 
 		$article = $this->retrievePublication($id, Article::CLASS_NAME);
@@ -178,10 +170,8 @@ class ArticleController extends AbstractHowtoBasedController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Howto/Article/edit.html.twig")
-	 */
 	#[Route(path: '/pas-a-pas/articles/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_howto_article_update')]
+	#[Template('@LadbCore/Howto/Article/edit.html.twig')]
 	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EmbeddableUtils $embaddableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, MentionUtils $mentionUtils, EntityManagerInterface $om, SearchUtils $searchUtils, TranslatorInterface $translator) {
 
 		$article = $this->retrievePublication($id, Article::CLASS_NAME);
@@ -262,10 +252,8 @@ class ArticleController extends AbstractHowtoBasedController {
 		return $this->redirect($this->generateUrl('core_howto_edit', array( 'id' => $howto->getId() )));
 	}
 
-	/**
-	 * @Template("@LadbCore/Howto/Article/widget-xhr.html.twig")
-	 */
 	#[Route(path: '/pas-a-pas/articles/{id}/widget', requirements: ['id' => '\d+'], name: 'core_howto_article_widget')]
+	#[Template('@LadbCore/Howto/Article/widget-xhr.html.twig')]
 	public function widgetAction(Request $request, $id) {
 
 		$id = intval($id);
@@ -326,10 +314,8 @@ class ArticleController extends AbstractHowtoBasedController {
 		return $this->redirect($this->generateUrl('core_howto_article_show', array( 'id' => $id )));
 	}
 
-	/**
-	 * @Template("@LadbCore/Howto/Article/show.html.twig")
-	 */
 	#[Route(path: '/pas-a-pas/articles/{id}.html', name: 'core_howto_article_show')]
+	#[Template('@LadbCore/Howto/Article/show.html.twig')]
 	public function showAction(Request $request, $id, EventDispatcherInterface $dispatcher, EntityManagerInterface $om, WitnessManager $witnessManager) {
 		$articleRepository = $om->getRepository(Article::CLASS_NAME);
 

@@ -6,7 +6,6 @@ use Ladb\CoreBundle\Controller\AbstractController;
 use Ladb\CoreBundle\Controller\Wonder\CreationController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 
 class DefaultController extends AbstractController {
 

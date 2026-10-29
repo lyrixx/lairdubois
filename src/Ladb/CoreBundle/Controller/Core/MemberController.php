@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Exception\MissingMandatoryParametersException;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Ladb\CoreBundle\Entity\Core\MemberRequest;
 use Ladb\CoreBundle\Manager\Core\MemberInvitationManager;
 use Ladb\CoreBundle\Manager\Core\MemberManager;
@@ -41,10 +41,8 @@ class MemberController extends AbstractController {
 	}
 
 	/////
-	/**
-	 * @Template("@LadbCore/Core/Member/invitation-new.html.twig")
-	 */
 	#[Route(path: '/{teamId}/invitation/new', requirements: ['teamId' => '\d+'], name: 'core_member_invitation_new')]
+	#[Template('@LadbCore/Core/Member/invitation-new.html.twig')]
 	public function newInvitationAction($teamId, EntityManagerInterface $om) {
 
 		$team = $this->_retrieveTeam($teamId, $om);
@@ -173,10 +171,8 @@ class MemberController extends AbstractController {
 	}
 
 	/////
-	/**
-	 * @Template("@LadbCore/Core/Member/request-new.html.twig")
-	 */
 	#[Route(path: '/{teamId}/request/new', requirements: ['teamId' => '\d+'], name: 'core_member_request_new')]
+	#[Template('@LadbCore/Core/Member/request-new.html.twig')]
 	public function newRequestAction($teamId, EntityManagerInterface $om) {
 
 		$team = $this->_retrieveTeam($teamId, $om);
@@ -332,11 +328,9 @@ class MemberController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_user_show', array( 'username' => $team->getUsernameCanonical() )));
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/Member/list-session-teams-xhr.html.twig")
-	 */
 	#[Route(path: '/', name: 'core_member_list_session_teams')]
 	#[Route(path: '/{page}', requirements: ['page' => '\d+'], name: 'core_member_list_session_teams_page')]
+	#[Template('@LadbCore/Core/Member/list-session-teams-xhr.html.twig')]
 	public function listSessionTeamsAction(Request $request, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $page = 0) {
 
 		$titleTransKey = $request->get('title-trans-key');

@@ -8,8 +8,7 @@ use Ladb\CoreBundle\Entity\Core\Member;
 use Ladb\CoreBundle\Utils\LocalisableUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Ladb\CoreBundle\Form\Type\Find\FindType;
 use Ladb\CoreBundle\Entity\Find\Find;
 use Ladb\CoreBundle\Entity\Find\Content\Gallery;
@@ -41,10 +40,8 @@ class FindController extends AbstractController {
 
 	use PublicationControllerTrait;
 
-	/**
-	 * @Template("@LadbCore/Find/Find/new.html.twig")
-	 */
 	#[Route(path: '/new', name: 'core_find_new')]
+	#[Template('@LadbCore/Find/Find/new.html.twig')]
 	public function newAction(Request $request, TagUtils $tagUtils) {
 
 		$find = new Find();
@@ -58,10 +55,8 @@ class FindController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Find/Find/new.html.twig")
-	 */
 	#[Route(path: '/create', methods: ['POST'], name: 'core_find_create')]
+	#[Template('@LadbCore/Find/Find/new.html.twig')]
 	public function createAction(Request $request, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, FindUtils $findUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$owner = $this->retrieveOwner($request);
@@ -160,10 +155,8 @@ class FindController extends AbstractController {
 		return $this->redirect($returnToUrl);
 	}
 
-	/**
-	 * @Template("@LadbCore/Find/Find/edit.html.twig")
-	 */
 	#[Route(path: '/{id}/edit', requirements: ['id' => '\d+'], name: 'core_find_edit')]
+	#[Template('@LadbCore/Find/Find/edit.html.twig')]
 	public function editAction($id, TagUtils $tagUtils) {
 
 		$find = $this->retrievePublication($id, Find::CLASS_NAME);
@@ -178,10 +171,8 @@ class FindController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Find/Find/edit.html.twig")
-	 */
 	#[Route(path: '/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_find_update')]
+	#[Template('@LadbCore/Find/Find/edit.html.twig')]
 	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, FindUtils $findUtils, EntityManagerInterface $om, PicturedUtils $picturedUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$doUp = $request->get('ladb_do_up', false) && $this->isGranted('ROLE_ADMIN');
@@ -274,10 +265,8 @@ class FindController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_find_show', array( 'id' => $find->getSluggedId() )));
 	}
 
-	/**
-	 * @Template("@LadbCore/Find/Find/widget-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/widget', requirements: ['id' => '\d+'], name: 'core_find_widget')]
+	#[Template('@LadbCore/Find/Find/widget-xhr.html.twig')]
 	public function widgetAction($id) {
 
 		$find = $this->retrievePublication($id, Find::CLASS_NAME);
@@ -288,10 +277,8 @@ class FindController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Find/Find/location.geojson.twig")
-	 */
 	#[Route(path: '/{id}/location.geojson', name: 'core_find_location', defaults: ['_format' => 'json'])]
+	#[Template('@LadbCore/Find/Find/location.geojson.twig')]
 	public function locationAction($id) {
 
 		$find = $this->retrievePublication($id, Find::CLASS_NAME);
@@ -315,10 +302,8 @@ class FindController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Find/Find/card-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/card.xhr', name: 'core_find_card')]
+	#[Template('@LadbCore/Find/Find/card-xhr.html.twig')]
 	public function cardAction(Request $request, $id) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_find_card-');
@@ -338,12 +323,10 @@ class FindController extends AbstractController {
 		throw new \Symfony\Component\HttpKernel\Exception\GoneHttpException();
 	}
 
-	/**
-	 * @Template("@LadbCore/Find/Find/list.html.twig")
-	 */
 	#[Route(path: '/', name: 'core_find_list')]
 	#[Route(path: '/{page}', requirements: ['page' => '\d+'], name: 'core_find_list_page')]
 	#[Route(path: '.geojson', defaults: ['_format' => 'json', 'page' => -1, 'layout' => 'geojson'], name: 'core_find_list_geojson')]
+	#[Template('@LadbCore/Find/Find/list.html.twig')]
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, LocalisableUtils $localisableUtils, SearchUtils $searchUtils, TranslatorInterface $translator, $page = 0, $layout = 'view') {
 
 		// Elasticsearch paginiation limit
@@ -554,10 +537,8 @@ class FindController extends AbstractController {
 		return $parameters;
 	}
 
-	/**
-	 * @Template("@LadbCore/Find/Find/show.html.twig")
-	 */
 	#[Route(path: '/{id}.html', name: 'core_find_show')]
+	#[Template('@LadbCore/Find/Find/show.html.twig')]
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, EntityManagerInterface $om, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$findRepository = $om->getRepository(Find::CLASS_NAME);
 

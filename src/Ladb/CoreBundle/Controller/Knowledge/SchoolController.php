@@ -8,8 +8,8 @@ use Ladb\CoreBundle\Entity\Knowledge\Provider;
 use Ladb\CoreBundle\Utils\KnowledgeUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Bridge\Twig\Attribute\Template;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Ladb\CoreBundle\Entity\Wonder\Plan;
 use Ladb\CoreBundle\Entity\Howto\Howto;
 use Ladb\CoreBundle\Entity\Wonder\Creation;
@@ -41,10 +41,8 @@ class SchoolController extends AbstractController {
 
 	use PublicationControllerTrait;
 
-	/**
-	 * @Template("@LadbCore/Knowledge/School/new.html.twig")
-	 */
 	#[Route(path: '/new', name: 'core_school_new')]
+	#[Template('@LadbCore/Knowledge/School/new.html.twig')]
 	public function newAction(KnowledgeUtils $knowledgeUtils) {
 
 		// Exclude if user is not email confirmed
@@ -61,10 +59,8 @@ class SchoolController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Knowledge/School/new.html.twig")
-	 */
 	#[Route(path: '/create', methods: ['POST'], name: 'core_school_create')]
+	#[Template('@LadbCore/Knowledge/School/new.html.twig')]
 	public function createAction(Request $request, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, EntityManagerInterface $om, TranslatorInterface $translator) {
 
 		// Exclude if user is not email confirmed
@@ -133,10 +129,8 @@ class SchoolController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_school_delete)")
-	 */
 	#[Route(path: '/{id}/delete', requirements: ['id' => '\d+'], name: 'core_school_delete')]
+	#[IsGranted('ROLE_ADMIN', statusCode: 404, message: 'Not allowed (core_school_delete)')]
 	public function deleteAction($id, SchoolManager $schoolManager, TranslatorInterface $translator) {
 
 		$school = $this->retrievePublication($id, School::CLASS_NAME);
@@ -151,10 +145,8 @@ class SchoolController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_school_list'));
 	}
 
-	/**
-	 * @Template("@LadbCore/Knowledge/School/location.geojson.twig")
-	 */
 	#[Route(path: '/{id}/location.geojson', name: 'core_school_location', defaults: ['_format' => 'json'])]
+	#[Template('@LadbCore/Knowledge/School/location.geojson.twig')]
 	public function locationAction(Request $request, $id) {
 
 		$school = $this->retrievePublication($id, School::CLASS_NAME);
@@ -178,10 +170,8 @@ class SchoolController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Knowledge/School/widget-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/widget', requirements: ['id' => '\d+'], name: 'core_school_widget')]
+	#[Template('@LadbCore/Knowledge/School/widget-xhr.html.twig')]
 	public function widgetAction(Request $request, $id) {
 
 		$school = $this->retrievePublication($id, School::CLASS_NAME);
@@ -192,12 +182,10 @@ class SchoolController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Knowledge/School/list.html.twig")
-	 */
 	#[Route(path: '/', name: 'core_school_list')]
 	#[Route(path: '/{page}', requirements: ['page' => '\d+'], name: 'core_school_list_page')]
 	#[Route(path: '.geojson', defaults: ['_format' => 'json', 'page' => -1, 'layout' => 'geojson'], name: 'core_school_list_geojson')]
+	#[Template('@LadbCore/Knowledge/School/list.html.twig')]
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, LocalisableUtils $localisableUtils, SearchUtils $searchUtils, $page = 0, $layout = 'view') {
 
 		// Elasticsearch paginiation limit
@@ -421,12 +409,10 @@ class SchoolController extends AbstractController {
 		return $parameters;
 	}
 
-	/**
-	 * @Template("@LadbCore/Knowledge/School/creations.html.twig")
-	 */
 	#[Route(path: '/{id}/creations', requirements: ['id' => '\d+'], name: 'core_school_creations')]
 	#[Route(path: '/{id}/creations/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_school_creations_filter')]
 	#[Route(path: '/{id}/creations/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_school_creations_filter_page')]
+	#[Template('@LadbCore/Knowledge/School/creations.html.twig')]
 	public function creationsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$schoolRepository = $om->getRepository(School::CLASS_NAME);
 
@@ -460,12 +446,10 @@ class SchoolController extends AbstractController {
 		));
 	}
 
-	/**
-	 * @Template("@LadbCore/Knowledge/School/plans.html.twig")
-	 */
 	#[Route(path: '/{id}/plans', requirements: ['id' => '\d+'], name: 'core_school_plans')]
 	#[Route(path: '/{id}/plans/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_school_plans_filter')]
 	#[Route(path: '/{id}/plans/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_school_plans_filter_page')]
+	#[Template('@LadbCore/Knowledge/School/plans.html.twig')]
 	public function plansAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$schoolRepository = $om->getRepository(School::CLASS_NAME);
 
@@ -499,12 +483,10 @@ class SchoolController extends AbstractController {
 		));
 	}
 
-	/**
-	 * @Template("@LadbCore/Knowledge/School/howtos.html.twig")
-	 */
 	#[Route(path: '/{id}/pas-a-pas', requirements: ['id' => '\d+'], name: 'core_school_howtos')]
 	#[Route(path: '/{id}/pas-a-pas/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_school_howtos_filter')]
 	#[Route(path: '/{id}/pas-a-pas/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_school_howtos_filter_page')]
+	#[Template('@LadbCore/Knowledge/School/howtos.html.twig')]
 	public function howtosAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$schoolRepository = $om->getRepository(School::CLASS_NAME);
 
@@ -538,10 +520,8 @@ class SchoolController extends AbstractController {
 		));
 	}
 
-	/**
-	 * @Template("@LadbCore/Knowledge/School/card-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/card.xhr', name: 'core_school_card')]
+	#[Template('@LadbCore/Knowledge/School/card-xhr.html.twig')]
 	public function cardAction(Request $request, $id, EntityManagerInterface $om) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_school_card)');
@@ -561,10 +541,8 @@ class SchoolController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Knowledge/School/show.html.twig")
-	 */
 	#[Route(path: '/{id}.html', name: 'core_school_show')]
+	#[Template('@LadbCore/Knowledge/School/show.html.twig')]
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, LikableUtils $likableUtils, EntityManagerInterface $om, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$schoolRepository = $om->getRepository(School::CLASS_NAME);
 

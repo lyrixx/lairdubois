@@ -5,15 +5,13 @@ namespace Ladb\CoreBundle\Controller\Core;
 use Ladb\CoreBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Symfony\Bridge\Twig\Attribute\Template;
 
 #[Route(path: '/api')]
 class ApiController extends AbstractController {
 
-	/**
-	 * @Template("@LadbCore/Core/Api/networkShareCount.json.twig")
-	 */
 	#[Route(path: '/{network}/share.count.json', defaults: ['_format' => 'json'], name: 'core_api_network_share_count')]
+	#[Template('@LadbCore/Core/Api/networkShareCount.json.twig')]
 	public function networkShareCountAction(Request $request, $network) {
 
 		$url = $request->get('url');

@@ -9,8 +9,8 @@ use Ladb\CoreBundle\Utils\ElasticaQueryUtils;
 use Ladb\CoreBundle\Utils\KnowledgeUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Bridge\Twig\Attribute\Template;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Ladb\CoreBundle\Entity\Howto\Howto;
 use Ladb\CoreBundle\Entity\Knowledge\Provider;
 use Ladb\CoreBundle\Entity\Wonder\Creation;
@@ -42,10 +42,8 @@ class ProviderController extends AbstractController {
 
 	use PublicationControllerTrait;
 
-	/**
-	 * @Template("@LadbCore/Knowledge/Provider/new.html.twig")
-	 */
 	#[Route(path: '/new', name: 'core_provider_new')]
+	#[Template('@LadbCore/Knowledge/Provider/new.html.twig')]
 	public function newAction(KnowledgeUtils $knowledgeUtils) {
 
 		// Exclude if user is not email confirmed
@@ -62,10 +60,8 @@ class ProviderController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Knowledge/Provider/new.html.twig")
-	 */
 	#[Route(path: '/create', methods: ['POST'], name: 'core_provider_create')]
+	#[Template('@LadbCore/Knowledge/Provider/new.html.twig')]
 	public function createAction(Request $request, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, EntityManagerInterface $om, TranslatorInterface $translator) {
 
 		// Exclude if user is not email confirmed
@@ -136,10 +132,8 @@ class ProviderController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_provider_delete)")
-	 */
 	#[Route(path: '/{id}/delete', requirements: ['id' => '\d+'], name: 'core_provider_delete')]
+	#[IsGranted('ROLE_ADMIN', statusCode: 404, message: 'Not allowed (core_provider_delete)')]
 	public function deleteAction($id, ProviderManager $providerManager, TranslatorInterface $translator) {
 
 		$provider = $this->retrievePublication($id, Provider::CLASS_NAME);
@@ -154,10 +148,8 @@ class ProviderController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_provider_list'));
 	}
 
-	/**
-	 * @Template("@LadbCore/Knowledge/Provider/location.geojson.twig")
-	 */
 	#[Route(path: '/{id}/location.geojson', name: 'core_provider_location', defaults: ['_format' => 'json'])]
+	#[Template('@LadbCore/Knowledge/Provider/location.geojson.twig')]
 	public function locationAction(Request $request, $id) {
 
 		$provider = $this->retrievePublication($id, Provider::CLASS_NAME);
@@ -181,10 +173,8 @@ class ProviderController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Knowledge/Provider/widget-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/widget', requirements: ['id' => '\d+'], name: 'core_provider_widget')]
+	#[Template('@LadbCore/Knowledge/Provider/widget-xhr.html.twig')]
 	public function widgetAction(Request $request, $id) {
 
 		$provider = $this->retrievePublication($id, Provider::CLASS_NAME);
@@ -195,12 +185,10 @@ class ProviderController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Knowledge/Provider/list.html.twig")
-	 */
 	#[Route(path: '/', name: 'core_provider_list')]
 	#[Route(path: '/{page}', requirements: ['page' => '\d+'], name: 'core_provider_list_page')]
 	#[Route(path: '.geojson', defaults: ['_format' => 'json', 'page' => -1, 'layout' => 'geojson'], name: 'core_provider_list_geojson')]
+	#[Template('@LadbCore/Knowledge/Provider/list.html.twig')]
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, ElasticaQueryUtils $elasticaQueryUtils, LocalisableUtils $localisableUtils, SearchUtils $searchUtils, $page = 0, $layout = 'view') {
 
 		// Elasticsearch paginiation limit
@@ -469,12 +457,10 @@ class ProviderController extends AbstractController {
 		return $parameters;
 	}
 
-	/**
-	 * @Template("@LadbCore/Knowledge/Provider/creations.html.twig")
-	 */
 	#[Route(path: '/{id}/creations', requirements: ['id' => '\d+'], name: 'core_provider_creations')]
 	#[Route(path: '/{id}/creations/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_provider_creations_filter')]
 	#[Route(path: '/{id}/creations/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_provider_creations_filter_page')]
+	#[Template('@LadbCore/Knowledge/Provider/creations.html.twig')]
 	public function creationsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$providerRepository = $om->getRepository(Provider::CLASS_NAME);
 
@@ -508,12 +494,10 @@ class ProviderController extends AbstractController {
 		));
 	}
 
-	/**
-	 * @Template("@LadbCore/Knowledge/Provider/howtos.html.twig")
-	 */
 	#[Route(path: '/{id}/pas-a-pas', requirements: ['id' => '\d+'], name: 'core_provider_howtos')]
 	#[Route(path: '/{id}/pas-a-pas/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_provider_howtos_filter')]
 	#[Route(path: '/{id}/pas-a-pas/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_provider_howtos_filter_page')]
+	#[Template('@LadbCore/Knowledge/Provider/howtos.html.twig')]
 	public function howtosAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$providerRepository = $om->getRepository(Provider::CLASS_NAME);
 
@@ -547,10 +531,8 @@ class ProviderController extends AbstractController {
 		));
 	}
 
-	/**
-	 * @Template("@LadbCore/Knowledge/Provider/card-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/card.xhr', name: 'core_provider_card')]
+	#[Template('@LadbCore/Knowledge/Provider/card-xhr.html.twig')]
 	public function cardAction(Request $request, $id, EntityManagerInterface $om) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_provider_card)');
@@ -570,10 +552,8 @@ class ProviderController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Knowledge/Provider/show.html.twig")
-	 */
 	#[Route(path: '/{id}.html', name: 'core_provider_show')]
+	#[Template('@LadbCore/Knowledge/Provider/show.html.twig')]
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ElasticaQueryUtils $elasticaQueryUtils, LikableUtils $likableUtils, EntityManagerInterface $om, ReviewableUtils $reviewableUtils, SearchUtils $searchUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$providerRepository = $om->getRepository(Provider::CLASS_NAME);
 

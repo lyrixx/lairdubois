@@ -39,21 +39,6 @@ services:
   ladb_core.user_checker:
     class: Ladb\CoreBundle\Security\UserChecker
   Ladb\CoreBundle\Security\UserChecker: '@ladb_core.user_checker'
-  # The listener of @Security of SensioFrameworkExtraBundle, with a NullToken for an anonymous user: the 404
-  # of its statusCode, not a redirection to the login form. To remove with the bundle (#27)
-  sensio_framework_extra.security.listener:
-    class: Sensio\Bundle\FrameworkExtraBundle\EventListener\SecurityListener
-    arguments:
-      - '@framework_extra_bundle.argument_name_convertor'
-      - '@sensio_framework_extra.security.expression_language.default'
-      - '@security.authentication.trust_resolver'
-      - '@security.role_hierarchy'
-      - '@ladb_core.null_token_storage'
-      - '@security.authorization_checker'
-      - '@logger'
-  ladb_core.null_token_storage:
-    class: Ladb\CoreBundle\Security\NullTokenStorage
-    arguments: ['@security.token_storage']
 
   # Utils
   ladb_core.displayname_canonicalizer:

@@ -7,8 +7,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Bridge\Twig\Attribute\Template;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\ExpressionLanguage\Expression;
 use Ladb\CoreBundle\Manager\Core\WitnessManager;
 use Ladb\CoreBundle\Manager\Core\TipManager;
 use Ladb\CoreBundle\Model\HiddableInterface;
@@ -26,11 +27,9 @@ use Doctrine\ORM\EntityManagerInterface;
 #[Route(path: '/astuces')]
 class TipController extends AbstractController {
 
-	/**
-	 * @Template("@LadbCore/Core/Tip/new.html.twig")
-	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_TIP')", statusCode=404, message="Not allowed (core_tip_new)")
-	 */
 	#[Route(path: '/new', name: 'core_tip_new')]
+	#[Template('@LadbCore/Core/Tip/new.html.twig')]
+	#[IsGranted(new Expression("is_granted('ROLE_ADMIN') or is_granted('ROLE_TIP')"), statusCode: 404, message: 'Not allowed (core_tip_new)')]
 	public function newAction() {
 
 		$tip = new Tip();
@@ -41,11 +40,9 @@ class TipController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/Tip/new.html.twig")
-	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_TIP')", statusCode=404, message="Not allowed (core_tip_create)")
-	 */
 	#[Route(path: '/create', methods: ['POST'], name: 'core_tip_create')]
+	#[Template('@LadbCore/Core/Tip/new.html.twig')]
+	#[IsGranted(new Expression("is_granted('ROLE_ADMIN') or is_granted('ROLE_TIP')"), statusCode: 404, message: 'Not allowed (core_tip_create)')]
 	public function createAction(Request $request, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TranslatorInterface $translator) {
 
 		$this->createLock('core_tip_create', false, self::LOCK_TTL_CREATE_ACTION, false);
@@ -78,11 +75,9 @@ class TipController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/Tip/edit.html.twig")
-	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_TIP')", statusCode=404, message="Not allowed (core_tip_edit)")
-	 */
 	#[Route(path: '/{id}/edit', requirements: ['id' => '\d+'], name: 'core_tip_edit')]
+	#[Template('@LadbCore/Core/Tip/edit.html.twig')]
+	#[IsGranted(new Expression("is_granted('ROLE_ADMIN') or is_granted('ROLE_TIP')"), statusCode: 404, message: 'Not allowed (core_tip_edit)')]
 	public function editAction($id, EntityManagerInterface $om) {
 		$tipRepository = $om->getRepository(Tip::CLASS_NAME);
 
@@ -99,11 +94,9 @@ class TipController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/Tip/edit.html.twig")
-	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_TIP')", statusCode=404, message="Not allowed (core_tip_update)")
-	 */
 	#[Route(path: '/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_tip_update')]
+	#[Template('@LadbCore/Core/Tip/edit.html.twig')]
+	#[IsGranted(new Expression("is_granted('ROLE_ADMIN') or is_granted('ROLE_TIP')"), statusCode: 404, message: 'Not allowed (core_tip_update)')]
 	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TranslatorInterface $translator) {
 		$tipRepository = $om->getRepository(Tip::CLASS_NAME);
 
@@ -143,10 +136,8 @@ class TipController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_TIP')", statusCode=404, message="Not allowed (core_tip_delete)")
-	 */
 	#[Route(path: '/{id}/delete', requirements: ['id' => '\d+'], name: 'core_tip_delete')]
+	#[IsGranted(new Expression("is_granted('ROLE_ADMIN') or is_granted('ROLE_TIP')"), statusCode: 404, message: 'Not allowed (core_tip_delete)')]
 	public function deleteAction($id, EntityManagerInterface $om, TipManager $tipManager, TranslatorInterface $translator) {
 		$tipRepository = $om->getRepository(Tip::CLASS_NAME);
 
@@ -164,11 +155,9 @@ class TipController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_tip_list'));
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/Tip/list.html.twig")
-	 */
 	#[Route(path: '/', name: 'core_tip_list')]
 	#[Route(path: '/{page}', requirements: ['page' => '\d+'], name: 'core_tip_list_page')]
+	#[Template('@LadbCore/Core/Tip/list.html.twig')]
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, SearchUtils $searchUtils, $page = 0) {
 
 		// Elasticsearch paginiation limit
@@ -238,10 +227,8 @@ class TipController extends AbstractController {
 		return $parameters;
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/Tip/show.html.twig")
-	 */
 	#[Route(path: '/{id}.html', name: 'core_tip_show')]
+	#[Template('@LadbCore/Core/Tip/show.html.twig')]
 	public function showAction(Request $request, $id, EventDispatcherInterface $dispatcher, EntityManagerInterface $om, WitnessManager $witnessManager) {
 		$tipRepository = $om->getRepository(Tip::CLASS_NAME);
 

@@ -5,7 +5,7 @@ namespace Ladb\CoreBundle\Controller\Core;
 use Ladb\CoreBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Ladb\CoreBundle\Utils\WatchableUtils;
 use Ladb\CoreBundle\Utils\TypableUtils;
 use Ladb\CoreBundle\Utils\PaginatorUtils;
@@ -30,10 +30,8 @@ class WatchController extends AbstractController {
 	}
 
 	/////
-	/**
-	 * @Template("@LadbCore/Core/Watch/create-xhr.html.twig")
-	 */
 	#[Route(path: '/{entityType}/{entityId}/create', requirements: ['entityType' => '\d+', 'entityId' => '\d+'], name: 'core_watch_create')]
+	#[Template('@LadbCore/Core/Watch/create-xhr.html.twig')]
 	public function createAction(Request $request, $entityType, $entityId, TranslatorInterface $translator, TypableUtils $typableUtils, WatchableUtils $watchableUtils) {
 
 		$this->createLock('core_watch_create', false, self::LOCK_TTL_CREATE_ACTION, false);
@@ -66,10 +64,8 @@ class WatchController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/Watch/delete-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/delete', requirements: ['id' => '\d+'], name: 'core_watch_delete')]
+	#[Template('@LadbCore/Core/Watch/delete-xhr.html.twig')]
 	public function deleteAction(Request $request, $id, EntityManagerInterface $om, TypableUtils $typableUtils, WatchableUtils $watchableUtils) {
 		$watchRepository = $om->getRepository(Watch::CLASS_NAME);
 
@@ -105,11 +101,9 @@ class WatchController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/Watch/list-byentity.html.twig")
-	 */
 	#[Route(path: '/{entityType}/{entityId}', requirements: ['entityType' => '\d+', 'entityId' => '\d+'], name: 'core_watch_list_byentity')]
 	#[Route(path: '/{entityType}/{entityId}/{page}', requirements: ['entityType' => '\d+', 'entityId' => '\d+', 'page' => '\d+'], name: 'core_watch_list_byentity_page')]
+	#[Template('@LadbCore/Core/Watch/list-byentity.html.twig')]
 	public function listByEntityAction(Request $request, $entityType, $entityId, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, TypableUtils $typableUtils, $page = 0) {
 		$watchRepository = $om->getRepository(Watch::CLASS_NAME);
 

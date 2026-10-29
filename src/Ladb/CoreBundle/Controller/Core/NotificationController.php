@@ -9,7 +9,7 @@ use Ladb\CoreBundle\Entity\Qa\Answer;
 use Ladb\CoreBundle\Model\WatchableChildInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Ladb\CoreBundle\Entity\Core\Notification;
 use Ladb\CoreBundle\Utils\TypableUtils;
 use Ladb\CoreBundle\Utils\PaginatorUtils;
@@ -18,12 +18,10 @@ use Doctrine\ORM\EntityManagerInterface;
 #[Route(path: '/notifications')]
 class NotificationController extends AbstractController {
 
-	/**
-	 * @Template("@LadbCore/Core/Notification/list-xhr.html.twig")
-	 */
 	#[Route(path: '/', name: 'core_notification_list')]
 	#[Route(path: '/{filter}', requirements: ['filter' => '[a-z-]+'], name: 'core_notification_list_filter')]
 	#[Route(path: '/{filter}/{page}', requirements: ['filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_notification_list_filter_page')]
+	#[Template('@LadbCore/Core/Notification/list-xhr.html.twig')]
 	public function listAction(Request $request, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$notificationRepository = $om->getRepository(Notification::CLASS_NAME);
 

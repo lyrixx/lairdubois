@@ -4,7 +4,7 @@ namespace Ladb\CoreBundle\Controller\Workflow;
 
 use Ladb\CoreBundle\Controller\PublicationControllerTrait;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Ladb\CoreBundle\Entity\Workflow\Workflow;
@@ -115,10 +115,8 @@ class TaskController extends AbstractWorkflowBasedController {
 	}
 
 	/////
-	/**
-	 * @Template("@LadbCore/Workflow/Task/new-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/task/new', requirements: ['id' => '\d+'], name: 'core_workflow_task_new')]
+	#[Template('@LadbCore/Workflow/Task/new-xhr.html.twig')]
 	public function newAction(Request $request, $id) {
 
 		// Retrieve workflow
@@ -137,10 +135,8 @@ class TaskController extends AbstractWorkflowBasedController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Workflow/Task/new-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/task/create', requirements: ['id' => '\d+'], name: 'core_workflow_task_create')]
+	#[Template('@LadbCore/Workflow/Task/new-xhr.html.twig')]
 	public function createAction(Request $request, $id, EntityManagerInterface $om) {
 
 		$this->createLock('core_workflow_task_create', false, self::LOCK_TTL_CREATE_ACTION, false);
@@ -232,10 +228,8 @@ class TaskController extends AbstractWorkflowBasedController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Workflow/Task/edit-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/task/edit', requirements: ['id' => '\d+'], name: 'core_workflow_task_edit')]
+	#[Template('@LadbCore/Workflow/Task/edit-xhr.html.twig')]
 	public function editAction(Request $request, $id, EntityManagerInterface $om) {
 
 		// Retrieve workflow
@@ -255,10 +249,8 @@ class TaskController extends AbstractWorkflowBasedController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Workflow/Task/edit-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/task/update', requirements: ['id' => '\d+'], name: 'core_workflow_task_update')]
+	#[Template('@LadbCore/Workflow/Task/edit-xhr.html.twig')]
 	public function updateAction(Request $request, $id, EntityManagerInterface $om) {
 		// Retrieve workflow
 		$workflow = $this->_retrieveWorkflow($id);
