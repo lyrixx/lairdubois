@@ -24,9 +24,9 @@ class Plan extends AbstractWonder implements HtmlBodiedInterface, InspirableInte
 	const STRIPPED_NAME = 'plan';
 	const TYPE = 105;
 
+	// Mapped by AbstractWonder: declared again for its constraints only
 	#[Assert\NotBlank]
 	#[Assert\Length(min: 5, max: 4000)]
-	#[ORM\Column(type: 'text', nullable: false)]
 	protected $body;
 
 	#[ORM\Column(type: 'text', nullable: false)]

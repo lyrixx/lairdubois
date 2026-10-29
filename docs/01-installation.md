@@ -447,7 +447,7 @@ value   = k=rsa; p=[PUBLIC KEY HERE]
 ### Build the schema (tables, etc ...)
 
 ``` bash
-    $ ladb doctrine:schema:update --force
+    $ ladb doctrine:schema:update --force --complete
 ```
 
 ### Build session table

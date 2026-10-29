@@ -767,9 +767,14 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   classe par classe : les lignes de classes différentes créées ensemble (blocs texte et galerie
   d'un contenu, valeurs d'une fiche de la xylothèque, avatar et bannière d'un compte) prennent leurs
   ids dans un autre ordre, fixtures comprises. Les contenus d'id 1 ne bougent pas.
-- `doctrine:schema:update` sans `--complete` : un avertissement de l'ORM 2.20, l'option sera
-  obligatoire avec DBAL 4. Avec elle, il supprimerait les tables hors mapping (`sessions`) : un
-  `schema_filter` avant DBAL 4. `doctrine:query:sql` est déprécié, `dbal:run-sql` le remplace.
+- `doctrine:schema:update --complete` (#178) : sans l'option, un avertissement de l'ORM 2.20 et
+  la dépréciation `SchemaDiff::toSaveSql` de DBAL 3. Il supprime les tables hors mapping, sauf
+  celles que cachent le `schema_filter` (`sessions`) et le `SchemaFilterListener` de
+  DoctrineMigrationsBundle (`migration_versions`), qui ne s'active que pour une commande de premier
+  niveau. `ladb:init` lance `schema:update` sans l'option, en commande imbriquée : avec elle, il
+  supprimerait `migration_versions` sur la prod. Il garde la dépréciation jusqu'à l'ORM 3, où
+  `schema:update` est toujours complet (#178). `doctrine:query:sql` est déprécié, `dbal:run-sql`
+  le remplace.
 - Symfony Mailer (#19) : `MailerUtils` envoie des `Email`, que Mailer passe au bus de Messenger ;
   `SendEmailMessage` va dans la file `mailer` de RabbitMQ, et son worker (`messenger:consume
   mailer`) les envoie. Un envoi en échec (SMTP injoignable) est rejoué 5 fois, après 1, 3, 9, 27 et
@@ -824,8 +829,9 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   (`schema:update`, `schema:validate`, `migrations:diff`) proposerait de modifier la table, et
   créerait puis supprimerait une table pour vérifier qu'elle est dans la même base : MariaDB
   valide la transaction sur ce DDL, celle de dama disparaît, et PHPUnit s'arrête (« There is no
-  active transaction », `ladb:init`). À revoir avec DBAL 4 (#178) : avec le listener, la table
-  ferait partie du schéma, et `--complete` ne la supprimerait pas.
+  active transaction », `ladb:init`). Le `schema_filter` de `config.yml` (#178) la cache aux
+  commandes de schéma : `schema:update --complete` (`castor app:db:schema`, doc d'installation) ne
+  la supprime pas, et `migrations:diff` ne propose plus de la supprimer.
 - Les sessions ouvertes en 3.4 et 4.4 ont des objets `Security\Core\Role\Role` dans leur token :
   Symfony 5.4 et 6.4 gardent une classe `Role` pour les relire (vide en 6.4, « Allows migrating
   session payloads from v4 »), et elles restent connectées (`LoginTest`, avec un token capturé
