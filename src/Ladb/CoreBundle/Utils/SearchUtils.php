@@ -173,8 +173,9 @@ class SearchUtils {
 			$wrapperQuery = new \Elastica\Query\FunctionScore();
 			$wrapperQuery->setQuery($query);
 			if (!empty($sort['randomSeed'])) {
-				// The seed is a string (smartsearch.js), that Elasticsearch hashes: setRandomScore() only takes an integer
-				$wrapperQuery->setParam('random_score', array( 'seed' => $sort['randomSeed'] ));
+				// The seed is a string (smartsearch.js), that Elasticsearch hashes: setRandomScore() only takes an integer.
+				// With the field hashed with it, which Elasticsearch 7 asks for, and which is the default of 9
+				$wrapperQuery->setParam('random_score', array( 'seed' => $sort['randomSeed'], 'field' => '_seq_no' ));
 			}
 			$query = $wrapperQuery;
 		}

@@ -96,7 +96,7 @@ final class FacetTest extends WebTestCase
         yield 'core_user_list @sort-popular-followers' => [UserFixtures::USER, 'core_user_list', ['q' => '@sort-popular-followers'], [['core_user', 'meta.followerCount desc', [2, 1, 3], 3]]];
         yield 'core_user_list @sort-popular-likes' => [UserFixtures::USER, 'core_user_list', ['q' => '@sort-popular-likes'], [['core_user', 'meta.recievedLikeCount desc', [2, 1, 3], 3]]];
         yield 'core_user_list @sort-popular-members' => [UserFixtures::USER, 'core_user_list', ['q' => '@sort-popular-members'], [['core_user', 'meta.memberCount desc', [1, 2, 3], 3]]];
-        yield 'core_user_list @sort-random:42' => [UserFixtures::USER, 'core_user_list', ['q' => '@sort-random:42'], [['core_user', 'random', [3, 1, 2], 3]]];
+        yield 'core_user_list @sort-random:42' => [UserFixtures::USER, 'core_user_list', ['q' => '@sort-random:42'], [['core_user', 'random', [2, 1, 3], 3]]];
         yield 'core_event_list' => [UserFixtures::USER, 'core_event_list', [], [['event_event', 'startAt asc', [1], 1]]];
         yield 'core_event_list ouvertes' => [UserFixtures::USER, 'core_event_list', ['q' => 'ouvertes'], [['event_event', 'score', [1], 1]]];
         yield 'core_event_list OUVERTES' => [UserFixtures::USER, 'core_event_list', ['q' => 'OUVERTES'], [['event_event', 'score', [1], 1]]];

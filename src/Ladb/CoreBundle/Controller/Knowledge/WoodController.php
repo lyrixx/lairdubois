@@ -267,7 +267,7 @@ class WoodController extends AbstractController {
 
 					case 'name':
 
-						$filters[] = $elasticaQueryUtils->createShouldMatchPhraseQuery('name', $facet->value);
+						$filters[] = $elasticaQueryUtils->createShouldMatchPhraseQuery('name', $facet->value)->setBoost(3);
 
 						break;
 
@@ -338,7 +338,7 @@ class WoodController extends AbstractController {
 						if (is_null($facet->name)) {
 
 							$filter = new \Elastica\Query\QueryString($facet->value);
-							$filter->setFields(array( 'name^100', 'scientificname', 'englishname' ));
+							$filter->setFields(array( 'name^300', 'scientificname', 'englishname' ));
 							$filters[] = $filter;
 
 							$couldUseDefaultSort = false;

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4e111afffb9caf0037d42cee40ab7d55",
+    "content-hash": "4f6f0f28f5c1b8346d93e1e71851a2bc",
     "packages": [
         {
             "name": "afarkas/html5shiv",
@@ -2517,71 +2517,120 @@
             "time": "2023-06-01T07:04:22+00:00"
         },
         {
-            "name": "elasticsearch/elasticsearch",
-            "version": "v7.17.3",
+            "name": "elastic/transport",
+            "version": "v9.0.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/elastic/elasticsearch-php.git",
-                "reference": "b8a60b4136ee31117d1aa1b19879530eb6d11efb"
+                "url": "https://github.com/elastic/elastic-transport-php.git",
+                "reference": "3488b9d070e220f2a1ebdb500e6c588069f1897f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/elastic/elasticsearch-php/zipball/b8a60b4136ee31117d1aa1b19879530eb6d11efb",
-                "reference": "b8a60b4136ee31117d1aa1b19879530eb6d11efb",
+                "url": "https://api.github.com/repos/elastic/elastic-transport-php/zipball/3488b9d070e220f2a1ebdb500e6c588069f1897f",
+                "reference": "3488b9d070e220f2a1ebdb500e6c588069f1897f",
                 "shasum": ""
             },
             "require": {
-                "ext-json": ">=1.3.7",
-                "ezimuel/ringphp": "^1.1.2",
-                "php": "^7.3 || ^8.0",
-                "psr/log": "^1|^2|^3"
+                "composer-runtime-api": "^2.0",
+                "nyholm/psr7": "^1.8",
+                "open-telemetry/api": "^1.0",
+                "php": "^8.1",
+                "php-http/discovery": "^1.14",
+                "php-http/httplug": "^2.4",
+                "psr/http-client": "^1.0",
+                "psr/http-factory": "^1.0",
+                "psr/http-message": "^2.0",
+                "psr/log": "^2.0 || ^3.0"
             },
             "require-dev": {
-                "ext-yaml": "*",
-                "ext-zip": "*",
-                "mockery/mockery": "^1.2",
-                "phpstan/phpstan": "^1.10",
-                "phpunit/phpunit": "^9.3",
-                "squizlabs/php_codesniffer": "^3.4",
-                "symfony/finder": "~4.0"
-            },
-            "suggest": {
-                "ext-curl": "*",
-                "monolog/monolog": "Allows for client-level logging and tracing"
+                "open-telemetry/sdk": "^1.0",
+                "php-http/mock-client": "^1.5",
+                "phpstan/phpstan": "^2.1",
+                "phpunit/phpunit": "^10",
+                "symfony/http-client": "^6.0"
             },
             "type": "library",
             "autoload": {
-                "files": [
-                    "src/autoload.php"
-                ],
                 "psr-4": {
-                    "Elasticsearch\\": "src/Elasticsearch/"
+                    "Elastic\\Transport\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "Apache-2.0",
-                "LGPL-2.1-only"
+                "MIT"
             ],
-            "authors": [
-                {
-                    "name": "Zachary Tong"
-                },
-                {
-                    "name": "Enrico Zimuel"
+            "description": "HTTP transport PHP library for Elastic products",
+            "keywords": [
+                "PSR_17",
+                "elastic",
+                "http",
+                "psr-18",
+                "psr-7",
+                "transport"
+            ],
+            "support": {
+                "issues": "https://github.com/elastic/elastic-transport-php/issues",
+                "source": "https://github.com/elastic/elastic-transport-php/tree/v9.0.1"
+            },
+            "time": "2025-05-08T12:31:50+00:00"
+        },
+        {
+            "name": "elasticsearch/elasticsearch",
+            "version": "v9.5.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/elastic/elasticsearch-php.git",
+                "reference": "6fe5f99ea3a8b697f8c098399cc84d2339a9508d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/elastic/elasticsearch-php/zipball/6fe5f99ea3a8b697f8c098399cc84d2339a9508d",
+                "reference": "6fe5f99ea3a8b697f8c098399cc84d2339a9508d",
+                "shasum": ""
+            },
+            "require": {
+                "elastic/transport": "^9.0",
+                "php": "^8.1",
+                "psr/http-client": "^1.0",
+                "psr/http-message": "^2.0",
+                "psr/log": "^2.0|^3.0"
+            },
+            "require-dev": {
+                "ext-yaml": "*",
+                "ext-zip": "*",
+                "guzzlehttp/guzzle": "^7.0",
+                "mockery/mockery": "^1.6",
+                "nette/php-generator": "^4.0",
+                "nyholm/psr7": "^1.8",
+                "php-http/mock-client": "^1.6",
+                "phpstan/phpstan": "^2.1",
+                "phpunit/phpunit": "^10.0",
+                "psr/http-factory": "^1.0",
+                "symfony/finder": "^6.0",
+                "symfony/http-client": "^6.0|^7.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Elastic\\Elasticsearch\\": "src/"
                 }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
             ],
             "description": "PHP Client for Elasticsearch",
             "keywords": [
                 "client",
+                "elastic",
                 "elasticsearch",
                 "search"
             ],
             "support": {
                 "issues": "https://github.com/elastic/elasticsearch-php/issues",
-                "source": "https://github.com/elastic/elasticsearch-php/tree/v7.17.3"
+                "source": "https://github.com/elastic/elasticsearch-php/tree/v9.5.0"
             },
-            "time": "2025-07-14T09:07:02+00:00"
+            "time": "2026-08-04T14:31:01+00:00"
         },
         {
             "name": "emojione/emojione",
@@ -2726,117 +2775,6 @@
             "time": "2017-07-23T21:35:13+00:00"
         },
         {
-            "name": "ezimuel/guzzlestreams",
-            "version": "4.1.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/ezimuel/guzzlestreams.git",
-                "reference": "903161be81e9f497cc42fb7db982404a4e6441b0"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/ezimuel/guzzlestreams/zipball/903161be81e9f497cc42fb7db982404a4e6441b0",
-                "reference": "903161be81e9f497cc42fb7db982404a4e6441b0",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.4.0"
-            },
-            "require-dev": {
-                "phpstan/phpstan": "^2.1",
-                "phpunit/phpunit": "~9.0"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "3.0-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "GuzzleHttp\\Stream\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Michael Dowling",
-                    "email": "mtdowling@gmail.com",
-                    "homepage": "https://github.com/mtdowling"
-                }
-            ],
-            "description": "Fork of guzzle/streams (abandoned) to be used with elasticsearch-php",
-            "homepage": "http://guzzlephp.org/",
-            "keywords": [
-                "Guzzle",
-                "stream"
-            ],
-            "support": {
-                "source": "https://github.com/ezimuel/guzzlestreams/tree/4.1.0"
-            },
-            "time": "2025-08-05T06:44:46+00:00"
-        },
-        {
-            "name": "ezimuel/ringphp",
-            "version": "1.4.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/ezimuel/ringphp.git",
-                "reference": "b97f46088940671100012482577eeb59f26a13b5"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/ezimuel/ringphp/zipball/b97f46088940671100012482577eeb59f26a13b5",
-                "reference": "b97f46088940671100012482577eeb59f26a13b5",
-                "shasum": ""
-            },
-            "require": {
-                "ezimuel/guzzlestreams": "^3.0.1 || ^4.0.0",
-                "php": ">=5.4.0",
-                "react/promise": "^2.0 || ^3.0"
-            },
-            "replace": {
-                "guzzlehttp/ringphp": "self.version"
-            },
-            "require-dev": {
-                "ext-curl": "*",
-                "phpunit/phpunit": "~9.0"
-            },
-            "suggest": {
-                "ext-curl": "Guzzle will use specific adapters if cURL is present"
-            },
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "1.1-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "GuzzleHttp\\Ring\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Michael Dowling",
-                    "email": "mtdowling@gmail.com",
-                    "homepage": "https://github.com/mtdowling"
-                }
-            ],
-            "description": "Fork of guzzle/RingPHP (abandoned) to be used with elasticsearch-php",
-            "support": {
-                "source": "https://github.com/ezimuel/ringphp/tree/1.4.1"
-            },
-            "time": "2026-02-11T16:42:15+00:00"
-        },
-        {
             "name": "facebook/graph-sdk",
             "version": "5.7.0",
             "source": {
@@ -2977,50 +2915,57 @@
         },
         {
             "name": "friendsofsymfony/elastica-bundle",
-            "version": "v6.3.1",
+            "version": "v7.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/FriendsOfSymfony/FOSElasticaBundle.git",
-                "reference": "5dd16e0199bad60735e2847f2b8f00e2121e8378"
+                "reference": "16ae7e8c0abf6b78e68feb7f9c612a91f8ce0f0d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/FriendsOfSymfony/FOSElasticaBundle/zipball/5dd16e0199bad60735e2847f2b8f00e2121e8378",
-                "reference": "5dd16e0199bad60735e2847f2b8f00e2121e8378",
+                "url": "https://api.github.com/repos/FriendsOfSymfony/FOSElasticaBundle/zipball/16ae7e8c0abf6b78e68feb7f9c612a91f8ce0f0d",
+                "reference": "16ae7e8c0abf6b78e68feb7f9c612a91f8ce0f0d",
                 "shasum": ""
             },
             "require": {
-                "pagerfanta/pagerfanta": "^2.4 || ^3.0",
-                "php": "^7.4 || ^8.0",
-                "psr/log": "^1.0 || ^2.0 || ^3.0",
-                "ruflin/elastica": "^7.1",
-                "symfony/console": "^4.4 || ^5.4 || ^6.2",
-                "symfony/dependency-injection": "^4.4 || ^5.4 || ^6.2",
-                "symfony/framework-bundle": "^4.4 || ^5.4 || ^6.2",
-                "symfony/property-access": "^4.4 || ^5.4 || ^6.2"
+                "pagerfanta/pagerfanta": "^3.0 || ^4.0",
+                "php": "^8.1",
+                "psr/log": "^3.0",
+                "ruflin/elastica": "^8.0 || ^9.0",
+                "symfony/console": "^6.4 || ^7.4 || ^8.0",
+                "symfony/dependency-injection": "^6.4 || ^7.4 || ^8.0",
+                "symfony/event-dispatcher": "^6.4 || ^7.4 || ^8.0",
+                "symfony/framework-bundle": "^6.4 || ^7.4 || ^8.0",
+                "symfony/property-access": "^6.4 || ^7.4 || ^8.0",
+                "symfony/stopwatch": "^6.4 || ^7.4 || ^8.0"
+            },
+            "conflict": {
+                "phpstan/phpstan": "<1.12.0"
             },
             "require-dev": {
-                "doctrine/doctrine-bundle": "^2.1.1",
+                "doctrine/doctrine-bundle": "^2.5 || ^3.0",
                 "doctrine/mongodb-odm": "^2.2",
-                "doctrine/orm": "^2.8",
-                "doctrine/phpcr-odm": "^1.4",
+                "doctrine/orm": "^2.17 || ^3.2",
+                "doctrine/phpcr-odm": "^1.5.3 || ^2.0 || ^3.0",
                 "ergebnis/composer-normalize": "^2.28",
-                "friendsofphp/php-cs-fixer": "^3.0",
-                "jackalope/jackalope-doctrine-dbal": "^1.2",
-                "jms/serializer": "^3.8",
-                "jms/serializer-bundle": "^3.5 || ^4.0",
-                "knplabs/knp-components": "^2.4 || ^3.0",
+                "jackalope/jackalope-doctrine-dbal": "^2.0",
+                "jms/serializer": "^3.32",
+                "jms/serializer-bundle": "^5.4",
+                "knplabs/knp-components": "^4.0 || ^5.0",
+                "nyholm/psr7": "^1.8",
+                "php-cs-fixer/shim": "3.60.0",
                 "phpstan/extension-installer": "^1.1",
-                "phpstan/phpstan": "^1.4",
-                "phpstan/phpstan-phpunit": "^1.1",
-                "phpstan/phpstan-symfony": "^1.2",
+                "phpstan/phpstan": "^1.12",
+                "phpstan/phpstan-phpunit": "^1.4",
+                "phpstan/phpstan-symfony": "^1.4",
                 "phpunit/phpunit": "^9.5",
-                "symfony/expression-language": "^4.4 || ^5.4 || ^6.2",
-                "symfony/messenger": "^4.4 || ^5.4 || ^6.2",
-                "symfony/serializer": "^4.4 || ^5.4 || ^6.2",
-                "symfony/twig-bundle": "^4.4 || ^5.4 || ^6.2",
-                "symfony/web-profiler-bundle": "^4.4 || ^5.4 || ^6.2",
-                "symfony/yaml": "^4.4 || ^5.4 || ^6.2"
+                "symfony/expression-language": "^6.4 || ^7.4 || ^8.0",
+                "symfony/http-client": "^6.4 || ^7.4 || ^8.0",
+                "symfony/messenger": "^6.4 || ^7.4 || ^8.0",
+                "symfony/serializer": "^6.4 || ^7.4 || ^8.0",
+                "symfony/twig-bundle": "^6.4 || ^7.4 || ^8.0",
+                "symfony/web-profiler-bundle": "^6.4 || ^7.4 || ^8.0",
+                "symfony/yaml": "^6.4 || ^7.4 || ^8.0"
             },
             "suggest": {
                 "enqueue/elastica-bundle": "For populating Elasticsearch indexes asynchronously and using significanly less resources. Uses Enqueue.",
@@ -3029,7 +2974,7 @@
             "type": "symfony-bundle",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "6.3.x-dev"
+                    "dev-master": "7.2.x-dev"
                 }
             },
             "autoload": {
@@ -3070,9 +3015,9 @@
             ],
             "support": {
                 "issues": "https://github.com/FriendsOfSymfony/FOSElasticaBundle/issues",
-                "source": "https://github.com/FriendsOfSymfony/FOSElasticaBundle/tree/v6.3.1"
+                "source": "https://github.com/FriendsOfSymfony/FOSElasticaBundle/tree/v7.2.0"
             },
-            "time": "2023-05-28T18:05:31+00:00"
+            "time": "2026-06-01T21:22:44+00:00"
         },
         {
             "name": "gedmo/doctrine-extensions",
@@ -4426,51 +4371,70 @@
         },
         {
             "name": "monolog/monolog",
-            "version": "1.27.1",
+            "version": "3.12.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Seldaek/monolog.git",
-                "reference": "904713c5929655dc9b97288b69cfeedad610c9a1"
+                "reference": "d7059e4c691d05ea1222b5124bed0f961be46e15"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/904713c5929655dc9b97288b69cfeedad610c9a1",
-                "reference": "904713c5929655dc9b97288b69cfeedad610c9a1",
+                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/d7059e4c691d05ea1222b5124bed0f961be46e15",
+                "reference": "d7059e4c691d05ea1222b5124bed0f961be46e15",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.3.0",
-                "psr/log": "~1.0"
+                "php": ">=8.1",
+                "psr/log": "^2.0 || ^3.0"
             },
             "provide": {
-                "psr/log-implementation": "1.0.0"
+                "psr/log-implementation": "3.0.0"
             },
             "require-dev": {
-                "aws/aws-sdk-php": "^2.4.9 || ^3.0",
+                "aws/aws-sdk-php": "^3.0",
                 "doctrine/couchdb": "~1.0@dev",
-                "graylog2/gelf-php": "~1.0",
-                "php-amqplib/php-amqplib": "~2.4",
-                "php-console/php-console": "^3.1.3",
-                "phpstan/phpstan": "^0.12.59",
-                "phpunit/phpunit": "~4.5",
-                "ruflin/elastica": ">=0.90 <3.0",
-                "sentry/sentry": "^0.13",
-                "swiftmailer/swiftmailer": "^5.3|^6.0"
+                "elasticsearch/elasticsearch": "^7 || ^8",
+                "ext-json": "*",
+                "graylog2/gelf-php": "^1.4.2 || ^2.0",
+                "guzzlehttp/guzzle": "^7.4.5",
+                "guzzlehttp/psr7": "^2.2",
+                "mongodb/mongodb": "^1.8 || ^2.0",
+                "php-amqplib/php-amqplib": "~2.4 || ^3",
+                "php-console/php-console": "^3.1.8",
+                "phpstan/phpstan": "^2",
+                "phpstan/phpstan-deprecation-rules": "^2",
+                "phpstan/phpstan-strict-rules": "^2",
+                "phpunit/phpunit": "^10.5.17 || ^11.0.7",
+                "predis/predis": "^1.1 || ^2",
+                "psr/clock": "^1.0",
+                "rollbar/rollbar": "^4.0",
+                "ruflin/elastica": "^7 || ^8",
+                "symfony/mailer": "^5.4 || ^6",
+                "symfony/mime": "^5.4 || ^6"
             },
             "suggest": {
                 "aws/aws-sdk-php": "Allow sending log messages to AWS services like DynamoDB",
                 "doctrine/couchdb": "Allow sending log messages to a CouchDB server",
+                "elasticsearch/elasticsearch": "Allow sending log messages to an Elasticsearch server via official client",
                 "ext-amqp": "Allow sending log messages to an AMQP server (1.0+ required)",
-                "ext-mongo": "Allow sending log messages to a MongoDB server",
+                "ext-curl": "Required to send log messages using the IFTTTHandler, the LogglyHandler, the SendGridHandler, the SlackWebhookHandler or the TelegramBotHandler",
+                "ext-mbstring": "Allow to work properly with unicode symbols",
+                "ext-mongodb": "Allow sending log messages to a MongoDB server (via driver)",
+                "ext-openssl": "Required to send log messages using SSL",
+                "ext-sockets": "Allow sending log messages to a Syslog server (via UDP driver)",
                 "graylog2/gelf-php": "Allow sending log messages to a GrayLog2 server",
-                "mongodb/mongodb": "Allow sending log messages to a MongoDB server via PHP Driver",
+                "mongodb/mongodb": "Allow sending log messages to a MongoDB server (via library)",
                 "php-amqplib/php-amqplib": "Allow sending log messages to an AMQP server using php-amqplib",
-                "php-console/php-console": "Allow sending log messages to Google Chrome",
+                "psr/clock": "Required to pass a clock to the Logger and control the timestamp of log records",
                 "rollbar/rollbar": "Allow sending log messages to Rollbar",
-                "ruflin/elastica": "Allow sending log messages to an Elastic Search server",
-                "sentry/sentry": "Allow sending log messages to a Sentry server"
+                "ruflin/elastica": "Allow sending log messages to an Elastic Search server"
             },
             "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "3.x-dev"
+                }
+            },
             "autoload": {
                 "psr-4": {
                     "Monolog\\": "src/Monolog"
@@ -4484,11 +4448,11 @@
                 {
                     "name": "Jordi Boggiano",
                     "email": "j.boggiano@seld.be",
-                    "homepage": "http://seld.be"
+                    "homepage": "https://seld.be"
                 }
             ],
             "description": "Sends your logs to files, sockets, inboxes, databases and various web services",
-            "homepage": "http://github.com/Seldaek/monolog",
+            "homepage": "https://github.com/Seldaek/monolog",
             "keywords": [
                 "log",
                 "logging",
@@ -4496,7 +4460,7 @@
             ],
             "support": {
                 "issues": "https://github.com/Seldaek/monolog/issues",
-                "source": "https://github.com/Seldaek/monolog/tree/1.27.1"
+                "source": "https://github.com/Seldaek/monolog/tree/3.12.1"
             },
             "funding": [
                 {
@@ -4508,37 +4472,48 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2022-06-09T08:53:42+00:00"
+            "time": "2026-09-29T19:21:12+00:00"
         },
         {
-            "name": "nyholm/dsn",
-            "version": "2.0.1",
+            "name": "nyholm/psr7",
+            "version": "1.8.2",
             "source": {
                 "type": "git",
-                "url": "https://github.com/Nyholm/dsn.git",
-                "reference": "9445621b426bac8c0ca161db8cd700da00a4e618"
+                "url": "https://github.com/Nyholm/psr7.git",
+                "reference": "a71f2b11690f4b24d099d6b16690a90ae14fc6f3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Nyholm/dsn/zipball/9445621b426bac8c0ca161db8cd700da00a4e618",
-                "reference": "9445621b426bac8c0ca161db8cd700da00a4e618",
+                "url": "https://api.github.com/repos/Nyholm/psr7/zipball/a71f2b11690f4b24d099d6b16690a90ae14fc6f3",
+                "reference": "a71f2b11690f4b24d099d6b16690a90ae14fc6f3",
                 "shasum": ""
             },
             "require": {
-                "php": ">=7.1"
+                "php": ">=7.2",
+                "psr/http-factory": "^1.0",
+                "psr/http-message": "^1.1 || ^2.0"
+            },
+            "provide": {
+                "php-http/message-factory-implementation": "1.0",
+                "psr/http-factory-implementation": "1.0",
+                "psr/http-message-implementation": "1.0"
             },
             "require-dev": {
-                "symfony/phpunit-bridge": "^5.1"
+                "http-interop/http-factory-tests": "^0.9",
+                "php-http/message-factory": "^1.0",
+                "php-http/psr7-integration-tests": "^1.0",
+                "phpunit/phpunit": "^7.5 || ^8.5 || ^9.4",
+                "symfony/error-handler": "^4.4"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.0-dev"
+                    "dev-master": "1.8-dev"
                 }
             },
             "autoload": {
                 "psr-4": {
-                    "Nyholm\\Dsn\\": "src/"
+                    "Nyholm\\Psr7\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -4549,27 +4524,33 @@
                 {
                     "name": "Tobias Nyholm",
                     "email": "tobias.nyholm@gmail.com"
+                },
+                {
+                    "name": "Martijn van der Ven",
+                    "email": "martijn@vanderven.se"
                 }
             ],
-            "description": "Parse your DSN strings in a powerful and flexible way",
-            "homepage": "http://tnyholm.se",
+            "description": "A fast PHP7 implementation of PSR-7",
+            "homepage": "https://tnyholm.se",
             "keywords": [
-                "database",
-                "dsn",
-                "dsn parser",
-                "parser"
+                "psr-17",
+                "psr-7"
             ],
             "support": {
-                "issues": "https://github.com/Nyholm/dsn/issues",
-                "source": "https://github.com/Nyholm/dsn/tree/2.0.1"
+                "issues": "https://github.com/Nyholm/psr7/issues",
+                "source": "https://github.com/Nyholm/psr7/tree/1.8.2"
             },
             "funding": [
                 {
-                    "url": "https://github.com/Nyholm",
+                    "url": "https://github.com/Zegnat",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nyholm",
                     "type": "github"
                 }
             ],
-            "time": "2021-11-18T09:23:29+00:00"
+            "time": "2024-09-09T07:06:30+00:00"
         },
         {
             "name": "oomphinc/composer-installers-extender",
@@ -4630,25 +4611,162 @@
             "time": "2020-08-11T21:06:11+00:00"
         },
         {
-            "name": "pagerfanta/pagerfanta",
-            "version": "v2.5.0",
+            "name": "open-telemetry/api",
+            "version": "1.10.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/BabDev/Pagerfanta.git",
-                "reference": "14c5e02fa5b192e1f22b34ce8e3e908c1823c8a9"
+                "url": "https://github.com/opentelemetry-php/api.git",
+                "reference": "b2bc26bf8bd6b2b6447b3626b2a1b5733873aa0b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/BabDev/Pagerfanta/zipball/14c5e02fa5b192e1f22b34ce8e3e908c1823c8a9",
-                "reference": "14c5e02fa5b192e1f22b34ce8e3e908c1823c8a9",
+                "url": "https://api.github.com/repos/opentelemetry-php/api/zipball/b2bc26bf8bd6b2b6447b3626b2a1b5733873aa0b",
+                "reference": "b2bc26bf8bd6b2b6447b3626b2a1b5733873aa0b",
+                "shasum": ""
+            },
+            "require": {
+                "open-telemetry/context": "^1.4",
+                "php": "^8.1",
+                "psr/log": "^1.1|^2.0|^3.0",
+                "symfony/polyfill-php82": "^1.26"
+            },
+            "conflict": {
+                "open-telemetry/sdk": "<=1.11"
+            },
+            "type": "library",
+            "extra": {
+                "spi": {
+                    "OpenTelemetry\\API\\Instrumentation\\AutoInstrumentation\\HookManagerInterface": [
+                        "OpenTelemetry\\API\\Instrumentation\\AutoInstrumentation\\ExtensionHookManager"
+                    ]
+                },
+                "branch-alias": {
+                    "dev-main": "1.8.x-dev"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "Trace/functions.php"
+                ],
+                "psr-4": {
+                    "OpenTelemetry\\API\\": "."
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "opentelemetry-php contributors",
+                    "homepage": "https://github.com/open-telemetry/opentelemetry-php/graphs/contributors"
+                }
+            ],
+            "description": "API for OpenTelemetry PHP.",
+            "keywords": [
+                "Metrics",
+                "api",
+                "apm",
+                "logging",
+                "opentelemetry",
+                "otel",
+                "tracing"
+            ],
+            "support": {
+                "chat": "https://app.slack.com/client/T08PSQ7BQ/C01NFPCV44V",
+                "docs": "https://opentelemetry.io/docs/languages/php",
+                "issues": "https://github.com/open-telemetry/opentelemetry-php/issues",
+                "source": "https://github.com/open-telemetry/opentelemetry-php"
+            },
+            "time": "2026-09-16T01:59:09+00:00"
+        },
+        {
+            "name": "open-telemetry/context",
+            "version": "1.5.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/opentelemetry-php/context.git",
+                "reference": "3c414b246e0dabb7d6145404e6a5e4536ca18d07"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/opentelemetry-php/context/zipball/3c414b246e0dabb7d6145404e6a5e4536ca18d07",
+                "reference": "3c414b246e0dabb7d6145404e6a5e4536ca18d07",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.1",
+                "symfony/polyfill-php82": "^1.26"
+            },
+            "suggest": {
+                "ext-ffi": "To allow context switching in Fibers"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "fiber/initialize_fiber_handler.php"
+                ],
+                "psr-4": {
+                    "OpenTelemetry\\Context\\": "."
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "opentelemetry-php contributors",
+                    "homepage": "https://github.com/open-telemetry/opentelemetry-php/graphs/contributors"
+                }
+            ],
+            "description": "Context implementation for OpenTelemetry PHP.",
+            "keywords": [
+                "Context",
+                "opentelemetry",
+                "otel"
+            ],
+            "support": {
+                "chat": "https://app.slack.com/client/T08PSQ7BQ/C01NFPCV44V",
+                "docs": "https://opentelemetry.io/docs/languages/php",
+                "issues": "https://github.com/open-telemetry/opentelemetry-php/issues",
+                "source": "https://github.com/open-telemetry/opentelemetry-php"
+            },
+            "time": "2025-10-19T06:44:33+00:00"
+        },
+        {
+            "name": "pagerfanta/pagerfanta",
+            "version": "v3.6.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/BabDev/Pagerfanta.git",
+                "reference": "0486e63edb74e55f85485c16c31decbf65f6e432"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/BabDev/Pagerfanta/zipball/0486e63edb74e55f85485c16c31decbf65f6e432",
+                "reference": "0486e63edb74e55f85485c16c31decbf65f6e432",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
-                "php": "^7.2 || ^8.0",
-                "symfony/deprecation-contracts": "^2.1"
+                "php": "^7.4 || ^8.0",
+                "symfony/deprecation-contracts": "^2.1 || ^3.0",
+                "symfony/polyfill-php80": "^1.15"
             },
             "conflict": {
+                "doctrine/collections": "<1.6",
+                "doctrine/dbal": "<2.13.1 || ~3.0.0",
+                "doctrine/mongodb-odm": "<2.2.2",
+                "doctrine/orm": "<2.8",
+                "doctrine/phpcr-odm": "<1.5",
+                "ruflin/elastica": "<6.0",
+                "solarium/solarium": "<5.0",
                 "twig/twig": "<1.35 || >=2.0,<2.5"
             },
             "replace": {
@@ -4663,22 +4781,23 @@
                 "pagerfanta/twig": "self.version"
             },
             "require-dev": {
-                "dg/bypass-finals": "^1.2.2",
-                "doctrine/collections": "^1.4",
-                "doctrine/dbal": "^2.5",
-                "doctrine/orm": "^2.5",
-                "doctrine/phpcr-odm": "^1.3",
-                "friendsofphp/php-cs-fixer": "^2.16.3",
-                "jackalope/jackalope-doctrine-dbal": "^1.3",
-                "mandango/mandango": "^1.0@dev",
-                "phpstan/extension-installer": "^1.0.4",
-                "phpstan/phpstan": "^0.12.33",
-                "phpstan/phpstan-phpunit": "^0.12.12",
-                "phpunit/phpunit": "^8.5 || ^9.0",
-                "propel/propel": "^2.0@dev",
-                "propel/propel1": "^1.7",
-                "ruflin/elastica": "^1.3 || ^2.0 || ^3.0 || ^5.0 || ^6.0 || ^7.0",
-                "solarium/solarium": "^2.3 || ^3.0 || ^4.0 || ^5.0 || ^6.0",
+                "dg/bypass-finals": "^1.3",
+                "doctrine/cache": "^1.11 || ^2.0",
+                "doctrine/collections": "^1.6",
+                "doctrine/dbal": "^2.13.1 || ^3.1",
+                "doctrine/mongodb-odm": "^2.2.2",
+                "doctrine/orm": "^2.8",
+                "doctrine/phpcr-odm": "^1.5",
+                "friendsofphp/php-cs-fixer": "^3.8",
+                "jackalope/jackalope-doctrine-dbal": "^1.6",
+                "phpstan/extension-installer": "^1.1",
+                "phpstan/phpstan": "1.8.0",
+                "phpstan/phpstan-phpunit": "1.1.1",
+                "phpunit/phpunit": "9.5.21",
+                "ruflin/elastica": "^6.0 || ^7.0",
+                "solarium/solarium": "^5.0 || ^6.0",
+                "symfony/cache": "^4.4 || ^5.4 || ^6.0",
+                "symfony/phpunit-bridge": "^5.4 || ^6.0",
                 "twig/twig": "^1.35 || ^2.5 || ^3.0"
             },
             "suggest": {
@@ -4689,7 +4808,6 @@
                 "psr-4": {
                     "Pagerfanta\\": "lib/Core/",
                     "Pagerfanta\\Twig\\": "lib/Twig/",
-                    "Pagerfanta\\Adapter\\": "src/Adapter/",
                     "Pagerfanta\\Elastica\\": "lib/Adapter/Elastica/",
                     "Pagerfanta\\Solarium\\": "lib/Adapter/Solarium/",
                     "Pagerfanta\\Doctrine\\ORM\\": "lib/Adapter/Doctrine/ORM/",
@@ -4697,7 +4815,10 @@
                     "Pagerfanta\\Doctrine\\PHPCRODM\\": "lib/Adapter/Doctrine/PHPCRODM/",
                     "Pagerfanta\\Doctrine\\MongoDBODM\\": "lib/Adapter/Doctrine/MongoDBODM/",
                     "Pagerfanta\\Doctrine\\Collections\\": "lib/Adapter/Doctrine/Collections/"
-                }
+                },
+                "exclude-from-classmap": [
+                    "lib/**/Tests/"
+                ]
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
@@ -4712,7 +4833,7 @@
             ],
             "support": {
                 "issues": "https://github.com/BabDev/Pagerfanta/issues",
-                "source": "https://github.com/BabDev/Pagerfanta/tree/v2.5.0"
+                "source": "https://github.com/BabDev/Pagerfanta/tree/v3.6.2"
             },
             "funding": [
                 {
@@ -4720,7 +4841,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2020-11-11T00:58:12+00:00"
+            "time": "2022-07-21T23:35:12+00:00"
         },
         {
             "name": "php-http/discovery",
@@ -4800,6 +4921,115 @@
                 "source": "https://github.com/php-http/discovery/tree/1.20.0"
             },
             "time": "2024-10-02T11:20:13+00:00"
+        },
+        {
+            "name": "php-http/httplug",
+            "version": "2.4.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-http/httplug.git",
+                "reference": "5cad731844891a4c282f3f3e1b582c46839d22f4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-http/httplug/zipball/5cad731844891a4c282f3f3e1b582c46839d22f4",
+                "reference": "5cad731844891a4c282f3f3e1b582c46839d22f4",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.1 || ^8.0",
+                "php-http/promise": "^1.1",
+                "psr/http-client": "^1.0",
+                "psr/http-message": "^1.0 || ^2.0"
+            },
+            "require-dev": {
+                "friends-of-phpspec/phpspec-code-coverage": "^4.1 || ^5.0 || ^6.0",
+                "phpspec/phpspec": "^5.1 || ^6.0 || ^7.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Http\\Client\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Eric GELOEN",
+                    "email": "geloen.eric@gmail.com"
+                },
+                {
+                    "name": "Márk Sági-Kazár",
+                    "email": "mark.sagikazar@gmail.com",
+                    "homepage": "https://sagikazarmark.hu"
+                }
+            ],
+            "description": "HTTPlug, the HTTP client abstraction for PHP",
+            "homepage": "http://httplug.io",
+            "keywords": [
+                "client",
+                "http"
+            ],
+            "support": {
+                "issues": "https://github.com/php-http/httplug/issues",
+                "source": "https://github.com/php-http/httplug/tree/2.4.1"
+            },
+            "time": "2024-09-23T11:39:58+00:00"
+        },
+        {
+            "name": "php-http/promise",
+            "version": "1.3.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-http/promise.git",
+                "reference": "fc85b1fba37c169a69a07ef0d5a8075770cc1f83"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-http/promise/zipball/fc85b1fba37c169a69a07ef0d5a8075770cc1f83",
+                "reference": "fc85b1fba37c169a69a07ef0d5a8075770cc1f83",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.1 || ^8.0"
+            },
+            "require-dev": {
+                "friends-of-phpspec/phpspec-code-coverage": "^4.3.2 || ^6.3",
+                "phpspec/phpspec": "^5.1.2 || ^6.2 || ^7.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Http\\Promise\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Joel Wurtz",
+                    "email": "joel.wurtz@gmail.com"
+                },
+                {
+                    "name": "Márk Sági-Kazár",
+                    "email": "mark.sagikazar@gmail.com"
+                }
+            ],
+            "description": "Promise used for asynchronous HTTP requests",
+            "homepage": "http://httplug.io",
+            "keywords": [
+                "promise"
+            ],
+            "support": {
+                "issues": "https://github.com/php-http/promise/issues",
+                "source": "https://github.com/php-http/promise/tree/1.3.1"
+            },
+            "time": "2024-03-15T13:55:21+00:00"
         },
         {
             "name": "psr/cache",
@@ -5214,30 +5444,30 @@
         },
         {
             "name": "psr/log",
-            "version": "1.1.4",
+            "version": "3.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-fig/log.git",
-                "reference": "d49695b909c3b7628b6289db5479a1c204601f11"
+                "reference": "f16e1d5863e37f8d8c2a01719f5b34baa2b714d3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-fig/log/zipball/d49695b909c3b7628b6289db5479a1c204601f11",
-                "reference": "d49695b909c3b7628b6289db5479a1c204601f11",
+                "url": "https://api.github.com/repos/php-fig/log/zipball/f16e1d5863e37f8d8c2a01719f5b34baa2b714d3",
+                "reference": "f16e1d5863e37f8d8c2a01719f5b34baa2b714d3",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.3.0"
+                "php": ">=8.0.0"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.1.x-dev"
+                    "dev-master": "3.x-dev"
                 }
             },
             "autoload": {
                 "psr-4": {
-                    "Psr\\Log\\": "Psr/Log/"
+                    "Psr\\Log\\": "src"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -5258,9 +5488,9 @@
                 "psr-3"
             ],
             "support": {
-                "source": "https://github.com/php-fig/log/tree/1.1.4"
+                "source": "https://github.com/php-fig/log/tree/3.0.2"
             },
-            "time": "2021-05-03T11:20:27+00:00"
+            "time": "2024-09-11T13:17:53+00:00"
         },
         {
             "name": "ralouphie/getallheaders",
@@ -5307,120 +5537,40 @@
             "time": "2019-03-08T08:55:37+00:00"
         },
         {
-            "name": "react/promise",
-            "version": "v3.3.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/reactphp/promise.git",
-                "reference": "23444f53a813a3296c1368bb104793ce8d88f04a"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/promise/zipball/23444f53a813a3296c1368bb104793ce8d88f04a",
-                "reference": "23444f53a813a3296c1368bb104793ce8d88f04a",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.1.0"
-            },
-            "require-dev": {
-                "phpstan/phpstan": "1.12.28 || 1.4.10",
-                "phpunit/phpunit": "^9.6 || ^7.5"
-            },
-            "type": "library",
-            "autoload": {
-                "files": [
-                    "src/functions_include.php"
-                ],
-                "psr-4": {
-                    "React\\Promise\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Jan Sorgalla",
-                    "email": "jsorgalla@gmail.com",
-                    "homepage": "https://sorgalla.com/"
-                },
-                {
-                    "name": "Christian Lück",
-                    "email": "christian@clue.engineering",
-                    "homepage": "https://clue.engineering/"
-                },
-                {
-                    "name": "Cees-Jan Kiewiet",
-                    "email": "reactphp@ceesjankiewiet.nl",
-                    "homepage": "https://wyrihaximus.net/"
-                },
-                {
-                    "name": "Chris Boden",
-                    "email": "cboden@gmail.com",
-                    "homepage": "https://cboden.dev/"
-                }
-            ],
-            "description": "A lightweight implementation of CommonJS Promises/A for PHP",
-            "keywords": [
-                "promise",
-                "promises"
-            ],
-            "support": {
-                "issues": "https://github.com/reactphp/promise/issues",
-                "source": "https://github.com/reactphp/promise/tree/v3.3.0"
-            },
-            "funding": [
-                {
-                    "url": "https://opencollective.com/reactphp",
-                    "type": "open_collective"
-                }
-            ],
-            "time": "2025-08-19T18:57:03+00:00"
-        },
-        {
             "name": "ruflin/elastica",
-            "version": "7.3.2",
+            "version": "9.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ruflin/Elastica.git",
-                "reference": "84ba137678707a1aa4242d12bad891dc38fa2608"
+                "reference": "cca4d638ea74a11638b0905e46b498b704664ded"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ruflin/Elastica/zipball/84ba137678707a1aa4242d12bad891dc38fa2608",
-                "reference": "84ba137678707a1aa4242d12bad891dc38fa2608",
+                "url": "https://api.github.com/repos/ruflin/Elastica/zipball/cca4d638ea74a11638b0905e46b498b704664ded",
+                "reference": "cca4d638ea74a11638b0905e46b498b704664ded",
                 "shasum": ""
             },
             "require": {
-                "elasticsearch/elasticsearch": "^7.10",
+                "elasticsearch/elasticsearch": "^9.0",
                 "ext-json": "*",
-                "nyholm/dsn": "^2.0.0",
-                "php": "^7.2 || ^8.0",
-                "psr/log": "^1.0 || ^2.0 || ^3.0",
-                "symfony/deprecation-contracts": "^2.2 || ^3.0",
-                "symfony/polyfill-php73": "^1.19"
+                "php": "~8.1.0 || ~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0",
+                "psr/log": "^2.0 || ^3.0"
+            },
+            "conflict": {
+                "guzzlehttp/psr7": "<2.0.0"
             },
             "require-dev": {
-                "aws/aws-sdk-php": "^3.155",
-                "guzzlehttp/guzzle": "^6.3 || ^7.2",
-                "phpstan/phpstan": "^1.5",
-                "phpstan/phpstan-phpunit": "^1.1",
-                "phpunit/phpunit": "^8.5.8 || ^9.4",
-                "symfony/phpunit-bridge": "^6.0"
+                "guzzlehttp/guzzle": "^7.2",
+                "phpstan/phpstan": "^2.1",
+                "phpstan/phpstan-phpunit": "^2.0",
+                "phpunit/phpunit": "^10.5",
+                "rector/rector": "^2.1"
             },
             "suggest": {
                 "aws/aws-sdk-php": "Allow using IAM authentication with Amazon ElasticSearch Service",
-                "guzzlehttp/guzzle": "Allow using guzzle as transport",
                 "monolog/monolog": "Logging request"
             },
             "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "7.0.x-dev"
-                }
-            },
             "autoload": {
                 "psr-4": {
                     "Elastica\\": "src/"
@@ -5444,9 +5594,9 @@
             ],
             "support": {
                 "issues": "https://github.com/ruflin/Elastica/issues",
-                "source": "https://github.com/ruflin/Elastica/tree/7.3.2"
+                "source": "https://github.com/ruflin/Elastica/tree/9.0.0"
             },
-            "time": "2024-03-11T14:11:50+00:00"
+            "time": "2025-10-01T12:57:48+00:00"
         },
         {
             "name": "spomky-labs/base64url",
@@ -9187,86 +9337,6 @@
             "time": "2024-09-09T11:45:10+00:00"
         },
         {
-            "name": "symfony/polyfill-php73",
-            "version": "v1.37.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/symfony/polyfill-php73.git",
-                "reference": "0f68c03565dcaaf25a890667542e8bd75fe7e5bb"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-php73/zipball/0f68c03565dcaaf25a890667542e8bd75fe7e5bb",
-                "reference": "0f68c03565dcaaf25a890667542e8bd75fe7e5bb",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.2"
-            },
-            "type": "library",
-            "extra": {
-                "thanks": {
-                    "url": "https://github.com/symfony/polyfill",
-                    "name": "symfony/polyfill"
-                }
-            },
-            "autoload": {
-                "files": [
-                    "bootstrap.php"
-                ],
-                "psr-4": {
-                    "Symfony\\Polyfill\\Php73\\": ""
-                },
-                "classmap": [
-                    "Resources/stubs"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Nicolas Grekas",
-                    "email": "p@tchwork.com"
-                },
-                {
-                    "name": "Symfony Community",
-                    "homepage": "https://symfony.com/contributors"
-                }
-            ],
-            "description": "Symfony polyfill backporting some PHP 7.3+ features to lower PHP versions",
-            "homepage": "https://symfony.com",
-            "keywords": [
-                "compatibility",
-                "polyfill",
-                "portable",
-                "shim"
-            ],
-            "support": {
-                "source": "https://github.com/symfony/polyfill-php73/tree/v1.37.0"
-            },
-            "funding": [
-                {
-                    "url": "https://symfony.com/sponsor",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/fabpot",
-                    "type": "github"
-                },
-                {
-                    "url": "https://github.com/nicolas-grekas",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                    "type": "tidelift"
-                }
-            ],
-            "time": "2024-09-09T11:45:10+00:00"
-        },
-        {
             "name": "symfony/polyfill-php80",
             "version": "v1.26.0",
             "source": {
@@ -9348,6 +9418,86 @@
                 }
             ],
             "time": "2022-05-10T07:21:04+00:00"
+        },
+        {
+            "name": "symfony/polyfill-php82",
+            "version": "v1.43.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/polyfill-php82.git",
+                "reference": "843bbe8b2a7934307b749751eede0f111f5d1cfc"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/polyfill-php82/zipball/843bbe8b2a7934307b749751eede0f111f5d1cfc",
+                "reference": "843bbe8b2a7934307b749751eede0f111f5d1cfc",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2"
+            },
+            "type": "library",
+            "extra": {
+                "thanks": {
+                    "url": "https://github.com/symfony/polyfill",
+                    "name": "symfony/polyfill"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "bootstrap.php"
+                ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Php82\\": ""
+                },
+                "classmap": [
+                    "Resources/stubs"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Nicolas Grekas",
+                    "email": "p@tchwork.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony polyfill backporting some PHP 8.2+ features to lower PHP versions",
+            "homepage": "https://symfony.com",
+            "keywords": [
+                "compatibility",
+                "polyfill",
+                "portable",
+                "shim"
+            ],
+            "support": {
+                "source": "https://github.com/symfony/polyfill-php82/tree/v1.43.0"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2026-09-25T15:50:05+00:00"
         },
         {
             "name": "symfony/polyfill-php83",

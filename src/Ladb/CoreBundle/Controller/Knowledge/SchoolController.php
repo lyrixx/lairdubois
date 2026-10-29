@@ -335,7 +335,7 @@ class SchoolController extends AbstractController {
 						if (is_null($facet->name)) {
 
 							$filter = new \Elastica\Query\QueryString($facet->value);
-							$filter->setFields(array( 'name^100', 'geographicalAreas^50', 'description' ));
+							$filter->setFields(array( 'name^300', 'geographicalAreas^50', 'description' ));
 							$filters[] = $filter;
 
 							$couldUseDefaultSort = false;

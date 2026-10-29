@@ -322,7 +322,7 @@ class UserController extends AbstractController {
 						if (is_null($facet->name)) {
 
 							$filter = new \Elastica\Query\QueryString($facet->value);
-							$filter->setFields(array( 'displayname', 'fullname', 'username' ));
+							$filter->setFields(array( 'displayname^2', 'fullname', 'username' ));
 							$filters[] = $filter;
 
 							$couldUseDefaultSort = false;
