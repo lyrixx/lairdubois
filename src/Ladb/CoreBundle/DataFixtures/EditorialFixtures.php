@@ -35,7 +35,7 @@ final class EditorialFixtures extends Fixture implements DependentFixtureInterfa
 		return array( UserFixtures::class );
 	}
 
-	public function load(ObjectManager $manager) {
+	public function load(ObjectManager $manager): void {
 		$admin = $this->getReference(UserFixtures::ADMIN);
 		$user = $this->getReference(UserFixtures::USER);
 

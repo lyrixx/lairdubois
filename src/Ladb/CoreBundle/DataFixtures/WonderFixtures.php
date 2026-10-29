@@ -56,7 +56,7 @@ final class WonderFixtures extends Fixture implements DependentFixtureInterface 
 		return array( HowtoFixtures::class, KnowledgeFixtures::class, QaFixtures::class, UserFixtures::class, WorkflowFixtures::class );
 	}
 
-	public function load(ObjectManager $manager) {
+	public function load(ObjectManager $manager): void {
 		$user = $this->getReference(UserFixtures::USER);
 		$user2 = $this->getReference(UserFixtures::USER2);
 

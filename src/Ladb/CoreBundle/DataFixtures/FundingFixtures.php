@@ -38,7 +38,7 @@ final class FundingFixtures extends Fixture implements DependentFixtureInterface
 		return array( UserFixtures::class );
 	}
 
-	public function load(ObjectManager $manager) {
+	public function load(ObjectManager $manager): void {
 		$user2 = $this->getReference(UserFixtures::USER2);
 
 		// The previous month, as FundingController::chargeCreateAction

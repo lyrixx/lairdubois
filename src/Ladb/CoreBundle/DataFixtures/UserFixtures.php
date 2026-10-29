@@ -41,7 +41,7 @@ final class UserFixtures extends Fixture {
 		$this->userManager = $userManager;
 	}
 
-	public function load(ObjectManager $manager) {
+	public function load(ObjectManager $manager): void {
 		$this->factory->copyPlaceholders();
 
 		// One second apart, in this order: the lists of users sorted by date do not depend on the speed of the load

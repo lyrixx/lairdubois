@@ -48,10 +48,7 @@ EOT
 			ORDER BY counter DESC
 		';
 
-		$stmt = $om->getConnection()->prepare($sql);
-		$stmt->execute([]);
-
-		$results = $stmt->fetchAll();
+		$results = $om->getConnection()->fetchAllAssociative($sql);
 
 		$output->writeln(count($results).' joins en doublon !');
 

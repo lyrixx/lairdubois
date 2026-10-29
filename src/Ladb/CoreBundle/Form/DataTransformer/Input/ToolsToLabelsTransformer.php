@@ -39,7 +39,7 @@ class ToolsToLabelsTransformer implements DataTransformerInterface {
 
 		$tools = array();
 		$labelsArray = preg_split("/[,;]+/", $labelsString);
-		$repository = $this->om->getRepository('LadbCoreBundle:Input\Tool');
+		$repository = $this->om->getRepository(Tool::class);
 		foreach ($labelsArray as $label) {
 			if (!preg_match("/^[ a-zA-Z0-9ÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿÑñ'-]{2,}$/", $label)) {
 				continue;

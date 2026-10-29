@@ -60,9 +60,7 @@ class AccessRepository extends AbstractEntityRepository {
 			$valueIndex += 1;
 			$stmt->bindValue($valueIndex, $locale);
 		}
-		$stmt->execute();
-
-		return $stmt->fetchAll();
+		return $stmt->executeQuery()->fetchAllAssociative();
 	}
 
 	public function countUniqueGroupByCountryCode($kind = null, $env = null, $backwardDays = 28, $continentCode = null, $language = null, $locale = null) {
@@ -117,9 +115,7 @@ class AccessRepository extends AbstractEntityRepository {
 			$valueIndex += 1;
 			$stmt->bindValue($valueIndex, $locale);
 		}
-		$stmt->execute();
-
-		return $stmt->fetchAll();
+		return $stmt->executeQuery()->fetchAllAssociative();
 	}
 
 	/////

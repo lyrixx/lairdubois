@@ -2,7 +2,7 @@
 
 namespace Ladb\CoreBundle\Repository\Message;
 
-use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Ladb\CoreBundle\Entity\Core\User;
@@ -123,7 +123,7 @@ class ThreadRepository extends AbstractEntityRepository {
 		$sql .= 'WHERE mm.id IS NULL ';
 		$sql .= 'GROUP BY v.user_id';
 
-		$counts = $this->getEntityManager()->getConnection()->fetchAllKeyValue($sql, array( 'userIds' => $userIds ), array( 'userIds' => Connection::PARAM_INT_ARRAY ));
+		$counts = $this->getEntityManager()->getConnection()->fetchAllKeyValue($sql, array( 'userIds' => $userIds ), array( 'userIds' => ArrayParameterType::INTEGER ));
 
 		return array_map('intval', $counts);
 	}

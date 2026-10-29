@@ -32,7 +32,7 @@ final class CollectionFixtures extends Fixture implements DependentFixtureInterf
 		return array( HowtoFixtures::class, UserFixtures::class, WonderFixtures::class );
 	}
 
-	public function load(ObjectManager $manager) {
+	public function load(ObjectManager $manager): void {
 		$user = $this->getReference(UserFixtures::USER);
 		$user2 = $this->getReference(UserFixtures::USER2);
 

@@ -6,6 +6,7 @@ use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\Form\Exception\TransformationFailedException;
 use Symfony\Component\Form\Exception\UnexpectedTypeException;
 use Doctrine\Persistence\ObjectManager;
+use Ladb\CoreBundle\Entity\Workflow\Part;
 
 class PartsToIdsTransformer implements DataTransformerInterface {
 
@@ -38,7 +39,7 @@ class PartsToIdsTransformer implements DataTransformerInterface {
 
 		$parts = array();
 		$idsStrings = preg_split("/[,]+/", $idsString);
-		$repository = $this->om->getRepository('LadbCoreBundle:Workflow\Part');
+		$repository = $this->om->getRepository(Part::class);
 		foreach ($idsStrings as $idString) {
 			$id = intval($idString);
 			if ($id == 0) {

@@ -673,24 +673,6 @@ parameters:
 			path: src/Ladb/CoreBundle/Repository/Offer/OfferRepository.php
 
 		-
-			message: '''
-				#^Call to deprecated method execute\(\) of class Doctrine\\DBAL\\Statement\:
-				Statement\:\:execute\(\) is deprecated, use Statement\:\:executeQuery\(\) or executeStatement\(\) instead$#
-			'''
-			identifier: method.deprecated
-			count: 2
-			path: src/Ladb/CoreBundle/Repository/Opencutlist/AccessRepository.php
-
-		-
-			message: '''
-				#^Call to deprecated method fetchAll\(\) of class Doctrine\\DBAL\\Statement\:
-				Use fetchAllNumeric\(\), fetchAllAssociative\(\) or fetchFirstColumn\(\) instead\.$#
-			'''
-			identifier: method.deprecated
-			count: 2
-			path: src/Ladb/CoreBundle/Repository/Opencutlist/AccessRepository.php
-
-		-
 			message: '#^Caught class Ladb\\CoreBundle\\Repository\\Qa\\NonUniqueResultException not found\.$#'
 			identifier: class.notFound
 			count: 1

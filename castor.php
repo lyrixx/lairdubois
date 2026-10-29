@@ -99,7 +99,7 @@ function db_schema(): void
     docker_compose_run(['bin/console', 'doctrine:database:create', '--if-not-exists']);
     docker_compose_run(['bin/console', 'doctrine:schema:update', '--force']);
     // The sessions live in the database (PdoSessionHandler), in a table Doctrine does not know
-    docker_compose_run(['bin/console', 'doctrine:query:sql', '--', file_get_contents(variable('root_dir') . '/docs/database/schema-sessions.sql')]);
+    docker_compose_run(['bin/console', 'dbal:run-sql', '--', file_get_contents(variable('root_dir') . '/docs/database/schema-sessions.sql')]);
 }
 
 #[AsTask(description: 'Recreates the database with the fixtures (dev and test data), then fills the Elasticsearch index', namespace: 'app:db', name: 'fixtures')]
@@ -121,7 +121,7 @@ function db_has_users(): bool
 {
     // The column name only shows in the output when a row is found. The query fails when the
     // database does not exist yet (the one of the tests, on a new copy).
-    $output = docker_compose_run(['bin/console', 'doctrine:query:sql', 'SELECT 1 AS has_users FROM tbl_core_user LIMIT 1'], c: context()->withQuiet()->withAllowFailure())->getOutput();
+    $output = docker_compose_run(['bin/console', 'dbal:run-sql', 'SELECT 1 AS has_users FROM tbl_core_user LIMIT 1'], c: context()->withQuiet()->withAllowFailure())->getOutput();
 
     return str_contains($output, 'has_users');
 }

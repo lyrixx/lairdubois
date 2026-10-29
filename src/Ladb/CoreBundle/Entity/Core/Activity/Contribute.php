@@ -15,7 +15,7 @@ class Contribute extends AbstractActivity {
 	const STRIPPED_NAME = 'contribute';
 
 	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\BaseValue", cascade="persist")
+	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\BaseValue", cascade={"persist"})
 	 * @ORM\JoinColumn(nullable=false)
 	 */
 	private $value;

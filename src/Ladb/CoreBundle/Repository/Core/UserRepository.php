@@ -2,7 +2,7 @@
 
 namespace Ladb\CoreBundle\Repository\Core;
 
-use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Ladb\CoreBundle\Entity\Core\Picture;
 use Ladb\CoreBundle\Entity\Core\User;
@@ -82,7 +82,7 @@ class UserRepository extends AbstractEntityRepository implements UserLoaderInter
 				if ($metadata->getName() === Picture::class && count($removedPictureIds) > 0) {
 					$sql .= ' AND id NOT IN (?)';
 					$parameters[] = $removedPictureIds;
-					$types[] = Connection::PARAM_INT_ARRAY;
+					$types[] = ArrayParameterType::INTEGER;
 				}
 
 				if ($connection->fetchOne($sql.' LIMIT 1', $parameters, $types) !== false) {
