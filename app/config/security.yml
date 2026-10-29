@@ -1,6 +1,4 @@
 security:
-    enable_authenticator_manager: true
-
     password_hashers:
         # The hash of FOSUserBundle, the one of the accounts that have not logged in since #24: hashed
         # again by the native hasher at their next login (UserRepository::upgradePassword())

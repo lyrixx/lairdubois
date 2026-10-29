@@ -417,9 +417,9 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   celles de PHP (comme `ClockMock` du bridge). Il connaît le compteur de partages de
   `OfflineFacebookGraph::URL`, répond une erreur pour `ERROR_URL` et pour toute autre requête, et
   rend les URL appelées (`popRequests()`).
-- Une `\Error` PHP sort du kernel (`framework.handle_all_throwables` à `false`, le défaut de 6.4) :
-  elle remonte de `$client->request()` au lieu de donner une 500. Un warning PHP devient une
-  exception (gestionnaire d'erreurs de PHPUnit) : 500.
+- Une `\Error` PHP donne une 500, comme une exception (`framework.handle_all_throwables`, #205) :
+  `$client->request()` rend la page d'erreur au lieu de la lever (`Tests\Error\PhpErrorTest`). Un
+  warning PHP devient une exception (gestionnaire d'erreurs de PHPUnit) : 500.
 - Smoke test (`tests/Smoke/RouteSmokeTest.php`) : chaque route GET en anonyme, `user` et `admin`,
   rien en 5xx ni en `\Error`. Une action qui refuse
   une requête hors XHR (« Only XML request allowed ») est rappelée en XHR. Paramètres des routes :
@@ -620,9 +620,10 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   La 4.4 les coupait (#128) : son Routing ne connaissait pas le message de PCRE2 10.43+ (PHP 8.5)
   pour un lookbehind, et chaque construction du cache du routeur par une requête donnait quelque
   350 warnings avant les en-têtes (500). Le Routing de 5.4 le connaît.
-- Tant que `framework.handle_all_throwables` n'est pas à `true` (le défaut de 7.0), `HttpKernel`
-  n'attrape que les `\Exception` : une `\Error` PHP (appel sur `null`, `TypeError`) sort du kernel
-  au lieu de donner une 500.
+- `framework.handle_all_throwables: true` (le défaut de 7.0, #205) : `HttpKernel` attrape aussi les
+  `\Error` PHP (appel sur `null`, `TypeError`), rendues comme une exception par le contrôleur
+  d'erreur (500). Avant, elles sortaient de `handle()`, et `DebugHandlersListener` les rendait par
+  `terminateWithException()`, avec la même page d'erreur.
 - Pages d'erreur : contrôleur d'erreur de FrameworkBundle (`twig.exception_controller: null`).
   `TwigErrorRenderer` ne rend que le HTML (`@Twig/Exception/error.html.twig`) ; les routes au
   `_format` json (`.json`, `.geojson`) gardent leur erreur en JSON par `RequestFormatErrorRenderer`
@@ -821,7 +822,7 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   le worker s'arrêterait sans le retirer. La connexion est en options : dans le DSN, le mot de passe
   et le vhost `/` seraient à encoder. Un handler en échec est rejoué 3 fois (échange `delays`), un
   mail 5 fois, puis le message est supprimé (log critical). Après chaque message, le worker vide
-  l'entity manager et remet à zéro les services (`reset_on_message`, le défaut de 6.0) : un handler flush ce qu'il
+  l'entity manager et remet à zéro les services (`reset_on_message`, toujours depuis 6.0 : l'option, qui ne fait plus rien, est retirée de `config.yml`) : un handler flush ce qu'il
   persiste, sinon c'est perdu, et ne garde rien d'un message à l'autre.
 - Les notifications web push sont signées avec les clés VAPID de la prod (`bentools_webpush.*` de
   `parameters.yml`) : avec celles de `parameters.yml.dist`, le worker `webpush_notification`
