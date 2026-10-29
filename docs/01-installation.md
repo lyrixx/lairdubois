@@ -137,22 +137,48 @@ Vite and its plugins (`package.json`) need Node.js 22.18 or later: the one of De
 
 Neither Less nor Java is needed any more for the assets: Less comes with the Node packages of the project.
 
-### Install *Java8* - *Used to run Elesticsearch*
+### Install [Elasticsearch](https://www.elastic.co/products/elasticsearch) 9 - *The search engine*
+
+The package comes with its own Java.
+
+*⚠️&nbsp;️&nbsp;Note : Upgrading from Elasticsearch 5.6, Elasticsearch 9 does not read its data. Stop it, put its data and its configuration aside (the indexes are built again from the database, step 11), then remove it and its repository, for a fresh install of 9 :*
 
 ``` bash
-    $ sudo apt-get install default-jre
+    $ sudo systemctl stop elasticsearch
+    $ sudo mv /var/lib/elasticsearch /var/lib/elasticsearch-5.6
+    $ sudo cp -a /etc/elasticsearch /etc/elasticsearch-5.6
+    $ sudo apt-get purge elasticsearch
+    $ sudo rm /etc/apt/sources.list.d/elastic-5.x.list
 ```
 
-### Install [Elasticsearch](https://www.elastic.co/products/elasticsearch) - *The search engine*
+*To go back to 5.6 : stop Elasticsearch 9, reinstall 5.6 from its repository, put back `/var/lib/elasticsearch-5.6` and `/etc/elasticsearch-5.6`, deploy the previous code.*
 
 ``` bash
-    $ wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
-    $ echo "deb https://artifacts.elastic.co/packages/5.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-5.x.list
+    $ wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo gpg --dearmor -o /usr/share/keyrings/elasticsearch-keyring.gpg
+    $ echo "deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] https://artifacts.elastic.co/packages/9.x/apt stable main" | sudo tee /etc/apt/sources.list.d/elastic-9.x.list
     $ sudo apt-get update
 ```
 
 ``` bash
     $ sudo apt-get install elasticsearch
+```
+
+The package turns on the security (TLS, password of the `elastic` user) and listens on every interface. The site connects without TLS nor password (`elasticsearch_host` and `elasticsearch_port` of `parameters.yml`), as with 5.6 : in `/etc/elasticsearch/elasticsearch.yml`, replace the block between `# BEGIN SECURITY AUTO CONFIGURATION` and `# END SECURITY AUTO CONFIGURATION` by :
+
+``` yaml
+# Only the site, on this server: no TLS nor password
+network.host: 127.0.0.1
+discovery.type: single-node
+xpack.security.enabled: false
+# No download of the GeoIP databases of the ingest pipelines, which the site does not use
+ingest.geoip.downloader.enabled: false
+```
+
+Fix the size of the heap, by default computed from the memory of the server (up to half of it), in `/etc/elasticsearch/jvm.options.d/heap.options` (the one of 5.6 is in `/etc/elasticsearch-5.6/jvm.options`) :
+
+``` text
+-Xms1g
+-Xmx1g
 ```
 
 Configure Elasticsearch to automatically start during bootup.
@@ -469,6 +495,8 @@ This step will create the initial Elasticsearch index.
 ```bash
     $ ladb fos:elastica:populate
 ```
+
+*⚠️&nbsp;️&nbsp;Note : Upgrading from Elasticsearch 5.6, run it during the maintenance, after the deployment of the code : until it ends, the lists and the search are empty or fail (no index yet).*
 
 ## Step 12 - Create a first admin user
 
