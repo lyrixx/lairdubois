@@ -2,6 +2,7 @@
 
 namespace Ladb\CoreBundle\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -9,13 +10,11 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 
+#[AsCommand(name: 'ladb:load', description: 'Load fixture data into database')]
 class LoadCommand extends Command {
-
-	protected static $defaultName = 'ladb:load';
 
 	protected function configure() {
 		$this
-			->setDescription('Load fixture data into database')
 			->setHelp(<<<EOT
 The <info>ladb:reset</info> command load fixtures :
 

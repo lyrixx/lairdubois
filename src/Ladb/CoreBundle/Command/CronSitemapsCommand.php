@@ -2,6 +2,7 @@
 
 namespace Ladb\CoreBundle\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Twig\Environment;
@@ -19,9 +20,8 @@ use Ladb\CoreBundle\Model\PicturedInterface;
 use Ladb\CoreBundle\Utils\PicturedUtils;
 use Ladb\CoreBundle\Utils\VideoHostingUtils;
 
+#[AsCommand(name: 'ladb:cron:sitemaps', description: 'Generate sitemaps')]
 class CronSitemapsCommand extends Command {
-
-	protected static $defaultName = 'ladb:cron:sitemaps';
 
 	private $om;
 	private $packages;
@@ -52,7 +52,6 @@ class CronSitemapsCommand extends Command {
 	protected function configure() {
 		$this
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
-			->setDescription('Generate sitemaps')
 			->setHelp(<<<EOT
 The <info>ladb:cron:sitemaps</info> generate sitemaps
 EOT

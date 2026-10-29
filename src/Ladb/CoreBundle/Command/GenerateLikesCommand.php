@@ -2,6 +2,7 @@
 
 namespace Ladb\CoreBundle\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputArgument;
@@ -12,9 +13,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Ladb\CoreBundle\Model\AuthoredInterface;
 use Ladb\CoreBundle\Utils\TypableUtils;
 
+#[AsCommand(name: 'ladb:generate:likes', description: 'Generate likes')]
 class GenerateLikesCommand extends Command {
-
-	protected static $defaultName = 'ladb:generate:likes';
 
 	private $om;
 
@@ -26,7 +26,6 @@ class GenerateLikesCommand extends Command {
 	protected function configure() {
 		$this
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
-			->setDescription('Generate likes')
 			->setHelp(<<<EOT
 The <info>ladb:generate:likes</info> command generate likes
 EOT

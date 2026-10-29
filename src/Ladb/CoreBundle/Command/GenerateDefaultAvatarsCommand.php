@@ -2,6 +2,7 @@
 
 namespace Ladb\CoreBundle\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
@@ -12,9 +13,8 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Ladb\CoreBundle\Utils\UserUtils;
 
+#[AsCommand(name: 'ladb:generate:defaultavatars', description: 'Generate defaultavatars')]
 class GenerateDefaultAvatarsCommand extends Command {
-
-	protected static $defaultName = 'ladb:generate:defaultavatars';
 
 	private $om;
 	private $userUtils;
@@ -28,7 +28,6 @@ class GenerateDefaultAvatarsCommand extends Command {
 	protected function configure() {
 		$this
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
-			->setDescription('Generate defaultavatars')
 			->setHelp(<<<EOT
 The <info>ladb:generate:defaultavatars</info> command generate default avatars
 EOT

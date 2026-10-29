@@ -4,6 +4,7 @@ namespace Ladb\CoreBundle\Command;
 
 use Ladb\CoreBundle\Entity\Core\Comment;
 use Ladb\CoreBundle\Entity\Qa\Answer;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Twig\Environment;
@@ -17,9 +18,8 @@ use Ladb\CoreBundle\Utils\MailerUtils;
 use Ladb\CoreBundle\Utils\TypableUtils;
 use Ladb\CoreBundle\Model\WatchableChildInterface;
 
+#[AsCommand(name: 'ladb:cron:notification:email', description: 'Process notifications to send emails')]
 class CronNotificationEmailCommand extends Command {
-
-	protected static $defaultName = 'ladb:cron:notification:email';
 
 	private $mailerUtils;
 	private $om;
@@ -45,7 +45,6 @@ class CronNotificationEmailCommand extends Command {
 	protected function configure() {
 		$this
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
-			->setDescription('Process notifications to send emails')
 			->setHelp(<<<EOT
 The <info>ladb:cron:notification:email</info> Process notifications to send emails
 EOT

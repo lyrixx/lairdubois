@@ -677,7 +677,7 @@ services:
   Ladb\CoreBundle\Controller\:
     resource: '../../Controller'
 
-  # Commands: tagged console.command by autoconfigure, loaded lazily by their $defaultName
+  # Commands: tagged console.command by autoconfigure, loaded lazily by their #[AsCommand]
   Ladb\CoreBundle\Command\:
     resource: '../../Command'
     bind:

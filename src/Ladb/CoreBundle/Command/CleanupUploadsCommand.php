@@ -4,15 +4,15 @@ namespace Ladb\CoreBundle\Command;
 
 use Ladb\CoreBundle\Entity\Core\Picture;
 use Ladb\CoreBundle\Entity\Core\Resource;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+#[AsCommand(name: 'ladb:cleanup:uploads', description: 'Cleanup uploads')]
 class CleanupUploadsCommand extends Command {
-
-	protected static $defaultName = 'ladb:cleanup:uploads';
 
 	private $om;
 
@@ -24,7 +24,6 @@ class CleanupUploadsCommand extends Command {
 	protected function configure() {
 		$this
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force removing')
-			->setDescription('Cleanup uploads')
 			->setHelp(<<<EOT
 The <info>ladb:cleanup:uploads</info> command remove unused uploaded files
 EOT

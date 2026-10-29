@@ -5,6 +5,7 @@ namespace Ladb\CoreBundle\Command;
 use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Utils\KnowledgeUtils;
 use Ladb\CoreBundle\Utils\TypableUtils;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputInterface;
@@ -12,9 +13,8 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Ladb\CoreBundle\Utils\PropertyUtils;
 
+#[AsCommand(name: 'ladb:generate:completioncounters', description: 'Generate completion counters')]
 class GenerateCompletionCountersCommand extends Command {
-
-	protected static $defaultName = 'ladb:generate:completioncounters';
 
 	private $knowledgeUtils;
 	private $om;
@@ -28,7 +28,6 @@ class GenerateCompletionCountersCommand extends Command {
 	protected function configure() {
 		$this
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
-			->setDescription('Generate completion counters')
 			->setHelp(<<<EOT
 The <info>ladb:generate:completioncounters</info> command generate completion counters
 EOT

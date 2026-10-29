@@ -3,6 +3,7 @@
 namespace Ladb\CoreBundle\Command;
 
 use Ladb\CoreBundle\Manager\Core\UserManager;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -13,9 +14,8 @@ use Symfony\Component\Console\Question\Question;
 /**
  * fos:user:create of FOSUserBundle (#24), with the same arguments and options.
  */
+#[AsCommand(name: 'ladb:user:create', description: 'Create a user')]
 class UserCreateCommand extends Command {
-
-	protected static $defaultName = 'ladb:user:create';
 
 	private $userManager;
 
@@ -31,7 +31,6 @@ class UserCreateCommand extends Command {
 			->addArgument('password', InputArgument::REQUIRED, 'The password')
 			->addOption('super-admin', null, InputOption::VALUE_NONE, 'Set the user as super admin')
 			->addOption('inactive', null, InputOption::VALUE_NONE, 'Set the user as inactive')
-			->setDescription('Create a user')
 			->setHelp(<<<EOT
 The <info>ladb:user:create</info> command creates a user, and asks for the missing arguments:
 

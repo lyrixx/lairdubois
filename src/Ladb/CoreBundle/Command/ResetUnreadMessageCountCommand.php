@@ -2,6 +2,7 @@
 
 namespace Ladb\CoreBundle\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
@@ -10,9 +11,8 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Ladb\CoreBundle\Entity\Message\Thread;
 
+#[AsCommand(name: 'ladb:reset:unreadmessagecount', description: 'Reset unreadMessageCount')]
 class ResetUnreadMessageCountCommand extends Command {
-
-	protected static $defaultName = 'ladb:reset:unreadmessagecount';
 
 	private $om;
 
@@ -25,7 +25,6 @@ class ResetUnreadMessageCountCommand extends Command {
 		$this
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
-			->setDescription('Reset unreadMessageCount')
 			->setHelp(<<<EOT
 The <info>ladb:reset:unreadmessagecount</info> command reset unreadMessageCount
 EOT

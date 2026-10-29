@@ -2,6 +2,7 @@
 
 namespace Ladb\CoreBundle\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputArgument;
@@ -10,9 +11,8 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 
+#[AsCommand(name: 'ladb:cleanup:pictures', description: 'Cleanup pictures')]
 class CleanupPicturesCommand extends Command {
-
-	protected static $defaultName = 'ladb:cleanup:pictures';
 
 	private $om;
 
@@ -24,7 +24,6 @@ class CleanupPicturesCommand extends Command {
 	protected function configure() {
 		$this
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force removing')
-			->setDescription('Cleanup pictures')
 			->setHelp(<<<EOT
 The <info>ladb:cleanup:pictures</info> command remove unused pictures
 EOT

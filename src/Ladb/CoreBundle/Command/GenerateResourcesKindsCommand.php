@@ -3,15 +3,15 @@
 namespace Ladb\CoreBundle\Command;
 
 use Ladb\CoreBundle\Entity\Core\Resource;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+#[AsCommand(name: 'ladb:generate:resourceskinds', description: 'Generate resources kinds')]
 class GenerateResourcesKindsCommand extends Command {
-
-	protected static $defaultName = 'ladb:generate:resourceskinds';
 
 	private $om;
 
@@ -23,7 +23,6 @@ class GenerateResourcesKindsCommand extends Command {
 	protected function configure() {
 		$this
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
-			->setDescription('Generate resources kinds')
 			->setHelp(<<<EOT
 The <info>ladb:generate:resourceskinds</info> command generate resources kinds
 EOT

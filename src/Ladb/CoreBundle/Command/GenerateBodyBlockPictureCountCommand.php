@@ -2,6 +2,7 @@
 
 namespace Ladb\CoreBundle\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputArgument;
@@ -11,9 +12,8 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Ladb\CoreBundle\Utils\BlockBodiedUtils;
 
+#[AsCommand(name: 'ladb:generate:bodyblockpicturecount', description: 'Generate bodyblockpicturecount')]
 class GenerateBodyBlockPictureCountCommand extends Command {
-
-	protected static $defaultName = 'ladb:generate:bodyblockpicturecount';
 
 	private $blockBodiedUtils;
 	private $om;
@@ -27,7 +27,6 @@ class GenerateBodyBlockPictureCountCommand extends Command {
 	protected function configure() {
 		$this
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
-			->setDescription('Generate bodyblockpicturecount')
 			->setHelp(<<<EOT
 The <info>ladb:generate:bodyblockpicturecount</info> command generate bodyblockpicturecount
 EOT

@@ -13,6 +13,7 @@ use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Model\MultiPicturedInterface;
 use Ladb\CoreBundle\Model\PublicationInterface;
 use Ladb\CoreBundle\Utils\TypableUtils;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputArgument;
@@ -21,9 +22,8 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 
+#[AsCommand(name: 'ladb:change:owner', description: 'Change owner')]
 class ChangeOwnerCommand extends Command {
-
-	protected static $defaultName = 'ladb:change:owner';
 
 	private $om;
 	private $typableUtils;
@@ -46,7 +46,6 @@ class ChangeOwnerCommand extends Command {
 			->addOption('entity-type', null, InputOption::VALUE_REQUIRED, 'Entity type')
 			->addOption('entity-id', null, InputOption::VALUE_REQUIRED, 'Entity ID')
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force removing')
-			->setDescription('Change owner')
 			->setHelp(<<<EOT
 The <info>ladb:change:owner</info> command change owner
 EOT

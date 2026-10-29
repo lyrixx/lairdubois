@@ -3,6 +3,7 @@
 namespace Ladb\CoreBundle\Command;
 
 use Ladb\CoreBundle\Entity\Core\Member;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Twig\Environment;
@@ -16,9 +17,8 @@ use Ladb\CoreBundle\Entity\Core\Spotlight;
 use Ladb\CoreBundle\Utils\MailerUtils;
 use Ladb\CoreBundle\Utils\TypableUtils;
 
+#[AsCommand(name: 'ladb:cron:spotlight', description: 'Update spotlights')]
 class CronSpotlightCommand extends Command {
-
-	protected static $defaultName = 'ladb:cron:spotlight';
 
 	private $facebookAccessToken;
 	private $facebookAppId;
@@ -78,7 +78,6 @@ class CronSpotlightCommand extends Command {
 			->addOption('force-facebook', null, InputOption::VALUE_NONE, 'Force posting on Facebook')
 			->addOption('force-mastodon', null, InputOption::VALUE_NONE, 'Force posting on Mastodon')
 			->addOption('no-posting', null, InputOption::VALUE_NONE, 'No posting on social networks')
-			->setDescription('Update spotlights')
 			->setHelp(<<<EOT
 The <info>ladb:cron:spotlight</info> update spotlights
 EOT

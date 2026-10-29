@@ -3,6 +3,7 @@
 namespace Ladb\CoreBundle\Command;
 
 use Ladb\CoreBundle\Utils\TypableUtils;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -10,14 +11,12 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 
+#[AsCommand(name: 'ladb:cron:notification', description: 'Execute notifications commands')]
 class CronNotificationCommand extends Command {
-
-	protected static $defaultName = 'ladb:cron:notification';
 
 	protected function configure() {
 		$this
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
-			->setDescription('Execute notifications commands')
 			->setHelp(<<<EOT
 The <info>ladb:cron:notification:email</info> Execute notifications commands
 EOT

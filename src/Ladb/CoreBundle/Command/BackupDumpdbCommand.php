@@ -2,6 +2,7 @@
 
 namespace Ladb\CoreBundle\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -10,9 +11,8 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Filesystem\Filesystem;
 
+#[AsCommand(name: 'ladb:backup:dumpdb', description: 'Dump the database')]
 class BackupDumpdbCommand extends Command {
-
-	protected static $defaultName = 'ladb:backup:dumpdb';
 
 	private $databaseHost;
 	private $databaseName;
@@ -43,7 +43,6 @@ class BackupDumpdbCommand extends Command {
 			->addOption('table', null, InputOption::VALUE_REQUIRED, 'Dump this table ONLY')
 			->addOption('ignore-table', null, InputOption::VALUE_REQUIRED, 'Ignore given table (write without DB name)')
 			->addOption('where', null, InputOption::VALUE_REQUIRED, 'Dump only selected records. Quotes are mandatory.')
-			->setDescription('Dump the database')
 			->setHelp(<<<EOT
 The <info>ladb:backup:db</info> command dump the database
 EOT

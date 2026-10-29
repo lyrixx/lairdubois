@@ -2,6 +2,7 @@
 
 namespace Ladb\CoreBundle\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputInterface;
@@ -10,9 +11,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Utils\ActivityUtils;
 
+#[AsCommand(name: 'ladb:cleanup:watches', description: 'Cleanup watches by removing doubles')]
 class CleanupWatchesCommand extends Command {
-
-	protected static $defaultName = 'ladb:cleanup:watches';
 
 	private $activityUtils;
 	private $om;
@@ -26,7 +26,6 @@ class CleanupWatchesCommand extends Command {
 	protected function configure() {
 		$this
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force removing')
-			->setDescription('Cleanup watches by removing doubles')
 			->setHelp(<<<EOT
 The <info>ladb:cleanup:blocks</info> Cleanup watches by removing doubles
 EOT

@@ -3,6 +3,7 @@
 namespace Ladb\CoreBundle\Command;
 
 use Ladb\CoreBundle\Model\HiddableInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Input\InputInterface;
@@ -10,9 +11,8 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Ladb\CoreBundle\Utils\PropertyUtils;
 
+#[AsCommand(name: 'ladb:generate:contributioncounters', description: 'Generate contribution counters')]
 class GenerateContributionCountersCommand extends Command {
-
-	protected static $defaultName = 'ladb:generate:contributioncounters';
 
 	private $om;
 	private $propertyUtils;
@@ -26,7 +26,6 @@ class GenerateContributionCountersCommand extends Command {
 	protected function configure() {
 		$this
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
-			->setDescription('Generate contribution counters')
 			->setHelp(<<<EOT
 The <info>ladb:generate:contributioncounters</info> command generate contribution counters
 EOT
