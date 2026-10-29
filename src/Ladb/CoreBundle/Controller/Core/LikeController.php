@@ -6,7 +6,7 @@ use Ladb\CoreBundle\Controller\AbstractController;
 use Ladb\CoreBundle\Utils\WebpushNotificationUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Ladb\CoreBundle\Entity\Core\Like;
 use Ladb\CoreBundle\Model\IndexableInterface;
 use Ladb\CoreBundle\Model\LikableInterface;
@@ -37,10 +37,8 @@ class LikeController extends AbstractController {
 	}
 
 	/////
-	/**
-	 * @Template("@LadbCore/Core/Like/create-xhr.html.twig")
-	 */
 	#[Route(path: '/{entityType}/{entityId}/create', requirements: ['entityType' => '\d+', 'entityId' => '\d+'], name: 'core_like_create')]
+	#[Template('@LadbCore/Core/Like/create-xhr.html.twig')]
 	public function createAction(Request $request, $entityType, $entityId, ActivityUtils $activityUtils, LikableUtils $likableUtils, EntityManagerInterface $om, SearchUtils $searchUtils, TypableUtils $typableUtils, WatchableUtils $watchableUtils, WebpushNotificationUtils $webpushNotificationUtils) {
 
 		$this->createLock('core_like_create', false, self::LOCK_TTL_CREATE_ACTION, false);
@@ -122,10 +120,8 @@ class LikeController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/Like/delete-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/delete', requirements: ['id' => '\d+'], name: 'core_like_delete')]
+	#[Template('@LadbCore/Core/Like/delete-xhr.html.twig')]
 	public function deleteAction(Request $request, $id, ActivityUtils $activityUtils, LikableUtils $likableUtils, EntityManagerInterface $om, SearchUtils $searchUtils, TypableUtils $typableUtils) {
 		$likeRepository = $om->getRepository(Like::CLASS_NAME);
 
@@ -181,11 +177,9 @@ class LikeController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/Like/list-byentity.html.twig")
-	 */
 	#[Route(path: '/{entityType}/{entityId}', requirements: ['entityType' => '\d+', 'entityId' => '\d+'], name: 'core_like_list_byentity')]
 	#[Route(path: '/{entityType}/{entityId}/{page}', requirements: ['entityType' => '\d+', 'entityId' => '\d+', 'page' => '\d+'], name: 'core_like_list_byentity_page')]
+	#[Template('@LadbCore/Core/Like/list-byentity.html.twig')]
 	public function listByEntityAction(Request $request, $entityType, $entityId, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, TypableUtils $typableUtils, $page = 0) {
 		$likeRepository = $om->getRepository(Like::CLASS_NAME);
 

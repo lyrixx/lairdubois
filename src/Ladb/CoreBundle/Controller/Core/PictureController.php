@@ -6,7 +6,7 @@ use Ladb\CoreBundle\Controller\PublicationControllerTrait;
 use Ladb\CoreBundle\Entity\Core\Member;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Imagine\Gd\Imagine;
 use Ladb\CoreBundle\Controller\AbstractController;
 use Ladb\CoreBundle\Entity\Core\Picture;
@@ -51,10 +51,8 @@ class PictureController extends AbstractController {
 		exit(0);
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/Picture/edit-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/edit', requirements: ['id' => '\d+'], name: 'core_picture_edit')]
+	#[Template('@LadbCore/Core/Picture/edit-xhr.html.twig')]
 	public function editAction(Request $request, $id, EntityManagerInterface $om) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_picture_edit)');
@@ -85,10 +83,8 @@ class PictureController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/Picture/update-error-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_picture_update')]
+	#[Template('@LadbCore/Core/Picture/update-error-xhr.html.twig')]
 	public function updateAction(Request $request, $id, EntityManagerInterface $om) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_picture_update)');

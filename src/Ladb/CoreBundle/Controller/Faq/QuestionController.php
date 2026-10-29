@@ -7,8 +7,9 @@ use Ladb\CoreBundle\Controller\PublicationControllerTrait;
 use Ladb\CoreBundle\Utils\CollectionnableUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Bridge\Twig\Attribute\Template;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\ExpressionLanguage\Expression;
 use Ladb\CoreBundle\Entity\Faq\Question;
 use Ladb\CoreBundle\Form\Type\Faq\QuestionType;
 use Ladb\CoreBundle\Utils\TagUtils;
@@ -35,11 +36,9 @@ class QuestionController extends AbstractController {
 
 	use PublicationControllerTrait;
 
-	/**
-	 * @Template("@LadbCore/Faq/Question/new.html.twig")
-	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_FAQ')", statusCode=404, message="Not allowed (core_faq_question_new)")
-	 */
 	#[Route(path: '/new', name: 'core_faq_question_new')]
+	#[Template('@LadbCore/Faq/Question/new.html.twig')]
+	#[IsGranted(new Expression("is_granted('ROLE_ADMIN') or is_granted('ROLE_FAQ')"), statusCode: 404, message: 'Not allowed (core_faq_question_new)')]
 	public function newAction(Request $request, TagUtils $tagUtils) {
 
 		$question = new Question();
@@ -52,11 +51,9 @@ class QuestionController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Faq/Question/new.html.twig")
-	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_FAQ')", statusCode=404, message="Not allowed (core_faq_question_create)")
-	 */
 	#[Route(path: '/create', methods: ['POST'], name: 'core_faq_question_create')]
+	#[Template('@LadbCore/Faq/Question/new.html.twig')]
+	#[IsGranted(new Expression("is_granted('ROLE_ADMIN') or is_granted('ROLE_FAQ')"), statusCode: 404, message: 'Not allowed (core_faq_question_create)')]
 	public function createAction(Request $request, BlockBodiedUtils $blockBodiedUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$this->createLock('core_faq_question_create', false, self::LOCK_TTL_CREATE_ACTION, false);
@@ -116,10 +113,8 @@ class QuestionController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_faq_question_show', array( 'id' => $question->getSluggedId() )));
 	}
 
-	/**
-	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_FAQ')", statusCode=404, message="Not allowed (core_faq_question_publish)")
-	 */
 	#[Route(path: '/{id}/publish', requirements: ['id' => '\d+'], name: 'core_faq_question_publish')]
+	#[IsGranted(new Expression("is_granted('ROLE_ADMIN') or is_granted('ROLE_FAQ')"), statusCode: 404, message: 'Not allowed (core_faq_question_publish)')]
 	public function publishAction($id, QuestionManager $questionManager, TranslatorInterface $translator) {
 
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
@@ -155,11 +150,9 @@ class QuestionController extends AbstractController {
 		return $this->redirect($returnToUrl);
 	}
 
-	/**
-	 * @Template("@LadbCore/Faq/Question/edit.html.twig")
-	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_FAQ')", statusCode=404, message="Not allowed (core_faq_question_edit)")
-	 */
 	#[Route(path: '/{id}/edit', requirements: ['id' => '\d+'], name: 'core_faq_question_edit')]
+	#[Template('@LadbCore/Faq/Question/edit.html.twig')]
+	#[IsGranted(new Expression("is_granted('ROLE_ADMIN') or is_granted('ROLE_FAQ')"), statusCode: 404, message: 'Not allowed (core_faq_question_edit)')]
 	public function editAction($id, TagUtils $tagUtils) {
 
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
@@ -174,11 +167,9 @@ class QuestionController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Faq/Question/edit.html.twig")
-	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_FAQ')", statusCode=404, message="Not allowed (core_faq_question_update)")
-	 */
 	#[Route(path: '/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_faq_question_update')]
+	#[Template('@LadbCore/Faq/Question/edit.html.twig')]
+	#[IsGranted(new Expression("is_granted('ROLE_ADMIN') or is_granted('ROLE_FAQ')"), statusCode: 404, message: 'Not allowed (core_faq_question_update)')]
 	public function updateAction(Request $request, $id, BlockBodiedUtils $blockBodiedUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
@@ -246,10 +237,8 @@ class QuestionController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_faq_question_list'));
 	}
 
-	/**
-	 * @Template("@LadbCore/Faq/Question/widget-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/widget', requirements: ['id' => '\d+'], name: 'core_faq_question_widget')]
+	#[Template('@LadbCore/Faq/Question/widget-xhr.html.twig')]
 	public function widgetAction($id) {
 
 		$question = $this->retrievePublication($id, Question::CLASS_NAME);
@@ -266,11 +255,9 @@ class QuestionController extends AbstractController {
 		throw new \Symfony\Component\HttpKernel\Exception\GoneHttpException();
 	}
 
-	/**
-	 * @Template("@LadbCore/Faq/Question/list.html.twig")
-	 */
 	#[Route(path: '/', name: 'core_faq_question_list')]
 	#[Route(path: '/{page}', requirements: ['page' => '\d+'], name: 'core_faq_question_list_page')]
+	#[Template('@LadbCore/Faq/Question/list.html.twig')]
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, SearchUtils $searchUtils, $page = 0) {
 
 		// Elasticsearch paginiation limit
@@ -415,10 +402,8 @@ class QuestionController extends AbstractController {
 		return $parameters;
 	}
 
-	/**
-	 * @Template("@LadbCore/Faq/Question/show.html.twig")
-	 */
 	#[Route(path: '/{id}.html', requirements: ['slug' => '[a-z-]+'], name: 'core_faq_question_show')]
+	#[Template('@LadbCore/Faq/Question/show.html.twig')]
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, EntityManagerInterface $om, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$questionRepository = $om->getRepository(Question::CLASS_NAME);
 

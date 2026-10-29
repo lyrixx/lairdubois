@@ -10,8 +10,7 @@ use Ladb\CoreBundle\Utils\FeedbackableUtils;
 use Ladb\CoreBundle\Utils\LocalisableUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Ladb\CoreBundle\Form\Type\Event\EventType;
 use Ladb\CoreBundle\Entity\Event\Event;
 use Ladb\CoreBundle\Entity\Event\Content\Gallery;
@@ -43,10 +42,8 @@ class EventController extends AbstractController {
 
 	use PublicationControllerTrait;
 
-	/**
-	 * @Template("@LadbCore/Event/Event/new.html.twig")
-	 */
 	#[Route(path: '/new', name: 'core_event_new')]
+	#[Template('@LadbCore/Event/Event/new.html.twig')]
 	public function newAction(Request $request, TagUtils $tagUtils) {
 
 		$event = new Event();
@@ -60,10 +57,8 @@ class EventController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Event/Event/new.html.twig")
-	 */
 	#[Route(path: '/create', methods: ['POST'], name: 'core_event_create')]
+	#[Template('@LadbCore/Event/Event/new.html.twig')]
 	public function createAction(Request $request, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$owner = $this->retrieveOwner($request);
@@ -161,10 +156,8 @@ class EventController extends AbstractController {
 		return $this->redirect($returnToUrl);
 	}
 
-	/**
-	 * @Template("@LadbCore/Event/Event/edit.html.twig")
-	 */
 	#[Route(path: '/{id}/edit', requirements: ['id' => '\d+'], name: 'core_event_edit')]
+	#[Template('@LadbCore/Event/Event/edit.html.twig')]
 	public function editAction($id, TagUtils $tagUtils) {
 
 		$event = $this->retrievePublication($id, Event::CLASS_NAME);
@@ -179,10 +172,8 @@ class EventController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Event/Event/edit.html.twig")
-	 */
 	#[Route(path: '/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_event_update')]
+	#[Template('@LadbCore/Event/Event/edit.html.twig')]
 	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$event = $this->retrievePublication($id, Event::CLASS_NAME);
@@ -262,10 +253,8 @@ class EventController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_event_show', array( 'id' => $event->getSluggedId() )));
 	}
 
-	/**
-	 * @Template("@LadbCore/Event/Event/widget-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/widget', requirements: ['id' => '\d+'], name: 'core_event_widget')]
+	#[Template('@LadbCore/Event/Event/widget-xhr.html.twig')]
 	public function widgetAction($id) {
 
 		$event = $this->retrievePublication($id, Event::CLASS_NAME);
@@ -276,10 +265,8 @@ class EventController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Event/Event/location.geojson.twig")
-	 */
 	#[Route(path: '/{id}/location.geojson', name: 'core_event_location', defaults: ['_format' => 'json'])]
+	#[Template('@LadbCore/Event/Event/location.geojson.twig')]
 	public function locationAction($id) {
 
 		$event = $this->retrievePublication($id, Event::CLASS_NAME);
@@ -302,10 +289,8 @@ class EventController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Event/Event/card-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/card.xhr', name: 'core_event_card')]
+	#[Template('@LadbCore/Event/Event/card-xhr.html.twig')]
 	public function cardAction(Request $request, $id) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_event_card)');
@@ -319,13 +304,11 @@ class EventController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Event/Event/list.html.twig")
-	 */
 	#[Route(path: '/', name: 'core_event_list')]
 	#[Route(path: '/{page}', requirements: ['page' => '\d+'], name: 'core_event_list_page')]
 	#[Route(path: '.json', defaults: ['_format' => 'json', 'page' => -1, 'layout' => 'json'], name: 'core_event_list_json')]
 	#[Route(path: '.geojson', defaults: ['_format' => 'json', 'page' => -1, 'layout' => 'geojson'], name: 'core_event_list_geojson')]
+	#[Template('@LadbCore/Event/Event/list.html.twig')]
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, LocalisableUtils $localisableUtils, SearchUtils $searchUtils, TranslatorInterface $translator, $page = 0, $layout = 'view') {
 
 		// Elasticsearch paginiation limit
@@ -597,10 +580,8 @@ class EventController extends AbstractController {
 		return $parameters;
 	}
 
-	/**
-	 * @Template("@LadbCore/Event/Event/show.html.twig")
-	 */
 	#[Route(path: '/{id}.html', name: 'core_event_show')]
+	#[Template('@LadbCore/Event/Event/show.html.twig')]
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FeedbackableUtils $feedbackableUtils, FollowerUtils $followerUtils, JoinableUtils $joinableUtils, LikableUtils $likableUtils, EntityManagerInterface $om, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$eventRepository = $om->getRepository(Event::CLASS_NAME);
 

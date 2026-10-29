@@ -8,8 +8,7 @@ use Ladb\CoreBundle\Utils\CollectionnableUtils;
 use Ladb\CoreBundle\Utils\PaginatorUtils;
 use Ladb\CoreBundle\Utils\TypableUtils;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Component\HttpFoundation\Request;
 use Ladb\CoreBundle\Utils\FieldPreprocessorUtils;
 use Ladb\CoreBundle\Utils\TagUtils;
@@ -35,10 +34,8 @@ class CollectionController extends AbstractCollectionBasedController {
 
 	use PublicationControllerTrait;
 
-	/**
-	 * @Template("@LadbCore/Collection/Collection/new.html.twig")
-	 */
 	#[Route(path: '/new', name: 'core_collection_new')]
+	#[Template('@LadbCore/Collection/Collection/new.html.twig')]
 	public function newAction(Request $request, TagUtils $tagUtils) {
 
 		$collection = new Collection();
@@ -52,10 +49,8 @@ class CollectionController extends AbstractCollectionBasedController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Collection/Collection/new.html.twig")
-	 */
 	#[Route(path: '/create', methods: ['POST'], name: 'core_collection_create')]
+	#[Template('@LadbCore/Collection/Collection/new.html.twig')]
 	public function createAction(Request $request, CollectionnableUtils $collectionnableUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator, TypableUtils $typableUtils) {
 
 		$this->createLock('core_collection_create', false, self::LOCK_TTL_CREATE_ACTION, false);
@@ -173,10 +168,8 @@ class CollectionController extends AbstractCollectionBasedController {
 		return $this->redirect($returnToUrl);
 	}
 
-	/**
-	 * @Template("@LadbCore/Collection/Collection/edit.html.twig")
-	 */
 	#[Route(path: '/{id}/edit', requirements: ['id' => '\d+'], name: 'core_collection_edit')]
+	#[Template('@LadbCore/Collection/Collection/edit.html.twig')]
 	public function editAction($id, TagUtils $tagUtils) {
 
 		$collection = $this->retrievePublication($id, Collection::CLASS_NAME);
@@ -191,10 +184,8 @@ class CollectionController extends AbstractCollectionBasedController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Collection/Collection/edit.html.twig")
-	 */
 	#[Route(path: '/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_collection_update')]
+	#[Template('@LadbCore/Collection/Collection/edit.html.twig')]
 	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 		$collection = $this->retrievePublication($id, Collection::CLASS_NAME);
 		$this->assertEditabable($collection);
@@ -252,10 +243,8 @@ class CollectionController extends AbstractCollectionBasedController {
 		return $this->redirect($this->generateUrl('core_collection_list'));
 	}
 
-	/**
-	 * @Template("@LadbCore/Collection/Collection/widget-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/widget', requirements: ['id' => '\d+'], name: 'core_collection_widget')]
+	#[Template('@LadbCore/Collection/Collection/widget-xhr.html.twig')]
 	public function widgetAction(Request $request, $id) {
 
 		$collection = $this->retrievePublication($id, Collection::CLASS_NAME);
@@ -266,11 +255,9 @@ class CollectionController extends AbstractCollectionBasedController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Collection/Collection/list.html.twig")
-	 */
 	#[Route(path: '/', name: 'core_collection_list')]
 	#[Route(path: '/{page}', requirements: ['page' => '\d+'], name: 'core_collection_list_page')]
+	#[Template('@LadbCore/Collection/Collection/list.html.twig')]
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, SearchUtils $searchUtils, $page = 0) {
 
 		// Elasticsearch paginiation limit
@@ -421,11 +408,9 @@ class CollectionController extends AbstractCollectionBasedController {
 		return $parameters;
 	}
 
-	/**
-	 * @Template("@LadbCore/Collection/Collection/list-available-xhr.html.twig")
-	 */
 	#[Route(path: '/available/{entityType}/{entityId}', requirements: ['entityType' => '\d+', 'entityId' => '\d+'], name: 'core_collection_list_available')]
 	#[Route(path: '/available/{entityType}/{entityId}/{page}', requirements: ['entityType' => '\d+', 'entityId' => '\d+', 'page' => '\d+'], name: 'core_collection_list_available_page')]
+	#[Template('@LadbCore/Collection/Collection/list-available-xhr.html.twig')]
 	public function listAvailableAction($entityType, $entityId, CollectionnableUtils $collectionnableUtils, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $page = 0) {
 		$collectionRepository = $om->getRepository(Collection::CLASS_NAME);
 
@@ -458,11 +443,9 @@ class CollectionController extends AbstractCollectionBasedController {
 		return $parameters;
 	}
 
-	/**
-	 * @Template("@LadbCore/Collection/Collection/list-byentity.html.twig")
-	 */
 	#[Route(path: '/{entityType}/{entityId}', requirements: ['entityType' => '\d+', 'entityId' => '\d+'], name: 'core_collection_list_byentity')]
 	#[Route(path: '/{entityType}/{entityId}/{page}', requirements: ['entityType' => '\d+', 'entityId' => '\d+', 'page' => '\d+'], name: 'core_collection_list_byentity_page')]
+	#[Template('@LadbCore/Collection/Collection/list-byentity.html.twig')]
 	public function listByEntityAction(Request $request, $entityType, $entityId, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $page = 0) {
 		$collectionRepository = $om->getRepository(Collection::CLASS_NAME);
 
@@ -488,12 +471,10 @@ class CollectionController extends AbstractCollectionBasedController {
 		return $parameters;
 	}
 
-	/**
-	 * @Template("@LadbCore/Collection/Collection/showAbout.html.twig")
-	 */
 	#[Route(path: '/{id}.html', name: 'core_collection_show')]
 	#[Route(path: '/{id}/tab/{entityType}', requirements: ['id' => '\d+', 'entityType' => '\d+'], name: 'core_collection_show_type')]
 	#[Route(path: '/{id}/tab/{entityType}/{page}', requirements: ['id' => '\d+', 'entityType' => '\d+', 'page' => '\d+'], name: 'core_collection_show_type_page')]
+	#[Template('@LadbCore/Collection/Collection/showAbout.html.twig')]
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, FollowerUtils $followerUtils, LikableUtils $likableUtils, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, TypableUtils $typableUtils, WatchableUtils $watchableUtils, WitnessManager $witnessManager, $entityType = 0, $page = 0) {
 
 		// Retrieve collection

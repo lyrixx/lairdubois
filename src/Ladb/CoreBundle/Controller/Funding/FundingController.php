@@ -6,8 +6,8 @@ use Stripe\Exception\ApiErrorException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Bridge\Twig\Attribute\Template;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Ladb\CoreBundle\Controller\AbstractController;
@@ -24,11 +24,9 @@ use Doctrine\ORM\EntityManagerInterface;
 #[Route(path: '/financement')]
 class FundingController extends AbstractController {
 
-	/**
-	 * @Template("@LadbCore/Funding/dashboard.html.twig")
-	 */
 	#[Route(path: '/', name: 'core_funding_dashboard')]
 	#[Route(path: '/{year}/{month}', requirements: ['year' => '\d+', 'month' => '\d+'], name: 'core_funding_dashboard_year_month')]
+	#[Template('@LadbCore/Funding/dashboard.html.twig')]
 	public function dashboardAction(Request $request, FundingManager $fundingManager, EntityManagerInterface $om, $year = null, $month = null) {
 		$fundingRepository = $om->getRepository(Funding::CLASS_NAME);
 		$userRepository = $om->getRepository(User::CLASS_NAME);
@@ -68,10 +66,8 @@ class FundingController extends AbstractController {
 		return $parameters;
 	}
 
-	/**
-	 * @Template("@LadbCore/Funding/infos-charge-balance.html.twig")
-	 */
 	#[Route(path: '/{year}/{month}/infos/{panel}.xhr', requirements: ['year' => '\d+', 'month' => '\d+', 'panel' => '[a-z-]+'], name: 'core_funding_infos')]
+	#[Template('@LadbCore/Funding/infos-charge-balance.html.twig')]
 	public function infosAction(Request $request, FundingManager $fundingManager, EntityManagerInterface $om, $year = null, $month = null, $panel = null) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_funding_infos)');
@@ -106,11 +102,9 @@ class FundingController extends AbstractController {
 		throw $this->createNotFoundException('Unknow infos panel (panel='.$panel.').');
 	}
 
-	/**
-	 * @Template("@LadbCore/Funding/charge-new-xhr.html.twig")
-	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_funding_admin_charge_new)")
-	 */
 	#[Route(path: '/{year}/{month}/admin/charge/new', requirements: ['year' => '\d+', 'month' => '\d+'], name: 'core_funding_admin_charge_new')]
+	#[Template('@LadbCore/Funding/charge-new-xhr.html.twig')]
+	#[IsGranted('ROLE_ADMIN', statusCode: 404, message: 'Not allowed (core_funding_admin_charge_new)')]
 	public function chargeNewAction(Request $request, EntityManagerInterface $om, $year = null, $month = null) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_funding_admin_charge_new)');
@@ -132,11 +126,9 @@ class FundingController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Funding/charge-new-xhr.html.twig")
-	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_funding_admin_charge_create)")
-	 */
 	#[Route(path: '/{year}/{month}/admin/charge/create', requirements: ['year' => '\d+', 'month' => '\d+'], methods: ['POST'], name: 'core_funding_admin_charge_create')]
+	#[Template('@LadbCore/Funding/charge-new-xhr.html.twig')]
+	#[IsGranted('ROLE_ADMIN', statusCode: 404, message: 'Not allowed (core_funding_admin_charge_create)')]
 	public function chargeCreateAction(Request $request, FundingManager $fundingManager, EntityManagerInterface $om, $year = null, $month = null) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_funding_admin_charge_create)');
@@ -175,11 +167,9 @@ class FundingController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Funding/charge-edit-xhr.html.twig")
-	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_funding_admin_charge_edit)")
-	 */
 	#[Route(path: '/admin/charge/{id}/edit', requirements: ['id' => '\d+'], name: 'core_funding_admin_charge_edit')]
+	#[Template('@LadbCore/Funding/charge-edit-xhr.html.twig')]
+	#[IsGranted('ROLE_ADMIN', statusCode: 404, message: 'Not allowed (core_funding_admin_charge_edit)')]
 	public function chargeEditAction(Request $request, $id, EntityManagerInterface $om) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_funding_admin_charge_edit)');
@@ -200,11 +190,9 @@ class FundingController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Funding/charge-update-xhr.html.twig")
-	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_funding_admin_charge_update)")
-	 */
 	#[Route(path: '/admin/charge/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_funding_admin_charge_update')]
+	#[Template('@LadbCore/Funding/charge-update-xhr.html.twig')]
+	#[IsGranted('ROLE_ADMIN', statusCode: 404, message: 'Not allowed (core_funding_admin_charge_update)')]
 	public function chargeUpdateAction(Request $request, $id, FundingManager $fundingManager, EntityManagerInterface $om) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_funding_admin_charge_update)');
@@ -244,11 +232,9 @@ class FundingController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Funding/charge-delete-xhr.html.twig")
-	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_funding_admin_charge_delete)")
-	 */
 	#[Route(path: '/admin/charge/{id}/delete', requirements: ['id' => '\d+'], name: 'core_funding_admin_charge_delete')]
+	#[Template('@LadbCore/Funding/charge-delete-xhr.html.twig')]
+	#[IsGranted('ROLE_ADMIN', statusCode: 404, message: 'Not allowed (core_funding_admin_charge_delete)')]
 	public function chargeDeleteAction(Request $request, $id, FundingManager $fundingManager, EntityManagerInterface $om) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_funding_admin_charge_delete)');
@@ -275,10 +261,8 @@ class FundingController extends AbstractController {
 		return;
 	}
 
-	/**
-	 * @Template("@LadbCore/Funding/donation-new.html.twig")
-	 */
 	#[Route(path: '/donation/new', name: 'core_funding_donation_new')]
+	#[Template('@LadbCore/Funding/donation-new.html.twig')]
 	public function donationNewAction(Request $request) {
 
 		// Retrieve parameters
@@ -474,11 +458,9 @@ class FundingController extends AbstractController {
 		return new Response();
 	}
 
-	/**
-	 * @Template("@LadbCore/Funding/donors.html.twig")
-	 */
 	#[Route(path: '/donateurs', name: 'core_funding_donors')]
 	#[Route(path: '/donateurs/{page}', requirements: ['filter' => '\w+', 'page' => '\d+'], name: 'core_funding_donors_page')]
+	#[Template('@LadbCore/Funding/donors.html.twig')]
 	public function donorsAction(Request $request, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $page = 0) {
 		$userRepository = $om->getRepository(User::CLASS_NAME);
 
@@ -501,12 +483,10 @@ class FundingController extends AbstractController {
 
 	}
 
-	/**
-	 * @Template("@LadbCore/Funding/user-donation-list.html.twig")
-	 */
 	#[Route(path: '/mes-dons', name: 'core_funding_user_donation_list')]
 	#[Route(path: '/mes-dons/{filter}', requirements: ['filter' => '\w+'], name: 'core_funding_user_donation_list_filter')]
 	#[Route(path: '/mes-dons/{filter}/{page}', requirements: ['filter' => '\w+', 'page' => '\d+'], name: 'core_funding_user_donation_list_filter_page')]
+	#[Template('@LadbCore/Funding/user-donation-list.html.twig')]
 	public function userDonationListAction(Request $request, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = 'recent', $page = 0) {
 		$donationRepository = $om->getRepository(Donation::CLASS_NAME);
 		$userRepository = $om->getRepository(User::CLASS_NAME);
@@ -532,12 +512,10 @@ class FundingController extends AbstractController {
 
 	}
 
-	/**
-	 * @Template("@LadbCore/Funding/donation-list.html.twig")
-	 */
 	#[Route(path: '/admin/dons', name: 'core_funding_admin_donation_list')]
 	#[Route(path: '/admin/dons/{filter}', requirements: ['filter' => '\w+'], name: 'core_funding_admin_donation_list_filter')]
 	#[Route(path: '/admin/dons/{filter}/{page}', requirements: ['filter' => '\w+', 'page' => '\d+'], name: 'core_funding_admin_donation_list_filter_page')]
+	#[Template('@LadbCore/Funding/donation-list.html.twig')]
 	public function donationListAction(Request $request, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = 'recent', $page = 0) {
 		if (!$this->isGranted('ROLE_ADMIN')) {
 			throw $this->createNotFoundException('Access denied');

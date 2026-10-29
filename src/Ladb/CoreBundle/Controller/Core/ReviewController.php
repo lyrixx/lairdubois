@@ -6,7 +6,7 @@ use Ladb\CoreBundle\Controller\AbstractController;
 use Ladb\CoreBundle\Utils\CommentableUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Ladb\CoreBundle\Utils\SearchUtils;
 use Ladb\CoreBundle\Utils\FieldPreprocessorUtils;
 use Ladb\CoreBundle\Utils\WatchableUtils;
@@ -39,10 +39,8 @@ class ReviewController extends AbstractController {
 	}
 
 	/////
-	/**
-	 * @Template("@LadbCore/Core/Review/new-xhr.html.twig")
-	 */
 	#[Route(path: '/{entityType}/{entityId}/new', requirements: ['entityType' => '\d+', 'entityId' => '\d+'], name: 'core_review_new')]
+	#[Template('@LadbCore/Core/Review/new-xhr.html.twig')]
 	public function newAction(Request $request, $entityType, $entityId, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_review_new)');
@@ -66,10 +64,8 @@ class ReviewController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/Review/new-xhr.html.twig")
-	 */
 	#[Route(path: '/{entityType}/{entityId}/create', requirements: ['entityType' => '\d+', 'entityId' => '\d+'], methods: ['POST'], name: 'core_review_create')]
+	#[Template('@LadbCore/Core/Review/new-xhr.html.twig')]
 	public function createAction(Request $request, $entityType, $entityId, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, ReviewableUtils $reviewableUtils, TypableUtils $typableUtils, WatchableUtils $watchableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_review_create)');
@@ -141,10 +137,8 @@ class ReviewController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/Review/edit-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/edit', requirements: ['id' => '\d+'], name: 'core_review_edit')]
+	#[Template('@LadbCore/Core/Review/edit-xhr.html.twig')]
 	public function editAction(Request $request, $id, EntityManagerInterface $om, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_review_edit)');
@@ -172,10 +166,8 @@ class ReviewController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/Review/edit-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_review_update')]
+	#[Template('@LadbCore/Core/Review/edit-xhr.html.twig')]
 	public function updateAction(Request $request, $id, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, ReviewableUtils $reviewableUtils, SearchUtils $searchUtils, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_review_update)');

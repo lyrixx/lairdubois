@@ -9,8 +9,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Ladb\CoreBundle\Manager\Core\WitnessManager;
 use Ladb\CoreBundle\Manager\Promotion\GraphicManager;
 use Ladb\CoreBundle\Model\HiddableInterface;
@@ -38,10 +37,8 @@ class GraphicController extends AbstractController {
 
 	use PublicationControllerTrait;
 
-	/**
-	 * @Template("@LadbCore/Promotion/Graphic/new.html.twig")
-	 */
 	#[Route(path: '/new', name: 'core_promotion_graphic_new')]
+	#[Template('@LadbCore/Promotion/Graphic/new.html.twig')]
 	public function newAction(Request $request, TagUtils $tagUtils) {
 
 		$graphic = new Graphic();
@@ -54,10 +51,8 @@ class GraphicController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Promotion/Graphic/new.html.twig")
-	 */
 	#[Route(path: '/create', methods: ['POST'], name: 'core_promotion_graphic_create')]
+	#[Template('@LadbCore/Promotion/Graphic/new.html.twig')]
 	public function createAction(Request $request, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, GraphicUtils $graphicUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$owner = $this->retrieveOwner($request);
@@ -158,10 +153,8 @@ class GraphicController extends AbstractController {
 		return $this->redirect($returnToUrl);
 	}
 
-	/**
-	 * @Template("@LadbCore/Promotion/Graphic/edit.html.twig")
-	 */
 	#[Route(path: '/{id}/edit', requirements: ['id' => '\d+'], name: 'core_promotion_graphic_edit')]
+	#[Template('@LadbCore/Promotion/Graphic/edit.html.twig')]
 	public function editAction($id, TagUtils $tagUtils) {
 
 		$graphic = $this->retrievePublication($id, Graphic::CLASS_NAME);
@@ -176,10 +169,8 @@ class GraphicController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Promotion/Graphic/edit.html.twig")
-	 */
 	#[Route(path: '/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_promotion_graphic_update')]
+	#[Template('@LadbCore/Promotion/Graphic/edit.html.twig')]
 	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, GraphicUtils $graphicUtils, EntityManagerInterface $om, PicturedUtils $picturedUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$graphic = $this->retrievePublication($id, Graphic::CLASS_NAME);
@@ -260,10 +251,8 @@ class GraphicController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_promotion_graphic_show', array( 'id' => $graphic->getSluggedId() )));
 	}
 
-	/**
-	 * @Template("@LadbCore/Promotion/Graphic/widget-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/widget', requirements: ['id' => '\d+'], name: 'core_promotion_graphic_widget')]
+	#[Template('@LadbCore/Promotion/Graphic/widget-xhr.html.twig')]
 	public function widgetAction($id) {
 
 		$graphic = $this->retrievePublication($id, Graphic::CLASS_NAME);
@@ -308,11 +297,9 @@ class GraphicController extends AbstractController {
 		return $response;
 	}
 
-	/**
-	 * @Template("@LadbCore/Promotion/Graphic/list.html.twig")
-	 */
 	#[Route(path: '/', name: 'core_promotion_graphic_list')]
 	#[Route(path: '/{page}', requirements: ['page' => '\d+'], name: 'core_promotion_graphic_list_page')]
+	#[Template('@LadbCore/Promotion/Graphic/list.html.twig')]
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, SearchUtils $searchUtils, TranslatorInterface $translator, $page = 0) {
 
 		// Elasticsearch paginiation limit
@@ -479,10 +466,8 @@ class GraphicController extends AbstractController {
 		return $parameters;
 	}
 
-	/**
-	 * @Template("@LadbCore/Promotion/Graphic/show.html.twig")
-	 */
 	#[Route(path: '/{id}.html', name: 'core_promotion_graphic_show')]
+	#[Template('@LadbCore/Promotion/Graphic/show.html.twig')]
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, EntityManagerInterface $om, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$graphicRepository = $om->getRepository(Graphic::CLASS_NAME);
 

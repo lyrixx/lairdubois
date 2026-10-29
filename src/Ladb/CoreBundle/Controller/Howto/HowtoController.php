@@ -4,8 +4,7 @@ namespace Ladb\CoreBundle\Controller\Howto;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Ladb\CoreBundle\Controller\PublicationControllerTrait;
 use Ladb\CoreBundle\Entity\Knowledge\School;
 use Ladb\CoreBundle\Entity\Qa\Question;
@@ -38,10 +37,8 @@ class HowtoController extends AbstractHowtoBasedController {
 
 	use PublicationControllerTrait;
 
-	/**
-	 * @Template("@LadbCore/Howto/Howto/new.html.twig")
-	 */
 	#[Route(path: '/new', name: 'core_howto_new')]
+	#[Template('@LadbCore/Howto/Howto/new.html.twig')]
 	public function newAction(Request $request, TagUtils $tagUtils) {
 
 		$howto = new Howto();
@@ -54,10 +51,8 @@ class HowtoController extends AbstractHowtoBasedController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Howto/Howto/new.html.twig")
-	 */
 	#[Route(path: '/create', methods: ['POST'], name: 'core_howto_create')]
+	#[Template('@LadbCore/Howto/Howto/new.html.twig')]
 	public function createAction(Request $request, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$owner = $this->retrieveOwner($request);
@@ -153,10 +148,8 @@ class HowtoController extends AbstractHowtoBasedController {
 		return $this->redirect($returnToUrl);
 	}
 
-	/**
-	 * @Template("@LadbCore/Howto/Howto/edit.html.twig")
-	 */
 	#[Route(path: '/{id}/edit', requirements: ['id' => '\d+'], name: 'core_howto_edit')]
+	#[Template('@LadbCore/Howto/Howto/edit.html.twig')]
 	public function editAction($id, TagUtils $tagUtils) {
 
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
@@ -171,10 +164,8 @@ class HowtoController extends AbstractHowtoBasedController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Howto/Howto/edit.html.twig")
-	 */
 	#[Route(path: '/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_howto_update')]
+	#[Template('@LadbCore/Howto/Howto/edit.html.twig')]
 	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, EmbeddableUtils $embaddableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
@@ -311,10 +302,8 @@ class HowtoController extends AbstractHowtoBasedController {
 
 	}
 
-	/**
-	 * @Template("@LadbCore/Howto/Howto/widget-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/widget', requirements: ['id' => '\d+'], name: 'core_howto_widget')]
+	#[Template('@LadbCore/Howto/Howto/widget-xhr.html.twig')]
 	public function widgetAction(Request $request, $id) {
 
 		$id = intval($id);
@@ -333,11 +322,9 @@ class HowtoController extends AbstractHowtoBasedController {
 		throw new \Symfony\Component\HttpKernel\Exception\GoneHttpException();
 	}
 
-	/**
-	 * @Template("@LadbCore/Howto/Howto/list.html.twig")
-	 */
 	#[Route(path: '/', name: 'core_howto_list')]
 	#[Route(path: '/{page}', requirements: ['page' => '\d+'], name: 'core_howto_list_page')]
+	#[Template('@LadbCore/Howto/Howto/list.html.twig')]
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, SearchUtils $searchUtils, TranslatorInterface $translator, $page = 0) {
 
 		// Elasticsearch paginiation limit
@@ -583,12 +570,10 @@ class HowtoController extends AbstractHowtoBasedController {
 		return $parameters;
 	}
 
-	/**
-	 * @Template("@LadbCore/Howto/Howto/creations.html.twig")
-	 */
 	#[Route(path: '/{id}/creations', requirements: ['id' => '\d+'], name: 'core_howto_creations')]
 	#[Route(path: '/{id}/creations/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_howto_creations_filter')]
 	#[Route(path: '/{id}/creations/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_howto_creations_filter_page')]
+	#[Template('@LadbCore/Howto/Howto/creations.html.twig')]
 	public function creationsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
 		$this->assertShowable($howto);
@@ -618,12 +603,10 @@ class HowtoController extends AbstractHowtoBasedController {
 		));
     }
 
-	/**
-	 * @Template("@LadbCore/Howto/Howto/workshops.html.twig")
-	 */
 	#[Route(path: '/{id}/ateliers', requirements: ['id' => '\d+'], name: 'core_howto_workshops')]
 	#[Route(path: '/{id}/ateliers/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_howto_workshops_filter')]
 	#[Route(path: '/{id}/ateliers/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_howto_workshops_filter_page')]
+	#[Template('@LadbCore/Howto/Howto/workshops.html.twig')]
 	public function workshopsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
 		$this->assertShowable($howto);
@@ -653,12 +636,10 @@ class HowtoController extends AbstractHowtoBasedController {
 		));
 	}
 
-	/**
-	 * @Template("@LadbCore/Howto/Howto/plans.html.twig")
-	 */
 	#[Route(path: '/{id}/plans', requirements: ['id' => '\d+'], name: 'core_howto_plans')]
 	#[Route(path: '/{id}/plans/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_howto_plans_filter')]
 	#[Route(path: '/{id}/plans/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_howto_plans_filter_page')]
+	#[Template('@LadbCore/Howto/Howto/plans.html.twig')]
 	public function plansAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
 		$this->assertShowable($howto);
@@ -688,12 +669,10 @@ class HowtoController extends AbstractHowtoBasedController {
 		));
 	}
 
-	/**
-	 * @Template("@LadbCore/Howto/Howto/questions.html.twig")
-	 */
 	#[Route(path: '/{id}/questions', requirements: ['id' => '\d+'], name: 'core_howto_questions')]
 	#[Route(path: '/{id}/questions/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_howto_questions_filter')]
 	#[Route(path: '/{id}/questions/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_howto_questions_filter_page')]
+	#[Template('@LadbCore/Howto/Howto/questions.html.twig')]
 	public function questionsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
 		$this->assertShowable($howto);
@@ -723,12 +702,10 @@ class HowtoController extends AbstractHowtoBasedController {
 		));
 	}
 
-	/**
-	 * @Template("@LadbCore/Howto/Howto/workflows.html.twig")
-	 */
 	#[Route(path: '/{id}/processus', requirements: ['id' => '\d+'], name: 'core_howto_workflows')]
 	#[Route(path: '/{id}/processus/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_howto_workflows_filter')]
 	#[Route(path: '/{id}/processus/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_howto_workflows_filter_page')]
+	#[Template('@LadbCore/Howto/Howto/workflows.html.twig')]
 	public function workflowsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
 		$this->assertShowable($howto);
@@ -758,12 +735,10 @@ class HowtoController extends AbstractHowtoBasedController {
 		));
 	}
 
-	/**
-	 * @Template("@LadbCore/Howto/Howto/providers.html.twig")
-	 */
 	#[Route(path: '/{id}/fournisseurs', requirements: ['id' => '\d+'], name: 'core_howto_providers')]
 	#[Route(path: '/{id}/fournisseurs/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_howto_providers_filter')]
 	#[Route(path: '/{id}/fournisseurs/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_howto_providers_filter_page')]
+	#[Template('@LadbCore/Howto/Howto/providers.html.twig')]
 	public function providersAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
 		$this->assertShowable($howto);
@@ -793,12 +768,10 @@ class HowtoController extends AbstractHowtoBasedController {
 		));
 	}
 
-	/**
-	 * @Template("@LadbCore/Howto/Howto/schools.html.twig")
-	 */
 	#[Route(path: '/{id}/ecoles', requirements: ['id' => '\d+'], name: 'core_howto_schools')]
 	#[Route(path: '/{id}/ecoles/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_howto_schools_filter')]
 	#[Route(path: '/{id}/ecoles/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_howto_schools_filter_page')]
+	#[Template('@LadbCore/Howto/Howto/schools.html.twig')]
 	public function schoolsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$howto = $this->retrievePublication($id, Howto::CLASS_NAME);
 		$this->assertShowable($howto);
@@ -828,10 +801,8 @@ class HowtoController extends AbstractHowtoBasedController {
 		));
 	}
 
-	/**
-	 * @Template("@LadbCore/Howto/Howto/show.html.twig")
-	 */
 	#[Route(path: '/{id}.html', name: 'core_howto_show')]
+	#[Template('@LadbCore/Howto/Howto/show.html.twig')]
 	public function showAction(Request $request, $id, EventDispatcherInterface $dispatcher, EntityManagerInterface $om, WitnessManager $witnessManager) {
 		$howtoRepository = $om->getRepository(Howto::CLASS_NAME);
 

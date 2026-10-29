@@ -6,7 +6,7 @@ use Ladb\CoreBundle\Entity\Message\MessageMeta;
 use Ladb\CoreBundle\Manager\Core\UserManager;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Ladb\CoreBundle\Entity\Core\Member;
 use Ladb\CoreBundle\Utils\WebpushNotificationUtils;
 use Ladb\CoreBundle\Entity\Message\Thread;
@@ -21,11 +21,9 @@ use Doctrine\ORM\EntityManagerInterface;
 #[Route(path: '/messagerie')]
 class ThreadController extends AbstractThreadController {
 
-	/**
-	 * @Template("@LadbCore/Message/newThread.html.twig")
-	 */
 	#[Route(path: '/thread/new', name: 'core_message_thread_new', defaults: ['recipientUsername' => null, 'announcement' => false])]
 	#[Route(path: '/thread/to/{recipientUsername}/new', requirements: ['recipientUsername' => '[a-zA-Z0-9]+'], name: 'core_message_thread_new_recipientusername', defaults: ['announcement' => false])]
+	#[Template('@LadbCore/Message/newThread.html.twig')]
 	public function newAction($recipientUsername, UserManager $userManager, $subject = null, $message = null, $alertTemplate =  null) {
 //		if (!is_null($this->getUser()) && $this->getUser()->getIsTeam()) {
 //			throw $this->createNotFoundException('Team not allowed (core_message_thread_new)');
@@ -57,10 +55,8 @@ class ThreadController extends AbstractThreadController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Message/newThread.html.twig")
-	 */
 	#[Route(path: '/thread/create', methods: ['POST'], name: 'core_message_thread_create')]
+	#[Template('@LadbCore/Message/newThread.html.twig')]
 	public function createAction(Request $request, MailerUtils $mailerUtils, MessageUtils $messageUtils, EntityManagerInterface $om, TranslatorInterface $translator) {
 //		if (!is_null($this->getUser()) && $this->getUser()->getIsTeam()) {
 //			throw $this->createNotFoundException('Team not allowed (core_message_thread_create)');
@@ -115,10 +111,8 @@ class ThreadController extends AbstractThreadController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Message/deleteThread.html.twig")
-	 */
 	#[Route(path: '/thread/{id}/delete', requirements: ['id' => '\d+'], name: 'core_message_thread_delete')]
+	#[Template('@LadbCore/Message/deleteThread.html.twig')]
 	public function deleteAction($id, EntityManagerInterface $om) {
 		$threadRepository = $om->getRepository(Thread::CLASS_NAME);
 
@@ -147,10 +141,8 @@ class ThreadController extends AbstractThreadController {
 		return $this->redirect($this->generateUrl('core_message_mailbox'));
 	}
 
-	/**
-	 * @Template("@LadbCore/Message/showThread.html.twig")
-	 */
 	#[Route(path: '/thread/{id}', requirements: ['id' => '\d+'], name: 'core_message_thread_show')]
+	#[Template('@LadbCore/Message/showThread.html.twig')]
 	public function showAction($id, EntityManagerInterface $om) {
 
 		$this->createLock('core_message_thread_show', true, 3, false);
@@ -203,12 +195,10 @@ class ThreadController extends AbstractThreadController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Message/mailbox.html.twig")
-	 */
 	#[Route(path: '/', name: 'core_message_mailbox')]
 	#[Route(path: '/{filter}', requirements: ['filter' => '\w+'], name: 'core_message_mailbox_filter')]
 	#[Route(path: '/{filter}/{page}', requirements: ['filter' => '\w+', 'page' => '\d+'], name: 'core_message_mailbox_filter_page')]
+	#[Template('@LadbCore/Message/mailbox.html.twig')]
 	public function mailboxAction(Request $request, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = 'all', $page = 0) {
 		$threadRepository = $om->getRepository(Thread::CLASS_NAME);
 

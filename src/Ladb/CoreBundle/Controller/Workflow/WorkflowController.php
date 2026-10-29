@@ -5,8 +5,7 @@ namespace Ladb\CoreBundle\Controller\Workflow;
 use Ladb\CoreBundle\Controller\PublicationControllerTrait;
 use Ladb\CoreBundle\Utils\CollectionnableUtils;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mercure\Authorization;
@@ -40,10 +39,8 @@ class WorkflowController extends AbstractWorkflowBasedController {
 
 	use PublicationControllerTrait;
 
-	/**
-	 * @Template("@LadbCore/Workflow/Workflow/new.html.twig")
-	 */
 	#[Route(path: '/new', name: 'core_workflow_new')]
+	#[Template('@LadbCore/Workflow/Workflow/new.html.twig')]
 	public function newAction(Request $request, TagUtils $tagUtils) {
 
 		$workflow = new Workflow();
@@ -56,10 +53,8 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Workflow/Workflow/new.html.twig")
-	 */
 	#[Route(path: '/create', methods: ['POST'], name: 'core_workflow_create')]
+	#[Template('@LadbCore/Workflow/Workflow/new.html.twig')]
 	public function createAction(Request $request, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$owner = $this->retrieveOwner($request);
@@ -160,10 +155,8 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		return $this->redirect($returnToUrl);
 	}
 
-	/**
-	 * @Template("@LadbCore/Workflow/Workflow/edit.html.twig")
-	 */
 	#[Route(path: '/{id}/edit', requirements: ['id' => '\d+'], name: 'core_workflow_edit')]
+	#[Template('@LadbCore/Workflow/Workflow/edit.html.twig')]
 	public function editAction($id, TagUtils $tagUtils) {
 
 		$workflow = $this->retrievePublication($id, Workflow::CLASS_NAME);
@@ -178,10 +171,8 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Workflow/Workflow/edit.html.twig")
-	 */
 	#[Route(path: '/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_workflow_update')]
+	#[Template('@LadbCore/Workflow/Workflow/edit.html.twig')]
 	public function updateAction(Request $request, $id, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$workflow = $this->retrievePublication($id, Workflow::CLASS_NAME);
@@ -257,10 +248,8 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		return $this->redirect($this->generateUrl('core_workflow_show', array( 'id' => $workflow->getSluggedId() )));
 	}
 
-	/**
-	 * @Template("@LadbCore/Workflow/Workflow/widget-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/widget', requirements: ['id' => '\d+'], name: 'core_workflow_widget')]
+	#[Template('@LadbCore/Workflow/Workflow/widget-xhr.html.twig')]
 	public function widgetAction($id) {
 
 		$workflow = $this->retrievePublication($id, Workflow::CLASS_NAME);
@@ -271,12 +260,10 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Workflow/Workflow/howtos.html.twig")
-	 */
 	#[Route(path: '/{id}/pas-a-pas', requirements: ['id' => '\d+'], name: 'core_workflow_howtos')]
 	#[Route(path: '/{id}/pas-a-pas/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_workflow_howtos_filter')]
 	#[Route(path: '/{id}/pas-a-pas/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_workflow_howtos_filter_page')]
+	#[Template('@LadbCore/Workflow/Workflow/howtos.html.twig')]
 	public function howtosAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$workflow = $this->retrievePublication($id, Workflow::CLASS_NAME);
 		$this->assertShowable($workflow);
@@ -306,12 +293,10 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		));
 	}
 
-	/**
-	 * @Template("@LadbCore/Workflow/Workflow/creations.html.twig")
-	 */
 	#[Route(path: '/{id}/creations', requirements: ['id' => '\d+'], name: 'core_workflow_creations')]
 	#[Route(path: '/{id}/creations/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_workflow_creations_filter')]
 	#[Route(path: '/{id}/creations/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_workflow_creations_filter_page')]
+	#[Template('@LadbCore/Workflow/Workflow/creations.html.twig')]
 	public function creationsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$workflow = $this->retrievePublication($id, Workflow::CLASS_NAME);
 		$this->assertShowable($workflow);
@@ -341,12 +326,10 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		));
 	}
 
-	/**
-	 * @Template("@LadbCore/Workflow/Workflow/plans.html.twig")
-	 */
 	#[Route(path: '/{id}/plans', requirements: ['id' => '\d+'], name: 'core_workflow_plans')]
 	#[Route(path: '/{id}/plans/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_workflow_plans_filter')]
 	#[Route(path: '/{id}/plans/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_workflow_plans_filter_page')]
+	#[Template('@LadbCore/Workflow/Workflow/plans.html.twig')]
 	public function plansAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$workflow = $this->retrievePublication($id, Workflow::CLASS_NAME);
 		$this->assertShowable($workflow);
@@ -376,12 +359,10 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		));
 	}
 
-	/**
-	 * @Template("@LadbCore/Workflow/Workflow/workshops.html.twig")
-	 */
 	#[Route(path: '/{id}/ateliers', requirements: ['id' => '\d+'], name: 'core_workflow_workshops')]
 	#[Route(path: '/{id}/ateliers/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_workflow_workshops_filter')]
 	#[Route(path: '/{id}/ateliers/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_workflow_workshops_filter_page')]
+	#[Template('@LadbCore/Workflow/Workflow/workshops.html.twig')]
 	public function workshopsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$workflow = $this->retrievePublication($id, Workflow::CLASS_NAME);
 		$this->assertShowable($workflow);
@@ -411,12 +392,10 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		));
 	}
 
-	/**
-	 * @Template("@LadbCore/Workflow/Workflow/inspirations.html.twig")
-	 */
 	#[Route(path: '/{id}/inspirations', requirements: ['id' => '\d+'], name: 'core_workflow_inspirations')]
 	#[Route(path: '/{id}/inspirations/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_workflow_inspirations_filter')]
 	#[Route(path: '/{id}/inspirations/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_workflow_inspirations_filter_page')]
+	#[Template('@LadbCore/Workflow/Workflow/inspirations.html.twig')]
 	public function inspirationsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$workflowRepository = $om->getRepository(Workflow::CLASS_NAME);
 
@@ -446,12 +425,10 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		));
 	}
 
-	/**
-	 * @Template("@LadbCore/Workflow/Workflow/rebounds.html.twig")
-	 */
 	#[Route(path: '/{id}/rebonds', requirements: ['id' => '\d+'], name: 'core_workflow_rebounds')]
 	#[Route(path: '/{id}/rebonds/{filter}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+'], name: 'core_workflow_rebounds_filter')]
 	#[Route(path: '/{id}/rebonds/{filter}/{page}', requirements: ['id' => '\d+', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_workflow_rebounds_filter_page')]
+	#[Template('@LadbCore/Workflow/Workflow/rebounds.html.twig')]
 	public function reboundsAction(Request $request, $id, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$workflowRepository = $om->getRepository(Workflow::CLASS_NAME);
 
@@ -481,10 +458,8 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		));
 	}
 
-	/**
-	 * @Template("@LadbCore/Workflow/Workflow/restart-confirm-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/restart_confirm', requirements: ['id' => '\d+'], name: 'core_workflow_restart_confirm')]
+	#[Template('@LadbCore/Workflow/Workflow/restart-confirm-xhr.html.twig')]
 	public function restartConfirmAction(Request $request, $id) {
 
 		$workflow = $this->retrievePublication($id, Workflow::CLASS_NAME);
@@ -527,10 +502,8 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		return $this->redirect($this->generateUrl('core_workflow_show', array( 'id' => $newWorkflow->getSluggedId() )));
 	}
 
-	/**
-	 * @Template("@LadbCore/Workflow/Workflow/statistics-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/statistics', requirements: ['id' => '\d+'], name: 'core_workflow_statistics')]
+	#[Template('@LadbCore/Workflow/Workflow/statistics-xhr.html.twig')]
 	public function statisticsAction(Request $request, $id, EntityManagerInterface $om) {
 		$taskRepository = $om->getRepository(Task::CLASS_NAME);
 
@@ -557,10 +530,8 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Workflow/Workflow/show.html.twig")
-	 */
 	#[Route(path: '/{id}.html', name: 'core_workflow_show')]
+	#[Template('@LadbCore/Workflow/Workflow/show.html.twig')]
 	public function showAction(Request $request, $id, Authorization $authorization, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, FollowerUtils $followerUtils, LikableUtils $likableUtils, EntityManagerInterface $om, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$workflowRepository = $om->getRepository(Workflow::CLASS_NAME);
 
@@ -620,11 +591,9 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		return $parameters;
 	}
 
-	/**
-	 * @Template("@LadbCore/Workflow/Workflow/list.html.twig")
-	 */
 	#[Route(path: '/', name: 'core_workflow_list')]
 	#[Route(path: '/{page}', requirements: ['page' => '\d+'], name: 'core_workflow_list_page')]
+	#[Template('@LadbCore/Workflow/Workflow/list.html.twig')]
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, SearchUtils $searchUtils, $page = 0) {
 
 		// Elasticsearch paginiation limit
@@ -817,10 +786,8 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		return $parameters;
 	}
 
-	/**
-	 * @Template("@LadbCore/Workflow/Workflow/diagram.html.twig")
-	 */
 	#[Route(path: '/{id}/internal/diagram', name: 'core_workflow_internal_diagram')]
+	#[Template('@LadbCore/Workflow/Workflow/diagram.html.twig')]
 	public function internalDiagramAction($id) {
 
 		// Retrieve workflow

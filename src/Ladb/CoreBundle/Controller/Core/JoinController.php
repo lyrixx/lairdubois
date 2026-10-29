@@ -5,7 +5,7 @@ namespace Ladb\CoreBundle\Controller\Core;
 use Ladb\CoreBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Ladb\CoreBundle\Entity\Core\Join;
 use Ladb\CoreBundle\Model\PublicationInterface;
 use Ladb\CoreBundle\Model\WatchableInterface;
@@ -39,10 +39,8 @@ class JoinController extends AbstractController {
 	}
 
 	/////
-	/**
-	 * @Template("@LadbCore/Core/Join/create-xhr.html.twig")
-	 */
 	#[Route(path: '/{entityType}/{entityId}/create', requirements: ['entityType' => '\d+', 'entityId' => '\d+'], name: 'core_join_create')]
+	#[Template('@LadbCore/Core/Join/create-xhr.html.twig')]
 	public function createAction(Request $request, $entityType, $entityId, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, JoinableUtils $joinableUtils, EntityManagerInterface $om, TypableUtils $typableUtils, WatchableUtils $watchableUtils) {
 
 		$this->createLock('core_join_create', false, self::LOCK_TTL_CREATE_ACTION, false);
@@ -112,10 +110,8 @@ class JoinController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/Join/delete-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/delete', requirements: ['id' => '\d+'], name: 'core_join_delete')]
+	#[Template('@LadbCore/Core/Join/delete-xhr.html.twig')]
 	public function deleteAction(Request $request, $id, ActivityUtils $activityUtils, JoinableUtils $joinableUtils, EntityManagerInterface $om, SearchUtils $searchUtils, TypableUtils $typableUtils) {
 		$joinRepository = $om->getRepository(Join::CLASS_NAME);
 
@@ -162,11 +158,9 @@ class JoinController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/Join/list-byentity.html.twig")
-	 */
 	#[Route(path: '/{entityType}/{entityId}', requirements: ['entityType' => '\d+', 'entityId' => '\d+'], name: 'core_join_list_byentity')]
 	#[Route(path: '/{entityType}/{entityId}/{page}', requirements: ['entityType' => '\d+', 'entityId' => '\d+', 'page' => '\d+'], name: 'core_join_list_byentity_page')]
+	#[Template('@LadbCore/Core/Join/list-byentity.html.twig')]
 	public function listByEntityAction(Request $request, $entityType, $entityId, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, TypableUtils $typableUtils, $page = 0) {
 		$joinRepository = $om->getRepository(Join::CLASS_NAME);
 

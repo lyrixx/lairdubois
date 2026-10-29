@@ -5,7 +5,7 @@ namespace Ladb\CoreBundle\Controller\Knowledge\School;
 use Ladb\CoreBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Ladb\CoreBundle\Utils\SearchUtils;
 use Ladb\CoreBundle\Utils\FieldPreprocessorUtils;
 use Ladb\CoreBundle\Utils\WatchableUtils;
@@ -22,10 +22,8 @@ use Doctrine\ORM\EntityManagerInterface;
 #[Route(path: '/ecoles')]
 class TestimonialController extends AbstractController {
 
-	/**
-	 * @Template("@LadbCore/Knowledge/School/Testimonial/new-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/temoignages/new', requirements: ['id' => '\d+'], name: 'core_knowledge_school_testimonial_new')]
+	#[Template('@LadbCore/Knowledge/School/Testimonial/new-xhr.html.twig')]
 	public function newAction(Request $request, $id, EntityManagerInterface $om) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_review_new)');
@@ -47,10 +45,8 @@ class TestimonialController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Knowledge/School/Testimonial/new-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/temoignages/create', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_knowledge_school_testimonial_create')]
+	#[Template('@LadbCore/Knowledge/School/Testimonial/new-xhr.html.twig')]
 	public function createAction(Request $request, $id, ActivityUtils $activityUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, WatchableUtils $watchableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_review_create)');
@@ -116,10 +112,8 @@ class TestimonialController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Knowledge/School/Testimonial/edit-xhr.html.twig")
-	 */
 	#[Route(path: '/temoignages/{id}/edit', requirements: ['id' => '\d+'], name: 'core_knowledge_school_testimonial_edit')]
+	#[Template('@LadbCore/Knowledge/School/Testimonial/edit-xhr.html.twig')]
 	public function editAction(Request $request, $id, EntityManagerInterface $om) {
 		$testimonialRepository = $om->getRepository(School\Testimonial::CLASS_NAME);
 
@@ -139,10 +133,8 @@ class TestimonialController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Knowledge/School/Testimonial/edit-xhr.html.twig")
-	 */
 	#[Route(path: '/temoignages/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_knowledge_school_testimonial_update')]
+	#[Template('@LadbCore/Knowledge/School/Testimonial/edit-xhr.html.twig')]
 	public function updateAction(Request $request, $id, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om) {
 		$testimonialRepository = $om->getRepository(School\Testimonial::CLASS_NAME);
 

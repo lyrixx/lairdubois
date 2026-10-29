@@ -4,7 +4,7 @@ namespace Ladb\CoreBundle\Controller\Core;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Ladb\CoreBundle\Controller\AbstractController;
 use Ladb\CoreBundle\Utils\BlockBodiedUtils;
 use Ladb\CoreBundle\Utils\MentionUtils;
@@ -39,10 +39,8 @@ class FeedbackController extends AbstractController {
 	}
 
 	/////
-	/**
-	 * @Template("@LadbCore/Core/Feedback/new-xhr.html.twig")
-	 */
 	#[Route(path: '/{entityType}/{entityId}/new', requirements: ['entityType' => '\d+', 'entityId' => '\d+'], name: 'core_feedback_new')]
+	#[Template('@LadbCore/Core/Feedback/new-xhr.html.twig')]
 	public function newAction(Request $request, $entityType, $entityId, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_feedback_new)');
@@ -63,10 +61,8 @@ class FeedbackController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/Feedback/new-xhr.html.twig")
-	 */
 	#[Route(path: '/{entityType}/{entityId}/create', requirements: ['entityType' => '\d+', 'entityId' => '\d+'], methods: ['POST'], name: 'core_feedback_create')]
+	#[Template('@LadbCore/Core/Feedback/new-xhr.html.twig')]
 	public function createAction(Request $request, $entityType, $entityId, ActivityUtils $activityUtils, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FeedbackableUtils $feedbackableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, MentionUtils $mentionUtils, EntityManagerInterface $om, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_feedback_create)');
@@ -131,10 +127,8 @@ class FeedbackController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/Feedback/edit-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/edit', requirements: ['id' => '\d+'], name: 'core_feedback_edit')]
+	#[Template('@LadbCore/Core/Feedback/edit-xhr.html.twig')]
 	public function editAction(Request $request, $id, EntityManagerInterface $om) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_feedback_edit)');
@@ -158,10 +152,8 @@ class FeedbackController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/Feedback/edit-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_feedback_update')]
+	#[Template('@LadbCore/Core/Feedback/edit-xhr.html.twig')]
 	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, FeedbackableUtils $feedbackableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, MentionUtils $mentionUtils, EntityManagerInterface $om, SearchUtils $searchUtils, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_feedback_update)');

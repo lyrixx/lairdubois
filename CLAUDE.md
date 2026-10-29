@@ -203,7 +203,7 @@ castor qa:phpunit [-- --filter …]
 castor qa:deprecations       # var/deprecations/report.md, et le résumé du job en CI
 castor qa:install            # outils de tools/ (PHPStan, PHPUnit), installés à la volée sinon
 castor qa:e2e [-- --grep …]  # tests E2E (Playwright) : recharge la base du dev, hors qa:all, job E2E en CI
-castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et getDoctrine() des actions → arguments (#16, #177), des utils, managers, listeners et validateurs → constructeur (#118), dépréciations de 4.x (#133), routes, contraintes, `@required` et mapping de Doctrine et Gedmo en attributs (#25), commandes en `#[AsCommand]` (#28)
+castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et getDoctrine() des actions → arguments (#16, #177), des utils, managers, listeners et validateurs → constructeur (#118), dépréciations de 4.x (#133), routes, contraintes, `@required` et mapping de Doctrine et Gedmo en attributs (#25), commandes en `#[AsCommand]` (#28), `@Template` et `@Security` de Sensio en attributs natifs (#27)
 ```
 
 - PHPUnit 9.6, dans `tools/phpunit` et pas dans le `composer.json` de l'application : c'est la
@@ -278,6 +278,11 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et get
   `var/cache/`) : le rapport ne voyait pas les dépréciations de son constructeur. Un attribut est
   construit à chaque chargement des métadonnées, elles sortent en test (`Range` de `Find`, à `min`,
   `max` et `minMessage`, passé en `notInRangeMessage`).
+- Annotations de SensioFrameworkExtraBundle (#27) : deux passes. La première fait de `@Template` et
+  `@Security` les attributs de Sensio, et renomme déjà `#[Template]` en celui de TwigBridge ; la
+  seconde fait d'un `#[Security]` un `#[IsGranted]` (`SecurityAttributeToIsGrantedAttributeRector`,
+  une `Expression` quand ce n'est pas un seul `is_granted()`). Rector écrit ces attributs en nom
+  complet et laisse le `use` de Sensio : remplacés à la main.
 - Les règles de rector-symfony (les sets de 4.x ne sont plus dans Rector 2 : une règle à la fois
   dans `rector.php`) ne s'appliquent qu'à partir d'une version d'un paquet de Symfony
   (`symfony/console`…), et l'ignorent sans rien dire avant : `rector.php` donne à Rector les
@@ -852,10 +857,15 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   compilait pas, et le domaine restait aux templates compilés ensuite par `cache:warmup` (#138).
   Celui de 5.4 le sait. `Tests\Twig\TemplateCacheWarmerTest` compile dans un process tous les
   templates du warmer, puis vérifie une page et leurs erreurs.
-- Sans token pour un anonyme (#177), le `SecurityListener` de SensioFrameworkExtraBundle refuserait
-  l'accès avant d'évaluer `@Security` : une redirection vers `/login` au lieu du 404 de son
-  `statusCode`. `Security\NullTokenStorage` lui donne un `NullToken` (`services.yml`), à retirer
-  avec le bundle (#27).
+- Actions d'admin : `#[IsGranted('ROLE_ADMIN', statusCode: 404, message: …)]` (#27), une
+  `Expression` pour un rôle de plus (`ROLE_BLOG`…). Un anonyme n'a pas de token depuis
+  l'authenticator manager (#177) : l'`AuthorizationChecker` vote alors avec un `NullToken`, et
+  l'attribut répond 404, comme le `@Security` de Sensio avec `Security\NullTokenStorage` (retiré).
+- `#[Template]` de TwigBridge (#27) : une action qui rend `null` donne à son template ses
+  arguments, services compris (Sensio prenait les attributs de la requête du même nom) ; les trois
+  qui le font (`delete-xhr` des étiquettes et des pièces du workflow, des charges du financement)
+  ont un template vide. Un `FormInterface` passé tel quel (et non sa vue) répondrait 422 quand il
+  est soumis et invalide : les actions passent `createView()`.
 - SensioFrameworkExtraBundle est en 6.2 (#177), la dernière, abandonnée, qui accepte Symfony 6.4 :
   il part avec #27. Avant la 5.5, son `TemplateListener` demandait un `Twig_Environment`, qui
   n'existe plus en Twig 3 (`TypeError` sur toute action à `@Template`).

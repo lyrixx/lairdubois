@@ -6,8 +6,8 @@ use Ladb\CoreBundle\Entity\Qa\Question;
 use Ladb\CoreBundle\Manager\Core\CommentManager;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Bridge\Twig\Attribute\Template;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Ladb\CoreBundle\Controller\AbstractController;
 use Ladb\CoreBundle\Entity\Knowledge\Value\BaseValue;
 use Ladb\CoreBundle\Entity\Core\Comment;
@@ -42,10 +42,8 @@ class CommentController extends AbstractController {
 	}
 
 	/////
-	/**
-	 * @Template("@LadbCore/Core/Comment/new-xhr.html.twig")
-	 */
 	#[Route(path: '/{entityType}/{entityId}/{parentId}/new', requirements: ['entityType' => '\d+', 'entityId' => '\d+', 'parentId' => '\d+'], name: 'core_comment_new')]
+	#[Template('@LadbCore/Core/Comment/new-xhr.html.twig')]
 	public function newAction(Request $request, $entityType, $entityId, CommentableUtils $commentUtils, FormFactoryInterface $formFactory, TypableUtils $typableUtils, $parentId = 0) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_comment_new)');
@@ -76,10 +74,8 @@ class CommentController extends AbstractController {
 
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/Comment/new-xhr.html.twig")
-	 */
 	#[Route(path: '/{entityType}/{entityId}/{parentId}/create', requirements: ['entityType' => '\d+', 'entityId' => '\d+', 'parentId' => '\d+'], methods: ['POST'], name: 'core_comment_create')]
+	#[Template('@LadbCore/Core/Comment/new-xhr.html.twig')]
 	public function createAction(Request $request, $entityType, $entityId, CommentableUtils $commentUtils, CommentableUtils $commentableUtils, FormFactoryInterface $formFactory, EntityManagerInterface $om, TypableUtils $typableUtils, $parentId = 0) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_comment_create)');
@@ -143,10 +139,8 @@ class CommentController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/Comment/edit-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/edit', requirements: ['id' => '\d+'], name: 'core_comment_edit')]
+	#[Template('@LadbCore/Core/Comment/edit-xhr.html.twig')]
 	public function editAction(Request $request, $id, CommentableUtils $commentUtils, FormFactoryInterface $formFactory, EntityManagerInterface $om, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_comment_edit)');
@@ -174,10 +168,8 @@ class CommentController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/Comment/edit-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_comment_update')]
+	#[Template('@LadbCore/Core/Comment/edit-xhr.html.twig')]
 	public function updateAction(Request $request, $id, CommentableUtils $commentUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, FormFactoryInterface $formFactory, MentionUtils $mentionUtils, EntityManagerInterface $om, PicturedUtils $picturedUtils, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_comment_update)');
@@ -229,10 +221,8 @@ class CommentController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/Comment/delete-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/delete', requirements: ['id' => '\d+'], name: 'core_comment_delete')]
+	#[Template('@LadbCore/Core/Comment/delete-xhr.html.twig')]
 	public function deleteAction($id, CommentableUtils $commentableUtils, EntityManagerInterface $om, SearchUtils $searchUtils, TypableUtils $typableUtils) {
 		$commentRepository = $om->getRepository(Comment::CLASS_NAME);
 
@@ -281,11 +271,9 @@ class CommentController extends AbstractController {
 		return $this->redirect($typableUtils->getUrlAction($entity).'#_comment_'.$comment->getId());
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/Comment/moveup-xhr.html.twig")
-	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_comment_admin_moveup)")
-	 */
 	#[Route(path: '/{id}/admin/moveup', requirements: ['id' => '\d+'], name: 'core_comment_admin_moveup')]
+	#[Template('@LadbCore/Core/Comment/moveup-xhr.html.twig')]
+	#[IsGranted('ROLE_ADMIN', statusCode: 404, message: 'Not allowed (core_comment_admin_moveup)')]
 	public function adminMoveupAction($id, EntityManagerInterface $om) {
 		$commentRepository = $om->getRepository(Comment::CLASS_NAME);
 
@@ -307,10 +295,8 @@ class CommentController extends AbstractController {
 		return array();
 	}
 
-	/**
-	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_comment_admin_converttoanswer)")
-	 */
 	#[Route(path: '/{id}/{questionId}/admin/converttoanswer', requirements: ['id' => '\d+', 'questionId' => '\d+'], name: 'core_comment_admin_converttoanswer')]
+	#[IsGranted('ROLE_ADMIN', statusCode: 404, message: 'Not allowed (core_comment_admin_converttoanswer)')]
 	public function adminConvertToAnswerAction($id, $questionId, CommentManager $commentManager, EntityManagerInterface $om, TranslatorInterface $translator) {
 		$commentRepository = $om->getRepository(Comment::CLASS_NAME);
 		$questionRepository = $om->getRepository(Question::CLASS_NAME);

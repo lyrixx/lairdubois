@@ -25,6 +25,7 @@ use Rector\Symfony\Symfony44\Rector\ClassMethod\ConsoleExecuteReturnIntRector;
 use Rector\Symfony\Symfony51\Rector\Class_\LogoutSuccessHandlerToLogoutEventSubscriberRector;
 use Rector\Symfony\Symfony61\Rector\Class_\CommandConfigureToAttributeRector;
 use Rector\Symfony\Symfony61\Rector\Class_\CommandPropertyToAttributeRector;
+use Rector\Symfony\Symfony62\Rector\Class_\SecurityAttributeToIsGrantedAttributeRector;
 use Rector\TypeDeclaration\Rector\ClassMethod\AddReturnTypeDeclarationRector;
 use Rector\TypeDeclaration\ValueObject\AddReturnTypeDeclaration;
 
@@ -45,10 +46,15 @@ return static function (RectorConfig $rectorConfig): void {
             // configure() → #[AsCommand] (#28)
             CommandPropertyToAttributeRector::class,
             CommandConfigureToAttributeRector::class,
+            // #[Security] of SensioFrameworkExtraBundle → #[IsGranted] of Symfony 6.2 (#27), after
+            // the @Security annotations become attributes (a first pass)
+            SecurityAttributeToIsGrantedAttributeRector::class,
         ])
         // Of the renames of symfony/security-core 5.3 (composer-based set of rector-symfony), the
-        // one that the code needs (#177)
+        // one that the code needs (#177). The #[Template] of SensioFrameworkExtraBundle → that of
+        // symfony/twig-bridge 6.2 (#27), after the @Template annotations become attributes
         ->withConfiguredRule(RenameClassRector::class, [
+            'Sensio\\Bundle\\FrameworkExtraBundle\\Configuration\\Template' => 'Symfony\\Bridge\\Twig\\Attribute\\Template',
             'Symfony\\Component\\Security\\Core\\Encoder\\EncoderFactoryInterface' => 'Symfony\\Component\\PasswordHasher\\Hasher\\PasswordHasherFactoryInterface',
         ])
         // Return types that the DebugClassLoader of Symfony 5.4 announces for our classes (#177),
@@ -69,7 +75,8 @@ return static function (RectorConfig $rectorConfig): void {
         ])
         // Annotations → attributes (#25), one kind per PR. Rector 2.7 no longer applies
         // withAttributesSets(symfonyRoute: true) alone, and its "symfony" option also converts the
-        // constraints and @required. The annotations of SensioFrameworkExtraBundle stay until #27.
+        // constraints and @required. Those of SensioFrameworkExtraBundle become its own attributes
+        // (#27), that the rules above replace with those of Symfony.
         // The mapping of Doctrine and Gedmo: what withAttributesSets(doctrine: true, gedmo: true)
         // configures, for the annotations that the code uses (class names as fully qualified
         // ::class). The nested annotations (join columns of a join table, indexes and unique
@@ -110,6 +117,8 @@ return static function (RectorConfig $rectorConfig): void {
             new AnnotationToAttribute('Doctrine\ORM\Mapping\UniqueConstraint'),
             new AnnotationToAttribute('Gedmo\Mapping\Annotation\Slug'),
             new AnnotationToAttribute('Gedmo\Mapping\Annotation\Timestampable'),
+            new AnnotationToAttribute('Sensio\Bundle\FrameworkExtraBundle\Configuration\Security'),
+            new AnnotationToAttribute('Sensio\Bundle\FrameworkExtraBundle\Configuration\Template'),
             new AnnotationToAttribute('Symfony\Component\Routing\Annotation\Route'),
             // The constraints that the code uses: Rector skips ours until they are attributes
             // (#[\Attribute], added by hand)

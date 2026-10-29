@@ -8,8 +8,9 @@ use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Utils\CollectionnableUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Bridge\Twig\Attribute\Template;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\ExpressionLanguage\Expression;
 use Ladb\CoreBundle\Entity\Blog\Post;
 use Ladb\CoreBundle\Form\Type\Blog\PostType;
 use Ladb\CoreBundle\Utils\TagUtils;
@@ -35,11 +36,9 @@ class PostController extends AbstractController {
 
 	use PublicationControllerTrait;
 
-	/**
-	 * @Template("@LadbCore/Blog/Post/new.html.twig")
-	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_BLOG')", statusCode=404, message="Not allowed (core_blog_post_new)")
-	 */
 	#[Route(path: '/new', name: 'core_blog_post_new')]
+	#[Template('@LadbCore/Blog/Post/new.html.twig')]
+	#[IsGranted(new Expression("is_granted('ROLE_ADMIN') or is_granted('ROLE_BLOG')"), statusCode: 404, message: 'Not allowed (core_blog_post_new)')]
 	public function newAction(TagUtils $tagUtils) {
 
 		$post = new Post();
@@ -52,11 +51,9 @@ class PostController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Blog/Post/new.html.twig")
-	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_BLOG')", statusCode=404, message="Not allowed (core_blog_post_create)")
-	 */
 	#[Route(path: '/create', methods: ['POST'], name: 'core_blog_post_create')]
+	#[Template('@LadbCore/Blog/Post/new.html.twig')]
+	#[IsGranted(new Expression("is_granted('ROLE_ADMIN') or is_granted('ROLE_BLOG')"), statusCode: 404, message: 'Not allowed (core_blog_post_create)')]
 	public function createAction(Request $request, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$this->createLock('core_blog_post_create', false, self::LOCK_TTL_CREATE_ACTION, false);
@@ -114,10 +111,8 @@ class PostController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_blog_post_show', array( 'id' => $post->getSluggedId() )));
 	}
 
-	/**
-	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_BLOG')", statusCode=404, message="Not allowed (core_blog_post_publish)")
-	 */
 	#[Route(path: '/{id}/publish', requirements: ['id' => '\d+'], name: 'core_blog_post_publish')]
+	#[IsGranted(new Expression("is_granted('ROLE_ADMIN') or is_granted('ROLE_BLOG')"), statusCode: 404, message: 'Not allowed (core_blog_post_publish)')]
 	public function publishAction($id, PostManager $postManager, TranslatorInterface $translator) {
 
 		$post = $this->retrievePublication($id, Post::CLASS_NAME);
@@ -153,11 +148,9 @@ class PostController extends AbstractController {
 		return $this->redirect($returnToUrl);
 	}
 
-	/**
-	 * @Template("@LadbCore/Blog/Post/edit.html.twig")
-	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_BLOG')", statusCode=404, message="Not allowed (core_blog_post_edit)")
-	 */
 	#[Route(path: '/{id}/edit', requirements: ['id' => '\d+'], name: 'core_blog_post_edit')]
+	#[Template('@LadbCore/Blog/Post/edit.html.twig')]
+	#[IsGranted(new Expression("is_granted('ROLE_ADMIN') or is_granted('ROLE_BLOG')"), statusCode: 404, message: 'Not allowed (core_blog_post_edit)')]
 	public function editAction($id, TagUtils $tagUtils) {
 
 		$post = $this->retrievePublication($id, Post::CLASS_NAME);
@@ -172,11 +165,9 @@ class PostController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Blog/Post/edit.html.twig")
-	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_BLOG')", statusCode=404, message="Not allowed (core_blog_post_update)")
-	 */
 	#[Route(path: '/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_blog_post_update')]
+	#[Template('@LadbCore/Blog/Post/edit.html.twig')]
+	#[IsGranted(new Expression("is_granted('ROLE_ADMIN') or is_granted('ROLE_BLOG')"), statusCode: 404, message: 'Not allowed (core_blog_post_update)')]
 	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
 		$doUp = $request->get('ladb_do_up', false);
@@ -246,10 +237,8 @@ class PostController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_blog_post_list'));
 	}
 
-	/**
-	 * @Template("@LadbCore/Blog/Post/widget-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/widget', requirements: ['id' => '\d+'], name: 'core_blog_post_widget')]
+	#[Template('@LadbCore/Blog/Post/widget-xhr.html.twig')]
 	public function widgetAction($id) {
 
 		$post = $this->retrievePublication($id, Post::CLASS_NAME);
@@ -266,11 +255,9 @@ class PostController extends AbstractController {
 		throw new \Symfony\Component\HttpKernel\Exception\GoneHttpException();
 	}
 
-	/**
-	 * @Template("@LadbCore/Blog/Post/list.html.twig")
-	 */
 	#[Route(path: '/', name: 'core_blog_post_list')]
 	#[Route(path: '/{page}', requirements: ['page' => '\d+'], name: 'core_blog_post_list_page')]
+	#[Template('@LadbCore/Blog/Post/list.html.twig')]
 	public function listAction(Request $request, EventDispatcherInterface $dispatcher, SearchUtils $searchUtils, $page = 0) {
 
 		// Elasticsearch paginiation limit
@@ -407,10 +394,8 @@ class PostController extends AbstractController {
 		return $parameters;
 	}
 
-	/**
-	 * @Template("@LadbCore/Blog/Post/show.html.twig")
-	 */
 	#[Route(path: '/{id}.html', name: 'core_blog_post_show')]
+	#[Template('@LadbCore/Blog/Post/show.html.twig')]
 	public function showAction(Request $request, $id, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, ExplorableUtils $explorableUtils, FollowerUtils $followerUtils, LikableUtils $likableUtils, EntityManagerInterface $om, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$postRepository = $om->getRepository(\Ladb\CoreBundle\Entity\Blog\Post::CLASS_NAME);
 

@@ -24,7 +24,7 @@ use Ladb\CoreBundle\Utils\PropertyUtils;
 use Ladb\CoreBundle\Utils\TypableUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Ladb\CoreBundle\Entity\Core\UserWitness;
 use Ladb\CoreBundle\Entity\Knowledge\School\Testimonial;
 use Ladb\CoreBundle\Entity\Promotion\Graphic;
@@ -125,10 +125,8 @@ class UserController extends AbstractController {
 	}
 
 	/////
-	/**
-	 * @Template("@LadbCore/Core/User/emailCheck.html.twig")
-	 */
 	#[Route(path: '/email/check', name: 'core_user_email_check')]
+	#[Template('@LadbCore/Core/User/emailCheck.html.twig')]
 	public function emailCheckAction(MailerUtils $mailerUtils, TokenGeneratorInterface $tokenGenerator, UserManager $userManager) {
 
 		$user = $this->getUser();
@@ -147,10 +145,8 @@ class UserController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/User/emailConfirm.html.twig")
-	 */
 	#[Route(path: '/email/confirm/{token}', name: 'core_user_email_confirm')]
+	#[Template('@LadbCore/Core/User/emailConfirm.html.twig')]
 	public function emailConfirmAction($token, TranslatorInterface $translator, UserManager $userManager) {
 
 		$invalidToken = false;
@@ -182,10 +178,8 @@ class UserController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/User/emailUnsubscribe.html.twig")
-	 */
 	#[Route(path: '/email/unsubscribe/{list}/{encryptedEmail}', requirements: ['list' => 'notifications|weeknews'], name: 'core_user_email_unsubscribe')]
+	#[Template('@LadbCore/Core/User/emailUnsubscribe.html.twig')]
 	public function emailUnsubscribeAction($list, $encryptedEmail, CryptoUtils $cryptoUtils, UserManager $userManager) {
 
 		$invalidEmail = false;
@@ -233,15 +227,13 @@ class UserController extends AbstractController {
 		throw new \Symfony\Component\HttpKernel\Exception\GoneHttpException();
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/User/list.html.twig")
-	 */
 	#[Route(path: '/boiseux', name: 'core_user_list')]
 	#[Route(path: '/boiseux/{page}', requirements: ['page' => '\d+'], name: 'core_user_list_page')]
 	#[Route(path: '/boiseux.geojson', defaults: ['_format' => 'json', 'page' => -1, 'layout' => 'geojson'], name: 'core_user_list_geojson')]
 	#[Route(path: '/collectifs', defaults: ['family' => 'team'], name: 'core_user_team_list')]
 	#[Route(path: '/collectifs/{page}', defaults: ['family' => 'team'], requirements: ['page' => '\d+'], name: 'core_user_team_list_page')]
 	#[Route(path: '/collectifs.geojson', defaults: ['_format' => 'json', 'page' => -1, 'layout' => 'geojson', 'family' => 'team'], name: 'core_user_team_list_geojson')]
+	#[Template('@LadbCore/Core/User/list.html.twig')]
 	public function listAction(Request $request, LocalisableUtils $localisableUtils, SearchUtils $searchUtils, $page = 0, $layout = 'view', $family = 'user') {
 
 		$searchParameters = $searchUtils->searchPaginedEntities(
@@ -403,10 +395,8 @@ class UserController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_user_settings', array( 'username' => $username )));
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/User/settings.html.twig")
-	 */
 	#[Route(path: '/@{username}/parametres', name: 'core_user_settings')]
+	#[Template('@LadbCore/Core/User/settings.html.twig')]
 	public function settingsAction(Request $request, $username, FieldPreprocessorUtils $fieldPreprocessorUtils, LocalisableUtils $localisableUtils, EntityManagerInterface $om, SearchUtils $searchUtils, TranslatorInterface $translator, UserManager $userManager, UserUtils $userUtils) {
 		$user = $this->retrieveUserByUsername($username);
 		if (!$this->isGranted('ROLE_ADMIN')) {
@@ -480,10 +470,8 @@ class UserController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/User/counters-xhr.json.twig")
-	 */
 	#[Route(path: '/@me/counters.json', name: 'core_user_counters_me', defaults: ['_format' => 'json'])]
+	#[Template('@LadbCore/Core/User/counters-xhr.json.twig')]
 	public function countersAction(Request $request, PropertyUtils $propertyUtils, TypableUtils $typableUtils, UserUtils $userUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_user_counters_me)');
@@ -550,10 +538,8 @@ class UserController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/User/location.geojson.twig")
-	 */
 	#[Route(path: '/@{username}/location.geojson', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$'], name: 'core_user_location', defaults: ['_format' => 'json'])]
+	#[Template('@LadbCore/Core/User/location.geojson.twig')]
 	public function locationAction(Request $request, $username) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
@@ -578,10 +564,8 @@ class UserController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/User/card-xhr.html.twig")
-	 */
 	#[Route(path: '/@{username}/card.xhr', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$'], name: 'core_user_card')]
+	#[Template('@LadbCore/Core/User/card-xhr.html.twig')]
 	public function cardAction(Request $request, $username) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_user_card)');
@@ -602,10 +586,8 @@ class UserController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_user_show_about', array( 'username' => $username )));
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/User/showAbout.html.twig")
-	 */
 	#[Route(path: '/@{username}/a-propos', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$'], name: 'core_user_show_about')]
+	#[Template('@LadbCore/Core/User/showAbout.html.twig')]
 	public function showAboutAction($username, FollowerUtils $followerUtils, EntityManagerInterface $om) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
@@ -627,12 +609,10 @@ class UserController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_user_show_likes', array( 'username' => $username )));
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/User/showLikes.html.twig")
-	 */
 	#[Route(path: '/@{username}/coups-de-coeur', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$'], name: 'core_user_show_likes')]
 	#[Route(path: '/@{username}/coups-de-coeur/{filter}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => 'sent|recieved'], name: 'core_user_show_likes_filter')]
 	#[Route(path: '/@{username}/coups-de-coeur/{filter}/{page}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_user_show_likes_filter_page')]
+	#[Template('@LadbCore/Core/User/showLikes.html.twig')]
 	public function showLikesAction(Request $request, $username, FollowerUtils $followerUtils, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "sent", $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
@@ -667,11 +647,9 @@ class UserController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_user_show_comments', array( 'username' => $username )));
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/User/showComments.html.twig")
-	 */
 	#[Route(path: '/@{username}/commentaires', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$'], name: 'core_user_show_comments')]
 	#[Route(path: '/@{username}/commentaires/{page}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'page' => '\d+'], name: 'core_user_show_comments_page')]
+	#[Template('@LadbCore/Core/User/showComments.html.twig')]
 	public function showCommentsAction(Request $request, $username, FollowerUtils $followerUtils, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
@@ -705,12 +683,10 @@ class UserController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_user_show_votes', array( 'username' => $username )));
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/User/showVotes.html.twig")
-	 */
 	#[Route(path: '/@{username}/votes', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$'], name: 'core_user_show_votes')]
 	#[Route(path: '/@{username}/votes/{filter}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => 'positive|negative'], name: 'core_user_show_votes_filter')]
 	#[Route(path: '/@{username}/votes/{filter}/{page}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => 'positive|negative', 'page' => '\d+'], name: 'core_user_show_votes_filter_page')]
+	#[Template('@LadbCore/Core/User/showVotes.html.twig')]
 	public function showVotesAction(Request $request, $username, FollowerUtils $followerUtils, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = 'positive', $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
@@ -745,12 +721,10 @@ class UserController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_user_show_reviews', array( 'username' => $username )));
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/User/showReviews.html.twig")
-	 */
 	#[Route(path: '/@{username}/reviews', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$'], name: 'core_user_show_reviews')]
 	#[Route(path: '/@{username}/reviews/{filter}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+'], name: 'core_user_show_reviews_filter')]
 	#[Route(path: '/@{username}/reviews/{filter}/{page}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_user_show_reviews_filter_page')]
+	#[Template('@LadbCore/Core/User/showReviews.html.twig')]
 	public function showReviewsAction(Request $request, $username, FollowerUtils $followerUtils, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = 'recent', $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
@@ -785,12 +759,10 @@ class UserController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_user_show_feedbacks', array( 'username' => $username )));
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/User/showFeedbacks.html.twig")
-	 */
 	#[Route(path: '/@{username}/feedbacks', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$'], name: 'core_user_show_feedbacks')]
 	#[Route(path: '/@{username}/feedbacks/{filter}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+'], name: 'core_user_show_feedbacks_filter')]
 	#[Route(path: '/@{username}/feedbacks/{filter}/{page}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_user_show_feedbacks_filter_page')]
+	#[Template('@LadbCore/Core/User/showFeedbacks.html.twig')]
 	public function showFeedbacksAction(Request $request, $username, FollowerUtils $followerUtils, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
@@ -825,12 +797,10 @@ class UserController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_user_show_creations', array( 'username' => $username )));
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/User/showCreations.html.twig")
-	 */
 	#[Route(path: '/@{username}/creations', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$'], name: 'core_user_show_creations')]
 	#[Route(path: '/@{username}/creations/{filter}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+'], name: 'core_user_show_creations_filter')]
 	#[Route(path: '/@{username}/creations/{filter}/{page}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_user_show_creations_filter_page')]
+	#[Template('@LadbCore/Core/User/showCreations.html.twig')]
 	public function showCreationsAction(Request $request, $username, FollowerUtils $followerUtils, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = null, $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
@@ -879,12 +849,10 @@ class UserController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_user_show_workshops', array( 'username' => $username )));
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/User/showWorkshops.html.twig")
-	 */
 	#[Route(path: '/@{username}/ateliers', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$'], name: 'core_user_show_workshops')]
 	#[Route(path: '/@{username}/ateliers/{filter}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+'], name: 'core_user_show_workshops_filter')]
 	#[Route(path: '/@{username}/ateliers/{filter}/{page}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_user_show_workshops_filter_page')]
+	#[Template('@LadbCore/Core/User/showWorkshops.html.twig')]
 	public function showWorkshopsAction(Request $request, $username, FollowerUtils $followerUtils, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = null, $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
@@ -933,12 +901,10 @@ class UserController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_user_show_plans', array( 'username' => $username )));
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/User/showPlans.html.twig")
-	 */
 	#[Route(path: '/@{username}/plans', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$'], name: 'core_user_show_plans')]
 	#[Route(path: '/@{username}/plans/{filter}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+'], name: 'core_user_show_plans_filter')]
 	#[Route(path: '/@{username}/plans/{filter}/{page}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_user_show_plans_filter_page')]
+	#[Template('@LadbCore/Core/User/showPlans.html.twig')]
 	public function showPlansAction(Request $request, $username, FollowerUtils $followerUtils, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = null, $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
@@ -987,12 +953,10 @@ class UserController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_user_show_howtos', array( 'username' => $username )));
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/User/showHowtos.html.twig")
-	 */
 	#[Route(path: '/@{username}/pas-a-pas', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$'], name: 'core_user_show_howtos')]
 	#[Route(path: '/@{username}/pas-a-pas/{filter}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+'], name: 'core_user_show_howtos_filter')]
 	#[Route(path: '/@{username}/pas-a-pas/{filter}/{page}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_user_show_howtos_filter_page')]
+	#[Template('@LadbCore/Core/User/showHowtos.html.twig')]
 	public function showHowtosAction(Request $request, $username, FollowerUtils $followerUtils, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = null, $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
@@ -1041,12 +1005,10 @@ class UserController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_user_show_finds', array( 'username' => $username )));
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/User/showFinds.html.twig")
-	 */
 	#[Route(path: '/@{username}/trouvailles', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$'], name: 'core_user_show_finds')]
 	#[Route(path: '/@{username}/trouvailles/{filter}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+'], name: 'core_user_show_finds_filter')]
 	#[Route(path: '/@{username}/trouvailles/{filter}/{page}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_user_show_finds_filter_page')]
+	#[Template('@LadbCore/Core/User/showFinds.html.twig')]
 	public function showFindsAction(Request $request, $username, FollowerUtils $followerUtils, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = null, $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
@@ -1095,12 +1057,10 @@ class UserController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_user_show_questions', array( 'username' => $username )));
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/User/showQuestions.html.twig")
-	 */
 	#[Route(path: '/@{username}/questions', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$'], name: 'core_user_show_questions')]
 	#[Route(path: '/@{username}/questions/{filter}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+'], name: 'core_user_show_questions_filter')]
 	#[Route(path: '/@{username}/questions/{filter}/{page}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_user_show_questions_filter_page')]
+	#[Template('@LadbCore/Core/User/showQuestions.html.twig')]
 	public function showQuestionsAction(Request $request, $username, FollowerUtils $followerUtils, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = null, $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
@@ -1149,12 +1109,10 @@ class UserController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_user_show_answers', array( 'username' => $username )));
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/User/showAnswers.html.twig")
-	 */
 	#[Route(path: '/@{username}/reponses', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$'], name: 'core_user_show_answers')]
 	#[Route(path: '/@{username}/reponses/{filter}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+'], name: 'core_user_show_answers_filter')]
 	#[Route(path: '/@{username}/reponses/{filter}/{page}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_user_show_answers_filter_page')]
+	#[Template('@LadbCore/Core/User/showAnswers.html.twig')]
 	public function showAnswersAction(Request $request, $username, FollowerUtils $followerUtils, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "recent", $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
@@ -1189,12 +1147,10 @@ class UserController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_user_show_graphics', array( 'username' => $username )));
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/User/showGraphics.html.twig")
-	 */
 	#[Route(path: '/@{username}/graphismes', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$'], name: 'core_user_show_graphics')]
 	#[Route(path: '/@{username}/graphismes/{filter}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+'], name: 'core_user_show_graphics_filter')]
 	#[Route(path: '/@{username}/graphismes/{filter}/{page}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_user_show_graphics_filter_page')]
+	#[Template('@LadbCore/Core/User/showGraphics.html.twig')]
 	public function showGraphicsAction(Request $request, $username, FollowerUtils $followerUtils, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = null, $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
@@ -1243,12 +1199,10 @@ class UserController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_user_show_workflows', array( 'username' => $username )));
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/User/showWorkflows.html.twig")
-	 */
 	#[Route(path: '/@{username}/processus', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$'], name: 'core_user_show_workflows')]
 	#[Route(path: '/@{username}/processus/{filter}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+'], name: 'core_user_show_workflows_filter')]
 	#[Route(path: '/@{username}/processus/{filter}/{page}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_user_show_workflows_filter_page')]
+	#[Template('@LadbCore/Core/User/showWorkflows.html.twig')]
 	public function showWorkflowsAction(Request $request, $username, FollowerUtils $followerUtils, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = null, $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
@@ -1297,12 +1251,10 @@ class UserController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_user_show_offers', array( 'username' => $username )));
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/User/showOffers.html.twig")
-	 */
 	#[Route(path: '/@{username}/annonces', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$'], name: 'core_user_show_offers')]
 	#[Route(path: '/@{username}/annonces/{filter}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+'], name: 'core_user_show_offers_filter')]
 	#[Route(path: '/@{username}/annonces/{filter}/{page}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_user_show_offers_filter_page')]
+	#[Template('@LadbCore/Core/User/showOffers.html.twig')]
 	public function showOffersAction(Request $request, $username, FollowerUtils $followerUtils, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = null, $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
@@ -1351,12 +1303,10 @@ class UserController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_user_show_following', array( 'username' => $username )));
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/User/showFollowing.html.twig")
-	 */
 	#[Route(path: '/@{username}/abonnements', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$'], name: 'core_user_show_following')]
 	#[Route(path: '/@{username}/abonnements/{filter}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+'], name: 'core_user_show_following_filter')]
 	#[Route(path: '/@{username}/abonnements/{filter}/{page}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_user_show_following_filter_page')]
+	#[Template('@LadbCore/Core/User/showFollowing.html.twig')]
 	public function showFollowingAction(Request $request, $username, FollowerUtils $followerUtils, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "popular-followers", $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
@@ -1393,12 +1343,10 @@ class UserController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_user_show_followers', array( 'username' => $username )));
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/User/showFollowers.html.twig")
-	 */
 	#[Route(path: '/@{username}/abonnes', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$'], name: 'core_user_show_followers')]
 	#[Route(path: '/@{username}/abonnes/{filter}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+'], name: 'core_user_show_followers_filter')]
 	#[Route(path: '/@{username}/abonnes/{filter}/{page}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_user_show_followers_filter_page')]
+	#[Template('@LadbCore/Core/User/showFollowers.html.twig')]
 	public function showFollowersAction(Request $request, $username, FollowerUtils $followerUtils, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "popular-followers", $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
@@ -1431,12 +1379,10 @@ class UserController extends AbstractController {
 		)), $followerUtils, $om);
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/User/showMembers.html.twig")
-	 */
 	#[Route(path: '/@{username}/membres', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$'], name: 'core_user_show_members')]
 	#[Route(path: '/@{username}/membres/{filter}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+'], name: 'core_user_show_members_filter')]
 	#[Route(path: '/@{username}/membres/{filter}/{page}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_user_show_members_filter_page')]
+	#[Template('@LadbCore/Core/User/showMembers.html.twig')]
 	public function showMembersAction(Request $request, $username, FollowerUtils $followerUtils, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "popular-followers", $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
@@ -1468,12 +1414,10 @@ class UserController extends AbstractController {
 		)), $followerUtils, $om);
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/User/showInvitations.html.twig")
-	 */
 	#[Route(path: '/@{username}/invitations', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$'], name: 'core_user_show_invitations')]
 	#[Route(path: '/@{username}/invitations/{filter}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+'], name: 'core_user_show_invitations_filter')]
 	#[Route(path: '/@{username}/invitations/{filter}/{page}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_user_show_invitations_filter_page')]
+	#[Template('@LadbCore/Core/User/showInvitations.html.twig')]
 	public function showInvitationsAction(Request $request, $username, FollowerUtils $followerUtils, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "popular-followers", $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
@@ -1514,12 +1458,10 @@ class UserController extends AbstractController {
 		)), $followerUtils, $om, $isGrantedOwner);
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/User/showRequests.html.twig")
-	 */
 	#[Route(path: '/@{username}/demandes', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$'], name: 'core_user_show_requests')]
 	#[Route(path: '/@{username}/demandes/{filter}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+'], name: 'core_user_show_requests_filter')]
 	#[Route(path: '/@{username}/demandes/{filter}/{page}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_user_show_requests_filter_page')]
+	#[Template('@LadbCore/Core/User/showRequests.html.twig')]
 	public function showRequestsAction(Request $request, $username, FollowerUtils $followerUtils, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "popular-followers", $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
@@ -1560,12 +1502,10 @@ class UserController extends AbstractController {
 		)), $followerUtils, $om, $isGrantedOwner);
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/User/showTeams.html.twig")
-	 */
 	#[Route(path: '/@{username}/collectifs', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$'], name: 'core_user_show_teams')]
 	#[Route(path: '/@{username}/collectifs/{filter}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+'], name: 'core_user_show_teams_filter')]
 	#[Route(path: '/@{username}/collectifs/{filter}/{page}', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$', 'filter' => '[a-z-]+', 'page' => '\d+'], name: 'core_user_show_teams_filter_page')]
+	#[Template('@LadbCore/Core/User/showTeams.html.twig')]
 	public function showTeamsAction(Request $request, $username, FollowerUtils $followerUtils, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $filter = "popular-followers", $page = 0) {
 		$user = $this->retrieveUserByUsername($username);
 		if ($user->getUsernameCanonical() != $username) {
@@ -1652,10 +1592,8 @@ class UserController extends AbstractController {
 	}
 
 	// Team /////
-	/**
-	 * @Template("@LadbCore/Core/User/Team/new.html.twig")
-	 */
 	#[Route(path: '/collectifs/new', name: 'core_user_team_new')]
+	#[Template('@LadbCore/Core/User/Team/new.html.twig')]
 	public function teamNewAction(UserManager $userManager) {
 		if (!$this->getUser()->getEmailConfirmed()) {
 			throw $this->createNotFoundException('Not allowed (core_user_team_new)');
@@ -1669,10 +1607,8 @@ class UserController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/User/Team/new.html.twig")
-	 */
 	#[Route(path: '/collectifs/create', methods: ['POST'], name: 'core_user_team_create')]
+	#[Template('@LadbCore/Core/User/Team/new.html.twig')]
 	public function teamCreateAction(Request $request, MailerUtils $mailerUtils, MemberManager $memberManager, EntityManagerInterface $om, SearchUtils $searchUtils, TranslatorInterface $translator, UserManager $userManager, UserUtils $userUtils) {
 		if (!$this->getUser()->getEmailConfirmed()) {
 			throw $this->createNotFoundException('Not allowed (core_user_team_create)');
@@ -1738,10 +1674,8 @@ class UserController extends AbstractController {
 	}
 
 	// Admin /////
-	/**
-	 * @Template("@LadbCore/Core/User/showAdmin.html.twig")
-	 */
 	#[Route(path: '/@{username}/admin', requirements: ['username' => '^[a-zA-Z0-9.]{3,25}$'], name: 'core_user_show_admin')]
+	#[Template('@LadbCore/Core/User/showAdmin.html.twig')]
 	public function showAdminAction($username, FollowerUtils $followerUtils, EntityManagerInterface $om, UserManager $userManager) {
 		if (!$this->isGranted('ROLE_ADMIN')) {
 			throw $this->createNotFoundException('Access denied');

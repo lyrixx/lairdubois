@@ -4,7 +4,7 @@ namespace Ladb\CoreBundle\Controller\Core;
 
 use Ladb\CoreBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Symfony\Bridge\Twig\Attribute\Template;
 
 #[Route(path: '/a-propos')]
 class AboutController extends AbstractController {
@@ -20,10 +20,8 @@ class AboutController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_faq_question_list'));
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/About/legals.html.twig")
-	 */
 	#[Route(path: '/mentions-legales.html', name: 'core_about_legals')]
+	#[Template('@LadbCore/Core/About/legals.html.twig')]
 	public function legalsAction() {
 		return array();
 	}
@@ -33,10 +31,8 @@ class AboutController extends AbstractController {
         return $this->redirect($this->generateUrl('core_faq_question_show', array( 'id' => 'quelles-sont-les-conditions-generales-dutilisation-de-lair-du-bois' )));
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/About/credits.html.twig")
-	 */
 	#[Route(path: '/credits.html', name: 'core_about_credits')]
+	#[Template('@LadbCore/Core/About/credits.html.twig')]
 	public function creditsAction() {
 		$credits = array(
 			array( 'name' => 'Symfony', 'url' => 'http://www.symfony.com', 'labels' => array( 'PHP' ) ),

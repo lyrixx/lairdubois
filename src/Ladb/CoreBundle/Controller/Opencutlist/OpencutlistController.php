@@ -5,8 +5,9 @@ namespace Ladb\CoreBundle\Controller\Opencutlist;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Bridge\Twig\Attribute\Template;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\ExpressionLanguage\Expression;
 use Ladb\CoreBundle\Controller\AbstractController;
 use Ladb\CoreBundle\Entity\Opencutlist\Access;
 use Ladb\CoreBundle\Utils\PaginatorUtils;
@@ -231,12 +232,10 @@ class OpencutlistController extends AbstractController {
         return $this->redirect('https://www.opencutlist.org/lab');
     }
 
-    /**
-	 * @Template("@LadbCore/Opencutlist/stats.html.twig")
-	 * @Security("is_granted('ROLE_ADMIN') or is_granted('ROLE_OPENCUTLIST')", statusCode=404, message="Not allowed (core_opencutlist_stats)")
-	 */
 	#[Route(path: '/stats', name: 'core_opencutlist_stats')]
 	#[Route(path: '/stats/{page}', requirements: ['page' => '\d+'], name: 'core_opencutlist_stats_page')]
+	#[Template('@LadbCore/Opencutlist/stats.html.twig')]
+	#[IsGranted(new Expression("is_granted('ROLE_ADMIN') or is_granted('ROLE_OPENCUTLIST')"), statusCode: 404, message: 'Not allowed (core_opencutlist_stats)')]
 	public function statsAction(Request $request, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $page = 0) {
 
         set_time_limit(300); // Et time limit to 5 min

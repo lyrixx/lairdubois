@@ -4,7 +4,7 @@ namespace Ladb\CoreBundle\Controller\Message;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Ladb\CoreBundle\Entity\Message\Message;
 use Ladb\CoreBundle\Entity\Message\MessageMeta;
 use Ladb\CoreBundle\Utils\FieldPreprocessorUtils;
@@ -17,10 +17,8 @@ use Doctrine\ORM\EntityManagerInterface;
 #[Route(path: '/messagerie')]
 class MessageController extends AbstractThreadController {
 
-	/**
-	 * @Template("@LadbCore/Message/new-xhr.html.twig")
-	 */
 	#[Route(path: '/thread/{threadId}/new', requirements: ['threadId' => '\d+'], name: 'core_message_new')]
+	#[Template('@LadbCore/Message/new-xhr.html.twig')]
 	public function newAction(Request $request, $threadId) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_message_new)');
@@ -42,10 +40,8 @@ class MessageController extends AbstractThreadController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Message/new-xhr.html.twig")
-	 */
 	#[Route(path: '/thread/{threadId}/create', requirements: ['threadId' => '\d+'], name: 'core_message_create')]
+	#[Template('@LadbCore/Message/new-xhr.html.twig')]
 	public function createAction(Request $request, $threadId, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TranslatorInterface $translator) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_message_create)');
@@ -111,10 +107,8 @@ class MessageController extends AbstractThreadController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Message/edit-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/edit', requirements: ['id' => '\d+'], name: 'core_message_edit')]
+	#[Template('@LadbCore/Message/edit-xhr.html.twig')]
 	public function editAction(Request $request, $id, EntityManagerInterface $om) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_message_edit)');
@@ -138,10 +132,8 @@ class MessageController extends AbstractThreadController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Message/edit-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/update', requirements: ['id' => '\d+'], name: 'core_message_update')]
+	#[Template('@LadbCore/Message/edit-xhr.html.twig')]
 	public function updateAction(Request $request, $id, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_message_update)');

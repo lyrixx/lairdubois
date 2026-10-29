@@ -8,8 +8,8 @@ use Ladb\CoreBundle\Utils\MentionUtils;
 use Ladb\CoreBundle\Utils\WebpushNotificationUtils;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Bridge\Twig\Attribute\Template;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Ladb\CoreBundle\Entity\Qa\Question;
 use Ladb\CoreBundle\Entity\Qa\Answer;
 use Ladb\CoreBundle\Form\Type\Qa\AnswerType;
@@ -33,10 +33,8 @@ class AnswerController extends AbstractController {
 
 	use PublicationControllerTrait;
 
-	/**
-	 * @Template("@LadbCore/Qa/Answer/new-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/reponses/new', requirements: ['id' => '\d+'], name: 'core_qa_answer_new')]
+	#[Template('@LadbCore/Qa/Answer/new-xhr.html.twig')]
 	public function newAction(Request $request, $id) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_qa_answer_new)');
@@ -58,10 +56,8 @@ class AnswerController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Qa/Answer/new-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/reponses/create', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_qa_answer_create')]
+	#[Template('@LadbCore/Qa/Answer/new-xhr.html.twig')]
 	public function createAction(Request $request, $id, ActivityUtils $activityUtils, BlockBodiedUtils $blockUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, MentionUtils $mentionUtils, EntityManagerInterface $om, QuestionManager $questionManager, VotableUtils $votableUtils, WatchableUtils $watchableUtils, WebpushNotificationUtils $webpushNotificationUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_qa_answer_create)');
@@ -143,10 +139,8 @@ class AnswerController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Qa/Answer/edit-xhr.html.twig")
-	 */
 	#[Route(path: '/reponses/{id}/edit', requirements: ['id' => '\d+'], name: 'core_qa_answer_edit')]
+	#[Template('@LadbCore/Qa/Answer/edit-xhr.html.twig')]
 	public function editAction(Request $request, $id, EntityManagerInterface $om) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_qa_answer_edit)');
@@ -170,10 +164,8 @@ class AnswerController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Template("@LadbCore/Qa/Answer/edit-xhr.html.twig")
-	 */
 	#[Route(path: '/reponses/{id}/update', requirements: ['id' => '\d+'], methods: ['POST'], name: 'core_qa_answer_update')]
+	#[Template('@LadbCore/Qa/Answer/edit-xhr.html.twig')]
 	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, MentionUtils $mentionUtils, EntityManagerInterface $om, VotableUtils $votableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_qa_answer_update)');
@@ -310,11 +302,9 @@ class AnswerController extends AbstractController {
 		return $this->redirect($this->generateUrl('core_qa_question_show', array( 'id' => $question->getSluggedId() )).'#_answer_'.$answer->getId());
 	}
 
-	/**
-	 * @Template("@LadbCore/Qa/Answer/list-xhr.html.twig")
-	 */
 	#[Route(path: '/{id}/reponses', requirements: ['id' => '\d+'], name: 'core_qa_answer_list')]
 	#[Route(path: '/{id}/reponses/{sorter}', requirements: ['id' => '\d+', 'sorter' => '[a-z-]+'], name: 'core_qa_answer_list_sorter')]
+	#[Template('@LadbCore/Qa/Answer/list-xhr.html.twig')]
 	public function listAction(Request $request, $id, CommentableUtils $commentableUtils, EntityManagerInterface $om, VotableUtils $votableUtils, $sorter = 'score') {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_qa_answer_list_sorter)');
@@ -341,10 +331,8 @@ class AnswerController extends AbstractController {
 		);
 	}
 
-	/**
-	 * @Security("is_granted('ROLE_ADMIN')", statusCode=404, message="Not allowed (core_qa_answer_admin_converttocomment)")
-	 */
 	#[Route(path: '/{id}/reponses/admin/converttocomment', requirements: ['id' => '\d+'], name: 'core_qa_answer_admin_converttocomment')]
+	#[IsGranted('ROLE_ADMIN', statusCode: 404, message: 'Not allowed (core_qa_answer_admin_converttocomment)')]
 	public function adminConvertToCommentAction($id, AnswerManager $answerManager, EntityManagerInterface $om, TranslatorInterface $translator) {
 		$answerRepository = $om->getRepository(Answer::CLASS_NAME);
 

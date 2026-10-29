@@ -5,7 +5,7 @@ namespace Ladb\CoreBundle\Controller\Core;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Symfony\Bridge\Twig\Attribute\Template;
 use Ladb\CoreBundle\Controller\AbstractController;
 use Ladb\CoreBundle\Entity\Core\Comment;
 use Ladb\CoreBundle\Form\Model\NewVote;
@@ -79,10 +79,8 @@ class VoteController extends AbstractController {
 	}
 
 	/////
-	/**
-	 * @Template("@LadbCore/Core/Vote/new-xhr.html.twig")
-	 */
 	#[Route(path: '/{entityType}/{entityId}/{way}/new', requirements: ['entityType' => '\d+', 'entityId' => '\d+', 'way' => 'up|down'], name: 'core_vote_new')]
+	#[Template('@LadbCore/Core/Vote/new-xhr.html.twig')]
 	public function newAction(Request $request, $entityType, $entityId, $way, TypableUtils $typableUtils) {
 		if (!$request->isXmlHttpRequest()) {
 			throw $this->createNotFoundException('Only XML request allowed (core_vote_down_new)');
@@ -391,12 +389,10 @@ class VoteController extends AbstractController {
 		return $this->redirect($returnToUrl);
 	}
 
-	/**
-	 * @Template("@LadbCore/Core/Vote/list-byparent.html.twig")
-	 */
 	#[Route(path: '/p/{entityType}/{entityId}', requirements: ['entityType' => '\d+', 'entityId' => '\d+'], name: 'core_vote_list_parent_entity')]
 	#[Route(path: '/p/{entityType}/{entityId}/{filter}', requirements: ['entityType' => '\d+', 'entityId' => '\d+', 'filter' => 'positive|negative'], name: 'core_vote_list_parent_entity_filter')]
 	#[Route(path: '/p/{entityType}/{entityId}/{filter}/{page}', requirements: ['entityType' => '\d+', 'entityId' => '\d+', 'filter' => 'positive|negative', 'page' => '\d+'], name: 'core_vote_list_parent_entity_filter_page')]
+	#[Template('@LadbCore/Core/Vote/list-byparent.html.twig')]
 	public function showParentVotesAction(Request $request, $entityType, $entityId, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, TypableUtils $typableUtils, $filter = 'positive', $page = 0) {
 
 		// Retrieve related parent entity
