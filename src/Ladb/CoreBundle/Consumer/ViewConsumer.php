@@ -11,9 +11,9 @@ use Ladb\CoreBundle\Entity\Core\View;
 use Ladb\CoreBundle\Model\AuthoredInterface;
 use Ladb\CoreBundle\Utils\SearchUtils;
 use Ladb\CoreBundle\Utils\TypableUtils;
-use Symfony\Component\Messenger\Handler\MessageSubscriberInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-class ViewConsumer implements MessageSubscriberInterface {
+class ViewConsumer {
 
 	private $logger;
 	private $om;
@@ -174,15 +174,12 @@ class ViewConsumer implements MessageSubscriberInterface {
 
 	/////
 
-	public static function getHandledMessages(): iterable {
-		yield ListedViewMessage::class => array( 'method' => 'handleListedView' );
-		yield ShownViewMessage::class => array( 'method' => 'handleShownView' );
-	}
-
+	#[AsMessageHandler]
 	public function handleListedView(ListedViewMessage $message) {
 		$this->_executeListedProcess($message->getEntityType(), $message->getEntityIds(), $message->getUserId());
 	}
 
+	#[AsMessageHandler]
 	public function handleShownView(ShownViewMessage $message) {
 		$this->_executeShownProcess($message->getEntityType(), $message->getEntityId(), $message->getUserId());
 	}

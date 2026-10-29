@@ -6,9 +6,10 @@ use Ladb\CoreBundle\Message\WebpushNotificationMessage;
 use Psr\Log\LoggerInterface;
 use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Utils\WebpushNotificationUtils;
-use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
+use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-class WebpushNotificationConsumer implements MessageHandlerInterface {
+#[AsMessageHandler]
+class WebpushNotificationConsumer {
 
 	private $logger;
 	private $om;
