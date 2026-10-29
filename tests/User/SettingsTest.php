@@ -87,7 +87,7 @@ final class SettingsTest extends WebTestCase
         $crawler = $this->submitSettings($client, UserFixtures::USER, ['ladb_usersettings[fullname]' => 'Al']);
 
         self::assertSame(200, $client->getResponse()->getStatusCode());
-        self::assertSame(['Cette chaîne est trop courte. Elle doit avoir au minimum 3 caractères.'], static::getFieldErrors($crawler, 'ladb_usersettings[fullname]'));
+        self::assertSame(['Cette chaîne est trop courte. Elle doit contenir au minimum 3 caractères.'], static::getFieldErrors($crawler, 'ladb_usersettings[fullname]'));
     }
 
     public function testEditSettingsOfAnotherUser(): void

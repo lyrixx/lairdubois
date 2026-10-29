@@ -14,225 +14,27 @@ parameters:
 
 		-
 			message: '''
-				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
-				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
+				#^Class Ladb\\CoreBundle\\Consumer\\ViewConsumer implements deprecated interface Symfony\\Component\\Messenger\\Handler\\MessageSubscriberInterface\:
+				since Symfony 6\.2, use the \{@see AsMessageHandler\} attribute instead$#
 			'''
-			identifier: method.deprecated
+			identifier: class.implementsDeprecatedInterface
 			count: 1
-			path: src/Ladb/CoreBundle/Controller/Blog/PostController.php
+			path: src/Ladb/CoreBundle/Consumer/ViewConsumer.php
 
 		-
 			message: '''
-				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
-				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
+				#^Class Ladb\\CoreBundle\\Consumer\\WebpushNotificationConsumer implements deprecated interface Symfony\\Component\\Messenger\\Handler\\MessageHandlerInterface\:
+				since Symfony 6\.2, use the \{@see AsMessageHandler\} attribute instead$#
 			'''
-			identifier: method.deprecated
-			count: 2
-			path: src/Ladb/CoreBundle/Controller/Collection/CollectionController.php
-
-		-
-			message: '''
-				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
-				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
-			'''
-			identifier: method.deprecated
+			identifier: class.implementsDeprecatedInterface
 			count: 1
-			path: src/Ladb/CoreBundle/Controller/Core/PictureController.php
-
-		-
-			message: '''
-				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
-				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: src/Ladb/CoreBundle/Controller/Event/EventController.php
-
-		-
-			message: '''
-				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
-				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: src/Ladb/CoreBundle/Controller/Faq/QuestionController.php
-
-		-
-			message: '''
-				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
-				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: src/Ladb/CoreBundle/Controller/Find/FindController.php
-
-		-
-			message: '''
-				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
-				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: src/Ladb/CoreBundle/Controller/Howto/AbstractHowtoBasedController.php
-
-		-
-			message: '''
-				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
-				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: src/Ladb/CoreBundle/Controller/Howto/ArticleController.php
-
-		-
-			message: '''
-				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
-				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: src/Ladb/CoreBundle/Controller/Howto/HowtoController.php
-
-		-
-			message: '''
-				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
-				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: src/Ladb/CoreBundle/Controller/Knowledge/BookController.php
-
-		-
-			message: '''
-				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
-				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: src/Ladb/CoreBundle/Controller/Knowledge/ProviderController.php
-
-		-
-			message: '''
-				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
-				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: src/Ladb/CoreBundle/Controller/Knowledge/SchoolController.php
-
-		-
-			message: '''
-				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
-				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: src/Ladb/CoreBundle/Controller/Knowledge/SoftwareController.php
-
-		-
-			message: '''
-				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
-				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: src/Ladb/CoreBundle/Controller/Knowledge/ToolController.php
-
-		-
-			message: '''
-				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
-				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: src/Ladb/CoreBundle/Controller/Knowledge/WoodController.php
-
-		-
-			message: '''
-				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
-				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: src/Ladb/CoreBundle/Controller/Offer/OfferController.php
-
-		-
-			message: '''
-				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
-				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: src/Ladb/CoreBundle/Controller/Promotion/GraphicController.php
-
-		-
-			message: '''
-				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
-				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: src/Ladb/CoreBundle/Controller/Qa/AnswerController.php
-
-		-
-			message: '''
-				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
-				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: src/Ladb/CoreBundle/Controller/Qa/QuestionController.php
-
-		-
-			message: '''
-				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
-				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: src/Ladb/CoreBundle/Controller/Wonder/CreationController.php
-
-		-
-			message: '''
-				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
-				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: src/Ladb/CoreBundle/Controller/Wonder/PlanController.php
-
-		-
-			message: '''
-				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
-				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: src/Ladb/CoreBundle/Controller/Wonder/WorkshopController.php
-
-		-
-			message: '''
-				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
-				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: src/Ladb/CoreBundle/Controller/Workflow/TaskController.php
+			path: src/Ladb/CoreBundle/Consumer/WebpushNotificationConsumer.php
 
 		-
 			message: '#^Class Ladb\\CoreBundle\\Entity\\Workflow\\Run referenced with incorrect case\: ladb\\CoreBundle\\Entity\\Workflow\\Run\.$#'
 			identifier: class.nameCase
 			count: 1
 			path: src/Ladb/CoreBundle/Controller/Workflow/TaskController.php
-
-		-
-			message: '''
-				#^Call to deprecated method getUsername\(\) of interface Symfony\\Component\\Security\\Core\\User\\UserInterface\:
-				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: src/Ladb/CoreBundle/Controller/Workflow/WorkflowController.php
 
 		-
 			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
@@ -340,15 +142,6 @@ parameters:
 			message: '#^Access to an undefined property Ladb\\CoreBundle\\Entity\\Core\\User\:\:\$skills\.$#'
 			identifier: property.notFound
 			count: 1
-			path: src/Ladb/CoreBundle/Entity/Core/User.php
-
-		-
-			message: '''
-				#^Call to deprecated method getUsername\(\) of class Ladb\\CoreBundle\\Entity\\Core\\User\:
-				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
-			'''
-			identifier: method.deprecated
-			count: 2
 			path: src/Ladb/CoreBundle/Entity/Core/User.php
 
 		-
@@ -604,37 +397,10 @@ parameters:
 			path: src/Ladb/CoreBundle/Entity/Youtook/Took.php
 
 		-
-			message: '''
-				#^Call to method formatCurrency\(\) of deprecated class Symfony\\Component\\Intl\\NumberFormatter\\NumberFormatter\:
-				since Symfony 5\.3, use symfony/polyfill\-intl\-icu \^1\.21 instead$#
-			'''
-			identifier: method.deprecatedClass
-			count: 1
-			path: src/Ladb/CoreBundle/Form/Type/Knowledge/Value/PriceValueType.php
-
-		-
-			message: '''
-				#^Call to method formatCurrency\(\) of deprecated class Symfony\\Component\\Intl\\NumberFormatter\\NumberFormatter\:
-				since Symfony 5\.3, use symfony/polyfill\-intl\-icu \^1\.21 instead$#
-			'''
-			identifier: method.deprecatedClass
-			count: 1
-			path: src/Ladb/CoreBundle/Form/Type/Offer/OfferType.php
-
-		-
 			message: '#^Deprecated in PHP 8\.4\: Parameter \#3 \$owner \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
 			identifier: parameter.implicitlyNullable
 			count: 1
 			path: src/Ladb/CoreBundle/Handler/PictureUploadHandler.php
-
-		-
-			message: '''
-				#^Call to deprecated method getUsername\(\) of class Ladb\\CoreBundle\\Entity\\Core\\User\:
-				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: src/Ladb/CoreBundle/Manager/Core/UserManager.php
 
 		-
 			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
@@ -679,41 +445,14 @@ parameters:
 			path: src/Ladb/CoreBundle/Repository/Qa/AnswerRepository.php
 
 		-
-			message: '''
-				#^Call to method format\(\) of deprecated class Symfony\\Component\\Intl\\DateFormatter\\IntlDateFormatter\:
-				since Symfony 5\.3, use symfony/polyfill\-intl\-icu \^1\.21 instead$#
-			'''
-			identifier: method.deprecatedClass
-			count: 1
-			path: src/Ladb/CoreBundle/Twig/LadbExtension.php
-
-		-
 			message: '#^Deprecated in PHP 8\.4\: Parameter \#4 \$publisherUser \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
 			identifier: parameter.implicitlyNullable
 			count: 1
 			path: src/Ladb/CoreBundle/Utils/ActivityUtils.php
 
 		-
-			message: '''
-				#^Call to deprecated method getUsername\(\) of class Ladb\\CoreBundle\\Entity\\Core\\User\:
-				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: src/Ladb/CoreBundle/Utils/CanonicalFieldsUpdater.php
-
-		-
 			message: '#^Call to an undefined method Ladb\\CoreBundle\\Utils\\CommentableUtils\:\:createNotFoundException\(\)\.$#'
 			identifier: method.notFound
-			count: 2
-			path: src/Ladb/CoreBundle/Utils/CommentableUtils.php
-
-		-
-			message: '''
-				#^Call to deprecated method getUsername\(\) of class Ladb\\CoreBundle\\Entity\\Core\\User\:
-				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
-			'''
-			identifier: method.deprecated
 			count: 2
 			path: src/Ladb/CoreBundle/Utils/CommentableUtils.php
 
@@ -754,15 +493,6 @@ parameters:
 			path: src/Ladb/CoreBundle/Utils/PicturedUtils.php
 
 		-
-			message: '''
-				#^Call to deprecated method getUsername\(\) of class Ladb\\CoreBundle\\Entity\\Core\\User\:
-				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: src/Ladb/CoreBundle/Utils/UserUtils.php
-
-		-
 			message: '#^Deprecated in PHP 8\.4\: Parameter \#2 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
 			identifier: parameter.implicitlyNullable
 			count: 2
@@ -775,25 +505,7 @@ parameters:
 			path: src/Ladb/CoreBundle/Utils/WatchableUtils.php
 
 		-
-			message: '''
-				#^Call to deprecated method getUsername\(\) of class Ladb\\CoreBundle\\Entity\\Core\\User\:
-				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: src/Ladb/CoreBundle/Validator/CanonicalFieldsInitializer.php
-
-		-
 			message: '#^Class Ladb\\CoreBundle\\Entity\\Knowledge\\Value\\ToolIdentity not found\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/Ladb/CoreBundle/Validator/Constraints/ValidToolIdentityValueValidator.php
-
-		-
-			message: '''
-				#^Call to deprecated method getUsername\(\) of class Ladb\\CoreBundle\\Entity\\Core\\User\:
-				since Symfony 5\.3, use getUserIdentifier\(\) instead$#
-			'''
-			identifier: method.deprecated
-			count: 5
-			path: src/Ladb/CoreBundle/Validator/Constraints/ValidUserUsernameValidator.php

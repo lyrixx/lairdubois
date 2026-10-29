@@ -164,20 +164,12 @@ return static function (RectorConfig $rectorConfig): void {
         (new \ReflectionProperty(PrettyPrinterAbstract::class, 'tabWidth'))->setValue($printer, 1);
     });
 
-    // A rule of rector-symfony applies from a version of a package of Symfony (symfony/console…),
-    // read in vendor/composer/installed.json, where symfony/symfony replaces them: Rector would
-    // skip it. It reads them in a composer.json that requires the version of symfony/symfony for
-    // each of them.
-    foreach (json_decode(file_get_contents(__DIR__.'/../../vendor/composer/installed.json'), true)['packages'] as $package) {
-        if ('symfony/symfony' === $package['name']) {
-            $packagesFile = __DIR__.'/var/symfony-packages.json';
-            @mkdir(dirname($packagesFile), 0777, true);
-            $versions = array_fill_keys(array_keys($package['replace']), $package['version_normalized']);
-            // The rules of #[AsCommand] (#28) wait for symfony/console 6.1, which deprecates
-            // $defaultName: the attribute exists since 5.3
-            $versions['symfony/console'] = '6.1.0.0';
-            file_put_contents($packagesFile, json_encode(['require' => $versions]));
-            $rectorConfig->singleton(InstalledPackageResolver::class, static fn (): InstalledPackageResolver => new InstalledPackageResolver(null, $packagesFile));
-        }
-    }
+    // A rule of rector-symfony applies from a version of a package of Symfony (symfony/console…):
+    // Rector reads the versions installed in the application (its vendor/composer/installed.json),
+    // in a composer.json that requires them, not those of tools/rector.
+    $packagesFile = __DIR__.'/var/symfony-packages.json';
+    @mkdir(dirname($packagesFile), 0777, true);
+    $versions = array_column(json_decode(file_get_contents(__DIR__.'/../../vendor/composer/installed.json'), true)['packages'], 'version_normalized', 'name');
+    file_put_contents($packagesFile, json_encode(['require' => $versions]));
+    $rectorConfig->singleton(InstalledPackageResolver::class, static fn (): InstalledPackageResolver => new InstalledPackageResolver(null, $packagesFile));
 };

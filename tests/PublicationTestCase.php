@@ -187,7 +187,7 @@ abstract class PublicationTestCase extends WebTestCase
     public static function provideInvalidTitles(): iterable
     {
         yield 'empty' => ['', 'Cette valeur ne doit pas être vide.'];
-        yield 'too short' => ['abc', 'Cette chaîne est trop courte. Elle doit avoir au minimum 4 caractères.'];
+        yield 'too short' => ['abc', 'Cette chaîne est trop courte. Elle doit contenir au minimum 4 caractères.'];
     }
 
     /**
