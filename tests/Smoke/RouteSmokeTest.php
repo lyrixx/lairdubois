@@ -18,8 +18,8 @@ use Symfony\Component\Routing\Route;
 use Tests\WebTestCase;
 
 /**
- * Calls every GET route, anonymous, as "user" and as "admin": none may answer 5xx, nor throw a
- * PHP \Error (which escapes the HttpKernel of Symfony 3.4 instead of giving a 500).
+ * Calls every GET route, anonymous, as "user" and as "admin": none may answer 5xx, nor throw (a
+ * PHP \Error gives a 500 since framework.handle_all_throwables, and escaped the kernel before).
  *
  * The parameters of the routes come from the fixtures. A request that changes the database (like,
  * delete, mark as read...) is rolled back with its test.

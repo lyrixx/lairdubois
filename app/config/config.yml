@@ -5,6 +5,16 @@ framework:
     #esi:             ~
     translator:      { fallback: "%locale%" }
     secret:          "%secret%"
+    # No request of the site overrides its method with _method (the DELETE of the web push
+    # subscription is a real one)
+    http_method_override: false
+    # A PHP \Error is handled like an exception (error page, 500) instead of escaping handle()
+    handle_all_throwables: true
+    # The PHP errors (warnings, notices, deprecations) go to the logger (channel "php") in prod too,
+    # instead of the log of PHP: with the fingers_crossed handler of config_prod.yml, they are only
+    # written with an error of the same request or command
+    php_errors:
+        log: true
     router:
         resource: "%kernel.project_dir%/app/config/routing.yml"
         strict_requirements: "%kernel.debug%"
@@ -35,6 +45,8 @@ framework:
         save_path: "%kernel.project_dir%/app/sessions"
         cookie_lifetime: 0
         cookie_samesite: 'strict'
+        # Secure when the request is in HTTPS
+        cookie_secure: auto
         # The sessions have no lock (lock_mode below): a request that writes the session back can
         # erase what a concurrent one has just put in it (the CSRF token of a form loaded in XHR).
         # Updated every second, the last use date of the metadata would make each request write it
@@ -68,7 +80,6 @@ framework:
     # (after 1, 2 and 4 seconds, by the exchange "delays" and its "delay_*" queues), an email 5
     # times, then removed with a critical log.
     messenger:
-        reset_on_message: true
         buses:
             messenger.bus.default:
                 # A worker runs for days: reconnects to the database after a long idle time
@@ -152,6 +163,9 @@ doctrine:
     orm:
         auto_generate_proxy_classes: "%kernel.debug%"
         auto_mapping: true
+        # No action gets an entity as an argument
+        controller_resolver:
+            auto_mapping: false
         mappings:
             gedmo_loggable:
                 type: attribute
