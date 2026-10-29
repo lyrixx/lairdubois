@@ -13,7 +13,8 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  * table, and would create and drop a table to check that it is in the same database. MariaDB
  * commits on such a statement: in a test, the transaction of dama/doctrine-test-bundle is gone,
  * and PHPUnit stops ("There is no active transaction", CommandTest on ladb:init, which runs
- * doctrine:schema:update). To review with DBAL 4 (#178).
+ * doctrine:schema:update). The schema_filter of config.yml hides the table from these commands:
+ * doctrine:schema:update --complete does not drop it.
  */
 final readonly class RemoveSessionSchemaListenerPass implements CompilerPassInterface {
 

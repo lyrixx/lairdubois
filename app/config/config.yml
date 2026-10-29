@@ -157,12 +157,16 @@ doctrine:
         user:     "%database_user%"
         password: "%database_password%"
         charset:  UTF8
+        # The sessions table (PdoSessionHandler) is out of the mapping: doctrine:schema:update --complete
+        # would drop it
+        schema_filter: ~^(?!sessions$)~
 
     orm:
         auto_generate_proxy_classes: "%kernel.debug%"
         # Proxies are lazy ghost objects of symfony/var-exporter, the only kind in ORM 3
         enable_lazy_ghost_objects: true
         auto_mapping: true
+        report_fields_where_declared: true
         # No action gets an entity as an argument
         controller_resolver:
             auto_mapping: false
