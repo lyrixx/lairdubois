@@ -851,6 +851,10 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
 - symfony/monolog-bundle 3.10 (#177) passe au container les niveaux des handlers tels qu'écrits
   (`notice`, que Monolog convertit) et le `action_level` du `fingers_crossed` en
   `ErrorLevelActivationStrategy` : mêmes niveaux et mêmes fichiers que la 3.6.
+- `framework.form.legacy_error_messages: false` (#26) : le comportement de Symfony 6, qui retire
+  l'option. Une valeur qu'un type de formulaire ne peut pas transformer (langue inconnue, nombre mal
+  écrit, choix hors liste) donne le message du type (« Veuillez sélectionner une langue valide. »)
+  au lieu de « Cette valeur n'est pas valide. ».
 - `Length` n'a plus `allowEmptyString` (#177, retiré en 6.0) : elle refuse `''` avec `min`, mais
   ignore `null`, ce que donne un champ de formulaire vide (`TextType` sans `empty_data`). Une valeur
   validée qui vaudrait `''` (`empty_data: ''`, écrite par le code) serait « trop courte », en plus
