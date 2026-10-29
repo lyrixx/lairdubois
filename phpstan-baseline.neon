@@ -13,24 +13,6 @@ parameters:
 			path: src/Ladb/CoreBundle/Composer/ScriptHandler.php
 
 		-
-			message: '''
-				#^Class Ladb\\CoreBundle\\Consumer\\ViewConsumer implements deprecated interface Symfony\\Component\\Messenger\\Handler\\MessageSubscriberInterface\:
-				since Symfony 6\.2, use the \{@see AsMessageHandler\} attribute instead$#
-			'''
-			identifier: class.implementsDeprecatedInterface
-			count: 1
-			path: src/Ladb/CoreBundle/Consumer/ViewConsumer.php
-
-		-
-			message: '''
-				#^Class Ladb\\CoreBundle\\Consumer\\WebpushNotificationConsumer implements deprecated interface Symfony\\Component\\Messenger\\Handler\\MessageHandlerInterface\:
-				since Symfony 6\.2, use the \{@see AsMessageHandler\} attribute instead$#
-			'''
-			identifier: class.implementsDeprecatedInterface
-			count: 1
-			path: src/Ladb/CoreBundle/Consumer/WebpushNotificationConsumer.php
-
-		-
 			message: '#^Class Ladb\\CoreBundle\\Entity\\Workflow\\Run referenced with incorrect case\: ladb\\CoreBundle\\Entity\\Workflow\\Run\.$#'
 			identifier: class.nameCase
 			count: 1
