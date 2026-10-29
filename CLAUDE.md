@@ -617,8 +617,8 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   sous PHPUnit (`error_reporting=-1`), `Tests\DeprecationCollector` les compte toujours. Toujours
   utile en 5.4 : sans lui, la première page du FPM de dev après un démarrage affiche des
   dépréciations, celles des paramètres implicitement nullables de SensioFrameworkExtraBundle (chargé
-  en même temps que le container de debug ; Stof, DoctrineBundle et Liip n'en ont plus depuis #177,
-  SwiftmailerBundle est parti avec #19) et
+  en même temps que le container de debug, sa 6.2 en a encore, jusqu'à #27 ; Stof, DoctrineBundle et
+  Liip n'en ont plus depuis #177, SwiftmailerBundle est parti avec #19) et
   `SplObjectStorage::attach()`. En CLI, rien : `bin/console` a son gestionnaire en dev, et le
   container de prod ne charge plus que des fichiers de Symfony, propres depuis 5.4.55 (la 4.4
   affichait 6 dépréciations par commande). À revoir quand ces bundles monteront.
@@ -793,8 +793,9 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
 - Le géocodage (`geocoder-php/common-http`) trouve sa fabrique PSR-17 par `php-http/discovery`, à
   l'exécution : `GuzzleHttp\Psr7\HttpFactory` de `guzzlehttp/psr7` 2. Le plugin Composer de
   discovery est coupé dans `allow-plugins`.
-- `bentools/webpush-bundle` est en 0.12, la dernière qui accepte Symfony 4.4 (la 0.13 exige 5.4) ;
-  jusqu'à la 0.10, il appelait `GuzzleHttp\Promise\settle()`, supprimée de `guzzlehttp/promises` 2,
+- `bentools/webpush-bundle` est en 0.14 (#177), avec `minishlink/web-push` 6 et `web-token/jwt-*`
+  2.2 (abandonné) : web-push 9, qui passe à `web-token/jwt-library`, monterait aussi `psr/cache`,
+  `brick/math` et quatre polyfills de Symfony. Jusqu'à la 0.10, le bundle appelait `GuzzleHttp\Promise\settle()`, supprimée de `guzzlehttp/promises` 2,
   qu'exige Guzzle depuis la 7.10. Son `PushMessageSender` envoie avec un TTL de 0 : `services.yml`
   le redéfinit avec celui de web-push 2.0 (4 semaines). Le timeout est le sien, 30 s par requête
   (`DEFAULT_TIMEOUT`), qui passe avant les options du client Guzzle : ce client n'en a pas, il
@@ -840,8 +841,12 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   l'accès avant d'évaluer `@Security` : une redirection vers `/login` au lieu du 404 de son
   `statusCode`. `Security\NullTokenStorage` lui donne un `NullToken` (`services.yml`), à retirer
   avec le bundle (#27).
-- SensioFrameworkExtraBundle est en 5.5 : le `TemplateListener` de la 5.4 demande un
-  `Twig_Environment`, qui n'existe plus en Twig 3 (`TypeError` sur toute action à `@Template`).
+- SensioFrameworkExtraBundle est en 6.2 (#177), la dernière, abandonnée, qui accepte Symfony 6.4 :
+  il part avec #27. Avant la 5.5, son `TemplateListener` demandait un `Twig_Environment`, qui
+  n'existe plus en Twig 3 (`TypeError` sur toute action à `@Template`).
+- symfony/monolog-bundle 3.10 (#177) passe au container les niveaux des handlers tels qu'écrits
+  (`notice`, que Monolog convertit) et le `action_level` du `fingers_crossed` en
+  `ErrorLevelActivationStrategy` : mêmes niveaux et mêmes fichiers que la 3.6.
 - `Length` n'a plus `allowEmptyString` (#177, retiré en 6.0) : elle refuse `''` avec `min`, mais
   ignore `null`, ce que donne un champ de formulaire vide (`TextType` sans `empty_data`). Une valeur
   validée qui vaudrait `''` (`empty_data: ''`, écrite par le code) serait « trop courte », en plus
