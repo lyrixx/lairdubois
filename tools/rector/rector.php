@@ -71,10 +71,11 @@ return static function (RectorConfig $rectorConfig): void {
         // withAttributesSets(symfonyRoute: true) alone, and its "symfony" option also converts the
         // constraints and @required. The annotations of SensioFrameworkExtraBundle stay until #27.
         // The mapping of Doctrine and Gedmo: what withAttributesSets(doctrine: true, gedmo: true)
-        // configures, for the annotations that the code uses. The nested annotations (join
-        // columns of a join table, indexes and unique constraints of a table) become attributes of
-        // the property or the class: before AnnotationToAttributeRector, which would keep them in
-        // their parent.
+        // configures, for the annotations that the code uses (class names as fully qualified
+        // ::class). The nested annotations (join columns of a join table, indexes and unique
+        // constraints of a table) become attributes of the property or the class, before
+        // AnnotationToAttributeRector: it would keep them in their parent, where the
+        // AttributeDriver of the ORM 2 ignores those of a table.
         ->withConfiguredRule(NestedAnnotationToAttributeRector::class, [
             new NestedAnnotationToAttribute('Doctrine\ORM\Mapping\JoinTable', [
                 new AnnotationPropertyToAttributeClass('Doctrine\ORM\Mapping\JoinColumn', 'joinColumns'),
@@ -86,7 +87,6 @@ return static function (RectorConfig $rectorConfig): void {
             ]),
         ])
         ->withConfiguredRule(AnnotationToAttributeRector::class, [
-            // Class names as ::class (fully qualified), as the set writes them
             new AnnotationToAttribute('Doctrine\ORM\Mapping\Column'),
             new AnnotationToAttribute('Doctrine\ORM\Mapping\DiscriminatorColumn'),
             new AnnotationToAttribute('Doctrine\ORM\Mapping\DiscriminatorMap'),
