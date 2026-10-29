@@ -16,7 +16,7 @@ class ValidHexColorValidator extends ConstraintValidator {
 	 *
 	 * @api
 	 */
-	public function validate($value, Constraint $constraint) {
+	public function validate($value, Constraint $constraint): void {
 		if (!preg_match('/^#[a-f0-9]{6}$/i', $value)) {
 			$this->context->addViolation($constraint->message);
 		}

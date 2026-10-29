@@ -16,7 +16,7 @@ class ValidBookIdentityValueValidator extends ConstraintValidator {
 	 *
 	 * @api
 	 */
-	public function validate($value, Constraint $constraint) {
+	public function validate($value, Constraint $constraint): void {
 		if ($value instanceof BookIdentity) {
 			if ($value->getIsVolume() && empty($value->getVolume())) {
 				$this->context->buildViolation($constraint->message)

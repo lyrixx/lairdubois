@@ -110,7 +110,7 @@ class PolyCollectionResizeFormListener extends ResizeFormListener
         return $this->typeMap[$data[$this->typeFieldName]];
     }
 
-    public function preSetData(FormEvent $event)
+    public function preSetData(FormEvent $event): void
     {
         $form = $event->getForm();
         $data = $event->getData();
@@ -142,7 +142,7 @@ class PolyCollectionResizeFormListener extends ResizeFormListener
         $this->preSubmit($event);
     }
 
-    public function preSubmit(FormEvent $event)
+    public function preSubmit(FormEvent $event): void
     {
         $form = $event->getForm();
         $data = $event->getData();

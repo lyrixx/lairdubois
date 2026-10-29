@@ -22,7 +22,7 @@ class SelfRecipientValidator extends ConstraintValidator {
 	 *
 	 * @api
 	 */
-	public function validate($value, Constraint $constraint) {
+	public function validate($value, Constraint $constraint): void {
 		$currentUser = $this->tokenStorage->getToken()->getUser();
 		if (!is_null($currentUser)) {
 			if ($value instanceof \Doctrine\Common\Collections\ArrayCollection) {

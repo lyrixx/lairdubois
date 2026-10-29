@@ -8,7 +8,7 @@ class TextBlockType extends BlockType {
 
 	protected $dataClass = 'Ladb\CoreBundle\Entity\Core\Block\Text';
 
-	public function buildForm(FormBuilderInterface $builder, array $options) {
+	public function buildForm(FormBuilderInterface $builder, array $options): void {
 		parent::buildForm($builder, $options);
 		$builder
 			->add('body')

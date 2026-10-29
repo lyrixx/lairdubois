@@ -13,7 +13,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 #[AsCommand(name: 'ladb:load', description: 'Load fixture data into database')]
 class LoadCommand extends Command {
 
-	protected function configure() {
+	protected function configure(): void {
 		$this
 			->setHelp(<<<EOT
 The <info>ladb:reset</info> command load fixtures :

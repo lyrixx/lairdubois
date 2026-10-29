@@ -10,14 +10,14 @@ use Ladb\CoreBundle\Form\DataTransformer\Workflow\LabelsToNamesAndColorsTransfor
 
 class LabelType extends AbstractType {
 
-	public function buildForm(FormBuilderInterface $builder, array $options) {
+	public function buildForm(FormBuilderInterface $builder, array $options): void {
 		$builder
 			->add('name', TextType::class, array( 'label' => 'workflow.label.name' ))
 			->add('color', TextType::class, array( 'label' => 'workflow.label.color' ))
 		;
 	}
 
-	public function configureOptions(OptionsResolver $resolver) {
+	public function configureOptions(OptionsResolver $resolver): void {
 		$resolver->setDefaults(array(
 			'data_class' => 'Ladb\CoreBundle\Entity\Workflow\Label',
 		));

@@ -17,7 +17,7 @@ class GalleryType extends AbstractType {
 		$this->om = $om;
 	}
 
-	public function buildForm(FormBuilderInterface $builder, array $options) {
+	public function buildForm(FormBuilderInterface $builder, array $options): void {
 		$builder
 			->add($builder
 					->create('pictures', TextType::class, array( 'attr' => array( 'class' => 'ladb-pseudo-hidden' ) ))
@@ -27,7 +27,7 @@ class GalleryType extends AbstractType {
 		;
 	}
 
-	public function configureOptions(OptionsResolver $resolver) {
+	public function configureOptions(OptionsResolver $resolver): void {
 		$resolver->setDefaults(array(
 			'data_class' => 'Ladb\CoreBundle\Entity\Find\Content\Gallery',
 		));

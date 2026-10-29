@@ -22,7 +22,7 @@ class UserMetaSettingsType extends AbstractType {
 		$this->om = $om;
 	}
 
-	public function buildForm(FormBuilderInterface $builder, array $options) {
+	public function buildForm(FormBuilderInterface $builder, array $options): void {
 		$builder
 			->add($builder
 					->create('banner', HiddenType::class)
@@ -73,7 +73,7 @@ class UserMetaSettingsType extends AbstractType {
 		;
 	}
 
-	public function configureOptions(OptionsResolver $resolver) {
+	public function configureOptions(OptionsResolver $resolver): void {
 		$resolver->setDefaults(array(
 			'data_class' => 'Ladb\CoreBundle\Entity\Core\UserMeta',
 			'constraints' => new Valid(),

@@ -11,7 +11,7 @@ class BlockType extends AbstractType {
 
 	protected $dataClass = 'Ladb\CoreBundle\Entity\Core\Block\AbstractBlock';
 
-	public function buildForm(FormBuilderInterface $builder, array $options) {
+	public function buildForm(FormBuilderInterface $builder, array $options): void {
 		$builder
 			->add('_type', HiddenType::class, array(
 				'data'   => $this->getBlockPrefix(),
@@ -21,7 +21,7 @@ class BlockType extends AbstractType {
 		;
 	}
 
-	public function configureOptions(OptionsResolver $resolver) {
+	public function configureOptions(OptionsResolver $resolver): void {
 		$resolver
 			->setDefaults(array(
 				'data_class'  => $this->dataClass,

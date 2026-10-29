@@ -40,7 +40,7 @@ class ChangeOwnerCommand extends Command {
 		parent::__construct();
 	}
 
-	protected function configure() {
+	protected function configure(): void {
 		$this
 			->addOption('target-username', null, InputOption::VALUE_REQUIRED, 'Target username')
 			->addOption('entity-type', null, InputOption::VALUE_REQUIRED, 'Entity type')

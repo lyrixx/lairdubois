@@ -24,7 +24,7 @@ class UniqueBookValidator extends ConstraintValidator {
 	 *
 	 * @api
 	 */
-	public function validate($value, Constraint $constraint) {
+	public function validate($value, Constraint $constraint): void {
 		if (!is_null($value)) {
 			if ($value instanceof BookIdentity) {
 				$data = $value->getData();

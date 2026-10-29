@@ -35,7 +35,7 @@ class BackupDumpdbCommand extends Command {
 		parent::__construct();
 	}
 
-	protected function configure() {
+	protected function configure(): void {
 		$this
 			->addOption('dump-dir', null, InputOption::VALUE_REQUIRED, 'Define the dump dir', 'backups')
 			->addOption('compress', null, InputOption::VALUE_NONE, 'Define if dump file is compressed')

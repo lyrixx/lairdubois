@@ -15,7 +15,7 @@ class OneThingValidator extends ConstraintValidator {
 	 *
 	 * @api
 	 */
-	public function validate($value, Constraint $constraint) {
+	public function validate($value, Constraint $constraint): void {
 		if (preg_match("/(\bou\b)|(\bet\b)|(,)|(;)|(&)|(\s-)|(-\s)|(\s-\s)/i", $value)) {
 			$this->context->addViolation($constraint->message);
 		}

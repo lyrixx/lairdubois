@@ -16,7 +16,7 @@ class PictureValueType extends AbstractValueType {
 		$this->om = $om;
 	}
 
-	public function buildForm(FormBuilderInterface $builder, array $options) {
+	public function buildForm(FormBuilderInterface $builder, array $options): void {
 		parent::buildForm($builder, $options);
 		$builder
 			->add($builder
@@ -26,7 +26,7 @@ class PictureValueType extends AbstractValueType {
 		;
 	}
 
-	public function configureOptions(OptionsResolver $resolver) {
+	public function configureOptions(OptionsResolver $resolver): void {
 		parent::configureOptions($resolver);
 		$resolver->setDefaults(array(
 			'data_class' => 'Ladb\CoreBundle\Entity\Knowledge\Value\Picture',

@@ -14,7 +14,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 #[AsCommand(name: 'ladb:cron:notification', description: 'Execute notifications commands')]
 class CronNotificationCommand extends Command {
 
-	protected function configure() {
+	protected function configure(): void {
 		$this
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
 			->setHelp(<<<EOT

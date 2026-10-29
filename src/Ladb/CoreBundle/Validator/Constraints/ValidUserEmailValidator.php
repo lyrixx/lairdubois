@@ -25,7 +25,7 @@ class ValidUserEmailValidator extends ConstraintValidator {
 	 *
 	 * @api
 	 */
-    public function validate($value, Constraint $constraint) {
+    public function validate($value, Constraint $constraint): void {
         if ($value instanceof User) {
 
             $emailComponents = explode('@', strtolower($value->getEmail()));

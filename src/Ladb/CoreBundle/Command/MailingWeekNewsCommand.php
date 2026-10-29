@@ -26,7 +26,7 @@ class MailingWeekNewsCommand extends Command {
 
 	use LockableTrait;
 
-	protected function configure() {
+	protected function configure(): void {
 		$this
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force sending')
 			->addOption('limit', null, InputOption::VALUE_REQUIRED, 'Limit the number of users')

@@ -23,7 +23,7 @@ class ValueSourceValidator extends ConstraintValidator {
 	 *
 	 * @api
 	 */
-	public function validate($value, Constraint $constraint) {
+	public function validate($value, Constraint $constraint): void {
 		if ($value instanceof BaseValue) {
 			$sourceType = $value->getSourceType();
 			if ($sourceType > BaseValue::SOURCE_TYPE_PERSONAL) {

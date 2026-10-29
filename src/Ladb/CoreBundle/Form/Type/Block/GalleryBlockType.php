@@ -10,7 +10,7 @@ class GalleryBlockType extends BlockType {
 
 	protected $dataClass = 'Ladb\CoreBundle\Entity\Core\Block\Gallery';
 
-	public function buildForm(FormBuilderInterface $builder, array $options) {
+	public function buildForm(FormBuilderInterface $builder, array $options): void {
 		parent::buildForm($builder, $options);
 		$builder
 			->add($builder

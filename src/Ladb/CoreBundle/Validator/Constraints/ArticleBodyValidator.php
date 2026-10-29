@@ -17,7 +17,7 @@ class ArticleBodyValidator extends ConstraintValidator {
 	 *
 	 * @api
 	 */
-	public function validate($value, Constraint $constraint) {
+	public function validate($value, Constraint $constraint): void {
 		if ($value instanceof Article) {
 			$howto = $value->getHowto();
 			if (!is_null($howto) && $value->getBodyBlocks()->count() > 0 && $value->getBodyBlocks()[0] instanceof Text) {

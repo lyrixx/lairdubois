@@ -15,7 +15,7 @@ class UpperCaseRatioValidator extends ConstraintValidator {
 	 *
 	 * @api
 	 */
-	public function validate($value, Constraint $constraint) {
+	public function validate($value, Constraint $constraint): void {
 		$charCount = strlen($value);
 		if ($charCount > 5) {
 			$upperCaseCharCount = preg_match_all('/[A-Z]{1}/', $value);

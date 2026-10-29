@@ -38,7 +38,7 @@ class CronWorkflowThumbnailCommand extends Command {
 		parent::__construct();
 	}
 
-	protected function configure() {
+	protected function configure(): void {
 		$this
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force updating')
 			->setHelp(<<<EOT

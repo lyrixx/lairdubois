@@ -10,6 +10,7 @@ use PHPStan\Type\MixedType;
 use PHPStan\Type\ObjectType;
 use PHPStan\Type\StringType;
 use PHPStan\Type\UnionType;
+use PHPStan\Type\VoidType;
 use Rector\Composer\InstalledPackageResolver;
 use Rector\Config\RectorConfig;
 use Rector\Php80\Rector\Class_\AnnotationToAttributeRector;
@@ -72,6 +73,22 @@ return static function (RectorConfig $rectorConfig): void {
             new AddReturnTypeDeclaration('Twig\Extension\ExtensionInterface', 'getFilters', new ArrayType(new MixedType(), new MixedType())),
             new AddReturnTypeDeclaration('Twig\Extension\ExtensionInterface', 'getFunctions', new ArrayType(new MixedType(), new MixedType())),
             new AddReturnTypeDeclaration('Twig\Extension\ExtensionInterface', 'getTests', new ArrayType(new MixedType(), new MixedType())),
+            // Those that the DebugClassLoader of Symfony 6.4 announces for 7.0 (#205), as given by
+            // patch-type-declarations of ErrorHandler in report mode
+            new AddReturnTypeDeclaration('Symfony\Component\Console\Command\Command', 'configure', new VoidType()),
+            new AddReturnTypeDeclaration('Symfony\Component\Console\Command\Command', 'interact', new VoidType()),
+            new AddReturnTypeDeclaration('Symfony\Component\DependencyInjection\Extension\ExtensionInterface', 'load', new VoidType()),
+            new AddReturnTypeDeclaration('Symfony\Component\Form\AbstractType', 'buildForm', new VoidType()),
+            new AddReturnTypeDeclaration('Symfony\Component\Form\AbstractType', 'buildView', new VoidType()),
+            new AddReturnTypeDeclaration('Symfony\Component\Form\AbstractType', 'configureOptions', new VoidType()),
+            new AddReturnTypeDeclaration('Symfony\Component\Form\AbstractType', 'finishView', new VoidType()),
+            new AddReturnTypeDeclaration('Symfony\Component\Form\Extension\Core\EventListener\ResizeFormListener', 'preSetData', new VoidType()),
+            new AddReturnTypeDeclaration('Symfony\Component\Form\Extension\Core\EventListener\ResizeFormListener', 'preSubmit', new VoidType()),
+            new AddReturnTypeDeclaration('Symfony\Component\Security\Core\User\UserCheckerInterface', 'checkPostAuth', new VoidType()),
+            new AddReturnTypeDeclaration('Symfony\Component\Security\Core\User\UserCheckerInterface', 'checkPreAuth', new VoidType()),
+            new AddReturnTypeDeclaration('Symfony\Component\Security\Core\User\UserInterface', 'eraseCredentials', new VoidType()),
+            new AddReturnTypeDeclaration('Symfony\Component\Validator\ConstraintValidatorInterface', 'validate', new VoidType()),
+            new AddReturnTypeDeclaration('Symfony\Component\Validator\ObjectInitializerInterface', 'initialize', new VoidType()),
         ])
         // Annotations → attributes (#25), one kind per PR. Rector 2.7 no longer applies
         // withAttributesSets(symfonyRoute: true) alone, and its "symfony" option also converts the

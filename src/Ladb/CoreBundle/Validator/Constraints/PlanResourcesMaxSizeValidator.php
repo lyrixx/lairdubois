@@ -16,7 +16,7 @@ class PlanResourcesMaxSizeValidator extends ConstraintValidator {
 	 *
 	 * @api
 	 */
-	public function validate($value, Constraint $constraint) {
+	public function validate($value, Constraint $constraint): void {
 		if (!is_null($value) && $value instanceof Plan) {
 			$resourcesSize = 0;
 			foreach ($value->getResources() as $resource) {

@@ -11,7 +11,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class DecimalValueType extends AbstractValueType {
 
-	public function buildForm(FormBuilderInterface $builder, array $options) {
+	public function buildForm(FormBuilderInterface $builder, array $options): void {
 		parent::buildForm($builder, $options);
 		if (is_null($options['choices'])) {
 			$builder
@@ -38,7 +38,7 @@ class DecimalValueType extends AbstractValueType {
 
 	}
 
-	public function configureOptions(OptionsResolver $resolver) {
+	public function configureOptions(OptionsResolver $resolver): void {
 		parent::configureOptions($resolver);
 		$resolver->setDefaults(array(
 			'data_class' => 'Ladb\CoreBundle\Entity\Knowledge\Value\Decimal',

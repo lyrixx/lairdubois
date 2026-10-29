@@ -16,7 +16,7 @@ class ValidSoftwareIdentityValueValidator extends ConstraintValidator {
 	 *
 	 * @api
 	 */
-	public function validate($value, Constraint $constraint) {
+	public function validate($value, Constraint $constraint): void {
 		if ($value instanceof SoftwareIdentity) {
 			if ($value->getIsAddOn() && empty($value->getHostSoftwareName())) {
 				$this->context->buildViolation($constraint->message)

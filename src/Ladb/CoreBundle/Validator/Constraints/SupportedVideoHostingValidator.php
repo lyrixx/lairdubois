@@ -22,7 +22,7 @@ class SupportedVideoHostingValidator extends ConstraintValidator {
 	 *
 	 * @api
 	 */
-	public function validate($value, Constraint $constraint) {
+	public function validate($value, Constraint $constraint): void {
 		$url = null;
 		if ($value instanceof \Ladb\CoreBundle\Entity\Core\Block\Video) {
 			$url = $value->getUrl();

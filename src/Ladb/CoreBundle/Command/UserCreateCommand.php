@@ -24,7 +24,7 @@ class UserCreateCommand extends Command {
 		parent::__construct();
 	}
 
-	protected function configure() {
+	protected function configure(): void {
 		$this
 			->addArgument('username', InputArgument::REQUIRED, 'The username')
 			->addArgument('email', InputArgument::REQUIRED, 'The email')
@@ -39,7 +39,7 @@ EOT
 		);
 	}
 
-	protected function interact(InputInterface $input, OutputInterface $output) {
+	protected function interact(InputInterface $input, OutputInterface $output): void {
 		$questions = array(
 			'username' => 'Please choose a username:',
 			'email'    => 'Please choose an email:',

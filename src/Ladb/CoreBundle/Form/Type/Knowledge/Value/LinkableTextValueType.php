@@ -12,7 +12,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class LinkableTextValueType extends AbstractValueType {
 
-	public function buildForm(FormBuilderInterface $builder, array $options) {
+	public function buildForm(FormBuilderInterface $builder, array $options): void {
 		parent::buildForm($builder, $options);
 		$builder
 			->add('data', TextType::class, array(
@@ -22,7 +22,7 @@ class LinkableTextValueType extends AbstractValueType {
 		;
 	}
 
-	public function configureOptions(OptionsResolver $resolver) {
+	public function configureOptions(OptionsResolver $resolver): void {
 		parent::configureOptions($resolver);
 		$resolver->setDefaults(array(
 			'data_class' => 'Ladb\CoreBundle\Entity\Knowledge\Value\LinkableText',

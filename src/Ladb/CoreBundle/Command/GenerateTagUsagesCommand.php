@@ -23,7 +23,7 @@ class GenerateTagUsagesCommand extends Command {
 		parent::__construct();
 	}
 
-	protected function configure() {
+	protected function configure(): void {
 		$this
 			->setHelp(<<<EOT
 The <info>ladb:generate:tagusages</info> command generate tag usages
