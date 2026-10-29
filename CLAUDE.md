@@ -208,8 +208,8 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et get
 
 - PHPUnit 9.6, dans `tools/phpunit` et pas dans le `composer.json` de l'application : c'est la
   dernière version qui marche avec `Tests\DeprecationCollector` (`TestResult` et `ErrorHandler`
-  de PHPUnit, supprimés en 10). `symfony/phpunit-bridge`, que `symfony/symfony` ne
-  remplace pas, est en 8.1 : il ne dépend d'aucun composant de Symfony, n'exige que PHP 8.1 et
+  de PHPUnit, supprimés en 10). `symfony/phpunit-bridge`, qui n'est pas un des
+  composants en `5.4.*` de `composer.json`, est en 8.1 : il ne dépend d'aucun composant de Symfony, n'exige que PHP 8.1 et
   marche encore avec PHPUnit 9.6, rien à y changer aux sauts de version. Le collecteur ne
   l'appelle plus : il construit lui-même le gestionnaire d'erreurs de PHPUnit du test en cours,
   comme le `getPhpUnitErrorHandler()` du bridge, privé depuis 4.4.
@@ -280,9 +280,9 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et get
   `max` et `minMessage`, passé en `notInRangeMessage`).
 - Les règles de rector-symfony (les sets de 4.x ne sont plus dans Rector 2 : une règle à la fois
   dans `rector.php`) ne s'appliquent qu'à partir d'une version d'un paquet de Symfony
-  (`symfony/console`…), lue dans `vendor/composer/installed.json`, où `symfony/symfony` les
-  remplace : `rector.php` donne à Rector la version de `symfony/symfony` pour chacun, sinon il
-  les ignore sans rien dire. Sauf `symfony/console`, en 6.1 : les deux règles de `#[AsCommand]`
+  (`symfony/console`…), lue dans `vendor/composer/installed.json` : une règle dont le paquet est
+  trop vieux est ignorée sans rien dire. `rector.php` donne à Rector les versions installées,
+  sauf `symfony/console`, en 6.1 : les deux règles de `#[AsCommand]`
   (`CommandPropertyToAttributeRector` pour `$defaultName`, `CommandConfigureToAttributeRector`
   pour le `setDescription()` de `configure()`) attendent la 6.1, qui déprécie `$defaultName`,
   alors que l'attribut existe depuis 5.3. Elles typent par PHPStan :
@@ -717,7 +717,7 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `dama/doctrine-test-bundle` `~8.2.2` (la 8.3 veut PHPUnit 10, que Composer ne voit pas, dans
   `tools/phpunit`) ; `doctrine/data-fixtures` `^1.8` (la 2.0 impose les types natifs et la classe
   dans `getReference()`). `doctrine/migrations` est en 3.5 : à partir de la 3.6, il exige
-  `symfony/var-exporter` 6.2, que `symfony/symfony` 5.4 remplace.
+  `symfony/var-exporter` 6.2, que le `conflict` de `composer.json` refuse (composants en 5.4).
 - doctrine/migrations 3 lit la table des 1.x et 2.x (`storage.table_storage.table_name:
   migration_versions`) : la sienne par défaut, `doctrine_migration_versions`, lui ferait rejouer
   toutes les migrations de la prod. Le premier `doctrine:migrations:migrate` (ou
@@ -767,12 +767,33 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   l'authenticator du formulaire (`LastLoginListener` pose la dernière connexion). Le namespace
   `@FOSUser` est un chemin Twig de `config.yml` (`templates/bundles/FOSUserBundle/`), les traductions
   utilisées sont dans les domaines `FOSUserBundle` et `validators` du bundle.
-- symfony/symfony 5.4 ne livre pas les ponts de Messenger, de Mailer, de Notifier ni de Translation
-  (`export-ignore`) : ils s'installent à part. `symfony/amqp-messenger` porte nos transports.
-  `symfony/doctrine-messenger` ne sert à rien chez nous : sans lui, DoctrineBundle 2.1 cassait la
-  compilation du container en debug (il testait l'ancienne classe du transport Doctrine, que 5.4 ne
-  garde que comme un fichier qui charge celle du pont, et DebugClassLoader refuse un fichier sans
-  sa classe). DoctrineBundle 2.13 teste celle du pont : il peut partir.
+- Plus de `symfony/symfony`, que Symfony 7 refuse (#28) : `composer.json` exige en `5.4.*` les
+  bundles (framework, security, twig ; debug et web-profiler en dev) et les composants dont le site
+  se sert lui-même : les `use` de `src/`, `app/`, `tests/` et `bin/`, et ce que la config demande
+  (`yaml`, `translation`, `asset`, `http-client`, `expression-language` pour `@Security`). En dev,
+  ceux des tests (`browser-kit`, `css-selector`, `dom-crawler`, `finder`) et `stopwatch` (services
+  de debug et timeline du profiler, comme le `profiler-pack` de Symfony). Plus
+  `proxy-manager-bridge` : l'entity manager de DoctrineBundle est lazy, et `Registry::reset()` (le
+  worker, `reset_on_message`) ne recrée qu'un proxy fermé par une erreur ; sans le pont, il
+  resterait fermé. Le reste vient des dépendances. Celles qui acceptent aussi la 6.x ou plus (`cache`,
+  `process`, `property-info`, `string`, `twig-bridge`, `var-dumper`, `var-exporter`, `web-link`
+  et les ponts de Messenger) sont bornées par le `conflict` de `composer.json`, à monter avec les
+  composants.
+- `symfony/messenger` 5.4 exige ses trois ponts, la 6.0 plus aucun : `amqp-messenger` porte nos
+  transports, `doctrine-messenger` et `redis-messenger` ne servent pas (le second ajoute le
+  transport `redis://`).
+- Sans `symfony/symfony` (sa classe `FullStack`), FrameworkBundle active d'office chaque fonction
+  dont le composant est installé : `lock`, `property_info` et `web_link`, que tirent des
+  dépendances, sont coupés dans `config.yml`, comme avant. Un paquet ajouté peut en allumer une
+  autre : comparer `debug:container` et `debug:config` avant et après.
+- Chaque paquet est à sa dernière 5.4 (de 5.4.45 à 5.4.55) : le code est celui de symfony/symfony
+  5.4.55, sauf dans cinq paquets, dont le dépôt 5.4 a des correctifs que seul symfony/symfony a
+  publiés. `form` 5.4.45 : les transformers des dates, des nombres et des pourcentages
+  (espaces d'ICU 72, position en octets de `NumberFormatter::parse()` depuis PHP 8.5.11) ;
+  `doctrine-bridge` 5.4.48 (durée des requêtes dans le profiler), `error-handler` 5.4.46,
+  `property-info` 5.4.48, `security-guard` 5.4.45. Sans effet sur le site : le seul `DateType` en
+  texte (`EventType`, `dd/MM/yyyy`) n'a pas d'espace, `IntegerType` et `NumberType` (sans
+  `grouping`) ne lisent que des chiffres ASCII, PropertyInfo et Guard ne servent pas. À revoir au saut en 6.4.
 - Les sessions ouvertes en 3.4 et 4.4 ont des objets `Security\Core\Role\Role` dans leur token :
   Symfony 5.4 garde une classe `Role` interne pour les relire, et elles restent connectées
   (`LoginTest`, avec un token capturé sur la vraie 4.4 ; le cookie remember_me capturé avec lui est
