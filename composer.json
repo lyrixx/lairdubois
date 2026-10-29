@@ -32,7 +32,7 @@
 
         "doctrine/orm": "^2.20",
         "doctrine/doctrine-bundle": "^2.13",
-        "doctrine/persistence": "^2.5",
+        "doctrine/persistence": "^3.4",
         "incenteev/composer-parameter-handler": "^2.3",
         "symfony/monolog-bundle": "^3.10",
         "symfony/polyfill-apcu": "^1.0",
@@ -72,7 +72,7 @@
         "monolog/monolog": "^3.0",
 
         "doctrine/doctrine-migrations-bundle": "^3.7",
-        "beberlei/doctrineextensions": "^1.2",
+        "beberlei/doctrineextensions": "^1.5",
 
         "friendsofsymfony/elastica-bundle": "^7.2",
         "stof/doctrine-extensions-bundle": "^1.13",
