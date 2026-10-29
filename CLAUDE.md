@@ -255,9 +255,10 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et get
 - Annotations → attributs (#25) : une `AnnotationToAttribute` par sorte et par PR dans `rector.php`.
   Rector 2.7 n'applique plus `withAttributesSets(symfonyRoute: true)` ni `symfonyValidator` seuls,
   et `symfony: true` convertit d'un coup les routes, les contraintes et `@required`. Les routes sont
-  des `#[Route]` depuis #25 ; `routing.yml` garde `type: annotation`, le seul type de la 5.4 pour
-  un controller, attributs compris. Les contraintes de validation (`UniqueEntity` comprise) et les
-  setters `#[Required]` aussi ; `enable_annotations` du validateur lit les deux en 5.4. Le mapping
+  des `#[Route]` depuis #25 ; `routing.yml` les lit avec `type: attribute` depuis #27 (`annotation`,
+  le seul type de la 5.4 pour un controller, attributs compris, est déprécié en 6.4). Les
+  contraintes de validation (`UniqueEntity` comprise) et les setters `#[Required]` aussi
+  (`enable_attributes` du validateur depuis #27, `enable_annotations` lisait les deux). Le mapping
   de Doctrine et de Gedmo aussi, avec le driver `attribute` (`LadbCoreBundle`, `gedmo_loggable`,
   `gedmo_tree` dans `config.yml`, un seul driver par mapping) : `NestedAnnotationToAttributeRector`
   (rector-doctrine) sort les colonnes d'une `JoinTable`, les index et contraintes d'unicité d'une
@@ -271,9 +272,7 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et get
   casse du `use` (`@ladbAssert\…`, que Doctrine acceptait), recopie le nom complet d'une annotation
   (`@Ladb\CoreBundle\…`) sans `\` de tête (relatif au namespace : une autre classe), écrit
   `Required` en nom complet (importé à la main ensuite) et retire la ligne vide entre un
-  commentaire et le docblock qu'il supprime. Le validateur lit les attributs d'un élément avant
-  ses annotations : ne pas mélanger les deux sur une classe, une propriété ou un getter, l'ordre
-  des contraintes (et des messages) changerait.
+  commentaire et le docblock qu'il supprime.
   Une annotation était construite une fois, puis relue dans le cache d'annotations (fichiers de
   `var/cache/`) : le rapport ne voyait pas les dépréciations de son constructeur. Un attribut est
   construit à chaque chargement des métadonnées, elles sortent en test (`Range` de `Find`, à `min`,
@@ -866,9 +865,11 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   qui le font (`delete-xhr` des étiquettes et des pièces du workflow, des charges du financement)
   ont un template vide. Un `FormInterface` passé tel quel (et non sa vue) répondrait 422 quand il
   est soumis et invalide : les actions passent `createView()`.
-- SensioFrameworkExtraBundle est en 6.2 (#177), la dernière, abandonnée, qui accepte Symfony 6.4 :
-  il part avec #27. Avant la 5.5, son `TemplateListener` demandait un `Twig_Environment`, qui
-  n'existe plus en Twig 3 (`TypeError` sur toute action à `@Template`).
+- Plus d'annotations (#27) : ni SensioFrameworkExtraBundle ni `doctrine/annotations`, qu'il était
+  seul à exiger. FrameworkBundle coupe alors `framework.annotations` (plus d'`annotation_reader`),
+  et le `ReaderPass` de StofDoctrineExtensionsBundle donne aux listeners de Gedmo son
+  `AttributeReader`. Une annotation oubliée (`@Assert`, `@ORM`, `@Route`…) est ignorée sans rien
+  dire.
 - symfony/monolog-bundle 3.10 (#177) passe au container les niveaux des handlers tels qu'écrits
   (`notice`, que Monolog convertit) et le `action_level` du `fingers_crossed` en
   `ErrorLevelActivationStrategy` : mêmes niveaux et mêmes fichiers que la 3.6.
