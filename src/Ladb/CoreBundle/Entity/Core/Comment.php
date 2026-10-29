@@ -17,12 +17,9 @@ use Ladb\CoreBundle\Model\TypableInterface;
 use Ladb\CoreBundle\Model\HtmlBodiedInterface;
 use Ladb\CoreBundle\Model\MultiPicturedInterface;
 
-/**
- * @ORM\Table("tbl_core_comment", indexes={
- *     @ORM\Index(name="IDX_COMMENT_ENTITY", columns={"entity_type", "entity_id"})
- * })
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Core\CommentRepository")
- */
+#[ORM\Table('tbl_core_comment')]
+#[ORM\Index(name: 'IDX_COMMENT_ENTITY', columns: ['entity_type', 'entity_id'])]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\CommentRepository::class)]
 class Comment implements TypableInterface, BasicTimestampableInterface, AuthoredInterface, HtmlBodiedInterface, MultiPicturedInterface, MentionSourceInterface {
 
 	use BasicTimestampableTrait;
@@ -31,83 +28,57 @@ class Comment implements TypableInterface, BasicTimestampableInterface, Authored
 	const CLASS_NAME = 'LadbCoreBundle:Core\Comment';
 	const TYPE = 1;
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\Column(name="entity_type", type="smallint", nullable=false)
-	 */
+	#[ORM\Column(name: 'entity_type', type: 'smallint', nullable: false)]
 	private $entityType;
 
-	/**
-	 * @ORM\Column(name="entity_id", type="integer", nullable=false)
-	 */
+	#[ORM\Column(name: 'entity_id', type: 'integer', nullable: false)]
 	private $entityId;
 
-	/**
-	 * @ORM\Column(name="created_at", type="datetime")
-	 * @Gedmo\Timestampable(on="create")
-	 */
+	#[ORM\Column(name: 'created_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'create')]
 	private $createdAt;
 
-	/**
-	 * @ORM\Column(name="updated_at", type="datetime")
-	 * @Gedmo\Timestampable(on="update")
-	 */
+	#[ORM\Column(name: 'updated_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'update')]
 	private $updatedAt;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\User")
-	 * @ORM\JoinColumn(nullable=false)
-	 */
+	#[ORM\JoinColumn(nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\User::class)]
 	private $user;
 
-	/**
-	 * @ORM\Column(type="text", nullable=false)
-	 */
 	#[Assert\NotBlank]
 	#[Assert\Length(min: 2, max: 10000)]
 	#[LadbAssert\NoMediaLink]
+	#[ORM\Column(type: 'text', nullable: false)]
 	private $body;
 
-	/**
-	 * @ORM\Column(type="text", nullable=false)
-	 */
+	#[ORM\Column(type: 'text', nullable: false)]
 	private $htmlBody;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_core_comment_picture")
-	 * @ORM\OrderBy({"sortIndex" = "ASC"})
-	 */
 	#[Assert\Count(min: 0, max: 4)]
+	#[ORM\JoinTable(name: 'tbl_core_comment_picture')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Picture::class, cascade: ['persist'])]
+	#[ORM\OrderBy(['sortIndex' => 'ASC'])]
 	protected $pictures;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Comment", inversedBy="children")
-	 * @ORM\JoinColumn(nullable=true)
-	 */
+	#[ORM\JoinColumn(nullable: true)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Comment::class, inversedBy: 'children')]
 	private $parent;
 
-	/**
-	 * @ORM\OneToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Comment", mappedBy="parent", cascade={"persist"})
-	 * @ORM\OrderBy({"createdAt" = "ASC"})
-	 */
+	#[ORM\OneToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Comment::class, mappedBy: 'parent', cascade: ['persist'])]
+	#[ORM\OrderBy(['createdAt' => 'ASC'])]
 	private $children;
 
-	/**
-	 * @ORM\Column(type="integer")
-	 */
+	#[ORM\Column(type: 'integer')]
 	private $childCount = 0;
 
-	/**
-	 * @ORM\OneToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Vote")
-	 * @ORM\JoinColumn(name="vote_id", nullable=true)
-	 */
+	#[ORM\JoinColumn(name: 'vote_id', nullable: true)]
+	#[ORM\OneToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Vote::class)]
 	private $vote;
 
 	/////

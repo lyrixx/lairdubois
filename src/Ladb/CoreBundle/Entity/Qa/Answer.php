@@ -20,12 +20,10 @@ use Ladb\CoreBundle\Model\WatchableChildInterface;
 use Ladb\CoreBundle\Model\BlockBodiedInterface;
 use Ladb\CoreBundle\Model\CommentableInterface;
 
-/**
- * @ORM\Table("tbl_qa_answer")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Qa\AnswerRepository")
- */
 #[LadbAssert\BodyBlocks]
 #[LadbAssert\ValidAnswer]
+#[ORM\Table('tbl_qa_answer')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Qa\AnswerRepository::class)]
 class Answer implements TypableInterface, AuthoredInterface, BlockBodiedInterface, CommentableInterface, VotableInterface, WatchableChildInterface, MentionSourceInterface {
 
 	use BasicTimestampableTrait, AuthoredTrait, BlockBodiedTrait;
@@ -34,107 +32,70 @@ class Answer implements TypableInterface, AuthoredInterface, BlockBodiedInterfac
 	const CLASS_NAME = 'LadbCoreBundle:Qa\Answer';
 	const TYPE = 114;
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\User")
-	 * @ORM\JoinColumn(nullable=false)
-	 */
+	#[ORM\JoinColumn(nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\User::class)]
 	private $user;
 
-	/**
-	 * @ORM\Column(name="created_at", type="datetime")
-	 * @Gedmo\Timestampable(on="create")
-	 */
+	#[ORM\Column(name: 'created_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'create')]
 	private $createdAt;
 
-	/**
-	 * @ORM\Column(name="updated_at", type="datetime")
-	 */
+	#[ORM\Column(name: 'updated_at', type: 'datetime')]
 	private $updatedAt;
 
-	/**
-	 * @ORM\Column(name="is_best_answer", type="boolean")
-	 */
+	#[ORM\Column(name: 'is_best_answer', type: 'boolean')]
 	protected $isBestAnswer = false;
 
-	/**
-	 * @ORM\Column(name="parent_entity_type", type="smallint", nullable=false)
-	 */
+	#[ORM\Column(name: 'parent_entity_type', type: 'smallint', nullable: false)]
 	protected $parentEntityType;
 
-	/**
-	 * @ORM\Column(name="parent_entity_id", type="integer", nullable=false)
-	 */
+	#[ORM\Column(name: 'parent_entity_id', type: 'integer', nullable: false)]
 	protected $parentEntityId;
 
-	/**
-	 * @ORM\Column(name="parent_entity_field", type="string", length=20, nullable=false)
-	 */
+	#[ORM\Column(name: 'parent_entity_field', type: 'string', length: 20, nullable: false)]
 	protected $parentEntityField;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Qa\Question", inversedBy="answers")
-	 * @ORM\JoinColumn(nullable=false)
-	 */
+	#[ORM\JoinColumn(nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Qa\Question::class, inversedBy: 'answers')]
 	private $question;
 
-	/**
-	 * @ORM\Column(type="text", nullable=false)
-	 */
+	#[ORM\Column(type: 'text', nullable: false)]
 	private $body;
 
-	/**
-	 * @ORM\Column(type="string", length=255, nullable=false)
-	 */
+	#[ORM\Column(type: 'string', length: 255, nullable: false)]
 	private $bodyExtract;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Block\AbstractBlock", cascade={"persist", "remove"})
-	 * @ORM\JoinTable(name="tbl_qa_answer_body_block", inverseJoinColumns={@ORM\JoinColumn(name="block_id", referencedColumnName="id", unique=true, onDelete="cascade")})
-	 * @ORM\OrderBy({"sortIndex" = "ASC"})
-	 */
 	#[Assert\Count(min: 1)]
+	#[ORM\JoinTable(name: 'tbl_qa_answer_body_block')]
+	#[ORM\InverseJoinColumn(name: 'block_id', referencedColumnName: 'id', unique: true, onDelete: 'cascade')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Block\AbstractBlock::class, cascade: ['persist', 'remove'])]
+	#[ORM\OrderBy(['sortIndex' => 'ASC'])]
 	private $bodyBlocks;
 
-	/**
-	 * @ORM\Column(type="integer", name="body_block_picture_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'body_block_picture_count')]
 	private $bodyBlockPictureCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="body_block_video_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'body_block_video_count')]
 	private $bodyBlockVideoCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="comment_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'comment_count')]
 	private $commentCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="positive_vote_score")
-	 */
+	#[ORM\Column(type: 'integer', name: 'positive_vote_score')]
 	private $positiveVoteScore = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="negative_vote_score")
-	 */
+	#[ORM\Column(type: 'integer', name: 'negative_vote_score')]
 	private $negativeVoteScore = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="vote_score")
-	 */
+	#[ORM\Column(type: 'integer', name: 'vote_score')]
 	private $voteScore = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="vote_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'vote_count')]
 	private $voteCount = 0;
 
 	/////

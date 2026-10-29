@@ -37,11 +37,9 @@ use Ladb\CoreBundle\Model\TaggableInterface;
 use Ladb\CoreBundle\Model\ExplorableInterface;
 use Ladb\CoreBundle\Model\ScrapableInterface;
 
-/**
- * @ORM\Table("tbl_promotion_graphic")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Promotion\GraphicRepository")
- */
 #[LadbAssert\BodyBlocks]
+#[ORM\Table('tbl_promotion_graphic')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Promotion\GraphicRepository::class)]
 class Graphic extends AbstractDraftableAuthoredPublication implements TitledInterface, SluggedInterface, PicturedInterface, HtmlBodiedInterface, IndexableInterface, SitemapableInterface, TaggableInterface, ViewableInterface, ScrapableInterface, LikableInterface, WatchableInterface, CommentableInterface, CollectionnableInterface, ReportableInterface, ExplorableInterface {
 
 	use TitledTrait, SluggedTrait, PicturedTrait, HtmlBodiedTrait, LicensedTrait;
@@ -52,95 +50,63 @@ class Graphic extends AbstractDraftableAuthoredPublication implements TitledInte
 
 	const ACCEPTED_FILE_TYPE = '/(\.|\/)(pdf|svg)$/i';
 
-	/**
-	 * @ORM\Column(type="string", length=100)
-	 */
 	#[Assert\NotBlank]
 	#[Assert\Length(min: 4, max: 100)]
+	#[ORM\Column(type: 'string', length: 100)]
 	private $title;
 
-	/**
-	 * @Gedmo\Slug(fields={"title"}, separator="-")
-	 * @ORM\Column(type="string", length=100, unique=true)
-	 */
+	#[Gedmo\Slug(fields: ['title'], separator: '-')]
+	#[ORM\Column(type: 'string', length: 100, unique: true)]
 	private $slug;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
-	 * @ORM\JoinColumn(nullable=true, name="main_picture_id")
-	 */
 	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\Picture')]
+	#[ORM\JoinColumn(nullable: true, name: 'main_picture_id')]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Picture::class, cascade: ['persist'])]
 	private $mainPicture;
 
-	/**
-	 * @ORM\Column(type="text", nullable=false)
-	 */
+	#[ORM\Column(type: 'text', nullable: false)]
 	private $body;
 
-	/**
-	 * @ORM\Column(type="text", nullable=false)
-	 */
+	#[ORM\Column(type: 'text', nullable: false)]
 	private $htmlBody;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Tag", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_promotion_graphic_tag")
-	 */
+	#[ORM\JoinTable(name: 'tbl_promotion_graphic_tag')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Tag::class, cascade: ['persist'])]
 	private $tags;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Resource", cascade={"persist"})
-	 * @ORM\JoinColumn(nullable=false, name="resource_id")
-	 */
 	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\Resource')]
 	#[Assert\NotNull]
+	#[ORM\JoinColumn(nullable: false, name: 'resource_id')]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Resource::class, cascade: ['persist'])]
 	private $resource;
 
-	/**
-	 * @ORM\OneToOne(targetEntity="Ladb\CoreBundle\Entity\Core\License", cascade={"persist", "remove"})
-	 * @ORM\JoinColumn(nullable=true, name="license_id")
-	 */
 	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\License')]
+	#[ORM\JoinColumn(nullable: true, name: 'license_id')]
+	#[ORM\OneToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\License::class, cascade: ['persist', 'remove'])]
 	private $license;
 
-	/**
-	 * @ORM\Column(type="integer", name="zip_archive_size")
-	 */
+	#[ORM\Column(type: 'integer', name: 'zip_archive_size')]
 	private $zipArchiveSize = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="download_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'download_count')]
 	private $downloadCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="like_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'like_count')]
 	private $likeCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="watch_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'watch_count')]
 	private $watchCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="comment_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'comment_count')]
 	private $commentCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="private_collection_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'private_collection_count')]
 	private $privateCollectionCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="public_collection_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'public_collection_count')]
 	private $publicCollectionCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="view_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'view_count')]
 	private $viewCount = 0;
 
 	/////

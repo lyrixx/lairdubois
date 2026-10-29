@@ -5,35 +5,25 @@ namespace Ladb\CoreBundle\Entity\Message;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
-/**
- * @ORM\Table("tbl_message_thread_meta")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Message\ThreadMetaRepository")
- */
+#[ORM\Table('tbl_message_thread_meta')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Message\ThreadMetaRepository::class)]
 class ThreadMeta {
 
 	const CLASS_NAME = 'LadbCoreBundle:Message\ThreadMeta';
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Message\Thread", inversedBy="metas")
-	 */
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Message\Thread::class, inversedBy: 'metas')]
 	private $thread;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\User")
-	 * @ORM\JoinColumn(name="participant_user_id", referencedColumnName="id")
-	 */
+	#[ORM\JoinColumn(name: 'participant_user_id', referencedColumnName: 'id')]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\User::class)]
 	private $participant;
 
-	/**
-	 * @ORM\Column(type="boolean", name="is_deleted")
-	 */
+	#[ORM\Column(type: 'boolean', name: 'is_deleted')]
 	private $isDeleted = false;
 
 	// Id /////

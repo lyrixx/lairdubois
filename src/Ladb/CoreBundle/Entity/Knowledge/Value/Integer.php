@@ -6,10 +6,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Table("tbl_knowledge2_value_integer")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Knowledge\Value\IntegerRepository")
- */
+#[ORM\Table('tbl_knowledge2_value_integer')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Knowledge\Value\IntegerRepository::class)]
 class Integer extends BaseValue {
 
 	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Value\Integer';
@@ -17,12 +15,10 @@ class Integer extends BaseValue {
 
 	const TYPE_STRIPPED_NAME = 'integer';
 
-	/**
-	 * @ORM\Column(type="integer")
-	 */
 	#[Assert\NotNull(groups: ['mandatory'])]
 	#[Assert\Type(type: 'numeric')]
 	#[Assert\Range(min: 0)]
+	#[ORM\Column(type: 'integer')]
 	protected $data;
 
 	/////

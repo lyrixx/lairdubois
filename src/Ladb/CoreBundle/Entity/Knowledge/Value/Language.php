@@ -7,10 +7,8 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Intl\Intl;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Table("tbl_knowledge2_value_language")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Knowledge\Value\LanguageRepository")
- */
+#[ORM\Table('tbl_knowledge2_value_language')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Knowledge\Value\LanguageRepository::class)]
 class Language extends BaseValue {
 
 	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Value\Language';
@@ -18,16 +16,12 @@ class Language extends BaseValue {
 
 	const TYPE_STRIPPED_NAME = 'language';
 
-	/**
-	 * @ORM\Column(type="string")
-	 */
+	#[ORM\Column(type: 'string')]
 	protected $data;
 
-	/**
-	 * @ORM\Column(type="string")
-	 */
 	#[Assert\NotBlank(groups: ['mandatory'])]
 	#[Assert\Language]
+	#[ORM\Column(type: 'string')]
 	protected $rawLanguage = 'fr';
 
 	/////

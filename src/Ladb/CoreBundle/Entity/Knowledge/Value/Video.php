@@ -8,11 +8,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Ladb\CoreBundle\Validator\Constraints as LadbAssert;
 use Ladb\CoreBundle\Utils\VideoHostingUtils;
 
-/**
- * @ORM\Table("tbl_knowledge2_value_video")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Knowledge\Value\VideoRepository")
- */
 #[LadbAssert\SupportedVideoHosting]
+#[ORM\Table('tbl_knowledge2_value_video')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Knowledge\Value\VideoRepository::class)]
 class Video extends BaseValue {
 
 	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Value\Video';
@@ -20,22 +18,16 @@ class Video extends BaseValue {
 
 	const TYPE_STRIPPED_NAME = 'video';
 
-	/**
-	 * @ORM\Column(type="string", length=255)
-	 */
 	#[Assert\NotBlank(groups: ['mandatory'])]
 	#[Assert\Length(max: 255)]
 	#[Assert\Url]
+	#[ORM\Column(type: 'string', length: 255)]
 	protected $data;
 
-	/**
-	 * @ORM\Column(type="smallint")
-	 */
+	#[ORM\Column(type: 'smallint')]
 	private $kind = VideoHostingUtils::KIND_UNKNOW;
 
-	/**
-	 * @ORM\Column(type="string", length=255, nullable=true)
-	 */
+	#[ORM\Column(type: 'string', length: 255, nullable: true)]
 	private $embedIdentifier;
 
 	/////

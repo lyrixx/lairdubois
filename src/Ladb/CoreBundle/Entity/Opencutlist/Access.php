@@ -7,12 +7,9 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use Ladb\CoreBundle\Model\LocalisableInterface;
 use Ladb\CoreBundle\Model\LocalisableTrait;
 
-/**
- * @ORM\Table("tbl_opencutlist_access", indexes={
- *     @ORM\Index(name="IDX_ACCESS_ENTITY", columns={"client_ip4"})
- * })
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Opencutlist\AccessRepository")
- */
+#[ORM\Table('tbl_opencutlist_access')]
+#[ORM\Index(name: 'IDX_ACCESS_ENTITY', columns: ['client_ip4'])]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Opencutlist\AccessRepository::class)]
 class Access implements LocalisableInterface {
 
 	use LocalisableTrait;
@@ -38,102 +35,64 @@ class Access implements LocalisableInterface {
 	const OS_WIN = 1;
 	const OS_MAC = 2;
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	protected $id;
 
-	/**
-	 * @ORM\Column(name="created_at", type="datetime")
-	 * @Gedmo\Timestampable(on="create")
-	 */
+	#[ORM\Column(name: 'created_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'create')]
 	protected $createdAt;
 
-	/**
-	 * @ORM\Column(type="smallint")
-	 */
+	#[ORM\Column(type: 'smallint')]
 	protected $kind = self::KIND_UNKNOW;
 
-	/**
-	 * @ORM\Column(type="smallint")
-	 */
+	#[ORM\Column(type: 'smallint')]
 	protected $env = self::ENV_UNKNOW;
 
-	/**
-	 * @ORM\Column(type="boolean")
-	 */
+	#[ORM\Column(type: 'boolean')]
 	protected $analyzed = false;
 
-	/**
-	 * @ORM\Column(name="client_ip4", type="string")
-	 */
+	#[ORM\Column(name: 'client_ip4', type: 'string')]
 	protected $clientIp4;
 
-	/**
-	 * @ORM\Column(name="client_user_agent", type="string", nullable=true)
-	 */
+	#[ORM\Column(name: 'client_user_agent', type: 'string', nullable: true)]
 	protected $clientUserAgent;
 
-	/**
-	 * @ORM\Column(name="client_ocl_version", type="string", length=15, nullable=true)
-	 */
+	#[ORM\Column(name: 'client_ocl_version', type: 'string', length: 15, nullable: true)]
 	protected $clientOclVersion;
 
-	/**
-	 * @ORM\Column(name="client_ocl_build", type="string", length=16, nullable=true)
-	 */
+	#[ORM\Column(name: 'client_ocl_build', type: 'string', length: 16, nullable: true)]
 	protected $clientOclBuild;
 
-	/**
-	 * @ORM\Column(name="client_ocl_language", type="string", length=2, nullable=true)
-	 */
+	#[ORM\Column(name: 'client_ocl_language', type: 'string', length: 2, nullable: true)]
 	protected $clientOclLanguage;
 
-	/**
-	 * @ORM\Column(name="continent_code", type="string", length=2, nullable=true)
-	 */
+	#[ORM\Column(name: 'continent_code', type: 'string', length: 2, nullable: true)]
 	protected $continentCode;
 
-	/**
-	 * @ORM\Column(name="country_code", type="string", length=2, nullable=true)
-	 */
+	#[ORM\Column(name: 'country_code', type: 'string', length: 2, nullable: true)]
 	protected $countryCode;
 
-	/**
-	 * @ORM\Column(type="string", length=100, nullable=true)
-	 */
+	#[ORM\Column(type: 'string', length: 100, nullable: true)]
 	protected $location;
 
-	/**
-	 * @ORM\Column(type="float", nullable=true)
-	 */
+	#[ORM\Column(type: 'float', nullable: true)]
 	protected $latitude;
 
-	/**
-	 * @ORM\Column(type="float", nullable=true)
-	 */
+	#[ORM\Column(type: 'float', nullable: true)]
 	protected $longitude;
 
-	/**
-	 * @ORM\Column(name="client_os", type="smallint")
-	 */
+	#[ORM\Column(name: 'client_os', type: 'smallint')]
 	protected $clientOS = self::OS_UNKNOW;
 
-	/**
-	 * @ORM\Column(name="client_sketchup_family", type="smallint")
-	 */
+	#[ORM\Column(name: 'client_sketchup_family', type: 'smallint')]
 	protected $clientSketchupFamily = self::SKETCHUP_FAMILY_UNKNOW;
 
-	/**
-	 * @ORM\Column(name="client_sketchup_version", type="string", nullable=true)
-	 */
+	#[ORM\Column(name: 'client_sketchup_version', type: 'string', nullable: true)]
 	protected $clientSketchupVersion;
 
-	/**
-	 * @ORM\Column(name="client_sketchup_locale", type="string", length=5, nullable=true)
-	 */
+	#[ORM\Column(name: 'client_sketchup_locale', type: 'string', length: 5, nullable: true)]
 	protected $clientSketchupLocale;
 
 	/////

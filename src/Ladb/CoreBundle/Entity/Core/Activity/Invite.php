@@ -5,19 +5,15 @@ namespace Ladb\CoreBundle\Entity\Core\Activity;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Table("tbl_core_activity_invite")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Core\Activity\InviteRepository")
- */
+#[ORM\Table('tbl_core_activity_invite')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\Activity\InviteRepository::class)]
 class Invite extends AbstractActivity {
 
 	const CLASS_NAME = 'LadbCoreBundle:Core\Activity\Invite';
 	const STRIPPED_NAME = 'invite';
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\MemberInvitation")
-	 * @ORM\JoinColumn(nullable=false)
-	 */
+	#[ORM\JoinColumn(nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\MemberInvitation::class)]
 	private $invitation;
 
 	/////

@@ -5,34 +5,24 @@ namespace Ladb\CoreBundle\Entity\Core;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
-/**
- * @ORM\Table("tbl_core_tag_usage")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Core\TagUsageRepository")
- */
+#[ORM\Table('tbl_core_tag_usage')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\TagUsageRepository::class)]
 class TagUsage {
 
 	const CLASS_NAME = 'LadbCoreBundle:Core\TagUsage';
 
-	/**
-	 * @ORM\Id
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Tag", inversedBy="usages")
-	 */
+	#[ORM\Id]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Tag::class, inversedBy: 'usages')]
 	private $tag;
 
-	/**
-	 * @ORM\Id
-	 * @ORM\Column(name="entity_type", type="smallint", nullable=false)
-	 */
+	#[ORM\Id]
+	#[ORM\Column(name: 'entity_type', type: 'smallint', nullable: false)]
 	private $entityType;
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true)
-	 */
+	#[ORM\Column(type: 'integer', nullable: true)]
 	private $score = 0;
 
-	/**
-	 * @ORM\Column(type="boolean", nullable=true)
-	 */
+	#[ORM\Column(type: 'boolean', nullable: true)]
 	private $highlighted = false;
 
 	/////

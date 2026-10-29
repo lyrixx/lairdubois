@@ -10,23 +10,17 @@ use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Model\HiddableTrait;
 use Ladb\CoreBundle\Model\MentionSourceInterface;
 
-/**
- * @ORM\MappedSuperclass
- */
+#[ORM\MappedSuperclass]
 abstract class AbstractAuthoredPublication extends AbstractPublication implements AuthoredInterface, HiddableInterface, MentionSourceInterface {
 
 	use AuthoredTrait;
 	use HiddableTrait;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\User")
-	 * @ORM\JoinColumn(nullable=false)
-	 */
+	#[ORM\JoinColumn(nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\User::class)]
 	protected $user;
 
-	/**
-	 * @ORM\Column(name="visibility", type="integer")
-	 */
+	#[ORM\Column(name: 'visibility', type: 'integer')]
 	protected $visibility = self::VISIBILITY_PRIVATE;
 
 }

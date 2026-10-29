@@ -7,10 +7,8 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Intl\Intl;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Table("tbl_knowledge2_value_isbn")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Knowledge\Value\IsbnRepository")
- */
+#[ORM\Table('tbl_knowledge2_value_isbn')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Knowledge\Value\IsbnRepository::class)]
 class Isbn extends BaseValue {
 
 	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Value\Isbn';
@@ -18,17 +16,13 @@ class Isbn extends BaseValue {
 
 	const TYPE_STRIPPED_NAME = 'isbn';
 
-	/**
-	 * @ORM\Column(type="string")
-	 */
+	#[ORM\Column(type: 'string')]
 	protected $data;
 
-	/**
-	 * @ORM\Column(type="string", length=20)
-	 */
 	#[Assert\NotBlank(groups: ['mandatory'])]
 	#[Assert\Isbn]
 	#[Assert\Length(max: 20)]
+	#[ORM\Column(type: 'string', length: 20)]
 	protected $rawIsbn;
 
 	/////

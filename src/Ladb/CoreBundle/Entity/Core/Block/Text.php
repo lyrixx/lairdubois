@@ -8,25 +8,19 @@ use Ladb\CoreBundle\Validator\Constraints as LadbAssert;
 use Ladb\CoreBundle\Model\HtmlBodiedTrait;
 use Ladb\CoreBundle\Model\HtmlBodiedInterface;
 
-/**
- * @ORM\Table("tbl_core_block_text")
- * @ORM\Entity
- */
+#[ORM\Table('tbl_core_block_text')]
+#[ORM\Entity]
 class Text extends AbstractBlock implements HtmlBodiedInterface {
 
 	use HtmlBodiedTrait;
 
-	/**
-	 * @ORM\Column(type="text", nullable=false)
-	 */
 	#[Assert\NotBlank]
 	#[Assert\Length(min: 5, max: 10000)]
 	#[LadbAssert\NoMediaLink]
+	#[ORM\Column(type: 'text', nullable: false)]
 	private $body;
 
-	/**
-	 * @ORM\Column(type="text", nullable=false)
-	 */
+	#[ORM\Column(type: 'text', nullable: false)]
 	private $htmlBody;
 
 	// StrippedName /////

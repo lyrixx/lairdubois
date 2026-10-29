@@ -5,29 +5,21 @@ namespace Ladb\CoreBundle\Entity\Core\Activity;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Table("tbl_core_activity_publish")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Core\Activity\PublishRepository")
- */
+#[ORM\Table('tbl_core_activity_publish')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\Activity\PublishRepository::class)]
 class Publish extends AbstractActivity {
 
 	const CLASS_NAME = 'LadbCoreBundle:Core\Activity\Publish';
 	const STRIPPED_NAME = 'publish';
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\User")
-	 * @ORM\JoinColumn(name="publisher_user", nullable=true)
-	 */
+	#[ORM\JoinColumn(name: 'publisher_user', nullable: true)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\User::class)]
 	protected $publisherUser;
 
-	/**
-	 * @ORM\Column(name="entity_type", type="smallint", nullable=false)
-	 */
+	#[ORM\Column(name: 'entity_type', type: 'smallint', nullable: false)]
 	private $entityType;
 
-	/**
-	 * @ORM\Column(name="entity_id", type="integer", nullable=false)
-	 */
+	#[ORM\Column(name: 'entity_id', type: 'integer', nullable: false)]
 	private $entityId;
 
 	/////

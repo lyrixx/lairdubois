@@ -6,46 +6,32 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Table("tbl_funding_charge")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Funding\DonationRepository")
- */
+#[ORM\Table('tbl_funding_charge')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Funding\DonationRepository::class)]
 class Charge {
 
 	const CLASS_NAME = 'LadbCoreBundle:Funding\Charge';
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\Column(name="duty_free_amount", type="integer")
-	 */
+	#[ORM\Column(name: 'duty_free_amount', type: 'integer')]
 	private $dutyFreeAmount = 0;
 
-	/**
-	 * @ORM\Column(type="integer")
-	 */
+	#[ORM\Column(type: 'integer')]
 	private $amount = 0;
 
-	/**
-	 * @ORM\Column(type="string")
-	 */
 	#[Assert\NotBlank]
+	#[ORM\Column(type: 'string')]
 	private $label = '';
 
-	/**
-	 * @ORM\Column(type="boolean")
-	 */
+	#[ORM\Column(type: 'boolean')]
 	private $isRecurrent = false;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Funding\Funding", inversedBy="charges")
-	 * @ORM\JoinColumn(nullable=true)
-	 */
+	#[ORM\JoinColumn(nullable: true)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Funding\Funding::class, inversedBy: 'charges')]
 	private $funding = null;
 
 	/////

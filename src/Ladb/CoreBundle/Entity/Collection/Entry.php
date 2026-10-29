@@ -6,52 +6,34 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Ladb\CoreBundle\Model\IdentifiableInterface;
 
-/**
- * @ORM\Table("tbl_collection_entry",
- *		uniqueConstraints={
- *			@ORM\UniqueConstraint(name="ENTITY_COLLECTION_UNIQUE", columns={"entity_type", "entity_id", "collection_id"})
- * 		},
- * 		indexes={
- *     		@ORM\Index(name="IDX_COLLECTION_ENTRY_ENTITY", columns={"entity_type", "entity_id"})
- * 		})
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Collection\EntryRepository")
- */
+#[ORM\Table('tbl_collection_entry')]
+#[ORM\Index(name: 'IDX_COLLECTION_ENTRY_ENTITY', columns: ['entity_type', 'entity_id'])]
+#[ORM\UniqueConstraint(name: 'ENTITY_COLLECTION_UNIQUE', columns: ['entity_type', 'entity_id', 'collection_id'])]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Collection\EntryRepository::class)]
 class Entry implements IdentifiableInterface {
 
 	const CLASS_NAME = 'LadbCoreBundle:Collection\Entry';
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\Column(name="entity_type", type="smallint", nullable=false)
-	 */
+	#[ORM\Column(name: 'entity_type', type: 'smallint', nullable: false)]
 	private $entityType;
 
-	/**
-	 * @ORM\Column(name="entity_id", type="integer", nullable=false)
-	 */
+	#[ORM\Column(name: 'entity_id', type: 'integer', nullable: false)]
 	private $entityId;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Collection\Collection", inversedBy="entries")
-	 * @ORM\JoinColumn(nullable=false)
-	 */
+	#[ORM\JoinColumn(nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Collection\Collection::class, inversedBy: 'entries')]
 	private $collection;
 
-	/**
-	 * @ORM\Column(name="created_at", type="datetime")
-	 * @Gedmo\Timestampable(on="create")
-	 */
+	#[ORM\Column(name: 'created_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'create')]
 	protected $createdAt;
 
-	/**
-	 * @ORM\Column(type="integer", name="sort_index")
-	 */
+	#[ORM\Column(type: 'integer', name: 'sort_index')]
 	private $sortIndex = 0;
 
 	/////

@@ -13,7 +13,10 @@ use PHPStan\Type\UnionType;
 use Rector\Composer\InstalledPackageResolver;
 use Rector\Config\RectorConfig;
 use Rector\Php80\Rector\Class_\AnnotationToAttributeRector;
+use Rector\Php80\Rector\Property\NestedAnnotationToAttributeRector;
+use Rector\Php80\ValueObject\AnnotationPropertyToAttributeClass;
 use Rector\Php80\ValueObject\AnnotationToAttribute;
+use Rector\Php80\ValueObject\NestedAnnotationToAttribute;
 use Rector\PhpParser\Printer\BetterStandardPrinter;
 use Rector\Renaming\Rector\Name\RenameClassRector;
 use Rector\Symfony\Symfony42\Rector\New_\RootNodeTreeBuilderRector;
@@ -67,7 +70,46 @@ return static function (RectorConfig $rectorConfig): void {
         // Annotations → attributes (#25), one kind per PR. Rector 2.7 no longer applies
         // withAttributesSets(symfonyRoute: true) alone, and its "symfony" option also converts the
         // constraints and @required. The annotations of SensioFrameworkExtraBundle stay until #27.
+        // The mapping of Doctrine and Gedmo: what withAttributesSets(doctrine: true, gedmo: true)
+        // configures, for the annotations that the code uses. The nested annotations (join
+        // columns of a join table, indexes and unique constraints of a table) become attributes of
+        // the property or the class: before AnnotationToAttributeRector, which would keep them in
+        // their parent.
+        ->withConfiguredRule(NestedAnnotationToAttributeRector::class, [
+            new NestedAnnotationToAttribute('Doctrine\ORM\Mapping\JoinTable', [
+                new AnnotationPropertyToAttributeClass('Doctrine\ORM\Mapping\JoinColumn', 'joinColumns'),
+                new AnnotationPropertyToAttributeClass('Doctrine\ORM\Mapping\InverseJoinColumn', 'inverseJoinColumns', true),
+            ]),
+            new NestedAnnotationToAttribute('Doctrine\ORM\Mapping\Table', [
+                new AnnotationPropertyToAttributeClass('Doctrine\ORM\Mapping\Index', 'indexes', true),
+                new AnnotationPropertyToAttributeClass('Doctrine\ORM\Mapping\UniqueConstraint', 'uniqueConstraints', true),
+            ]),
+        ])
         ->withConfiguredRule(AnnotationToAttributeRector::class, [
+            // Class names as ::class (fully qualified), as the set writes them
+            new AnnotationToAttribute('Doctrine\ORM\Mapping\Column'),
+            new AnnotationToAttribute('Doctrine\ORM\Mapping\DiscriminatorColumn'),
+            new AnnotationToAttribute('Doctrine\ORM\Mapping\DiscriminatorMap'),
+            new AnnotationToAttribute('Doctrine\ORM\Mapping\Entity', null, ['repositoryClass']),
+            new AnnotationToAttribute('Doctrine\ORM\Mapping\GeneratedValue'),
+            new AnnotationToAttribute('Doctrine\ORM\Mapping\HasLifecycleCallbacks'),
+            new AnnotationToAttribute('Doctrine\ORM\Mapping\Id'),
+            new AnnotationToAttribute('Doctrine\ORM\Mapping\Index'),
+            new AnnotationToAttribute('Doctrine\ORM\Mapping\InheritanceType'),
+            new AnnotationToAttribute('Doctrine\ORM\Mapping\JoinColumn'),
+            new AnnotationToAttribute('Doctrine\ORM\Mapping\JoinTable'),
+            new AnnotationToAttribute('Doctrine\ORM\Mapping\ManyToMany', null, ['targetEntity']),
+            new AnnotationToAttribute('Doctrine\ORM\Mapping\ManyToOne', null, ['targetEntity']),
+            new AnnotationToAttribute('Doctrine\ORM\Mapping\MappedSuperclass', null, ['repositoryClass']),
+            new AnnotationToAttribute('Doctrine\ORM\Mapping\OneToMany', null, ['targetEntity']),
+            new AnnotationToAttribute('Doctrine\ORM\Mapping\OneToOne', null, ['targetEntity']),
+            new AnnotationToAttribute('Doctrine\ORM\Mapping\OrderBy'),
+            new AnnotationToAttribute('Doctrine\ORM\Mapping\PostRemove'),
+            new AnnotationToAttribute('Doctrine\ORM\Mapping\PreRemove'),
+            new AnnotationToAttribute('Doctrine\ORM\Mapping\Table'),
+            new AnnotationToAttribute('Doctrine\ORM\Mapping\UniqueConstraint'),
+            new AnnotationToAttribute('Gedmo\Mapping\Annotation\Slug'),
+            new AnnotationToAttribute('Gedmo\Mapping\Annotation\Timestampable'),
             new AnnotationToAttribute('Symfony\Component\Routing\Annotation\Route'),
             // The constraints that the code uses: Rector skips ours until they are attributes
             // (#[\Attribute], added by hand)

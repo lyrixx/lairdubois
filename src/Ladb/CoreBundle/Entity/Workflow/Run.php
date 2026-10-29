@@ -4,35 +4,25 @@ namespace Ladb\CoreBundle\Entity\Workflow;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Table("tbl_workflow_run")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Workflow\RunRepository")
- */
+#[ORM\Table('tbl_workflow_run')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Workflow\RunRepository::class)]
 class Run {
 
 	const CLASS_NAME = 'LadbCoreBundle:Workflow\Run';
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\Column(name="started_at", type="datetime", nullable=true)
-	 */
+	#[ORM\Column(name: 'started_at', type: 'datetime', nullable: true)]
 	private $startedAt;
 
-	/**
-	 * @ORM\Column(name="finished_at", type="datetime", nullable=true)
-	 */
+	#[ORM\Column(name: 'finished_at', type: 'datetime', nullable: true)]
 	private $finishedAt;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Workflow\Task", inversedBy="runs")
-	 * @ORM\JoinColumn(nullable=false)
-	 */
+	#[ORM\JoinColumn(nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Workflow\Task::class, inversedBy: 'runs')]
 	private $task;
 
 	/////

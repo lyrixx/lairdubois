@@ -6,10 +6,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Table("tbl_knowledge2_value_url")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Knowledge\Value\UrlRepository")
- */
+#[ORM\Table('tbl_knowledge2_value_url')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Knowledge\Value\UrlRepository::class)]
 class Url extends BaseValue {
 
 	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Value\Url';
@@ -17,12 +15,10 @@ class Url extends BaseValue {
 
 	const TYPE_STRIPPED_NAME = 'url';
 
-	/**
-	 * @ORM\Column(type="string", length=2048)
-	 */
 	#[Assert\NotBlank(groups: ['mandatory'])]
 	#[Assert\Length(max: 2048)]
 	#[Assert\Url]
+	#[ORM\Column(type: 'string', length: 2048)]
 	protected $data;
 
 	/////

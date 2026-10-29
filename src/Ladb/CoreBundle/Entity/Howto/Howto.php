@@ -45,10 +45,8 @@ use Ladb\CoreBundle\Model\ExplorableInterface;
 use Ladb\CoreBundle\Model\TaggableInterface;
 use Ladb\CoreBundle\Model\ScrapableInterface;
 
-/**
- * @ORM\Table("tbl_howto")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Howto\HowtoRepository")
- */
+#[ORM\Table('tbl_howto')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Howto\HowtoRepository::class)]
 class Howto extends AbstractDraftableAuthoredPublication implements TitledInterface, SluggedInterface, PicturedInterface, HtmlBodiedInterface, LicensedInterface, IndexableInterface, SitemapableInterface, TaggableInterface, ViewableInterface, ScrapableInterface, LikableInterface, WatchableInterface, CommentableInterface, CollectionnableInterface, ReportableInterface, ExplorableInterface, EmbeddableInterface, StripableInterface, LinkedToInterface, SpotlightableInterface {
 
 	use TitledTrait, SluggedTrait, PicturedTrait, HtmlBodiedTrait, LicensedTrait;
@@ -62,221 +60,146 @@ class Howto extends AbstractDraftableAuthoredPublication implements TitledInterf
 	const KIND_TECHNICAL = 2;
 	const KIND_DOCUMENTATION = 3;
 
-	/**
-	 * @ORM\Column(type="string", length=100)
-	 */
 	#[Assert\NotBlank]
 	#[Assert\Length(min: 4, max: 100)]
+	#[ORM\Column(type: 'string', length: 100)]
 	private $title;
 
-	/**
-	 * @Gedmo\Slug(fields={"title"}, separator="-")
-	 * @ORM\Column(type="string", length=100, unique=true)
-	 */
+	#[Gedmo\Slug(fields: ['title'], separator: '-')]
+	#[ORM\Column(type: 'string', length: 100, unique: true)]
 	private $slug;
 
-	/**
-	 * @ORM\Column(type="smallint")
-	 */
+	#[ORM\Column(type: 'smallint')]
 	private $kind = Howto::KIND_NONE;
 
-	/**
-	 * @ORM\Column(type="text", nullable=false)
-	 */
 	#[Assert\NotBlank]
 	#[Assert\Length(min: 2, max: 2000)]
+	#[ORM\Column(type: 'text', nullable: false)]
 	private $body;
 
-	/**
-	 * @ORM\Column(type="text", nullable=false)
-	 */
+	#[ORM\Column(type: 'text', nullable: false)]
 	private $htmlBody;
 
-	/**
-	 * @ORM\Column(type="integer", name="body_block_video_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'body_block_video_count')]
 	private $bodyBlockVideoCount = 0;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
-	 * @ORM\JoinColumn(name="main_picture_id", nullable=false)
-	 */
 	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\Picture')]
 	#[Assert\NotBlank]
+	#[ORM\JoinColumn(name: 'main_picture_id', nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Picture::class, cascade: ['persist'])]
 	private $mainPicture;
 
-	/**
-	 * @ORM\Column(type="boolean", name="is_work_in_progress")
-	 */
+	#[ORM\Column(type: 'boolean', name: 'is_work_in_progress')]
 	private $isWorkInProgress = false;
 
-	/**
-	 * @ORM\Column(name="draft_article_count", type="integer")
-	 */
+	#[ORM\Column(name: 'draft_article_count', type: 'integer')]
 	private $draftArticleCount = 0;
 
-	/**
-	 * @ORM\Column(name="published_article_count", type="integer")
-	 */
+	#[ORM\Column(name: 'published_article_count', type: 'integer')]
 	private $publishedArticleCount = 0;
 
-	/**
-	 * @ORM\OneToMany(targetEntity="Ladb\CoreBundle\Entity\Howto\Article", mappedBy="howto", cascade={"all"})
-	 * @ORM\OrderBy({"sortIndex" = "ASC"})
-	 */
+	#[ORM\OneToMany(targetEntity: \Ladb\CoreBundle\Entity\Howto\Article::class, mappedBy: 'howto', cascade: ['all'])]
+	#[ORM\OrderBy(['sortIndex' => 'ASC'])]
 	private $articles;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Tag", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_howto_tag")
-	 */
+	#[ORM\JoinTable(name: 'tbl_howto_tag')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Tag::class, cascade: ['persist'])]
 	private $tags;
 
-	/**
-	 * @ORM\OneToOne(targetEntity="Ladb\CoreBundle\Entity\Core\License", cascade={"persist", "remove"})
-	 * @ORM\JoinColumn(nullable=true, name="license_id")
-	 */
 	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\License')]
+	#[ORM\JoinColumn(nullable: true, name: 'license_id')]
+	#[ORM\OneToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\License::class, cascade: ['persist', 'remove'])]
 	private $license;
 
-	/**
-	 * @ORM\Column(type="integer", name="like_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'like_count')]
 	private $likeCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="watch_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'watch_count')]
 	private $watchCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="comment_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'comment_count')]
 	private $commentCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="private_collection_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'private_collection_count')]
 	private $privateCollectionCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="public_collection_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'public_collection_count')]
 	private $publicCollectionCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="view_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'view_count')]
 	private $viewCount = 0;
 
-	/**
-	 * @ORM\OneToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Spotlight", cascade={"remove"})
-	 * @ORM\JoinColumn(name="spotlight_id", referencedColumnName="id")
-	 */
+	#[ORM\JoinColumn(name: 'spotlight_id', referencedColumnName: 'id')]
+	#[ORM\OneToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Spotlight::class, cascade: ['remove'])]
 	private $spotlight = null;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
-	 * @ORM\JoinColumn(name="sticker_id", nullable=true)
-	 */
+	#[ORM\JoinColumn(name: 'sticker_id', nullable: true)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Picture::class, cascade: ['persist'])]
 	private $sticker;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
-	 * @ORM\JoinColumn(name="strip_id", nullable=true)
-	 */
+	#[ORM\JoinColumn(name: 'strip_id', nullable: true)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Picture::class, cascade: ['persist'])]
 	private $strip;
 
-	/**
-	 * @ORM\Column(type="integer", name="referral_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'referral_count')]
 	private $referralCount = 0;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Referer\Referral", cascade={"persist", "remove"})
-	 * @ORM\JoinTable(name="tbl_wonder_howto_referral", inverseJoinColumns={@ORM\JoinColumn(name="referral_id", referencedColumnName="id", unique=true)})
-	 * @ORM\OrderBy({"accessCount" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_wonder_howto_referral')]
+	#[ORM\InverseJoinColumn(name: 'referral_id', referencedColumnName: 'id', unique: true)]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Referer\Referral::class, cascade: ['persist', 'remove'])]
+	#[ORM\OrderBy(['accessCount' => 'DESC'])]
 	protected $referrals;
 
-	/**
-	 * @ORM\Column(type="integer", name="question_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'question_count')]
 	private $questionCount = 0;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Qa\Question", inversedBy="howtos", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_wonder_howto_question")
-	 */
 	#[Assert\Count(min: 0, max: 4)]
+	#[ORM\JoinTable(name: 'tbl_wonder_howto_question')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Qa\Question::class, inversedBy: 'howtos', cascade: ['persist'])]
 	private $questions;
 
-	/**
-	 * @ORM\Column(type="integer", name="creation_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'creation_count')]
 	private $creationCount = 0;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Wonder\Creation", mappedBy="howtos")
-	 */
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Wonder\Creation::class, mappedBy: 'howtos')]
 	private $creations;
 
-	/**
-	 * @ORM\Column(type="integer", name="workshop_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'workshop_count')]
 	private $workshopCount = 0;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Wonder\Workshop", mappedBy="howtos")
-	 */
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Wonder\Workshop::class, mappedBy: 'howtos')]
 	private $workshops;
 
-	/**
-	 * @ORM\Column(type="integer", name="plan_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'plan_count')]
 	private $planCount = 0;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Wonder\Plan", inversedBy="howtos", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_wonder_howto_plan")
-	 */
 	#[Assert\Count(min: 0, max: 4)]
+	#[ORM\JoinTable(name: 'tbl_wonder_howto_plan')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Wonder\Plan::class, inversedBy: 'howtos', cascade: ['persist'])]
 	private $plans;
 
-	/**
-	 * @ORM\Column(type="integer", name="workflow_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'workflow_count')]
 	private $workflowCount = 0;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Workflow\Workflow", inversedBy="howtos", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_howto_workflow")
-	 */
 	#[Assert\Count(min: 0, max: 4)]
+	#[ORM\JoinTable(name: 'tbl_howto_workflow')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Workflow\Workflow::class, inversedBy: 'howtos', cascade: ['persist'])]
 	private $workflows;
 
-	/**
-	 * @ORM\Column(type="integer", name="provider_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'provider_count')]
 	private $providerCount = 0;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Provider", inversedBy="howtos", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_howto_provider")
-	 */
 	#[Assert\Count(min: 0, max: 10)]
+	#[ORM\JoinTable(name: 'tbl_howto_provider')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Provider::class, inversedBy: 'howtos', cascade: ['persist'])]
 	private $providers;
 
-	/**
-	 * @ORM\Column(type="integer", name="school_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'school_count')]
 	private $schoolCount = 0;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\School", inversedBy="howtos", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_howto_school")
-	 */
 	#[Assert\Count(min: 0, max: 4)]
+	#[ORM\JoinTable(name: 'tbl_howto_school')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\School::class, inversedBy: 'howtos', cascade: ['persist'])]
 	private $schools;
 
 	/////

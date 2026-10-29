@@ -6,10 +6,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Table("tbl_knowledge2_value_longtext")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Knowledge\Value\TextRepository")
- */
+#[ORM\Table('tbl_knowledge2_value_longtext')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Knowledge\Value\TextRepository::class)]
 class Longtext extends BaseValue {
 
 	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Value\Longtext';
@@ -17,11 +15,9 @@ class Longtext extends BaseValue {
 
 	const TYPE_STRIPPED_NAME = 'longtext';
 
-	/**
-	 * @ORM\Column(type="text")
-	 */
 	#[Assert\NotBlank(groups: ['mandatory'])]
 	#[Assert\Length(max: 10000)]
+	#[ORM\Column(type: 'text')]
 	protected $data;
 
 	/////

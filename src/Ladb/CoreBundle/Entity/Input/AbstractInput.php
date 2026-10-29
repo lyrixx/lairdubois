@@ -5,27 +5,19 @@ namespace Ladb\CoreBundle\Entity\Input;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
-/**
- * @ORM\MappedSuperclass
- */
+#[ORM\MappedSuperclass]
 abstract class AbstractInput {
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\Column(type="string", length=50)
-	 */
+	#[ORM\Column(type: 'string', length: 50)]
 	private $label;
 
-	/**
-	 * @Gedmo\Slug(fields={"label"}, updatable=false, separator="_")
-	 * @ORM\Column(type="string", length=50, unique=true)
-	 */
+	#[Gedmo\Slug(fields: ['label'], updatable: false, separator: '_')]
+	#[ORM\Column(type: 'string', length: 50, unique: true)]
 	private $slug;
 
 	/////

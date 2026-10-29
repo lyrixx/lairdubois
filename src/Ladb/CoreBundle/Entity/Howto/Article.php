@@ -24,12 +24,10 @@ use Ladb\CoreBundle\Model\BasicEmbeddableInterface;
 use Ladb\CoreBundle\Model\WatchableChildInterface;
 use Ladb\CoreBundle\Model\ChildInterface;
 
-/**
- * @ORM\Table("tbl_howto_article")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Howto\ArticleRepository")
- */
 #[LadbAssert\ArticleBody]
 #[LadbAssert\BodyBlocks]
+#[ORM\Table('tbl_howto_article')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Howto\ArticleRepository::class)]
 class Article extends AbstractPublication implements AuthoredInterface, TitledInterface, SluggedInterface, BlockBodiedInterface, DraftableInterface, WatchableChildInterface, BasicEmbeddableInterface, ChildInterface, MentionSourceInterface {
 
 	use AuthoredTrait, TitledTrait, SluggedTrait, BlockBodiedTrait;
@@ -38,67 +36,46 @@ class Article extends AbstractPublication implements AuthoredInterface, TitledIn
 	const CLASS_NAME = 'LadbCoreBundle:Howto\Article';
 	const TYPE = 107;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Howto\Howto", inversedBy="articles")
-	 * @ORM\JoinColumn(nullable=false)
-	 */
+	#[ORM\JoinColumn(nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Howto\Howto::class, inversedBy: 'articles')]
 	private $howto;
 
-	/**
-	 * @ORM\Column(type="string", length=100)
-	 */
 	#[Assert\NotBlank]
 	#[Assert\Length(min: 4, max: 100)]
+	#[ORM\Column(type: 'string', length: 100)]
 	private $title;
 
-	/**
-	 * @Gedmo\Slug(fields={"title"}, separator="-")
-	 * @ORM\Column(type="string", length=100, unique=true)
-	 */
+	#[Gedmo\Slug(fields: ['title'], separator: '-')]
+	#[ORM\Column(type: 'string', length: 100, unique: true)]
 	private $slug;
 
-	/**
-	 * @ORM\Column(type="text", nullable=false)
-	 */
+	#[ORM\Column(type: 'text', nullable: false)]
 	private $body;
 
-	/**
-	 * @ORM\Column(type="string", length=255, nullable=false)
-	 */
+	#[ORM\Column(type: 'string', length: 255, nullable: false)]
 	private $bodyExtract;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Block\AbstractBlock", cascade={"persist", "remove"})
-	 * @ORM\JoinTable(name="tbl_howto_article_body_block", inverseJoinColumns={@ORM\JoinColumn(name="block_id", referencedColumnName="id", unique=true, onDelete="cascade")})
-	 * @ORM\OrderBy({"sortIndex" = "ASC"})
-	 */
 	#[Assert\Count(min: 1)]
+	#[ORM\JoinTable(name: 'tbl_howto_article_body_block')]
+	#[ORM\InverseJoinColumn(name: 'block_id', referencedColumnName: 'id', unique: true, onDelete: 'cascade')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Block\AbstractBlock::class, cascade: ['persist', 'remove'])]
+	#[ORM\OrderBy(['sortIndex' => 'ASC'])]
 	private $bodyBlocks;
 
-	/**
-	 * @ORM\Column(type="integer", name="body_block_picture_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'body_block_picture_count')]
 	private $bodyBlockPictureCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="body_block_video_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'body_block_video_count')]
 	private $bodyBlockVideoCount = 0;
 
-	/**
-	 * @ORM\Column(name="is_draft", type="boolean")
-	 */
+	#[ORM\Column(name: 'is_draft', type: 'boolean')]
 	protected $isDraft = true;
 
-	/**
-	 * @ORM\Column(type="integer")
-	 */
+	#[ORM\Column(type: 'integer')]
 	private $sortIndex = 0;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
-	 * @ORM\JoinColumn(name="sticker_id", nullable=true)
-	 */
+	#[ORM\JoinColumn(name: 'sticker_id', nullable: true)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Picture::class, cascade: ['persist'])]
 	private $sticker;
 
 	/////

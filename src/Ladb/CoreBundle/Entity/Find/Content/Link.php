@@ -5,23 +5,17 @@ namespace Ladb\CoreBundle\Entity\Find\Content;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\MappedSuperclass
- */
+#[ORM\MappedSuperclass]
 class Link extends AbstractContent {
 
-	/**
-	 * @ORM\Column(type="string", length=255, nullable=false)
-	 */
 	#[Assert\NotBlank(groups: ['link'])]
 	#[Assert\Url(groups: ['link'])]
+	#[ORM\Column(type: 'string', length: 255, nullable: false)]
 	private $url;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
-	 * @ORM\JoinColumn(name="thumbnail_id", nullable=true)
-	 */
 	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\Picture')]
+	#[ORM\JoinColumn(name: 'thumbnail_id', nullable: true)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Picture::class, cascade: ['persist'])]
 	private $thumbnail;
 
 	// Url /////

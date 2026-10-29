@@ -6,82 +6,55 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Table("tbl_core_notification", indexes={
- *     @ORM\Index(name="IDX_NOTIFICATION_ENTITY", columns={"group_identifier"})
- * })
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Core\NotificationRepository")
- * @ORM\HasLifecycleCallbacks()
- */
+#[ORM\Table('tbl_core_notification')]
+#[ORM\Index(name: 'IDX_NOTIFICATION_ENTITY', columns: ['group_identifier'])]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\NotificationRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Notification {
 
 	const CLASS_NAME = 'LadbCoreBundle:Core\Notification';
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\Column(name="created_at", type="datetime")
-	 * @Gedmo\Timestampable(on="create")
-	 */
+	#[ORM\Column(name: 'created_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'create')]
 	protected $createdAt;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\User")
-	 * @ORM\JoinColumn(nullable=false)
-	 */
+	#[ORM\JoinColumn(nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\User::class)]
 	private $user;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Activity\AbstractActivity", inversedBy="notifications")
-	 * @ORM\JoinColumn(nullable=false)
-	 */
+	#[ORM\JoinColumn(nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Activity\AbstractActivity::class, inversedBy: 'notifications')]
 	private $activity;
 
-	/**
-	 * @ORM\Column(type="string", length=30, name="group_identifier", nullable=true)
-	 */
+	#[ORM\Column(type: 'string', length: 30, name: 'group_identifier', nullable: true)]
 	private $groupIdentifier;
 
-	/**
-	 * @ORM\Column(type="boolean", name="is_pending_email")
-	 */
+	#[ORM\Column(type: 'boolean', name: 'is_pending_email')]
 	private $isPendingEmail = true;
 
-	/**
-	 * @ORM\Column(type="boolean", name="is_listed")
-	 */
+	#[ORM\Column(type: 'boolean', name: 'is_listed')]
 	private $isListed = false;
 
-	/**
-	 * @ORM\Column(type="boolean", name="is_shown")
-	 */
+	#[ORM\Column(type: 'boolean', name: 'is_shown')]
 	private $isShown = false;
 
-	/**
-	 * @ORM\Column(type="boolean", name="is_children_shown")
-	 */
+	#[ORM\Column(type: 'boolean', name: 'is_children_shown')]
 	private $isChildrenShown = false;
 
-	/**
-	 * @ORM\Column(type="boolean", name="is_folder")
-	 */
+	#[ORM\Column(type: 'boolean', name: 'is_folder')]
 	private $isFolder = false;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Notification", inversedBy="children")
-	 * @ORM\JoinColumn(nullable=true)
-	 */
+	#[ORM\JoinColumn(nullable: true)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Notification::class, inversedBy: 'children')]
 	private $folder;
 
-	/**
-	 * @ORM\OneToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Notification", mappedBy="folder")
-	 * @ORM\OrderBy({"id" = "DESC"})
-	 */
+	#[ORM\OneToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Notification::class, mappedBy: 'folder')]
+	#[ORM\OrderBy(['id' => 'DESC'])]
 	private $children;
 
 	/////
@@ -228,9 +201,7 @@ class Notification {
 		return array_unique($users);
 	}
 
-	/**
-	 * @ORM\PreRemove
-	 */
+	#[ORM\PreRemove]
 	public function preRemove() {
 		if ($this->getIsFolder()) {
 

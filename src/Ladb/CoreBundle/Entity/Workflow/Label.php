@@ -7,38 +7,28 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 use Ladb\CoreBundle\Validator\Constraints as LadbAssert;
 
-/**
- * @ORM\Table("tbl_workflow_label")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Workflow\LabelRepository")
- */
+#[ORM\Table('tbl_workflow_label')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Workflow\LabelRepository::class)]
 class Label {
 
 	const CLASS_NAME = 'LadbCoreBundle:Workflow\Label';
 	const COLOR_SEQUENCE = [ '#61BD4F', '#F2D600', '#FFAB4A', '#EB5A46', '#C377E0', '#0079BF', '#00C2E0', '#51E898', '#FF80CE', '#4D4D4D' ];
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\Column(type="string", length=40)
-	 */
 	#[Assert\NotBlank]
+	#[ORM\Column(type: 'string', length: 40)]
 	private $name;
 
-	/**
-	 * @ORM\Column(type="string", length=7)
-	 */
 	#[LadbAssert\ValidHexColor]
+	#[ORM\Column(type: 'string', length: 7)]
 	private $color;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Workflow\Workflow", inversedBy="labels")
-	 * @ORM\JoinColumn(nullable=false)
-	 */
+	#[ORM\JoinColumn(nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Workflow\Workflow::class, inversedBy: 'labels')]
 	private $workflow;
 
 	/////

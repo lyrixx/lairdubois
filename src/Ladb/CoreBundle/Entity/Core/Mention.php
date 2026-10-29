@@ -7,49 +7,33 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use Ladb\CoreBundle\Model\AuthoredInterface;
 use Ladb\CoreBundle\Model\AuthoredTrait;
 
-/**
- * @ORM\Table("tbl_core_mention",
- *		uniqueConstraints={
- *			@ORM\UniqueConstraint(name="ENTITY_MENTIONED_USER_UNIQUE", columns={"entity_type", "entity_id", "mentioned_user_id"})
- * 		},
- * 		indexes={
- *     		@ORM\Index(name="IDX_MENTION_ENTITY", columns={"entity_type", "entity_id"})
- * 		})
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Core\MentionRepository")
- */
+#[ORM\Table('tbl_core_mention')]
+#[ORM\Index(name: 'IDX_MENTION_ENTITY', columns: ['entity_type', 'entity_id'])]
+#[ORM\UniqueConstraint(name: 'ENTITY_MENTIONED_USER_UNIQUE', columns: ['entity_type', 'entity_id', 'mentioned_user_id'])]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\MentionRepository::class)]
 class Mention implements AuthoredInterface {
 
 	use AuthoredTrait;
 
 	const CLASS_NAME = 'LadbCoreBundle:Core\Mention';
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\Column(name="entity_type", type="smallint", nullable=false)
-	 */
+	#[ORM\Column(name: 'entity_type', type: 'smallint', nullable: false)]
 	private $entityType;
 
-	/**
-	 * @ORM\Column(name="entity_id", type="integer", nullable=false)
-	 */
+	#[ORM\Column(name: 'entity_id', type: 'integer', nullable: false)]
 	private $entityId;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\User")
-	 * @ORM\JoinColumn(name="mentioned_user_id", nullable=false)
-	 */
+	#[ORM\JoinColumn(name: 'mentioned_user_id', nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\User::class)]
 	private $mentionedUser = null;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\User")
-	 * @ORM\JoinColumn(nullable=false)
-	 */
+	#[ORM\JoinColumn(nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\User::class)]
 	private $user;
 
 	/////

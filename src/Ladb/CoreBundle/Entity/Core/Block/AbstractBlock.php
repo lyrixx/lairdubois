@@ -6,37 +6,27 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Table("tbl_core_block")
- * @ORM\Entity
- * @ORM\InheritanceType("JOINED")
- * @ORM\DiscriminatorColumn(name="discr", type="integer")
- * @ORM\DiscriminatorMap({1 = "Text", 2 = "Gallery", 3 = "Video"})
- */
+#[ORM\Table('tbl_core_block')]
+#[ORM\Entity]
+#[ORM\InheritanceType('JOINED')]
+#[ORM\DiscriminatorColumn(name: 'discr', type: 'integer')]
+#[ORM\DiscriminatorMap([1 => 'Text', 2 => 'Gallery', 3 => 'Video'])]
 abstract class AbstractBlock {
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\Column(name="created_at", type="datetime")
-	 * @Gedmo\Timestampable(on="create")
-	 */
+	#[ORM\Column(name: 'created_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'create')]
 	private $createdAt;
 
-	/**
-	 * @ORM\Column(name="updated_at", type="datetime")
-	 * @Gedmo\Timestampable(on="update")
-	 */
+	#[ORM\Column(name: 'updated_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'update')]
 	private $updatedAt;
 
-	/**
-	 * @ORM\Column(name="sort_index", type="integer")
-	 */
+	#[ORM\Column(name: 'sort_index', type: 'integer')]
 	private $sortIndex = 0;
 
 	/////

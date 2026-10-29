@@ -37,10 +37,8 @@ use Ladb\CoreBundle\Model\TaggableTrait;
 use Ladb\CoreBundle\Model\LicensedInterface;
 use Ladb\CoreBundle\Model\LicensedTrait;
 
-/**
- * @ORM\Table("tbl_workflow")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Workflow\WorkflowRepository")
- */
+#[ORM\Table('tbl_workflow')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Workflow\WorkflowRepository::class)]
 class Workflow extends AbstractAuthoredPublication implements IndexableInterface, SitemapableInterface, TitledInterface, SluggedInterface, PicturedInterface, HtmlBodiedInterface, TaggableInterface, ViewableInterface, LikableInterface, CommentableInterface, WatchableInterface, LicensedInterface, InspirableInterface, CollectionnableInterface, LinkedToInterface {
 
 	use TitledTrait, SluggedTrait, PicturedTrait, HtmlBodiedTrait, LicensedTrait;
@@ -49,191 +47,122 @@ class Workflow extends AbstractAuthoredPublication implements IndexableInterface
 	const CLASS_NAME = 'LadbCoreBundle:Workflow\Workflow';
 	const TYPE = 118;
 
-	/**
-	 * @ORM\Column(type="string", length=100)
-	 */
 	#[Assert\NotBlank]
 	#[Assert\Length(min: 4, max: 100)]
+	#[ORM\Column(type: 'string', length: 100)]
 	private $title;
 
-	/**
-	 * @Gedmo\Slug(fields={"title"}, separator="-")
-	 * @ORM\Column(type="string", length=100, unique=true)
-	 */
+	#[Gedmo\Slug(fields: ['title'], separator: '-')]
+	#[ORM\Column(type: 'string', length: 100, unique: true)]
 	private $slug;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
-	 * @ORM\JoinColumn(name="main_picture_id", nullable=true)
-	 */
+	#[ORM\JoinColumn(name: 'main_picture_id', nullable: true)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Picture::class, cascade: ['persist'])]
 	private $mainPicture;
 
-	/**
-	 * @ORM\Column(type="text", nullable=true)
-	 */
 	#[Assert\Length(max: 4000)]
 	#[Assert\Length(min: 5, groups: ['public'])]
 	#[Assert\NotBlank(groups: ['public'])]
+	#[ORM\Column(type: 'text', nullable: true)]
 	private $body;
 
-	/**
-	 * @ORM\Column(type="text", name="html_body", nullable=true)
-	 */
+	#[ORM\Column(type: 'text', name: 'html_body', nullable: true)]
 	private $htmlBody;
 
-	/**
-	 * @ORM\Column(type="integer", name="estimated_duration")
-	 */
+	#[ORM\Column(type: 'integer', name: 'estimated_duration')]
 	private $estimatedDuration = 0;
 
-	/**
-	 * @ORM\Column(type="integer")
-	 */
+	#[ORM\Column(type: 'integer')]
 	private $duration = 0;
 
-	/**
-	 * @ORM\OneToMany(targetEntity="Ladb\CoreBundle\Entity\Workflow\Task", mappedBy="workflow", cascade={"all"})
-	 * @ORM\OrderBy({"positionTop" = "ASC", "positionLeft" = "ASC"})
-	 */
+	#[ORM\OneToMany(targetEntity: \Ladb\CoreBundle\Entity\Workflow\Task::class, mappedBy: 'workflow', cascade: ['all'])]
+	#[ORM\OrderBy(['positionTop' => 'ASC', 'positionLeft' => 'ASC'])]
 	protected $tasks;
 
-	/**
-	 * @ORM\Column(type="integer", name="task_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'task_count')]
 	private $taskCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="running_task_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'running_task_count')]
 	private $runningTaskCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="done_task_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'done_task_count')]
 	private $doneTaskCount = 0;
 
-	/**
-	 * @ORM\OneToMany(targetEntity="Ladb\CoreBundle\Entity\Workflow\Part", mappedBy="workflow", cascade={"all"})
-	 */
+	#[ORM\OneToMany(targetEntity: \Ladb\CoreBundle\Entity\Workflow\Part::class, mappedBy: 'workflow', cascade: ['all'])]
 	protected $parts;
 
-	/**
-	 * @ORM\OneToMany(targetEntity="Ladb\CoreBundle\Entity\Workflow\Label", mappedBy="workflow", cascade={"all"})
-	 */
+	#[ORM\OneToMany(targetEntity: \Ladb\CoreBundle\Entity\Workflow\Label::class, mappedBy: 'workflow', cascade: ['all'])]
 	protected $labels;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Tag", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_workflow_tag")
-	 */
+	#[ORM\JoinTable(name: 'tbl_workflow_tag')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Tag::class, cascade: ['persist'])]
 	private $tags;
 
-	/**
-	 * @ORM\OneToOne(targetEntity="Ladb\CoreBundle\Entity\Core\License", cascade={"all"})
-	 * @ORM\JoinColumn(nullable=true, name="license_id")
-	 */
 	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\License')]
+	#[ORM\JoinColumn(nullable: true, name: 'license_id')]
+	#[ORM\OneToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\License::class, cascade: ['all'])]
 	private $license;
 
-	/**
-	 * @ORM\Column(type="integer", name="like_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'like_count')]
 	private $likeCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="watch_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'watch_count')]
 	private $watchCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="comment_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'comment_count')]
 	private $commentCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="private_collection_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'private_collection_count')]
 	private $privateCollectionCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="public_collection_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'public_collection_count')]
 	private $publicCollectionCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="view_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'view_count')]
 	private $viewCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="copy_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'copy_count')]
 	private $copyCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="rebound_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'rebound_count')]
 	private $reboundCount = 0;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Workflow\Workflow", mappedBy="inspirations")
-	 */
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Workflow\Workflow::class, mappedBy: 'inspirations')]
 	private $rebounds;
 
-	/**
-	 * @ORM\Column(type="integer", name="inspiration_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'inspiration_count')]
 	private $inspirationCount = 0;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Workflow\Workflow", inversedBy="rebounds", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_workflow_inspiration",
-	 *      	joinColumns={ @ORM\JoinColumn(name="workflow_id", referencedColumnName="id") },
-	 *      	inverseJoinColumns={ @ORM\JoinColumn(name="rebound_workflow_id", referencedColumnName="id") }
-	 *      )
-	 */
+	#[ORM\JoinTable(name: 'tbl_workflow_inspiration')]
+	#[ORM\JoinColumn(name: 'workflow_id', referencedColumnName: 'id')]
+	#[ORM\InverseJoinColumn(name: 'rebound_workflow_id', referencedColumnName: 'id')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Workflow\Workflow::class, inversedBy: 'rebounds', cascade: ['persist'])]
 	private $inspirations;
 
-	/**
-	 * @ORM\Column(type="integer", name="creation_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'creation_count')]
 	private $creationCount = 0;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Wonder\Creation", mappedBy="workflows")
-	 */
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Wonder\Creation::class, mappedBy: 'workflows')]
 	private $creations;
 
-	/**
-	 * @ORM\Column(type="integer", name="plan_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'plan_count')]
 	private $planCount = 0;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Wonder\Plan", inversedBy="workflows", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_workflow_plan")
-	 */
 	#[Assert\Count(min: 0, max: 4)]
+	#[ORM\JoinTable(name: 'tbl_workflow_plan')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Wonder\Plan::class, inversedBy: 'workflows', cascade: ['persist'])]
 	private $plans;
 
-	/**
-	 * @ORM\Column(type="integer", name="workshop_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'workshop_count')]
 	private $workshopCount = 0;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Wonder\Workshop", mappedBy="workflows")
-	 */
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Wonder\Workshop::class, mappedBy: 'workflows')]
 	private $workshops;
 
-	/**
-	 * @ORM\Column(type="integer", name="howto_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'howto_count')]
 	private $howtoCount = 0;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Howto\Howto", mappedBy="workflows")
-	 */
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Howto\Howto::class, mappedBy: 'workflows')]
 	private $howtos;
 
 	/////

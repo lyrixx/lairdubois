@@ -15,11 +15,9 @@ use Ladb\CoreBundle\Model\FeedbackableTrait;
 use Ladb\CoreBundle\Model\SpotlightableInterface;
 use Ladb\CoreBundle\Model\SpotlightableTrait;
 
-/**
- * @ORM\Table("tbl_wonder_creation")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Wonder\CreationRepository")
- */
 #[LadbAssert\BodyBlocks]
+#[ORM\Table('tbl_wonder_creation')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Wonder\CreationRepository::class)]
 class Creation extends AbstractWonder implements BlockBodiedInterface, InspirableInterface, FeedbackableInterface, SpotlightableInterface {
 
 	use BlockBodiedTrait;
@@ -28,180 +26,123 @@ class Creation extends AbstractWonder implements BlockBodiedInterface, Inspirabl
 	const CLASS_NAME = 'LadbCoreBundle:Wonder\Creation';
 	const TYPE = 100;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_wonder_creation_picture")
-	 * @ORM\OrderBy({"sortIndex" = "ASC"})
-	 */
 	#[Assert\Count(min: 1, max: 5)]
+	#[ORM\JoinTable(name: 'tbl_wonder_creation_picture')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Picture::class, cascade: ['persist'])]
+	#[ORM\OrderBy(['sortIndex' => 'ASC'])]
 	protected $pictures;
 
-	/**
-	 * @ORM\Column(type="string", length=255, nullable=false)
-	 */
+	#[ORM\Column(type: 'string', length: 255, nullable: false)]
 	private $bodyExtract;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Block\AbstractBlock", cascade={"persist", "remove"})
-	 * @ORM\JoinTable(name="tbl_wonder_creation_body_block", inverseJoinColumns={@ORM\JoinColumn(name="block_id", referencedColumnName="id", unique=true, onDelete="cascade")})
-	 * @ORM\OrderBy({"sortIndex" = "ASC"})
-	 */
 	#[Assert\Count(min: 1)]
+	#[ORM\JoinTable(name: 'tbl_wonder_creation_body_block')]
+	#[ORM\InverseJoinColumn(name: 'block_id', referencedColumnName: 'id', unique: true, onDelete: 'cascade')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Block\AbstractBlock::class, cascade: ['persist', 'remove'])]
+	#[ORM\OrderBy(['sortIndex' => 'ASC'])]
 	private $bodyBlocks;
 
-	/**
-	 * @ORM\Column(type="integer", name="body_block_picture_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'body_block_picture_count')]
 	private $bodyBlockPictureCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="body_block_video_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'body_block_video_count')]
 	private $bodyBlockVideoCount = 0;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Input\Wood", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_wonder_creation_wood")
-	 */
+	#[ORM\JoinTable(name: 'tbl_wonder_creation_wood')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Input\Wood::class, cascade: ['persist'])]
 	private $woods;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Input\Tool", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_wonder_creation_tool")
-	 */
+	#[ORM\JoinTable(name: 'tbl_wonder_creation_tool')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Input\Tool::class, cascade: ['persist'])]
 	private $tools;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Input\Finish", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_wonder_creation_finish")
-	 */
+	#[ORM\JoinTable(name: 'tbl_wonder_creation_finish')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Input\Finish::class, cascade: ['persist'])]
 	private $finishes;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Input\Hardware", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_wonder_creation_hardware")
-	 */
+	#[ORM\JoinTable(name: 'tbl_wonder_creation_hardware')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Input\Hardware::class, cascade: ['persist'])]
 	private $hardwares;
 
-	/**
-	 * @ORM\OneToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Spotlight", cascade={"remove"})
-	 * @ORM\JoinColumn(name="spotlight_id", referencedColumnName="id")
-	 */
+	#[ORM\JoinColumn(name: 'spotlight_id', referencedColumnName: 'id')]
+	#[ORM\OneToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Spotlight::class, cascade: ['remove'])]
 	private $spotlight = null;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Tag", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_wonder_creation_tag")
-	 */
+	#[ORM\JoinTable(name: 'tbl_wonder_creation_tag')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Tag::class, cascade: ['persist'])]
 	protected $tags;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Referer\Referral", cascade={"persist", "remove"})
-	 * @ORM\JoinTable(name="tbl_wonder_creation_referral", inverseJoinColumns={@ORM\JoinColumn(name="referral_id", referencedColumnName="id", unique=true)})
-	 * @ORM\OrderBy({"accessCount" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_wonder_creation_referral')]
+	#[ORM\InverseJoinColumn(name: 'referral_id', referencedColumnName: 'id', unique: true)]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Referer\Referral::class, cascade: ['persist', 'remove'])]
+	#[ORM\OrderBy(['accessCount' => 'DESC'])]
 	protected $referrals;
 
-	/**
-	 * @ORM\Column(type="integer", name="feedback_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'feedback_count')]
 	private $feedbackCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="rebound_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'rebound_count')]
 	private $reboundCount = 0;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Wonder\Creation", mappedBy="inspirations")
-	 */
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Wonder\Creation::class, mappedBy: 'inspirations')]
 	private $rebounds;
 
-	/**
-	 * @ORM\Column(type="integer", name="inspiration_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'inspiration_count')]
 	private $inspirationCount = 0;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Wonder\Creation", inversedBy="rebounds", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_wonder_creation_inspiration",
-	 *      	joinColumns={ @ORM\JoinColumn(name="creation_id", referencedColumnName="id") },
-	 *      	inverseJoinColumns={ @ORM\JoinColumn(name="rebound_creation_id", referencedColumnName="id") }
-	 *      )
-	 */
 	#[Assert\Count(min: 0, max: 4)]
+	#[ORM\JoinTable(name: 'tbl_wonder_creation_inspiration')]
+	#[ORM\JoinColumn(name: 'creation_id', referencedColumnName: 'id')]
+	#[ORM\InverseJoinColumn(name: 'rebound_creation_id', referencedColumnName: 'id')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Wonder\Creation::class, inversedBy: 'rebounds', cascade: ['persist'])]
 	private $inspirations;
 
-	/**
-	 * @ORM\Column(type="integer", name="question_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'question_count')]
 	private $questionCount = 0;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Qa\Question", inversedBy="creations", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_wonder_creation_question")
-	 */
 	#[Assert\Count(min: 0, max: 4)]
+	#[ORM\JoinTable(name: 'tbl_wonder_creation_question')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Qa\Question::class, inversedBy: 'creations', cascade: ['persist'])]
 	private $questions;
 
-	/**
-	 * @ORM\Column(type="integer", name="plan_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'plan_count')]
 	private $planCount = 0;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Wonder\Plan", inversedBy="creations", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_wonder_creation_plan")
-	 */
 	#[Assert\Count(min: 0, max: 4)]
+	#[ORM\JoinTable(name: 'tbl_wonder_creation_plan')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Wonder\Plan::class, inversedBy: 'creations', cascade: ['persist'])]
 	private $plans;
 
-	/**
-	 * @ORM\Column(type="integer", name="howto_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'howto_count')]
 	private $howtoCount = 0;
 
-    /**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Howto\Howto", inversedBy="creations", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_wonder_creation_howto")
-	 */
 	#[Assert\Count(min: 0, max: 4)]
+	#[ORM\JoinTable(name: 'tbl_wonder_creation_howto')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Howto\Howto::class, inversedBy: 'creations', cascade: ['persist'])]
 	private $howtos;
 
-	/**
-	 * @ORM\Column(type="integer", name="workflow_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'workflow_count')]
 	private $workflowCount = 0;
 
-    /**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Workflow\Workflow", inversedBy="creations", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_wonder_creation_workflow")
-	 */
 	#[Assert\Count(min: 0, max: 4)]
+	#[ORM\JoinTable(name: 'tbl_wonder_creation_workflow')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Workflow\Workflow::class, inversedBy: 'creations', cascade: ['persist'])]
 	private $workflows;
 
-	/**
-	 * @ORM\Column(type="integer", name="provider_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'provider_count')]
 	private $providerCount = 0;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Provider", inversedBy="creations", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_wonder_creation_provider")
-	 */
 	#[Assert\Count(min: 0, max: 10)]
+	#[ORM\JoinTable(name: 'tbl_wonder_creation_provider')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Provider::class, inversedBy: 'creations', cascade: ['persist'])]
 	private $providers;
 
-	/**
-	 * @ORM\Column(type="integer", name="school_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'school_count')]
 	private $schoolCount = 0;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\School", inversedBy="creations", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_wonder_creation_school")
-	 */
 	#[Assert\Count(min: 0, max: 4)]
+	#[ORM\JoinTable(name: 'tbl_wonder_creation_school')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\School::class, inversedBy: 'creations', cascade: ['persist'])]
 	private $schools;
 
 	/////

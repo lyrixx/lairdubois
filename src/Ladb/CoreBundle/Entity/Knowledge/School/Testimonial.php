@@ -11,11 +11,9 @@ use Ladb\CoreBundle\Model\AuthoredTrait;
 use Ladb\CoreBundle\Model\HtmlBodiedTrait;
 use Ladb\CoreBundle\Model\HtmlBodiedInterface;
 
-/**
- * @ORM\Table("tbl_knowledge2_school_testimonial")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Knowledge\School\TestimonialRepository")
- */
 #[LadbAssert\SchoolTestimonial]
+#[ORM\Table('tbl_knowledge2_school_testimonial')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Knowledge\School\TestimonialRepository::class)]
 class Testimonial implements TypableInterface, HtmlBodiedInterface {
 
 	use AuthoredTrait, HtmlBodiedTrait;
@@ -23,65 +21,45 @@ class Testimonial implements TypableInterface, HtmlBodiedInterface {
 	const CLASS_NAME = 'LadbCoreBundle:Knowledge\School\Testimonial';
 	const TYPE = 116;
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\Column(name="created_at", type="datetime")
-	 * @Gedmo\Timestampable(on="create")
-	 */
+	#[ORM\Column(name: 'created_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'create')]
 	protected $createdAt;
 
-	/**
-	 * @ORM\Column(name="updated_at", type="datetime")
-	 * @Gedmo\Timestampable(on="update")
-	 */
+	#[ORM\Column(name: 'updated_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'update')]
 	private $updatedAt;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Knowledge\School", inversedBy="testimonials")
-	 * @ORM\JoinColumn(nullable=false)
-	 */
+	#[ORM\JoinColumn(nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\School::class, inversedBy: 'testimonials')]
 	private $school;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\User")
-	 * @ORM\JoinColumn(nullable=false)
-	 */
+	#[ORM\JoinColumn(nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\User::class)]
 	private $user;
 
-	/**
-	 * @ORM\Column(type="string", nullable=true)
-	 */
+	#[ORM\Column(type: 'string', nullable: true)]
 	private $diploma;
 
-	/**
-	 * @ORM\Column(name="from_year", type="integer")
-	 */
 	#[Assert\NotNull]
 	#[Assert\GreaterThanOrEqual(1900)]
+	#[ORM\Column(name: 'from_year', type: 'integer')]
 	private $fromYear;
 
-	/**
-	 * @ORM\Column(name="to_year", type="integer", nullable=true)
-	 */
+	#[ORM\Column(name: 'to_year', type: 'integer', nullable: true)]
 	private $toYear;
 
-	/**
-	 * @ORM\Column(type="text", nullable=true)
-	 */
 	#[Assert\NotBlank]
 	#[Assert\Length(min: 5, max: 5000)]
 	#[LadbAssert\NoMediaLink]
+	#[ORM\Column(type: 'text', nullable: true)]
 	private $body;
 
-	/**
-	 * @ORM\Column(name="html_body", type="text", nullable=true)
-	 */
+	#[ORM\Column(name: 'html_body', type: 'text', nullable: true)]
 	private $htmlBody;
 
 	/////

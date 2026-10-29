@@ -17,17 +17,15 @@ use Symfony\Component\Security\Core\User\EquatableInterface;
 use Symfony\Component\Security\Core\User\LegacyPasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-/**
- * @ORM\Table("tbl_core_user")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Core\UserRepository")
- * @ORM\HasLifecycleCallbacks
- */
 #[UniqueEntity('email')]
 #[LadbAssert\ValidUserUsername]
 #[LadbAssert\ValidUserDisplayname]
 #[LadbAssert\ValidUserEmail]
 #[UniqueEntity(fields: 'usernameCanonical', errorPath: 'username', message: 'fos_user.username.already_used', groups: ['Registration', 'Profile'])]
 #[UniqueEntity(fields: 'emailCanonical', errorPath: 'email', message: 'fos_user.email.already_used', groups: ['Registration', 'Profile'])]
+#[ORM\Table('tbl_core_user')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\UserRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class User implements UserInterface, LegacyPasswordAuthenticatedUserInterface, EquatableInterface, \Serializable, IndexableInterface, SitemapableInterface, LocalisableInterface {
 
 	use IndexableTrait, SitemapableTrait, LocalisableTrait;
@@ -43,157 +41,107 @@ class User implements UserInterface, LegacyPasswordAuthenticatedUserInterface, E
 	const ACCOUNT_TYPE_HOBBYIST = 3;
 	const ACCOUNT_TYPE_BRAND = 4;
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	protected $id;
 
-	/**
-	 * @ORM\Column(name="created_at", type="datetime")
-	 * @Gedmo\Timestampable(on="create")
-	 */
+	#[ORM\Column(name: 'created_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'create')]
 	private $createdAt;
 
-	/**
-	 * @ORM\Column(name="updated_at", type="datetime")
-	 * @Gedmo\Timestampable(on="update")
-	 */
+	#[ORM\Column(name: 'updated_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'update')]
 	private $updatedAt;
 
-	/**
-	 * @ORM\Column(type="boolean", nullable=true, name="email_confirmed")
-	 */
+	#[ORM\Column(type: 'boolean', nullable: true, name: 'email_confirmed')]
 	private $emailConfirmed = false;
 
-	/**
-	 * @ORM\Column(type="string", length=180)
-	 */
 	#[Assert\Length(min: 3, max: 25)]
+	#[ORM\Column(type: 'string', length: 180)]
 	protected $username;
 
-	/**
-	 * @ORM\Column(type="string", length=180, unique=true, name="username_canonical")
-	 */
+	#[ORM\Column(type: 'string', length: 180, unique: true, name: 'username_canonical')]
 	protected $usernameCanonical;
 
-	/**
-	 * @ORM\Column(type="string", length=180)
-	 */
 	#[Assert\NotBlank(groups: ['settings'])]
 	#[Assert\Email(mode: 'strict', groups: ['settings'])]
+	#[ORM\Column(type: 'string', length: 180)]
 	protected $email;
 
-	/**
-	 * @ORM\Column(type="string", length=180, unique=true, name="email_canonical")
-	 */
+	#[ORM\Column(type: 'string', length: 180, unique: true, name: 'email_canonical')]
 	protected $emailCanonical;
 
-	/**
-	 * @ORM\Column(type="boolean")
-	 */
+	#[ORM\Column(type: 'boolean')]
 	protected $enabled;
 
 	/**
 	 * The salt of the sha512 hash of FOSUserBundle, null once the password is hashed again (#24).
-	 *
-	 * @ORM\Column(type="string", nullable=true)
 	 */
+	#[ORM\Column(type: 'string', nullable: true)]
 	protected $salt;
 
-	/**
-	 * @ORM\Column(type="string")
-	 */
+	#[ORM\Column(type: 'string')]
 	protected $password;
 
 	protected $plainPassword;
 
-	/**
-	 * @ORM\Column(type="datetime", nullable=true, name="last_login")
-	 */
+	#[ORM\Column(type: 'datetime', nullable: true, name: 'last_login')]
 	protected $lastLogin;
 
 	/**
 	 * The token of the forgotten password and of the email confirmation.
-	 *
-	 * @ORM\Column(type="string", length=180, unique=true, nullable=true, name="confirmation_token")
 	 */
+	#[ORM\Column(type: 'string', length: 180, unique: true, nullable: true, name: 'confirmation_token')]
 	protected $confirmationToken;
 
-	/**
-	 * @ORM\Column(type="datetime", nullable=true, name="password_requested_at")
-	 */
+	#[ORM\Column(type: 'datetime', nullable: true, name: 'password_requested_at')]
 	protected $passwordRequestedAt;
 
-	/**
-	 * @ORM\Column(type="array")
-	 */
+	#[ORM\Column(type: 'array')]
 	protected $roles;
 
-	/**
-	 * @ORM\Column(type="string", length=25, unique=true)
-	 */
 	#[Assert\Length(min: 3, max: 25, groups: ['settings'])]
 	#[Assert\NotBlank(groups: ['settings'])]
 	#[Assert\Regex("/^[ a-zA-Z0-9ÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿÑñ'°’’-]+\$/")]
+	#[ORM\Column(type: 'string', length: 25, unique: true)]
 	private $displayname;
 
-	/**
-	 * @ORM\Column(type="string", length=25, name="displayname_canonical")
-	 */
+	#[ORM\Column(type: 'string', length: 25, name: 'displayname_canonical')]
 	private $displaynameCanonical;
 
-	/**
-	 * @ORM\Column(type="string", length=100, nullable=true)
-	 */
 	#[Assert\Length(min: 3, max: 100, groups: ['settings'])]
 	#[Assert\Regex("/^[A-Za-z][ a-zA-Z0-9ÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿÑñ'°’’-]+\$/")]
+	#[ORM\Column(type: 'string', length: 100, nullable: true)]
 	private $fullname;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist", "remove"})
-	 * @ORM\JoinColumn(name="avatar_id", nullable=true)
-	 */
 	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\Picture')]
+	#[ORM\JoinColumn(name: 'avatar_id', nullable: true)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Picture::class, cascade: ['persist', 'remove'])]
 	private $avatar;
 
-	/**
-	 * @ORM\Column(type="string", length=100, nullable=true)
-	 */
+	#[ORM\Column(type: 'string', length: 100, nullable: true)]
 	private $location;
 
-	/**
-	 * @ORM\Column(type="float", nullable=true)
-	 */
+	#[ORM\Column(type: 'float', nullable: true)]
 	private $latitude;
 
-	/**
-	 * @ORM\Column(type="float", nullable=true)
-	 */
+	#[ORM\Column(type: 'float', nullable: true)]
 	private $longitude;
 
-	/**
-	 * @ORM\Column(type="smallint", name="account_type")
-	 */
+	#[ORM\Column(type: 'smallint', name: 'account_type')]
 	private $accountType = User::ACCOUNT_TYPE_NONE;
 
-	/**
-	 * @ORM\OneToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Follower", mappedBy="followingUser")
-	 */
+	#[ORM\OneToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Follower::class, mappedBy: 'followingUser')]
 	private $followers;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\UserMeta", cascade={"persist", "remove"})
-	 * @ORM\JoinColumn(name="meta_id", nullable=true)
-	 */
+	#[ORM\JoinColumn(name: 'meta_id', nullable: true)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\UserMeta::class, cascade: ['persist', 'remove'])]
 	private $meta = null;
 
 	// Team /////
 
-	/**
-	 * @ORM\Column(type="boolean", name="is_team", nullable=false)
-	 */
+	#[ORM\Column(type: 'boolean', name: 'is_team', nullable: false)]
 	private $isTeam = false;
 
 	/////

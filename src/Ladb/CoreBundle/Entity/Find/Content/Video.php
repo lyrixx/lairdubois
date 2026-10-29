@@ -6,20 +6,14 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Ladb\CoreBundle\Utils\VideoHostingUtils;
 
-/**
- * @ORM\Table("tbl_find_content_video")
- * @ORM\Entity
- */
+#[ORM\Table('tbl_find_content_video')]
+#[ORM\Entity]
 class Video extends Link {
 
-	/**
-	 * @ORM\Column(type="smallint")
-	 */
+	#[ORM\Column(type: 'smallint')]
 	private $kind = VideoHostingUtils::KIND_UNKNOW;
 
-	/**
-	 * @ORM\Column(type="string", length=255, nullable=true)
-	 */
+	#[ORM\Column(type: 'string', length: 255, nullable: true)]
 	private $embedIdentifier;
 
 	// Kind /////

@@ -7,46 +7,32 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 use Ladb\CoreBundle\Model\IdentifiableInterface;
 
-/**
- * @ORM\Table("tbl_core_member_invitation",
- *		uniqueConstraints={
- *			@ORM\UniqueConstraint(name="ENTITY_MEMBER_INVITATION_UNIQUE", columns={"team_id", "recipient_id"})
- * 		},)
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Core\MemberInvitationRepository")
- */
+#[ORM\Table('tbl_core_member_invitation')]
+#[ORM\UniqueConstraint(name: 'ENTITY_MEMBER_INVITATION_UNIQUE', columns: ['team_id', 'recipient_id'])]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\MemberInvitationRepository::class)]
 class MemberInvitation implements IdentifiableInterface {
 
 	const CLASS_NAME = 'LadbCoreBundle:Core\MemberInvitation';
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	protected $id;
 
-	/**
-	 * @ORM\Column(name="created_at", type="datetime")
-	 * @Gedmo\Timestampable(on="create")
-	 */
+	#[ORM\Column(name: 'created_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'create')]
 	private $createdAt;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\User")
-	 * @ORM\JoinColumn(name="team_id", nullable=false)
-	 */
+	#[ORM\JoinColumn(name: 'team_id', nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\User::class)]
 	private $team;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\User")
-	 * @ORM\JoinColumn(nullable=false)
-	 */
+	#[ORM\JoinColumn(nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\User::class)]
 	private $sender;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\User")
-	 * @ORM\JoinColumn(nullable=false)
-	 */
+	#[ORM\JoinColumn(nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\User::class)]
 	private $recipient;
 
 	// ID /////

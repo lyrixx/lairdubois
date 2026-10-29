@@ -10,32 +10,24 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Ladb\CoreBundle\Model\HtmlBodiedTrait;
 use Ladb\CoreBundle\Model\HtmlBodiedInterface;
 
-/**
- * @ORM\Table("tbl_core_biography")
- * @ORM\Entity
- */
+#[ORM\Table('tbl_core_biography')]
+#[ORM\Entity]
 class Biography implements IdentifiableInterface, HtmlBodiedInterface {
 
 	use HtmlBodiedTrait;
 
 	const CLASS_NAME = 'LadbCoreBundle:Core\Biography';
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\Column(type="text", nullable=true)
-	 */
 	#[Assert\Length(min: 2, max: 10000)]
+	#[ORM\Column(type: 'text', nullable: true)]
 	private $body;
 
-	/**
-	 * @ORM\Column(type="text", nullable=true)
-	 */
+	#[ORM\Column(type: 'text', nullable: true)]
 	private $htmlBody;
 
 	/////

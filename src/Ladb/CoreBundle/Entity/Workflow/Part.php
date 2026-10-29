@@ -7,42 +7,30 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 use Ladb\CoreBundle\Validator\Constraints as LadbAssert;
 
-/**
- * @ORM\Table("tbl_workflow_part")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Workflow\PartRepository")
- */
+#[ORM\Table('tbl_workflow_part')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Workflow\PartRepository::class)]
 class Part {
 
 	const CLASS_NAME = 'LadbCoreBundle:Workflow\Part';
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\Column(type="string", length=10, nullable=true)
-	 */
+	#[ORM\Column(type: 'string', length: 10, nullable: true)]
 	private $number;
 
-	/**
-	 * @ORM\Column(type="string", length=40)
-	 */
 	#[Assert\NotBlank]
+	#[ORM\Column(type: 'string', length: 40)]
 	private $name;
 
-	/**
-	 * @ORM\Column(type="integer")
-	 */
 	#[Assert\GreaterThan(0)]
+	#[ORM\Column(type: 'integer')]
 	private $count = 1;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Workflow\Workflow", inversedBy="parts")
-	 * @ORM\JoinColumn(nullable=false)
-	 */
+	#[ORM\JoinColumn(nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Workflow\Workflow::class, inversedBy: 'parts')]
 	private $workflow;
 
 	/////

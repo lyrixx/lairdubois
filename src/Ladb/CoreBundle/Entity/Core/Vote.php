@@ -8,17 +8,11 @@ use Ladb\CoreBundle\Model\AuthoredInterface;
 use Ladb\CoreBundle\Model\AuthoredTrait;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Table("tbl_core_vote",
- *		uniqueConstraints={
- *			@ORM\UniqueConstraint(name="ENTITY_USER_UNIQUE", columns={"entity_type", "entity_id", "user_id"})
- * 		},
- *		indexes={
- *			@ORM\Index(name="IDX_VOTE_ENTITY", columns={"entity_type", "entity_id"}),
- *			@ORM\Index(name="IDX_VOTE_PARENT_ENTITY", columns={"parent_entity_type", "parent_entity_id"})
- *		})
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Core\VoteRepository")
- */
+#[ORM\Table('tbl_core_vote')]
+#[ORM\Index(name: 'IDX_VOTE_ENTITY', columns: ['entity_type', 'entity_id'])]
+#[ORM\Index(name: 'IDX_VOTE_PARENT_ENTITY', columns: ['parent_entity_type', 'parent_entity_id'])]
+#[ORM\UniqueConstraint(name: 'ENTITY_USER_UNIQUE', columns: ['entity_type', 'entity_id', 'user_id'])]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\VoteRepository::class)]
 class Vote implements AuthoredInterface {
 
 	use AuthoredTrait;
@@ -27,65 +21,43 @@ class Vote implements AuthoredInterface {
 
 	const TYPE = 2;
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\Column(name="entity_type", type="smallint", nullable=false)
-	 */
+	#[ORM\Column(name: 'entity_type', type: 'smallint', nullable: false)]
 	private $entityType;
 
-	/**
-	 * @ORM\Column(name="entity_id", type="integer", nullable=false)
-	 */
+	#[ORM\Column(name: 'entity_id', type: 'integer', nullable: false)]
 	private $entityId;
 
-	/**
-	 * @ORM\Column(name="parent_entity_type", type="smallint", nullable=false)
-	 */
+	#[ORM\Column(name: 'parent_entity_type', type: 'smallint', nullable: false)]
 	private $parentEntityType;
 
-	/**
-	 * @ORM\Column(name="parent_entity_id", type="integer", nullable=false)
-	 */
+	#[ORM\Column(name: 'parent_entity_id', type: 'integer', nullable: false)]
 	private $parentEntityId;
 
-	/**
-	 * @ORM\Column(name="parent_entity_field", type="string", length=40)
-	 */
+	#[ORM\Column(name: 'parent_entity_field', type: 'string', length: 40)]
 	private $parentEntityField;
 
-	/**
-	 * @ORM\Column(name="created_at", type="datetime")
-	 * @Gedmo\Timestampable(on="create")
-	 */
+	#[ORM\Column(name: 'created_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'create')]
 	private $createdAt;
 
-	/**
-	 * @ORM\Column(name="updated_at", type="datetime")
-	 * @Gedmo\Timestampable(on="update")
-	 */
+	#[ORM\Column(name: 'updated_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'update')]
 	private $updatedAt;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\User")
-	 * @ORM\JoinColumn(nullable=true)
-	 */
+	#[ORM\JoinColumn(nullable: true)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\User::class)]
 	private $user;
 
-	/**
-	 * @ORM\Column(type="smallint")
-	 */
+	#[ORM\Column(type: 'smallint')]
 	private $score = 0;
 
-	/**
-	 * @ORM\OneToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Comment")
-	 * @ORM\JoinColumn(name="comment_id", nullable=true)
-	 */
+	#[ORM\JoinColumn(name: 'comment_id', nullable: true)]
+	#[ORM\OneToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Comment::class)]
 	private $comment;
 
 	/////

@@ -20,10 +20,9 @@ use Ladb\CoreBundle\Entity\Knowledge\Value\Picture;
 
 /**
  * Ladb\CoreBundle\Entity\Knowledge\Software
- *
- * @ORM\Table("tbl_knowledge2_software")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Knowledge\SoftwareRepository")
  */
+#[ORM\Table('tbl_knowledge2_software')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Knowledge\SoftwareRepository::class)]
 class Software extends AbstractKnowledge implements ReviewableInterface {
 
 	use ReviewableTrait;
@@ -73,270 +72,186 @@ class Software extends AbstractKnowledge implements ReviewableInterface {
 		Software::FIELD_SUPPORTED_FILES              => array(Software::ATTRIB_TYPE => FileExtension::TYPE_STRIPPED_NAME, Software::ATTRIB_MULTIPLE => true, Software::ATTRIB_FILTER_QUERY => '@supported-files:"%q%"'),
 	);
 
-	/**
-	 * @ORM\Column(type="string", nullable=true, length=100)
-	 */
+	#[ORM\Column(type: 'string', nullable: true, length: 100)]
 	private $name;
 
-	/**
-	 * @ORM\Column(type="boolean", name="is_addon")
-	 */
+	#[ORM\Column(type: 'boolean', name: 'is_addon')]
 	private $isAddOn = false;
 
-	/**
-	 * @ORM\Column(type="string", nullable=true, length=100, name="host_software_name")
-	 */
+	#[ORM\Column(type: 'string', nullable: true, length: 100, name: 'host_software_name')]
 	private $hostSoftwareName;
 
-	/**
-	 * @ORM\Column(type="string", nullable=true, length=100)
-	 */
+	#[ORM\Column(type: 'string', nullable: true, length: 100)]
 	private $identity;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\SoftwareIdentity", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_software_value_identity")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_identity')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\SoftwareIdentity::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $identityValues;
 
-	/**
-	 * @ORM\Column(type="boolean", nullable=false, name="name_rejected")
-	 */
+	#[ORM\Column(type: 'boolean', nullable: false, name: 'name_rejected')]
 	private $identityRejected = false;
 
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\Picture", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_software_value_icon")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_icon')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Picture::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $iconValues;
 
-	/**
-	 * @ORM\Column(type="boolean", nullable=false, name="icon_rejected")
-	 */
+	#[ORM\Column(type: 'boolean', nullable: false, name: 'icon_rejected')]
 	private $iconRejected = false;
 
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
-	 * @ORM\JoinColumn(name="screenshot_id", nullable=true)
-	 */
 	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\Picture')]
+	#[ORM\JoinColumn(name: 'screenshot_id', nullable: true)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Picture::class, cascade: ['persist'])]
 	private $screenshot;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\Picture", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_software_value_screenshot")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_screenshot')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Picture::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $screenshotValues;
 
 
-	/**
-	 * @ORM\Column(type="string", nullable=true)
-	 */
+	#[ORM\Column(type: 'string', nullable: true)]
 	private $authors;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\Text", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_software_value_authors")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_authors')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Text::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $authorsValues;
 
 
-	/**
-	 * @ORM\Column(type="string", nullable=true, name="last_version")
-	 */
+	#[ORM\Column(type: 'string', nullable: true, name: 'last_version')]
 	private $lastVersion;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\Text", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_software_value_last_version")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_last_version')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Text::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $lastVersionValues;
 
 
-	/**
-	 * @ORM\Column(type="string", nullable=true)
-	 */
+	#[ORM\Column(type: 'string', nullable: true)]
 	private $publisher;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\Text", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_software_value_publisher")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_publisher')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Text::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $publisherValues;
 
 
-	/**
-	 * @ORM\Column(type="string", nullable=true, length=2048)
-	 */
+	#[ORM\Column(type: 'string', nullable: true, length: 2048)]
 	private $website;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\Url", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_software_value_website")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_website')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Url::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $websiteValues;
 
 
-	/**
-	 * @ORM\Column(type="text", nullable=true)
-	 */
+	#[ORM\Column(type: 'text', nullable: true)]
 	private $description;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\Longtext", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_software_value_description")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_description')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Longtext::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $descriptionValues;
 
 
-	/**
-	 * @ORM\Column(type="boolean", nullable=true, name="open_source")
-	 */
+	#[ORM\Column(type: 'boolean', nullable: true, name: 'open_source')]
 	private $openSource;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\Integer", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_software_value_open_source")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_open_source')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Integer::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $openSourceValues;
 
 
-	/**
-	 * @ORM\Column(type="string", nullable=true, length=2048, name="source_core_repository")
-	 */
+	#[ORM\Column(type: 'string', nullable: true, length: 2048, name: 'source_core_repository')]
 	private $sourceCodeRepository;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\Url", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_software_value_source_code_repository")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_source_code_repository')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Url::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $sourceCodeRepositoryValues;
 
 
-	/**
-	 * @ORM\Column(type="text", nullable=true, name="source_docs")
-	 */
+	#[ORM\Column(type: 'text', nullable: true, name: 'source_docs')]
 	private $docs;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\Url", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_software_value_docs")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_docs')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Url::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $docsValues;
 
 
-	/**
-	 * @ORM\Column(type="string", nullable=true, length=255, name="video")
-	 */
+	#[ORM\Column(type: 'string', nullable: true, length: 255, name: 'video')]
 	private $video;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\Video", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_software_value_video")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_video')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Video::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $videoValues;
 
 
-	/**
-	 * @ORM\Column(type="text", nullable=true, name="operating_systems")
-	 */
+	#[ORM\Column(type: 'text', nullable: true, name: 'operating_systems')]
 	private $operatingSystems;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\Integer", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_software_value_operating_systems")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_operating_systems')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Integer::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $operatingSystemsValues;
 
 
-	/**
-	 * @ORM\Column(type="string", nullable=true, name="license_type")
-	 */
+	#[ORM\Column(type: 'string', nullable: true, name: 'license_type')]
 	private $licenseType;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\LinkableText", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_software_value_license_type")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_license_type')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\LinkableText::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $licenseTypeValues;
 
 
-	/**
-	 * @ORM\Column(type="string", nullable=true)
-	 */
+	#[ORM\Column(type: 'string', nullable: true)]
 	private $pricings;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\Integer", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_software_value_pricings")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_pricings')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Integer::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $pricingsValues;
 
 
-	/**
-	 * @ORM\Column(type="text", nullable=true)
-	 */
+	#[ORM\Column(type: 'text', nullable: true)]
 	private $features;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\Text", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_software_value_features")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_features')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Text::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $featuresValues;
 
 
-	/**
-	 * @ORM\Column(type="text", nullable=true)
-	 */
+	#[ORM\Column(type: 'text', nullable: true)]
 	private $languages;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\Language", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_software_value_languages")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_languages')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Language::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $languagesValues;
 
 
-	/**
-	 * @ORM\Column(type="text", nullable=true, name="supported_files")
-	 */
+	#[ORM\Column(type: 'text', nullable: true, name: 'supported_files')]
 	private $supportedFiles;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\FileExtension", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_software_value_supported_files")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_supported_files')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\FileExtension::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $supportedFilesValues;
 
 
-	/**
-	 * @ORM\Column(name="review_count", type="integer")
-	 */
+	#[ORM\Column(name: 'review_count', type: 'integer')]
 	private $reviewCount = 0;
 
-	/**
-	 * @ORM\Column(name="average_rating", type="float")
-	 */
+	#[ORM\Column(name: 'average_rating', type: 'float')]
 	private $averageRating = 0;
 
 	/////

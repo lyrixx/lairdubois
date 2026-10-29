@@ -7,36 +7,26 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use Ladb\CoreBundle\Model\IdentifiableInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Table("tbl_core_follower")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Core\FollowerRepository")
- */
+#[ORM\Table('tbl_core_follower')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\FollowerRepository::class)]
 class Follower implements IdentifiableInterface {
 
 	const CLASS_NAME = 'LadbCoreBundle:Core\Follower';
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	protected $id;
 
-	/**
-	 * @ORM\Column(name="following_user_id", type="integer")
-	 */
+	#[ORM\Column(name: 'following_user_id', type: 'integer')]
 	private $followingUserId;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\User", inversedBy="followers")
-	 * @ORM\JoinColumn(name="following_user_id", nullable=false)
-	 */
+	#[ORM\JoinColumn(name: 'following_user_id', nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\User::class, inversedBy: 'followers')]
 	private $followingUser;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\User")
-	 * @ORM\JoinColumn(nullable=false)
-	 */
+	#[ORM\JoinColumn(nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\User::class)]
 	private $user;
 
 	// ID /////

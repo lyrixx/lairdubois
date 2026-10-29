@@ -44,12 +44,10 @@ use Ladb\CoreBundle\Model\ReportableInterface;
 use Ladb\CoreBundle\Model\TaggableInterface;
 use Ladb\CoreBundle\Model\ExplorableInterface;
 
-/**
- * @ORM\Table("tbl_event")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Event\EventRepository")
- */
 #[LadbAssert\BodyBlocks]
 #[LadbAssert\ValidEvent]
+#[ORM\Table('tbl_event')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Event\EventRepository::class)]
 class Event extends AbstractDraftableAuthoredPublication implements TitledInterface, SluggedInterface, PicturedInterface, MultiPicturedInterface, BlockBodiedInterface, IndexableInterface, SitemapableInterface, TaggableInterface, ViewableInterface, ScrapableInterface, LikableInterface, WatchableInterface, CommentableInterface, CollectionnableInterface, ReportableInterface, ExplorableInterface, LocalisableInterface, JoinableInterface, FeedbackableInterface {
 
 	use TitledTrait, SluggedTrait, PicturedTrait, MultiPicturedTrait, BlockBodiedTrait;
@@ -66,176 +64,115 @@ class Event extends AbstractDraftableAuthoredPublication implements TitledInterf
 	const STATUS_RUNNING = 2;
 	const STATUS_COMPLETED = 3;
 
-	/**
-	 * @ORM\Column(type="string", length=100)
-	 */
 	#[Assert\NotBlank]
 	#[Assert\Length(min: 4, max: 100)]
+	#[ORM\Column(type: 'string', length: 100)]
 	private $title;
 
-	/**
-	 * @Gedmo\Slug(fields={"title"}, separator="-")
-	 * @ORM\Column(type="string", length=100, unique=true)
-	 */
+	#[Gedmo\Slug(fields: ['title'], separator: '-')]
+	#[ORM\Column(type: 'string', length: 100, unique: true)]
 	private $slug;
 
-	/**
-	 * @ORM\Column(type="text", nullable=false)
-	 */
+	#[ORM\Column(type: 'text', nullable: false)]
 	private $body;
 
-	/**
-	 * @ORM\Column(type="string", length=255, nullable=false)
-	 */
+	#[ORM\Column(type: 'string', length: 255, nullable: false)]
 	private $bodyExtract;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Block\AbstractBlock", cascade={"persist", "remove"})
-	 * @ORM\JoinTable(name="tbl_event_body_block", inverseJoinColumns={@ORM\JoinColumn(name="block_id", referencedColumnName="id", unique=true, onDelete="cascade")})
-	 * @ORM\OrderBy({"sortIndex" = "ASC"})
-	 */
 	#[Assert\Count(min: 1)]
+	#[ORM\JoinTable(name: 'tbl_event_body_block')]
+	#[ORM\InverseJoinColumn(name: 'block_id', referencedColumnName: 'id', unique: true, onDelete: 'cascade')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Block\AbstractBlock::class, cascade: ['persist', 'remove'])]
+	#[ORM\OrderBy(['sortIndex' => 'ASC'])]
 	private $bodyBlocks;
 
-	/**
-	 * @ORM\Column(type="integer", name="body_block_picture_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'body_block_picture_count')]
 	private $bodyBlockPictureCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="body_block_video_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'body_block_video_count')]
 	private $bodyBlockVideoCount = 0;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
-	 * @ORM\JoinColumn(nullable=true, name="main_picture_id")
-	 */
+	#[ORM\JoinColumn(nullable: true, name: 'main_picture_id')]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Picture::class, cascade: ['persist'])]
 	private $mainPicture;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_event_picture")
-	 * @ORM\OrderBy({"sortIndex" = "ASC"})
-	 */
 	#[Assert\Count(min: 1, max: 5)]
+	#[ORM\JoinTable(name: 'tbl_event_picture')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Picture::class, cascade: ['persist'])]
+	#[ORM\OrderBy(['sortIndex' => 'ASC'])]
 	private $pictures;
 
-	/**
-	 * @ORM\Column(type="string", length=100, nullable=true)
-	 */
+	#[ORM\Column(type: 'string', length: 100, nullable: true)]
 	private $location;
 
-	/**
-	 * @ORM\Column(type="float", nullable=true)
-	 */
+	#[ORM\Column(type: 'float', nullable: true)]
 	private $latitude;
 
-	/**
-	 * @ORM\Column(type="float", nullable=true)
-	 */
+	#[ORM\Column(type: 'float', nullable: true)]
 	private $longitude;
 
-	/**
-	 * @ORM\Column(name="start_at", type="datetime")
-	 */
+	#[ORM\Column(name: 'start_at', type: 'datetime')]
 	private $startAt;
 
-	/**
-	 * @ORM\Column(name="start_date", type="date")
-	 */
 	#[Assert\Type('\DateTimeInterface')]
 	#[Assert\NotBlank]
+	#[ORM\Column(name: 'start_date', type: 'date')]
 	private $startDate;
 
-	/**
-	 * @ORM\Column(name="start_time", type="time", nullable=true)
-	 */
 	#[Assert\Type('\DateTimeInterface')]
+	#[ORM\Column(name: 'start_time', type: 'time', nullable: true)]
 	private $startTime;
 
-	/**
-	 * @ORM\Column(name="end_at", type="datetime", nullable=false)
-	 */
+	#[ORM\Column(name: 'end_at', type: 'datetime', nullable: false)]
 	private $endAt;
 
-	/**
-	 * @ORM\Column(name="end_date", type="date", nullable=true)
-	 */
 	#[Assert\Type('\DateTimeInterface')]
+	#[ORM\Column(name: 'end_date', type: 'date', nullable: true)]
 	private $endDate;
 
-	/**
-	 * @ORM\Column(name="end_time", type="time", nullable=true)
-	 */
 	#[Assert\Type('\DateTimeInterface')]
+	#[ORM\Column(name: 'end_time', type: 'time', nullable: true)]
 	private $endTime;
 
-	/**
-	 * @ORM\Column(type="string", length=255, nullable=true)
-	 */
 	#[Assert\Url]
+	#[ORM\Column(type: 'string', length: 255, nullable: true)]
 	private $url;
 
-	/**
-	 * @ORM\Column(name="online", type="boolean")
-	 */
+	#[ORM\Column(name: 'online', type: 'boolean')]
 	private $online = false;
 
-	/**
-	 * @ORM\Column(type="boolean")
-	 */
+	#[ORM\Column(type: 'boolean')]
 	private $cancelled = false;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Tag", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_event_tag")
-	 */
+	#[ORM\JoinTable(name: 'tbl_event_tag')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Tag::class, cascade: ['persist'])]
 	private $tags;
 
-	/**
-	 * @ORM\Column(type="integer", name="like_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'like_count')]
 	private $likeCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="watch_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'watch_count')]
 	private $watchCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="comment_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'comment_count')]
 	private $commentCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="private_collection_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'private_collection_count')]
 	private $privateCollectionCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="public_collection_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'public_collection_count')]
 	private $publicCollectionCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="view_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'view_count')]
 	private $viewCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="join_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'join_count')]
 	private $joinCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="feedback_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'feedback_count')]
 	private $feedbackCount = 0;
 
-	/**
-	 * @ORM\Column(type="boolean", options={"default":true})
-	 */
+	#[ORM\Column(type: 'boolean', options: ['default' => true])]
 	private $highlightable = true;
 
 	/////

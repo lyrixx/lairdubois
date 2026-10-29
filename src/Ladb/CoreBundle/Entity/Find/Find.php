@@ -40,12 +40,10 @@ use Ladb\CoreBundle\Model\TaggableInterface;
 use Ladb\CoreBundle\Model\ExplorableInterface;
 use Ladb\CoreBundle\Entity\Find\Content\Event;
 
-/**
- * @ORM\Table("tbl_find")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Find\FindRepository")
- */
 #[LadbAssert\UniqueFind]
 #[LadbAssert\BodyBlocks]
+#[ORM\Table('tbl_find')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Find\FindRepository::class)]
 class Find extends AbstractDraftableAuthoredPublication implements TitledInterface, SluggedInterface, PicturedInterface, BlockBodiedInterface, IndexableInterface, SitemapableInterface, TaggableInterface, ViewableInterface, ScrapableInterface, LikableInterface, WatchableInterface, CommentableInterface, CollectionnableInterface, ReportableInterface, ExplorableInterface {
 
 	use TitledTrait, SluggedTrait, PicturedTrait, BlockBodiedTrait;
@@ -63,99 +61,66 @@ class Find extends AbstractDraftableAuthoredPublication implements TitledInterfa
 	const KIND_VIDEO = 2;
 	const KIND_GALLERY = 3;
 
-	/**
-	 * @ORM\Column(type="string", length=100)
-	 */
 	#[Assert\NotBlank]
 	#[Assert\Length(min: 4, max: 100)]
+	#[ORM\Column(type: 'string', length: 100)]
 	private $title;
 
-	/**
-	 * @Gedmo\Slug(fields={"title"}, separator="-")
-	 * @ORM\Column(type="string", length=100, unique=true)
-	 */
+	#[Gedmo\Slug(fields: ['title'], separator: '-')]
+	#[ORM\Column(type: 'string', length: 100, unique: true)]
 	private $slug;
 
-	/**
-	 * @ORM\OneToOne(targetEntity="Ladb\CoreBundle\Entity\Find\Content\AbstractContent", orphanRemoval=true, cascade={"persist", "remove"})
-	 * @ORM\JoinColumn(name="content_id", nullable=false)
-	 */
 	#[Assert\Valid]
+	#[ORM\JoinColumn(name: 'content_id', nullable: false)]
+	#[ORM\OneToOne(targetEntity: \Ladb\CoreBundle\Entity\Find\Content\AbstractContent::class, orphanRemoval: true, cascade: ['persist', 'remove'])]
 	private $content;
 
-	/**
-	 * @ORM\Column(type="smallint")
-	 */
+	#[ORM\Column(type: 'smallint')]
 	private $kind = Find::KIND_NONE;
 
-	/**
-	 * @ORM\Column(type="text", nullable=false)
-	 */
+	#[ORM\Column(type: 'text', nullable: false)]
 	private $body;
 
-	/**
-	 * @ORM\Column(type="string", length=255, nullable=false)
-	 */
+	#[ORM\Column(type: 'string', length: 255, nullable: false)]
 	private $bodyExtract;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Block\AbstractBlock", cascade={"persist", "remove"})
-	 * @ORM\JoinTable(name="tbl_find_body_block", inverseJoinColumns={@ORM\JoinColumn(name="block_id", referencedColumnName="id", unique=true, onDelete="cascade")})
-	 * @ORM\OrderBy({"sortIndex" = "ASC"})
-	 */
 	#[Assert\Count(min: 1)]
+	#[ORM\JoinTable(name: 'tbl_find_body_block')]
+	#[ORM\InverseJoinColumn(name: 'block_id', referencedColumnName: 'id', unique: true, onDelete: 'cascade')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Block\AbstractBlock::class, cascade: ['persist', 'remove'])]
+	#[ORM\OrderBy(['sortIndex' => 'ASC'])]
 	private $bodyBlocks;
 
-	/**
-	 * @ORM\Column(type="integer", name="body_block_picture_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'body_block_picture_count')]
 	private $bodyBlockPictureCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="body_block_video_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'body_block_video_count')]
 	private $bodyBlockVideoCount = 0;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
-	 * @ORM\JoinColumn(nullable=true, name="main_picture_id")
-	 */
+	#[ORM\JoinColumn(nullable: true, name: 'main_picture_id')]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Picture::class, cascade: ['persist'])]
 	private $mainPicture;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Tag", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_find_tag")
-	 */
+	#[ORM\JoinTable(name: 'tbl_find_tag')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Tag::class, cascade: ['persist'])]
 	private $tags;
 
-	/**
-	 * @ORM\Column(type="integer", name="like_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'like_count')]
 	private $likeCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="watch_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'watch_count')]
 	private $watchCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="comment_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'comment_count')]
 	private $commentCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="private_collection_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'private_collection_count')]
 	private $privateCollectionCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="public_collection_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'public_collection_count')]
 	private $publicCollectionCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="view_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'view_count')]
 	private $viewCount = 0;
 
 	/////

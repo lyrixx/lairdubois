@@ -12,10 +12,9 @@ use Ladb\CoreBundle\Entity\Knowledge\Value\Picture;
 
 /**
  * Ladb\CoreBundle\Entity\Knowledge\Wood
- *
- * @ORM\Table("tbl_knowledge2_wood")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Knowledge\WoodRepository")
  */
+#[ORM\Table('tbl_knowledge2_wood')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Knowledge\WoodRepository::class)]
 class Wood extends AbstractKnowledge {
 
 	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Wood';
@@ -59,237 +58,167 @@ class Wood extends AbstractKnowledge {
 		Wood::FIELD_DATABASE_LINK  => array(Wood::ATTRIB_TYPE => Url::TYPE_STRIPPED_NAME, Wood::ATTRIB_MULTIPLE => true),
 	);
 
-	/**
-	 * @ORM\Column(type="text", nullable=true)
-	 */
+	#[ORM\Column(type: 'text', nullable: true)]
 	private $name;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\Text", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_wood_value_name")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_wood_value_name')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Text::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $nameValues;
 
-	/**
-	 * @ORM\Column(type="boolean", nullable=false, name="name_rejected")
-	 */
+	#[ORM\Column(type: 'boolean', nullable: false, name: 'name_rejected')]
 	private $nameRejected = false;
 
 
-	/**
-	 * @ORM\Column(type="text", nullable=true)
-	 */
+	#[ORM\Column(type: 'text', nullable: true)]
 	private $scientificname;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\Text", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_wood_value_scientificname")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_wood_value_scientificname')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Text::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $scientificnameValues;
 
 
-	/**
-	 * @ORM\Column(type="text", nullable=true)
-	 */
+	#[ORM\Column(type: 'text', nullable: true)]
 	private $englishname;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\Text", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_wood_value_englishname")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_wood_value_englishname')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Text::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $englishnameValues;
 
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\Picture", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_wood_value_grain")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_wood_value_grain')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Picture::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $grainValues;
 
-	/**
-	 * @ORM\Column(type="boolean", nullable=false, name="grain_rejected")
-	 */
+	#[ORM\Column(type: 'boolean', nullable: false, name: 'grain_rejected')]
 	private $grainRejected = false;
 
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
-	 * @ORM\JoinColumn(name="endgrain_id", nullable=true)
-	 */
 	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\Picture')]
+	#[ORM\JoinColumn(name: 'endgrain_id', nullable: true)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Picture::class, cascade: ['persist'])]
 	private $endgrain;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\Picture", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_wood_value_endgrain")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_wood_value_endgrain')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Picture::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $endgrainValues;
 
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
-	 * @ORM\JoinColumn(name="lumber_id", nullable=true)
-	 */
 	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\Picture')]
+	#[ORM\JoinColumn(name: 'lumber_id', nullable: true)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Picture::class, cascade: ['persist'])]
 	private $lumber;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\Picture", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_wood_value_lumber")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_wood_value_lumber')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Picture::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $lumberValues;
 
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
-	 * @ORM\JoinColumn(name="tree_id", nullable=true)
-	 */
 	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\Picture')]
+	#[ORM\JoinColumn(name: 'tree_id', nullable: true)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Picture::class, cascade: ['persist'])]
 	private $tree;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\Picture", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_wood_value_tree")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_wood_value_tree')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Picture::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $treeValues;
 
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
-	 * @ORM\JoinColumn(name="leaf_id", nullable=true)
-	 */
 	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\Picture')]
+	#[ORM\JoinColumn(name: 'leaf_id', nullable: true)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Picture::class, cascade: ['persist'])]
 	private $leaf;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\Picture", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_wood_value_leaf")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_wood_value_leaf')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Picture::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $leafValues;
 
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
-	 * @ORM\JoinColumn(name="bark_id", nullable=true)
-	 */
 	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\Picture')]
+	#[ORM\JoinColumn(name: 'bark_id', nullable: true)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Picture::class, cascade: ['persist'])]
 	private $bark;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\Picture", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_wood_value_bark")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_wood_value_bark')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Picture::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $barkValues;
 
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true)
-	 */
+	#[ORM\Column(type: 'integer', nullable: true)]
 	private $family;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\Integer", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_wood_value_family")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_wood_value_family')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Integer::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $familyValues;
 
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true)
-	 */
+	#[ORM\Column(type: 'integer', nullable: true)]
 	private $density;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\Integer", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_wood_value_density")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_wood_value_density')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Integer::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $densityValues;
 
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true)
- 	 */
+	#[ORM\Column(type: 'integer', nullable: true)]
 	private $availability;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\Integer", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_wood_value_availability")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_wood_value_availability')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Integer::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $availabilityValues;
 
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true)
- 	 */
+	#[ORM\Column(type: 'integer', nullable: true)]
 	private $price;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\Integer", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_wood_value_price")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_wood_value_price')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Integer::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $priceValues;
 
 
-	/**
-	 * @ORM\Column(type="text", nullable=true)
-	 */
+	#[ORM\Column(type: 'text', nullable: true)]
 	private $origin;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\Text", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_wood_value_origin")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_wood_value_origin')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Text::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $originValues;
 
 
-	/**
-	 * @ORM\Column(type="text", nullable=true)
-	 */
+	#[ORM\Column(type: 'text', nullable: true)]
 	private $utilization;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\Text", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_wood_value_utilization")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_wood_value_utilization')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Text::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $utilizationValues;
 
 
-	/**
-	 * @ORM\Column(type="text", nullable=true)
-	 */
+	#[ORM\Column(type: 'text', nullable: true)]
 	private $databaseLink;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Value\Url", cascade={"all"})
-	 * @ORM\JoinTable(name="tbl_knowledge2_wood_value_database_link")
-	 * @ORM\OrderBy({"moderationScore" = "DESC", "voteScore" = "DESC", "createdAt" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_knowledge2_wood_value_database_link')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Url::class, cascade: ['all'])]
+	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
 	private $databaseLinkValues;
 
 
-	/**
-	 * @ORM\Column(name="texture_count", type="integer")
-	 */
+	#[ORM\Column(name: 'texture_count', type: 'integer')]
 	private $textureCount = 0;
 
-	/**
-	 * @ORM\OneToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\Wood\Texture", mappedBy="wood", cascade={"all"})
-	 */
+	#[ORM\OneToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Wood\Texture::class, mappedBy: 'wood', cascade: ['all'])]
 	private $textures;
 
 	/////

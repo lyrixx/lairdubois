@@ -4,19 +4,15 @@ namespace Ladb\CoreBundle\Entity\Core\Activity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Table("tbl_core_activity_testify")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Core\Activity\TestifyRepository")
- */
+#[ORM\Table('tbl_core_activity_testify')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\Activity\TestifyRepository::class)]
 class Testify extends AbstractActivity {
 
 	const CLASS_NAME = 'LadbCoreBundle:Core\Activity\Testify';
 	const STRIPPED_NAME = 'testify';
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Knowledge\School\Testimonial")
-	 * @ORM\JoinColumn(nullable=false)
-	 */
+	#[ORM\JoinColumn(nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\School\Testimonial::class)]
 	private $testimonial;
 
 	/////

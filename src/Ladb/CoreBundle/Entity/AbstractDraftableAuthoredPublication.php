@@ -9,16 +9,12 @@ use Ladb\CoreBundle\Model\AuthoredTrait;
 use Ladb\CoreBundle\Model\DraftableInterface;
 use Ladb\CoreBundle\Model\DraftableTrait;
 
-/**
- * @ORM\MappedSuperclass
- */
+#[ORM\MappedSuperclass]
 abstract class AbstractDraftableAuthoredPublication extends AbstractAuthoredPublication implements DraftableInterface {
 
 	use DraftableTrait;
 
-	/**
-	 * @ORM\Column(name="is_draft", type="boolean")
-	 */
+	#[ORM\Column(name: 'is_draft', type: 'boolean')]
 	protected $isDraft = true;
 
 }

@@ -4,19 +4,15 @@ namespace Ladb\CoreBundle\Entity\Core\Activity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Table("tbl_core_activity_review")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Core\Activity\ReviewRepository")
- */
+#[ORM\Table('tbl_core_activity_review')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\Activity\ReviewRepository::class)]
 class Review extends AbstractActivity {
 
 	const CLASS_NAME = 'LadbCoreBundle:Core\Activity\Review';
 	const STRIPPED_NAME = 'review';
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Review")
-	 * @ORM\JoinColumn(nullable=false)
-	 */
+	#[ORM\JoinColumn(nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Review::class)]
 	private $review;
 
 	/////

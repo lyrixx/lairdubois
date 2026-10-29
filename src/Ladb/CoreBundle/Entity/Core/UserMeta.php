@@ -6,583 +6,369 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Table("tbl_core_user_meta")
- * @ORM\Entity
- */
+#[ORM\Table('tbl_core_user_meta')]
+#[ORM\Entity]
 class UserMeta {
 
 	const CLASS_NAME = 'LadbCoreBundle:Core\UserMeta';
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist", "remove"})
-	 * @ORM\JoinColumn(name="banner_id", nullable=true)
-	 */
 	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\Picture')]
+	#[ORM\JoinColumn(name: 'banner_id', nullable: true)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Picture::class, cascade: ['persist', 'remove'])]
 	private $banner;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Biography", cascade={"persist", "remove"})
-	 * @ORM\JoinColumn(nullable=true, name="biography_id")
-	 */
 	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\Biography')]
+	#[ORM\JoinColumn(nullable: true, name: 'biography_id')]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Biography::class, cascade: ['persist', 'remove'])]
 	private $biography;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Input\Skill", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_core_user_meta_skill")
-	 */
+	#[ORM\JoinTable(name: 'tbl_core_user_meta_skill')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Input\Skill::class, cascade: ['persist'])]
 	private $skills;
 
 
-	/**
-	 * @ORM\Column(type="string", length=255, nullable=true)
-	 */
 	#[Assert\Url]
+	#[ORM\Column(type: 'string', length: 255, nullable: true)]
 	private $website;
 
-	/**
-	 * @ORM\Column(type="string", length=50, nullable=true)
-	 */
 	#[Assert\Regex('/^[a-zA-Z0-9.]+$/')]
+	#[ORM\Column(type: 'string', length: 50, nullable: true)]
 	private $facebook;
 
-	/**
-	 * @ORM\Column(type="string", length=50, nullable=true)
-	 */
 	#[Assert\Regex('/^[a-zA-Z0-9_]{1,15}$/')]
+	#[ORM\Column(type: 'string', length: 50, nullable: true)]
 	private $twitter;
 
-	/**
-	 * @ORM\Column(type="string", length=50, nullable=true)
-	 */
 	#[Assert\Regex('/^[a-zA-Z0-9-_]+$/')]
+	#[ORM\Column(type: 'string', length: 50, nullable: true)]
 	private $youtube;
 
-	/**
-	 * @ORM\Column(type="string", length=24, nullable=true)
-	 */
 	#[Assert\Regex('/^[a-zA-Z0-9]+$/')]
+	#[ORM\Column(type: 'string', length: 24, nullable: true)]
 	private $vimeo;
 
-	/**
-	 * @ORM\Column(type="string", length=24, nullable=true)
-	 */
 	#[Assert\Regex('/^[a-zA-Z0-9]+$/')]
+	#[ORM\Column(type: 'string', length: 24, nullable: true)]
 	private $dailymotion;
 
-	/**
-	 * @ORM\Column(type="string", length=50, nullable=true)
-	 */
 	#[Assert\Regex('/^[a-zA-Z0-9]+$/')]
+	#[ORM\Column(type: 'string', length: 50, nullable: true)]
 	private $pinterest;
 
-	/**
-	 * @ORM\Column(type="string", length=50, nullable=true)
-	 */
 	#[Assert\Regex('/^[a-zA-Z0-9_.]+$/')]
+	#[ORM\Column(type: 'string', length: 50, nullable: true)]
 	private $instagram;
 
 
-	/**
-	 * @ORM\Column(type="boolean", nullable=true, name="request_enabled", options={"default":true})
-	 */
+	#[ORM\Column(type: 'boolean', nullable: true, name: 'request_enabled', options: ['default' => true])]
 	private $requestEnabled = false;
 
-	/**
-	 * @ORM\Column(type="boolean", nullable=true, name="auto_watch_enabled", options={"default":true})
-	 */
+	#[ORM\Column(type: 'boolean', nullable: true, name: 'auto_watch_enabled', options: ['default' => true])]
 	private $autoWatchEnabled = true;
 
 
-	/**
-	 * @ORM\Column(type="boolean", name="wonder_creations_badge_enabled", options={"default":true})
-	 */
+	#[ORM\Column(type: 'boolean', name: 'wonder_creations_badge_enabled', options: ['default' => true])]
 	private $wonderCreationsBadgeEnabled = true;
 
-	/**
-	 * @ORM\Column(type="boolean", name="qa_questions_badge_enabled", options={"default":true})
-	 */
+	#[ORM\Column(type: 'boolean', name: 'qa_questions_badge_enabled', options: ['default' => true])]
 	private $qaQuestionsBadgeEnabled = true;
 
-	/**
-	 * @ORM\Column(type="boolean", name="wonder_plans_badge_enabled", options={"default":true})
-	 */
+	#[ORM\Column(type: 'boolean', name: 'wonder_plans_badge_enabled', options: ['default' => true])]
 	private $wonderPlansBadgeEnabled = true;
 
-	/**
-	 * @ORM\Column(type="boolean", name="howto_howtos_badge_enabled", options={"default":true})
-	 */
+	#[ORM\Column(type: 'boolean', name: 'howto_howtos_badge_enabled', options: ['default' => true])]
 	private $howtoHowtosBadgeEnabled = true;
 
-	/**
-	 * @ORM\Column(type="boolean", name="wonder_workshops_badge_enabled", options={"default":true})
-	 */
+	#[ORM\Column(type: 'boolean', name: 'wonder_workshops_badge_enabled', options: ['default' => true])]
 	private $wonderWorkshopsBadgeEnabled = true;
 
-	/**
-	 * @ORM\Column(type="boolean", name="knowledge_woods_badge_enabled", options={"default":true})
-	 */
+	#[ORM\Column(type: 'boolean', name: 'knowledge_woods_badge_enabled', options: ['default' => true])]
 	private $knowledgeWoodsBadgeEnabled = true;
 
-	/**
-	 * @ORM\Column(type="boolean", name="knowledge_tools_badge_enabled", options={"default":true})
-	 */
+	#[ORM\Column(type: 'boolean', name: 'knowledge_tools_badge_enabled', options: ['default' => true])]
 	private $knowledgeToolsBadgeEnabled = true;
 
-	/**
-	 * @ORM\Column(type="boolean", name="knowledge_books_badge_enabled", options={"default":true})
-	 */
+	#[ORM\Column(type: 'boolean', name: 'knowledge_books_badge_enabled', options: ['default' => true])]
 	private $knowledgeBooksBadgeEnabled = true;
 
-	/**
-	 * @ORM\Column(type="boolean", name="knowledge_softwares_badge_enabled", options={"default":true})
-	 */
+	#[ORM\Column(type: 'boolean', name: 'knowledge_softwares_badge_enabled', options: ['default' => true])]
 	private $knowledgeSoftwaresBadgeEnabled = true;
 
-	/**
-	 * @ORM\Column(type="boolean", name="collection_collections_badge_enabled", options={"default":true})
-	 */
+	#[ORM\Column(type: 'boolean', name: 'collection_collections_badge_enabled', options: ['default' => true])]
 	private $collectionCollectionsBadgeEnabled = true;
 
-	/**
-	 * @ORM\Column(type="boolean", name="knowledgeproviders_badge_enabled", options={"default":true})
-	 */
+	#[ORM\Column(type: 'boolean', name: 'knowledgeproviders_badge_enabled', options: ['default' => true])]
 	private $knowledgeProvidersBadgeEnabled = true;
 
-	/**
-	 * @ORM\Column(type="boolean", name="knowledge_schools_badge_enabled", options={"default":true})
-	 */
+	#[ORM\Column(type: 'boolean', name: 'knowledge_schools_badge_enabled', options: ['default' => true])]
 	private $knowledgeSchoolsBadgeEnabled = true;
 
-	/**
-	 * @ORM\Column(type="boolean", name="find_finds_badge_enabled", options={"default":true})
-	 */
+	#[ORM\Column(type: 'boolean', name: 'find_finds_badge_enabled', options: ['default' => true])]
 	private $findFindsBadgeEnabled = true;
 
-	/**
-	 * @ORM\Column(type="boolean", name="event_events_badge_enabled", options={"default":true})
-	 */
+	#[ORM\Column(type: 'boolean', name: 'event_events_badge_enabled', options: ['default' => true])]
 	private $eventEventsBadgeEnabled = true;
 
-	/**
-	 * @ORM\Column(type="boolean", name="offer_offers_badge_enabled", options={"default":true})
-	 */
+	#[ORM\Column(type: 'boolean', name: 'offer_offers_badge_enabled', options: ['default' => true])]
 	private $offerOffersBadgeEnabled = true;
 
-	/**
-	 * @ORM\Column(type="boolean", name="workflow_workflows_badge_enabled", options={"default":true})
-	 */
+	#[ORM\Column(type: 'boolean', name: 'workflow_workflows_badge_enabled', options: ['default' => true])]
 	private $workflowWorkflowsBadgeEnabled = true;
 
-	/**
-	 * @ORM\Column(type="boolean", name="promotion_graphics_badge_enabled", options={"default":true})
-	 */
+	#[ORM\Column(type: 'boolean', name: 'promotion_graphics_badge_enabled', options: ['default' => true])]
 	private $promotionGraphicsBadgeEnabled = true;
 
-	/**
-	 * @ORM\Column(type="boolean", name="blog_posts_badge_enabled", options={"default":true})
-	 */
+	#[ORM\Column(type: 'boolean', name: 'blog_posts_badge_enabled', options: ['default' => true])]
 	private $blogPostsBadgeEnabled = true;
 
-	/**
-	 * @ORM\Column(type="boolean", name="faq_questions_badge_enabled", options={"default":true})
-	 */
+	#[ORM\Column(type: 'boolean', name: 'faq_questions_badge_enabled', options: ['default' => true])]
 	private $faqQuestionsBadgeEnabled = true;
 
 
-	/**
-	 * @ORM\Column(type="boolean", nullable=true, name="incoming_message_email_notification_enabled", options={"default":true})
-	 */
+	#[ORM\Column(type: 'boolean', nullable: true, name: 'incoming_message_email_notification_enabled', options: ['default' => true])]
 	private $incomingMessageEmailNotificationEnabled = true;
 
-	/**
-	 * @ORM\Column(type="boolean", nullable=true, name="new_follower_email_notification_enabled", options={"default":true})
-	 */
+	#[ORM\Column(type: 'boolean', nullable: true, name: 'new_follower_email_notification_enabled', options: ['default' => true])]
 	private $newFollowerEmailNotificationEnabled = true;
 
-	/**
-	 * @ORM\Column(type="boolean", nullable=true, name="new_mention_email_notification_enabled", options={"default":true})
-	 */
+	#[ORM\Column(type: 'boolean', nullable: true, name: 'new_mention_email_notification_enabled', options: ['default' => true])]
 	private $newMentionEmailNotificationEnabled = true;
 
-	/**
-	 * @ORM\Column(type="boolean", nullable=true, name="new_like_email_notification_enabled", options={"default":true})
-	 */
+	#[ORM\Column(type: 'boolean', nullable: true, name: 'new_like_email_notification_enabled', options: ['default' => true])]
 	private $newLikeEmailNotificationEnabled = true;
 
-	/**
-	 * @ORM\Column(type="boolean", nullable=true, name="new_vote_email_notification_enabled", options={"default":true})
-	 */
+	#[ORM\Column(type: 'boolean', nullable: true, name: 'new_vote_email_notification_enabled', options: ['default' => true])]
 	private $newVoteEmailNotificationEnabled = true;
 
-	/**
-	 * @ORM\Column(type="boolean", nullable=true, name="new_following_post_email_notification_enabled", options={"default":true})
-	 */
+	#[ORM\Column(type: 'boolean', nullable: true, name: 'new_following_post_email_notification_enabled', options: ['default' => true])]
 	private $newFollowingPostEmailNotificationEnabled = true;
 
-	/**
-	 * @ORM\Column(type="boolean", nullable=true, name="new_watch_activity_email_notification_enabled", options={"default":true})
-	 */
+	#[ORM\Column(type: 'boolean', nullable: true, name: 'new_watch_activity_email_notification_enabled', options: ['default' => true])]
 	private $newWatchActivityEmailNotificationEnabled = true;
 
-	/**
-	 * @ORM\Column(type="boolean", nullable=true, name="new_spotlight_email_notification_enabled", options={"default":true})
-	 */
+	#[ORM\Column(type: 'boolean', nullable: true, name: 'new_spotlight_email_notification_enabled', options: ['default' => true])]
 	private $newSpotlightEmailNotificationEnabled = true;
 
-	/**
-	 * @ORM\Column(type="boolean", nullable=true, name="week_news_email_enabled", options={"default":true})
-	 */
+	#[ORM\Column(type: 'boolean', nullable: true, name: 'week_news_email_enabled', options: ['default' => true])]
 	private $weekNewsEmailEnabled = true;
 
 
-	/**
-	 * @ORM\Column(name="unlisted_wonder_creation_count", type="integer")
-	 */
+	#[ORM\Column(name: 'unlisted_wonder_creation_count', type: 'integer')]
 	private $unlistedWonderCreationCount = 0;
 
-	/**
-	 * @ORM\Column(name="unlisted_wonder_plan_count", type="integer")
-	 */
+	#[ORM\Column(name: 'unlisted_wonder_plan_count', type: 'integer')]
 	private $unlistedWonderPlanCount = 0;
 
-	/**
-	 * @ORM\Column(name="unlisted_wonder_workshop_count", type="integer")
-	 */
+	#[ORM\Column(name: 'unlisted_wonder_workshop_count', type: 'integer')]
 	private $unlistedWonderWorkshopCount = 0;
 
-	/**
-	 * @ORM\Column(name="unlisted_find_find_count", type="integer")
-	 */
+	#[ORM\Column(name: 'unlisted_find_find_count', type: 'integer')]
 	private $unlistedFindFindCount = 0;
 
-	/**
-	 * @ORM\Column(name="unlisted_event_event_count", type="integer")
-	 */
+	#[ORM\Column(name: 'unlisted_event_event_count', type: 'integer')]
 	private $unlistedEventEventCount = 0;
 
-	/**
-	 * @ORM\Column(name="unlisted_howto_howto_count", type="integer")
-	 */
+	#[ORM\Column(name: 'unlisted_howto_howto_count', type: 'integer')]
 	private $unlistedHowtoHowtoCount = 0;
 
-	/**
-	 * @ORM\Column(name="unlisted_knowledge_wood_count", type="integer")
-	 */
+	#[ORM\Column(name: 'unlisted_knowledge_wood_count', type: 'integer')]
 	private $unlistedKnowledgeWoodCount = 0;
 
-	/**
-	 * @ORM\Column(name="unlisted_knowledge_provider_count", type="integer")
-	 */
+	#[ORM\Column(name: 'unlisted_knowledge_provider_count', type: 'integer')]
 	private $unlistedKnowledgeProviderCount = 0;
 
-	/**
-	 * @ORM\Column(name="unlisted_knowledge_school_count", type="integer")
-	 */
+	#[ORM\Column(name: 'unlisted_knowledge_school_count', type: 'integer')]
 	private $unlistedKnowledgeSchoolCount = 0;
 
-	/**
-	 * @ORM\Column(name="unlisted_knowledge_book_count", type="integer")
-	 */
+	#[ORM\Column(name: 'unlisted_knowledge_book_count', type: 'integer')]
 	private $unlistedKnowledgeBookCount = 0;
 
-	/**
-	 * @ORM\Column(name="unlisted_knowledge_software_count", type="integer")
-	 */
+	#[ORM\Column(name: 'unlisted_knowledge_software_count', type: 'integer')]
 	private $unlistedKnowledgeSoftwareCount = 0;
 
-	/**
-	 * @ORM\Column(name="unlisted_knowledge_tool_count", type="integer")
-	 */
+	#[ORM\Column(name: 'unlisted_knowledge_tool_count', type: 'integer')]
 	private $unlistedKnowledgeToolCount = 0;
 
-	/**
-	 * @ORM\Column(name="unlisted_blog_post_count", type="integer")
-	 */
+	#[ORM\Column(name: 'unlisted_blog_post_count', type: 'integer')]
 	private $unlistedBlogPostCount = 0;
 
-	/**
-	 * @ORM\Column(name="unlisted_faq_question_count", type="integer")
-	 */
+	#[ORM\Column(name: 'unlisted_faq_question_count', type: 'integer')]
 	private $unlistedFaqQuestionCount = 0;
 
-	/**
-	 * @ORM\Column(name="unlisted_qa_question_count", type="integer")
-	 */
+	#[ORM\Column(name: 'unlisted_qa_question_count', type: 'integer')]
 	private $unlistedQaQuestionCount = 0;
 
-	/**
-	 * @ORM\Column(name="unlisted_promotion_graphic_count", type="integer")
-	 */
+	#[ORM\Column(name: 'unlisted_promotion_graphic_count', type: 'integer')]
 	private $unlistedPromotionGraphicCount = 0;
 
-	/**
-	 * @ORM\Column(name="unlisted_workflow_workflow_count", type="integer")
-	 */
+	#[ORM\Column(name: 'unlisted_workflow_workflow_count', type: 'integer')]
 	private $unlistedWorkflowWorkflowCount = 0;
 
-	/**
-	 * @ORM\Column(name="unlisted_collection_collection_count", type="integer")
-	 */
+	#[ORM\Column(name: 'unlisted_collection_collection_count', type: 'integer')]
 	private $unlistedCollectionCollectionCount = 0;
 
-	/**
-	 * @ORM\Column(name="unlisted_offer_offer_count", type="integer")
-	 */
+	#[ORM\Column(name: 'unlisted_offer_offer_count', type: 'integer')]
 	private $unlistedOfferOfferCount = 0;
 
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="member_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'member_count')]
 	private $memberCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="invitation_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'invitation_count')]
 	private $invitationCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="request_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'request_count')]
 	private $requestCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="team_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'team_count')]
 	private $teamCount = 0;
 
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="follower_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'follower_count')]
 	private $followerCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="following_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'following_count')]
 	private $followingCount = 0;
 
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="recieved_like_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'recieved_like_count')]
 	private $recievedLikeCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="sent_like_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'sent_like_count')]
 	private $sentLikeCount = 0;
 
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="positive_vote_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'positive_vote_count')]
 	private $positiveVoteCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="negative_vote_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'negative_vote_count')]
 	private $negativeVoteCount = 0;
 
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="unread_message_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'unread_message_count')]
 	private $unreadMessageCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="fresh_notification_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'fresh_notification_count')]
 	private $freshNotificationCount = 0;
 
-	/**
-	 * @ORM\Column(type="datetime", nullable=true, name="notifications_folding_since")
-	 */
+	#[ORM\Column(type: 'datetime', nullable: true, name: 'notifications_folding_since')]
 	private $notificationsFoldingSince;
 
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="comment_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'comment_count')]
 	private $commentCount = 0;
 
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="contribution_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'contribution_count')]
 	private $contributionCount = 0;
 
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="private_creation_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'private_creation_count')]
 	private $privateCreationCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="public_creation_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'public_creation_count')]
 	private $publicCreationCount = 0;
 
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="private_plan_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'private_plan_count')]
 	private $privatePlanCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="public_plan_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'public_plan_count')]
 	private $publicPlanCount = 0;
 
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="private_howto_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'private_howto_count')]
 	private $privateHowtoCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="public_howto_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'public_howto_count')]
 	private $publicHowtoCount = 0;
 
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="private_workshop_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'private_workshop_count')]
 	private $privateWorkshopCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="public_workshop_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'public_workshop_count')]
 	private $publicWorkshopCount = 0;
 
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="private_find_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'private_find_count')]
 	private $privateFindCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="public_find_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'public_find_count')]
 	private $publicFindCount = 0;
 
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="private_event_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'private_event_count')]
 	private $privateEventCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="public_event_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'public_event_count')]
 	private $publicEventCount = 0;
 
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="private_question_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'private_question_count')]
 	private $privateQuestionCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="public_question_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'public_question_count')]
 	private $publicQuestionCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="answer_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'answer_count')]
 	private $answerCount = 0;
 
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="private_offer_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'private_offer_count')]
 	private $privateOfferCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="public_offer_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'public_offer_count')]
 	private $publicOfferCount = 0;
 
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="private_graphic_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'private_graphic_count')]
 	private $privateGraphicCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="public_graphic_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'public_graphic_count')]
 	private $publicGraphicCount = 0;
 
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="private_workflow_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'private_workflow_count')]
 	private $privateWorkflowCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="public_workflow_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'public_workflow_count')]
 	private $publicWorkflowCount = 0;
 
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="private_collection_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'private_collection_count')]
 	private $privateCollectionCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="public_collection_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'public_collection_count')]
 	private $publicCollectionCount = 0;
 
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="proposal_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'proposal_count')]
 	private $proposalCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="testimonial_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'testimonial_count')]
 	private $testimonialCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="review_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'review_count')]
 	private $reviewCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true, name="feedback_count")
-	 */
+	#[ORM\Column(type: 'integer', nullable: true, name: 'feedback_count')]
 	private $feedbackCount = 0;
 
 
-	/**
-	 * @ORM\Column(name="donation_count", type="integer")
-	 */
+	#[ORM\Column(name: 'donation_count', type: 'integer')]
 	private $donationCount = 0;
 
-	/**
-	 * @ORM\Column(name="donation_balance", type="integer")
-	 */
+	#[ORM\Column(name: 'donation_balance', type: 'integer')]
 	private $donationBalance = 0;
 
-	/**
-	 * @ORM\Column(name="donation_fee_balance", type="integer")
-	 */
+	#[ORM\Column(name: 'donation_fee_balance', type: 'integer')]
 	private $donationFeeBalance = 0;
 
 
