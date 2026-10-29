@@ -793,8 +793,9 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
 - Le géocodage (`geocoder-php/common-http`) trouve sa fabrique PSR-17 par `php-http/discovery`, à
   l'exécution : `GuzzleHttp\Psr7\HttpFactory` de `guzzlehttp/psr7` 2. Le plugin Composer de
   discovery est coupé dans `allow-plugins`.
-- `bentools/webpush-bundle` est en 0.12, la dernière qui accepte Symfony 4.4 (la 0.13 exige 5.4) ;
-  jusqu'à la 0.10, il appelait `GuzzleHttp\Promise\settle()`, supprimée de `guzzlehttp/promises` 2,
+- `bentools/webpush-bundle` est en 0.14 (#177), avec `minishlink/web-push` 6 et `web-token/jwt-*`
+  2.2 (abandonné) : web-push 9, qui passe à `web-token/jwt-library`, monterait aussi `psr/cache`,
+  `brick/math` et quatre polyfills de Symfony. Jusqu'à la 0.10, le bundle appelait `GuzzleHttp\Promise\settle()`, supprimée de `guzzlehttp/promises` 2,
   qu'exige Guzzle depuis la 7.10. Son `PushMessageSender` envoie avec un TTL de 0 : `services.yml`
   le redéfinit avec celui de web-push 2.0 (4 semaines). Le timeout est le sien, 30 s par requête
   (`DEFAULT_TIMEOUT`), qui passe avant les options du client Guzzle : ce client n'en a pas, il

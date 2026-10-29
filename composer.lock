@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3cb3b41df904de51fae1ff13c8b20133",
+    "content-hash": "bb319593017faafaec1dd7877acefdae",
     "packages": [
         {
             "name": "afarkas/html5shiv",
@@ -150,16 +150,16 @@
         },
         {
             "name": "bentools/webpush-bundle",
-            "version": "0.12",
+            "version": "0.14.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/bpolaszek/webpush-bundle.git",
-                "reference": "19b49b38f042356ee3aecd874457a23b8f832e93"
+                "reference": "9c0cc7f0c9b38b6dfc5fe2a720d3e1d41cc89453"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bpolaszek/webpush-bundle/zipball/19b49b38f042356ee3aecd874457a23b8f832e93",
-                "reference": "19b49b38f042356ee3aecd874457a23b8f832e93",
+                "url": "https://api.github.com/repos/bpolaszek/webpush-bundle/zipball/9c0cc7f0c9b38b6dfc5fe2a720d3e1d41cc89453",
+                "reference": "9c0cc7f0c9b38b6dfc5fe2a720d3e1d41cc89453",
                 "shasum": ""
             },
             "require": {
@@ -167,26 +167,24 @@
                 "ext-json": "*",
                 "ext-mbstring": "*",
                 "ext-openssl": "*",
-                "guzzlehttp/guzzle": "^6.5.8|^7.4",
-                "minishlink/web-push": "~6.0|~7.0|~8.0",
+                "guzzlehttp/guzzle": "^6.5.8 || ^7.4",
+                "minishlink/web-push": "^6.0.7 || ^7.0 || ^8.0 || ^9.0",
                 "php": ">=8.1",
-                "symfony/http-kernel": "^4.4.50|^5.4.20|^6.0"
+                "symfony/http-kernel": "^5.4.20 || ^6.0 || ^7.0 || ^8.0",
+                "symfony/yaml": "^5.4 || ^6.0 || ^7.0 || ^8.0"
             },
             "require-dev": {
                 "bentools/doctrine-static": "1.0.x-dev",
-                "doctrine/dbal": "~2.5 <=2.9",
-                "nyholm/symfony-bundle-test": "~1.8",
-                "phpunit/phpunit": "^8.5.38|~9.0",
-                "symfony/config": "~4.0|~5.0|~6.0",
-                "symfony/dependency-injection": "~3.0|~4.0|~5.0|~6.0",
-                "symfony/framework-bundle": "~3.0|~4.0|~5.0|~6.0",
-                "symfony/http-foundation": "~3.0|~4.0|~5.0|~6.0",
-                "symfony/routing": "~3.0|~4.0|~5.0|~6.0",
-                "symfony/security": "~3.0|~4.0|~5.0|~6.0",
-                "symfony/var-dumper": "~3.0|~4.0|~5.0|~6.0",
-                "symfony/yaml": "~3.0|~4.0|~5.0|~6.0",
-                "twig/twig": "~1.0|~2.0",
-                "web-token/jwt-util-ecc": ">=2.1"
+                "doctrine/dbal": "^2.9 || ^3.0",
+                "phpunit/phpunit": "^9.0",
+                "symfony/config": "^5.4 || ^6.0 || ^7.0 || ^8.0",
+                "symfony/dependency-injection": "^5.4 || ^6.0 || ^7.0 || ^8.0",
+                "symfony/framework-bundle": "^5.4 || ^6.0 || ^7.0 || ^8.0",
+                "symfony/http-foundation": "^5.4 || ^6.0 || ^7.0 || ^8.0",
+                "symfony/routing": "^5.4 || ^6.0 || ^7.0 || ^8.0",
+                "symfony/security-core": "^5.4 || ^6.0 || ^7.0 || ^8.0",
+                "symfony/var-dumper": "^5.4 || ^6.0 || ^7.0 || ^8.0",
+                "twig/twig": "^2.0 || ^3.0"
             },
             "type": "symfony-bundle",
             "extra": {
@@ -306,9 +304,9 @@
             ],
             "support": {
                 "issues": "https://github.com/bpolaszek/webpush-bundle/issues",
-                "source": "https://github.com/bpolaszek/webpush-bundle/tree/0.12"
+                "source": "https://github.com/bpolaszek/webpush-bundle/tree/0.14.1"
             },
-            "time": "2024-05-22T15:07:58+00:00"
+            "time": "2026-03-29T07:12:44+00:00"
         },
         {
             "name": "biblys/isbn",
