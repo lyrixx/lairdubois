@@ -110,16 +110,23 @@ services:
     # The hub of Mercure, in HTTP behind the router: same domain and port as the site. No
     # anonymous subscriber, as in production: the site sets the JWT in a cookie
     mercure:
-        image: dunglas/mercure:v0.24.2
+        image: dunglas/mercure:v1.1.5
         environment:
             SERVER_NAME: ":80"
+            # The "iss" of the JWT of the site (mercure.hubs.default.jwt.claims of config.yml)
+            MERCURE_TRUSTED_ISSUERS: https://lairdubois.fr
             MERCURE_PUBLISHER_JWT_KEY: *mercure_jwt_secret
             MERCURE_SUBSCRIBER_JWT_KEY: *mercure_jwt_secret
-            # Keeps the subscriptions open (600s by default): a workspace reloads its tasks at
-            # each reconnection. The hub still closes one when its JWT expires
-            MERCURE_EXTRA_DIRECTIVES: "write_timeout 0s"
+            # write_timeout: keeps the subscriptions open (600s by default), a workspace reloads
+            # its tasks at each reconnection. The hub still closes one when its JWT expires.
+            # resource_identifier: the "aud" of the JWT, the public URL of the hub (MERCURE_PUBLIC_URL
+            # of the builder). The hub would take it from the request, in HTTP behind the router
+            MERCURE_EXTRA_DIRECTIVES: |-
+                write_timeout 0s
+                resource_identifier https://${PROJECT_ROOT_DOMAIN}${PROJECT_HTTPS_PORT:+:${PROJECT_HTTPS_PORT}}/.well-known/mercure
+        # On the admin API of Caddy, that listens on 127.0.0.1 of the container only
         healthcheck:
-            test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/healthz"]
+            test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:2019/mercure/health/ready"]
             interval: 5s
             timeout: 5s
             retries: 10

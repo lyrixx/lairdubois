@@ -143,13 +143,18 @@ Contextes : `--context=test` (`SYMFONY_ENV=test`), `--context=ci` (le même, san
   (profil `worker`) : les trois de Messenger (`messenger:consume mailer`, `messenger:consume view`,
   `messenger:consume webpush_notification`). Extension PHP `amqp` dans les images, pour le transport
   AMQP de Messenger.
-- Hub Mercure (service `mercure`, profil `default`, #21) : l'image `dunglas/mercure`, en HTTP
-  (`SERVER_NAME=:80`), routé sur `/.well-known/mercure` du domaine et du port du site. Une clé JWT
-  de dev fixe (`MERCURE_JWT_SECRET` de `docker-compose.yml`) signe la publication et
-  l'abonnement ; pas d'abonné anonyme : sans JWT, 401. Paramètres `mercure_url` (interne, pour
-  publier), `mercure_public_url` (celle du navigateur) et `mercure_jwt_secret`. `write_timeout 0s`
-  (`MERCURE_EXTRA_DIRECTIVES`) : sinon le hub ferme chaque abonnement au bout de 10 minutes, et
-  l'espace de travail recharge ses tâches à chaque reconnexion.
+- Hub Mercure (service `mercure`, profil `default`, #21) : l'image `dunglas/mercure` 1.x
+  (protocole 1.0, #154), en HTTP (`SERVER_NAME=:80`), routé sur `/.well-known/mercure` du domaine
+  et du port du site. Une clé JWT de dev fixe (`MERCURE_JWT_SECRET` de `docker-compose.yml`) signe
+  la publication et l'abonnement ; pas d'abonné anonyme : sans JWT, 401. Paramètres `mercure_url`
+  (interne, pour publier), `mercure_public_url` (celle du navigateur) et `mercure_jwt_secret`.
+  Les JWT sont des access tokens OAuth 2.0 : `iss` fixe (`https://lairdubois.fr`,
+  `jwt.claims` de `config.yml`, que le hub reconnaît par `MERCURE_TRUSTED_ISSUERS`), `aud` =
+  l'URL publique du hub, que `resource_identifier` épingle (derrière le routeur, en HTTP, le hub
+  la déduirait en `http://`). `write_timeout 0s` (`MERCURE_EXTRA_DIRECTIVES`) : sinon le hub ferme
+  chaque abonnement au bout de 10 minutes, et l'espace de travail recharge ses tâches à chaque
+  reconnexion. Healthcheck sur l'API d'admin de Caddy (`127.0.0.1:2019/mercure/health/ready`,
+  qui n'écoute que dans le conteneur) : la 1.x ne sert plus `/healthz`.
 - Mailpit (service `mailpit`, profil `default`, #19) : l'image `axllent/mailpit`, qui reçoit les
   mails en SMTP sur `mailpit:1025` et les affiche dans son interface, routée sur `/mailpit/` du
   domaine et du port du site (`MP_WEBROOT`) : `castor about` donne son URL. Base temporaire, sans
@@ -592,15 +597,14 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   Docker les lui présente comme locales, `getClientIp()` vaut donc toujours `127.0.0.1` en dev.
 - Sans index Elasticsearch, la page d'accueil répond 500 (`no such index [ladb_…]`) :
   `castor app:elasticsearch:populate`.
-- Le hub Mercure reste en 0.24 tant que `symfony/mercure-bundle` est en 0.3 (`symfony/mercure`
-  0.6, protocole 0.x : claim `mercure`, cookie `mercureAuthorization`, `topic=`). La 1.x change
-  le protocole : elle vient avec le bundle 0.6, au saut en 6.4 (#154).
 - Éditeur de processus et Mercure (#21) : chaque modification est publiée sur le hub
   (`_push()` d'`AbstractWorkflowBasedController`), en update privée sur deux topics fixes,
-  indépendants de l'hôte : `https://lairdubois.fr/workflows/{id}`, celui de l'espace de travail,
-  et `…/users/{userId}/workflows/{id}`, par propriétaire. La page de l'espace de travail, hors
-  lecture seule, pose le cookie `mercureAuthorization` (chemin `/.well-known/mercure`), dont le
-  JWT vise les processus du compte (tous pour un admin) : deux onglets sur deux processus ne
+  indépendants de l'hôte, écrits en URL Pattern : `https://lairdubois.fr/workflows/:id`, celui de
+  l'espace de travail, qui s'y abonne par `match=` (topic exact), et
+  `…/users/:userId/workflows/:id`, par propriétaire. La page de l'espace de travail, hors lecture seule, pose le cookie
+  `__Secure-mercure_access_token` (chemin `/.well-known/mercure`, `cookie_name` de `config.yml` :
+  en debug, le bundle en prendrait un autre), dont le JWT vise les processus du compte (tous pour
+  un admin) par `match_type: urlpattern` (`…/users/2/workflows/:id`) : deux onglets sur deux processus ne
   l'écrasent pas. Le hub ferme un abonnement quand son JWT expire, et le navigateur se
   reconnecte avec le même cookie : cookie et JWT durent un an, comme `remember_me`, et la
   déconnexion supprime le cookie (`delete_cookies` de `security.yml`). Hub injoignable : 500

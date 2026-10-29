@@ -572,7 +572,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 				// The workspace gets the changes of its workflow from the Mercure hub (_push()),
 				// with this cookie
 				if (!$parameters['readOnly']) {
-					$authorization->setCookie($request, array( $this->_getMercureSubscribeTopic() ));
+					$authorization->setCookie($request, array( 'urlpattern' => array( $this->_getMercureSubscribeTopic() ) ));
 				}
 
 				return $this->render('@LadbCore/Workflow/Workflow/show-workspace.html.twig', array_merge($parameters, array(

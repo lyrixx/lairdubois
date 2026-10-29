@@ -143,7 +143,7 @@ final class LoginTest extends WebTestCase
         $client->request('GET', '/logout');
 
         $cookies = array_values(array_filter($client->getResponse()->headers->getCookies(), static function (ResponseCookie $cookie): bool {
-            return 'mercureAuthorization' === $cookie->getName();
+            return '__Secure-mercure_access_token' === $cookie->getName();
         }));
         self::assertCount(1, $cookies);
         self::assertTrue($cookies[0]->isCleared());

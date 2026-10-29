@@ -101,7 +101,7 @@ final class WorkflowTest extends WebTestCase
 
         self::assertSame(200, $client->getResponse()->getStatusCode());
         $cookies = array_values(array_filter($client->getResponse()->headers->getCookies(), static function (Cookie $cookie): bool {
-            return 'mercureAuthorization' === $cookie->getName();
+            return '__Secure-mercure_access_token' === $cookie->getName();
         }));
         if (null === $subscribe) {
             self::assertSame([], $cookies);
@@ -118,7 +118,18 @@ final class WorkflowTest extends WebTestCase
         $jwt = Configuration::forSymmetricSigner(new Sha256(), InMemory::plainText($client->getContainer()->getParameter('mercure_jwt_secret')));
         $token = $jwt->parser()->parse($cookies[0]->getValue());
         self::assertTrue($jwt->validator()->validate($token, new SignedWith($jwt->signer(), $jwt->verificationKey())));
-        self::assertSame(['publish' => [], 'subscribe' => $subscribe], $token->claims()->get('mercure'));
+        // An access token of OAuth 2.0 (Mercure 1.0), for the public URL of the hub, from the
+        // issuer that the hub trusts
+        self::assertSame('at+jwt', $token->headers()->get('typ'));
+        self::assertSame('https://lairdubois.fr', $token->claims()->get('iss'));
+        self::assertSame([$client->getContainer()->getParameter('mercure_public_url')], $token->claims()->get('aud'));
+        self::assertSame([[
+            'type' => 'https://mercure.rocks/authorization-detail',
+            'actions' => ['subscribe'],
+            'topics' => array_map(static function (string $pattern): array {
+                return ['match' => $pattern, 'match_type' => 'urlpattern'];
+            }, $subscribe),
+        ]], $token->claims()->get('authorization_details'));
         // A year, as remember_me: the hub closes the subscription when the JWT expires. Counted in
         // local time, as the bundle does: an hour off across a change of daylight saving time
         self::assertEqualsWithDelta((new \DateTimeImmutable('+31536000 seconds'))->getTimestamp(), $cookies[0]->getExpiresTime(), 60);
@@ -131,10 +142,10 @@ final class WorkflowTest extends WebTestCase
     public static function provideSubscribeClaims(): iterable
     {
         // The workflows of "user" (id 2)
-        yield 'author' => [UserFixtures::USER, ['https://lairdubois.fr/users/2/workflows/{id}']];
+        yield 'author' => [UserFixtures::USER, ['https://lairdubois.fr/users/2/workflows/:id']];
         yield 'other user' => [UserFixtures::USER2, null];
         yield 'anonymous' => [null, null];
-        yield 'admin' => [UserFixtures::ADMIN, ['https://lairdubois.fr/workflows/{id}']];
+        yield 'admin' => [UserFixtures::ADMIN, ['https://lairdubois.fr/workflows/:id']];
     }
 
     /**

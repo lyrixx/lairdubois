@@ -35,7 +35,7 @@ security:
             logout:
                 # The subscription cookie of the workspaces (Mercure, a year as remember_me)
                 delete_cookies:
-                    mercureAuthorization: { path: /.well-known/mercure, secure: true, samesite: strict }
+                    __Secure-mercure_access_token: { path: /.well-known/mercure, secure: true, samesite: strict }
             remember_me:
                 secret:   "%secret%"
                 lifetime: 31536000 # 365 days in seconds

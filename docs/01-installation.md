@@ -176,11 +176,11 @@ If you want to monitor RabbitMQ, enable the management plugin
 
 ### Install [Mercure](https://mercure.rocks/) - *The real-time hub of the workflow editor*
 
-The hub is a single binary (a build of [Caddy](https://caddyserver.com/)), with its `Caddyfile`. Keep the 0.24 version: `symfony/mercure-bundle` 0.3 does not speak the protocol of Mercure 1.x.
+The hub is a single binary (a build of [Caddy](https://caddyserver.com/)), with its `Caddyfile`. Version 1.x: the protocol of Mercure 1.0, that `symfony/mercure-bundle` 0.6 speaks.
 
 ``` bash
     $ cd /tmp
-    $ wget https://github.com/dunglas/mercure/releases/download/v0.24.2/mercure_Linux_x86_64.tar.gz
+    $ wget https://github.com/dunglas/mercure/releases/download/v1.1.5/mercure_Linux_x86_64.tar.gz
     $ sudo mkdir /opt/mercure
     $ sudo tar -xzf mercure_Linux_x86_64.tar.gz -C /opt/mercure mercure Caddyfile
 ```
@@ -204,10 +204,16 @@ Then write the configuration of the hub, read by its service (Step 14.4), readab
 # HTTP only, on the local interface: nginx serves it on /.well-known/mercure (Step 6)
 SERVER_NAME=:3000
 CADDY_SERVER_EXTRA_DIRECTIVES=bind 127.0.0.1
+# The "iss" of the JWT of the site (mercure.hubs.default.jwt.claims of app/config/config.yml)
+MERCURE_TRUSTED_ISSUERS=https://lairdubois.fr
 MERCURE_PUBLISHER_JWT_KEY=THE_SECRET
 MERCURE_SUBSCRIBER_JWT_KEY=THE_SECRET
-# Keeps the subscriptions open (600s by default): a workspace reloads its tasks at each reconnection
-MERCURE_EXTRA_DIRECTIVES=write_timeout 0s
+# write_timeout: keeps the subscriptions open (600s by default), a workspace reloads its tasks at
+# each reconnection. resource_identifier: the "aud" of the JWT, the public URL of the hub (the
+# mercure_public_url parameter); the hub would take it from the request, in HTTP behind nginx
+# (one directive per line, in single quotes)
+MERCURE_EXTRA_DIRECTIVES='write_timeout 0s
+resource_identifier https://www.lairdubois.fr/.well-known/mercure'
 # Where the hub keeps its state (mercure.db), see StateDirectory in its service
 XDG_DATA_HOME=/var/lib/ladb_mercure
 XDG_CONFIG_HOME=/var/lib/ladb_mercure
@@ -623,7 +629,7 @@ Start these services
     $ sudo systemctl start ladb_mercure.service
 ```
 
-Check the hub: `curl -i http://127.0.0.1:3000/healthz` answers 200, and `https://www.lairdubois.fr/.well-known/mercure` answers 401 (no JWT).
+Check the hub: `curl -i http://127.0.0.1:2019/mercure/health/ready` (the admin API of Caddy, on the local interface only) answers 200, and `https://www.lairdubois.fr/.well-known/mercure?match=x` answers 401 (no JWT).
 
 ## Step 15 - Sending emails (Not necessary on the **DEV** server)
 
