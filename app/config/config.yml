@@ -10,11 +10,9 @@ framework:
     http_method_override: false
     # A PHP \Error is handled like an exception (error page, 500) instead of escaping handle()
     handle_all_throwables: true
-    # The PHP errors (warnings, notices, deprecations) go to the logger (channel "php") in prod too,
-    # instead of the log of PHP: with the fingers_crossed handler of config_prod.yml, they are only
-    # written with an error of the same request or command
+    # Not true (7.0): a PHP warning of the prod stays in the log of PHP, not dropped by fingers_crossed
     php_errors:
-        log: true
+        log: '%kernel.debug%'
     router:
         resource: "%kernel.project_dir%/app/config/routing.yml"
         strict_requirements: "%kernel.debug%"
