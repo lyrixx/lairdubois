@@ -35,12 +35,6 @@ services:
     factory: [Symfony\Component\ErrorHandler\ErrorRenderer\HtmlErrorRenderer, isDebug]
     arguments: ['@request_stack', '%kernel.debug%']
 
-  # Imagine Post processors
-  ladb_imagine.filter.post_processor.imageoptimizer:
-    class: Ladb\CoreBundle\Imagine\ImageOptimizerPostProcessor
-    tags:
-      - { name: liip_imagine.filter.post_processor, post_processor: ladb_imageoptimizer }
-
   # Security: the user checker of the firewall
   ladb_core.user_checker:
     class: Ladb\CoreBundle\Security\UserChecker
