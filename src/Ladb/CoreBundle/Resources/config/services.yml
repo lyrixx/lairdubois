@@ -157,9 +157,6 @@ services:
   Ladb\CoreBundle\Utils\FollowerUtils: '@ladb_core.follower_utils'
   ladb_core.login_utils:
     class: Ladb\CoreBundle\Utils\LoginUtils
-    arguments:
-      $authenticator: '@security.authenticator.form_login.main'
-      $userChecker: '@security.user_checker.main'
   Ladb\CoreBundle\Utils\LoginUtils: '@ladb_core.login_utils'
   ladb_core.mailer_utils:
     class: Ladb\CoreBundle\Utils\MailerUtils

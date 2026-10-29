@@ -707,15 +707,16 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `Urlizer` passent par `symfony/string` : les slugs et les labels de tags peuvent changer) ;
   `dama/doctrine-test-bundle` `~8.2.2` (la 8.3 veut PHPUnit 10, que Composer ne voit pas, dans
   `tools/phpunit`) ; `doctrine/data-fixtures` `^1.8` (la 2.0 impose les types natifs et la classe
-  dans `getReference()`). `doctrine/migrations` est en 3.5 : à partir de la 3.6, il exige
-  `symfony/var-exporter` 6.2, que la 5.4 n'avait pas.
+  dans `getReference()`).
 - doctrine/migrations 3 lit la table des 1.x et 2.x (`storage.table_storage.table_name:
   migration_versions`) : la sienne par défaut, `doctrine_migration_versions`, lui ferait rejouer
   toutes les migrations de la prod. Le premier `doctrine:migrations:migrate` (ou
   `sync-metadata-storage`) la convertit : `version` en `VARCHAR(191)`, qui porte le nom de la
   classe, et les colonnes `executed_at` et `execution_time` ; avant, `status` échoue (« The
-  metadata storage is not up to date »). Il ajoute à chaque migration qu'il joue le diff de DBAL
-  entre le schéma de la base et celui que décrit la migration.
+  metadata storage is not up to date »). En 3.9 (#26), il n'ajoute à une migration le diff de DBAL
+  entre le schéma de la base et celui qu'elle décrit que si elle touche à `$schema` (un objet lazy
+  de `symfony/var-exporter` depuis la 3.6, `proxy-manager-lts` avant) : la 3.5 rejouait l'`ALTER`
+  de `Version20261028235655`, qui n'a que des `addSql()`.
 - DBAL 3 déclare une colonne `json` en `JSON` sur MariaDB (`LONGTEXT … utf8mb4_bin CHECK
   (json_valid(…))`) et voit celle de DBAL 2, un `LONGTEXT`, comme différente
   (`declarationMismatch`) : `Version20261028235655` convertit
@@ -754,8 +755,9 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   (`SecurityController`, `RegistrationController`, `ResettingController`,
   `ChangePasswordController`), qui gardent les routes, les noms de formulaires et les templates
   (`@FOSUser/…`) de FOSUserBundle (#24). `LoginUtils` connecte un compte après son inscription ou
-  un nouveau mot de passe, comme le `LoginManager` de FOSUserBundle, par `authenticateUser()` avec
-  l'authenticator du formulaire (`LastLoginListener` pose la dernière connexion). Le namespace
+  un nouveau mot de passe, comme le `LoginManager` de FOSUserBundle, par `Security::login()` avec
+  l'authenticator du formulaire (#26), qui appelle aussi le user checker (`LastLoginListener` pose
+  la dernière connexion). Le namespace
   `@FOSUser` est un chemin Twig de `config.yml` (`templates/bundles/FOSUserBundle/`), les traductions
   utilisées sont dans les domaines `FOSUserBundle` et `validators` du bundle.
 - Symfony 6.4 en composants séparés (#26) : plus de `symfony/symfony`, que Symfony 7 refuse.
