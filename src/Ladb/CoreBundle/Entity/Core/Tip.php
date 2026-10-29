@@ -15,11 +15,9 @@ use Ladb\CoreBundle\Model\IndexableInterface;
 use Ladb\CoreBundle\Model\TitledInterface;
 use Ladb\CoreBundle\Model\ViewableInterface;
 
-/**
- * @ORM\Table("tbl_core_tip")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Core\TipRepository")
- */
 #[LadbAssert\BodyBlocks]
+#[ORM\Table('tbl_core_tip')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\TipRepository::class)]
 class Tip extends AbstractPublication implements TitledInterface, HtmlBodiedInterface, IndexableInterface, ViewableInterface {
 
 	use HtmlBodiedTrait;
@@ -28,26 +26,18 @@ class Tip extends AbstractPublication implements TitledInterface, HtmlBodiedInte
 	const CLASS_NAME = 'LadbCoreBundle:Core\Tip';
 	const TYPE = 5;
 
-	/**
-	 * @ORM\Column(type="text", nullable=false)
-	 */
+	#[ORM\Column(type: 'text', nullable: false)]
 	private $body;
 
-	/**
-	 * @ORM\Column(type="text", nullable=false)
-	 */
+	#[ORM\Column(type: 'text', nullable: false)]
 	private $htmlBody;
 
-	/**
-	 * @ORM\Column(type="string", length=255, nullable=false)
-	 */
 	#[Assert\NotBlank]
 	#[Assert\Url]
+	#[ORM\Column(type: 'string', length: 255, nullable: false)]
 	private $url;
 
-	/**
-	 * @ORM\Column(type="integer", name="view_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'view_count')]
 	private $viewCount = 0;
 
 	/////

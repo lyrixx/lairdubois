@@ -7,40 +7,28 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 use Ladb\CoreBundle\Model\IdentifiableInterface;
 
-/**
- * @ORM\Table("tbl_core_member_request",
- *		uniqueConstraints={
- *			@ORM\UniqueConstraint(name="ENTITY_MEMBER_INVITATION_UNIQUE", columns={"team_id", "sender_id"})
- * 		},)
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Core\MemberRequestRepository")
- */
+#[ORM\Table('tbl_core_member_request')]
+#[ORM\UniqueConstraint(name: 'ENTITY_MEMBER_INVITATION_UNIQUE', columns: ['team_id', 'sender_id'])]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\MemberRequestRepository::class)]
 class MemberRequest implements IdentifiableInterface {
 
 	const CLASS_NAME = 'LadbCoreBundle:Core\MemberRequest';
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	protected $id;
 
-	/**
-	 * @ORM\Column(name="created_at", type="datetime")
-	 * @Gedmo\Timestampable(on="create")
-	 */
+	#[ORM\Column(name: 'created_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'create')]
 	private $createdAt;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\User")
-	 * @ORM\JoinColumn(name="team_id", nullable=false)
-	 */
+	#[ORM\JoinColumn(name: 'team_id', nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\User::class)]
 	private $team;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\User")
-	 * @ORM\JoinColumn(nullable=false)
-	 */
+	#[ORM\JoinColumn(nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\User::class)]
 	private $sender;
 
 	// ID /////

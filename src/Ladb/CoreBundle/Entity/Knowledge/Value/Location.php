@@ -10,11 +10,9 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Ladb\CoreBundle\Validator\Constraints as LadbAssert;
 use Ladb\CoreBundle\Model\LocalisableExtendedInterface;
 
-/**
- * @ORM\Table("tbl_knowledge2_value_location")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Knowledge\Value\LocationRepository")
- */
 #[LadbAssert\ValidLocationValue]
+#[ORM\Table('tbl_knowledge2_value_location')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Knowledge\Value\LocationRepository::class)]
 class Location extends BaseValue implements LocalisableExtendedInterface {
 
 	use LocalisableTrait, LocalisableExtendedTrait;
@@ -24,46 +22,30 @@ class Location extends BaseValue implements LocalisableExtendedInterface {
 
 	const TYPE_STRIPPED_NAME = 'location';
 
-	/**
-	 * @ORM\Column(type="string", length=255, nullable=false)
-	 */
+	#[ORM\Column(type: 'string', length: 255, nullable: false)]
 	protected $data;
 
-	/**
-	 * @ORM\Column(type="string", length=255, nullable=false)
-	 */
 	#[Assert\NotBlank(groups: ['mandatory'])]
 	#[Assert\Length(max: 255)]
+	#[ORM\Column(type: 'string', length: 255, nullable: false)]
 	private $location;
 
-	/**
-	 * @ORM\Column(type="float", nullable=true)
-	 */
+	#[ORM\Column(type: 'float', nullable: true)]
 	private $latitude;
 
-	/**
-	 * @ORM\Column(type="float", nullable=true)
-	 */
+	#[ORM\Column(type: 'float', nullable: true)]
 	private $longitude;
 
-	/**
-	 * @ORM\Column(type="string", nullable=true)
-	 */
+	#[ORM\Column(type: 'string', nullable: true)]
 	private $postalCode;
 
-	/**
-	 * @ORM\Column(type="string", nullable=true)
-	 */
+	#[ORM\Column(type: 'string', nullable: true)]
 	private $locality;
 
-	/**
-	 * @ORM\Column(type="string", nullable=true)
-	 */
+	#[ORM\Column(type: 'string', nullable: true)]
 	private $country;
 
-	/**
-	 * @ORM\Column(type="string", nullable=true)
-	 */
+	#[ORM\Column(type: 'string', nullable: true)]
 	private $geographicalAreas;
 
 	/////

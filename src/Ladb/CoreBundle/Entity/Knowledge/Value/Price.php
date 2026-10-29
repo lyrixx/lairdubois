@@ -7,10 +7,8 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 use Ladb\CoreBundle\Validator\Constraints as LadbAssert;
 
-/**
- * @ORM\Table("tbl_knowledge2_value_price")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Knowledge\Value\PriceRepository")
- */
+#[ORM\Table('tbl_knowledge2_value_price')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Knowledge\Value\PriceRepository::class)]
 class Price extends BaseValue {
 
 	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Value\Price';
@@ -18,21 +16,15 @@ class Price extends BaseValue {
 
 	const TYPE_STRIPPED_NAME = 'price';
 
-	/**
-	 * @ORM\Column(type="string", length=20)
-	 */
+	#[ORM\Column(type: 'string', length: 20)]
 	protected $data;
 
-	/**
-	 * @ORM\Column(type="float")
-	 */
 	#[Assert\NotBlank(groups: ['mandatory'])]
+	#[ORM\Column(type: 'float')]
 	protected $rawPrice;
 
-	/**
-	 * @ORM\Column(type="string", length=3)
-	 */
 	#[Assert\NotBlank]
+	#[ORM\Column(type: 'string', length: 3)]
 	protected $currency = 'EUR';
 
 	/////

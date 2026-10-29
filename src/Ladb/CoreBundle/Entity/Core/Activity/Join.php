@@ -5,19 +5,15 @@ namespace Ladb\CoreBundle\Entity\Core\Activity;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Table("tbl_core_activity_join")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Core\Activity\JoinRepository")
- */
+#[ORM\Table('tbl_core_activity_join')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\Activity\JoinRepository::class)]
 class Join extends AbstractActivity {
 
 	const CLASS_NAME = 'LadbCoreBundle:Core\Activity\Join';
 	const STRIPPED_NAME = 'join';
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Join")
-	 * @ORM\JoinColumn(nullable=false)
-	 */
+	#[ORM\JoinColumn(nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Join::class)]
 	private $join;
 
 	/////

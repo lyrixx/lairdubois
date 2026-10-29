@@ -5,36 +5,26 @@ namespace Ladb\CoreBundle\Entity\Core;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
-/**
- * @ORM\Table("tbl_core_tag")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Core\TagRepository")
- */
+#[ORM\Table('tbl_core_tag')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\TagRepository::class)]
 class Tag {
 
 	const CLASS_NAME = 'LadbCoreBundle:Core\Tag';
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\Column(type="string", length=40)
-	 */
+	#[ORM\Column(type: 'string', length: 40)]
 	private $label;
 
-	/**
-	 * @Gedmo\Slug(fields={"label"}, updatable=false)
-	 * @ORM\Column(type="string", length=40, unique=true)
-	 */
+	#[Gedmo\Slug(fields: ['label'], updatable: false)]
+	#[ORM\Column(type: 'string', length: 40, unique: true)]
 	private $slug;
 
-	/**
-	 * @ORM\Id
-	 * @ORM\OneToMany(targetEntity="Ladb\CoreBundle\Entity\Core\TagUsage", mappedBy="tag", cascade={"remove"})
-	 */
+	#[ORM\Id]
+	#[ORM\OneToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\TagUsage::class, mappedBy: 'tag', cascade: ['remove'])]
 	private $usages;
 
 	/////

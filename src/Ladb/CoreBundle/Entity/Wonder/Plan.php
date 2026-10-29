@@ -12,11 +12,9 @@ use Ladb\CoreBundle\Model\HtmlBodiedTrait;
 use Ladb\CoreBundle\Model\InspirableInterface;
 use Ladb\CoreBundle\Model\InspirableTrait;
 
-/**
- * @ORM\Table("tbl_wonder_plan")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Wonder\PlanRepository")
- */
 #[LadbAssert\PlanResourcesMaxSize]
+#[ORM\Table('tbl_wonder_plan')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Wonder\PlanRepository::class)]
 class Plan extends AbstractWonder implements HtmlBodiedInterface, InspirableInterface {
 
 	use HtmlBodiedTrait;
@@ -26,171 +24,113 @@ class Plan extends AbstractWonder implements HtmlBodiedInterface, InspirableInte
 	const STRIPPED_NAME = 'plan';
 	const TYPE = 105;
 
-	/**
-	 * @ORM\Column(type="text", nullable=false)
-	 */
 	#[Assert\NotBlank]
 	#[Assert\Length(min: 5, max: 4000)]
+	#[ORM\Column(type: 'text', nullable: false)]
 	protected $body;
 
-	/**
-	 * @ORM\Column(type="text", nullable=false)
-	 */
+	#[ORM\Column(type: 'text', nullable: false)]
 	private $htmlBody;
 
-	/**
-	 * @ORM\Column(type="simple_array")
-	 */
+	#[ORM\Column(type: 'simple_array')]
 	private $kinds = array( Resource::KIND_UNKNOW );
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_wonder_plan_picture")
-	 * @ORM\OrderBy({"sortIndex" = "ASC"})
-	 */
 	#[Assert\Count(min: 1, max: 5)]
+	#[ORM\JoinTable(name: 'tbl_wonder_plan_picture')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Picture::class, cascade: ['persist'])]
+	#[ORM\OrderBy(['sortIndex' => 'ASC'])]
 	protected $pictures;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Resource", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_wonder_plan_resource")
-	 */
 	#[Assert\Count(min: 1, max: 10)]
+	#[ORM\JoinTable(name: 'tbl_wonder_plan_resource')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Resource::class, cascade: ['persist'])]
 	private $resources;
 
-	/**
-	 * @ORM\Column(type="string", length=255, nullable=true, name="sketchup_3d_warehouse_url")
-	 */
 	#[Assert\Url]
+	#[ORM\Column(type: 'string', length: 255, nullable: true, name: 'sketchup_3d_warehouse_url')]
 	private $sketchup3DWarehouseUrl = null;
 
-	/**
-	 * @ORM\Column(type="string", length=255, nullable=true, name="sketchup_3d_warehouse_embed_identifier")
-	 */
+	#[ORM\Column(type: 'string', length: 255, nullable: true, name: 'sketchup_3d_warehouse_embed_identifier')]
 	private $sketchup3DWarehouseEmbedIdentifier = null;
 
-	/**
-	 * @ORM\Column(type="string", length=255, nullable=true, name="a360_url")
-	 */
 	#[Assert\Regex('/^https:\/\/a360\.co\/[a-zA-Z0-9]+$/', message: 'Lien public non conforme.')]
 	#[Assert\Url]
+	#[ORM\Column(type: 'string', length: 255, nullable: true, name: 'a360_url')]
 	private $a360Url = null;
 
-	/**
-	 * @ORM\Column(type="string", length=255, nullable=true, name="a360_embed_identifier")
-	 */
+	#[ORM\Column(type: 'string', length: 255, nullable: true, name: 'a360_embed_identifier')]
 	private $a360EmbedIdentifier = null;
 
-	/**
-	 * @ORM\Column(type="integer", name="zip_archive_size")
-	 */
+	#[ORM\Column(type: 'integer', name: 'zip_archive_size')]
 	private $zipArchiveSize = 0;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Tag", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_wonder_plan_tag")
-	 */
+	#[ORM\JoinTable(name: 'tbl_wonder_plan_tag')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Tag::class, cascade: ['persist'])]
 	protected $tags;
 
-	/**
-	 * @ORM\Column(type="integer", name="download_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'download_count')]
 	private $downloadCount = 0;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Referer\Referral", cascade={"persist", "remove"})
-	 * @ORM\JoinTable(name="tbl_wonder_plan_referral", inverseJoinColumns={@ORM\JoinColumn(name="referral_id", referencedColumnName="id", unique=true)})
-	 * @ORM\OrderBy({"accessCount" = "DESC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_wonder_plan_referral')]
+	#[ORM\InverseJoinColumn(name: 'referral_id', referencedColumnName: 'id', unique: true)]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Referer\Referral::class, cascade: ['persist', 'remove'])]
+	#[ORM\OrderBy(['accessCount' => 'DESC'])]
 	protected $referrals;
 
-	/**
-	 * @ORM\Column(type="integer", name="rebound_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'rebound_count')]
 	private $reboundCount = 0;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Wonder\Plan", mappedBy="inspirations")
-	 */
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Wonder\Plan::class, mappedBy: 'inspirations')]
 	private $rebounds;
 
-	/**
-	 * @ORM\Column(type="integer", name="inspiration_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'inspiration_count')]
 	private $inspirationCount = 0;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Wonder\Plan", inversedBy="rebounds", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_wonder_plan_inspiration",
-	 *      	joinColumns={ @ORM\JoinColumn(name="plan_id", referencedColumnName="id") },
-	 *      	inverseJoinColumns={ @ORM\JoinColumn(name="rebound_plan_id", referencedColumnName="id") }
-	 *      )
-	 */
 	#[Assert\Count(min: 0, max: 4)]
+	#[ORM\JoinTable(name: 'tbl_wonder_plan_inspiration')]
+	#[ORM\JoinColumn(name: 'plan_id', referencedColumnName: 'id')]
+	#[ORM\InverseJoinColumn(name: 'rebound_plan_id', referencedColumnName: 'id')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Wonder\Plan::class, inversedBy: 'rebounds', cascade: ['persist'])]
 	private $inspirations;
 
-	/**
-	 * @ORM\Column(type="integer", name="question_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'question_count')]
 	private $questionCount = 0;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Qa\Question", inversedBy="plans", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_wonder_plan_question")
-	 */
 	#[Assert\Count(min: 0, max: 4)]
+	#[ORM\JoinTable(name: 'tbl_wonder_plan_question')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Qa\Question::class, inversedBy: 'plans', cascade: ['persist'])]
 	private $questions;
 
-	/**
-	 * @ORM\Column(type="integer", name="creation_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'creation_count')]
 	private $creationCount = 0;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Wonder\Creation", mappedBy="plans")
-	 */
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Wonder\Creation::class, mappedBy: 'plans')]
 	private $creations;
 
-	/**
-	 * @ORM\Column(type="integer", name="workshop_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'workshop_count')]
 	private $workshopCount = 0;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Wonder\Workshop", mappedBy="plans")
-	 */
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Wonder\Workshop::class, mappedBy: 'plans')]
 	private $workshops;
 
-	/**
-	 * @ORM\Column(type="integer", name="howto_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'howto_count')]
 	private $howtoCount = 0;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Howto\Howto", mappedBy="plans")
-	 */
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Howto\Howto::class, mappedBy: 'plans')]
 	private $howtos;
 
-	/**
-	 * @ORM\Column(type="integer", name="workflow_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'workflow_count')]
 	private $workflowCount = 0;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Workflow\Workflow", mappedBy="plans")
-	 */
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Workflow\Workflow::class, mappedBy: 'plans')]
 	private $workflows;
 
-	/**
-	 * @ORM\Column(type="integer", name="school_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'school_count')]
 	private $schoolCount = 0;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Knowledge\School", inversedBy="plans", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_wonder_plan_school")
-	 */
 	#[Assert\Count(min: 0, max: 10)]
+	#[ORM\JoinTable(name: 'tbl_wonder_plan_school')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\School::class, inversedBy: 'plans', cascade: ['persist'])]
 	private $schools;
 
 	/////

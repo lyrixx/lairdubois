@@ -154,17 +154,21 @@ doctrine:
         auto_mapping: true
         mappings:
             gedmo_loggable:
-                type: annotation
+                type: attribute
                 prefix: Gedmo\Loggable\Entity
                 dir: "%kernel.project_dir%/vendor/gedmo/doctrine-extensions/src/Loggable/Entity"
                 alias: GedmoLoggable # this one is optional and will default to the name set for the mapping
                 is_bundle: false
             gedmo_tree:
-                type: annotation
+                type: attribute
                 prefix: Gedmo\Tree\Entity
                 dir: "%kernel.project_dir%/vendor/gedmo/doctrine-extensions/src/Tree/Entity"
                 alias: GedmoTree # this one is optional and will default to the name set for the mapping
                 is_bundle: false
+            # After the mappings of Gedmo, as auto_mapping put it: the order of the classes
+            # (doctrine:schema:create) stays the same
+            LadbCoreBundle:
+                type: attribute
         filters:
             softdeleteable:
                 class: Gedmo\SoftDeleteable\Filter\SoftDeleteableFilter

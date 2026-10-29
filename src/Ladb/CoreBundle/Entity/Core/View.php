@@ -5,12 +5,9 @@ namespace Ladb\CoreBundle\Entity\Core;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
-/**
- * @ORM\Table("tbl_core_view", indexes={
- *     @ORM\Index(name="IDX_VIEW_ENTITY", columns={"entity_type", "entity_id"})
- * })
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Core\ViewRepository")
- */
+#[ORM\Table('tbl_core_view')]
+#[ORM\Index(name: 'IDX_VIEW_ENTITY', columns: ['entity_type', 'entity_id'])]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\ViewRepository::class)]
 class View {
 
 	const CLASS_NAME = 'LadbCoreBundle:Core\View';
@@ -19,38 +16,26 @@ class View {
 	const KIND_LISTED = 1;
 	const KIND_SHOWN = 2;
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\Column(name="entity_type", type="smallint", nullable=false)
-	 */
+	#[ORM\Column(name: 'entity_type', type: 'smallint', nullable: false)]
 	private $entityType;
 
-	/**
-	 * @ORM\Column(name="entity_id", type="integer", nullable=false)
-	 */
+	#[ORM\Column(name: 'entity_id', type: 'integer', nullable: false)]
 	private $entityId;
 
-	/**
-	 * @ORM\Column(name="created_at", type="datetime")
-	 * @Gedmo\Timestampable(on="create")
-	 */
+	#[ORM\Column(name: 'created_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'create')]
 	private $createdAt;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\User")
-	 * @ORM\JoinColumn(nullable=false)
-	 */
+	#[ORM\JoinColumn(nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\User::class)]
 	private $user;
 
-	/**
-	 * @ORM\Column(name="kind", type="smallint")
-	 */
+	#[ORM\Column(name: 'kind', type: 'smallint')]
 	private $kind = View::KIND_NONE;
 
 	/////

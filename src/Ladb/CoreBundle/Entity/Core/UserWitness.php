@@ -5,34 +5,24 @@ namespace Ladb\CoreBundle\Entity\Core;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
-/**
- * @ORM\Table("tbl_core_user_witness")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Core\UserWitnessRepository")
- */
+#[ORM\Table('tbl_core_user_witness')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\UserWitnessRepository::class)]
 class UserWitness {
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\Column(name="created_at", type="datetime")
-	 * @Gedmo\Timestampable(on="create")
-	 */
+	#[ORM\Column(name: 'created_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'create')]
 	private $createdAt;
 
-	/**
-	 * @ORM\Column(type="string", length=25, unique=true)
-	 */
+	#[ORM\Column(type: 'string', length: 25, unique: true)]
 	private $username;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\User", cascade={"persist"})
-	 * @ORM\JoinColumn(name="user_id", nullable=false)
-	 */
+	#[ORM\JoinColumn(name: 'user_id', nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\User::class, cascade: ['persist'])]
 	private $user;
 
 	/////

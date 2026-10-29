@@ -5,12 +5,9 @@ namespace Ladb\CoreBundle\Entity\Core;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
-/**
- * @ORM\Table("tbl_core_witness", indexes={
- *     @ORM\Index(name="IDX_WITNESS_ENTITY", columns={"entity_type", "entity_id"})
- * })
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Core\WitnessRepository")
- */
+#[ORM\Table('tbl_core_witness')]
+#[ORM\Index(name: 'IDX_WITNESS_ENTITY', columns: ['entity_type', 'entity_id'])]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\WitnessRepository::class)]
 class Witness {
 
 	const CLASS_NAME = 'LadbCoreBundle:Core\Witness';
@@ -20,37 +17,25 @@ class Witness {
 	const KIND_CONVERTED = 2;
 	const KIND_DELETED = 3;
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\Column(name="created_at", type="datetime")
-	 * @Gedmo\Timestampable(on="create")
-	 */
+	#[ORM\Column(name: 'created_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'create')]
 	private $createdAt;
 
-	/**
-	 * @ORM\Column(name="entity_type", type="smallint", nullable=false)
-	 */
+	#[ORM\Column(name: 'entity_type', type: 'smallint', nullable: false)]
 	private $entityType;
 
-	/**
-	 * @ORM\Column(name="entity_id", type="integer", nullable=false)
-	 */
+	#[ORM\Column(name: 'entity_id', type: 'integer', nullable: false)]
 	private $entityId;
 
-	/**
-	 * @ORM\Column(type="smallint", nullable=false)
-	 */
+	#[ORM\Column(type: 'smallint', nullable: false)]
 	private $kind = self::KIND_NONE;
 
-	/**
-	 * @ORM\Column(type="simple_array", nullable=true)
-	 */
+	#[ORM\Column(type: 'simple_array', nullable: true)]
 	protected $meta = null;
 
 	/////

@@ -19,11 +19,9 @@ use Ladb\CoreBundle\Model\TitledInterface;
 use Ladb\CoreBundle\Model\TitledTrait;
 use Ladb\CoreBundle\Utils\VideoHostingUtils;
 
-/**
- * @ORM\Table("tbl_youtook_took")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Youtook\TookRepository")
- */
 #[LadbAssert\ValidTook]
+#[ORM\Table('tbl_youtook_took')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Youtook\TookRepository::class)]
 class Took extends AbstractAuthoredPublication implements TitledInterface, SluggedInterface, PicturedInterface, HtmlBodiedInterface, ScrapableInterface {
 
 	use TitledTrait, SluggedTrait, PicturedTrait, HtmlBodiedTrait;
@@ -32,71 +30,47 @@ class Took extends AbstractAuthoredPublication implements TitledInterface, Slugg
 	const CLASS_NAME = 'LadbCoreBundle:Youtook\Took';
 	const TYPE = 112;
 
-	/**
-	 * @ORM\Column(type="string", length=255, nullable=false)
-	 */
 	#[Assert\NotBlank]
 	#[Assert\Url]
+	#[ORM\Column(type: 'string', length: 255, nullable: false)]
 	private $url;
 
-	/**
-	 * @ORM\Column(type="smallint")
-	 */
+	#[ORM\Column(type: 'smallint')]
 	private $kind = VideoHostingUtils::KIND_UNKNOW;
 
-	/**
-	 * @ORM\Column(type="string", length=255, nullable=false)
-	 */
+	#[ORM\Column(type: 'string', length: 255, nullable: false)]
 	private $embedIdentifier;
 
-	/**
-	 * @ORM\Column(type="string", length=255)
-	 */
 	#[Assert\NotBlank]
+	#[ORM\Column(type: 'string', length: 255)]
 	private $title;
 
-	/**
-	 * @Gedmo\Slug(fields={"title"}, separator="-")
-	 * @ORM\Column(type="string", length=100, unique=true)
-	 */
+	#[Gedmo\Slug(fields: ['title'], separator: '-')]
+	#[ORM\Column(type: 'string', length: 100, unique: true)]
 	private $slug;
 
-	/**
-	 * @ORM\Column(type="text")
-	 */
+	#[ORM\Column(type: 'text')]
 	private $body;
 
-	/**
-	 * @ORM\Column(type="text")
-	 */
+	#[ORM\Column(type: 'text')]
 	private $htmlBody;
 
-	/**
-	 * @ORM\Column(type="string", length=255, name="thumbnail_loc")
-	 */
+	#[ORM\Column(type: 'string', length: 255, name: 'thumbnail_loc')]
 	private $thumbnailUrl;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
-	 * @ORM\JoinColumn(name="main_picture_id", nullable=true)
-	 */
 	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\Picture')]
 	#[Assert\NotBlank]
+	#[ORM\JoinColumn(name: 'main_picture_id', nullable: true)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Picture::class, cascade: ['persist'])]
 	private $mainPicture;
 
-	/**
-	 * @ORM\Column(type="string", length=255, name="channel_id")
-	 */
+	#[ORM\Column(type: 'string', length: 255, name: 'channel_id')]
 	private $channelId;
 
-	/**
-	 * @ORM\Column(type="string", length=255, name="channel_thumbnail_url")
-	 */
+	#[ORM\Column(type: 'string', length: 255, name: 'channel_thumbnail_url')]
 	private $channelThumbnailUrl;
 
-	/**
-	 * @ORM\Column(type="string", length=255, name="channel_title")
-	 */
+	#[ORM\Column(type: 'string', length: 255, name: 'channel_title')]
 	private $channelTitle;
 
 	/////

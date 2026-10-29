@@ -12,10 +12,8 @@ use Ladb\CoreBundle\Model\MultiPicturedTrait;
 use Ladb\CoreBundle\Model\TypableInterface;
 use Ladb\CoreBundle\Model\BasicTimestampableTrait;
 
-/**
- * @ORM\Table("tbl_message")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Message\MessageRepository")
- */
+#[ORM\Table('tbl_message')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Message\MessageRepository::class)]
 class Message implements TypableInterface, MultiPicturedInterface, HtmlBodiedInterface {
 
 	use BasicTimestampableTrait;
@@ -24,60 +22,42 @@ class Message implements TypableInterface, MultiPicturedInterface, HtmlBodiedInt
 	const CLASS_NAME = 'LadbCoreBundle:Message\Message';
 	const TYPE = 3;
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\Column(name="created_at", type="datetime")
-	 * @Gedmo\Timestampable(on="create")
-	 */
+	#[ORM\Column(name: 'created_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'create')]
 	private $createdAt;
 
-	/**
-	 * @ORM\Column(name="updated_at", type="datetime", nullable=true)
-	 * @Gedmo\Timestampable(on="update")
-	 */
+	#[ORM\Column(name: 'updated_at', type: 'datetime', nullable: true)]
+	#[Gedmo\Timestampable(on: 'update')]
 	private $updatedAt;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Message\Thread", inversedBy="messages")
-	 * @ORM\JoinColumn(name="thread_id", referencedColumnName="id")
-	 */
+	#[ORM\JoinColumn(name: 'thread_id', referencedColumnName: 'id')]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Message\Thread::class, inversedBy: 'messages')]
 	private $thread;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\User")
-	 * @ORM\JoinColumn(name="sender_user_id", referencedColumnName="id")
-	 */
+	#[ORM\JoinColumn(name: 'sender_user_id', referencedColumnName: 'id')]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\User::class)]
 	private $sender;
 
-	/**
-	 * @ORM\Column(type="text", nullable=false)
-	 */
 	#[Assert\NotBlank]
 	#[Assert\Length(min: 2, max: 10000)]
+	#[ORM\Column(type: 'text', nullable: false)]
 	private $body;
 
-	/**
-	 * @ORM\Column(type="text", nullable=false)
-	 */
+	#[ORM\Column(type: 'text', nullable: false)]
 	private $htmlBody;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_message_picture")
-	 * @ORM\OrderBy({"sortIndex" = "ASC"})
-	 */
 	#[Assert\Count(min: 0, max: 4)]
+	#[ORM\JoinTable(name: 'tbl_message_picture')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Picture::class, cascade: ['persist'])]
+	#[ORM\OrderBy(['sortIndex' => 'ASC'])]
 	protected $pictures;
 
-	/**
-	 * @ORM\OneToMany(targetEntity="Ladb\CoreBundle\Entity\Message\MessageMeta", mappedBy="message", cascade={"all"})
-	 */
+	#[ORM\OneToMany(targetEntity: \Ladb\CoreBundle\Entity\Message\MessageMeta::class, mappedBy: 'message', cascade: ['all'])]
 	private $metas;
 
 	/////

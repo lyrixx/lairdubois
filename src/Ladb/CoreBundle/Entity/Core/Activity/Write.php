@@ -5,19 +5,15 @@ namespace Ladb\CoreBundle\Entity\Core\Activity;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Table("tbl_core_activity_write")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Core\Activity\WriteRepository")
- */
+#[ORM\Table('tbl_core_activity_write')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\Activity\WriteRepository::class)]
 class Write extends AbstractActivity {
 
 	const CLASS_NAME = 'LadbCoreBundle:Core\Activity\Write';
 	const STRIPPED_NAME = 'write';
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Message\Message")
-	 * @ORM\JoinColumn(nullable=false)
-	 */
+	#[ORM\JoinColumn(nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Message\Message::class)]
 	private $message;
 
 	/////

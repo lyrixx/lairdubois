@@ -5,61 +5,41 @@ namespace Ladb\CoreBundle\Entity\Core\Referer;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
-/**
- * @ORM\Table("tbl_core_referer")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Core\Referer\RefererRepository")
- */
+#[ORM\Table('tbl_core_referer')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\Referer\RefererRepository::class)]
 class Referer {
 
 	const CLASS_NAME = 'LadbCoreBundle:Core\Referer\Referer';
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\Column(name="created_at", type="datetime")
-	 * @Gedmo\Timestampable(on="create")
-	 */
+	#[ORM\Column(name: 'created_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'create')]
 	private $createdAt;
 
-	/**
-	 * @ORM\Column(name="updated_at", type="datetime", nullable=true)
-	 * @Gedmo\Timestampable(on="update")
-	 */
+	#[ORM\Column(name: 'updated_at', type: 'datetime', nullable: true)]
+	#[Gedmo\Timestampable(on: 'update')]
 	private $updatedAt;
 
-	/**
-	 * @ORM\Column(type="string", length=255, nullable=false)
-	 */
+	#[ORM\Column(type: 'string', length: 255, nullable: false)]
 	private $title;
 
-	/**
-	 * @ORM\Column(name="base_url", type="string", length=255, nullable=false)
-	 */
+	#[ORM\Column(name: 'base_url', type: 'string', length: 255, nullable: false)]
 	private $baseUrl;
 
-	/**
-	 * @ORM\Column(name="favicon_url", type="string", length=255, nullable=true)
-	 */
+	#[ORM\Column(name: 'favicon_url', type: 'string', length: 255, nullable: true)]
 	private $faviconUrl = null;
 
-	/**
-	 * @ORM\Column(name="route_pattern", type="string", length=100, nullable=true)
-	 */
+	#[ORM\Column(name: 'route_pattern', type: 'string', length: 100, nullable: true)]
 	private $routePattern = null;
 
-	/**
-	 * @ORM\Column(name="route_title_pattern", type="string", length=100, nullable=true)
-	 */
+	#[ORM\Column(name: 'route_title_pattern', type: 'string', length: 100, nullable: true)]
 	private $routeTitlePattern = null;
 
-	/**
-	 * @ORM\Column(name="route_title_replacement", type="string", length=100, nullable=true)
-	 */
+	#[ORM\Column(name: 'route_title_replacement', type: 'string', length: 100, nullable: true)]
 	private $routeTitleReplacement = null;
 
 	/////

@@ -6,10 +6,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Table("tbl_knowledge2_value_linkable_text")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Knowledge\Value\LinkableTextRepository")
- */
+#[ORM\Table('tbl_knowledge2_value_linkable_text')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Knowledge\Value\LinkableTextRepository::class)]
 class LinkableText extends Text {
 
 	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Value\LinkableText';
@@ -17,12 +15,10 @@ class LinkableText extends Text {
 
 	const TYPE_STRIPPED_NAME = 'linkable-text';
 
-	/**
-	 * @ORM\Column(type="string", length=255, nullable=true)
-	 */
 	#[Assert\NotBlank(groups: ['mandatory'])]
 	#[Assert\Length(max: 255)]
 	#[Assert\Url]
+	#[ORM\Column(type: 'string', length: 255, nullable: true)]
 	private $url;
 
 	/////

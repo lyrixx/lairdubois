@@ -5,10 +5,8 @@ namespace Ladb\CoreBundle\Entity\Core;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
-/**
- * @ORM\Table("tbl_core_license")
- * @ORM\Entity
- */
+#[ORM\Table('tbl_core_license')]
+#[ORM\Entity]
 class License {
 
 	const CLASS_NAME = 'LadbCoreBundle:Core\License';
@@ -16,31 +14,21 @@ class License {
 	const SUPPORTED_VERSIONS = [ '3.0', '4.0' ];
 	const DEFAULT_VERSION = '4.0';
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\Column(type="string", nullable=false)
-	 */
+	#[ORM\Column(type: 'string', nullable: false)]
 	private $version = self::DEFAULT_VERSION;
 
-	/**
-	 * @ORM\Column(type="boolean", nullable=true, name="allow_derivs")
-	 */
+	#[ORM\Column(type: 'boolean', nullable: true, name: 'allow_derivs')]
 	private $allowDerivs = true;
 
-	/**
-	 * @ORM\Column(type="boolean", nullable=true, name="share_alike")
-	 */
+	#[ORM\Column(type: 'boolean', nullable: true, name: 'share_alike')]
 	private $shareAlike = true;
 
-	/**
-	 * @ORM\Column(type="boolean", nullable=true, name="allow_commercial")
-	 */
+	#[ORM\Column(type: 'boolean', nullable: true, name: 'allow_commercial')]
 	private $allowCommercial = false;
 
 	/////

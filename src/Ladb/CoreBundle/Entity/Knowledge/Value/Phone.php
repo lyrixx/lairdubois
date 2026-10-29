@@ -7,11 +7,9 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 use Ladb\CoreBundle\Validator\Constraints as LadbAssert;
 
-/**
- * @ORM\Table("tbl_knowledge2_value_phone")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Knowledge\Value\PhoneRepository")
- */
 #[LadbAssert\ValidPhoneValue]
+#[ORM\Table('tbl_knowledge2_value_phone')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Knowledge\Value\PhoneRepository::class)]
 class Phone extends BaseValue {
 
 	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Value\Phone';
@@ -19,22 +17,16 @@ class Phone extends BaseValue {
 
 	const TYPE_STRIPPED_NAME = 'phone';
 
-	/**
-	 * @ORM\Column(type="string", length=20)
-	 */
+	#[ORM\Column(type: 'string', length: 20)]
 	protected $data;
 
-	/**
-	 * @ORM\Column(type="string", length=20)
-	 */
 	#[Assert\NotBlank(groups: ['mandatory'])]
 	#[Assert\Length(max: 20)]
+	#[ORM\Column(type: 'string', length: 20)]
 	protected $rawPhoneNumber;
 
-	/**
-	 * @ORM\Column(type="string", length=2)
-	 */
 	#[Assert\NotBlank]
+	#[ORM\Column(type: 'string', length: 2)]
 	protected $country = 'FR';
 
 	/////

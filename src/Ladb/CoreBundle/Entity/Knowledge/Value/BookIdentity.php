@@ -7,11 +7,9 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 use Ladb\CoreBundle\Validator\Constraints as LadbAssert;
 
-/**
- * @ORM\Table("tbl_knowledge2_value_book_identity")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Knowledge\Value\BookIdentityRepository")
- */
 #[LadbAssert\ValidBookIdentityValue]
+#[ORM\Table('tbl_knowledge2_value_book_identity')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Knowledge\Value\BookIdentityRepository::class)]
 class BookIdentity extends BaseValue {
 
 	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Value\BookIdentity';
@@ -19,29 +17,21 @@ class BookIdentity extends BaseValue {
 
 	const TYPE_STRIPPED_NAME = 'book-identity';
 
-	/**
-	 * @ORM\Column(type="string", length=200)
-	 */
+	#[ORM\Column(type: 'string', length: 200)]
 	protected $data;
 
-	/**
-	 * @ORM\Column(type="string", length=100)
-	 */
 	#[Assert\NotBlank(groups: ['mandatory'])]
 	#[Assert\Length(max: 100)]
 	#[Assert\Regex("/^[ a-zA-Z0-9ÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿÑñ'’’#,.:«»&+-]+\$/")]
+	#[ORM\Column(type: 'string', length: 100)]
 	private $work;
 
-	/**
-	 * @ORM\Column(type="boolean", name="is_volume")
-	 */
+	#[ORM\Column(type: 'boolean', name: 'is_volume')]
 	private $isVolume = false;
 
-	/**
-	 * @ORM\Column(type="string", length=100, nullable=true)
-	 */
 	#[Assert\Length(max: 100)]
 	#[Assert\Regex("/^[ a-zA-Z0-9ÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿÑñ'’’#,.:«»&+-]+\$/")]
+	#[ORM\Column(type: 'string', length: 100, nullable: true)]
 	private $volume;
 
 	/////

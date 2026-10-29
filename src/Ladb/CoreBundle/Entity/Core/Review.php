@@ -16,16 +16,10 @@ use Ladb\CoreBundle\Model\AuthoredInterface;
 use Ladb\CoreBundle\Model\BasicTimestampableInterface;
 use Ladb\CoreBundle\Model\BasicTimestampableTrait;
 
-/**
- * @ORM\Table("tbl_core_review",
- *		uniqueConstraints={
- *			@ORM\UniqueConstraint(name="ENTITY_USER_UNIQUE", columns={"entity_type", "entity_id", "user_id"})
- * 		},
- * 		indexes={
- *     		@ORM\Index(name="IDX_REVIEW_ENTITY", columns={"entity_type", "entity_id"})
- * 		})
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Core\ReviewRepository")
- */
+#[ORM\Table('tbl_core_review')]
+#[ORM\Index(name: 'IDX_REVIEW_ENTITY', columns: ['entity_type', 'entity_id'])]
+#[ORM\UniqueConstraint(name: 'ENTITY_USER_UNIQUE', columns: ['entity_type', 'entity_id', 'user_id'])]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\ReviewRepository::class)]
 class Review implements TypableInterface, BasicTimestampableInterface, AuthoredInterface, TitledInterface, HtmlBodiedInterface {
 
 	use BasicTimestampableTrait;
@@ -34,64 +28,44 @@ class Review implements TypableInterface, BasicTimestampableInterface, AuthoredI
 	const CLASS_NAME = 'LadbCoreBundle:Core\Review';
 	const TYPE = 4;
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\Column(name="entity_type", type="smallint", nullable=false)
-	 */
+	#[ORM\Column(name: 'entity_type', type: 'smallint', nullable: false)]
 	private $entityType;
 
-	/**
-	 * @ORM\Column(name="entity_id", type="integer", nullable=false)
-	 */
+	#[ORM\Column(name: 'entity_id', type: 'integer', nullable: false)]
 	private $entityId;
 
-	/**
-	 * @ORM\Column(name="created_at", type="datetime")
-	 * @Gedmo\Timestampable(on="create")
-	 */
+	#[ORM\Column(name: 'created_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'create')]
 	protected $createdAt;
 
-	/**
-	 * @ORM\Column(name="updated_at", type="datetime")
-	 * @Gedmo\Timestampable(on="update")
-	 */
+	#[ORM\Column(name: 'updated_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'update')]
 	private $updatedAt;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\User")
-	 * @ORM\JoinColumn(nullable=false)
-	 */
+	#[ORM\JoinColumn(nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\User::class)]
 	private $user;
 
-	/**
-	 * @ORM\Column(type="string", length=100, nullable=false)
-	 */
 	#[Assert\NotBlank]
 	#[Assert\Length(min: 2, max: 100)]
+	#[ORM\Column(type: 'string', length: 100, nullable: false)]
 	protected $title;
 
-	/**
-	 * @ORM\Column(type="text", nullable=true)
-	 */
 	#[Assert\NotBlank]
 	#[Assert\Length(min: 5, max: 5000)]
 	#[LadbAssert\NoMediaLink]
+	#[ORM\Column(type: 'text', nullable: true)]
 	protected $body;
 
-	/**
-	 * @ORM\Column(name="html_body", type="text", nullable=true)
-	 */
+	#[ORM\Column(name: 'html_body', type: 'text', nullable: true)]
 	private $htmlBody;
 
-	/**
-	 * @ORM\Column(type="integer", nullable=true)
-	 */
+	#[ORM\Column(type: 'integer', nullable: true)]
 	private $rating;
 
 	/////

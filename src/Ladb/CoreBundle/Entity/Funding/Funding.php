@@ -5,59 +5,39 @@ namespace Ladb\CoreBundle\Entity\Funding;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
-/**
- * @ORM\Table("tbl_funding")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Funding\FundingRepository")
- */
+#[ORM\Table('tbl_funding')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Funding\FundingRepository::class)]
 class Funding {
 
 	const CLASS_NAME = 'LadbCoreBundle:Funding\Funding';
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\Column(type="smallint")
-	 */
+	#[ORM\Column(type: 'smallint')]
 	private $month;
 
-	/**
-	 * @ORM\Column(type="smallint")
-	 */
+	#[ORM\Column(type: 'smallint')]
 	private $year;
 
-	/**
-	 * @ORM\Column(name="charge_balance", type="integer")
-	 */
+	#[ORM\Column(name: 'charge_balance', type: 'integer')]
 	private $chargeBalance = 0;
 
-	/**
-	 * @ORM\Column(name="donation_fee_balance", type="integer")
-	 */
+	#[ORM\Column(name: 'donation_fee_balance', type: 'integer')]
 	private $donationFeeBalance = 0;
 
-	/**
-	 * @ORM\Column(name="carried_forward_balance", type="integer")
-	 */
+	#[ORM\Column(name: 'carried_forward_balance', type: 'integer')]
 	private $carriedForwoardBalance = 0;
 
-	/**
-	 * @ORM\Column(name="donation_balance", type="integer")
-	 */
+	#[ORM\Column(name: 'donation_balance', type: 'integer')]
 	private $donationBalance = 0;
 
-	/**
-	 * @ORM\Column(name="donation_count", type="integer")
-	 */
+	#[ORM\Column(name: 'donation_count', type: 'integer')]
 	private $donationCount = 0;
 
-	/**
-	 * @ORM\OneToMany(targetEntity="Ladb\CoreBundle\Entity\Funding\Charge", mappedBy="funding", cascade={"all"})
-	 */
+	#[ORM\OneToMany(targetEntity: \Ladb\CoreBundle\Entity\Funding\Charge::class, mappedBy: 'funding', cascade: ['all'])]
 	private $charges;
 
 	/////

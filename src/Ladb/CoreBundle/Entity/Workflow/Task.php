@@ -6,10 +6,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Table("tbl_workflow_task")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Workflow\TaskRepository")
- */
+#[ORM\Table('tbl_workflow_task')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Workflow\TaskRepository::class)]
 class Task {
 
 	const CLASS_NAME = 'LadbCoreBundle:Workflow\Task';
@@ -20,105 +18,69 @@ class Task {
 	const STATUS_RUNNING = 3;
 	const STATUS_DONE = 4;
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\Column(name="created_at", type="datetime")
-	 * @Gedmo\Timestampable(on="create")
-	 */
+	#[ORM\Column(name: 'created_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'create')]
 	private $createdAt;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Workflow\Workflow", inversedBy="tasks")
-	 * @ORM\JoinColumn(nullable=false)
-	 */
+	#[ORM\JoinColumn(nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Workflow\Workflow::class, inversedBy: 'tasks')]
 	private $workflow;
 
-	/**
-	 * @ORM\Column(type="string", length=100)
-	 */
 	#[Assert\NotBlank]
+	#[ORM\Column(type: 'string', length: 100)]
 	private $title;
 
-	/**
-	 * @ORM\Column(type="integer", name="position_left")
-	 */
+	#[ORM\Column(type: 'integer', name: 'position_left')]
 	private $positionLeft = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="position_top")
-	 */
+	#[ORM\Column(type: 'integer', name: 'position_top')]
 	private $positionTop = 0;
 
-	/**
-	 * @ORM\Column(type="smallint")
-	 */
+	#[ORM\Column(type: 'smallint')]
 	private $status = self::STATUS_UNKNOW;
 
-	/**
-	 * @ORM\Column(name="started_at", type="datetime", nullable=true)
-	 */
+	#[ORM\Column(name: 'started_at', type: 'datetime', nullable: true)]
 	private $startedAt;
 
-	/**
-	 * @ORM\Column(name="finished_at", type="datetime", nullable=true)
-	 */
+	#[ORM\Column(name: 'finished_at', type: 'datetime', nullable: true)]
 	private $finishedAt;
 
-	/**
-	 * @ORM\Column(type="integer", name="estimated_duration")
-	 */
 	#[Assert\GreaterThanOrEqual(0)]
+	#[ORM\Column(type: 'integer', name: 'estimated_duration')]
 	private $estimatedDuration = 0;
 
-	/**
-	 * @ORM\Column(type="integer")
-	 */
 	#[Assert\GreaterThanOrEqual(0)]
+	#[ORM\Column(type: 'integer')]
 	private $duration = 0;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Workflow\Label", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_workflow_task_label")
-	 * @ORM\OrderBy({"id" = "ASC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_workflow_task_label')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Workflow\Label::class, cascade: ['persist'])]
+	#[ORM\OrderBy(['id' => 'ASC'])]
 	private $labels;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Workflow\Part", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_workflow_task_part")
-	 * @ORM\OrderBy({"name" = "ASC"})
-	 */
+	#[ORM\JoinTable(name: 'tbl_workflow_task_part')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Workflow\Part::class, cascade: ['persist'])]
+	#[ORM\OrderBy(['name' => 'ASC'])]
 	private $parts;
 
-	/**
-	 * @ORM\Column(type="integer", name="part_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'part_count')]
 	private $partCount = 0;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Workflow\Task", mappedBy="targetTasks")
-	 */
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Workflow\Task::class, mappedBy: 'targetTasks')]
 	private $sourceTasks;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Workflow\Task", inversedBy="sourceTasks")
-	 * @ORM\JoinTable(
-	 *      name="tbl_workflow_task_connection",
-	 *      joinColumns={@ORM\JoinColumn(name="from_task_id", referencedColumnName="id")},
-	 *      inverseJoinColumns={@ORM\JoinColumn(name="to_task_id", referencedColumnName="id")}
-	 * )
-	 */
+	#[ORM\JoinTable(name: 'tbl_workflow_task_connection')]
+	#[ORM\JoinColumn(name: 'from_task_id', referencedColumnName: 'id')]
+	#[ORM\InverseJoinColumn(name: 'to_task_id', referencedColumnName: 'id')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Workflow\Task::class, inversedBy: 'sourceTasks')]
 	private $targetTasks;
 
-	/**
-	 * @ORM\OneToMany(targetEntity="Ladb\CoreBundle\Entity\Workflow\Run", orphanRemoval=true, mappedBy="task", cascade={"all"})
-	 */
+	#[ORM\OneToMany(targetEntity: \Ladb\CoreBundle\Entity\Workflow\Run::class, orphanRemoval: true, mappedBy: 'task', cascade: ['all'])]
 	private $runs;
 
 	/////

@@ -6,33 +6,23 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use BenTools\WebPushBundle\Model\Subscription\UserSubscriptionInterface;
 
-/**
- * @ORM\Table("tbl_webpush_user_subscription")
- * @ORM\Entity()
- */
+#[ORM\Table('tbl_webpush_user_subscription')]
+#[ORM\Entity]
 class UserSubscription implements UserSubscriptionInterface {
 
-	/**
-	 * @ORM\Column(type="integer")
-	 * @ORM\Id()
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\User")
-	 * @ORM\JoinColumn(nullable=false)
-	 */
+	#[ORM\JoinColumn(nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\User::class)]
 	private $user;
 
-	/**
-	 * @ORM\Column(type="string", name="subscription_hash")
-	 */
+	#[ORM\Column(type: 'string', name: 'subscription_hash')]
 	private $subscriptionHash;
 
-	/**
-	 * @ORM\Column(type="json")
-	 */
+	#[ORM\Column(type: 'json')]
 	private $subscription;
 
 	/////

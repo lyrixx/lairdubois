@@ -6,52 +6,36 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Table("tbl_core_registration")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Core\RegistrationRepository")
- */
+#[ORM\Table('tbl_core_registration')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\RegistrationRepository::class)]
 class Registration {
 
 	const CLASS_NAME = 'LadbCoreBundle:Core\Registration';
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\Column(name="created_at", type="datetime")
-	 * @Gedmo\Timestampable(on="create")
-	 */
+	#[ORM\Column(name: 'created_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'create')]
 	protected $createdAt;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\User")
-	 * @ORM\JoinColumn(nullable=true)
-	 */
+	#[ORM\JoinColumn(nullable: true)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\User::class)]
 	private $creator;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\User")
-	 * @ORM\JoinColumn(nullable=false)
-	 */
+	#[ORM\JoinColumn(nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\User::class)]
 	private $user;
 
-	/**
-	 * @ORM\Column(name="client_ip4", type="string")
-	 */
+	#[ORM\Column(name: 'client_ip4', type: 'string')]
 	private $clientIp4;
 
-	/**
-	 * @ORM\Column(name="client_ip6", type="string", nullable=true)
-	 */
+	#[ORM\Column(name: 'client_ip6', type: 'string', nullable: true)]
 	private $clientIp6;
 
-	/**
-	 * @ORM\Column(name="client_user_agent", type="string", nullable=true)
-	 */
+	#[ORM\Column(name: 'client_user_agent', type: 'string', nullable: true)]
 	private $clientUserAgent;
 
 	/////

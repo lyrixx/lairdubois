@@ -5,67 +5,45 @@ namespace Ladb\CoreBundle\Entity\Core\Referer;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
-/**
- * @ORM\Table("tbl_core_referer_referral")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Core\Referer\ReferralRepository")
- */
+#[ORM\Table('tbl_core_referer_referral')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\Referer\ReferralRepository::class)]
 class Referral {
 
 	const CLASS_NAME = 'LadbCoreBundle:Core\Referer\Referral';
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\Column(name="entity_type", type="smallint", nullable=true)
-	 */
+	#[ORM\Column(name: 'entity_type', type: 'smallint', nullable: true)]
 	private $entityType;
 
-	/**
-	 * @ORM\Column(name="entity_id", type="integer", nullable=true)
-	 */
+	#[ORM\Column(name: 'entity_id', type: 'integer', nullable: true)]
 	private $entityId;
 
-	/**
-	 * @ORM\Column(name="created_at", type="datetime")
-	 * @Gedmo\Timestampable(on="create")
-	 */
+	#[ORM\Column(name: 'created_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'create')]
 	private $createdAt;
 
-	/**
-	 * @ORM\Column(name="updated_at", type="datetime", nullable=true)
-	 * @Gedmo\Timestampable(on="update")
-	 */
+	#[ORM\Column(name: 'updated_at', type: 'datetime', nullable: true)]
+	#[Gedmo\Timestampable(on: 'update')]
 	private $updatedAt;
 
-	/**
-	 * @ORM\Column(type="string", length=255)
-	 */
+	#[ORM\Column(type: 'string', length: 255)]
 	private $title;
 
-	/**
-	 * @ORM\Column(type="string", length=255)
-	 */
+	#[ORM\Column(type: 'string', length: 255)]
 	private $url;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Referer\Referer")
-	 * @ORM\JoinColumn(name="referer_id", nullable=false)
-	 */
+	#[ORM\JoinColumn(name: 'referer_id', nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Referer\Referer::class)]
 	private $referer;
 
-	/**
-	 * @ORM\Column(type="boolean")
-	 */
+	#[ORM\Column(type: 'boolean')]
 	private $enabled = false;
 
-	/**
-	 * @ORM\Column(name="access_count", type="integer")
-	 */
+	#[ORM\Column(name: 'access_count', type: 'integer')]
 	private $accessCount = 0;
 
 	/////

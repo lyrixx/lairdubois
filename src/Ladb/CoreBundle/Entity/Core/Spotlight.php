@@ -6,47 +6,32 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Table("tbl_core_spotlight", indexes={
- *     @ORM\Index(name="IDX_SPOTLIGHT_ENTITY", columns={"entity_type", "entity_id"})
- * }))
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Core\SpotlightRepository")
- */
+#[ORM\Table('tbl_core_spotlight')]
+#[ORM\Index(name: 'IDX_SPOTLIGHT_ENTITY', columns: ['entity_type', 'entity_id'])]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\SpotlightRepository::class)]
 class Spotlight {
 
 	const CLASS_NAME = 'LadbCoreBundle:Core\Spotlight';
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\Column(name="created_at", type="datetime")
-	 * @Gedmo\Timestampable(on="create")
-	 */
+	#[ORM\Column(name: 'created_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'create')]
 	private $createdAt;
 
-	/**
-	 * @ORM\Column(name="finished_at", type="datetime", nullable=true)
-	 */
+	#[ORM\Column(name: 'finished_at', type: 'datetime', nullable: true)]
 	private $finishedAt;
 
-	/**
-	 * @ORM\Column(name="entity_type", type="smallint", nullable=false)
-	 */
+	#[ORM\Column(name: 'entity_type', type: 'smallint', nullable: false)]
 	private $entityType;
 
-	/**
-	 * @ORM\Column(name="entity_id", type="integer", nullable=false)
-	 */
+	#[ORM\Column(name: 'entity_id', type: 'integer', nullable: false)]
 	private $entityId;
 
-	/**
-	 * @ORM\Column(type="boolean")
-	 */
+	#[ORM\Column(type: 'boolean')]
 	private $enabled = true;
 
 	// Id /////

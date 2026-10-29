@@ -30,10 +30,8 @@ use Ladb\CoreBundle\Entity\AbstractAuthoredPublication;
 use Ladb\CoreBundle\Model\TaggableInterface;
 use Ladb\CoreBundle\Model\TaggableTrait;
 
-/**
- * @ORM\Table("tbl_collection")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Collection\CollectionRepository")
- */
+#[ORM\Table('tbl_collection')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Collection\CollectionRepository::class)]
 class Collection extends AbstractAuthoredPublication implements IndexableInterface, TitledInterface, SluggedInterface, PicturedInterface, HtmlBodiedInterface, TaggableInterface, ViewableInterface, LikableInterface, CommentableInterface, CollectionnableInterface, WatchableInterface {
 
 	use TitledTrait, SluggedTrait, PicturedTrait, HtmlBodiedTrait;
@@ -42,89 +40,59 @@ class Collection extends AbstractAuthoredPublication implements IndexableInterfa
 	const CLASS_NAME = 'LadbCoreBundle:Collection\Collection';
 	const TYPE = 120;
 
-	/**
-	 * @ORM\Column(type="string", length=100)
-	 */
 	#[Assert\NotBlank]
 	#[Assert\Length(min: 4, max: 100)]
+	#[ORM\Column(type: 'string', length: 100)]
 	private $title;
 
-	/**
-	 * @Gedmo\Slug(fields={"title"}, separator="-")
-	 * @ORM\Column(type="string", length=100, unique=true)
-	 */
+	#[Gedmo\Slug(fields: ['title'], separator: '-')]
+	#[ORM\Column(type: 'string', length: 100, unique: true)]
 	private $slug;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
-	 * @ORM\JoinColumn(name="main_picture_id", nullable=true)
-	 */
+	#[ORM\JoinColumn(name: 'main_picture_id', nullable: true)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Picture::class, cascade: ['persist'])]
 	private $mainPicture;
 
-	/**
-	 * @ORM\Column(type="text", nullable=true)
-	 */
 	#[Assert\Length(max: 4000)]
 	#[Assert\Length(min: 5, groups: ['public'])]
 	#[Assert\NotBlank(groups: ['public'])]
+	#[ORM\Column(type: 'text', nullable: true)]
 	private $body;
 
-	/**
-	 * @ORM\Column(type="text", name="html_body", nullable=true)
-	 */
+	#[ORM\Column(type: 'text', name: 'html_body', nullable: true)]
 	private $htmlBody;
 
-	/**
-	 * @ORM\Column(type="integer", name="entry_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'entry_count')]
 	private $entryCount = 0;
 
-	/**
-	 * @ORM\Column(type="array", name="entry_type_counters")
-	 */
+	#[ORM\Column(type: 'array', name: 'entry_type_counters')]
 	private $entryTypeCounters;
 
-	/**
-	 * @ORM\OneToMany(targetEntity="Ladb\CoreBundle\Entity\Collection\Entry", mappedBy="collection", cascade={"all"})
-	 * @ORM\OrderBy({"sortIndex" = "ASC"})
-	 */
+	#[ORM\OneToMany(targetEntity: \Ladb\CoreBundle\Entity\Collection\Entry::class, mappedBy: 'collection', cascade: ['all'])]
+	#[ORM\OrderBy(['sortIndex' => 'ASC'])]
 	private $entries;
 
-	/**
-	 * @ORM\ManyToMany(targetEntity="Ladb\CoreBundle\Entity\Core\Tag", cascade={"persist"})
-	 * @ORM\JoinTable(name="tbl_collection_tag")
-	 */
 	#[Assert\Count(min: 2, groups: ['public'])]
+	#[ORM\JoinTable(name: 'tbl_collection_tag')]
+	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Tag::class, cascade: ['persist'])]
 	private $tags;
 
-	/**
-	 * @ORM\Column(type="integer", name="like_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'like_count')]
 	private $likeCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="watch_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'watch_count')]
 	private $watchCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="comment_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'comment_count')]
 	private $commentCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="private_collection_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'private_collection_count')]
 	private $privateCollectionCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="public_collection_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'public_collection_count')]
 	private $publicCollectionCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="view_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'view_count')]
 	private $viewCount = 0;
 
 	/////

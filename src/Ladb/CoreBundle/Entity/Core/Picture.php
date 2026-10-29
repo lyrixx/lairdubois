@@ -6,11 +6,9 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Table("tbl_core_picture")
- * @ORM\Entity
- * @ORM\HasLifecycleCallbacks
- */
+#[ORM\Table('tbl_core_picture')]
+#[ORM\Entity]
+#[ORM\HasLifecycleCallbacks]
 class Picture {
 
 	const CLASS_NAME = 'LadbCoreBundle:Core\Picture';
@@ -31,87 +29,57 @@ class Picture {
 	const POST_PROCESSOR_NONE = 'none';
 	const POST_PROCESSOR_SQUARE = 'square';
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\Column(name="created_at", type="datetime")
-	 * @Gedmo\Timestampable(on="create")
-	 */
+	#[ORM\Column(name: 'created_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'create')]
 	private $createdAt;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\User")
-	 * @ORM\JoinColumn(nullable=true)
-	 */
+	#[ORM\JoinColumn(nullable: true)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\User::class)]
 	private $user;
 
-	/**
-	 * @ORM\Column(type="string", length=255, nullable=true)
-	 */
+	#[ORM\Column(type: 'string', length: 255, nullable: true)]
 	private $legend;
 
-	/**
-	 * @ORM\Column(type="string", length=255, nullable=true, name="source_url")
-	 */
 	#[Assert\Length(max: 255)]
 	#[Assert\Url]
+	#[ORM\Column(type: 'string', length: 255, nullable: true, name: 'source_url')]
 	private $sourceUrl;
 
-	/**
-	 * @ORM\Column(type="string", length=255, nullable=true, name="master_path")
-	 */
+	#[ORM\Column(type: 'string', length: 255, nullable: true, name: 'master_path')]
 	private $masterPath;
 
-	/**
-	 * @ORM\Column(type="string", length=255, nullable=true, name="transformed_path")
-	 */
+	#[ORM\Column(type: 'string', length: 255, nullable: true, name: 'transformed_path')]
 	private $transformedPath;
 
-	/**
-	 * @ORM\Column(type="integer")
-	 */
+	#[ORM\Column(type: 'integer')]
 	private $rotation = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="sort_index")
-	 */
+	#[ORM\Column(type: 'integer', name: 'sort_index')]
 	private $sortIndex = 0;
 
-	/**
-	 * @ORM\Column(type="integer")
-	 */
+	#[ORM\Column(type: 'integer')]
 	private $width = 0;
 
-	/**
-	 * @ORM\Column(type="integer")
-	 */
+	#[ORM\Column(type: 'integer')]
 	private $height = 0;
 
-	/**
-	 * @ORM\Column(type="float", name="height_ratio_100")
-	 */
+	#[ORM\Column(type: 'float', name: 'height_ratio_100')]
 	private $heightRatio100 = 100;
 
-	/**
-	 * @ORM\Column(type="integer", name="center_x_100")
-	 */
+	#[ORM\Column(type: 'integer', name: 'center_x_100')]
 	private $centerX100 = 50;
 
-	/**
-	 * @ORM\Column(type="integer", name="center_y_100")
-	 */
+	#[ORM\Column(type: 'integer', name: 'center_y_100')]
 	private $centerY100 = 50;
 
 	/////
 
-	/**
-	 * @ORM\PostRemove()
-	 */
+	#[ORM\PostRemove]
 	public function removeUpload() {
 		if (!$this->isMaster()) {
 			if ($filename = $this->getAbsoluteTransformedPath()) {

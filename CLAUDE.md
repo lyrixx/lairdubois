@@ -203,7 +203,7 @@ castor qa:phpunit [-- --filter …]
 castor qa:deprecations       # var/deprecations/report.md, et le résumé du job en CI
 castor qa:install            # outils de tools/ (PHPStan, PHPUnit), installés à la volée sinon
 castor qa:e2e [-- --grep …]  # tests E2E (Playwright) : recharge la base du dev, hors qa:all, job E2E en CI
-castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et getDoctrine() des actions → arguments (#16, #177), des utils, managers, listeners et validateurs → constructeur (#118), dépréciations de 4.x (#133), routes, contraintes et `@required` en attributs (#25), commandes en `#[AsCommand]` (#28)
+castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et getDoctrine() des actions → arguments (#16, #177), des utils, managers, listeners et validateurs → constructeur (#118), dépréciations de 4.x (#133), routes, contraintes, `@required` et mapping de Doctrine et Gedmo en attributs (#25), commandes en `#[AsCommand]` (#28)
 ```
 
 - PHPUnit 9.6, dans `tools/phpunit` et pas dans le `composer.json` de l'application : c'est la
@@ -257,7 +257,14 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et get
   et `symfony: true` convertit d'un coup les routes, les contraintes et `@required`. Les routes sont
   des `#[Route]` depuis #25 ; `routing.yml` garde `type: annotation`, le seul type de la 5.4 pour
   un controller, attributs compris. Les contraintes de validation (`UniqueEntity` comprise) et les
-  setters `#[Required]` aussi ; `enable_annotations` du validateur lit les deux en 5.4.
+  setters `#[Required]` aussi ; `enable_annotations` du validateur lit les deux en 5.4. Le mapping
+  de Doctrine et de Gedmo aussi, avec le driver `attribute` (`LadbCoreBundle`, `gedmo_loggable`,
+  `gedmo_tree` dans `config.yml`, un seul driver par mapping) : `NestedAnnotationToAttributeRector`
+  (rector-doctrine) sort les colonnes d'une `JoinTable`, les index et contraintes d'unicité d'une
+  `Table` en attributs de la propriété ou de la classe. Il passe avant les autres : un
+  `#[ORM\JoinColumn]` précède son `#[ORM\ManyToOne]`, et les attributs convertis suivent ceux
+  qui étaient déjà là. Rector indente l'attribut comme le `/**` du docblock qu'il remplace (des
+  espaces, deux fois dans `Creation`).
 - Rector ne convertit une contrainte qu'en attribut existant : les nôtres ont un
   `#[\Attribute(...)]`, écrit à la main, aux cibles de leur `getTargets()` (classe, ou propriété et
   getter), répétables comme celles de Symfony. Il saute une annotation dont l'alias n'a pas la
@@ -351,7 +358,7 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
     écritures des précédents, toutes, quel que soit le temps écoulé. Un résultat de recherche peut
     donc dépendre de l'ordre des tests de la classe ;
   - `uploads/`, partagé avec le dev : un fichier qu'un test supprime (images d'un contenu supprimé,
-    `@ORM\PostRemove` de `Picture` et `Resource`) est remis après le test, depuis des liens durs
+    `#[ORM\PostRemove]` de `Picture` et `Resource`) est remis après le test, depuis des liens durs
     pris au début de la classe (`var/tests/uploads/`). Les fichiers qu'un test crée (stickers,
     avatars…) restent.
 - `Tests\WebTestCase` :
@@ -724,9 +731,8 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `tbl_webpush_user_subscription.subscription`.
 - `use_savepoints: true` en test (`config_test.yml`) : dama 8 l'exige, sa transaction contient
   celles des flush. Le site n'imbrique jamais de transaction.
-- Les annotations de l'ORM 2.20 ont un constructeur typé (`NamedArgumentConstructor`) : un tableau
-  ne prend plus une valeur seule, ce que DocParser acceptait (`cascade={"persist"}`, pas
-  `cascade="persist"`).
+- Les attributs de l'ORM ont un constructeur typé : un tableau ne prend pas une valeur seule
+  (`cascade: ['persist']`, pas `cascade: 'persist'`), ce que DocParser acceptait avant l'ORM 2.20.
 - Depuis l'ORM 2.16, un flush ordonne ses INSERT entité par entité (persist et clés étrangères), plus
   classe par classe : les lignes de classes différentes créées ensemble (blocs texte et galerie
   d'un contenu, valeurs d'une fiche de la xylothèque, avatar et bannière d'un compte) prennent leurs

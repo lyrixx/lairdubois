@@ -5,19 +5,15 @@ namespace Ladb\CoreBundle\Entity\Core\Activity;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Table("tbl_core_activity_like")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Core\Activity\LikeRepository")
- */
+#[ORM\Table('tbl_core_activity_like')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\Activity\LikeRepository::class)]
 class Like extends AbstractActivity {
 
 	const CLASS_NAME = 'LadbCoreBundle:Core\Activity\Like';
 	const STRIPPED_NAME = 'like';
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Like")
-	 * @ORM\JoinColumn(nullable=false)
-	 */
+	#[ORM\JoinColumn(nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Like::class)]
 	private $like;
 
 	/////

@@ -7,28 +7,20 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Ladb\CoreBundle\Validator\Constraints as LadbAssert;
 use Ladb\CoreBundle\Utils\VideoHostingUtils;
 
-/**
- * @ORM\Table("tbl_core_block_video")
- * @ORM\Entity
- */
 #[LadbAssert\SupportedVideoHosting]
+#[ORM\Table('tbl_core_block_video')]
+#[ORM\Entity]
 class Video extends AbstractBlock {
 
-	/**
-	 * @ORM\Column(type="string", length=255, nullable=false)
-	 */
 	#[Assert\NotBlank]
 	#[Assert\Url]
+	#[ORM\Column(type: 'string', length: 255, nullable: false)]
 	private $url;
 
-	/**
-	 * @ORM\Column(type="smallint")
-	 */
+	#[ORM\Column(type: 'smallint')]
 	private $kind = VideoHostingUtils::KIND_UNKNOW;
 
-	/**
-	 * @ORM\Column(type="string", length=255, nullable=true)
-	 */
+	#[ORM\Column(type: 'string', length: 255, nullable: true)]
 	private $embedIdentifier;
 
 	// StrippedName /////

@@ -7,62 +7,42 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Ladb\CoreBundle\Model\TypableInterface;
 
-/**
- * @ORM\Table("tbl_message_thread")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Message\ThreadRepository")
- */
+#[ORM\Table('tbl_message_thread')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Message\ThreadRepository::class)]
 class Thread implements TypableInterface {
 
 	const CLASS_NAME = 'LadbCoreBundle:Message\Thread';
 	const TYPE = 2;
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\Column(name="created_at", type="datetime")
-	 * @Gedmo\Timestampable(on="create")
-	 */
+	#[ORM\Column(name: 'created_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'create')]
 	private $createdAt;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\User")
-	 * @ORM\JoinColumn(name="created_by_user_id", referencedColumnName="id")
-	 */
+	#[ORM\JoinColumn(name: 'created_by_user_id', referencedColumnName: 'id')]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\User::class)]
 	private $createdBy;
 
-	/**
-	 * @ORM\Column(type="string", length=255)
-	 */
+	#[ORM\Column(type: 'string', length: 255)]
 	private $subject;
 
-	/**
-	 * @ORM\Column(type="boolean")
-	 */
+	#[ORM\Column(type: 'boolean')]
 	private $announcement = false;
 
-	/**
-	 * @ORM\OneToMany(targetEntity="Ladb\CoreBundle\Entity\Message\Message", mappedBy="thread", cascade={"all"})
-	 */
+	#[ORM\OneToMany(targetEntity: \Ladb\CoreBundle\Entity\Message\Message::class, mappedBy: 'thread', cascade: ['all'])]
 	private $messages;
 
-	/**
-	 * @ORM\Column(name="message_count", type="integer")
-	 */
+	#[ORM\Column(name: 'message_count', type: 'integer')]
 	private $messageCount = 0;
 
-	/**
-	 * @ORM\Column(name="last_message_date", type="datetime", nullable=true)
-	 */
+	#[ORM\Column(name: 'last_message_date', type: 'datetime', nullable: true)]
 	private $lastMessageDate;
 
-	/**
-	 * @ORM\OneToMany(targetEntity="Ladb\CoreBundle\Entity\Message\ThreadMeta", mappedBy="thread", cascade={"all"})
-	 */
+	#[ORM\OneToMany(targetEntity: \Ladb\CoreBundle\Entity\Message\ThreadMeta::class, mappedBy: 'thread', cascade: ['all'])]
 	private $metas;
 
 	/////

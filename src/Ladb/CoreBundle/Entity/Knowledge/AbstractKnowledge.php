@@ -33,9 +33,7 @@ use Ladb\CoreBundle\Model\VotableParentInterface;
 use Ladb\CoreBundle\Model\WatchableInterface;
 use Ladb\CoreBundle\Model\ScrapableInterface;
 
-/**
- * @ORM\MappedSuperclass
- */
+#[ORM\MappedSuperclass]
 abstract class AbstractKnowledge extends AbstractPublication implements TitledInterface, SluggedInterface, PicturedInterface, IndexableInterface, SitemapableInterface, ViewableInterface, ScrapableInterface, LikableInterface, WatchableInterface, CommentableInterface, CollectionnableInterface, ReportableInterface, VotableParentInterface {
 
 	use TitledTrait, SluggedTrait, ScrapableTrait, PicturedTrait;
@@ -55,77 +53,49 @@ abstract class AbstractKnowledge extends AbstractPublication implements TitledIn
 	const ATTRIB_QUALITY = 10;
 	const ATTRIB_POST_PROCESSOR = 11;
 
-	/**
-	 * @ORM\Column(type="string", length=100)
-	 */
+	#[ORM\Column(type: 'string', length: 100)]
 	private $title;
 
-	/**
-	 * @Gedmo\Slug(fields={"title"}, separator="-")
-	 * @ORM\Column(type="string", length=100, unique=true)
-	 */
+	#[Gedmo\Slug(fields: ['title'], separator: '-')]
+	#[ORM\Column(type: 'string', length: 100, unique: true)]
 	private $slug;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"persist"})
-	 * @ORM\JoinColumn(name="main_picture_id", nullable=true)
-	 */
 	#[Assert\Type(type: 'Ladb\CoreBundle\Entity\Core\Picture')]
+	#[ORM\JoinColumn(name: 'main_picture_id', nullable: true)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Picture::class, cascade: ['persist'])]
 	private $mainPicture;
 
-	/**
-	 * @ORM\Column(type="integer", name="completion_100")
-	 */
+	#[ORM\Column(type: 'integer', name: 'completion_100')]
 	private $completion100 = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="contributor_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'contributor_count')]
 	private $contributorCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="positive_vote_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'positive_vote_count')]
 	private $positiveVoteCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="negative_vote_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'negative_vote_count')]
 	private $negativeVoteCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="vote_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'vote_count')]
 	private $voteCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="like_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'like_count')]
 	private $likeCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="watch_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'watch_count')]
 	private $watchCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="comment_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'comment_count')]
 	private $commentCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="private_collection_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'private_collection_count')]
 	private $privateCollectionCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="public_collection_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'public_collection_count')]
 	private $publicCollectionCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="view_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'view_count')]
 	private $viewCount = 0;
 
 	/////

@@ -15,18 +15,14 @@ use Ladb\CoreBundle\Model\VotableInterface;
 use Ladb\CoreBundle\Model\AuthoredInterface;
 use Ladb\CoreBundle\Model\WatchableChildInterface;
 
-/**
- * @ORM\Table("tbl_knowledge2_value",
- *		uniqueConstraints={
- *			@ORM\UniqueConstraint(name="data_unique", columns={"data_hash", "parent_entity_type", "parent_entity_id", "parent_entity_field"})
- * 		})
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Knowledge\Value\BaseValueRepository")
- * @ORM\InheritanceType("JOINED")
- * @ORM\DiscriminatorColumn(name="discr", type="integer")
- * @ORM\DiscriminatorMap({1 = "Integer", 2 = "Text", 3 = "Picture", 4 = "Url", 5 = "Location", 6 = "Phone", 7 = "Sign", 8 = "Longtext", 9 = "Language", 10 = "Isbn", 11 = "Price", 12 = "SoftwareIdentity", 13 = "FileExtension", 14 = "LinkableText", 15 = "Video", 16 = "BookIdentity", 17 = "Pdf", 18 = "Decimal"})
- */
 #[LadbAssert\ValueSource]
 #[UniqueEntity(fields: ['dataHash', 'parentEntityType', 'parentEntityId', 'parentEntityField'])]
+#[ORM\Table('tbl_knowledge2_value')]
+#[ORM\UniqueConstraint(name: 'data_unique', columns: ['data_hash', 'parent_entity_type', 'parent_entity_id', 'parent_entity_field'])]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Knowledge\Value\BaseValueRepository::class)]
+#[ORM\InheritanceType('JOINED')]
+#[ORM\DiscriminatorColumn(name: 'discr', type: 'integer')]
+#[ORM\DiscriminatorMap([1 => 'Integer', 2 => 'Text', 3 => 'Picture', 4 => 'Url', 5 => 'Location', 6 => 'Phone', 7 => 'Sign', 8 => 'Longtext', 9 => 'Language', 10 => 'Isbn', 11 => 'Price', 12 => 'SoftwareIdentity', 13 => 'FileExtension', 14 => 'LinkableText', 15 => 'Video', 16 => 'BookIdentity', 17 => 'Pdf', 18 => 'Decimal'])]
 abstract class BaseValue implements AuthoredInterface, WatchableChildInterface, CommentableInterface, VotableInterface {
 
 	use AuthoredTrait;
@@ -44,100 +40,66 @@ abstract class BaseValue implements AuthoredInterface, WatchableChildInterface, 
 		self::SOURCE_TYPE_OTHER => 'Autre',
 	);
 
-	/**
-	 * @ORM\Column(name="parent_entity_type", type="smallint", nullable=false)
-	 */
+	#[ORM\Column(name: 'parent_entity_type', type: 'smallint', nullable: false)]
 	protected $parentEntityType;
 
-	/**
-	 * @ORM\Column(name="parent_entity_id", type="integer", nullable=false)
-	 */
+	#[ORM\Column(name: 'parent_entity_id', type: 'integer', nullable: false)]
 	protected $parentEntityId;
 
-	/**
-	 * @ORM\Column(name="parent_entity_field", type="string", length=25, nullable=false)
-	 */
+	#[ORM\Column(name: 'parent_entity_field', type: 'string', length: 25, nullable: false)]
 	protected $parentEntityField;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\User")
-	 * @ORM\JoinColumn(name="user_id", nullable=false)
-	 */
+	#[ORM\JoinColumn(name: 'user_id', nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\User::class)]
 	protected $user;
 
 	protected $data;
 
-	/**
-	 * @ORM\Column(type="string", name="data_hash", length=32)
-	 */
+	#[ORM\Column(type: 'string', name: 'data_hash', length: 32)]
 	protected $dataHash;
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\Column(name="created_at", type="datetime")
-	 * @Gedmo\Timestampable(on="create")
-	 */
+	#[ORM\Column(name: 'created_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'create')]
 	private $createdAt;
 
-	/**
-	 * @ORM\Column(name="updated_at", type="datetime")
-	 * @Gedmo\Timestampable(on="update")
-	 */
+	#[ORM\Column(name: 'updated_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'update')]
 	private $updatedAt;
 
-	/**
-	 * @ORM\Column(type="string", length=255, nullable=true)
-	 */
 	#[Assert\Length(max: 255)]
+	#[ORM\Column(type: 'string', length: 255, nullable: true)]
 	private $legend;
 
-	/**
-	 * @ORM\Column(type="smallint", name="source_type", nullable=true)
-	 */
+	#[ORM\Column(type: 'smallint', name: 'source_type', nullable: true)]
 	private $sourceType;
 
-	/**
-	 * @ORM\Column(type="string", length=2048, nullable=true)
-	 */
 	#[Assert\NotBlank(groups: ['website', 'other'])]
 	#[Assert\Length(min: 2, max: 2048, groups: ['website', 'other'])]
 	#[Assert\Url(groups: ['website'])]
+	#[ORM\Column(type: 'string', length: 2048, nullable: true)]
 	private $source;
 
-	/**
-	 * @ORM\Column(name="moderation_score", type="integer")
-	 */
+	#[ORM\Column(name: 'moderation_score', type: 'integer')]
 	protected $moderationScore = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="positive_vote_score")
-	 */
+	#[ORM\Column(type: 'integer', name: 'positive_vote_score')]
 	private $positiveVoteScore = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="negative_vote_score")
-	 */
+	#[ORM\Column(type: 'integer', name: 'negative_vote_score')]
 	private $negativeVoteScore = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="vote_score")
-	 */
+	#[ORM\Column(type: 'integer', name: 'vote_score')]
 	private $voteScore = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="vote_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'vote_count')]
 	private $voteCount = 0;
 
-	/**
-	 * @ORM\Column(type="integer", name="comment_count")
-	 */
+	#[ORM\Column(type: 'integer', name: 'comment_count')]
 	private $commentCount = 0;
 
 	/////

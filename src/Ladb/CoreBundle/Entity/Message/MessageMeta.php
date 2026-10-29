@@ -5,39 +5,26 @@ namespace Ladb\CoreBundle\Entity\Message;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
-/**
- * @ORM\Table("tbl_message_meta",
- *		uniqueConstraints={
- *			@ORM\UniqueConstraint(name="ENTITY_MESSAGE_META_UNIQUE", columns={"participant_user_id", "message_id"})
- * 		}
- * )
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Message\MessageMetaRepository")
- */
+#[ORM\Table('tbl_message_meta')]
+#[ORM\UniqueConstraint(name: 'ENTITY_MESSAGE_META_UNIQUE', columns: ['participant_user_id', 'message_id'])]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Message\MessageMetaRepository::class)]
 class MessageMeta {
 
 	const CLASS_NAME = 'LadbCoreBundle:Message\MessageMeta';
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Message\Message", inversedBy="metas")
-	 */
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Message\Message::class, inversedBy: 'metas')]
 	private $message;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\User")
-	 * @ORM\JoinColumn(name="participant_user_id", referencedColumnName="id")
-	 */
+	#[ORM\JoinColumn(name: 'participant_user_id', referencedColumnName: 'id')]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\User::class)]
 	private $participant;
 
-	/**
-	 * @ORM\Column(type="boolean", name="is_read")
-	 */
+	#[ORM\Column(type: 'boolean', name: 'is_read')]
 	private $isRead = false;
 
 	// Id /////

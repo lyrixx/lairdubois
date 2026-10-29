@@ -7,37 +7,27 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use Ladb\CoreBundle\Model\IdentifiableInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Table("tbl_core_member")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Core\MemberRepository")
- */
+#[ORM\Table('tbl_core_member')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\MemberRepository::class)]
 class Member implements IdentifiableInterface {
 
 	const CLASS_NAME = 'LadbCoreBundle:Core\Member';
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	protected $id;
 
-	/**
-	 * @ORM\Column(name="created_at", type="datetime")
-	 * @Gedmo\Timestampable(on="create")
-	 */
+	#[ORM\Column(name: 'created_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'create')]
 	private $createdAt;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\User")
-	 * @ORM\JoinColumn(name="team_id", nullable=false)
-	 */
+	#[ORM\JoinColumn(name: 'team_id', nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\User::class)]
 	private $team;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\User")
-	 * @ORM\JoinColumn(nullable=false)
-	 */
+	#[ORM\JoinColumn(nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\User::class)]
 	private $user;
 
 	// ID /////

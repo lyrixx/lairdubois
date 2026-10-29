@@ -5,19 +5,15 @@ namespace Ladb\CoreBundle\Entity\Core\Activity;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Table("tbl_core_activity_follow")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Core\Activity\FollowRepository")
- */
+#[ORM\Table('tbl_core_activity_follow')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\Activity\FollowRepository::class)]
 class Follow extends AbstractActivity {
 
 	const CLASS_NAME = 'LadbCoreBundle:Core\Activity\Follow';
 	const STRIPPED_NAME = 'follow';
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Follower")
-	 * @ORM\JoinColumn(nullable=false)
-	 */
+	#[ORM\JoinColumn(nullable: false)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Follower::class)]
 	private $follower;
 
 	/////

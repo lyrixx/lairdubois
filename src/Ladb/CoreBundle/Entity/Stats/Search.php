@@ -5,45 +5,31 @@ namespace Ladb\CoreBundle\Entity\Stats;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
-/**
- * @ORM\Table("tbl_stats_search")
- * @ORM\Entity()
- */
+#[ORM\Table('tbl_stats_search')]
+#[ORM\Entity]
 class Search {
 
 	const CLASS_NAME = 'LadbCoreBundle:Stats\Search';
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\Column(name="created_at", type="datetime")
-	 * @Gedmo\Timestampable(on="create")
-	 */
+	#[ORM\Column(name: 'created_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'create')]
 	protected $createdAt;
 
-	/**
-	 * @ORM\Column(type="string", length=14, name="session_identifier")
-	 */
+	#[ORM\Column(type: 'string', length: 14, name: 'session_identifier')]
 	private $sessionIdentifier;
 
-	/**
-	 * @ORM\Column(type="string", length=50)
-	 */
+	#[ORM\Column(type: 'string', length: 50)]
 	private $context;
 
-	/**
-	 * @ORM\Column(type="text")
-	 */
+	#[ORM\Column(type: 'text')]
 	private $query;
 
-	/**
-	 * @ORM\Column(type="integer", name="total_hits")
-	 */
+	#[ORM\Column(type: 'integer', name: 'total_hits')]
 	private $totalHits;
 
 	/////

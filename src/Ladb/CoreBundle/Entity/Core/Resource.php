@@ -6,11 +6,9 @@ use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Table("tbl_core_resource")
- * @ORM\Entity(repositoryClass="Ladb\CoreBundle\Repository\Core\ResourceRepository")
- * @ORM\HasLifecycleCallbacks
- */
+#[ORM\Table('tbl_core_resource')]
+#[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\ResourceRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Resource {
 
 	const CLASS_NAME = 'LadbCoreBundle:Core\Resource';
@@ -36,54 +34,36 @@ class Resource {
 	const KIND_RHINO3D = 15;
 	const KIND_GRASSHOPPER = 16;
 
-	/**
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="AUTO")
-	 */
+	#[ORM\Column(name: 'id', type: 'integer')]
+	#[ORM\Id]
+	#[ORM\GeneratedValue(strategy: 'AUTO')]
 	private $id;
 
-	/**
-	 * @ORM\Column(name="created_at", type="datetime")
-	 * @Gedmo\Timestampable(on="create")
-	 */
+	#[ORM\Column(name: 'created_at', type: 'datetime')]
+	#[Gedmo\Timestampable(on: 'create')]
 	private $createdAt;
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\User")
-	 * @ORM\JoinColumn(nullable=true)
-	 */
+	#[ORM\JoinColumn(nullable: true)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\User::class)]
 	private $user;
 
-	/**
-	 * @ORM\Column(type="string", length=255)
-	 */
+	#[ORM\Column(type: 'string', length: 255)]
 	private $path;
 
-	/**
-	 * @ORM\Column(name="file_name", type="string", length=255)
-	 */
+	#[ORM\Column(name: 'file_name', type: 'string', length: 255)]
 	private $fileName;
 
-	/**
-	 * @ORM\Column(name="file_extension", type="string", length=50)
-	 */
+	#[ORM\Column(name: 'file_extension', type: 'string', length: 50)]
 	private $fileExtension;
 
-	/**
-	 * @ORM\Column(name="file_size", type="integer")
-	 */
+	#[ORM\Column(name: 'file_size', type: 'integer')]
 	private $fileSize = 0;
 
-	/**
-	 * @ORM\Column(type="integer")
-	 */
+	#[ORM\Column(type: 'integer')]
 	private $kind = array( Resource::KIND_UNKNOW );
 
-	/**
-	 * @ORM\ManyToOne(targetEntity="Ladb\CoreBundle\Entity\Core\Picture", cascade={"all"})
-	 * @ORM\JoinColumn(nullable=true)
-	 */
+	#[ORM\JoinColumn(nullable: true)]
+	#[ORM\ManyToOne(targetEntity: \Ladb\CoreBundle\Entity\Core\Picture::class, cascade: ['all'])]
 	private $thumbnail;
 
 	/////
@@ -92,9 +72,7 @@ class Resource {
 		return null === $this->path ? null : '/'.$this->path;
 	}
 
-	/**
-	 * @ORM\PostRemove()
-	 */
+	#[ORM\PostRemove]
 	public function removeUpload() {
 		if ($filename = $this->getAbsolutePath()) {
 			try {
