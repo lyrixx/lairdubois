@@ -160,6 +160,8 @@ doctrine:
 
     orm:
         auto_generate_proxy_classes: "%kernel.debug%"
+        # Proxies are lazy ghost objects of symfony/var-exporter, the only kind in ORM 3
+        enable_lazy_ghost_objects: true
         auto_mapping: true
         # No action gets an entity as an argument
         controller_resolver:
@@ -169,13 +171,11 @@ doctrine:
                 type: attribute
                 prefix: Gedmo\Loggable\Entity
                 dir: "%kernel.project_dir%/vendor/gedmo/doctrine-extensions/src/Loggable/Entity"
-                alias: GedmoLoggable # this one is optional and will default to the name set for the mapping
                 is_bundle: false
             gedmo_tree:
                 type: attribute
                 prefix: Gedmo\Tree\Entity
                 dir: "%kernel.project_dir%/vendor/gedmo/doctrine-extensions/src/Tree/Entity"
-                alias: GedmoTree # this one is optional and will default to the name set for the mapping
                 is_bundle: false
             # After the mappings of Gedmo, as auto_mapping put it: the order of the classes
             # (doctrine:schema:create) stays the same

@@ -735,12 +735,12 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
 - Les managers (`publish()`…) parcourent les collections inverses (créations d'un plan…), qui ne sont
   initialisées que sur une entité chargée depuis la base : `FixtureFactory::create()` fait un
   `refresh()` après le premier `flush()`.
-- Doctrine (#177) : ORM 2.20, DBAL 3, DoctrineBundle 2.13 (la dernière pour 5.4). `doctrine/persistence`
-  reste en 2.5 : la 3 refuse les alias `LadbCoreBundle:…` (`getRepository()`, DQL), dont les 107
-  constantes `CLASS_NAME` des entités et les `from('LadbCoreBundle:…')` des commandes ; c'est pour
-  l'ORM 3 (#178). Symfony 6.4 l'accepte, la 7.4 non. `enable_lazy_ghost_objects` reste donc à
-  `false` (il exige persistence 3.1) : sa dépréciation, celle de DoctrineBundle 2.11, reste
-  jusqu'à #178.
+- Doctrine (#177, #178) : ORM 2.20, DBAL 3, DoctrineBundle 2.13 (la dernière pour 5.4),
+  `doctrine/persistence` 3.4, qu'exige le DoctrineBridge de 7.4 (la 4 attend DoctrineBundle 3).
+  Les proxys sont des lazy ghost objects de `symfony/var-exporter` (`enable_lazy_ghost_objects`,
+  les seuls de l'ORM 3) : même nom de classe (`Proxies\__CG__\…`, que `ClassUtils::getRealClass()`
+  retire), mais un proxy se charge au premier accès à une propriété, plus à l'appel d'une méthode,
+  et son `__serialize()` le charge.
 - Bornes de `composer.json` : `gedmo/doctrine-extensions` `~3.20.1` (depuis la 3.21, Sluggable et
   `Urlizer` passent par `symfony/string` : les slugs et les labels de tags peuvent changer) ;
   `dama/doctrine-test-bundle` `~8.2.2` (la 8.3 veut PHPUnit 10, que Composer ne voit pas, dans
