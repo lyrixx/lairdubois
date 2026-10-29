@@ -10,7 +10,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Knowledge\Value\TextRepository::class)]
 class Longtext extends BaseValue {
 
-	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Value\Longtext';
+	const CLASS_NAME = self::class;
 	const TYPE = 17;
 
 	const TYPE_STRIPPED_NAME = 'longtext';

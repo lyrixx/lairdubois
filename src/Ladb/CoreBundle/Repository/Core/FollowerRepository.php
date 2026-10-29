@@ -13,7 +13,7 @@ class FollowerRepository extends AbstractEntityRepository {
 	public function findOneByFollowingUserIdAndUser($followingUserId, User $user) {
 		$query = $this->getEntityManager()
 			->createQuery('
-                SELECT f FROM LadbCoreBundle:Core\Follower f
+                SELECT f FROM Ladb\CoreBundle\Entity\Core\Follower f
                 WHERE f.followingUserId = :followingUserId AND f.user = :user
             ')
 			->setParameter('followingUserId', $followingUserId)
@@ -47,7 +47,7 @@ class FollowerRepository extends AbstractEntityRepository {
 	public function existsByFollowingUserIdAndUser($followingUserId, User $user) {
 		$query = $this->getEntityManager()
 			->createQuery('
-                SELECT count(f.id) FROM LadbCoreBundle:Core\Follower f
+                SELECT count(f.id) FROM Ladb\CoreBundle\Entity\Core\Follower f
                 WHERE f.followingUserId = :followingUserId AND f.user = :user
             ')
 			->setParameter('followingUserId', $followingUserId)

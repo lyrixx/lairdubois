@@ -9,7 +9,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\Referer\RefererRepository::class)]
 class Referer {
 
-	const CLASS_NAME = 'LadbCoreBundle:Core\Referer\Referer';
+	const CLASS_NAME = self::class;
 
 	#[ORM\Column(name: 'id', type: 'integer')]
 	#[ORM\Id]

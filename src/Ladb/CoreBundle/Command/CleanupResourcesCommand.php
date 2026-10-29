@@ -39,7 +39,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'r' ))
-			->from('LadbCoreBundle:Core\Resource', 'r')
+			->from(\Ladb\CoreBundle\Entity\Core\Resource::class, 'r')
 		;
 
 		try {
@@ -60,7 +60,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'p', 'r' ))
-			->from('LadbCoreBundle:Wonder\Plan', 'p')
+			->from(\Ladb\CoreBundle\Entity\Wonder\Plan::class, 'p')
 			->leftJoin('p.resources', 'r')
 		;
 
@@ -84,7 +84,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'g', 'r' ))
-			->from('LadbCoreBundle:Promotion\Graphic', 'g')
+			->from(\Ladb\CoreBundle\Entity\Promotion\Graphic::class, 'g')
 			->leftJoin('g.resource', 'r')
 		;
 
@@ -109,7 +109,7 @@ EOT
         $queryBuilder = $om->createQueryBuilder();
         $queryBuilder
             ->select(array( 'v', 'd' ))
-            ->from('LadbCoreBundle:Knowledge\Value\Pdf', 'v')
+            ->from(\Ladb\CoreBundle\Entity\Knowledge\Value\Pdf::class, 'v')
             ->leftJoin('v.data', 'd')
         ;
 

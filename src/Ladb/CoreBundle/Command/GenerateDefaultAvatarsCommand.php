@@ -46,7 +46,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'count(u.id)' ))
-			->from('LadbCoreBundle:Core\User', 'u')
+			->from(\Ladb\CoreBundle\Entity\Core\User::class, 'u')
 			->where('u.avatar is NULL')
 		;
 
@@ -71,7 +71,7 @@ EOT
 			$queryBuilder = $om->createQueryBuilder();
 			$queryBuilder
 				->select(array( 'u' ))
-				->from('LadbCoreBundle:Core\User', 'u')
+				->from(\Ladb\CoreBundle\Entity\Core\User::class, 'u')
 				->where('u.avatar is NULL')
 				->setFirstResult($batchIndex * $batchSize)
 				->setMaxResults($batchSize)

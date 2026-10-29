@@ -49,7 +49,7 @@ class Find extends AbstractDraftableAuthoredPublication implements TitledInterfa
 	use TitledTrait, SluggedTrait, PicturedTrait, BlockBodiedTrait;
 	use IndexableTrait, SitemapableTrait, TaggableTrait, ViewableTrait, ScrapableTrait, LikableTrait, WatchableTrait, CommentableTrait, CollectionnableTrait;
 
-	const CLASS_NAME = 'LadbCoreBundle:Find\Find';
+	const CLASS_NAME = self::class;
 	const TYPE = 104;
 
 	const CONTENT_TYPE_NONE = 0;

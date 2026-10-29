@@ -11,7 +11,7 @@ use Ladb\CoreBundle\Model\TypableInterface;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Message\ThreadRepository::class)]
 class Thread implements TypableInterface {
 
-	const CLASS_NAME = 'LadbCoreBundle:Message\Thread';
+	const CLASS_NAME = self::class;
 	const TYPE = 2;
 
 	#[ORM\Column(name: 'id', type: 'integer')]

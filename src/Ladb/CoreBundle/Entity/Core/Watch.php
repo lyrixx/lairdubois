@@ -15,7 +15,7 @@ class Watch implements AuthoredInterface {
 
 	use AuthoredTrait;
 
-	const CLASS_NAME = 'LadbCoreBundle:Core\Watch';
+	const CLASS_NAME = self::class;
 
 	#[ORM\Column(name: 'id', type: 'integer')]
 	#[ORM\Id]

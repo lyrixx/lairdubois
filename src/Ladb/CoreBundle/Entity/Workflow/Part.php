@@ -11,7 +11,7 @@ use Ladb\CoreBundle\Validator\Constraints as LadbAssert;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Workflow\PartRepository::class)]
 class Part {
 
-	const CLASS_NAME = 'LadbCoreBundle:Workflow\Part';
+	const CLASS_NAME = self::class;
 
 	#[ORM\Column(name: 'id', type: 'integer')]
 	#[ORM\Id]

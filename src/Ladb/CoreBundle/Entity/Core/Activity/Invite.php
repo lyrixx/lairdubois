@@ -9,7 +9,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\Activity\InviteRepository::class)]
 class Invite extends AbstractActivity {
 
-	const CLASS_NAME = 'LadbCoreBundle:Core\Activity\Invite';
+	const CLASS_NAME = self::class;
 	const STRIPPED_NAME = 'invite';
 
 	#[ORM\JoinColumn(nullable: false)]

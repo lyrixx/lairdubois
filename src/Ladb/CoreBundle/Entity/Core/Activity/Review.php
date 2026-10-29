@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\Activity\ReviewRepository::class)]
 class Review extends AbstractActivity {
 
-	const CLASS_NAME = 'LadbCoreBundle:Core\Activity\Review';
+	const CLASS_NAME = self::class;
 	const STRIPPED_NAME = 'review';
 
 	#[ORM\JoinColumn(nullable: false)]

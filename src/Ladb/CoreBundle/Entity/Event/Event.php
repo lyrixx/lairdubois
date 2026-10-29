@@ -56,7 +56,7 @@ class Event extends AbstractDraftableAuthoredPublication implements TitledInterf
 		getIsJoinable as getIsJoinableTrait;
 	}
 
-	const CLASS_NAME = 'LadbCoreBundle:Event\Event';
+	const CLASS_NAME = self::class;
 	const TYPE = 123;
 
 	const STATUS_UNKONW = 0;

@@ -12,7 +12,7 @@ use Ladb\CoreBundle\Model\IdentifiableInterface;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Collection\EntryRepository::class)]
 class Entry implements IdentifiableInterface {
 
-	const CLASS_NAME = 'LadbCoreBundle:Collection\Entry';
+	const CLASS_NAME = self::class;
 
 	#[ORM\Column(name: 'id', type: 'integer')]
 	#[ORM\Id]

@@ -13,7 +13,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\DiscriminatorMap([1 => 'Comment', 2 => 'Follow', 3 => 'Like', 4 => 'Publish', 5 => 'Vote', 6 => 'Write', 7 => 'Contribute', 8 => 'Mention', 9 => 'Join', 10 => 'Answer', 11 => 'Testify', 12 => 'Review', 13 => 'Feedback', 14 => 'Invite', 15 => 'Request'])]
 abstract class AbstractActivity {
 
-	const CLASS_NAME = 'LadbCoreBundle:Core\Activity\AbstractActivity';
+	const CLASS_NAME = self::class;
 
 	#[ORM\Column(name: 'id', type: 'integer')]
 	#[ORM\Id]

@@ -10,7 +10,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Workflow\TaskRepository::class)]
 class Task {
 
-	const CLASS_NAME = 'LadbCoreBundle:Workflow\Task';
+	const CLASS_NAME = self::class;
 
 	const STATUS_UNKNOW = 0;
 	const STATUS_PENDING = 1;

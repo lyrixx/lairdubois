@@ -23,7 +23,7 @@ class Creation extends AbstractWonder implements BlockBodiedInterface, Inspirabl
 	use BlockBodiedTrait;
 	use InspirableTrait, FeedbackableTrait, SpotlightableTrait;
 
-	const CLASS_NAME = 'LadbCoreBundle:Wonder\Creation';
+	const CLASS_NAME = self::class;
 	const TYPE = 100;
 
 	#[Assert\Count(min: 1, max: 5)]

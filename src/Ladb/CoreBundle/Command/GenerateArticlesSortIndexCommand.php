@@ -43,7 +43,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'h' ))
-			->from('LadbCoreBundle:Howto\Howto', 'h')
+			->from(\Ladb\CoreBundle\Entity\Howto\Howto::class, 'h')
 		;
 
 		try {

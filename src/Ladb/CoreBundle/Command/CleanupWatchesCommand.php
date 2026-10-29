@@ -70,7 +70,7 @@ EOT
 				$queryBuilder = $om->createQueryBuilder();
 				$queryBuilder
 					->select(array( 'l' ))
-					->from('LadbCoreBundle:Core\Watch', 'l')
+					->from(\Ladb\CoreBundle\Entity\Core\Watch::class, 'l')
 					->where('l.entityType = :entityType')
 					->andWhere('l.entityId = :entityId')
 					->andWhere('l.user = :user')

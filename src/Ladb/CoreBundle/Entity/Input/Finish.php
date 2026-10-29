@@ -8,6 +8,6 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Input\FinishRepository::class)]
 class Finish extends AbstractInput {
 
-	const CLASS_NAME = 'LadbCoreBundle:Input\Finish';
+	const CLASS_NAME = self::class;
 
 }

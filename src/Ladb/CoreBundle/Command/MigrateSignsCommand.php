@@ -45,7 +45,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 's' ))
-			->from('LadbCoreBundle:Knowledge\Value\Sign', 's')
+			->from(\Ladb\CoreBundle\Entity\Knowledge\Value\Sign::class, 's')
 		;
 
 		try {

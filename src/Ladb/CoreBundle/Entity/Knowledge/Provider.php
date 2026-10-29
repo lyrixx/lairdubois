@@ -28,7 +28,7 @@ class Provider extends AbstractKnowledge implements LocalisableInterface, Review
 
 	use LocalisableTrait, ReviewableTrait;
 
-	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Provider';
+	const CLASS_NAME = self::class;
 	const TYPE = 111;
 
 	const STRIPPED_NAME = 'provider';

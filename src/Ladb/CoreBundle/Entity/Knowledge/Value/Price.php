@@ -11,7 +11,7 @@ use Ladb\CoreBundle\Validator\Constraints as LadbAssert;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Knowledge\Value\PriceRepository::class)]
 class Price extends BaseValue {
 
-	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Value\Price';
+	const CLASS_NAME = self::class;
 	const TYPE = 20;
 
 	const TYPE_STRIPPED_NAME = 'price';

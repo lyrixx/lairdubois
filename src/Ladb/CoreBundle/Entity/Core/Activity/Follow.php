@@ -9,7 +9,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\Activity\FollowRepository::class)]
 class Follow extends AbstractActivity {
 
-	const CLASS_NAME = 'LadbCoreBundle:Core\Activity\Follow';
+	const CLASS_NAME = self::class;
 	const STRIPPED_NAME = 'follow';
 
 	#[ORM\JoinColumn(nullable: false)]

@@ -57,7 +57,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array('count(u.id)'))
-			->from('LadbCoreBundle:Core\User', 'u');
+			->from(User::class, 'u');
 
 		try {
 			$userCount = $queryBuilder->getQuery()->getSingleScalarResult();
@@ -80,7 +80,7 @@ EOT
 			$queryBuilder = $om->createQueryBuilder();
 			$queryBuilder
 				->select(array('u'))
-				->from('LadbCoreBundle:Core\User', 'u')
+				->from(User::class, 'u')
 				->setFirstResult($batchIndex * $batchSize)
 				->setMaxResults($batchSize);
 

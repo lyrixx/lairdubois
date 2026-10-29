@@ -71,7 +71,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'o' ))
-			->from('LadbCoreBundle:Offer\Offer', 'o')
+			->from(Offer::class, 'o')
 			->where('o.publishCount > 0')
 			->andWhere('o.changedAt < :retrieveDate')
             ->orderBy('o.changedAt', 'ASC')
@@ -118,7 +118,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'o' ))
-			->from('LadbCoreBundle:Offer\Offer', 'o')
+			->from(Offer::class, 'o')
 			->where('o.isDraft = false')
 			->andWhere('o.changedAt < :retrieveDate')
 			->setParameter('retrieveDate', $retrieveDate)

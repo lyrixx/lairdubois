@@ -9,7 +9,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\Activity\PublishRepository::class)]
 class Publish extends AbstractActivity {
 
-	const CLASS_NAME = 'LadbCoreBundle:Core\Activity\Publish';
+	const CLASS_NAME = self::class;
 	const STRIPPED_NAME = 'publish';
 
 	#[ORM\JoinColumn(name: 'publisher_user', nullable: true)]

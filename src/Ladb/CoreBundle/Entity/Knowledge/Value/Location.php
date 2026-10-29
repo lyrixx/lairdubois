@@ -17,7 +17,7 @@ class Location extends BaseValue implements LocalisableExtendedInterface {
 
 	use LocalisableTrait, LocalisableExtendedTrait;
 
-	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Value\Location';
+	const CLASS_NAME = self::class;
 	const TYPE = 14;
 
 	const TYPE_STRIPPED_NAME = 'location';

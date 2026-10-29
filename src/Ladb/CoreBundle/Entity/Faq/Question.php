@@ -44,7 +44,7 @@ class Question extends AbstractDraftableAuthoredPublication implements TitledInt
 	use TitledTrait, SluggedTrait, PicturedTrait, BlockBodiedTrait;
 	use IndexableTrait, SitemapableTrait, TaggableTrait, ViewableTrait, ScrapableTrait, LikableTrait, WatchableTrait, CommentableTrait, CollectionnableTrait;
 
-	const CLASS_NAME = 'LadbCoreBundle:Faq\Question';
+	const CLASS_NAME = self::class;
 	const TYPE = 110;
 
 	#[ORM\Column(name: 'weight', type: 'integer')]

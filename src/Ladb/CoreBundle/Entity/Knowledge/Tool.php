@@ -25,7 +25,7 @@ class Tool extends AbstractKnowledge implements ReviewableInterface {
 
 	use ReviewableTrait;
 
-	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Tool';
+	const CLASS_NAME = self::class;
 	const TYPE = 124;
 
 	const STRIPPED_NAME = 'tool';

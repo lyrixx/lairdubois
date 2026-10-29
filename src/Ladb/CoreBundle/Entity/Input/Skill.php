@@ -9,6 +9,6 @@ use Gedmo\Mapping\Annotation as Gedmo;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Input\SkillRepository::class)]
 class Skill extends AbstractInput {
 
-	const CLASS_NAME = 'LadbCoreBundle:Input\Skill';
+	const CLASS_NAME = self::class;
 
 }

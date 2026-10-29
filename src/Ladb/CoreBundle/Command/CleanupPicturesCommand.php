@@ -39,7 +39,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'p' ))
-			->from('LadbCoreBundle:Core\Picture', 'p')
+			->from(\Ladb\CoreBundle\Entity\Core\Picture::class, 'p')
 		;
 
 		try {
@@ -60,7 +60,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'r', 'th' ))
-			->from('LadbCoreBundle:Core\Resource', 'r')
+			->from(\Ladb\CoreBundle\Entity\Core\Resource::class, 'r')
 			->leftJoin('r.thumbnail', 'th')
 		;
 
@@ -85,7 +85,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'c', 'ps' ))
-			->from('LadbCoreBundle:Core\Comment', 'c')
+			->from(\Ladb\CoreBundle\Entity\Core\Comment::class, 'c')
 			->leftJoin('c.pictures', 'ps')
 		;
 
@@ -109,7 +109,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'm', 'ps' ))
-			->from('LadbCoreBundle:Message\Message', 'm')
+			->from(\Ladb\CoreBundle\Entity\Message\Message::class, 'm')
 			->leftJoin('m.pictures', 'ps')
 		;
 
@@ -133,7 +133,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'u', 'um', 'a', 'b' ))
-			->from('LadbCoreBundle:Core\User', 'u')
+			->from(\Ladb\CoreBundle\Entity\Core\User::class, 'u')
 			->innerJoin('u.meta', 'um')
 			->leftJoin('u.avatar', 'a')
 			->leftJoin('um.banner', 'b')
@@ -164,7 +164,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'c', 'mp', 'ps', 'sk', 'sp' ))
-			->from('LadbCoreBundle:Wonder\Creation', 'c')
+			->from(\Ladb\CoreBundle\Entity\Wonder\Creation::class, 'c')
 			->leftJoin('c.mainPicture', 'mp')
 			->leftJoin('c.pictures', 'ps')
 			->leftJoin('c.sticker', 'sk')
@@ -203,7 +203,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'p', 'mp', 'ps', 'sk', 'sp' ))
-			->from('LadbCoreBundle:Wonder\Plan', 'p')
+			->from(\Ladb\CoreBundle\Entity\Wonder\Plan::class, 'p')
 			->leftJoin('p.mainPicture', 'mp')
 			->leftJoin('p.pictures', 'ps')
 			->leftJoin('p.sticker', 'sk')
@@ -242,7 +242,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'w', 'mp', 'ps', 'sk', 'sp' ))
-			->from('LadbCoreBundle:Wonder\Workshop', 'w')
+			->from(\Ladb\CoreBundle\Entity\Wonder\Workshop::class, 'w')
 			->leftJoin('w.mainPicture', 'mp')
 			->leftJoin('w.pictures', 'ps')
 			->leftJoin('w.sticker', 'sk')
@@ -281,7 +281,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'f', 'c' ))
-			->from('LadbCoreBundle:Find\Find', 'f')
+			->from(\Ladb\CoreBundle\Entity\Find\Find::class, 'f')
 			->leftJoin('f.content', 'c')
 		;
 
@@ -312,7 +312,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'e', 'mp', 'ps' ))
-			->from('LadbCoreBundle:Event\Event', 'e')
+			->from(\Ladb\CoreBundle\Entity\Event\Event::class, 'e')
 			->leftJoin('e.mainPicture', 'mp')
 			->leftJoin('e.pictures', 'ps')
 		;
@@ -341,7 +341,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'h', 'a', 'mp', 'sk', 'sp' ))
-			->from('LadbCoreBundle:Howto\Howto', 'h')
+			->from(\Ladb\CoreBundle\Entity\Howto\Howto::class, 'h')
 			->leftJoin('h.articles', 'a')
 			->leftJoin('h.mainPicture', 'mp')
 			->leftJoin('h.sticker', 'sk')
@@ -383,7 +383,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'p', 'mp' ))
-			->from('LadbCoreBundle:Blog\Post', 'p')
+			->from(\Ladb\CoreBundle\Entity\Blog\Post::class, 'p')
 			->leftJoin('p.mainPicture', 'mp')
 		;
 
@@ -408,7 +408,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'g', 'mp' ))
-			->from('LadbCoreBundle:Promotion\Graphic', 'g')
+			->from(\Ladb\CoreBundle\Entity\Promotion\Graphic::class, 'g')
 			->leftJoin('g.mainPicture', 'mp')
 		;
 
@@ -433,7 +433,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'q', 'mp' ))
-			->from('LadbCoreBundle:Qa\Question', 'q')
+			->from(\Ladb\CoreBundle\Entity\Qa\Question::class, 'q')
 			->leftJoin('q.mainPicture', 'mp')
 		;
 
@@ -458,7 +458,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'q', 'mp' ))
-			->from('LadbCoreBundle:Faq\Question', 'q')
+			->from(\Ladb\CoreBundle\Entity\Faq\Question::class, 'q')
 			->leftJoin('q.mainPicture', 'mp')
 		;
 
@@ -483,7 +483,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'w', 'mp' ))
-			->from('LadbCoreBundle:Workflow\Workflow', 'w')
+			->from(\Ladb\CoreBundle\Entity\Workflow\Workflow::class, 'w')
 			->leftJoin('w.mainPicture', 'mp')
 		;
 
@@ -508,7 +508,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'o', 'mp', 'ps' ))
-			->from('LadbCoreBundle:Offer\Offer', 'o')
+			->from(\Ladb\CoreBundle\Entity\Offer\Offer::class, 'o')
 			->leftJoin('o.mainPicture', 'mp')
 			->leftJoin('o.pictures', 'ps')
 		;
@@ -537,7 +537,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'w', 'mp', 'eg', 'lb', 'tr', 'le', 'br' ))
-			->from('LadbCoreBundle:Knowledge\Wood', 'w')
+			->from(\Ladb\CoreBundle\Entity\Knowledge\Wood::class, 'w')
 			->leftJoin('w.mainPicture', 'mp')
 			->leftJoin('w.endgrain', 'eg')
 			->leftJoin('w.lumber', 'lb')
@@ -587,7 +587,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'p', 'mp', 'ph' ))
-			->from('LadbCoreBundle:Knowledge\Provider', 'p')
+			->from(\Ladb\CoreBundle\Entity\Knowledge\Provider::class, 'p')
 			->leftJoin('p.mainPicture', 'mp')
 			->leftJoin('p.photo', 'ph')
 		;
@@ -617,7 +617,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 's', 'mp', 'ph' ))
-			->from('LadbCoreBundle:Knowledge\School', 's')
+			->from(\Ladb\CoreBundle\Entity\Knowledge\School::class, 's')
 			->leftJoin('s.mainPicture', 'mp')
 			->leftJoin('s.photo', 'ph')
 		;
@@ -647,7 +647,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'b', 'mp', 'bc' ))
-			->from('LadbCoreBundle:Knowledge\Book', 'b')
+			->from(\Ladb\CoreBundle\Entity\Knowledge\Book::class, 'b')
 			->leftJoin('b.mainPicture', 'mp')
 			->leftJoin('b.backCover', 'bc')
 		;
@@ -677,7 +677,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 's', 'mp', 'scs' ))
-			->from('LadbCoreBundle:Knowledge\Software', 's')
+			->from(\Ladb\CoreBundle\Entity\Knowledge\Software::class, 's')
 			->leftJoin('s.mainPicture', 'mp')
 			->leftJoin('s.screenshot', 'scs')
 		;
@@ -707,7 +707,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 's', 'mp' ))
-			->from('LadbCoreBundle:Knowledge\Software', 's')
+			->from(\Ladb\CoreBundle\Entity\Knowledge\Software::class, 's')
 			->leftJoin('s.mainPicture', 'mp')
 		;
 
@@ -732,7 +732,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'v', 'd' ))
-			->from('LadbCoreBundle:Knowledge\Value\Picture', 'v')
+			->from(\Ladb\CoreBundle\Entity\Knowledge\Value\Picture::class, 'v')
 			->leftJoin('v.data', 'd')
 		;
 
@@ -757,7 +757,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'g', 'ps' ))
-			->from('LadbCoreBundle:Core\Block\Gallery', 'g')
+			->from(\Ladb\CoreBundle\Entity\Core\Block\Gallery::class, 'g')
 			->leftJoin('g.pictures', 'ps')
 		;
 
@@ -781,7 +781,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'm' ))
-			->from('LadbCoreBundle:Knowledge\Wood\Texture', 'm')
+			->from(\Ladb\CoreBundle\Entity\Knowledge\Wood\Texture::class, 'm')
 		;
 
 		try {
@@ -807,7 +807,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 't', 'mp' ))
-			->from('LadbCoreBundle:Youtook\Took', 't')
+			->from(\Ladb\CoreBundle\Entity\Youtook\Took::class, 't')
 			->leftJoin('t.mainPicture', 'mp')
 		;
 
@@ -832,7 +832,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'c', 'mp' ))
-			->from('LadbCoreBundle:Collection\Collection', 'c')
+			->from(\Ladb\CoreBundle\Entity\Collection\Collection::class, 'c')
 			->innerJoin('c.mainPicture', 'mp')
 		;
 

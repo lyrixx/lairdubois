@@ -45,7 +45,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'u' ))
-			->from('LadbCoreBundle:Core\User', 'u')
+			->from(\Ladb\CoreBundle\Entity\Core\User::class, 'u')
 		;
 
 		try {
@@ -68,7 +68,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'l', 'u' ))
-			->from('LadbCoreBundle:Core\Like', 'l')
+			->from(\Ladb\CoreBundle\Entity\Core\Like::class, 'l')
 			->innerJoin('l.user', 'u')
 		;
 

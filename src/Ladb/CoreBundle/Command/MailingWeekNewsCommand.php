@@ -60,7 +60,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'c', 'u', 'mp' ))
-			->from('LadbCoreBundle:Wonder\Creation', 'c')
+			->from(\Ladb\CoreBundle\Entity\Wonder\Creation::class, 'c')
 			->innerJoin('c.user', 'u')
 			->innerJoin('c.mainPicture', 'mp')
 			->where('c.isDraft = false')
@@ -87,7 +87,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'q', 'u' ))
-			->from('LadbCoreBundle:Qa\Question', 'q')
+			->from(\Ladb\CoreBundle\Entity\Qa\Question::class, 'q')
 			->innerJoin('q.user', 'u')
 			->where('q.isDraft = false')
 			->andWhere('q.createdAt > :date')
@@ -111,7 +111,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'p', 'u', 'mp' ))
-			->from('LadbCoreBundle:Wonder\Plan', 'p')
+			->from(\Ladb\CoreBundle\Entity\Wonder\Plan::class, 'p')
 			->innerJoin('p.user', 'u')
 			->innerJoin('p.mainPicture', 'mp')
 			->where('p.isDraft = false')
@@ -138,7 +138,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'w', 'u', 'mp' ))
-			->from('LadbCoreBundle:Wonder\Workshop', 'w')
+			->from(\Ladb\CoreBundle\Entity\Wonder\Workshop::class, 'w')
 			->innerJoin('w.user', 'u')
 			->innerJoin('w.mainPicture', 'mp')
 			->where('w.isDraft = false')
@@ -165,7 +165,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'h', 'u', 'mp' ))
-			->from('LadbCoreBundle:Howto\Howto', 'h')
+			->from(\Ladb\CoreBundle\Entity\Howto\Howto::class, 'h')
 			->innerJoin('h.user', 'u')
 			->leftJoin('h.mainPicture', 'mp')
 			->where('h.isDraft = false')
@@ -192,7 +192,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'a', 'h', 'u' ))
-			->from('LadbCoreBundle:Howto\Article', 'a')
+			->from(\Ladb\CoreBundle\Entity\Howto\Article::class, 'a')
 			->innerJoin('a.howto', 'h')
 			->innerJoin('h.user', 'u')
 			->where('a.isDraft = false')
@@ -232,7 +232,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'f', 'u' ))
-			->from('LadbCoreBundle:Find\Find', 'f')
+			->from(\Ladb\CoreBundle\Entity\Find\Find::class, 'f')
 			->innerJoin('f.user', 'u')
 			->where('f.isDraft = false')
 			->andWhere('f.createdAt > :date')
@@ -258,7 +258,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'p', 'u', 'mp' ))
-			->from('LadbCoreBundle:Blog\Post', 'p')
+			->from(\Ladb\CoreBundle\Entity\Blog\Post::class, 'p')
 			->innerJoin('p.user', 'u')
 			->leftJoin('p.mainPicture', 'mp')
 			->where('p.isDraft = false')
@@ -282,7 +282,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'w', 'mp' ))
-			->from('LadbCoreBundle:Knowledge\Wood', 'w')
+			->from(\Ladb\CoreBundle\Entity\Knowledge\Wood::class, 'w')
 			->innerJoin('w.mainPicture', 'mp')
 			->where('w.nameRejected = false')
 			->andWhere('w.grainRejected = false')
@@ -309,7 +309,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'p', 'mp' ))
-			->from('LadbCoreBundle:Knowledge\Provider', 'p')
+			->from(\Ladb\CoreBundle\Entity\Knowledge\Provider::class, 'p')
 			->innerJoin('p.mainPicture', 'mp')
 			->where('p.signRejected = false')
 			->andWhere('p.logoRejected = false')
@@ -336,7 +336,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 's', 'mp' ))
-			->from('LadbCoreBundle:Knowledge\School', 's')
+			->from(\Ladb\CoreBundle\Entity\Knowledge\School::class, 's')
 			->innerJoin('s.mainPicture', 'mp')
 			->where('s.nameRejected = false')
 			->andWhere('s.logoRejected = false')
@@ -365,7 +365,7 @@ EOT
 			$queryBuilder = $om->createQueryBuilder();
 			$queryBuilder
 				->select(array( 'count(u.id)' ))
-				->from('LadbCoreBundle:Core\User', 'u')
+				->from(\Ladb\CoreBundle\Entity\Core\User::class, 'u')
 				->innerJoin('u.meta', 'm')
 				->where('u.enabled = true')
 				->andWhere('u.emailConfirmed = true')
@@ -395,7 +395,7 @@ EOT
 				$queryBuilder = $om->createQueryBuilder();
 				$queryBuilder
 					->select(array( 'u', 'm' ))
-					->from('LadbCoreBundle:Core\User', 'u')
+					->from(\Ladb\CoreBundle\Entity\Core\User::class, 'u')
 					->innerJoin('u.meta', 'm')
 					->where('u.enabled = true')
 					->andWhere('u.isTeam = false')

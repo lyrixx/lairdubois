@@ -39,7 +39,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'w' ))
-			->from('LadbCoreBundle:Input\Wood', 'w')
+			->from(\Ladb\CoreBundle\Entity\Input\Wood::class, 'w')
 		;
 
 		try {
@@ -60,7 +60,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'c', 'w' ))
-			->from('LadbCoreBundle:Wonder\Creation', 'c')
+			->from(\Ladb\CoreBundle\Entity\Wonder\Creation::class, 'c')
 			->leftJoin('c.woods', 'w')
 		;
 

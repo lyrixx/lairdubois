@@ -12,7 +12,7 @@ use Ladb\CoreBundle\Validator\Constraints as LadbAssert;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Knowledge\Value\PhoneRepository::class)]
 class Phone extends BaseValue {
 
-	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Value\Phone';
+	const CLASS_NAME = self::class;
 	const TYPE = 15;
 
 	const TYPE_STRIPPED_NAME = 'phone';

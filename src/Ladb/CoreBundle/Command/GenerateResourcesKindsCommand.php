@@ -43,7 +43,7 @@ EOT
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'r' ))
-			->from('LadbCoreBundle:Core\Resource', 'r')
+			->from(Resource::class, 'r')
 		;
 
 		try {

@@ -23,7 +23,7 @@ class Tip extends AbstractPublication implements TitledInterface, HtmlBodiedInte
 	use HtmlBodiedTrait;
 	use IndexableTrait, ViewableTrait;
 
-	const CLASS_NAME = 'LadbCoreBundle:Core\Tip';
+	const CLASS_NAME = self::class;
 	const TYPE = 5;
 
 	#[ORM\Column(type: 'text', nullable: false)]

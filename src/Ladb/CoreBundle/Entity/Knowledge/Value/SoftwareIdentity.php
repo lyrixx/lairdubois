@@ -12,7 +12,7 @@ use Ladb\CoreBundle\Validator\Constraints as LadbAssert;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Knowledge\Value\SoftwareIdentityRepository::class)]
 class SoftwareIdentity extends BaseValue {
 
-	const CLASS_NAME = 'LadbCoreBundle:Knowledge\Value\SoftwareIdentity';
+	const CLASS_NAME = self::class;
 	const TYPE = 21;
 
 	const TYPE_STRIPPED_NAME = 'software-identity';

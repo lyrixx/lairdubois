@@ -11,7 +11,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\MemberRepository::class)]
 class Member implements IdentifiableInterface {
 
-	const CLASS_NAME = 'LadbCoreBundle:Core\Member';
+	const CLASS_NAME = self::class;
 
 	#[ORM\Column(name: 'id', type: 'integer')]
 	#[ORM\Id]
