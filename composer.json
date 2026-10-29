@@ -34,7 +34,6 @@
         "doctrine/doctrine-bundle": "^2.13",
         "doctrine/persistence": "^2.5",
         "incenteev/composer-parameter-handler": "^2.3",
-        "sensio/framework-extra-bundle": "^6.2",
         "symfony/monolog-bundle": "^3.10",
         "symfony/polyfill-apcu": "^1.0",
         "symfony/amqp-messenger": "6.4.*",
