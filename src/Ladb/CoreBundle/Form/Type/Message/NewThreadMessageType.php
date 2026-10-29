@@ -22,7 +22,7 @@ class NewThreadMessageType extends AbstractType {
 		$this->userManager = $userManager;
 	}
 
-	public function buildForm(FormBuilderInterface $builder, array $options) {
+	public function buildForm(FormBuilderInterface $builder, array $options): void {
 		$builder
 			->add($builder
 				->create('recipients', TextType::class, array( 'attr' => array( 'class' => 'ladb-pseudo-hidden2' ) ))
@@ -35,7 +35,7 @@ class NewThreadMessageType extends AbstractType {
 		;
 	}
 
-	public function configureOptions(OptionsResolver $resolver) {
+	public function configureOptions(OptionsResolver $resolver): void {
 		$resolver->setDefaults(array(
 			'data_class' => 'Ladb\CoreBundle\Form\Model\NewThreadMessage'
 		));

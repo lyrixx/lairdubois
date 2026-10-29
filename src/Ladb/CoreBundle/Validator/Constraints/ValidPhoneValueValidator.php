@@ -18,7 +18,7 @@ class ValidPhoneValueValidator extends ConstraintValidator {
 	 *
 	 * @api
 	 */
-	public function validate($value, Constraint $constraint) {
+	public function validate($value, Constraint $constraint): void {
 		if ($value instanceof Phone) {
 			$rawPhoneNumber = $value->getRawPhoneNumber();
 			$country = $value->getCountry();

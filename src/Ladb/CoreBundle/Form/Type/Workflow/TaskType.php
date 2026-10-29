@@ -21,7 +21,7 @@ class TaskType extends AbstractType {
 		$this->om = $om;
 	}
 
-	public function buildForm(FormBuilderInterface $builder, array $options) {
+	public function buildForm(FormBuilderInterface $builder, array $options): void {
 		$builder
 			->add('title', TextType::class, array( 'label' => 'workflow.task.title' ))
 			->add($builder
@@ -39,7 +39,7 @@ class TaskType extends AbstractType {
 		;
 	}
 
-	public function configureOptions(OptionsResolver $resolver) {
+	public function configureOptions(OptionsResolver $resolver): void {
 		$resolver->setRequired(array(
 			'label_choices',
 		));

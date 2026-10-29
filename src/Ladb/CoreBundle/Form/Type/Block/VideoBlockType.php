@@ -8,7 +8,7 @@ class VideoBlockType extends BlockType {
 
 	protected $dataClass = 'Ladb\CoreBundle\Entity\Core\Block\Video';
 
-	public function buildForm(FormBuilderInterface $builder, array $options) {
+	public function buildForm(FormBuilderInterface $builder, array $options): void {
 		parent::buildForm($builder, $options);
 		$builder
 			->add('url')

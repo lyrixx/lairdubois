@@ -17,7 +17,7 @@ class ValidTookValidator extends ConstraintValidator {
 	 *
 	 * @api
 	 */
-	public function validate($value, Constraint $constraint) {
+	public function validate($value, Constraint $constraint): void {
 		if ($value instanceof Took) {
 			if ($value->getKind() != VideoHostingUtils::KIND_YOUTUBE) {
 				$this->context->buildViolation('Ce lien n\'est pas une URL YouTube valide.')

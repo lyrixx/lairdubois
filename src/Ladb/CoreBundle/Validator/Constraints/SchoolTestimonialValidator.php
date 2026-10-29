@@ -15,7 +15,7 @@ class SchoolTestimonialValidator extends ConstraintValidator {
 	 *
 	 * @api
 	 */
-	public function validate($value, Constraint $constraint) {
+	public function validate($value, Constraint $constraint): void {
 		if ($value instanceof \Ladb\CoreBundle\Entity\Knowledge\School\Testimonial) {
 			if ($value->getToYear() > 0 && $value->getFromYear() > $value->getToYear()) {
 				$this->context->buildViolation('L\'année de sortie ne peut pas précéder l\'année d\'entrée.')

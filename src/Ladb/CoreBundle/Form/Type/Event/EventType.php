@@ -34,7 +34,7 @@ class EventType extends AbstractType {
 		$this->linkUtils = $linkUtils;
 	}
 
-	public function buildForm(FormBuilderInterface $builder, array $options) {
+	public function buildForm(FormBuilderInterface $builder, array $options): void {
 		$builder
 			->add('title')
 			->add('bodyBlocks', PolyCollectionType::class, array(
@@ -105,7 +105,7 @@ class EventType extends AbstractType {
 
 	}
 
-	public function configureOptions(OptionsResolver $resolver) {
+	public function configureOptions(OptionsResolver $resolver): void {
 		$resolver->setDefaults(array(
 			'data_class' => 'Ladb\CoreBundle\Entity\Event\Event',
 		));

@@ -16,7 +16,7 @@ class ValidLocationValueValidator extends ConstraintValidator {
 	 *
 	 * @api
 	 */
-	public function validate($value, Constraint $constraint) {
+	public function validate($value, Constraint $constraint): void {
 		if ($value instanceof Location) {
 			if (!empty($value->getLocation()) && is_null($value->getLatitude()) && is_null($value->getLongitude())) {
 				$this->context->buildViolation('Cette adresse est inconnue ou incorrecte.')

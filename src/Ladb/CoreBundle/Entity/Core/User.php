@@ -353,7 +353,7 @@ class User implements UserInterface, LegacyPasswordAuthenticatedUserInterface, E
 		return $this->plainPassword;
 	}
 
-	public function eraseCredentials() {
+	public function eraseCredentials(): void {
 		$this->plainPassword = null;
 	}
 

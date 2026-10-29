@@ -25,7 +25,7 @@ class UniqueSchoolValidator extends ConstraintValidator {
 	 *
 	 * @api
 	 */
-	public function validate($value, Constraint $constraint) {
+	public function validate($value, Constraint $constraint): void {
 		if (!is_null($value)) {
 			if ($value instanceof Text) {
 				$data = $value->getData();

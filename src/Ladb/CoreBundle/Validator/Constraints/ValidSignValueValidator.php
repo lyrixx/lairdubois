@@ -16,7 +16,7 @@ class ValidSignValueValidator extends ConstraintValidator {
 	 *
 	 * @api
 	 */
-	public function validate($value, Constraint $constraint) {
+	public function validate($value, Constraint $constraint): void {
 		if ($value instanceof Sign) {
 			if ($value->getIsAffiliate() && empty($value->getStore())) {
 				$this->context->buildViolation($constraint->message)

@@ -17,7 +17,7 @@ class ValidOfferValidator extends ConstraintValidator {
 	 *
 	 * @api
 	 */
-	public function validate($value, Constraint $constraint) {
+	public function validate($value, Constraint $constraint): void {
 		if ($value instanceof Offer && $value->getKind() == Offer::KIND_OFFER && $value->getCategory() != Offer::CATEGORY_JOB) {
             $blocks = $value->getBodyBlocks();
             foreach ($blocks as $block) {

@@ -15,7 +15,7 @@ use Ladb\CoreBundle\Entity\Knowledge\Value\BaseValue;
 
 abstract class AbstractValueType extends AbstractType {
 
-	public function buildForm(FormBuilderInterface $builder, array $options) {
+	public function buildForm(FormBuilderInterface $builder, array $options): void {
 		$builder
 			->add('legend', TextareaType::class)
 			->add('sourceType', ChoiceType::class, array(
@@ -38,7 +38,7 @@ abstract class AbstractValueType extends AbstractType {
 
 	}
 
-	public function configureOptions(OptionsResolver $resolver) {
+	public function configureOptions(OptionsResolver $resolver): void {
 		$resolver->setRequired(array(
 			'choices',
 			'dataConstraints',

@@ -13,7 +13,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 #[AsCommand(name: 'ladb:init', description: 'Reset database')]
 class InitCommand extends Command {
 
-	protected function configure() {
+	protected function configure(): void {
 		$this
 			->setHelp(<<<EOT
 The <info>ladb:init</info> command create the default connections

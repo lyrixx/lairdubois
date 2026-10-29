@@ -35,7 +35,7 @@ class PolyCollectionType extends AbstractType
 	/**
 	 * {@inheritdoc}
 	 */
-	public function buildForm(FormBuilderInterface $builder, array $options)
+	public function buildForm(FormBuilderInterface $builder, array $options): void
 	{
 		$prototypes = $this->buildPrototypes($builder, $options);
 		if ($options['allow_add'] && $options['prototype']) {
@@ -100,7 +100,7 @@ class PolyCollectionType extends AbstractType
 	/**
 	 * {@inheritdoc}
 	 */
-	public function buildView(FormView $view, FormInterface $form, array $options)
+	public function buildView(FormView $view, FormInterface $form, array $options): void
 	{
 		$view->vars['allow_add']    = $options['allow_add'];
 		$view->vars['allow_delete'] = $options['allow_delete'];
@@ -115,7 +115,7 @@ class PolyCollectionType extends AbstractType
 	/**
 	 * {@inheritdoc}
 	 */
-	public function finishView(FormView $view, FormInterface $form, array $options)
+	public function finishView(FormView $view, FormInterface $form, array $options): void
 	{
 		if ($form->getConfig()->hasAttribute('prototypes')) {
 			$multiparts = array_filter(
@@ -134,7 +134,7 @@ class PolyCollectionType extends AbstractType
 	/**
 	 * {@inheritdoc}
 	 */
-	public function configureOptions(OptionsResolver $resolver) {
+	public function configureOptions(OptionsResolver $resolver): void {
 		$optionsNormalizer = function (Options $options, $value) {
 			$value['block_name'] = 'entry';
 

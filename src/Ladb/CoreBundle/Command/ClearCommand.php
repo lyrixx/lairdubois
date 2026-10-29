@@ -13,7 +13,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 #[AsCommand(name: 'ladb:clear', description: 'Clear database')]
 class ClearCommand extends Command {
 
-	protected function configure() {
+	protected function configure(): void {
 		$this
 			->addOption('force', null, InputOption::VALUE_NONE, 'Force removing')
 			->setHelp(<<<EOT

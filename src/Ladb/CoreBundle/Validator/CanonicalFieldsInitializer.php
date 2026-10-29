@@ -12,7 +12,7 @@ use Symfony\Component\Validator\ObjectInitializerInterface;
  */
 final class CanonicalFieldsInitializer implements ObjectInitializerInterface {
 
-	public function initialize($object) {
+	public function initialize($object): void {
 		if ($object instanceof User) {
 			$object->setUsernameCanonical(CanonicalFieldsUpdater::canonicalize($object->getUsername()));
 			$object->setEmailCanonical(CanonicalFieldsUpdater::canonicalize($object->getEmail()));

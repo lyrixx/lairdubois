@@ -15,7 +15,7 @@ class ValidEventValidator extends ConstraintValidator {
 	 *
 	 * @api
 	 */
-	public function validate($value, Constraint $constraint) {
+	public function validate($value, Constraint $constraint): void {
 		if ($value instanceof \Ladb\CoreBundle\Entity\Event\Event) {
 			if ($value->getStartAt() > $value->getEndAt()) {
 				$this->context->buildViolation('La fin de l\'évènement ne peut pas précéder son début.')

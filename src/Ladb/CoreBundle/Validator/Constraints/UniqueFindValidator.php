@@ -26,7 +26,7 @@ class UniqueFindValidator extends ConstraintValidator {
 	 *
 	 * @api
 	 */
-	public function validate($value, Constraint $constraint) {
+	public function validate($value, Constraint $constraint): void {
 		if (!is_null($value) && $value instanceof Find) {
 			$content = $value->getContent();
 			if (!is_null($content) && $content instanceof Link) {

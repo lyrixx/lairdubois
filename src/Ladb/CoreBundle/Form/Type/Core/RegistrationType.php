@@ -15,7 +15,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  */
 final class RegistrationType extends AbstractType {
 
-	public function buildForm(FormBuilderInterface $builder, array $options) {
+	public function buildForm(FormBuilderInterface $builder, array $options): void {
 		$builder
 			->add('email', EmailType::class, array( 'label' => 'form.email', 'translation_domain' => 'FOSUserBundle' ))
 			->add('username', null, array( 'label' => 'form.username', 'translation_domain' => 'FOSUserBundle' ))
@@ -32,7 +32,7 @@ final class RegistrationType extends AbstractType {
 		;
 	}
 
-	public function configureOptions(OptionsResolver $resolver) {
+	public function configureOptions(OptionsResolver $resolver): void {
 		$resolver->setDefaults(array(
 			'data_class'        => User::class,
 			'csrf_token_id'     => 'registration',

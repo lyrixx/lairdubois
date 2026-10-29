@@ -18,7 +18,7 @@ class QuestionType extends AbstractType {
 		$this->om = $om;
 	}
 
-	public function buildForm(FormBuilderInterface $builder, array $options) {
+	public function buildForm(FormBuilderInterface $builder, array $options): void {
 		$builder
 			->add('title')
 			->add('bodyBlocks', PolyCollectionType::class, array(
@@ -42,7 +42,7 @@ class QuestionType extends AbstractType {
 		;
 	}
 
-	public function configureOptions(OptionsResolver $resolver) {
+	public function configureOptions(OptionsResolver $resolver): void {
 		$resolver->setDefaults(array(
 			'data_class' => 'Ladb\CoreBundle\Entity\Qa\Question',
 		));

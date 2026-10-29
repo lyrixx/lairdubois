@@ -15,7 +15,7 @@ class NoMediaLinkValidator extends ConstraintValidator {
 	 *
 	 * @api
 	 */
-	public function validate($value, Constraint $constraint) {
+	public function validate($value, Constraint $constraint): void {
 		if (preg_match("/(?:http(?:s|):\/\/(?:www\.|dev\.|)lairdubois\.(?:fr|com)|[(])\/media\/cache\//i", $value)) {
 			$this->context->addViolation($constraint->message);
 		}

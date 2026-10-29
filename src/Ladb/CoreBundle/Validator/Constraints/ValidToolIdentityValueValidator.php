@@ -16,7 +16,7 @@ class ValidToolIdentityValueValidator extends ConstraintValidator {
 	 *
 	 * @api
 	 */
-	public function validate($value, Constraint $constraint) {
+	public function validate($value, Constraint $constraint): void {
 		if ($value instanceof ToolIdentity) {
 			if ($value->getIsProduct() && empty($value->getProductName())) {
 				$this->context->buildViolation($constraint->message)

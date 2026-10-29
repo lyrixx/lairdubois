@@ -208,7 +208,7 @@ castor qa:phpunit [-- --filter …]
 castor qa:deprecations       # var/deprecations/report.md, et le résumé du job en CI
 castor qa:install            # outils de tools/ (PHPStan, PHPUnit), installés à la volée sinon
 castor qa:e2e [-- --grep …]  # tests E2E (Playwright) : recharge la base du dev, hors qa:all, job E2E en CI
-castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et getDoctrine() des actions → arguments (#16, #177), des utils, managers, listeners et validateurs → constructeur (#118), dépréciations de 4.x (#133), routes, contraintes, `@required` et mapping de Doctrine et Gedmo en attributs (#25), commandes en `#[AsCommand]` (#28), `@Template` et `@Security` de Sensio en attributs natifs (#27)
+castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et getDoctrine() des actions → arguments (#16, #177), des utils, managers, listeners et validateurs → constructeur (#118), dépréciations de 4.x (#133), routes, contraintes, `@required` et mapping de Doctrine et Gedmo en attributs (#25), commandes en `#[AsCommand]` (#28), `@Template` et `@Security` de Sensio en attributs natifs (#27), types de retour natifs de 5.4 et 6.4 (#177, #205)
 ```
 
 - PHPUnit 9.6, dans `tools/phpunit` et pas dans le `composer.json` de l'application : c'est la
@@ -294,6 +294,16 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et get
   `tools/rector`. Elles typent par PHPStan :
   `MakeDispatchFirstArgumentEventRector` ne reconnaît pas le dispatcher d'une propriété sans type
   (`$this->dispatcher` des managers).
+- Types de retour natifs annoncés par le DebugClassLoader (« might add … as a native return type
+  declaration ») : le rapport ne voit que les classes que la suite charge. La liste complète vient du
+  script `patch-type-declarations` d'ErrorHandler en mode rapport, qui parcourt le classmap
+  (`composer dump-autoload -o` avant, `composer dump-autoload` après) et charge `tests/`, donc
+  PHPUnit : `castor builder -- env 'SYMFONY_PATCH_TYPE_DECLARATIONS=deprecations=1&php=8.5' php -d
+  auto_prepend_file=tools/phpunit/vendor/autoload.php
+  vendor/symfony/error-handler/Resources/bin/patch-type-declarations`. Les types s'écrivent par
+  `AddReturnTypeDeclarationRector` (`rector.php`), pas par le script (`force=2`) : il n'ajoute un
+  type que si la signature finit la ligne, et en ajoute à nos propres méthodes d'après leur
+  `@return` (#182).
 
 ## Fixtures
 
