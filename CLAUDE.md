@@ -926,3 +926,10 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   ignore `null`, ce que donne un champ de formulaire vide (`TextType` sans `empty_data`). Une valeur
   validée qui vaudrait `''` (`empty_data: ''`, écrite par le code) serait « trop courte », en plus
   du message de `NotBlank`.
+- `validation.email_validation_mode: html5` (#205), le défaut de Symfony 7 (`loose` disparaît) : il
+  ne vaut que pour les contraintes `Email` sans `mode`, celle de l'inscription (getter `getEmail()`
+  de `User`, groupe `Registration`). Elle refuse maintenant ce que `loose` (`^.+@\S+\.\S+$`)
+  acceptait : accents, espaces, guillemets, `_` ou point final dans le domaine. Les paramètres du
+  compte vérifient l'adresse en `strict` (propriété `$email`, groupe `settings`, egulias) : une
+  adresse de la base qu'`html5` refuse y reste valide (`josé@…`), celles que `strict` refuse
+  (espace, `_` dans le domaine) l'étaient déjà. Rien ne revalide une adresse hors d'un formulaire.

@@ -21,7 +21,8 @@ framework:
         utf8: false
     form:            true
     csrf_protection: true
-    validation:      { enable_attributes: true }
+    # html5, the default of Symfony 7, for the Email constraints without a mode (registration)
+    validation:      { enable_attributes: true, email_validation_mode: html5 }
     trusted_hosts: ['^(dev|www)\.lairdubois\.fr$']
     assets:
         version:    "20230707"
