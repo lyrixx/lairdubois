@@ -12,7 +12,7 @@ use Ladb\CoreBundle\Utils\MessageUtils;
 use Ladb\CoreBundle\Utils\UserUtils;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 

@@ -8,7 +8,7 @@ use Ladb\CoreBundle\Entity\Howto\Article;
 use Ladb\CoreBundle\Entity\Qa\Answer;
 use Ladb\CoreBundle\Model\WatchableChildInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bridge\Twig\Attribute\Template;
 use Ladb\CoreBundle\Entity\Core\Notification;
 use Ladb\CoreBundle\Utils\TypableUtils;

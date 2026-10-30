@@ -23,7 +23,7 @@ use Ladb\CoreBundle\Utils\MemberUtils;
 use Ladb\CoreBundle\Utils\PropertyUtils;
 use Ladb\CoreBundle\Utils\TypableUtils;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bridge\Twig\Attribute\Template;
 use Ladb\CoreBundle\Entity\Core\UserWitness;
 use Ladb\CoreBundle\Entity\Knowledge\School\Testimonial;

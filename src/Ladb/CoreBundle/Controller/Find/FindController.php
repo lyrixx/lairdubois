@@ -7,7 +7,7 @@ use Ladb\CoreBundle\Controller\PublicationControllerTrait;
 use Ladb\CoreBundle\Entity\Core\Member;
 use Ladb\CoreBundle\Utils\LocalisableUtils;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bridge\Twig\Attribute\Template;
 use Ladb\CoreBundle\Form\Type\Find\FindType;
 use Ladb\CoreBundle\Entity\Find\Find;

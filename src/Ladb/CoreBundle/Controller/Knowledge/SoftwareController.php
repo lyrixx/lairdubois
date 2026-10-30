@@ -9,7 +9,7 @@ use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Utils\CollectionnableUtils;
 use Ladb\CoreBundle\Utils\ReviewableUtils;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Ladb\CoreBundle\Form\Type\Knowledge\NewSoftwareType;

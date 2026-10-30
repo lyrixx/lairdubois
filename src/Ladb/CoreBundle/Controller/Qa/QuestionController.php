@@ -10,7 +10,7 @@ use Ladb\CoreBundle\Entity\Core\Tip;
 use Ladb\CoreBundle\Entity\Offer\Offer;
 use Ladb\CoreBundle\Utils\MaybeUtils;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Ladb\CoreBundle\Entity\Qa\Question;

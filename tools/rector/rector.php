@@ -59,9 +59,11 @@ return static function (RectorConfig $rectorConfig): void {
         ])
         // Of the renames of symfony/security-core 5.3 (composer-based set of rector-symfony), the
         // one that the code needs (#177). The #[Template] of SensioFrameworkExtraBundle → that of
-        // symfony/twig-bridge 6.2 (#27), after the @Template annotations become attributes
+        // symfony/twig-bridge 6.2 (#27), after the @Template annotations become attributes. The
+        // Annotation\Route of symfony/routing, an alias deprecated in 7.4 → Attribute\Route (#205)
         ->withConfiguredRule(RenameClassRector::class, [
             'Sensio\\Bundle\\FrameworkExtraBundle\\Configuration\\Template' => 'Symfony\\Bridge\\Twig\\Attribute\\Template',
+            'Symfony\\Component\\Routing\\Annotation\\Route' => 'Symfony\\Component\\Routing\\Attribute\\Route',
             'Symfony\\Component\\Security\\Core\\Encoder\\EncoderFactoryInterface' => 'Symfony\\Component\\PasswordHasher\\Hasher\\PasswordHasherFactoryInterface',
         ])
         // Return types that the DebugClassLoader of Symfony 5.4 announces for our classes (#177),

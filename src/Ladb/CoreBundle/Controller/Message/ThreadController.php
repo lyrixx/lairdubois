@@ -5,7 +5,7 @@ namespace Ladb\CoreBundle\Controller\Message;
 use Ladb\CoreBundle\Entity\Message\MessageMeta;
 use Ladb\CoreBundle\Manager\Core\UserManager;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bridge\Twig\Attribute\Template;
 use Ladb\CoreBundle\Entity\Core\Member;
 use Ladb\CoreBundle\Utils\WebpushNotificationUtils;

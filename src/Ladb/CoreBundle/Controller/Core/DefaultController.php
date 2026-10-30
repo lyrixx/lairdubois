@@ -5,7 +5,7 @@ namespace Ladb\CoreBundle\Controller\Core;
 use Ladb\CoreBundle\Controller\AbstractController;
 use Ladb\CoreBundle\Controller\Wonder\CreationController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 class DefaultController extends AbstractController {
 
