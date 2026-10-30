@@ -68,6 +68,36 @@ final class SettingsTest extends WebTestCase
     }
 
     /**
+     * The settings check the address in the strict mode of the Email constraint, not in html5, the
+     * mode of the registration (#205): an address of the database that html5 refuses stays valid.
+     */
+    public function testEditSettingsKeepsAnEmailRefusedByHtml5(): void
+    {
+        static::getEntityManager()->getConnection()->update('tbl_core_user', ['email' => 'josé@lairdubois.test'], ['username_canonical' => UserFixtures::USER]);
+        $client = static::createClientAs(UserFixtures::USER);
+
+        $this->submitSettings($client, UserFixtures::USER, ['ladb_usersettings[displayname]' => 'Menuisière du dimanche']);
+
+        self::assertSame('/@user', $client->getResponse()->headers->get('Location'));
+        self::assertSame('Menuisière du dimanche', static::findUser(UserFixtures::USER)->getDisplayname());
+    }
+
+    /**
+     * Unchanged by html5 (#205): the strict mode already refused these addresses, accepted at the
+     * registration by the loose mode of Symfony 6.
+     */
+    public function testEditSettingsRefusesAnEmailRefusedByTheStrictMode(): void
+    {
+        static::getEntityManager()->getConnection()->update('tbl_core_user', ['email' => 'nou veau@lairdubois.test'], ['username_canonical' => UserFixtures::USER]);
+        $client = static::createClientAs(UserFixtures::USER);
+
+        $crawler = $this->submitSettings($client, UserFixtures::USER, ['ladb_usersettings[displayname]' => 'Menuisière du dimanche']);
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertSame(["Cette valeur n'est pas une adresse e-mail valide."], static::getFieldErrors($crawler, 'ladb_usersettings[email]'));
+    }
+
+    /**
      * The full name has no NotBlank: empty, it arrives as null, which Length ignores (#177).
      */
     public function testEditSettingsWithEmptyFullname(): void

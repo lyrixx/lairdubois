@@ -4,8 +4,10 @@ namespace Tests\User;
 
 use Ladb\CoreBundle\DataFixtures\UserFixtures;
 use Ladb\CoreBundle\Entity\Core\Registration;
+use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Entity\Message\ThreadMeta;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
+use Symfony\Component\DomCrawler\Crawler;
 use Tests\WebTestCase;
 
 /**
@@ -107,6 +109,56 @@ final class RegistrationTest extends WebTestCase
         self::assertStringContainsString("L'utilisateur a été créé avec succès.", $crawler->filter('.alert-success')->text(null, false));
     }
 
+    /**
+     * @dataProvider provideEmailsAcceptedByHtml5
+     */
+    public function testRegisterWithAnEmailAcceptedByHtml5(string $email): void
+    {
+        $client = static::createClient();
+
+        $this->submitRegistration($client, $email);
+
+        self::assertSame('/salut/confirmed', $client->getResponse()->headers->get('Location'));
+        self::assertSame($email, static::findUser('nouveau')->getEmail());
+    }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function provideEmailsAcceptedByHtml5(): iterable
+    {
+        yield 'dot and plus' => ['prenom.nom+bois@atelier.lairdubois.test'];
+        yield 'apostrophe' => ["o'neill@lairdubois.test"];
+    }
+
+    /**
+     * Accepted by the loose mode of Symfony 6 (/^.+\@\S+\.\S+$/), refused by html5, its default in
+     * Symfony 7 (#205).
+     *
+     * @dataProvider provideEmailsRefusedByHtml5
+     */
+    public function testRegisterWithAnEmailRefusedByHtml5(string $email): void
+    {
+        $client = static::createClient();
+
+        $crawler = $this->submitRegistration($client, $email);
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertSame(["L'adresse e-mail est invalide."], static::getFieldErrors($crawler, 'fos_user_registration_form[email]'));
+        self::assertNull(static::getEntityManager()->getRepository(User::class)->findOneBy(['usernameCanonical' => 'nouveau']));
+    }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function provideEmailsRefusedByHtml5(): iterable
+    {
+        yield 'accent' => ['josé@lairdubois.test'];
+        yield 'space' => ['nou veau@lairdubois.test'];
+        yield 'underscore in the domain' => ['nouveau@lair_dubois.test'];
+        yield 'dot at the end' => ['nouveau@lairdubois.test.'];
+    }
+
     public function testConfirmedPageAnonymous(): void
     {
         $client = static::createClient();
@@ -183,6 +235,18 @@ final class RegistrationTest extends WebTestCase
         $client->request('GET', '/email/check');
 
         self::assertSame('https://lairdubois.test/login', $client->getResponse()->headers->get('Location'));
+    }
+
+    private function submitRegistration(KernelBrowser $client, string $email): Crawler
+    {
+        $crawler = $client->request('GET', '/salut/');
+
+        return $client->submit($crawler->filter('form[action="/salut/"]')->form([
+            'fos_user_registration_form[username]' => 'nouveau',
+            'fos_user_registration_form[email]' => $email,
+            'fos_user_registration_form[plainPassword][first]' => 'Copeaux-de-chene-1',
+            'fos_user_registration_form[plainPassword][second]' => 'Copeaux-de-chene-1',
+        ]));
     }
 
     /**
