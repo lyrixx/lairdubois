@@ -27,11 +27,9 @@
     {{ form_errors(formPictures) }}
     {{ form_widget(formPictures) }}
     <ul id="{{ formSection }}_thumbnails" class="ladb-form-thumbnails">
-        {% apply spaceless %}
-        {% for picture in pictures %}
+        {% for picture in pictures -%}
             {% include '@LadbCore/Core/Picture/_form-thumbnail.part.html.twig' %}
-        {% endfor %}
-        {% endapply %}
+        {%- endfor %}
     </ul>
     <div id="{{ formSection }}_fileupload" {% if pictures|length >= maxPictureCount %}style="display: none;"{% endif %}>
         <div class="progress progress-striped" role="progressbar" style="display: none;">

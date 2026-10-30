@@ -1,15 +1,12 @@
-{% apply spaceless %}
+{# set entities -#}
+{# set noShowMore (facultative) -#}
 
-{# set entities #}
-{# set noShowMore (facultative) #}
+{% set maxResults = maxResults|default(3) -%}
+{% set typePrefix = typePrefix|default('') -%}
+{% set transPrefix = transPrefix|default(type) -%}
+{% set noShowMore = noShowMore|default(false) -%}
+{% set listSorter = listSorter|default('@sort-popular-likes:desc') -%}
 
-{% set maxResults = maxResults|default(3) %}
-{% set typePrefix = typePrefix|default('') %}
-{% set transPrefix = transPrefix|default(type) %}
-{% set noShowMore = noShowMore|default(false) %}
-{% set listSorter = listSorter|default('@sort-popular-likes:desc') %}
-
-{% endapply %}
 ----------
 
 {{ entities|length }} {{ (transPrefix~'.choice.new_'~type~'s')|trans({ '%count%':(entities|length) }) }}
