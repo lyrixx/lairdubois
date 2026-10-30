@@ -20,11 +20,9 @@
 {{ form_errors(formResources) }}
 {{ form_widget(formResources) }}
 <ul id="{{ formSection }}_thumbnails" class="ladb-form-thumbnails">
-    {% apply spaceless %}
-    {% for resource in resources %}
+    {% for resource in resources -%}
         {% include '@LadbCore/Core/Resource/_form-thumbnail.part.html.twig' %}
-    {% endfor %}
-    {% endapply %}
+    {%- endfor %}
 </ul>
 <div id="{{ formSection }}_fileupload" {% if resources|length >= maxResourceCount %}style="display: none;"{% endif %}>
     <div class="progress progress-striped" role="progressbar" style="display: none;">

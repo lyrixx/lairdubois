@@ -6,10 +6,10 @@
 {% set pageContentItemType = 'SoftwareApplication' %}
 {% set pageSectionUrl = url('core_software_list') %}
 {% set pageSectionName = 'knowledge.software.list'|trans %}
-{% if software.description %}
-    {% set pageDescription = software.description|striptags|truncate(200, true, '...') %}
-{% else %}
-    {% set pageDescription = software.name %}
+{% if software.description -%}
+    {% set pageDescription = software.description|striptags|truncate(200, true, '...') -%}
+{% else -%}
+    {% set pageDescription = software.name -%}
 {% endif %}
 
 {% set bodyContainerClasses = 'ladb-margin-top' %}

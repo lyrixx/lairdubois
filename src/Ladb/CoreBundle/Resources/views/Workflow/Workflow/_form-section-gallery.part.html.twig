@@ -11,11 +11,11 @@
 {% set icon = icon|default('workflow') %}
 {% set title = title|default('workflow.workflow.choice.entities'|trans({ '%count%':2 })|capitalize) %}
 
-{% if formWorkflows is not defined %}
-    {% set formWorkflows = form.workflows %}
+{% if formWorkflows is not defined -%}
+    {% set formWorkflows = form.workflows -%}
 {% endif %}
-{% if workflows is not defined %}
-    {% set workflows = form.vars.data.workflows %}
+{% if workflows is not defined -%}
+    {% set workflows = form.vars.data.workflows -%}
 {% endif %}
 
 {% block body %}

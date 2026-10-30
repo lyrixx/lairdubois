@@ -6,8 +6,8 @@
 {% set pageContentItemprop = 'mainEntity' %}
 {% set pageContentItemType = 'Question' %}
 {% set pageTitlePrefix = '[Question]' %}
-{% if question.mainPicture is null %}
-    {% set pageImage = asset('banner-questions-600x376.jpg') %}
+{% if question.mainPicture is null -%}
+    {% set pageImage = asset('banner-questions-600x376.jpg') -%}
 {% endif %}
 {% set pageSectionUrl = url('core_qa_question_list') %}
 {% set pageSectionName = 'qa.question.list'|trans %}

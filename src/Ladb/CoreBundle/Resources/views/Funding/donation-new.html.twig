@@ -46,10 +46,10 @@
                                     <small><em>Aucune donnée bancaire ne transite par le serveur de L'Air du Bois.</em></small>
                                 </p>
                                 {% embed '@LadbCore/Common/_loading-panel.part.html.twig' %}
-                                    {% block inner %}
+                                    {% block inner -%}
                                         <i class="ladb-icon-lock ladb-icon-lg"></i>
-                                        {{ parent() }}
-                                    {% endblock %}
+                                        {{- parent() }}
+                                    {%- endblock %}
                                 {% endembed %}
                             </div>
                         </div>

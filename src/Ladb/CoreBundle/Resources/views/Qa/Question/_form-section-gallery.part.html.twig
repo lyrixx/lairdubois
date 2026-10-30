@@ -12,11 +12,11 @@
 {% set icon = icon|default('question') %}
 {% set title = title|default('qa.question.choice.entities'|trans({ '%count%':2 })|capitalize) %}
 
-{% if formQuestions is not defined %}
-    {% set formQuestions = form.questions %}
+{% if formQuestions is not defined -%}
+    {% set formQuestions = form.questions -%}
 {% endif %}
-{% if questions is not defined %}
-    {% set questions = form.vars.data.questions %}
+{% if questions is not defined -%}
+    {% set questions = form.vars.data.questions -%}
 {% endif %}
 
 {% block body %}

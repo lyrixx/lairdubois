@@ -9,9 +9,9 @@
     $(document).ready(function () {
         var inputField = $("#{{ fieldId }}");
         {% if proposals is defined and proposals is not empty %}
-            inputField.after("{% apply spaceless %}{{ include('@LadbCore/Common/_form-token-proposals.part.html.twig')|escape('js') }}{% endapply %}");
+            inputField.after("{{ include('@LadbCore/Common/_form-token-proposals.part.html.twig')|escape('js') }}");
         {% endif %}
-        inputField.after("{% apply spaceless %}{{ include('@LadbCore/Common/_form-token-input.part.html.twig')|escape('js') }}{% endapply %}");
+        inputField.after("{{ include('@LadbCore/Common/_form-token-input.part.html.twig')|escape('js') }}");
         var inputFieldValue = inputField.val();
         if (inputFieldValue != undefined && inputFieldValue.length > 0) {
             var tokens = inputFieldValue.length > 0 ? inputFieldValue.split(",") : [];

@@ -11,11 +11,11 @@
 {% set icon = icon|default('creation') %}
 {% set title = title|default('wonder.creation.choice.entities'|trans({ '%count%':2 })|capitalize) %}
 
-{% if formCreations is not defined %}
-    {% set formCreations = form.creations %}
+{% if formCreations is not defined -%}
+    {% set formCreations = form.creations -%}
 {% endif %}
-{% if creations is not defined %}
-    {% set creations = form.vars.data.creations %}
+{% if creations is not defined -%}
+    {% set creations = form.vars.data.creations -%}
 {% endif %}
 
 {% block body %}

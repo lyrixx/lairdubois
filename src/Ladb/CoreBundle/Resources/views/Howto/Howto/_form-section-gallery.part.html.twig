@@ -10,11 +10,11 @@
 {% set icon = icon|default('howto') %}
 {% set title = title|default('howto.howto.choice.entities'|trans({ '%count%':2 })|capitalize) %}
 
-{% if formHowtos is not defined %}
-    {% set formHowtos = form.howtos %}
+{% if formHowtos is not defined -%}
+    {% set formHowtos = form.howtos -%}
 {% endif %}
-{% if howtos is not defined %}
-    {% set howtos = form.vars.data.howtos %}
+{% if howtos is not defined -%}
+    {% set howtos = form.vars.data.howtos -%}
 {% endif %}
 
 {% block body %}

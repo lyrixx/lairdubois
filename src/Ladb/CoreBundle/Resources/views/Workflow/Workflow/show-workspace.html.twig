@@ -173,10 +173,10 @@
                 </div>
             </div>
             {% embed '@LadbCore/Common/_loading-panel.part.html.twig' with { 'noHidden':true } %}
-                {% block inner %}
-                    {{ parent() }}
+                {% block inner -%}
+                    {{ parent() -}}
                     <div class="ladb-loading-status">Connexion en cours...</div>
-                {% endblock %}
+                {%- endblock %}
             {% endembed %}
         </div>
         {% include '@LadbCore/Common/Modal/_modal-empty-loading.part.html.twig' with { 'id':'workflow_modal' } %}

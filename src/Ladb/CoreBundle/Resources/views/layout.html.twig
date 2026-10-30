@@ -52,18 +52,19 @@
         {% endblock %}
     {% endembed %}
     {% embed '_bottombar.part.html.twig' %}
-        {% block bottomBarPromotionGraphicNotificationBadge %}
-            {{ parent() }}
-            {% include '@LadbCore/Common/_notification-counter-badge.part.html.twig' with { 'classes':'badge-nav-promotion-graphics' } %}
-        {% endblock %}
+        {% block bottomBarPromotionGraphicNotificationBadge -%}
+            {{ parent() -}}
+            {% apply trim %}{% include '@LadbCore/Common/_notification-counter-badge.part.html.twig' with { 'classes':'badge-nav-promotion-graphics' } %}{% endapply %}
+        {%- endblock %}
+        {# The badges of the blog and the FAQ follow a text: the whitespace before them stays (#205) #}
         {% block bottomBarBlogPostNotificationBadge %}
             {{ parent() }}
-            {% include '@LadbCore/Common/_notification-counter-badge.part.html.twig' with { 'classes':'badge-nav-blog-posts' } %}
-        {% endblock %}
+            {% apply trim(side = 'right') %}{% include '@LadbCore/Common/_notification-counter-badge.part.html.twig' with { 'classes':'badge-nav-blog-posts' } %}{% endapply %}
+        {%- endblock %}
         {% block bottomBarFaqQuestionNotificationBadge %}
             {{ parent() }}
-            {% include '@LadbCore/Common/_notification-counter-badge.part.html.twig' with { 'classes':'badge-nav-faq-questions' } %}
-        {% endblock %}
+            {% apply trim(side = 'right') %}{% include '@LadbCore/Common/_notification-counter-badge.part.html.twig' with { 'classes':'badge-nav-faq-questions' } %}{% endapply %}
+        {%- endblock %}
     {% endembed %}
     {% if is_granted("ROLE_USER") %}
         <div id="ladb_offcanvas_logged_user_nav" class="uk-offcanvas ladb-no-print">

@@ -887,9 +887,27 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   (`@LadbCore/Dir/file.html.twig`, `@FOSUser/…`, `base.html.twig` pour `templates/`), la
   notation de bundle (`LadbCoreBundle:Dir:file.html.twig`, `::base.html.twig`) ne les trouve plus.
   Un service reçoit `Twig\Environment`.
-- Twig reste en 3.27 (`~3.27.1`) : depuis la 3.28 (twigphp/Twig#4292), un template qui en étend
-  un autre affiche les espaces des `{% if %}` qu'il a hors de ses blocs (l'indentation de leurs
-  `{% set %}`), avant le doctype ; Twig 3.27 les retire, comme Twig 2.
+- Twig 3.30 (#205). Depuis la 3.28 (twigphp/Twig#4292), un template qui en étend un autre affiche
+  les espaces des `{% if %}` et `{% for %}` qu'il a hors de ses blocs (l'indentation de leurs
+  `{% set %}`), avant le doctype, là où la 3.27 les retirait comme Twig 2 : les balises qu'ils
+  contiennent finissent par `-%}`. Un nouveau `{% if %}` hors des blocs d'un template enfant fait
+  de même.
+- Plus de `spaceless` (déprécié depuis Twig 3.12, #205) : le contrôle des espaces de Twig le
+  remplace, à rendu identique. `{%- … -%}` sur les balises de Twig, `{# -#}` en fin de ligne entre
+  deux balises HTML, et pas de saut de ligne final quand le `spaceless` entourait tout le fichier.
+  Le `spaceless` ne retirait que les espaces entre `>` et `<`, et ceux des bords : un espace à côté
+  d'un texte restait (`&nbsp;` puis l'indentation de la ligne suivante, un libellé avant
+  `</label>`), et l'indentation de ces lignes fait partie du rendu, à ne pas réindenter. Il
+  compactait aussi ce que rendaient dedans un include, un embed ou un bloc du thème de formulaire,
+  alors que le contrôle des espaces n'agit que sur le texte du template lui-même : un partiel
+  partagé garde ses espaces partout (les 4 espaces en tête de `form_widget_simple` et
+  `form_errors`, la dropzone de `Picture/_form-gallery`). `{% apply trim %}` retire les espaces
+  des bords d'un include sans l'échapper (`_img.part` dans la vignette de Resource), alors que
+  `{{ include(…)|trim }}` l'échappe.
+- Mails : seul `email-layout.html.twig` est compact. Le contenu des mails garde ses espaces entre
+  balises de bloc ; entre deux éléments en ligne (une image dans un lien, deux images, deux
+  `<span>`), le template les retire lui-même. Le HTML des utilisateurs (`raw`) garde les siens :
+  le `spaceless` du layout collait « **gras** *italique* » en « grasitalique ».
 - Twig 3 échappe les templates `*.json.twig` pour JS (`FileExtensionEscapingStrategy`), Twig 2
   pour HTML : ceux qui affichent des valeurs sont dans un `{% autoescape 'html' %}`, le JS du site
   les insère dans la page.

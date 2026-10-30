@@ -10,11 +10,11 @@
 {% set icon = icon|default('provider') %}
 {% set title = title|default('knowledge.provider.choice.entities'|trans({ '%count%':2 })|capitalize) %}
 
-{% if formProviders is not defined %}
-    {% set formProviders = form.providers %}
+{% if formProviders is not defined -%}
+    {% set formProviders = form.providers -%}
 {% endif %}
-{% if providers is not defined %}
-    {% set providers = form.vars.data.providers %}
+{% if providers is not defined -%}
+    {% set providers = form.vars.data.providers -%}
 {% endif %}
 
 {% block body %}

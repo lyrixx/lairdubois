@@ -20,7 +20,7 @@
             acceptedFileTypes: {{ acceptedFileTypes }},
             loadMaxFileSize: {{ loadMaxFileSize }},
             maxFileSize: {{ maxFileSize }},
-            thumnailTemplate: "{% apply spaceless %}{{ include('@LadbCore/Core/Picture/_form-thumbnail.part.html.twig', { 'formSection':formSection, 'editable':editable, 'sortable':sortable } , with_context = false)|escape('js') }}{% endapply %}",
+            thumnailTemplate: "{{ include('@LadbCore/Core/Picture/_form-thumbnail.part.html.twig', { 'formSection':formSection, 'editable':editable, 'sortable':sortable } , with_context = false)|escape('js') }}",
             sortable: {{ sortable ? 'true' : 'false' }}
         });
     };
