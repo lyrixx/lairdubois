@@ -56,13 +56,14 @@
             {{ parent() -}}
             {% apply trim %}{% include '@LadbCore/Common/_notification-counter-badge.part.html.twig' with { 'classes':'badge-nav-promotion-graphics' } %}{% endapply %}
         {%- endblock %}
-        {% block bottomBarBlogPostNotificationBadge -%}
-            {{ parent() -}}
-            {% apply trim %}{% include '@LadbCore/Common/_notification-counter-badge.part.html.twig' with { 'classes':'badge-nav-blog-posts' } %}{% endapply %}
+        {# The badges of the blog and the FAQ follow a text: the whitespace before them stays (#205) #}
+        {% block bottomBarBlogPostNotificationBadge %}
+            {{ parent() }}
+            {% apply trim(side = 'right') %}{% include '@LadbCore/Common/_notification-counter-badge.part.html.twig' with { 'classes':'badge-nav-blog-posts' } %}{% endapply %}
         {%- endblock %}
-        {% block bottomBarFaqQuestionNotificationBadge -%}
-            {{ parent() -}}
-            {% apply trim %}{% include '@LadbCore/Common/_notification-counter-badge.part.html.twig' with { 'classes':'badge-nav-faq-questions' } %}{% endapply %}
+        {% block bottomBarFaqQuestionNotificationBadge %}
+            {{ parent() }}
+            {% apply trim(side = 'right') %}{% include '@LadbCore/Common/_notification-counter-badge.part.html.twig' with { 'classes':'badge-nav-faq-questions' } %}{% endapply %}
         {%- endblock %}
     {% endembed %}
     {% if is_granted("ROLE_USER") %}
