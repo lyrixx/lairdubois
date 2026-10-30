@@ -1,37 +1,34 @@
-{% apply spaceless %}
+{# set pageItemType (facultative) -#}
+{# set pageContentItemprop (facultative) -#}
+{# set pageContentItemType (facultative) -#}
+{# set pageContentNameItemprop (facultative) -#}
+{# set pageContentDescriptionItemprop (facultative) -#}
+{# set pageFeedRoute (facultative) -#}
+{# set noLazyLoad (facultative) -#}
 
-{# set pageItemType (facultative) #}
-{# set pageContentItemprop (facultative) #}
-{# set pageContentItemType (facultative) #}
-{# set pageContentNameItemprop (facultative) #}
-{# set pageContentDescriptionItemprop (facultative) #}
-{# set pageFeedRoute (facultative) #}
-{# set noLazyLoad (facultative) #}
+{% set pageUrl = pageUrl|default(app.request.uri) -%}
+{% set pageType = pageType|default('website') -%}
+{% set pageCard = pageCard|default('summary_large_image') -%}
+{% set pageTitle = pageTitle|default('default.slogan'|trans()) -%}
+{% set pageDescription = pageDescription|default('L\'Air du Bois est une plateforme Open Source de partage collaboratif ouvert à tous les amoureux du travail du bois')|trim -%}
+{% set pageAuthor = pageAuthor|default('L\'Air du Bois') -%}
+{% set pageImage = pageImage|default(asset('banner-600x376.jpg')) -%}
+{% set pageImageWidth = pageImageWidth|default('') -%}
+{% set pageImageHeight = pageImageHeight|default('') -%}
+{% set pageVideo = pageVideo|default('') -%}
+{% set pageVideoWidth = pageVideoWidth|default('') -%}
+{% set pageVideoHeight = pageVideoHeight|default('') -%}
+{% set pageSectionUrl = pageSectionUrl|default('') -%}
+{% set pageSectionName = pageSectionName|default('') -%}
+{% set pageLicenseUrl = pageLicenseUrl|default('') -%}
+{% set pageItemType = pageItemType|default('WebPage') -%}
+{% set pageContentItemprop = pageContentItemprop|default('mainEntity') -%}
+{% set pageContentNameItemprop = pageContentNameItemprop|default('name') -%}
+{% set pageContentDescriptionItemprop = pageContentDescriptionItemprop|default('description') -%}
+{% set pageFeedRoute = pageFeedRoute|default('') -%}
+{% set titleSuffixHidden = titleSuffixHidden|default(false) -%}
+{% set noLazyLoad = noLazyLoad|default(false) -%}
 
-{% set pageUrl = pageUrl|default(app.request.uri) %}
-{% set pageType = pageType|default('website') %}
-{% set pageCard = pageCard|default('summary_large_image') %}
-{% set pageTitle = pageTitle|default('default.slogan'|trans()) %}
-{% set pageDescription = pageDescription|default('L\'Air du Bois est une plateforme Open Source de partage collaboratif ouvert à tous les amoureux du travail du bois')|trim %}
-{% set pageAuthor = pageAuthor|default('L\'Air du Bois') %}
-{% set pageImage = pageImage|default(asset('banner-600x376.jpg')) %}
-{% set pageImageWidth = pageImageWidth|default('') %}
-{% set pageImageHeight = pageImageHeight|default('') %}
-{% set pageVideo = pageVideo|default('') %}
-{% set pageVideoWidth = pageVideoWidth|default('') %}
-{% set pageVideoHeight = pageVideoHeight|default('') %}
-{% set pageSectionUrl = pageSectionUrl|default('') %}
-{% set pageSectionName = pageSectionName|default('') %}
-{% set pageLicenseUrl = pageLicenseUrl|default('') %}
-{% set pageItemType = pageItemType|default('WebPage') %}
-{% set pageContentItemprop = pageContentItemprop|default('mainEntity') %}
-{% set pageContentNameItemprop = pageContentNameItemprop|default('name') %}
-{% set pageContentDescriptionItemprop = pageContentDescriptionItemprop|default('description') %}
-{% set pageFeedRoute = pageFeedRoute|default('') %}
-{% set titleSuffixHidden = titleSuffixHidden|default(false) %}
-{% set noLazyLoad = noLazyLoad|default(false) %}
-
-{% endapply %}
 <!DOCTYPE html>
 <html lang="{{ app.request.locale }}" itemscope itemtype="http://schema.org/{{ pageItemType }}">
     <head prefix="{% block headPrefix %}og: http://ogp.me/ns# fb: http://ogp.me/ns/fb#{% endblock %}">

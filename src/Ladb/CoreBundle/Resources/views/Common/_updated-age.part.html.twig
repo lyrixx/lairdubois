@@ -1,6 +1,3 @@
-{% apply spaceless %}
-
-{# set entity #}
+{# set entity -#}
 
 <span class="ladb-updated-age{% if classes is defined %} {{ classes }}{% endif %}">Mis à jour <time datetime="{{ entity.updatedAt|date('Y-m-d H:i:s') }}">{{ entity.updatedAt|time_diff() }}</time></span>
-{% endapply %}
