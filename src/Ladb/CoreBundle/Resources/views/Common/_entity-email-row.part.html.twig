@@ -6,8 +6,8 @@
 <tr>
     {% if entity.mainPicture is defined %}
         <td height="74" width="74">
-            <a href="{{ ladb_entity_url_action(entity, 'show') }}" style="color: #333;">
-                <img src="{{ (entity.mainPicture is empty ? 'avatar.png' : entity.mainPicture.webPath)|imagine_filter('64x64o') }}" width="64" height="64" style="border: 1px solid #ccc; background-color: #fff; padding: 4px;" alt="{{ entity.title|raw }}">
+            <a href="{{ ladb_entity_url_action(entity, 'show') }}" style="color: #333;">{# -#}
+                <img src="{{ (entity.mainPicture is empty ? 'avatar.png' : entity.mainPicture.webPath)|imagine_filter('64x64o') }}" width="64" height="64" style="border: 1px solid #ccc; background-color: #fff; padding: 4px;" alt="{{ entity.title|raw }}">{# -#}
             </a>
         </td>
     {% endif %}

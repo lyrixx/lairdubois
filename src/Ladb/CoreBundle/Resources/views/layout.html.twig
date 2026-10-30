@@ -52,18 +52,18 @@
         {% endblock %}
     {% endembed %}
     {% embed '_bottombar.part.html.twig' %}
-        {% block bottomBarPromotionGraphicNotificationBadge %}
-            {{ parent() }}
-            {% include '@LadbCore/Common/_notification-counter-badge.part.html.twig' with { 'classes':'badge-nav-promotion-graphics' } %}
-        {% endblock %}
-        {% block bottomBarBlogPostNotificationBadge %}
-            {{ parent() }}
-            {% include '@LadbCore/Common/_notification-counter-badge.part.html.twig' with { 'classes':'badge-nav-blog-posts' } %}
-        {% endblock %}
-        {% block bottomBarFaqQuestionNotificationBadge %}
-            {{ parent() }}
-            {% include '@LadbCore/Common/_notification-counter-badge.part.html.twig' with { 'classes':'badge-nav-faq-questions' } %}
-        {% endblock %}
+        {% block bottomBarPromotionGraphicNotificationBadge -%}
+            {{ parent() -}}
+            {% apply trim %}{% include '@LadbCore/Common/_notification-counter-badge.part.html.twig' with { 'classes':'badge-nav-promotion-graphics' } %}{% endapply %}
+        {%- endblock %}
+        {% block bottomBarBlogPostNotificationBadge -%}
+            {{ parent() -}}
+            {% apply trim %}{% include '@LadbCore/Common/_notification-counter-badge.part.html.twig' with { 'classes':'badge-nav-blog-posts' } %}{% endapply %}
+        {%- endblock %}
+        {% block bottomBarFaqQuestionNotificationBadge -%}
+            {{ parent() -}}
+            {% apply trim %}{% include '@LadbCore/Common/_notification-counter-badge.part.html.twig' with { 'classes':'badge-nav-faq-questions' } %}{% endapply %}
+        {%- endblock %}
     {% endembed %}
     {% if is_granted("ROLE_USER") %}
         <div id="ladb_offcanvas_logged_user_nav" class="uk-offcanvas ladb-no-print">
