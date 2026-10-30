@@ -3,17 +3,17 @@
 {% set entity = book %}
 
 {% set pageTitle = book.title %}
-{% if book.authors %}
-    {% set pageTitle = pageTitle~' '~(pageTitleBy|default('default.of'|trans()))~' '~book.authors %}
+{% if book.authors -%}
+    {% set pageTitle = pageTitle~' '~(pageTitleBy|default('default.of'|trans()))~' '~book.authors -%}
 {% endif %}
 {% set pageContentItemType = 'Book' %}
 {% set pageType = 'book' %}
 {% set pageSectionUrl = url('core_book_list') %}
 {% set pageSectionName = 'knowledge.book.list'|trans %}
-{% if book.summary %}
-    {% set pageDescription = book.summary|striptags|truncate(200, true, '...') %}
-{% else %}
-    {% set pageDescription = book.title %}
+{% if book.summary -%}
+    {% set pageDescription = book.summary|striptags|truncate(200, true, '...') -%}
+{% else -%}
+    {% set pageDescription = book.title -%}
 {% endif %}
 
 {% set bodyContainerClasses = 'ladb-margin-top' %}

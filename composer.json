@@ -68,7 +68,7 @@
         "symfony/twig-bundle": "6.4.*",
         "symfony/validator": "6.4.*",
         "symfony/yaml": "6.4.*",
-        "twig/twig": "~3.27.1",
+        "twig/twig": "^3.30",
         "monolog/monolog": "^3.0",
 
         "doctrine/doctrine-migrations-bundle": "^3.7",

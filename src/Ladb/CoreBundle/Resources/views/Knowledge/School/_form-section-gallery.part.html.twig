@@ -10,11 +10,11 @@
 {% set icon = icon|default('school') %}
 {% set title = title|default('knowledge.school.choice.entities'|trans({ '%count%':2 })|capitalize) %}
 
-{% if formSchools is not defined %}
-    {% set formSchools = form.schools %}
+{% if formSchools is not defined -%}
+    {% set formSchools = form.schools -%}
 {% endif %}
-{% if schools is not defined %}
-    {% set schools = form.vars.data.schools %}
+{% if schools is not defined -%}
+    {% set schools = form.vars.data.schools -%}
 {% endif %}
 
 {% block body %}

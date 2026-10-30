@@ -13,11 +13,11 @@
 {% set icon = icon|default('plan') %}
 {% set title = title|default('wonder.plan.choice.entities'|trans({ '%count%':2 })|capitalize) %}
 
-{% if formPlans is not defined %}
-    {% set formPlans = form.plans %}
+{% if formPlans is not defined -%}
+    {% set formPlans = form.plans -%}
 {% endif %}
-{% if plans is not defined %}
-    {% set plans = form.vars.data.plans %}
+{% if plans is not defined -%}
+    {% set plans = form.vars.data.plans -%}
 {% endif %}
 
 {% block body %}

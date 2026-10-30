@@ -1,37 +1,37 @@
 {% extends '@LadbCore/layout.html.twig' %}
 
-{% if entity is defined %}
-    {% set pageUrl = pageUrl|default(ladb_entity_url_action(entity, 'show')) %}
-    {% set pageType = pageType|default('article') %}
-    {% set pageName = pageName|default(entity.title) %}
-    {% set pageTitle = pageTitle|default(pageName) %}
-    {% if entity.user is defined %}
-        {% set pageTitle = pageTitle~' '~(pageTitleBy|default('default.by'|trans()))~' '~entity.user.displayname %}
-    {% endif %}
-    {% if pageDescription is not defined and entity.bodyExtract is defined and entity.bodyExtract is not empty %}
-        {% set pageDescription = entity.bodyExtract %}
-    {% endif %}
-    {% if entity.user is defined %}
-        {% set pageAuthor = entity.user.displayname %}
-    {% endif %}
-    {% if pageImage is not defined %}
-        {% if entity.pictures is defined and entity.pictures is not empty %}
-            {% set pageImage = [] %}
-            {% for picture in entity.pictures %}
-                {% set pageImage = pageImage|merge([picture.webPath|imagine_filter('470x275o')]) %}
-            {% endfor %}
-            {% set pageImageWidth = '470' %}
-            {% set pageImageHeight = '275' %}
-        {% elseif entity.mainPicture is defined and entity.mainPicture is not null %}
-            {% set pageImage = (entity.mainPicture.webPath|imagine_filter('470x275o')) %}
-            {% set pageImageWidth = '470' %}
-            {% set pageImageHeight = '275' %}
-        {% endif %}
-    {% endif %}
-    {% set pageContentItemType = pageContentItemType|default('CreativeWork') %}
-    {% if entity.license is defined %}
-        {% set pageLicenseUrl = entity.license.contentUrl %}
-    {% endif %}
+{% if entity is defined -%}
+    {% set pageUrl = pageUrl|default(ladb_entity_url_action(entity, 'show')) -%}
+    {% set pageType = pageType|default('article') -%}
+    {% set pageName = pageName|default(entity.title) -%}
+    {% set pageTitle = pageTitle|default(pageName) -%}
+    {% if entity.user is defined -%}
+        {% set pageTitle = pageTitle~' '~(pageTitleBy|default('default.by'|trans()))~' '~entity.user.displayname -%}
+    {% endif -%}
+    {% if pageDescription is not defined and entity.bodyExtract is defined and entity.bodyExtract is not empty -%}
+        {% set pageDescription = entity.bodyExtract -%}
+    {% endif -%}
+    {% if entity.user is defined -%}
+        {% set pageAuthor = entity.user.displayname -%}
+    {% endif -%}
+    {% if pageImage is not defined -%}
+        {% if entity.pictures is defined and entity.pictures is not empty -%}
+            {% set pageImage = [] -%}
+            {% for picture in entity.pictures -%}
+                {% set pageImage = pageImage|merge([picture.webPath|imagine_filter('470x275o')]) -%}
+            {% endfor -%}
+            {% set pageImageWidth = '470' -%}
+            {% set pageImageHeight = '275' -%}
+        {% elseif entity.mainPicture is defined and entity.mainPicture is not null -%}
+            {% set pageImage = (entity.mainPicture.webPath|imagine_filter('470x275o')) -%}
+            {% set pageImageWidth = '470' -%}
+            {% set pageImageHeight = '275' -%}
+        {% endif -%}
+    {% endif -%}
+    {% set pageContentItemType = pageContentItemType|default('CreativeWork') -%}
+    {% if entity.license is defined -%}
+        {% set pageLicenseUrl = entity.license.contentUrl -%}
+    {% endif -%}
 {% endif %}
 
 {% set bodyContainerClasses = 'ladb-margin-top' %}

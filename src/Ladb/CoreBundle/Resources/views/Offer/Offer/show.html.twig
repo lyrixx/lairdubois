@@ -4,18 +4,18 @@
 
 {% set entity = offer %}
 
-{% if offer.isKindOffer %}
-    {% if offer.isCategoryJob %}
-        {% set pageContentItemType = 'JobPosting' %}
-        {% set pageContentNameItemprop = 'title' %}
-        {% set authorItemtype = 'Organization' %}
-        {% set authorItemprop = 'hiringOrganization' %}
-        {% set locationItemprop = 'jobLocation' %}
-    {% else %}
-        {% set pageContentItemType = 'Offer' %}
-        {% set authorItemprop = 'seller' %}
-        {% set locationItemprop = 'areaServed' %}
-    {% endif %}
+{% if offer.isKindOffer -%}
+    {% if offer.isCategoryJob -%}
+        {% set pageContentItemType = 'JobPosting' -%}
+        {% set pageContentNameItemprop = 'title' -%}
+        {% set authorItemtype = 'Organization' -%}
+        {% set authorItemprop = 'hiringOrganization' -%}
+        {% set locationItemprop = 'jobLocation' -%}
+    {% else -%}
+        {% set pageContentItemType = 'Offer' -%}
+        {% set authorItemprop = 'seller' -%}
+        {% set locationItemprop = 'areaServed' -%}
+    {% endif -%}
 {% endif %}
 {% set pageSectionUrl = url('core_offer_list') %}
 {% set pageSectionName = 'offer.offer.list'|trans %}

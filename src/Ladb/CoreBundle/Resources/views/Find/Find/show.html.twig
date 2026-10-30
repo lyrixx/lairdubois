@@ -6,11 +6,11 @@
 
 {% set pageTitleBy = 'trouvé par' %}
 {% set noMicrodataLocation = false %}
-{% if find.kind == constant('Ladb\\CoreBundle\\Entity\\Find\\Find::KIND_VIDEO') or find.kind == constant('Ladb\\CoreBundle\\Entity\\Find\\Find::KIND_GALLERY') %}
-    {% set pageContentItemType = 'CreativeWork' %}
-    {% set noMicrodataLocation = true %}
-{% else %}
-    {% set pageContentItemType = 'WebSite' %}
+{% if find.kind == constant('Ladb\\CoreBundle\\Entity\\Find\\Find::KIND_VIDEO') or find.kind == constant('Ladb\\CoreBundle\\Entity\\Find\\Find::KIND_GALLERY') -%}
+    {% set pageContentItemType = 'CreativeWork' -%}
+    {% set noMicrodataLocation = true -%}
+{% else -%}
+    {% set pageContentItemType = 'WebSite' -%}
 {% endif %}
 {% set pageSectionUrl = url('core_find_list') %}
 {% set pageSectionName = 'find.find.list'|trans %}
