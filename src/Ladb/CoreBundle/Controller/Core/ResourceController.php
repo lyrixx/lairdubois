@@ -2,7 +2,7 @@
 
 namespace Ladb\CoreBundle\Controller\Core;
 
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Ladb\CoreBundle\Controller\AbstractController;
 use Ladb\CoreBundle\Handler\ResourceUploadHandler;
 

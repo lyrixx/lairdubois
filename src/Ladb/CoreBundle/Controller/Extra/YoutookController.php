@@ -4,7 +4,7 @@ namespace Ladb\CoreBundle\Controller\Extra;
 
 use Ladb\CoreBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bridge\Twig\Attribute\Template;
 use Ladb\CoreBundle\Entity\Youtook\Took;
 use Ladb\CoreBundle\Form\Type\Youtook\NewTookType;

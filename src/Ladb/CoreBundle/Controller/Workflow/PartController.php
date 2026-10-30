@@ -2,7 +2,7 @@
 
 namespace Ladb\CoreBundle\Controller\Workflow;
 
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Component\HttpFoundation\Request;
 use Ladb\CoreBundle\Entity\Workflow\Task;

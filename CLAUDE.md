@@ -208,7 +208,7 @@ castor qa:phpunit [-- --filter …]
 castor qa:deprecations       # var/deprecations/report.md, et le résumé du job en CI
 castor qa:install            # outils de tools/ (PHPStan, PHPUnit), installés à la volée sinon
 castor qa:e2e [-- --grep …]  # tests E2E (Playwright) : recharge la base du dev, hors qa:all, job E2E en CI
-castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et getDoctrine() des actions → arguments (#16, #177), des utils, managers, listeners et validateurs → constructeur (#118), dépréciations de 4.x (#133), routes, contraintes, `@required` et mapping de Doctrine et Gedmo en attributs (#25), commandes en `#[AsCommand]` (#28), `@Template` et `@Security` de Sensio en attributs natifs (#27), types de retour natifs de 5.4 et 6.4 (#177, #205), handlers de Messenger en `#[AsMessageHandler]` (#205)
+castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et getDoctrine() des actions → arguments (#16, #177), des utils, managers, listeners et validateurs → constructeur (#118), dépréciations de 4.x (#133), routes, contraintes, `@required` et mapping de Doctrine et Gedmo en attributs (#25), commandes en `#[AsCommand]` (#28), `@Template` et `@Security` de Sensio en attributs natifs (#27), types de retour natifs de 5.4 et 6.4 (#177, #205), handlers de Messenger en `#[AsMessageHandler]` (#205), `Routing\Annotation\Route` en `Routing\Attribute\Route` (#205)
 ```
 
 - PHPUnit 9.6, dans `tools/phpunit` et pas dans le `composer.json` de l'application : c'est la
@@ -287,6 +287,9 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et get
   seconde fait d'un `#[Security]` un `#[IsGranted]` (`SecurityAttributeToIsGrantedAttributeRector`,
   une `Expression` quand ce n'est pas un seul `is_granted()`). Rector écrit ces attributs en nom
   complet et laisse le `use` de Sensio : remplacés à la main.
+- `Routing\Annotation\Route` → `Routing\Attribute\Route` (#205, `RenameClassRector`) : Rector écrit
+  chaque `#[Route]` en nom complet et laisse l'ancien `use`, sans l'utiliser. Les deux remplacés
+  par un script : seul le `use` change.
 - Handlers de Messenger (#205) : `MessageSubscriberInterface` étend `MessageHandlerInterface`, et
   `MessageHandlerInterfaceToAttributeRector` met aussi un `#[AsMessageHandler]` sur la classe d'un
   subscriber, sans `__invoke()` (le container refuse le handler). Rector réimprime la classe dont il

@@ -7,7 +7,7 @@ use Ladb\CoreBundle\Form\Type\Core\ChangePasswordType;
 use Ladb\CoreBundle\Manager\Core\UserManager;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**

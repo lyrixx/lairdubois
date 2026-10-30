@@ -7,7 +7,7 @@ use Ladb\CoreBundle\Entity\Collection\Entry;
 use Ladb\CoreBundle\Utils\CollectionnableUtils;
 use Ladb\CoreBundle\Utils\PaginatorUtils;
 use Ladb\CoreBundle\Utils\TypableUtils;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bridge\Twig\Attribute\Template;
 use Symfony\Component\HttpFoundation\Request;
 use Ladb\CoreBundle\Utils\FieldPreprocessorUtils;

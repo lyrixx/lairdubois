@@ -3,7 +3,7 @@
 namespace Ladb\CoreBundle\Controller\Core;
 
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bridge\Twig\Attribute\Template;
 use Ladb\CoreBundle\Controller\AbstractController;
 use Ladb\CoreBundle\Utils\BlockBodiedUtils;
