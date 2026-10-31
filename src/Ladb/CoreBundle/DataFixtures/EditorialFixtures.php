@@ -7,6 +7,7 @@ use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use Ladb\CoreBundle\Entity\Blog\Post;
 use Ladb\CoreBundle\Entity\Core\Tip;
+use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Entity\Faq\Question;
 use Ladb\CoreBundle\Event\PublicationListener;
 use Ladb\CoreBundle\Manager\Blog\PostManager;
@@ -31,13 +32,13 @@ final class EditorialFixtures extends Fixture implements DependentFixtureInterfa
 		$this->postManager = $postManager;
 	}
 
-	public function getDependencies() {
+	public function getDependencies(): array {
 		return array( UserFixtures::class );
 	}
 
 	public function load(ObjectManager $manager): void {
-		$admin = $this->getReference(UserFixtures::ADMIN);
-		$user = $this->getReference(UserFixtures::USER);
+		$admin = $this->getReference(UserFixtures::ADMIN, User::class);
+		$user = $this->getReference(UserFixtures::USER, User::class);
 
 		$this->factory->actAs($admin);
 

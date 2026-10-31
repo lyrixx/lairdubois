@@ -9,9 +9,14 @@ use Ladb\CoreBundle\Entity\Core\Feedback;
 use Ladb\CoreBundle\Entity\Core\License;
 use Ladb\CoreBundle\Entity\Core\Resource;
 use Ladb\CoreBundle\Entity\Core\User;
+use Ladb\CoreBundle\Entity\Howto\Howto;
+use Ladb\CoreBundle\Entity\Knowledge\Provider;
+use Ladb\CoreBundle\Entity\Knowledge\School;
+use Ladb\CoreBundle\Entity\Qa\Question;
 use Ladb\CoreBundle\Entity\Wonder\Creation;
 use Ladb\CoreBundle\Entity\Wonder\Plan;
 use Ladb\CoreBundle\Entity\Wonder\Workshop;
+use Ladb\CoreBundle\Entity\Workflow\Workflow;
 use Ladb\CoreBundle\Event\PublicationListener;
 use Ladb\CoreBundle\Manager\Wonder\CreationManager;
 use Ladb\CoreBundle\Manager\Wonder\PlanManager;
@@ -52,13 +57,13 @@ final class WonderFixtures extends Fixture implements DependentFixtureInterface 
 		$this->workshopManager = $workshopManager;
 	}
 
-	public function getDependencies() {
+	public function getDependencies(): array {
 		return array( HowtoFixtures::class, KnowledgeFixtures::class, QaFixtures::class, UserFixtures::class, WorkflowFixtures::class );
 	}
 
 	public function load(ObjectManager $manager): void {
-		$user = $this->getReference(UserFixtures::USER);
-		$user2 = $this->getReference(UserFixtures::USER2);
+		$user = $this->getReference(UserFixtures::USER, User::class);
+		$user2 = $this->getReference(UserFixtures::USER2, User::class);
 
 		$this->factory->actAs($user);
 
@@ -131,11 +136,11 @@ final class WonderFixtures extends Fixture implements DependentFixtureInterface 
 			$creation->addHardware($hardware);
 		}
 		$creation->addPlan($plan);
-		$creation->addHowto($this->getReference(HowtoFixtures::HOWTO));
-		$creation->addWorkflow($this->getReference(WorkflowFixtures::WORKFLOW));
-		$creation->addQuestion($this->getReference(QaFixtures::QUESTION));
-		$creation->addProvider($this->getReference(KnowledgeFixtures::PROVIDER));
-		$creation->addSchool($this->getReference(KnowledgeFixtures::SCHOOL));
+		$creation->addHowto($this->getReference(HowtoFixtures::HOWTO, Howto::class));
+		$creation->addWorkflow($this->getReference(WorkflowFixtures::WORKFLOW, Workflow::class));
+		$creation->addQuestion($this->getReference(QaFixtures::QUESTION, Question::class));
+		$creation->addProvider($this->getReference(KnowledgeFixtures::PROVIDER, Provider::class));
+		$creation->addSchool($this->getReference(KnowledgeFixtures::SCHOOL, School::class));
 		$this->factory->preprocess($creation);
 		$creation->setUser($user);
 		$creation->setMainPicture($creation->getPictures()->first());

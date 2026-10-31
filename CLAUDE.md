@@ -373,7 +373,10 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
 - Chaque test tourne dans une transaction annulée à sa fin (`dama/doctrine-test-bundle`, extension
   PHPUnit de `phpunit.xml.dist`), y compris à travers les reboots du kernel entre deux requêtes :
   un test crée, modifie et supprime sans nettoyer derrière lui. Les ids créés par un test ne
-  reviennent pas (l'`AUTO_INCREMENT` d'InnoDB n'est pas annulé).
+  reviennent pas (l'`AUTO_INCREMENT` d'InnoDB n'est pas annulé). L'extension est la nôtre,
+  `Tests\TransactionExtension` : celle de dama 8.3+ ne parle que les événements de PHPUnit 10+.
+  C'est celle de dama 8.2 pour PHPUnit 9, qui garde sa connexion (`StaticDriver`) d'un test à
+  l'autre et ouvre et annule la transaction autour de chacun.
 - Ce qui n'est pas en base n'est pas annulé, `Tests\WebTestCase` s'en charge :
   - les index : quand les tests d'une classe en ont modifié un (publication, suppression…), il est
     rempli à nouveau depuis la base après le dernier (`fos:elastica:populate --index`, une
@@ -747,8 +750,8 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `refresh()` après le premier `flush()`.
 - Doctrine (#177, #178) : ORM 2.20, DBAL 3, DoctrineBundle 2.13 (la dernière pour 5.4),
   `doctrine/persistence` 3.4, qu'exige le DoctrineBridge de 7.4 (la 4 attend DoctrineBundle 3),
-  comme `doctrine/event-manager` 2 et `doctrine/collections` 1.8 (#28 ; la 2 attend
-  `commerceguys/addressing` 1.4). DoctrineBundle ajoute en 7.4 le listener
+  comme `doctrine/event-manager` 2 et `doctrine/collections` 1.8 (#28 ; la 2 vient avec
+  l'ORM 3). DoctrineBundle ajoute en 7.4 le listener
   `IdleConnection\Listener` de DoctrineBridge (`kernel.request`) : il ferme une connexion restée
   inutilisée plus de 10 minutes, ce qui n'arrive pas sous FPM.
   Les proxys sont des lazy ghost objects de `symfony/var-exporter` (`enable_lazy_ghost_objects`,
@@ -757,9 +760,14 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   et son `__serialize()` le charge.
 - Bornes de `composer.json` : `gedmo/doctrine-extensions` `~3.20.1` (depuis la 3.21, Sluggable et
   `Urlizer` passent par `symfony/string` : les slugs et les labels de tags peuvent changer) ;
-  `dama/doctrine-test-bundle` `~8.2.2` (la 8.3 veut PHPUnit 10, que Composer ne voit pas, dans
-  `tools/phpunit`) ; `doctrine/data-fixtures` `^1.8` (la 2.0 impose les types natifs et la classe
-  dans `getReference()`).
+  `dama/doctrine-test-bundle` `~8.4.1` (la 8.4 refuse PHPUnit 9 par un `conflict`, que Composer ne
+  voit pas, dans `tools/phpunit`, et son extension ne se charge pas : la nôtre la remplace ; la 8.5
+  veut PHPUnit 11). `doctrine/data-fixtures` 2 (#178) : `getReference()` demande la classe de la
+  référence.
+- `commerceguys/addressing` 1.4.2 (#178, `doctrine/collections` 2 de l'ORM 3) : l'adresse formatée
+  d'une localisation (`LocalisableUtils`) change pour trois pays, Biélorussie (rue en tête), Irlande
+  (code postal sur sa ligne) et Namibie (la 1.0.9 écrivait un `n` à la place du saut de ligne).
+  Les adresses de la base ne bougent pas, seulement celles qui sont géocodées ensuite.
 - doctrine/migrations 3 lit la table des 1.x et 2.x (`storage.table_storage.table_name:
   migration_versions`) : la sienne par défaut, `doctrine_migration_versions`, lui ferait rejouer
   toutes les migrations de la prod. Le premier `doctrine:migrations:migrate` (ou
@@ -981,3 +989,6 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   compte vérifient l'adresse en `strict` (propriété `$email`, groupe `settings`, egulias) : une
   adresse de la base qu'`html5` refuse y reste valide (`josé@…`), celles que `strict` refuse
   (espace, `_` dans le domaine) l'étaient déjà. Rien ne revalide une adresse hors d'un formulaire.
+  egulias 4 (#178) accepte en `strict` des adresses longues que la 3 refusait, toutes dans les
+  limites de la RFC (partie locale de 64 caractères, label de 63, domaine de 243) ; le reste ne
+  change pas, ni la validation de Mime (`MessageIDValidation`) que passe tout destinataire de mail.

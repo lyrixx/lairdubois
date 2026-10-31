@@ -50,13 +50,13 @@ final class KnowledgeFixtures extends Fixture implements DependentFixtureInterfa
 		$this->watchableUtils = $watchableUtils;
 	}
 
-	public function getDependencies() {
+	public function getDependencies(): array {
 		return array( UserFixtures::class );
 	}
 
 	public function load(ObjectManager $manager): void {
-		$user = $this->getReference(UserFixtures::USER);
-		$user2 = $this->getReference(UserFixtures::USER2);
+		$user = $this->getReference(UserFixtures::USER, User::class);
+		$user2 = $this->getReference(UserFixtures::USER2, User::class);
 
 		$this->factory->actAs($user);
 

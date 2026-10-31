@@ -5,6 +5,7 @@ namespace Ladb\CoreBundle\DataFixtures;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
+use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Entity\Funding\Charge;
 use Ladb\CoreBundle\Entity\Funding\Donation;
 use Ladb\CoreBundle\Entity\Funding\Funding;
@@ -34,12 +35,12 @@ final class FundingFixtures extends Fixture implements DependentFixtureInterface
 		$this->secret = $secret;
 	}
 
-	public function getDependencies() {
+	public function getDependencies(): array {
 		return array( UserFixtures::class );
 	}
 
 	public function load(ObjectManager $manager): void {
-		$user2 = $this->getReference(UserFixtures::USER2);
+		$user2 = $this->getReference(UserFixtures::USER2, User::class);
 
 		// The previous month, as FundingController::chargeCreateAction
 

@@ -5,6 +5,7 @@ namespace Ladb\CoreBundle\DataFixtures;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
+use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Entity\Offer\Offer;
 use Ladb\CoreBundle\Manager\Offer\OfferManager;
 
@@ -24,13 +25,13 @@ final class OfferFixtures extends Fixture implements DependentFixtureInterface {
 		$this->offerManager = $offerManager;
 	}
 
-	public function getDependencies() {
+	public function getDependencies(): array {
 		return array( UserFixtures::class );
 	}
 
 	public function load(ObjectManager $manager): void {
-		$user = $this->getReference(UserFixtures::USER);
-		$user2 = $this->getReference(UserFixtures::USER2);
+		$user = $this->getReference(UserFixtures::USER, User::class);
+		$user2 = $this->getReference(UserFixtures::USER2, User::class);
 
 		// As OfferController::createAction, with the price formatted by OfferType
 

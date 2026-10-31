@@ -6,6 +6,7 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use Ladb\CoreBundle\Entity\Core\License;
+use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Entity\Howto\Article;
 use Ladb\CoreBundle\Entity\Howto\Howto;
 use Ladb\CoreBundle\Manager\Howto\HowtoManager;
@@ -28,13 +29,13 @@ final class HowtoFixtures extends Fixture implements DependentFixtureInterface {
 		$this->howtoManager = $howtoManager;
 	}
 
-	public function getDependencies() {
+	public function getDependencies(): array {
 		return array( UserFixtures::class );
 	}
 
 	public function load(ObjectManager $manager): void {
-		$user = $this->getReference(UserFixtures::USER);
-		$user2 = $this->getReference(UserFixtures::USER2);
+		$user = $this->getReference(UserFixtures::USER, User::class);
+		$user2 = $this->getReference(UserFixtures::USER2, User::class);
 
 		// As HowtoController::createAction
 

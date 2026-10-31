@@ -6,6 +6,10 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use Ladb\CoreBundle\Entity\Collection\Collection;
+use Ladb\CoreBundle\Entity\Core\User;
+use Ladb\CoreBundle\Entity\Howto\Howto;
+use Ladb\CoreBundle\Entity\Wonder\Creation;
+use Ladb\CoreBundle\Entity\Wonder\Plan;
 use Ladb\CoreBundle\Manager\Collection\CollectionManager;
 use Ladb\CoreBundle\Utils\CollectionnableUtils;
 
@@ -28,13 +32,13 @@ final class CollectionFixtures extends Fixture implements DependentFixtureInterf
 		$this->factory = $factory;
 	}
 
-	public function getDependencies() {
+	public function getDependencies(): array {
 		return array( HowtoFixtures::class, UserFixtures::class, WonderFixtures::class );
 	}
 
 	public function load(ObjectManager $manager): void {
-		$user = $this->getReference(UserFixtures::USER);
-		$user2 = $this->getReference(UserFixtures::USER2);
+		$user = $this->getReference(UserFixtures::USER, User::class);
+		$user2 = $this->getReference(UserFixtures::USER2, User::class);
 
 		// As CollectionController::createAction
 
@@ -52,8 +56,8 @@ final class CollectionFixtures extends Fixture implements DependentFixtureInterf
 		$user->getMeta()->incrementPrivateCollectionCount();
 		$this->factory->create($collection);
 
-		foreach (array( WonderFixtures::CREATION, WonderFixtures::PLAN, HowtoFixtures::HOWTO ) as $reference) {
-			$this->collectionnableUtils->createEntry($this->getReference($reference), $collection);
+		foreach (array( WonderFixtures::CREATION => Creation::class, WonderFixtures::PLAN => Plan::class, HowtoFixtures::HOWTO => Howto::class ) as $reference => $class) {
+			$this->collectionnableUtils->createEntry($this->getReference($reference, $class), $collection);
 		}
 		$manager->flush();
 

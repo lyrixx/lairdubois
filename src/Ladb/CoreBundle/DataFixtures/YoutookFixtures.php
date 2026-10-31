@@ -5,6 +5,7 @@ namespace Ladb\CoreBundle\DataFixtures;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
+use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Entity\Youtook\Took;
 use Ladb\CoreBundle\Utils\VideoHostingUtils;
 
@@ -21,12 +22,12 @@ final class YoutookFixtures extends Fixture implements DependentFixtureInterface
 		$this->factory = $factory;
 	}
 
-	public function getDependencies() {
+	public function getDependencies(): array {
 		return array( UserFixtures::class );
 	}
 
 	public function load(ObjectManager $manager): void {
-		$user = $this->getReference(UserFixtures::USER);
+		$user = $this->getReference(UserFixtures::USER, User::class);
 
 		// As YoutookController::createAction
 
