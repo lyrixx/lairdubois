@@ -68,7 +68,8 @@ class OfferType extends AbstractType {
 				'expanded' => true,
 			))
 			->add('rawPrice')
-			->add('currency', CurrencyType::class)
+			// All the currencies, as before Symfony 7.4, whose CurrencyType only lists the ones in use today
+			->add('currency', CurrencyType::class, array( 'active_at' => null, 'legal_tender' => null ))
 			->add('priceSuffix', TextType::class)
 			->add('location')
 			->add($builder

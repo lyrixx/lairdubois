@@ -57,9 +57,11 @@ framework:
     fragments:       ~
     # Off, as they were with symfony/symfony: without it, FrameworkBundle turns on each of these
     # features when its component is installed. Lock: the site makes its own lock factory
-    # (AbstractController::createLock()). PropertyInfo comes with PropertyAccess, WebLink with Mercure
+    # (AbstractController::createLock()). PropertyInfo comes with PropertyAccess, TypeInfo with
+    # PropertyInfo (7.x), WebLink with Mercure
     lock:            false
     property_info:   false
+    type_info:       false
     web_link:        false
     # Only for the Mercure hub (mercure.hub.default), the one service that gets "http_client":
     # without it, the hub creates a client without timeout, and an edition of a workflow would wait
@@ -80,7 +82,8 @@ framework:
     # webpush_notification". The connection is given as options: in the DSN, the password and the
     # vhost ("/") would have to be URL-encoded. A message whose handler fails is retried 3 times
     # (after 1, 2 and 4 seconds, by the exchange "delays" and its "delay_*" queues), an email 5
-    # times, then removed with a critical log.
+    # times, then removed with a critical log. Each delay is 10% more or less, at random (the jitter
+    # of Symfony 7.1)
     messenger:
         buses:
             messenger.bus.default:
