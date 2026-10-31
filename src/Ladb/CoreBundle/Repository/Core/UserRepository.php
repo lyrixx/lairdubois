@@ -3,6 +3,7 @@
 namespace Ladb\CoreBundle\Repository\Core;
 
 use Doctrine\DBAL\ArrayParameterType;
+use Doctrine\DBAL\ParameterType;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Ladb\CoreBundle\Entity\Core\Picture;
 use Ladb\CoreBundle\Entity\Core\User;
@@ -76,9 +77,9 @@ class UserRepository extends AbstractEntityRepository implements UserLoaderInter
 					continue;
 				}
 
-				$sql = 'SELECT 1 FROM '.$metadata->getTableName().' WHERE '.$mapping['joinColumns'][0]['name'].' = ?';
+				$sql = 'SELECT 1 FROM '.$metadata->getTableName().' WHERE '.$mapping['joinColumns'][0]->name.' = ?';
 				$parameters = array( $user->getId() );
-				$types = array( \PDO::PARAM_INT );
+				$types = array( ParameterType::INTEGER );
 				if ($metadata->getName() === Picture::class && count($removedPictureIds) > 0) {
 					$sql .= ' AND id NOT IN (?)';
 					$parameters[] = $removedPictureIds;

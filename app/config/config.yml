@@ -163,20 +163,24 @@ doctrine:
         dbname:   "%database_name%"
         user:     "%database_user%"
         password: "%database_password%"
+        server_version: "%database_server_version%"
         charset:  UTF8
-        # The sessions table (PdoSessionHandler) is out of the mapping: doctrine:schema:update --complete
-        # would drop it
+        # The defaults of DBAL 3, gone in DBAL 4: a new table has the collation of the existing ones,
+        # not the one of the database
+        default_table_options:
+            charset: UTF8
+            collation: UTF8_unicode_ci
+            engine: InnoDB
+        # The sessions table (PdoSessionHandler) is out of the mapping: doctrine:schema:update, always
+        # complete in ORM 3, would drop it
         schema_filter: ~^(?!sessions$)~
+        types:
+            # The array type of DBAL 3, removed in DBAL 4: User::$roles, Collection::$entryTypeCounters,
+            # LogEntry::$data of Gedmo
+            array: Ladb\CoreBundle\Doctrine\Type\ArrayType
 
     orm:
-        auto_generate_proxy_classes: "%kernel.debug%"
-        # Proxies are lazy ghost objects of symfony/var-exporter, the only kind in ORM 3
-        enable_lazy_ghost_objects: true
         auto_mapping: true
-        report_fields_where_declared: true
-        # No action gets an entity as an argument
-        controller_resolver:
-            auto_mapping: false
         mappings:
             gedmo_loggable:
                 type: attribute

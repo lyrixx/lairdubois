@@ -9,7 +9,6 @@
 
 namespace Ladb\CoreBundle\Form\EventListener;
 
-use Doctrine\Common\Util\ClassUtils;
 use Symfony\Component\Form\Exception\UnexpectedTypeException;
 use Symfony\Component\Form\Extension\Core\EventListener\ResizeFormListener;
 use Symfony\Component\Form\FormEvent;
@@ -96,8 +95,8 @@ class PolyCollectionResizeFormListener extends ResizeFormListener
      */
     protected function getTypeForObject($object)
     {
+        // A lazy entity has its own class (native lazy objects of PHP 8.4, ORM 3), not a proxy one
         $class = get_class($object);
-        $class = ClassUtils::getRealClass($class);
 
         if (array_key_exists($class, $this->classMap)) {
             return $this->classMap[$class];
