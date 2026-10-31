@@ -45,6 +45,14 @@ class PolyCollectionResizeFormListener extends ResizeFormListener
     protected $typeFieldName;
 
     /**
+     * Read by the methods below: the ResizeFormListener of Symfony 7 keeps its own private
+     */
+    protected $type;
+    protected $options;
+    protected $allowAdd;
+    protected $allowDelete;
+
+    /**
      * @param array<FormInterface> $prototypes
      * @param array $options
      * @param bool $allowAdd
@@ -72,6 +80,11 @@ class PolyCollectionResizeFormListener extends ResizeFormListener
         }
 
         parent::__construct($defaultType, $options, $allowAdd, $allowDelete);
+
+        $this->type = $defaultType;
+        $this->options = $options;
+        $this->allowAdd = $allowAdd;
+        $this->allowDelete = $allowDelete;
     }
 
     /**

@@ -51,6 +51,9 @@ framework:
         # Updated every second, the last use date of the metadata would make each request write it
         # back; every 2 minutes, a request that changes nothing else (/@me/counters.json) does not.
         metadata_update_threshold: 120
+        # The default of Symfony 6 (none since 7.0): without it, the session.gc_probability of the
+        # php.ini of Debian (0) leaves the expired sessions in their table
+        gc_probability: 1
     fragments:       ~
     # Off, as they were with symfony/symfony: without it, FrameworkBundle turns on each of these
     # features when its component is installed. Lock: the site makes its own lock factory

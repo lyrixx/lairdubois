@@ -633,7 +633,10 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `sessions`. Depuis Symfony 4.4, `sess_lifetime` porte la date d'expiration, trop grande pour
   l'ancien `MEDIUMINT` (500 sur toute page qui écrit la session) :
   `docs/database/schema-sessions.sql` passe aussi une table plus ancienne en `INTEGER UNSIGNED`, et
-  `castor app:db:schema` le rejoue.
+  `castor app:db:schema` le rejoue. Les sessions expirées sont supprimées par le ramasse-miettes de
+  PHP (`gc()` du handler, une fois sur `gc_divisor`) : `gc_probability: 1` dans `config.yml`, la
+  valeur que Symfony donnait jusqu'en 6.4, que la 7.0 ne donne plus, et que le php.ini de Debian
+  (images, et sans doute la prod) met à 0 : sans elle, la table grandirait sans fin (#28).
 - Le FPM affiche les erreurs natives de PHP (`display_errors` du php.ini des images), la prod non.
   La 4.4 les coupait (#128) : son Routing ne connaissait pas le message de PCRE2 10.43+ (PHP 8.5)
   pour un lookbehind, et chaque construction du cache du routeur par une requête donnait quelque
@@ -931,7 +934,7 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   et le `ReaderPass` de StofDoctrineExtensionsBundle donne aux listeners de Gedmo son
   `AttributeReader`. Une annotation oubliée (`@Assert`, `@ORM`, `@Route`…) est ignorée sans rien
   dire.
-- symfony/monolog-bundle 3.10 (#177) passe au container les niveaux des handlers tels qu'écrits
+- symfony/monolog-bundle 3.11 (#177, #28) passe au container les niveaux des handlers tels qu'écrits
   (`notice`, que Monolog convertit) et le `action_level` du `fingers_crossed` en
   `ErrorLevelActivationStrategy` : mêmes niveaux et mêmes fichiers que la 3.6.
 - Depuis Symfony 6 (`framework.form.legacy_error_messages`, sans effet), une valeur qu'un type de
