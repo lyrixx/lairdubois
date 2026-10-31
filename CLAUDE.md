@@ -748,16 +748,33 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
 - Les managers (`publish()`…) parcourent les collections inverses (créations d'un plan…), qui ne sont
   initialisées que sur une entité chargée depuis la base : `FixtureFactory::create()` fait un
   `refresh()` après le premier `flush()`.
-- Doctrine (#177, #178) : ORM 2.20, DBAL 3, DoctrineBundle 2.13 (la dernière pour 5.4),
-  `doctrine/persistence` 3.4, qu'exige le DoctrineBridge de 7.4 (la 4 attend DoctrineBundle 3),
-  comme `doctrine/event-manager` 2 et `doctrine/collections` 1.8 (#28 ; la 2 vient avec
-  l'ORM 3). DoctrineBundle ajoute en 7.4 le listener
+- Doctrine (#177, #178) : ORM 3.7, DBAL 4.5, DoctrineBundle 3.3, `doctrine/persistence` 4.2,
+  `doctrine/collections` 2 (gedmo 3.20 refuse la 3) et `doctrine/lexer` 3. `doctrine/common` est
+  parti, et `ClassUtils` avec lui. DoctrineBundle ajoute depuis la 7.4 le listener
   `IdleConnection\Listener` de DoctrineBridge (`kernel.request`) : il ferme une connexion restée
   inutilisée plus de 10 minutes, ce qui n'arrive pas sous FPM.
-  Les proxys sont des lazy ghost objects de `symfony/var-exporter` (`enable_lazy_ghost_objects`,
-  les seuls de l'ORM 3) : même nom de classe (`Proxies\__CG__\…`, que `ClassUtils::getRealClass()`
-  retire), mais un proxy se charge au premier accès à une propriété, plus à l'appel d'une méthode,
-  et son `__serialize()` le charge.
+  Les proxys sont les lazy objects natifs de PHP 8.4, que DoctrineBundle 3 ne permet plus de
+  couper : une entité pas encore chargée a la classe de l'entité, pas celle d'un proxy
+  (`get_class()` suffit). Elle se charge au premier accès à une de ses propriétés (l'identifiant
+  excepté), pas à l'appel d'une méthode, et son `__serialize()` la charge.
+- DBAL 4 refuse un type de paramètre de PDO (`\PDO::PARAM_INT`) : `ParameterType::INTEGER`,
+  `ArrayParameterType::INTEGER`.
+- `doctrine:database:create` (#178) lit la plateforme avant de créer la base, et DBAL 4 se connecte
+  à la base pour connaître la version du serveur (DBAL 3 réessayait sans elle) : sur une base qui
+  n'existe pas, « Unknown database ». Le paramètre `database_server_version` (`server_version` de
+  `config.yml`) donne la version sans connexion : `10.11.19-MariaDB` dans Docker
+  (`DATABASE_SERVER_VERSION`, la version de l'image ; avec « MariaDB » dedans, sinon DBAL la prend
+  pour MySQL), `null` dans `parameters.yml.dist` (détection, comme en prod). Même plateforme dans
+  les deux cas (`MariaDB1010Platform`).
+- DBAL 4 n'a plus les options de table par défaut de DBAL 3 : `default_table_options` de
+  `config.yml` les remet (`UTF8`, `UTF8_unicode_ci`, InnoDB), sinon une nouvelle table prendrait la
+  collation de la base (`utf8mb3_general_ci`), pas celle des tables de la prod. Sur une base neuve
+  (`castor app:db:fixtures`, la CI), deux différences de forme avec la prod, sans effet : un booléen
+  est un `TINYINT` (`tinyint(4)`, `tinyint(1)` en prod) et les colonnes des associations héritées
+  d'une mapped superclass viennent après les autres (113 tables).
+- `Doctrine\ORM\Tools\Pagination\Paginator` est déprécié par une docblock de l'ORM 3.7, pour l'ORM 4
+  (`OffsetPaginator`), sans dépréciation à l'exécution : ses 91 usages sont dans la baseline de
+  PHPStan.
 - Bornes de `composer.json` : `gedmo/doctrine-extensions` `~3.20.1` (depuis la 3.21, Sluggable et
   `Urlizer` passent par `symfony/string` : les slugs et les labels de tags peuvent changer) ;
   `dama/doctrine-test-bundle` `~8.4.1` (la 8.4 refuse PHPUnit 9 par un `conflict`, que Composer ne
@@ -777,26 +794,50 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   entre le schéma de la base et celui qu'elle décrit que si elle touche à `$schema` (un objet lazy
   de `symfony/var-exporter` depuis la 3.6, `proxy-manager-lts` avant) : la 3.5 rejouait l'`ALTER`
   de `Version20261028235655`, qui n'a que des `addSql()`.
+- Migrations et DBAL 4 (#178) : `AbstractPlatform::getName()` n'existe plus, les migrations de ce
+  fork testent `instanceof AbstractMySQLPlatform`. Les 51 migrations de Boris (avant 2026)
+  l'appellent encore dans `up()` et `down()` : elles ne tournent plus. La prod les a toutes jouées,
+  et elles ne tournaient déjà pas sur une base vide (elles modifient des tables que
+  `schema:update` avait créées). PHPStan ne les lit pas (`paths` de `phpstan.neon`). Une migration
+  qui ne fait que des `ALTER TABLE` a `isTransactional()` à `false` : MariaDB valide la
+  transaction à chaque DDL, et doctrine/migrations le déprécie.
+- `migration_versions` ne va pas dans le `schema_filter` : doctrine/migrations cherche sa table dans
+  la liste filtrée (`tablesExist()`), et la recréerait.
 - DBAL 3 déclare une colonne `json` en `JSON` sur MariaDB (`LONGTEXT … utf8mb4_bin CHECK
   (json_valid(…))`) et voit celle de DBAL 2, un `LONGTEXT`, comme différente
   (`declarationMismatch`) : `Version20261028235655` convertit
   `tbl_webpush_user_subscription.subscription`.
-- `use_savepoints: true` en test (`config_test.yml`) : dama 8 l'exige, sa transaction contient
-  celles des flush. Le site n'imbrique jamais de transaction.
+- DBAL 4 (#178) n'écrit plus les commentaires `(DC2Type:…)` et ne s'en sert plus pour reconnaître un
+  type : `Version20261031093745` les retire (trois `array`, deux `simple_array`, un `json`), des
+  `ALTER` qui ne changent que les métadonnées sur MariaDB 10.11 (`ALGORITHM=INSTANT`). Le type
+  `array` (`serialize()` de PHP dans un `LONGTEXT`), retiré de DBAL 4, est le nôtre, sous le même
+  nom (`Doctrine\Type\ArrayType`, copie de celui de DBAL 3, `types` de `config.yml`) :
+  `User::$roles`, `Collection::$entryTypeCounters` et `data` du `LogEntry` de Gedmo.
+- En test, les transactions des flush, dans celle de dama, sont des savepoints, les seules
+  transactions imbriquées de DBAL 4 (`use_savepoints` n'existe plus). Le site n'imbrique jamais de
+  transaction.
 - Les attributs de l'ORM ont un constructeur typé : un tableau ne prend pas une valeur seule
   (`cascade: ['persist']`, pas `cascade: 'persist'`), ce que DocParser acceptait avant l'ORM 2.20.
 - Depuis l'ORM 2.16, un flush ordonne ses INSERT entité par entité (persist et clés étrangères), plus
   classe par classe : les lignes de classes différentes créées ensemble (blocs texte et galerie
   d'un contenu, valeurs d'une fiche de la xylothèque, avatar et bannière d'un compte) prennent leurs
-  ids dans un autre ordre, fixtures comprises. Les contenus d'id 1 ne bougent pas.
-- `doctrine:schema:update --complete` (#178) : sans l'option, un avertissement de l'ORM 2.20 et
-  la dépréciation `SchemaDiff::toSaveSql` de DBAL 3. Il supprime les tables hors mapping, sauf
+  ids dans un autre ordre, fixtures comprises. Les contenus d'id 1 ne bougent pas. L'ORM 3 garde
+  cet ordre (mêmes INSERT, mêmes ids, fixtures identiques) ; seul celui des UPDATE d'un même flush
+  change.
+- Les ex aequo d'un `ORDER BY` (tags proposés de même score, activités de la même seconde, images de
+  même `sortIndex`) sortent dans l'ordre de MariaDB, qui peut changer d'un passage de la suite à
+  l'autre selon ce qui a tourné avant : avec l'ORM 3, le SQL est le même, mais l'ordre de 218
+  réponses sur 4 717 a changé (#178).
+- `doctrine:schema:update` (#178) est toujours complet en ORM 3 (`--complete` ne fait plus rien,
+  avec une dépréciation et un avertissement à l'écran) : il supprime les tables hors mapping, sauf
   celles que cachent le `schema_filter` (`sessions`) et le `SchemaFilterListener` de
-  DoctrineMigrationsBundle (`migration_versions`), qui ne s'active que pour une commande de premier
-  niveau. `ladb:init` lance `schema:update` sans l'option, en commande imbriquée : avec elle, il
-  supprimerait `migration_versions` sur la prod. Il garde la dépréciation jusqu'à l'ORM 3, où
-  `schema:update` est toujours complet (#178). `doctrine:query:sql` est déprécié, `dbal:run-sql`
-  le remplace.
+  DoctrineMigrationsBundle (`migration_versions`). Celui-ci ne s'active qu'en voyant la commande
+  démarrer (`console.command`) : `ladb:init` la lance par `Application::doRun()`, qui envoie les
+  événements de la console à la commande imbriquée et rend ensuite à `ladb:init` ses gestionnaires
+  de signaux, pas par `find()->run()`, qui supprimerait `migration_versions` sur la prod.
+  `CommandTest::testInitKeepsTheTablesOutOfTheMapping` le vérifie sur une base qui a les deux
+  tables, hors de la transaction de dama. `doctrine:query:sql` est déprécié, `dbal:run-sql` le
+  remplace.
 - Symfony Mailer (#19) : `MailerUtils` envoie des `Email`, que Mailer passe au bus de Messenger ;
   `SendEmailMessage` va dans la file `mailer` de RabbitMQ, et son worker (`messenger:consume
   mailer`) les envoie. Un envoi en échec (SMTP injoignable) est rejoué 5 fois, après 1, 3, 9, 27 et
@@ -856,8 +897,9 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   créerait puis supprimerait une table pour vérifier qu'elle est dans la même base : MariaDB
   valide la transaction sur ce DDL, celle de dama disparaît, et PHPUnit s'arrête (« There is no
   active transaction », `ladb:init`). Le `schema_filter` de `config.yml` (#178) la cache aux
-  commandes de schéma : `schema:update --complete` (`castor app:db:schema`, doc d'installation) ne
-  la supprime pas, et `migrations:diff` ne propose plus de la supprimer.
+  commandes de schéma : `schema:update` (`castor app:db:schema`, doc d'installation) ne la supprime
+  pas, et `migrations:diff` ne propose plus de la supprimer. Vérifié avec DBAL 4 et DoctrineBundle
+  3, qui garde l'id du listener.
 - Les sessions ouvertes en 3.4 et 4.4 ont des objets `Security\Core\Role\Role` dans leur token :
   Symfony 5.4, 6.4 et 7.4 gardent une classe `Role` pour les relire (vide depuis 6.4, « Allows
   migrating session payloads from v4 »), et elles restent connectées (`LoginTest`, avec un token

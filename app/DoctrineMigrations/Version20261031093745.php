@@ -13,6 +13,13 @@ final class Version20261031093745 extends AbstractMigration
         return 'Mapping of doctrine/dbal 4: no more (DC2Type:…) comments on the array, simple_array and json columns.';
     }
 
+    // MariaDB commits before and after each ALTER TABLE: a transaction around them would be
+    // committed already when doctrine/migrations commits it
+    public function isTransactional() : bool
+    {
+        return false;
+    }
+
     public function up(Schema $schema) : void
     {
         $this->abortIf(!$this->connection->getDatabasePlatform() instanceof AbstractMySQLPlatform, 'Migration can only be executed safely on \'mysql\'.');

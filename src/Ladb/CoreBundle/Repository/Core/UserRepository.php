@@ -77,7 +77,7 @@ class UserRepository extends AbstractEntityRepository implements UserLoaderInter
 					continue;
 				}
 
-				$sql = 'SELECT 1 FROM '.$metadata->getTableName().' WHERE '.$mapping['joinColumns'][0]['name'].' = ?';
+				$sql = 'SELECT 1 FROM '.$metadata->getTableName().' WHERE '.$mapping['joinColumns'][0]->name.' = ?';
 				$parameters = array( $user->getId() );
 				$types = array( ParameterType::INTEGER );
 				if ($metadata->getName() === Picture::class && count($removedPictureIds) > 0) {
