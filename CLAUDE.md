@@ -793,15 +793,15 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `SendEmailMessage` va dans la file `mailer` de RabbitMQ, et son worker (`messenger:consume
   mailer`) les envoie. Un envoi en échec (SMTP injoignable) est rejoué 5 fois, après 1, 3, 9, 27 et
   81 minutes à 10 % près (le `jitter` de Messenger 7.1), puis le message est supprimé (log
-  critical). Quand RabbitMQ ne répond pas,
-  `MailerUtils` attrape la `TransportException` de Messenger, journalise un warning et envoie le
-  mail en direct, dans la requête ou la commande (`TransportInterface` de Mailer, le transport de
-  `mailer_dsn`) : le spool fichier de Swiftmailer ne tombait jamais. Les messages de la file sont
-  sérialisés en PHP (`PhpSerializer`) : la vider avant un saut de Symfony, par précaution (un
-  message de chaque file mis par la 6.4 est lu et traité par la 7.4, #28). Un seul paramètre,
-  `mailer_dsn` (`framework.mailer.dsn`). Mailer lance STARTTLS dès que le serveur SMTP l'annonce et
-  vérifie son certificat, ce que Swiftmailer ne faisait pas sans `encryption` : `?verify_peer=0`
-  pour un Postfix au certificat autosigné (l'option `auto_tls` n'arrive qu'en 7.1).
+  critical). Quand RabbitMQ ne répond pas, `MailerUtils` attrape la `TransportException` de
+  Messenger, journalise un warning et envoie le mail en direct, dans la requête ou la commande
+  (`TransportInterface` de Mailer, le transport de `mailer_dsn`) : le spool fichier de Swiftmailer
+  ne tombait jamais. Les messages de la file sont sérialisés en PHP (`PhpSerializer`) : la vider
+  avant un saut de Symfony, par précaution (un message de chaque file mis par la 6.4 est lu et
+  traité par la 7.4, #28). Un seul paramètre, `mailer_dsn` (`framework.mailer.dsn`). Mailer lance
+  STARTTLS dès que le serveur SMTP l'annonce et vérifie son certificat, ce que Swiftmailer ne
+  faisait pas sans `encryption` : `?verify_peer=0` pour un Postfix au certificat autosigné (l'option
+  `auto_tls` n'arrive qu'en 7.1).
 - `Event\DkimSignedMessageListener` signe chaque mail avec la clé DKIM de la prod
   (`keys/private.pem`, hors git, `relaxed/relaxed`) quand le transport l'envoie (`MessageEvent` pas
   `isQueued()`, dans le worker), pas quand Mailer le met sur le bus : le message en file reste un
@@ -819,20 +819,22 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   la dernière connexion). Le namespace
   `@FOSUser` est un chemin Twig de `config.yml` (`templates/bundles/FOSUserBundle/`), les traductions
   utilisées sont dans les domaines `FOSUserBundle` et `validators` du bundle.
-- Symfony en composants séparés (#26), en 7.4 depuis #28 : plus de `symfony/symfony`, que
-  Symfony 7 refuse. `composer.json` exige en `7.4.*` les bundles (framework, security, twig ; debug et web-profiler
-  en dev) et les composants dont le site se sert lui-même : les `use` de `src/`, `app/`, `tests/`
-  et `bin/`, et ce que la config demande (`yaml`, `translation`, `asset`, `http-client`,
-  `expression-language` pour `@Security`). En dev, ceux des tests (`browser-kit`, `css-selector`,
-  `dom-crawler`, `finder`) et `stopwatch` (services de debug et timeline du profiler, comme le
-  `profiler-pack` de Symfony). Le reste vient des dépendances. Celles qui acceptent aussi la 8.x
-  (`cache`, `clock`, `process`, `property-info`, `string`, `twig-bridge`, `type-info`,
-  `var-dumper`, `var-exporter`, `web-link`) sont bornées par le `conflict` de `composer.json`, à
-  monter avec les composants. Les contrats sont en 3.x, séparés (`service-contracts`…).
+- Symfony en composants séparés (#26), en 7.4 depuis #28 : plus de `symfony/symfony`, que Symfony 7
+  refuse. `composer.json` exige en `7.4.*` les bundles (framework, security, twig ; debug et
+  web-profiler en dev) et les composants dont le site se sert lui-même : les `use` de `src/`,
+  `app/`, `tests/` et `bin/`, et ce que la config demande (`yaml`, `translation`, `asset`,
+  `http-client`, `expression-language` pour `@Security`). En dev, ceux des tests (`browser-kit`,
+  `css-selector`, `dom-crawler`, `finder`) et `stopwatch` (services de debug et timeline du
+  profiler, comme le `profiler-pack` de Symfony). Le reste vient des dépendances. Celles qui
+  acceptent aussi la 8.x (`cache`, `clock`, `process`, `property-info`, `string`, `twig-bridge`,
+  `type-info`, `var-dumper`, `var-exporter`, `web-link`) sont bornées par le `conflict` de
+  `composer.json`, à monter avec les composants. Les contrats sont en 3.x, séparés
+  (`service-contracts`…).
 - Sans `symfony/symfony` (sa classe `FullStack`), FrameworkBundle active d'office chaque fonction
   dont le composant est installé : `lock`, `property_info`, `type_info` (que tire `property-info`
-  7.x) et `web_link`, que tirent des dépendances, sont coupés dans `config.yml`, comme avant. Un paquet ajouté peut en allumer une
-  autre : comparer `debug:container` et `debug:config` avant et après.
+  7.x) et `web_link`, que tirent des dépendances, sont coupés dans `config.yml`, comme avant. Un
+  paquet ajouté peut en allumer une autre : comparer `debug:container` et `debug:config` avant et
+  après.
 - Services lazy (l'entity manager de DoctrineBundle) : depuis la 6.4, Symfony fait ses proxys
   (`symfony/var-exporter`, `EntityManagerGhost…` dans le container), plus de
   `symfony/proxy-manager-bridge` (déprécié en 6.3). `Registry::reset()` (le worker,
@@ -961,9 +963,10 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   pas) sur un champ en erreur. `CurrencyType` ne liste plus que les devises en cours
   (`active_at`, `legal_tender` de 7.4) : les annonces et les prix des fiches gardent toutes les
   devises (`null` aux deux).
-- Le `ResizeFormListener` de Symfony 7 garde ses propriétés privées : `PolyCollectionResizeFormListener`
-  (blocs des contenus) a ses copies (#28). Son `preSetData()` remplace celui du parent, déprécié
-  en 7.2 au profit de `postSetData()` : une dépréciation par formulaire, pour le milestone 7.
+- Le `ResizeFormListener` de Symfony 7 garde ses propriétés privées :
+  `PolyCollectionResizeFormListener` (blocs des contenus) a ses copies (#28). Son `preSetData()`
+  remplace celui du parent, déprécié en 7.2 au profit de `postSetData()` : une dépréciation par
+  formulaire, pour le milestone 7.
 - DomCrawler 7.4 sous PHP 8.4+ lit les réponses des tests avec le parseur HTML5 natif
   (`Dom\HTMLDocument`) au lieu de libxml et de masterminds/html5 : aucun sélecteur des tests n'a
   changé (#28).
