@@ -739,10 +739,230 @@ parameters:
 			path: src/Ladb/CoreBundle/Model/SpotlightableInterface.php
 
 		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Blog/PostRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Blog/PostRepository.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Repository/Collection/CollectionRepository.php
+
+		-
 			message: '#^Deprecated in PHP 8\.4\: Parameter \#2 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
 			identifier: parameter.implicitlyNullable
 			count: 1
 			path: src/Ladb/CoreBundle/Repository/Collection/CollectionRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Repository/Collection/CollectionRepository.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Collection/EntryRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Collection/EntryRepository.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Repository/Core/FollowerRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Repository/Core/FollowerRepository.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Core/JoinRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Core/JoinRepository.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Core/LikeRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Core/LikeRepository.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Repository/Core/MemberInvitationRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Repository/Core/MemberInvitationRepository.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Repository/Core/MemberRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Repository/Core/MemberRepository.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Repository/Core/MemberRequestRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Repository/Core/MemberRequestRepository.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Core/NotificationRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Core/NotificationRepository.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Core/SpotlightRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Core/SpotlightRepository.php
 
 		-
 			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
@@ -751,10 +971,300 @@ parameters:
 			path: src/Ladb/CoreBundle/Repository/Core/TipRepository.php
 
 		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Repository/Core/UserRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Repository/Core/UserRepository.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Core/WatchRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Core/WatchRepository.php
+
+		-
 			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
 			identifier: parameter.implicitlyNullable
 			count: 1
 			path: src/Ladb/CoreBundle/Repository/Event/EventRepository.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Faq/QuestionRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Faq/QuestionRepository.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Repository/Find/FindRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Repository/Find/FindRepository.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Repository/Funding/DonationRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Repository/Funding/DonationRepository.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 9
+			path: src/Ladb/CoreBundle/Repository/Howto/HowtoRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 9
+			path: src/Ladb/CoreBundle/Repository/Howto/HowtoRepository.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Knowledge/BookRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Knowledge/BookRepository.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 3
+			path: src/Ladb/CoreBundle/Repository/Knowledge/ProviderRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 3
+			path: src/Ladb/CoreBundle/Repository/Knowledge/ProviderRepository.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 4
+			path: src/Ladb/CoreBundle/Repository/Knowledge/SchoolRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 4
+			path: src/Ladb/CoreBundle/Repository/Knowledge/SchoolRepository.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Knowledge/SoftwareRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Knowledge/SoftwareRepository.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Knowledge/ToolRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Knowledge/ToolRepository.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Knowledge/Wood/TextureRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Knowledge/Wood/TextureRepository.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Knowledge/WoodRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Knowledge/WoodRepository.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Message/ThreadRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Message/ThreadRepository.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Repository/Offer/OfferRepository.php
 
 		-
 			message: '#^Deprecated in PHP 8\.4\: Parameter \#2 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
@@ -763,10 +1273,200 @@ parameters:
 			path: src/Ladb/CoreBundle/Repository/Offer/OfferRepository.php
 
 		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Repository/Offer/OfferRepository.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Opencutlist/AccessRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Opencutlist/AccessRepository.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Promotion/GraphicRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Promotion/GraphicRepository.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Qa/AnswerRepository.php
+
+		-
 			message: '#^Caught class Ladb\\CoreBundle\\Repository\\Qa\\NonUniqueResultException not found\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/Ladb/CoreBundle/Repository/Qa/AnswerRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 1
+			path: src/Ladb/CoreBundle/Repository/Qa/AnswerRepository.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 5
+			path: src/Ladb/CoreBundle/Repository/Qa/QuestionRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 5
+			path: src/Ladb/CoreBundle/Repository/Qa/QuestionRepository.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 10
+			path: src/Ladb/CoreBundle/Repository/Wonder/CreationRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 10
+			path: src/Ladb/CoreBundle/Repository/Wonder/CreationRepository.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 10
+			path: src/Ladb/CoreBundle/Repository/Wonder/PlanRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 10
+			path: src/Ladb/CoreBundle/Repository/Wonder/PlanRepository.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 5
+			path: src/Ladb/CoreBundle/Repository/Wonder/WorkshopRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 5
+			path: src/Ladb/CoreBundle/Repository/Wonder/WorkshopRepository.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 8
+			path: src/Ladb/CoreBundle/Repository/Workflow/WorkflowRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 8
+			path: src/Ladb/CoreBundle/Repository/Workflow/WorkflowRepository.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Repository/Youtook/TookRepository.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class Doctrine\\ORM\\Tools\\Pagination\\Paginator\:
+				This class is no longer needed by the ORM and will be removed in 4\.0\.
+				            Use \{@see OffsetPaginator\} instead\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Repository/Youtook/TookRepository.php
 
 		-
 			message: '#^Deprecated in PHP 8\.4\: Parameter \#4 \$publisherUser \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
