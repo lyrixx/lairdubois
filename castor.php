@@ -97,7 +97,7 @@ function db_schema(): void
     io()->title('Updating the database schema');
 
     docker_compose_run(['bin/console', 'doctrine:database:create', '--if-not-exists']);
-    docker_compose_run(['bin/console', 'doctrine:schema:update', '--force', '--complete']);
+    docker_compose_run(['bin/console', 'doctrine:schema:update', '--force']);
     // The sessions live in the database (PdoSessionHandler), in a table Doctrine does not know
     docker_compose_run(['bin/console', 'dbal:run-sql', '--', file_get_contents(variable('root_dir') . '/docs/database/schema-sessions.sql')]);
 }

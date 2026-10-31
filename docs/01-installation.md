@@ -440,6 +440,8 @@ value   = k=rsa; p=[PUBLIC KEY HERE]
 
 ### Create the database
 
+Set `database_server_version` in `app/config/parameters.yml` first (the result of `SELECT VERSION();`, like `10.11.19-MariaDB`): without it, Doctrine connects to the database to find its version, and fails as long as it does not exist.
+
 ``` bash
     $ ladb doctrine:database:create
 ```
@@ -447,7 +449,7 @@ value   = k=rsa; p=[PUBLIC KEY HERE]
 ### Build the schema (tables, etc ...)
 
 ``` bash
-    $ ladb doctrine:schema:update --force --complete
+    $ ladb doctrine:schema:update --force
 ```
 
 ### Build session table

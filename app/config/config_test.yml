@@ -50,11 +50,10 @@ parameters:
 # Their own database and indexes, loaded with the fixtures (castor -c test app:db:fixtures): the
 # tests do not overwrite the data of the dev environment. Each test runs in a transaction rolled
 # back at its end (dama/doctrine-test-bundle), whose flushes are then nested transactions: savepoints,
-# which dama/doctrine-test-bundle 8 requires (the site itself never nests a transaction).
+# the only kind of DBAL 4 (the site itself never nests a transaction).
 doctrine:
     dbal:
         dbname: "%database_name%_test"
-        use_savepoints: true
 
 services:
     # Public only for the doubles that the tests read from the container

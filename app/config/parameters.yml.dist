@@ -6,6 +6,9 @@ parameters:
     database_user:                  YOUR_DATABASE_USER
     database_password:              YOUR_DATABASE_PASSWORD
     database_path:                  null
+    # The version of the database server ("10.11.19-MariaDB"), so that Doctrine knows its platform
+    # without connecting (doctrine:database:create, before the database exists); null: it connects
+    database_server_version:        null
 
     mailer_dsn:                     smtp://localhost:25
 

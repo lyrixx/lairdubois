@@ -6,6 +6,9 @@ x-templates:
     parameters_environment: &parameters_environment
         DATABASE_HOST: mariadb
         DATABASE_PASSWORD: app
+        # The version of the server of the service "mariadb" (SELECT VERSION()): "MariaDB" in it, or
+        # Doctrine would take it for MySQL
+        DATABASE_SERVER_VERSION: 10.11.19-MariaDB
         DATABASE_USER: root
         ELASTICSEARCH_HOST: elasticsearch
         # The SMTP of Mailpit (service "mailpit")

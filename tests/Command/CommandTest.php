@@ -2,9 +2,14 @@
 
 namespace Tests\Command;
 
+use DAMA\DoctrineTestBundle\Doctrine\DBAL\StaticDriver;
 use Ladb\CoreBundle\DataFixtures\UserFixtures;
 use Ladb\CoreBundle\Entity\Wonder\Creation;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Component\Console\ConsoleEvents;
+use Symfony\Component\Console\Event\ConsoleSignalEvent;
+use Symfony\Component\Console\Input\StringInput;
+use Symfony\Component\Console\Output\BufferedOutput;
 use Tests\WebTestCase;
 
 /**
@@ -152,6 +157,77 @@ final class CommandTest extends WebTestCase
         self::assertStringContainsString('Nothing to update', $output);
     }
 
+    /**
+     * In ORM 3, doctrine:schema:update is always complete: it would drop the tables out of the
+     * mapping, migration_versions on the production server. ladb:init runs it through the
+     * application, with the events of the console, so that the SchemaFilterListener of
+     * DoctrineMigrationsBundle hides migration_versions, as for doctrine:schema:update itself
+     * (castor app:db:schema, docs/01-installation.md); the schema_filter of config.yml hides
+     * sessions. On a plain connection, out of the transaction of the test, which a DDL statement
+     * would commit.
+     */
+    public function testInitKeepsTheTablesOutOfTheMapping(): void
+    {
+        $keepStaticConnections = StaticDriver::isKeepStaticConnections();
+        StaticDriver::setKeepStaticConnections(false);
+        $createdMigrationVersions = false;
+        try {
+            static::bootKernel();
+            if (!self::tableExists('migration_versions')) {
+                [$exitCode, $output] = static::runCommand('doctrine:migrations:sync-metadata-storage');
+                self::assertSame(0, $exitCode, $output);
+                $createdMigrationVersions = true;
+            }
+            self::assertTrue(self::tableExists('migration_versions'));
+            self::assertTrue(self::tableExists('sessions'));
+
+            [$exitCode, $output] = static::runCommand('doctrine:schema:update --dump-sql');
+            self::assertSame(0, $exitCode, $output);
+            self::assertStringContainsString('Nothing to update', $output);
+
+            // With the signal handlers of the console, which static::runCommand() leaves out: once
+            // the nested command is over, the rest of ladb:init runs with its own handlers
+            $application = new Application(static::bootKernel());
+            $application->setAutoExit(false);
+            $application->setCatchExceptions(false);
+            $signaledCommands = [];
+            static::getContainer()->get('event_dispatcher')->addListener(ConsoleEvents::SIGNAL, static function (ConsoleSignalEvent $event) use (&$signaledCommands): void {
+                $signaledCommands[] = $event->getCommand()->getName();
+                $event->abortExit();
+            });
+            $output = new class extends BufferedOutput {
+                public ?\Closure $onInitComplete = null;
+
+                protected function doWrite(string $message, bool $newline): void
+                {
+                    if (null !== $this->onInitComplete && str_contains($message, 'Ladb init complete')) {
+                        ($this->onInitComplete)();
+                    }
+                    parent::doWrite($message, $newline);
+                }
+            };
+            $output->onInitComplete = static function (): void {
+                posix_kill(getmypid(), \SIGUSR1);
+                pcntl_signal_dispatch();
+            };
+            $exitCode = $application->run(new StringInput('ladb:init'), $output);
+            $output = $output->fetch();
+
+            self::assertSame(0, $exitCode, $output);
+            self::assertMatchesRegularExpression('/Nothing to update.*Ladb init complete/s', $output);
+            self::assertSame(['ladb:init'], $signaledCommands);
+            self::assertTrue(self::tableExists('migration_versions'));
+            self::assertTrue(self::tableExists('sessions'));
+        } finally {
+            if ($createdMigrationVersions) {
+                static::bootKernel();
+                static::getContainer()->get('doctrine.dbal.default_connection')->executeStatement('DROP TABLE IF EXISTS migration_versions');
+            }
+            static::ensureKernelShutdown();
+            StaticDriver::setKeepStaticConnections($keepStaticConnections);
+        }
+    }
+
     public function testChangeOwner(): void
     {
         [$exitCode, $output] = static::runCommand('ladb:change:owner --target-username='.UserFixtures::USER2.' --entity-type='.Creation::TYPE.' --entity-id=1 --force');
@@ -159,6 +235,15 @@ final class CommandTest extends WebTestCase
         self::assertSame(0, $exitCode, $output);
         static::getEntityManager()->clear();
         self::assertSame(UserFixtures::USER2, static::getEntityManager()->find(Creation::class, 1)->getUser()->getUsername());
+    }
+
+    /**
+     * Whether the database of the booted kernel has the table, which the schema filters do not hide
+     * from information_schema.
+     */
+    private static function tableExists(string $table): bool
+    {
+        return 1 === (int) static::getContainer()->get('doctrine.dbal.default_connection')->fetchOne('SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?', [$table]);
     }
 
     /**

@@ -30,14 +30,16 @@ EOT
 	protected function execute(InputInterface $input, OutputInterface $output): int {
 		// Run doctrine:schema:update --force
 
-		$command = $this->getApplication()->find('doctrine:schema:update');
 		$arguments = array(
 			'command' => 'doctrine:schema:update',
 			'--force' => true
 		);
 
 		$updateInput = new ArrayInput($arguments);
-		$returnCode = $command->run($updateInput, $output);
+		// Through the application, with the events of the console: the SchemaFilterListener of
+		// DoctrineMigrationsBundle hides migration_versions from doctrine:schema:update, always
+		// complete in ORM 3, only when it sees the command start
+		$returnCode = $this->getApplication()->doRun($updateInput, $output);
 
 		if ($returnCode) {
 			return $returnCode;
