@@ -13,7 +13,8 @@ class PriceValueType extends AbstractValueType {
 		parent::buildForm($builder, $options);
 		$builder
 			->add('rawPrice')
-			->add('currency', \Symfony\Component\Form\Extension\Core\Type\CurrencyType::class)
+			// All the currencies, as before Symfony 7.4, whose CurrencyType only lists the ones in use today
+			->add('currency', \Symfony\Component\Form\Extension\Core\Type\CurrencyType::class, array( 'active_at' => null, 'legal_tender' => null ))
 		;
 
 		$builder->addEventListener(

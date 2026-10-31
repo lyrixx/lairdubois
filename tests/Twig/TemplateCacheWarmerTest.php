@@ -16,6 +16,9 @@ final class TemplateCacheWarmerTest extends WebTestCase
     private const UNCOMPILABLE = [
         '@email/zurb_2/notification/body.html.twig', // inky_to_html, twig/inky-extra
         '@email/zurb_2/notification/content_markdown.html.twig', // markdown_to_html, twig/markdown-extra
+        // Not a template: a script of WebProfilerBundle 7.4 that its workflow panel includes with source()
+        '@WebProfiler/Script/Mermaid/mermaid-flowchart-v2.min.js',
+        '@!WebProfiler/Script/Mermaid/mermaid-flowchart-v2.min.js',
     ];
 
     /**

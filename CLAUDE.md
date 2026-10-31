@@ -214,7 +214,7 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et get
 - PHPUnit 9.6, dans `tools/phpunit` et pas dans le `composer.json` de l'application : c'est la
   dernière version qui marche avec `Tests\DeprecationCollector` (`TestResult` et `ErrorHandler`
   de PHPUnit, supprimés en 10). `symfony/phpunit-bridge`, qui n'est pas un des composants en
-  `6.4.*` de `composer.json`, est en 8.1 : il ne dépend d'aucun composant de Symfony, n'exige que
+  `7.4.*` de `composer.json`, est en 8.1 : il ne dépend d'aucun composant de Symfony, n'exige que
   PHP 8.1 et marche encore avec PHPUnit 9.6, rien à y changer aux sauts de version. Le collecteur ne
   l'appelle plus : il construit lui-même le gestionnaire d'erreurs de PHPUnit du test en cours,
   comme le `getPhpUnitErrorHandler()` du bridge, privé depuis 4.4.
@@ -577,8 +577,9 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `eonasdan/bootstrap-datetimepicker`) : toutes ses versions tirent `kriswallsmith/assetic` 1.x,
   qui refuse `symfony/process` 4. Il reste à `false` dans `allow-plugins` : sinon, sur une copie
   où il est encore installé, `composer install` s'arrête avant de le retirer.
-- Le bundle `symfony/reprise` exige Symfony `^7.4` et PHP 8.4 : avant le saut en 7.4, seul le côté
-  JS (Vite et le plugin npm `@symfony/reprise`) est utilisable. Ce plugin demande Node 22.18 ou plus.
+- Le bundle `symfony/reprise` exige Symfony `^7.4` et PHP 8.4 : installable depuis le saut en 7.4
+  (#28), il n'est pas encore là (#29) ; seul le côté JS (Vite et le plugin npm `@symfony/reprise`)
+  sert. Ce plugin demande Node 22.18 ou plus.
 - Sans `web/build/manifest.json`, `asset(…, 'build')` lève une exception : toute page répond 500.
   Après un `git pull` qui touche aux assets, `castor app:assets:build`.
 - Les scripts du site sont écrits pour la portée globale (`var` et `function` en tête de fichier,
@@ -649,6 +650,9 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `TwigErrorRenderer` ne rend que le HTML (`@Twig/Exception/error.html.twig`) ; les routes au
   `_format` json (`.json`, `.geojson`) gardent leur erreur en JSON par `RequestFormatErrorRenderer`
   (`@Twig/Exception/error.json.twig`). En debug, la page d'exception de Symfony, en HTML.
+  Depuis la 7.x, `error_renderer` choisit le HTML ou le texte selon `kernel.runtime_mode` : HTML
+  sous FPM et dans `WebTestCase` (`APP_RUNTIME_MODE=web=1`), texte pour un kernel lancé en CLI
+  par un script.
 - Les comptes de la prod ont le hash de FOSUserBundle (sha512, 5000 itérations, base64, sel du
   compte) : ils doivent continuer à se connecter sans reset, d'un bout à l'autre de la migration.
   `security.yml` le garde en `migrate_from` du hasher `native` (`auto` l'ignore, en 4.4 comme en
@@ -742,7 +746,11 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   initialisées que sur une entité chargée depuis la base : `FixtureFactory::create()` fait un
   `refresh()` après le premier `flush()`.
 - Doctrine (#177, #178) : ORM 2.20, DBAL 3, DoctrineBundle 2.13 (la dernière pour 5.4),
-  `doctrine/persistence` 3.4, qu'exige le DoctrineBridge de 7.4 (la 4 attend DoctrineBundle 3).
+  `doctrine/persistence` 3.4, qu'exige le DoctrineBridge de 7.4 (la 4 attend DoctrineBundle 3),
+  comme `doctrine/event-manager` 2 et `doctrine/collections` 1.8 (#28 ; la 2 attend
+  `commerceguys/addressing` 1.4). DoctrineBundle ajoute en 7.4 le listener
+  `IdleConnection\Listener` de DoctrineBridge (`kernel.request`) : il ferme une connexion restée
+  inutilisée plus de 10 minutes, ce qui n'arrive pas sous FPM.
   Les proxys sont des lazy ghost objects de `symfony/var-exporter` (`enable_lazy_ghost_objects`,
   les seuls de l'ORM 3) : même nom de classe (`Proxies\__CG__\…`, que `ClassUtils::getRealClass()`
   retire), mais un proxy se charge au premier accès à une propriété, plus à l'appel d'une méthode,
@@ -784,14 +792,16 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
 - Symfony Mailer (#19) : `MailerUtils` envoie des `Email`, que Mailer passe au bus de Messenger ;
   `SendEmailMessage` va dans la file `mailer` de RabbitMQ, et son worker (`messenger:consume
   mailer`) les envoie. Un envoi en échec (SMTP injoignable) est rejoué 5 fois, après 1, 3, 9, 27 et
-  81 minutes, puis le message est supprimé (log critical). Quand RabbitMQ ne répond pas,
-  `MailerUtils` attrape la `TransportException` de Messenger, journalise un warning et envoie le
-  mail en direct, dans la requête ou la commande (`TransportInterface` de Mailer, le transport de
-  `mailer_dsn`) : le spool fichier de Swiftmailer ne tombait jamais. Les messages de la file sont
-  sérialisés en PHP (`PhpSerializer`) : la vider avant un saut de Symfony. Un seul paramètre,
-  `mailer_dsn` (`framework.mailer.dsn`). Mailer lance STARTTLS dès que le serveur SMTP l'annonce et
-  vérifie son certificat, ce que Swiftmailer ne faisait pas sans `encryption` : `?verify_peer=0`
-  pour un Postfix au certificat autosigné (l'option `auto_tls` n'arrive qu'en 7.1).
+  81 minutes à 10 % près (le `jitter` de Messenger 7.1), puis le message est supprimé (log
+  critical). Quand RabbitMQ ne répond pas, `MailerUtils` attrape la `TransportException` de
+  Messenger, journalise un warning et envoie le mail en direct, dans la requête ou la commande
+  (`TransportInterface` de Mailer, le transport de `mailer_dsn`) : le spool fichier de Swiftmailer
+  ne tombait jamais. Les messages de la file sont sérialisés en PHP (`PhpSerializer`) : la vider
+  avant un saut de Symfony, par précaution (un message de chaque file mis par la 6.4 est lu et
+  traité par la 7.4, #28). Un seul paramètre, `mailer_dsn` (`framework.mailer.dsn`). Mailer lance
+  STARTTLS dès que le serveur SMTP l'annonce et vérifie son certificat, ce que Swiftmailer ne
+  faisait pas sans `encryption` : `?verify_peer=0` pour un Postfix au certificat autosigné (l'option
+  `auto_tls` n'arrive qu'en 7.1).
 - `Event\DkimSignedMessageListener` signe chaque mail avec la clé DKIM de la prod
   (`keys/private.pem`, hors git, `relaxed/relaxed`) quand le transport l'envoie (`MessageEvent` pas
   `isQueued()`, dans le worker), pas quand Mailer le met sur le bus : le message en file reste un
@@ -809,21 +819,23 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   la dernière connexion). Le namespace
   `@FOSUser` est un chemin Twig de `config.yml` (`templates/bundles/FOSUserBundle/`), les traductions
   utilisées sont dans les domaines `FOSUserBundle` et `validators` du bundle.
-- Symfony 6.4 en composants séparés (#26) : plus de `symfony/symfony`, que Symfony 7 refuse.
-  `composer.json` exige en `6.4.*` les bundles (framework, security, twig ; debug et web-profiler
-  en dev) et les composants dont le site se sert lui-même : les `use` de `src/`, `app/`, `tests/`
-  et `bin/`, et ce que la config demande (`yaml`, `translation`, `asset`, `http-client`,
-  `expression-language` pour `@Security`). En dev, ceux des tests (`browser-kit`, `css-selector`,
-  `dom-crawler`, `finder`) et `stopwatch` (services de debug et timeline du profiler, comme le
-  `profiler-pack` de Symfony). Le reste vient des dépendances. Celles qui acceptent aussi la 7.x
-  (`cache`, `clock`, `process`, `property-info`, `string`, `twig-bridge`, `var-dumper`,
-  `var-exporter`, `web-link`) sont bornées par le `conflict` de `composer.json`, à monter avec
-  les composants. Les contrats sont en 3.x, séparés (`service-contracts`…).
+- Symfony en composants séparés (#26), en 7.4 depuis #28 : plus de `symfony/symfony`, que Symfony 7
+  refuse. `composer.json` exige en `7.4.*` les bundles (framework, security, twig ; debug et
+  web-profiler en dev) et les composants dont le site se sert lui-même : les `use` de `src/`,
+  `app/`, `tests/` et `bin/`, et ce que la config demande (`yaml`, `translation`, `asset`,
+  `http-client`, `expression-language` pour `@Security`). En dev, ceux des tests (`browser-kit`,
+  `css-selector`, `dom-crawler`, `finder`) et `stopwatch` (services de debug et timeline du
+  profiler, comme le `profiler-pack` de Symfony). Le reste vient des dépendances. Celles qui
+  acceptent aussi la 8.x (`cache`, `clock`, `process`, `property-info`, `string`, `twig-bridge`,
+  `type-info`, `var-dumper`, `var-exporter`, `web-link`) sont bornées par le `conflict` de
+  `composer.json`, à monter avec les composants. Les contrats sont en 3.x, séparés
+  (`service-contracts`…).
 - Sans `symfony/symfony` (sa classe `FullStack`), FrameworkBundle active d'office chaque fonction
-  dont le composant est installé : `lock`, `property_info` et `web_link`, que tirent des
-  dépendances, sont coupés dans `config.yml`, comme avant. Un paquet ajouté peut en allumer une
-  autre : comparer `debug:container` et `debug:config` avant et après.
-- Services lazy (l'entity manager de DoctrineBundle) : la 6.4 fait ses proxys elle-même
+  dont le composant est installé : `lock`, `property_info`, `type_info` (que tire `property-info`
+  7.x) et `web_link`, que tirent des dépendances, sont coupés dans `config.yml`, comme avant. Un
+  paquet ajouté peut en allumer une autre : comparer `debug:container` et `debug:config` avant et
+  après.
+- Services lazy (l'entity manager de DoctrineBundle) : depuis la 6.4, Symfony fait ses proxys
   (`symfony/var-exporter`, `EntityManagerGhost…` dans le container), plus de
   `symfony/proxy-manager-bridge` (déprécié en 6.3). `Registry::reset()` (le worker,
   `reset_on_message`) remet à zéro un entity manager fermé par une erreur.
@@ -839,10 +851,10 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   commandes de schéma : `schema:update --complete` (`castor app:db:schema`, doc d'installation) ne
   la supprime pas, et `migrations:diff` ne propose plus de la supprimer.
 - Les sessions ouvertes en 3.4 et 4.4 ont des objets `Security\Core\Role\Role` dans leur token :
-  Symfony 5.4 et 6.4 gardent une classe `Role` pour les relire (vide en 6.4, « Allows migrating
-  session payloads from v4 »), et elles restent connectées (`LoginTest`, avec un token capturé
-  sur la vraie 4.4 ; le cookie remember_me capturé avec lui est refusé et supprimé depuis
-  l'authenticator manager, qui signe autrement, #177). À revérifier en 7.4 et en 8.2.
+  Symfony 5.4, 6.4 et 7.4 gardent une classe `Role` pour les relire (vide depuis 6.4, « Allows
+  migrating session payloads from v4 »), et elles restent connectées (`LoginTest`, avec un token
+  capturé sur la vraie 4.4 ; le cookie remember_me capturé avec lui est refusé et supprimé depuis
+  l'authenticator manager, qui signe autrement, #177). Vérifié en 7.4 (#28), à revérifier en 8.2.
 - Messenger (#22) : trois transports AMQP (`config.yml`), chacun avec son échange et sa file du
   même nom, `mailer` (#19), `view` et `webpush_notification`. Les anciennes files de RabbitMqBundle
   (`view_queue`…) ne servent plus : le `PhpSerializer` lit un de leurs messages comme un array, et
@@ -940,9 +952,24 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
 - Depuis Symfony 6 (`framework.form.legacy_error_messages`, sans effet), une valeur qu'un type de
   formulaire ne peut pas transformer (langue inconnue, nombre mal écrit, choix hors liste) donne le
   message du type (« Cette langue n'est pas valide. ») au lieu de « Cette valeur n'est pas
-  valide. ». Les messages traduits du validateur suivent ceux de Symfony 6.4 (« Elle doit contenir
-  au minimum 4 caractères. »). Un `NumberType` sans `html5` a un `inputmode` (`decimal`, ou
-  `numeric` avec `scale` à 0) : le clavier numérique sur mobile.
+  valide. ». Les messages traduits du validateur suivent ceux de Symfony (« Elle doit contenir
+  au minimum 4 caractères. », depuis la 6.4 ; la 7.4 ne change aucun de ceux que voient les
+  tests). Un `NumberType` sans `html5` a un `inputmode` (`decimal`, ou `numeric` avec `scale` à 0) :
+  le clavier numérique sur mobile.
+- Formulaires de Symfony 7 (#28) : le champ `_token` a un `data-controller="csrf-protection"`
+  (`form.csrf_protection.field_attr` de 7.2), sans effet, le site n'a pas Stimulus ; le `form_row`
+  de `form_div_layout` (aucun bloc du thème du site ne le remplace : changement de mot de passe…)
+  met `aria-invalid` et `aria-describedby` (`<id>_error1`, que le `form_errors` du site n'écrit
+  pas) sur un champ en erreur. `CurrencyType` ne liste plus que les devises en cours
+  (`active_at`, `legal_tender` de 7.4) : les annonces et les prix des fiches gardent toutes les
+  devises (`null` aux deux).
+- Le `ResizeFormListener` de Symfony 7 garde ses propriétés privées :
+  `PolyCollectionResizeFormListener` (blocs des contenus) a ses copies (#28). Son `preSetData()`
+  remplace celui du parent, déprécié en 7.2 au profit de `postSetData()` : une dépréciation par
+  formulaire, pour le milestone 7.
+- DomCrawler 7.4 sous PHP 8.4+ lit les réponses des tests avec le parseur HTML5 natif
+  (`Dom\HTMLDocument`) au lieu de libxml et de masterminds/html5 : aucun sélecteur des tests n'a
+  changé (#28).
 - `Length` n'a plus `allowEmptyString` (#177, retiré en 6.0) : elle refuse `''` avec `min`, mais
   ignore `null`, ce que donne un champ de formulaire vide (`TextType` sans `empty_data`). Une valeur
   validée qui vaudrait `''` (`empty_data: ''`, écrite par le code) serait « trop courte », en plus

@@ -13,10 +13,343 @@ parameters:
 			path: src/Ladb/CoreBundle/Composer/ScriptHandler.php
 
 		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 3
+			path: src/Ladb/CoreBundle/Controller/Blog/PostController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 8
+			path: src/Ladb/CoreBundle/Controller/Collection/CollectionController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Core/ApiController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Core/CommentController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Core/FollowerController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Core/JoinController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 3
+			path: src/Ladb/CoreBundle/Controller/Core/LikeController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 5
+			path: src/Ladb/CoreBundle/Controller/Core/MemberController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 7
+			path: src/Ladb/CoreBundle/Controller/Core/PictureController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 4
+			path: src/Ladb/CoreBundle/Controller/Core/ReportController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 2
+			path: src/Ladb/CoreBundle/Controller/Core/SearchController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Core/UserController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 3
+			path: src/Ladb/CoreBundle/Controller/Core/VoteController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Core/WatchController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 2
+			path: src/Ladb/CoreBundle/Controller/Event/EventController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 2
+			path: src/Ladb/CoreBundle/Controller/Faq/QuestionController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 3
+			path: src/Ladb/CoreBundle/Controller/Find/FindController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 4
+			path: src/Ladb/CoreBundle/Controller/Funding/FundingController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Howto/AbstractHowtoBasedController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 4
+			path: src/Ladb/CoreBundle/Controller/Howto/ArticleController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 3
+			path: src/Ladb/CoreBundle/Controller/Howto/HowtoController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Knowledge/BookController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 2
+			path: src/Ladb/CoreBundle/Controller/Knowledge/ProviderController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 2
+			path: src/Ladb/CoreBundle/Controller/Knowledge/SchoolController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Knowledge/SoftwareController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Knowledge/ToolController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Knowledge/WoodController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 2
+			path: src/Ladb/CoreBundle/Controller/Offer/OfferController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 11
+			path: src/Ladb/CoreBundle/Controller/Opencutlist/OpencutlistController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 3
+			path: src/Ladb/CoreBundle/Controller/Promotion/GraphicController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Controller/Qa/AnswerController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 3
+			path: src/Ladb/CoreBundle/Controller/Qa/QuestionController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 5
+			path: src/Ladb/CoreBundle/Controller/Wonder/CreationController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 3
+			path: src/Ladb/CoreBundle/Controller/Wonder/PlanController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 2
+			path: src/Ladb/CoreBundle/Controller/Wonder/WorkshopController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 8
+			path: src/Ladb/CoreBundle/Controller/Workflow/TaskController.php
+
+		-
 			message: '#^Class Ladb\\CoreBundle\\Entity\\Workflow\\Run referenced with incorrect case\: ladb\\CoreBundle\\Entity\\Workflow\\Run\.$#'
 			identifier: class.nameCase
 			count: 1
 			path: src/Ladb/CoreBundle/Controller/Workflow/TaskController.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 4
+			path: src/Ladb/CoreBundle/Controller/Workflow/WorkflowController.php
 
 		-
 			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
@@ -385,6 +718,15 @@ parameters:
 			path: src/Ladb/CoreBundle/Handler/PictureUploadHandler.php
 
 		-
+			message: '''
+				#^Call to deprecated method eraseCredentials\(\) of class Ladb\\CoreBundle\\Entity\\Core\\User\:
+				since Symfony 7\.3, erase credentials using the "__serialize\(\)" method instead$#
+			'''
+			identifier: method.deprecated
+			count: 1
+			path: src/Ladb/CoreBundle/Manager/Core/UserManager.php
+
+		-
 			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
 			identifier: parameter.implicitlyNullable
 			count: 1
@@ -439,6 +781,15 @@ parameters:
 			path: src/Ladb/CoreBundle/Utils/CommentableUtils.php
 
 		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 2
+			path: src/Ladb/CoreBundle/Utils/EmbeddableUtils.php
+
+		-
 			message: '#^Deprecated in PHP 8\.4\: Parameter \#2 \$followerUser \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
 			identifier: parameter.implicitlyNullable
 			count: 1
@@ -473,6 +824,15 @@ parameters:
 			identifier: parameter.implicitlyNullable
 			count: 1
 			path: src/Ladb/CoreBundle/Utils/PicturedUtils.php
+
+		-
+			message: '''
+				#^Call to deprecated method get\(\) of class Symfony\\Component\\HttpFoundation\\Request\:
+				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#
+			'''
+			identifier: method.deprecated
+			count: 3
+			path: src/Ladb/CoreBundle/Utils/SearchUtils.php
 
 		-
 			message: '#^Deprecated in PHP 8\.4\: Parameter \#2 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
