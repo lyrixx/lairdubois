@@ -34,7 +34,7 @@
         "doctrine/doctrine-bundle": "^2.13",
         "doctrine/persistence": "^3.4",
         "incenteev/composer-parameter-handler": "^2.3",
-        "symfony/monolog-bundle": "^3.10",
+        "symfony/monolog-bundle": "^3.11",
         "symfony/polyfill-apcu": "^1.0",
         "symfony/amqp-messenger": "6.4.*",
         "symfony/asset": "6.4.*",
