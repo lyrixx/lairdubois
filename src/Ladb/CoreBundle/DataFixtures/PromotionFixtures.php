@@ -7,6 +7,7 @@ use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use Ladb\CoreBundle\Entity\Core\License;
 use Ladb\CoreBundle\Entity\Core\Resource;
+use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Entity\Promotion\Graphic;
 use Ladb\CoreBundle\Manager\Promotion\GraphicManager;
 use Ladb\CoreBundle\Utils\GraphicUtils;
@@ -30,13 +31,13 @@ final class PromotionFixtures extends Fixture implements DependentFixtureInterfa
 		$this->graphicUtils = $graphicUtils;
 	}
 
-	public function getDependencies() {
+	public function getDependencies(): array {
 		return array( UserFixtures::class );
 	}
 
 	public function load(ObjectManager $manager): void {
-		$user = $this->getReference(UserFixtures::USER);
-		$user2 = $this->getReference(UserFixtures::USER2);
+		$user = $this->getReference(UserFixtures::USER, User::class);
+		$user2 = $this->getReference(UserFixtures::USER2, User::class);
 
 		// As GraphicController::createAction
 

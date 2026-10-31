@@ -27,6 +27,6 @@
 
     <extensions>
         <!-- Each test runs in a transaction, rolled back at its end -->
-        <extension class="DAMA\DoctrineTestBundle\PHPUnit\PHPUnitExtension" />
+        <extension class="Tests\TransactionExtension" />
     </extensions>
 </phpunit>

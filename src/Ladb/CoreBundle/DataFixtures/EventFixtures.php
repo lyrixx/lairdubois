@@ -6,6 +6,7 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use Ladb\CoreBundle\Entity\Core\Join;
+use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Entity\Event\Event;
 use Ladb\CoreBundle\Event\PublicationListener;
 use Ladb\CoreBundle\Manager\Event\EventManager;
@@ -34,13 +35,13 @@ final class EventFixtures extends Fixture implements DependentFixtureInterface {
 		$this->watchableUtils = $watchableUtils;
 	}
 
-	public function getDependencies() {
+	public function getDependencies(): array {
 		return array( UserFixtures::class );
 	}
 
 	public function load(ObjectManager $manager): void {
-		$user = $this->getReference(UserFixtures::USER);
-		$user2 = $this->getReference(UserFixtures::USER2);
+		$user = $this->getReference(UserFixtures::USER, User::class);
+		$user2 = $this->getReference(UserFixtures::USER2, User::class);
 
 		// As EventController::createAction, with the dates computed by EventType
 
@@ -80,7 +81,7 @@ final class EventFixtures extends Fixture implements DependentFixtureInterface {
 	 * As JoinController::createAction, for "user2".
 	 */
 	private function join(ObjectManager $manager, Event $event): void {
-		$user2 = $this->getReference(UserFixtures::USER2);
+		$user2 = $this->getReference(UserFixtures::USER2, User::class);
 
 		$event->incrementJoinCount();
 
