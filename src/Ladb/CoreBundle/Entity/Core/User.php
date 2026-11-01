@@ -158,6 +158,9 @@ class User implements UserInterface, LegacyPasswordAuthenticatedUserInterface, E
 
 	// Serialization in the session (token) /////
 
+	/**
+	 * Never the plain password (#222).
+	 */
 	public function __serialize(): array {
 		return array(
 			$this->password,
@@ -353,8 +356,13 @@ class User implements UserInterface, LegacyPasswordAuthenticatedUserInterface, E
 		return $this->plainPassword;
 	}
 
+	/**
+	 * Empty: UserManager erases the plain password once hashed, and __serialize() leaves it out
+	 * (#222). #[\Deprecated] tells Symfony 7.4 not to call it after a login, as 8.0 does, whose
+	 * UserInterface no longer has it: to remove with Symfony 8 (#30).
+	 */
+	#[\Deprecated]
 	public function eraseCredentials(): void {
-		$this->plainPassword = null;
 	}
 
 	// LastLogin /////
