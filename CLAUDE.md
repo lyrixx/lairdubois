@@ -671,7 +671,9 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   depuis #177 : un anonyme n'a plus de token (`null`), et le cookie remember_me est reposé à chaque
   reconnexion automatique (un an après la dernière visite).
 - Mot de passe en clair (`plainPassword`, hors mapping, #222) : `UserManager` l'efface dès qu'il l'a
-  haché, et `__serialize()` (que `serialize()` appelle) ne l'écrit pas, ni en session ni ailleurs.
+  haché, et `__serialize()` (que `serialize()` appelle) ne l'écrit pas, ni en session ni ailleurs :
+  un formulaire de changement de mot de passe refusé le laisse sur le compte du token, que la
+  session reçoit sans lui (`Tests\User\PlainPasswordTest`).
   `User::eraseCredentials()`, déprécié en 7.3 et retiré de `UserInterface` en 8.0, est vide et
   `#[\Deprecated]` : Symfony 7.4 ne l'appelle plus après une connexion, comme la 8.0. Il n'y avait
   plus rien à effacer à ce moment-là : l'inscription et le nouveau mot de passe hachent avant
