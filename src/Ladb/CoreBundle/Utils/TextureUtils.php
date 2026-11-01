@@ -214,7 +214,7 @@ class TextureUtils {
 	}
 
 	public function getBaseFilename($texture) {
-		return $texture->getWood()->getSlug().'_'.\Gedmo\Sluggable\Util\Urlizer::urlize($this->translator->trans('knowledge.wood.field.'.$texture->getValue()->getParentEntityField()), '_').'_'.$texture->getValue()->getId();
+		return $texture->getWood()->getSlug().'_'.\Behat\Transliterator\Transliterator::urlize($this->translator->trans('knowledge.wood.field.'.$texture->getValue()->getParentEntityField()), '_').'_'.$texture->getValue()->getId();
 	}
 	
 

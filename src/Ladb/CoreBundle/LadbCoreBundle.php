@@ -3,6 +3,7 @@
 namespace Ladb\CoreBundle;
 
 use Ladb\CoreBundle\DependencyInjection\Compiler\RemoveSessionSchemaListenerPass;
+use Ladb\CoreBundle\DependencyInjection\Compiler\SluggableTransliteratorPass;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
@@ -14,6 +15,7 @@ class LadbCoreBundle extends Bundle {
 
 		// Before the passes of DoctrineBundle, which register its listeners
 		$container->addCompilerPass(new RemoveSessionSchemaListenerPass(), PassConfig::TYPE_BEFORE_OPTIMIZATION, 1);
+		$container->addCompilerPass(new SluggableTransliteratorPass());
 	}
 
 }

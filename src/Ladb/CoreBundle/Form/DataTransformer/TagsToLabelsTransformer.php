@@ -50,7 +50,7 @@ class TagsToLabelsTransformer implements DataTransformerInterface {
 			if (!preg_match("/^[ a-zA-Z0-9ÀÁÂÃÄÅàáâãäåÒÓÔÕÖØòóôõöøÈÉÊËèéêëÇçÌÍÎÏìíîïÙÚÛÜùúûüÿÑñ'-]{2,}$/", $label)) {
 				continue;
 			}
-			$label = \Gedmo\Sluggable\Util\Urlizer::urlize($label);
+			$label = \Behat\Transliterator\Transliterator::urlize($label);
 			if (strlen($label) == 0) {
 				continue;
 			}
