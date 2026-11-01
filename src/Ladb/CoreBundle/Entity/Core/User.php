@@ -357,9 +357,9 @@ class User implements UserInterface, LegacyPasswordAuthenticatedUserInterface, E
 	}
 
 	/**
-	 * Empty: UserManager erases the plain password once hashed, and __serialize() leaves it out (#222).
-	 * #[\Deprecated] tells Symfony 7.4 not to call it after a login, as 8.0 does, whose UserInterface no
-	 * longer has it: to remove with Symfony 8 (#30).
+	 * Empty: UserManager erases the plain password once hashed, and __serialize() leaves it out
+	 * (#222). #[\Deprecated] tells Symfony 7.4 not to call it after a login, as 8.0 does, whose
+	 * UserInterface no longer has it: to remove with Symfony 8 (#30).
 	 */
 	#[\Deprecated]
 	public function eraseCredentials(): void {

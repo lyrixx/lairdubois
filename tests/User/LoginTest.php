@@ -25,7 +25,8 @@ final class LoginTest extends WebTestCase
     private const SHA512_HASH = '/r+tTBYXOOfHdCRUDwJuesex6ZpOpafKuYRyXvNtY4RK7S7Qm97lWAr4U8SC/O/IGuxFMoxvooYgaqiTy6kCYA==';
     // The native hash of "user" in the fixtures when the values of Symfony 4.4 below were captured
     private const SYMFONY_44_HASH = '$argon2id$v=19$m=65536,t=4,p=1$ZkdxcUg5T1dpclFnYjJBUA$xaqpAZakiM6hwj+94/K42DTswt8FQX1+TXhKQWknOhk';
-    // The native hash of "user" in the fixtures when the remember me cookie of Symfony 7.4 below was captured
+    // The native hash of "user" in the fixtures when the remember me cookie of Symfony 7.4 below
+    // was captured
     private const SYMFONY_74_HASH = '$2y$13$3VGS4V.j81mtzoHiMSfmzuw5H3oLezXeG.pRHf21FpZPC4ouae56K';
 
     public function testLoginWithSha512PasswordHash(): void
@@ -377,7 +378,8 @@ final class LoginTest extends WebTestCase
 
     /**
      * A remember me cookie set by Symfony 7.4 logs in. It still holds the class of the user, that
-     * Symfony 8.0 no longer writes and skips when it reads the cookie, with the same signature (#222).
+     * Symfony 8.0 no longer writes and skips when it reads the cookie, with the same signature
+     * (#222).
      */
     public function testRememberMeOfSymfony74(): void
     {

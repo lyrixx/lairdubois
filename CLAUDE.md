@@ -683,15 +683,15 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
 - Cookie remember_me (#222) : la 7.4 y écrit encore la classe du compte
   (`Ladb.CoreBundle.Entity.Core.User:<identifiant en base64>:<expiration>:<signature>`, celui de la
   4.4 était tout entier en base64). La 8.0 ne l'écrit plus (`:<identifiant>:…`) et ignore la
-  première partie à la lecture (`RememberMeDetails::fromRawCookie()`). La signature (HMAC par le `secret` de l'expiration, de
-  l'identifiant et du hash du mot de passe, `signature_properties`) ne change pas de la 7.4 à la 8.2
-  (`SignatureHasher`, réécrit en 8.2 pour la rotation des secrets) : un cookie posé par la 7.4 est
-  relu en 8.x. `LoginTest::testRememberMeOfSymfony74` rejoue un cookie capturé en 7.4 ; le même
-  cookie a été relu par les classes de la 8.2, lancées sans les installer. À revérifier au saut
-  (#30), avec les changements de la 8.2 sans effet ici : `use_referer` garde le referer d'un échec
-  de connexion (le seul formulaire est sur `/login`, exclu), `#[IsGranted(statusCode: 404)]` lève
-  une `NotFoundHttpException` (même réponse), et les hashers prennent le coût minimal quand
-  `framework.test` est activé.
+  première partie à la lecture (`RememberMeDetails::fromRawCookie()`). La signature (HMAC par le
+  `secret` de l'expiration, de l'identifiant et du hash du mot de passe, `signature_properties`) ne
+  change pas de la 7.4 à la 8.2 (`SignatureHasher`, réécrit en 8.2 pour la rotation des secrets) :
+  un cookie posé par la 7.4 est relu en 8.x. `LoginTest::testRememberMeOfSymfony74` rejoue un cookie
+  capturé en 7.4 ; le même cookie a été relu par les classes de la 8.2, lancées sans les installer.
+  À revérifier au saut (#30), avec les changements de la 8.2 sans effet ici : `use_referer` garde le
+  referer d'un échec de connexion (le seul formulaire est sur `/login`, exclu),
+  `#[IsGranted(statusCode: 404)]` lève une `NotFoundHttpException` (même réponse), et les hashers
+  prennent le coût minimal quand `framework.test` est activé.
 - Controllers : services autowirés (prototype `Ladb\CoreBundle\Controller\`), une action reçoit ses
   services en arguments, un helper de la classe de l'action qui l'appelle (en dernier argument),
   un trait ou un controller abstrait par un setter `#[Required]`. L'entity manager est un service
