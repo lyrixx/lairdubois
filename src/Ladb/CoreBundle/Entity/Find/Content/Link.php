@@ -9,7 +9,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 class Link extends AbstractContent {
 
 	#[Assert\NotBlank(groups: ['link'])]
-	#[Assert\Url(groups: ['link'])]
+	#[Assert\Url(groups: ['link'], requireTld: false)]
 	#[ORM\Column(type: 'string', length: 255, nullable: false)]
 	private $url;
 

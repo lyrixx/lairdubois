@@ -24,7 +24,7 @@ final class ChangePasswordType extends AbstractType {
 				'mapped'             => false,
 				'constraints'        => array(
 					new NotBlank(),
-					new UserPassword(array( 'message' => 'fos_user.current_password.invalid', 'groups' => array( 'ChangePassword' ) )),
+					new UserPassword(message: 'fos_user.current_password.invalid', groups: array( 'ChangePassword' )),
 				),
 				'attr'               => array( 'autocomplete' => 'current-password' ),
 			))

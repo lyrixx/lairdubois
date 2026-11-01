@@ -33,7 +33,7 @@ class UserMeta {
 	private $skills;
 
 
-	#[Assert\Url]
+	#[Assert\Url(requireTld: false)]
 	#[ORM\Column(type: 'string', length: 255, nullable: true)]
 	private $website;
 

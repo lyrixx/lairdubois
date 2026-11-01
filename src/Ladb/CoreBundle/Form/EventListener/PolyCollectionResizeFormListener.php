@@ -9,18 +9,23 @@
 
 namespace Ladb\CoreBundle\Form\EventListener;
 
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Form\Exception\UnexpectedTypeException;
-use Symfony\Component\Form\Extension\Core\EventListener\ResizeFormListener;
 use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormTypeInterface;
 
 /**
  * A Form Resize listener capable of coping with a polycollection.
  *
+ * Not a ResizeFormListener any more: Symfony 8 makes its preSetData() and postSetData() final, and
+ * its other methods read its private state. It does what ResizeFormListener does with the options
+ * of PolyCollectionType (no delete_empty, no keep_as_list), the type of each row aside.
+ *
  * @author Tim Nagel <tim@nagel.com.au>
  */
-class PolyCollectionResizeFormListener extends ResizeFormListener
+class PolyCollectionResizeFormListener implements EventSubscriberInterface
 {
     /**
      * Stores an array of Types with the Type name as the key.
@@ -44,7 +49,7 @@ class PolyCollectionResizeFormListener extends ResizeFormListener
     protected $typeFieldName;
 
     /**
-     * Read by the methods below: the ResizeFormListener of Symfony 7 keeps its own private
+     * The type of an object of none of the classes of the prototypes: the first one
      */
     protected $type;
     protected $options;
@@ -72,18 +77,29 @@ class PolyCollectionResizeFormListener extends ResizeFormListener
                 $defaultType = get_class($type);
             }
 
-            // The class of the type: the ResizeFormListener of Symfony 4 only takes a class
+            // The class of the type: what Form::add() takes
             $typeKey = $type instanceof FormTypeInterface ? $type->getBlockPrefix() : $type;
             $this->typeMap[$typeKey] = get_class($type);
             $this->classMap[$modelClass] = get_class($type);
         }
 
-        parent::__construct($defaultType, $options, $allowAdd, $allowDelete);
-
         $this->type = $defaultType;
         $this->options = $options;
         $this->allowAdd = $allowAdd;
         $this->allowDelete = $allowDelete;
+    }
+
+    public static function getSubscribedEvents(): array
+    {
+        return array(
+            // As ResizeFormListener since Symfony 7.2: the rows are built once the data is set, as
+            // early as possible
+            FormEvents::POST_SET_DATA => array('postSetData', 255),
+            FormEvents::PRE_SUBMIT    => 'preSubmit',
+            // Before MergeCollectionListener and MergeDoctrineCollectionListener, as in
+            // ResizeFormListener
+            FormEvents::SUBMIT        => array('onSubmit', 50),
+        );
     }
 
     /**
@@ -122,7 +138,7 @@ class PolyCollectionResizeFormListener extends ResizeFormListener
         return $this->typeMap[$data[$this->typeFieldName]];
     }
 
-    public function preSetData(FormEvent $event): void
+    public function postSetData(FormEvent $event): void
     {
         $form = $event->getForm();
         $data = $event->getData();
@@ -187,5 +203,36 @@ class PolyCollectionResizeFormListener extends ResizeFormListener
                 }
             }
         }
+    }
+
+    public function onSubmit(FormEvent $event): void
+    {
+        $form = $event->getForm();
+        $data = $event->getData();
+
+        if (null === $data) {
+            $data = array();
+        }
+
+        if (!is_array($data) && !($data instanceof \Traversable && $data instanceof \ArrayAccess)) {
+            throw new UnexpectedTypeException($data, 'array or (\Traversable and \ArrayAccess)');
+        }
+
+        // The data mapper only adds, but does not remove items, so do this here
+        if ($this->allowDelete) {
+            $toDelete = array();
+
+            foreach ($data as $name => $child) {
+                if (!$form->has($name)) {
+                    $toDelete[] = $name;
+                }
+            }
+
+            foreach ($toDelete as $name) {
+                unset($data[$name]);
+            }
+        }
+
+        $event->setData($data);
     }
 }

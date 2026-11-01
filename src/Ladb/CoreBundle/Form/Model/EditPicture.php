@@ -10,7 +10,7 @@ class EditPicture {
 	private $legend;
 
 	#[Assert\Length(max: 255)]
-	#[Assert\Url]
+	#[Assert\Url(requireTld: false)]
 	private $sourceUrl;
 
 	private $rotation = 0;

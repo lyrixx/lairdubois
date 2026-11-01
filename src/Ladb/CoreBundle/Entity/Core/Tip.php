@@ -33,7 +33,7 @@ class Tip extends AbstractPublication implements TitledInterface, HtmlBodiedInte
 	private $htmlBody;
 
 	#[Assert\NotBlank]
-	#[Assert\Url]
+	#[Assert\Url(requireTld: false)]
 	#[ORM\Column(type: 'string', length: 255, nullable: false)]
 	private $url;
 

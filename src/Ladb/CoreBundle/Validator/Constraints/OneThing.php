@@ -2,6 +2,7 @@
 
 namespace Ladb\CoreBundle\Validator\Constraints;
 
+use Symfony\Component\Validator\Attribute\HasNamedArguments;
 use Symfony\Component\Validator\Constraint;
 
 /**
@@ -11,6 +12,13 @@ use Symfony\Component\Validator\Constraint;
 class OneThing extends Constraint {
 
 	public $message = 'Une seule chose';
+
+	#[HasNamedArguments]
+	public function __construct(?string $message = null, ?array $groups = null, mixed $payload = null) {
+		parent::__construct(null, $groups, $payload);
+
+		$this->message = $message ?? $this->message;
+	}
 
 	public function validatedBy(): string {
 		return 'ladb_core.one_thing_validator';

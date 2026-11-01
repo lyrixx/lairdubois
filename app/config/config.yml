@@ -144,8 +144,6 @@ services:
 twig:
     debug:            "%kernel.debug%"
     strict_variables: "%kernel.debug%"
-    # The error pages are rendered by the error controller of FrameworkBundle (TwigErrorRenderer)
-    exception_controller: null
     # The templates of the login, the registration, the forgotten password and the password change keep
     # the names that FOSUserBundle gave them (#24)
     paths:

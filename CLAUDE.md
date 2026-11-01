@@ -649,10 +649,11 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `\Error` PHP (appel sur `null`, `TypeError`), rendues comme une exception par le contrôleur
   d'erreur (500). Avant, elles sortaient de `handle()`, et `DebugHandlersListener` les rendait par
   `terminateWithException()`, avec la même page d'erreur.
-- Pages d'erreur : contrôleur d'erreur de FrameworkBundle (`twig.exception_controller: null`).
-  `TwigErrorRenderer` ne rend que le HTML (`@Twig/Exception/error.html.twig`) ; les routes au
-  `_format` json (`.json`, `.geojson`) gardent leur erreur en JSON par `RequestFormatErrorRenderer`
-  (`@Twig/Exception/error.json.twig`). En debug, la page d'exception de Symfony, en HTML.
+- Pages d'erreur : contrôleur d'erreur de FrameworkBundle, le seul depuis la 5.0
+  (`twig.exception_controller`, sans effet, retiré par #223). `TwigErrorRenderer` ne rend que le
+  HTML (`@Twig/Exception/error.html.twig`) ; les routes au `_format` json (`.json`, `.geojson`)
+  gardent leur erreur en JSON par `RequestFormatErrorRenderer` (`@Twig/Exception/error.json.twig`).
+  En debug, la page d'exception de Symfony, en HTML.
   Depuis la 7.x, `error_renderer` choisit le HTML ou le texte selon `kernel.runtime_mode` : HTML
   sous FPM et dans `WebTestCase` (`APP_RUNTIME_MODE=web=1`), texte pour un kernel lancé en CLI
   par un script.
@@ -1063,10 +1064,32 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   pas) sur un champ en erreur. `CurrencyType` ne liste plus que les devises en cours
   (`active_at`, `legal_tender` de 7.4) : les annonces et les prix des fiches gardent toutes les
   devises (`null` aux deux).
-- Le `ResizeFormListener` de Symfony 7 garde ses propriétés privées :
-  `PolyCollectionResizeFormListener` (blocs des contenus) a ses copies (#28). Son `preSetData()`
-  remplace celui du parent, déprécié en 7.2 au profit de `postSetData()` : une dépréciation par
-  formulaire, pour le milestone 7.
+- `PolyCollectionResizeFormListener` (blocs des contenus) n'étend plus le `ResizeFormListener` de
+  Symfony (#223) : la 8.0 rend final son `preSetData()` et son `postSetData()`, et ses autres
+  méthodes lisent ses propriétés privées. Il construit les lignes en `POST_SET_DATA` (priorité
+  255), comme Symfony depuis la 7.2, chacune du type de la classe de son bloc ; une ligne soumise
+  prend le type que nomme son `_type`. Son `onSubmit()` est celui de la 7.4 pour nos options
+  (`allow_delete`, sans `delete_empty` ni `keep_as_list`). À la mise à jour, un contenu repart
+  d'une collection vide (`resetBodyBlocks()`) : tous ses blocs sont recréés depuis le formulaire.
+  `Tests\Block\BodyBlocksTest` : types des blocs, ajout, retrait et ordre.
+- Défauts que la 8.x change, écrits à leur valeur de la 7.4 (#223), vérifiés par
+  `Tests\Form\DefaultsTest` :
+  - `requireTld: false` sur chaque `#[Assert\Url]` (la 8.0 passe à `true`), à écrire aussi sur une
+    nouvelle ;
+  - `default_protocol: 'http'` de tout `UrlType` (`Form\Extension\UrlTypeExtension`, la 8.0 passe
+    à `null`), y compris ceux que le validateur devine pour le `->add('url')` d'une propriété en
+    `#[Assert\Url]` ;
+  - `placeholder_attr: []` de tout `ChoiceType` (`Form\Extension\ChoiceTypeExtension`) : la 8.1
+    met `hidden` sur le placeholder d'un choix requis et replié ;
+  - `profiler.collect_serializer_data: true` (`config_dev.yml`), sans effet (pas de Serializer) :
+    la 8.0 n'accepte plus que `true`, et la 8.1 déprécie l'option, à retirer au saut (#30).
+- Options d'une contrainte en arguments nommés (7.4) : `new UserPassword(message: …)`. Une
+  contrainte à nous qui en prend a un constructeur `#[HasNamedArguments]` (`OneThing`). Celles des
+  fiches (`ATTRIB_CONSTRAINTS`) sont créées sans argument, puis `KnowledgeController` écrit leurs
+  propriétés : sans dépréciation.
+- Routes du profiler et des pages d'erreur (`routing_dev.yml`) : les fichiers `.php` des bundles
+  (7.3), mêmes routes ; la 8.0 retire les `.xml`. `LadbCoreExtension` étend l'`Extension` de
+  DependencyInjection, celle de HttpKernel est interne depuis la 7.1.
 - DomCrawler 7.4 sous PHP 8.4+ lit les réponses des tests avec le parseur HTML5 natif
   (`Dom\HTMLDocument`) au lieu de libxml et de masterminds/html5 : aucun sélecteur des tests n'a
   changé (#28).
