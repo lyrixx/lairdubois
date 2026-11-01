@@ -749,14 +749,14 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   initialisées que sur une entité chargée depuis la base : `FixtureFactory::create()` fait un
   `refresh()` après le premier `flush()`.
 - Doctrine (#177, #178) : ORM 3.7, DBAL 4.5, DoctrineBundle 3.3, `doctrine/persistence` 4.2,
-  `doctrine/collections` 2 (gedmo 3.20 refuse la 3) et `doctrine/lexer` 3. `doctrine/common` est
-  parti, et `ClassUtils` avec lui. DoctrineBundle ajoute depuis la 7.4 le listener
-  `IdleConnection\Listener` de DoctrineBridge (`kernel.request`) : il ferme une connexion restée
-  inutilisée plus de 10 minutes, ce qui n'arrive pas sous FPM.
-  Les proxys sont les lazy objects natifs de PHP 8.4, que DoctrineBundle 3 ne permet plus de
-  couper : une entité pas encore chargée a la classe de l'entité, pas celle d'un proxy
-  (`get_class()` suffit). Elle se charge au premier accès à une de ses propriétés (l'identifiant
-  excepté), pas à l'appel d'une méthode, et son `__serialize()` la charge.
+  `doctrine/collections` 2 (`commerceguys/addressing` 1.4 refuse la 3) et `doctrine/lexer` 3.
+  `doctrine/common` est parti, et `ClassUtils` avec lui. DoctrineBundle ajoute depuis la 7.4 le
+  listener `IdleConnection\Listener` de DoctrineBridge (`kernel.request`) : il ferme une connexion
+  restée inutilisée plus de 10 minutes, ce qui n'arrive pas sous FPM. Les proxys sont les lazy
+  objects natifs de PHP 8.4, que DoctrineBundle 3 ne permet plus de couper : une entité pas encore
+  chargée a la classe de l'entité, pas celle d'un proxy (`get_class()` suffit). Elle se charge au
+  premier accès à une de ses propriétés (l'identifiant excepté), pas à l'appel d'une méthode, et son
+  `__serialize()` la charge.
 - DBAL 4 refuse un type de paramètre de PDO (`\PDO::PARAM_INT`) : `ParameterType::INTEGER`,
   `ArrayParameterType::INTEGER`.
 - `doctrine:database:create` (#178) lit la plateforme avant de créer la base, et DBAL 4 se connecte
@@ -775,12 +775,27 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
 - `Doctrine\ORM\Tools\Pagination\Paginator` est déprécié par une docblock de l'ORM 3.7, pour l'ORM 4
   (`OffsetPaginator`), sans dépréciation à l'exécution : ses 91 usages sont dans la baseline de
   PHPStan.
-- Bornes de `composer.json` : `gedmo/doctrine-extensions` `~3.20.1` (depuis la 3.21, Sluggable et
-  `Urlizer` passent par `symfony/string` : les slugs et les labels de tags peuvent changer) ;
-  `dama/doctrine-test-bundle` `~8.4.1` (la 8.4 refuse PHPUnit 9 par un `conflict`, que Composer ne
-  voit pas, dans `tools/phpunit`, et son extension ne se charge pas : la nôtre la remplace ; la 8.5
-  veut PHPUnit 11). `doctrine/data-fixtures` 2 (#178) : `getReference()` demande la classe de la
-  référence.
+- Bornes de `composer.json` : `behat/transliterator` à `1.3.0` exactement (#219), la
+  translittération des slugs et des labels de tags, que gedmo n'exige plus : la 1.5 change ses
+  tables (`x02` à `x0a`) ; `dama/doctrine-test-bundle` `~8.4.1` (la 8.4 refuse PHPUnit 9 par un
+  `conflict`, que Composer ne voit pas, dans `tools/phpunit`, et son extension ne se charge pas : la
+  nôtre la remplace ; la 8.5 veut PHPUnit 11). `doctrine/data-fixtures` 2 (#178) : `getReference()`
+  demande la classe de la référence.
+- Gedmo 3.22 et StofDoctrineExtensionsBundle 1.15 (#219). Depuis la 3.21, le `SluggableListener`
+  translittère par `symfony/string` (`u()->ascii()`, puis `AsciiSlugger`), et
+  `Gedmo\Sluggable\Util\Urlizer`, déprécié, lève une exception sans `behat/transliterator`.
+  `SluggableTransliteratorPass` redonne au listener les fonctions de behat (`setTransliterator()`,
+  `setUrlizer()`), et `TagsToLabelsTransformer` et `TextureUtils` appellent
+  `Behat\Transliterator\Transliterator` : slugs et labels identiques à ceux de la 3.20
+  (`Tests\Core\SlugTest`). Le slugger de Symfony ferait d'une apostrophe un séparateur
+  (`l-atelier` au lieu de `latelier`), retirerait `×` et `°`, translittérerait autrement le
+  cyrillique et le grec : un autre slug à la modification d'un titre (updatable), un doublon pour
+  un tag dont le label change. Un contenu se trouve par son id (`intval()` de `{id}`), sauf les
+  questions de la FAQ, aussi par leur slug seul : 28 liens écrits en dur dans les templates.
+- Stof 1.15 donne l'auteur à Loggable par un actor provider, à la place de son listener de
+  `kernel.request`, et abonne SoftDeleteable à `postFlush` (`handle_post_flush_event: false`, sans
+  effet). Aucune entité n'est Loggable ni SoftDeleteable (`ext_log_entries` reste vide), Tree ne
+  sert que par son mapping.
 - `commerceguys/addressing` 1.4.2 (#178, `doctrine/collections` 2 de l'ORM 3) : l'adresse formatée
   d'une localisation (`LocalisableUtils`) change pour trois pays, Biélorussie (rue en tête), Irlande
   (code postal sur sa ligne) et Namibie (la 1.0.9 écrivait un `n` à la place du saut de ligne).
