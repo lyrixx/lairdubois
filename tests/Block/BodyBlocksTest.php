@@ -6,6 +6,8 @@ use Ladb\CoreBundle\DataFixtures\UserFixtures;
 use Ladb\CoreBundle\Entity\Core\Block\Gallery;
 use Ladb\CoreBundle\Entity\Core\Block\Text;
 use Ladb\CoreBundle\Entity\Event\Event;
+use Ladb\CoreBundle\Entity\Find\Find;
+use Ladb\CoreBundle\Entity\Offer\Offer;
 use Ladb\CoreBundle\Entity\Wonder\Creation;
 use Ladb\CoreBundle\Model\BlockBodiedInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -20,9 +22,8 @@ use Tests\XhrTrait;
  * others (BodyBlocks). What the editor of the site submits: the rows in the order of the page,
  * under their keys, their sortIndex renumbered, a new row under the next key.
  *
- * At the update, a creation recreates its blocks from the form (resetBodyBlocks(), as the
- * workshop, the questions, the answers, the articles, the blog and the FAQ), an event keeps them
- * and updates them (as the find and the offer).
+ * At the update, every type recreates its blocks from the form (resetBodyBlocks()), in the order
+ * of the page: the validation and the merge of neighbour text blocks follow it.
  */
 final class BodyBlocksTest extends WebTestCase
 {
@@ -51,44 +52,117 @@ final class BodyBlocksTest extends WebTestCase
 
     /**
      * The first block deleted, the last one moved to the top, a block added at the end.
+     *
+     * @dataProvider provideTypes
+     *
+     * @param class-string<BlockBodiedInterface> $class
      */
-    public function testUpdateOfACreationAddsRemovesAndReordersBlocks(): void
+    public function testUpdateAddsRemovesAndReordersBlocks(string $class, string $routePrefix, string $formName): void
     {
-        [$first, $gallery] = $this->addLastBlocks(Creation::class);
+        [$first, $gallery] = $this->addLastBlocks($class);
         $firstId = $first->getId();
 
         $client = static::createClientAs(UserFixtures::USER);
-        $crawler = $this->submitBlocks($client, 'core_creation', 'ladb_wonder_creation', [
+        $crawler = $this->submitBlocks($client, $routePrefix, $formName, [
             2 => self::text(self::LAST_BODY, 0),
             1 => self::gallery($gallery, 1),
             3 => self::text(self::NEW_BODY, 2),
         ]);
 
         self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertSame([], self::getErrors($crawler));
         self::assertCount(1, $crawler->filter('.alert-success'));
-        // The form of the updated creation
+        // The form of the updated content, in the order of the page
         self::assertSame([
             0 => self::text(self::LAST_BODY, 0),
             1 => self::gallery($gallery, 1),
             2 => self::text(self::NEW_BODY, 2),
-        ], self::getFormBlocks($crawler, 'ladb_wonder_creation'));
+        ], self::getFormBlocks($crawler, $formName));
 
         static::getEntityManager()->clear();
-        $blocks = $this->findBlocks(Creation::class);
+        $blocks = $this->findBlocks($class);
         self::assertSame([Text::class, Gallery::class, Text::class], array_map('get_class', $blocks));
         self::assertSame(self::LAST_BODY, $blocks[0]->getBody());
         self::assertSame(self::getPictureIds($gallery), self::getPictureIds($blocks[1]));
         self::assertSame(self::NEW_BODY, $blocks[2]->getBody());
         self::assertNull(static::getEntityManager()->find(Text::class, $firstId));
-        self::assertSame(self::LAST_BODY."\n".self::NEW_BODY, $this->find(Creation::class)->getBody());
+        $content = $this->find($class);
+        self::assertSame(self::LAST_BODY."\n".self::NEW_BODY, $content->getBody());
+        // The extract of the lists and of the description of the page: its first text block
+        self::assertSame('Un dernier bloc, sous la galerie.', trim($content->getBodyExtract()));
     }
 
     /**
-     * An invalid form shows the submitted blocks, under their keys, with the type of their "_type".
+     * The gallery moved to the top: the first block of the page is not a text block.
+     *
+     * @dataProvider provideTypes
+     *
+     * @param class-string<BlockBodiedInterface> $class
      */
-    public function testInvalidUpdateShowsTheSubmittedBlocks(): void
+    public function testUpdateRefusesAGalleryAtTheTop(string $class, string $routePrefix, string $formName): void
     {
-        [$first, $gallery] = $this->addLastBlocks(Creation::class);
+        [$first, $gallery, $last] = $this->addLastBlocks($class);
+        $blockIds = [$first->getId(), $gallery->getId(), $last->getId()];
+        $firstBody = $first->getBody();
+
+        $client = static::createClientAs(UserFixtures::USER);
+        $crawler = $this->submitBlocks($client, $routePrefix, $formName, [
+            1 => self::gallery($gallery, 0),
+            0 => self::text($firstBody, 1),
+            2 => self::text(self::LAST_BODY, 2),
+        ]);
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertSame(['Le premier bloc doit être un bloc de texte.'], self::getErrors($crawler));
+        self::assertCount(0, $crawler->filter('.alert-success'));
+
+        static::getEntityManager()->clear();
+        self::assertSame($blockIds, array_map(static fn ($block) => $block->getId(), $this->findBlocks($class)));
+    }
+
+    /**
+     * The last block moved between the first one and the gallery: the two text blocks, neighbours
+     * on the page, are merged.
+     *
+     * @dataProvider provideTypes
+     *
+     * @param class-string<BlockBodiedInterface> $class
+     */
+    public function testUpdateMergesNeighbourTextBlocks(string $class, string $routePrefix, string $formName): void
+    {
+        [$first, $gallery] = $this->addLastBlocks($class);
+        $firstBody = $first->getBody();
+
+        $client = static::createClientAs(UserFixtures::USER);
+        $crawler = $this->submitBlocks($client, $routePrefix, $formName, [
+            0 => self::text($firstBody, 0),
+            2 => self::text(self::LAST_BODY, 1),
+            1 => self::gallery($gallery, 2),
+        ]);
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertSame([], self::getErrors($crawler));
+        self::assertCount(1, $crawler->filter('.alert-success'));
+
+        static::getEntityManager()->clear();
+        $blocks = $this->findBlocks($class);
+        self::assertSame([Text::class, Gallery::class], array_map('get_class', $blocks));
+        self::assertSame($firstBody."\n\n".self::LAST_BODY, $blocks[0]->getBody());
+        self::assertSame(self::getPictureIds($gallery), self::getPictureIds($blocks[1]));
+        self::assertSame($firstBody."\n\n".self::LAST_BODY, $this->find($class)->getBody());
+    }
+
+    /**
+     * An invalid form shows the submitted blocks, under their keys and in their order, with the
+     * type of their "_type".
+     *
+     * @dataProvider provideTypes
+     *
+     * @param class-string<BlockBodiedInterface> $class
+     */
+    public function testInvalidUpdateShowsTheSubmittedBlocks(string $class, string $routePrefix, string $formName): void
+    {
+        [$first, $gallery] = $this->addLastBlocks($class);
         $submitted = [
             2 => self::text(self::LAST_BODY, 0),
             1 => self::gallery($gallery, 1),
@@ -96,51 +170,27 @@ final class BodyBlocksTest extends WebTestCase
         ];
 
         $client = static::createClientAs(UserFixtures::USER);
-        $crawler = $this->submitBlocks($client, 'core_creation', 'ladb_wonder_creation', $submitted, ['title' => '']);
+        $crawler = $this->submitBlocks($client, $routePrefix, $formName, $submitted, ['title' => '']);
 
         self::assertSame(200, $client->getResponse()->getStatusCode());
         self::assertCount(0, $crawler->filter('.alert-success'));
-        self::assertSame($submitted, self::getFormBlocks($crawler, 'ladb_wonder_creation'));
+        self::assertSame($submitted, self::getFormBlocks($crawler, $formName));
 
         static::getEntityManager()->clear();
-        self::assertSame($first->getId(), $this->findBlocks(Creation::class)[0]->getId());
+        self::assertSame($first->getId(), $this->findBlocks($class)[0]->getId());
     }
 
     /**
-     * The last block deleted, a block added between the first one and the gallery. The event keeps
-     * its blocks, the new one goes at the end of its collection: the page orders them by sortIndex.
+     * Each type with body blocks: its entity, its route prefix and its form name.
+     *
+     * @return iterable<string, array{class-string<BlockBodiedInterface>, string, string}>
      */
-    public function testUpdateOfAnEventAddsRemovesAndReordersBlocks(): void
+    public static function provideTypes(): iterable
     {
-        [$first, $gallery, $last] = $this->addLastBlocks(Event::class);
-        $firstId = $first->getId();
-        $galleryId = $gallery->getId();
-        $lastId = $last->getId();
-
-        $client = static::createClientAs(UserFixtures::USER);
-        $crawler = $this->submitBlocks($client, 'core_event', 'ladb_event_event', [
-            0 => self::text($first->getBody(), 0),
-            3 => self::text(self::NEW_BODY, 1),
-            1 => self::gallery($gallery, 2),
-        ]);
-
-        self::assertSame(200, $client->getResponse()->getStatusCode());
-        self::assertCount(1, $crawler->filter('.alert-success'));
-        // The form of the updated event: its collection, in the order of its keys
-        self::assertSame([
-            0 => self::text($first->getBody(), 0),
-            1 => self::gallery($gallery, 2),
-            3 => self::text(self::NEW_BODY, 1),
-        ], self::getFormBlocks($crawler, 'ladb_event_event'));
-
-        static::getEntityManager()->clear();
-        $blocks = $this->findBlocks(Event::class);
-        self::assertSame([Text::class, Text::class, Gallery::class], array_map('get_class', $blocks));
-        self::assertSame($firstId, $blocks[0]->getId());
-        self::assertSame(self::NEW_BODY, $blocks[1]->getBody());
-        self::assertSame($galleryId, $blocks[2]->getId());
-        self::assertNull(static::getEntityManager()->find(Text::class, $lastId));
-        self::assertSame($blocks[0]->getBody()."\n".self::NEW_BODY, $this->find(Event::class)->getBody());
+        yield 'creation' => [Creation::class, 'core_creation', 'ladb_wonder_creation'];
+        yield 'event' => [Event::class, 'core_event', 'ladb_event_event'];
+        yield 'find' => [Find::class, 'core_find', 'ladb_find_find'];
+        yield 'offer' => [Offer::class, 'core_offer', 'ladb_offer_offer'];
     }
 
     /**
@@ -220,6 +270,16 @@ final class BodyBlocksTest extends WebTestCase
         $values = $crawler->filter('form[action$="/update"]')->form()->getPhpValues();
 
         return $values[$formName]['bodyBlocks'];
+    }
+
+    /**
+     * The error messages of the form of the page.
+     *
+     * @return list<string>
+     */
+    private static function getErrors(Crawler $crawler): array
+    {
+        return $crawler->filter('form[action$="/update"] .alert-danger li')->each(static fn (Crawler $node): string => $node->text());
     }
 
     /**
