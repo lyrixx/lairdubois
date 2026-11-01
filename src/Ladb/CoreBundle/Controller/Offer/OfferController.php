@@ -185,6 +185,8 @@ class OfferController extends AbstractController {
 		$originalBodyBlocks = $offer->getBodyBlocks()->toArray();	// Need to be an array to copy values
 		$previouslyUsedTags = $offer->getTags()->toArray();	// Need to be an array to copy values
 
+		$offer->resetBodyBlocks(); // Reset bodyBlocks array to consider form bodyBlocks order
+
 		$form = $this->createForm(OfferType::class, $offer);
 		$form->handleRequest($request);
 

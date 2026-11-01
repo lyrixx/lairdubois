@@ -187,6 +187,8 @@ class FindController extends AbstractController {
 		$originalBodyBlocks = $find->getBodyBlocks()->toArray();	// Need to be an array to copy values
 		$previouslyUsedTags = $find->getTags()->toArray();	// Need to be an array to copy values
 
+		$find->resetBodyBlocks(); // Reset bodyBlocks array to consider form bodyBlocks order
+
 		$form = $this->createForm(FindType::class, $find);
 		$form->handleRequest($request);
 
