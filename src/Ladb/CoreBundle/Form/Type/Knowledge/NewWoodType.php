@@ -15,7 +15,7 @@ class NewWoodType extends AbstractType {
 			->add('nameValue', TextValueType::class, array(
 				'choices'         => null,
 				'dataConstraints' => array(
-					new \Ladb\CoreBundle\Validator\Constraints\OneThing(array('message' => 'N\'indiquez qu\'un seul Nom français'))),
+					new \Ladb\CoreBundle\Validator\Constraints\OneThing(message: 'N\'indiquez qu\'un seul Nom français')),
 				'constraints'     => array(
 					new \Symfony\Component\Validator\Constraints\Valid(),
 					new \Ladb\CoreBundle\Validator\Constraints\UniqueWood(),

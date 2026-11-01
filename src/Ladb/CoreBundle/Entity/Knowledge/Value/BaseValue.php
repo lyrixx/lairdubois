@@ -80,7 +80,7 @@ abstract class BaseValue implements AuthoredInterface, WatchableChildInterface, 
 
 	#[Assert\NotBlank(groups: ['website', 'other'])]
 	#[Assert\Length(min: 2, max: 2048, groups: ['website', 'other'])]
-	#[Assert\Url(groups: ['website'])]
+	#[Assert\Url(groups: ['website'], requireTld: false)]
 	#[ORM\Column(type: 'string', length: 2048, nullable: true)]
 	private $source;
 

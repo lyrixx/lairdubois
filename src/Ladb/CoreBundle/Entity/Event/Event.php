@@ -134,7 +134,7 @@ class Event extends AbstractDraftableAuthoredPublication implements TitledInterf
 	#[ORM\Column(name: 'end_time', type: 'time', nullable: true)]
 	private $endTime;
 
-	#[Assert\Url]
+	#[Assert\Url(requireTld: false)]
 	#[ORM\Column(type: 'string', length: 255, nullable: true)]
 	private $url;
 

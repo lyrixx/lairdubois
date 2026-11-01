@@ -31,7 +31,7 @@ class Took extends AbstractAuthoredPublication implements TitledInterface, Slugg
 	const TYPE = 112;
 
 	#[Assert\NotBlank]
-	#[Assert\Url]
+	#[Assert\Url(requireTld: false)]
 	#[ORM\Column(type: 'string', length: 255, nullable: false)]
 	private $url;
 

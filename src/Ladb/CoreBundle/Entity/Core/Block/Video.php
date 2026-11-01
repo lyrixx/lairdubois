@@ -13,7 +13,7 @@ use Ladb\CoreBundle\Utils\VideoHostingUtils;
 class Video extends AbstractBlock {
 
 	#[Assert\NotBlank]
-	#[Assert\Url]
+	#[Assert\Url(requireTld: false)]
 	#[ORM\Column(type: 'string', length: 255, nullable: false)]
 	private $url;
 

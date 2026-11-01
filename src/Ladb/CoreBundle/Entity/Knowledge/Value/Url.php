@@ -17,7 +17,7 @@ class Url extends BaseValue {
 
 	#[Assert\NotBlank(groups: ['mandatory'])]
 	#[Assert\Length(max: 2048)]
-	#[Assert\Url]
+	#[Assert\Url(requireTld: false)]
 	#[ORM\Column(type: 'string', length: 2048)]
 	protected $data;
 

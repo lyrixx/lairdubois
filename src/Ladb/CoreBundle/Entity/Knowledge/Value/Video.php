@@ -20,7 +20,7 @@ class Video extends BaseValue {
 
 	#[Assert\NotBlank(groups: ['mandatory'])]
 	#[Assert\Length(max: 255)]
-	#[Assert\Url]
+	#[Assert\Url(requireTld: false)]
 	#[ORM\Column(type: 'string', length: 255)]
 	protected $data;
 

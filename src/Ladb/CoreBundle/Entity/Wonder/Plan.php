@@ -46,7 +46,7 @@ class Plan extends AbstractWonder implements HtmlBodiedInterface, InspirableInte
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Resource::class, cascade: ['persist'])]
 	private $resources;
 
-	#[Assert\Url]
+	#[Assert\Url(requireTld: false)]
 	#[ORM\Column(type: 'string', length: 255, nullable: true, name: 'sketchup_3d_warehouse_url')]
 	private $sketchup3DWarehouseUrl = null;
 
@@ -54,7 +54,7 @@ class Plan extends AbstractWonder implements HtmlBodiedInterface, InspirableInte
 	private $sketchup3DWarehouseEmbedIdentifier = null;
 
 	#[Assert\Regex('/^https:\/\/a360\.co\/[a-zA-Z0-9]+$/', message: 'Lien public non conforme.')]
-	#[Assert\Url]
+	#[Assert\Url(requireTld: false)]
 	#[ORM\Column(type: 'string', length: 255, nullable: true, name: 'a360_url')]
 	private $a360Url = null;
 

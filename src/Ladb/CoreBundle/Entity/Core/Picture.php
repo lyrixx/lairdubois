@@ -46,7 +46,7 @@ class Picture {
 	private $legend;
 
 	#[Assert\Length(max: 255)]
-	#[Assert\Url]
+	#[Assert\Url(requireTld: false)]
 	#[ORM\Column(type: 'string', length: 255, nullable: true, name: 'source_url')]
 	private $sourceUrl;
 
