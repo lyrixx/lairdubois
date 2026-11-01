@@ -670,6 +670,26 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `User::unserialize()` les lit, et `isEqualTo()` ne compare pas leurs rôles. Authenticator manager
   depuis #177 : un anonyme n'a plus de token (`null`), et le cookie remember_me est reposé à chaque
   reconnexion automatique (un an après la dernière visite).
+- Mot de passe en clair (`plainPassword`, hors mapping, #222) : `UserManager` l'efface dès qu'il l'a
+  haché, et `__serialize()` (que `serialize()` appelle) ne l'écrit pas, ni en session ni ailleurs.
+  `User::eraseCredentials()`, déprécié en 7.3 et retiré de `UserInterface` en 8.0, est vide et
+  `#[\Deprecated]` : Symfony 7.4 ne l'appelle plus après une connexion, comme la 8.0. Il n'y avait
+  plus rien à effacer à ce moment-là : l'inscription et le nouveau mot de passe hachent avant
+  `LoginUtils`. La méthode part au saut en 8.2 (#30). Pas de `security.erase_credentials`, que la
+  8.1 déprécie. `UserChecker::checkPostAuth()` a déjà la signature de la 8.0
+  (`?TokenInterface $token = null`).
+- Cookie remember_me (#222) : la 7.4 y écrit encore la classe du compte
+  (`Ladb.CoreBundle.Entity.Core.User:<identifiant en base64>:<expiration>:<signature>`, celui de la
+  4.4 était tout entier en base64). La 8.0 ne l'écrit plus (`:<identifiant>:…`) et ignore la
+  première partie à la lecture (`RememberMeDetails::fromRawCookie()`). La signature (HMAC par le `secret` de l'expiration, de
+  l'identifiant et du hash du mot de passe, `signature_properties`) ne change pas de la 7.4 à la 8.2
+  (`SignatureHasher`, réécrit en 8.2 pour la rotation des secrets) : un cookie posé par la 7.4 est
+  relu en 8.x. `LoginTest::testRememberMeOfSymfony74` rejoue un cookie capturé en 7.4 ; le même
+  cookie a été relu par les classes de la 8.2, lancées sans les installer. À revérifier au saut
+  (#30), avec les changements de la 8.2 sans effet ici : `use_referer` garde le referer d'un échec
+  de connexion (le seul formulaire est sur `/login`, exclu), `#[IsGranted(statusCode: 404)]` lève
+  une `NotFoundHttpException` (même réponse), et les hashers prennent le coût minimal quand
+  `framework.test` est activé.
 - Controllers : services autowirés (prototype `Ladb\CoreBundle\Controller\`), une action reçoit ses
   services en arguments, un helper de la classe de l'action qui l'appelle (en dernier argument),
   un trait ou un controller abstrait par un setter `#[Required]`. L'entity manager est un service
@@ -924,10 +944,15 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   pas, et `migrations:diff` ne propose plus de la supprimer. Vérifié avec DBAL 4 et DoctrineBundle
   3, qui garde l'id du listener.
 - Les sessions ouvertes en 3.4 et 4.4 ont des objets `Security\Core\Role\Role` dans leur token :
-  Symfony 5.4, 6.4 et 7.4 gardent une classe `Role` pour les relire (vide depuis 6.4, « Allows
-  migrating session payloads from v4 »), et elles restent connectées (`LoginTest`, avec un token
-  capturé sur la vraie 4.4 ; le cookie remember_me capturé avec lui est refusé et supprimé depuis
-  l'authenticator manager, qui signe autrement, #177). Vérifié en 7.4 (#28), à revérifier en 8.2.
+  Symfony 5.4 à 8.2 gardent une classe `Role` pour les relire (vide depuis 6.4, `@internal`,
+  « Allows migrating session payloads from v4 »), et elles restent connectées (`LoginTest`, avec
+  un token capturé sur la vraie 4.4 ; le cookie remember_me capturé avec lui est refusé et supprimé
+  depuis l'authenticator manager, qui signe autrement, #177). Vérifié en 7.4 (#28). Pour la 8.x,
+  vérifié sur le code (#222) : `Role` est le même fichier en 8.0, 8.1 et 8.2. Ne changent pas non
+  plus `AbstractToken::__unserialize()`, `UsernamePasswordToken`, `SwitchUserToken`, ni
+  `ContextListener::safelyUnserialize()` (au contexte d'un log près en 8.0) et `hasUserChanged()`,
+  qui ne fait qu'appeler `isEqualTo()`. `RememberMeToken` ignore depuis la 8.0 le secret que la 7.4
+  sérialisait. À revérifier au saut en 8.2 (#30), par `LoginTest`.
 - Messenger (#22) : trois transports AMQP (`config.yml`), chacun avec son échange et sa file du
   même nom, `mailer` (#19), `view` et `webpush_notification`. Les anciennes files de RabbitMqBundle
   (`view_queue`…) ne servent plus : le `PhpSerializer` lit un de leurs messages comme un array, et

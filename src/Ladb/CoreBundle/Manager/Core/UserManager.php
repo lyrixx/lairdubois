@@ -83,7 +83,7 @@ class UserManager {
 
 		$user->setSalt(null);
 		$user->setPassword($this->passwordHasherFactory->getPasswordHasher($user)->hash($plainPassword));
-		$user->eraseCredentials();
+		$user->setPlainPassword(null);
 	}
 
 }
