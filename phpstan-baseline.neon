@@ -385,15 +385,6 @@ parameters:
 			path: src/Ladb/CoreBundle/Handler/PictureUploadHandler.php
 
 		-
-			message: '''
-				#^Call to deprecated method eraseCredentials\(\) of class Ladb\\CoreBundle\\Entity\\Core\\User\:
-				since Symfony 7\.3, erase credentials using the "__serialize\(\)" method instead$#
-			'''
-			identifier: method.deprecated
-			count: 1
-			path: src/Ladb/CoreBundle/Manager/Core/UserManager.php
-
-		-
 			message: '#^Deprecated in PHP 8\.4\: Parameter \#1 \$user \(Ladb\\CoreBundle\\Entity\\Core\\User\) is implicitly nullable via default value null\.$#'
 			identifier: parameter.implicitlyNullable
 			count: 1
