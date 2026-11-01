@@ -1069,9 +1069,12 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   méthodes lisent ses propriétés privées. Il construit les lignes en `POST_SET_DATA` (priorité
   255), comme Symfony depuis la 7.2, chacune du type de la classe de son bloc ; une ligne soumise
   prend le type que nomme son `_type`. Son `onSubmit()` est celui de la 7.4 pour nos options
-  (`allow_delete`, sans `delete_empty` ni `keep_as_list`). À la mise à jour, un contenu repart
-  d'une collection vide (`resetBodyBlocks()`) : tous ses blocs sont recréés depuis le formulaire.
-  `Tests\Block\BodyBlocksTest` : types des blocs, ajout, retrait et ordre.
+  (`allow_delete`, sans `delete_empty` ni `keep_as_list`). À la mise à jour, une création, un
+  atelier, une question, une réponse, un article, un billet et une FAQ repartent d'une collection
+  vide (`resetBodyBlocks()`) et recréent leurs blocs dans l'ordre de la page ; un événement, une
+  trouvaille et une annonce gardent les leurs, et un bloc ajouté va en fin de collection. Les
+  pages les rangent par `sortIndex`. `Tests\Block\BodyBlocksTest` : types des blocs, ajout,
+  retrait et ordre, dans les deux cas.
 - Défauts que la 8.x change, écrits à leur valeur de la 7.4 (#223), vérifiés par
   `Tests\Form\DefaultsTest` :
   - `requireTld: false` sur chaque `#[Assert\Url]` (la 8.0 passe à `true`), à écrire aussi sur une
