@@ -106,7 +106,7 @@ class LikeController extends AbstractController {
 		if (!$request->isXmlHttpRequest()) {
 
 			// Return to
-			$returnToUrl = $request->get('rtu');
+			$returnToUrl = $request->query->get('rtu');
 			if (is_null($returnToUrl)) {
 				$returnToUrl = $this->getRefererUrl($request);
 			}
@@ -116,7 +116,7 @@ class LikeController extends AbstractController {
 
 		return array(
 			'likeContext'    => $likableUtils->getLikeContext($entity, $this->getUser()),
-			'noTextOnMobile' => $request->get('noTextOnMobile', false),
+			'noTextOnMobile' => $request->query->get('noTextOnMobile', false),
 		);
 	}
 
@@ -173,7 +173,7 @@ class LikeController extends AbstractController {
 
 		return array(
 			'likeContext'    => $likableUtils->getLikeContext($entity, $this->getUser()),
-			'noTextOnMobile' => $request->get('noTextOnMobile', false),
+			'noTextOnMobile' => $request->query->get('noTextOnMobile', false),
 		);
 	}
 

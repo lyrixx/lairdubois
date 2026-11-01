@@ -147,7 +147,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		$this->addFlash('success', $translator->trans('workflow.workflow.form.alert.unpublish_success', array( '%title%' => $workflow->getTitle() )));
 
 		// Return to
-		$returnToUrl = $request->get('rtu');
+		$returnToUrl = $request->query->get('rtu');
 		if (is_null($returnToUrl)) {
 			$returnToUrl = $this->getRefererUrl($request);
 		}
@@ -535,7 +535,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 	public function showAction(Request $request, $id, Authorization $authorization, CollectionnableUtils $collectionnableUtils, CommentableUtils $commentableUtils, EventDispatcherInterface $dispatcher, FollowerUtils $followerUtils, LikableUtils $likableUtils, EntityManagerInterface $om, WatchableUtils $watchableUtils, WitnessManager $witnessManager) {
 		$workflowRepository = $om->getRepository(Workflow::CLASS_NAME);
 
-		$layout = $request->get('layout', 'page');
+		$layout = $request->query->get('layout', 'page');
 
 		$id = intval($id);
 
@@ -601,7 +601,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 			throw $this->createNotFoundException('Page limit reached (core_workflow_list_page)');
 		}
 
-		$layout = $request->get('layout', 'view');
+		$layout = $request->query->get('layout', 'view');
 
 		$routeParameters = array();
 		if ($layout != 'view') {

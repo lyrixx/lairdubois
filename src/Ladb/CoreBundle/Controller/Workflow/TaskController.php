@@ -32,7 +32,8 @@ class TaskController extends AbstractWorkflowBasedController {
 	private function _retrieveTaskFromTaskIdParam(Request $request, EntityManagerInterface $om, $param = 'taskId', $notFoundException = true) {
 		$taskRepository = $om->getRepository(Task::CLASS_NAME);
 
-		$taskId = intval($request->get($param, 0));
+		// In the query of edit, delete and the create of a task (sourceTaskId), in the body of the other actions
+		$taskId = intval($request->query->get($param) ?? $request->request->get($param, 0));
 
 		$task = $taskRepository->findOneById($taskId);
 		if (is_null($task) && $notFoundException) {
@@ -124,14 +125,14 @@ class TaskController extends AbstractWorkflowBasedController {
 		$this->_assertAuthorizedWorkflow($workflow);
 
 		$task = new Task();
-		$task->setPositionLeft(intval($request->get('positionLeft', 0)));
-		$task->setPositionTop(intval($request->get('positionTop', 0)));
+		$task->setPositionLeft(intval($request->query->get('positionLeft', 0)));
+		$task->setPositionTop(intval($request->query->get('positionTop', 0)));
 		$form = $this->createForm(TaskType::class, $task, array( 'label_choices' => $this->_computeLabelChoices($workflow) ));
 
 		return array(
 			'workflow'     => $workflow,
 			'form'         => $form->createView(),
-			'sourceTaskId' => $request->get('sourceTaskId', 0),
+			'sourceTaskId' => $request->query->get('sourceTaskId', 0),
 		);
 	}
 
@@ -224,7 +225,7 @@ class TaskController extends AbstractWorkflowBasedController {
 		return array(
 			'workflow'     => $workflow,
 			'form'         => $form->createView(),
-			'sourceTaskId' => $request->get('sourceTaskId', 0),
+			'sourceTaskId' => $request->query->get('sourceTaskId', 0),
 		);
 	}
 
@@ -391,7 +392,7 @@ class TaskController extends AbstractWorkflowBasedController {
 		// Status
 		$statusChanged = false;
 
-		$newStatus = intval($request->get('status', Task::STATUS_UNKNOW));
+		$newStatus = intval($request->request->get('status', Task::STATUS_UNKNOW));
 		if ($newStatus < Task::STATUS_PENDING || $newStatus > Task::STATUS_DONE) {
 			throw $this->createNotFoundException('Invalid status (status='.$newStatus.')');
 		}
@@ -533,7 +534,7 @@ class TaskController extends AbstractWorkflowBasedController {
 		$this->assertShowable($workflow);
 
 		// Retrieve readOnly parameter
-		$readOnly = $request->get('readOnly', false);
+		$readOnly = $request->query->get('readOnly', false);
 
 		// Compute durationHidden parameter
 		$durationsHidden = !$this->isGranted('ROLE_ADMIN') && $this->getUser() != $workflow->getUser();

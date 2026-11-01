@@ -138,7 +138,7 @@ class ArticleController extends AbstractHowtoBasedController {
 		$this->addFlash('success', $translator->trans('howto.article.form.alert.unpublish_success', array( '%title%' => $article->getTitle() )));
 
 		// Return to
-		$returnToUrl = $request->get('rtu');
+		$returnToUrl = $request->query->get('rtu');
 		if (is_null($returnToUrl)) {
 			$returnToUrl = $this->getRefererUrl($request);
 		}
@@ -157,7 +157,7 @@ class ArticleController extends AbstractHowtoBasedController {
 
 		// Return to
 
-		$returnToUrl = $request->get('rtu');
+		$returnToUrl = $request->query->get('rtu');
 		if (is_null($returnToUrl)) {
 			$returnToUrl = $this->getRefererUrl($request);
 		}
@@ -222,7 +222,7 @@ class ArticleController extends AbstractHowtoBasedController {
 		}
 
 		return array(
-			'rtu'     => $request->get('rtu'),
+			'rtu'     => $request->query->get('rtu'),
 			'howto'   => $article->getHowto(),
 			'article' => $article,
 			'form'    => $form->createView(),

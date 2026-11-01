@@ -681,6 +681,14 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `$this->getParameter()` : en 3.4, un `bind` ne s'appliquait à un argument d'action que s'il
   désignait un service ; en 4.4, il s'applique aussi à une valeur (`%param%`). Un service de
   bundle sans alias par type reçoit un alias de son id dans `services.yml`.
+- Paramètres de la requête (#221, `Request::get()` est retiré en 8.0) : on lit le sac d'où vient la
+  valeur. `$request->attributes` pour un paramètre de route ou d'un `forward()`, `->query` pour la
+  query string, y compris celle de l'URL d'action d'un formulaire en POST, et `->request` pour le
+  corps d'un POST. Les deux, dans l'ordre de `get()` (`query->get('x') ?? request->get('x')`), quand
+  le site envoie le même paramètre des deux façons : `owner` (`retrieveOwner()`), `taskId`
+  (`TaskController`). `InputBag::get()` (`query`, `request`) refuse une valeur non scalaire (400,
+  `BadRequestException`), ce que `Request::get()` ne faisait pas : un paramètre qui est un tableau
+  se lit par `->all('nom')`, et le défaut passé à `get()` doit être scalaire.
 - `TypableUtils::getManagerByType()` (`ladb:change:owner`) lit les managers dans un service locator
   (`ladb_core.typable_utils.manager_locator` de `services.yml`), par le nom que donne
   `getStrippedNameByType()` : un manager n'a pas à être public pour lui. `Tests\Command\ManagerByTypeTest`

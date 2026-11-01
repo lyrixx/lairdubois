@@ -148,7 +148,7 @@ class EventController extends AbstractController {
 		$this->addFlash('success', $translator->trans('event.event.form.alert.unpublish_success', array( '%title%' => $event->getTitle() )));
 
 		// Return to
-		$returnToUrl = $request->get('rtu');
+		$returnToUrl = $request->query->get('rtu');
 		if (is_null($returnToUrl)) {
 			$returnToUrl = $this->getRefererUrl($request);
 		}

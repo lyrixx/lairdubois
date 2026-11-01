@@ -16,7 +16,7 @@ class SearchController extends AbstractController {
 	#[Route(path: '/creations', name: 'core_search_creations')]
 	public function searchAction(Request $request) {
 		return $this->redirect($this->generateUrl('core_creation_list', array(
-			'q'    => $request->get('q'),
+			'q'    => $request->query->get('q'),
 		)));
 	}
 
@@ -24,7 +24,7 @@ class SearchController extends AbstractController {
 	#[Template('@LadbCore/Core/Search/searchTypeaheadUsers.json.twig')]
 	public function searchTypeaheadUsersAction(Request $request, SearchUtils $searchUtils, $page = 0) {
 
-		$family = $request->get('family');
+		$family = $request->query->get('family');
 
 		$searchParameters = $searchUtils->searchPaginedEntities(
 			$request,

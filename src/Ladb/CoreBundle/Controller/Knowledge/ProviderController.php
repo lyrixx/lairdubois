@@ -196,7 +196,8 @@ class ProviderController extends AbstractController {
 			throw $this->createNotFoundException('Page limit reached (core_provider_list_page)');
 		}
 
-		$layout = $request->get('layout', 'view');
+		// In the defaults of the .geojson route, in the query of the choice list
+		$layout = $request->attributes->get('layout') ?? $request->query->get('layout', 'view');
 
 		$routeParameters = array();
 		if ($layout != 'view') {

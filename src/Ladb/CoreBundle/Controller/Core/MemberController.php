@@ -73,7 +73,7 @@ class MemberController extends AbstractController {
 			throw $this->createNotFoundException('Not allowed (core_member_invitation_create)');
 		}
 
-		$recipientUsernames = $request->get('recipients');
+		$recipientUsernames = $request->query->get('recipients');
 
 		$invitationCount = 0;
 		foreach (explode(',', $recipientUsernames) as $username) {
@@ -159,7 +159,7 @@ class MemberController extends AbstractController {
 		$this->addFlash('success', 'Invitation supprimée.');
 
 		// Return to
-		$returnToUrl = $request->get('rtu');
+		$returnToUrl = $request->query->get('rtu');
 		if (is_null($returnToUrl)) {
 			$returnToUrl = $request->headers->get('referer');
 			if (is_null($returnToUrl)) {
@@ -262,7 +262,7 @@ class MemberController extends AbstractController {
 		$this->addFlash('success', 'Demande supprimée.');
 
 		// Return to
-		$returnToUrl = $request->get('rtu');
+		$returnToUrl = $request->query->get('rtu');
 		if (is_null($returnToUrl)) {
 			$returnToUrl = $request->headers->get('referer');
 			if (is_null($returnToUrl)) {
@@ -333,8 +333,8 @@ class MemberController extends AbstractController {
 	#[Template('@LadbCore/Core/Member/list-session-teams-xhr.html.twig')]
 	public function listSessionTeamsAction(Request $request, EntityManagerInterface $om, PaginatorUtils $paginatorUtils, $page = 0) {
 
-		$titleTransKey = $request->get('title-trans-key');
-		$route = $request->get('route');
+		$titleTransKey = $request->query->get('title-trans-key');
+		$route = $request->query->get('route');
 		if (is_null($route)) {
 			throw $this->createNotFoundException('Missing route (core_member_list_session_teams)');
 		}

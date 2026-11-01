@@ -251,7 +251,7 @@ class SearchUtils {
 
 		// Log search
 		if ($page == 0) {
-			$this->_logSearch($request->get('_route'), $q, $totalHits);
+			$this->_logSearch($request->attributes->get('_route'), $q, $totalHits);
 		}
 
 		return array(
@@ -268,7 +268,7 @@ class SearchUtils {
 	/////
 
 	private function _parseQueryRequest(Request $request, $parseFacets = true) {
-		$q = $request->get('q', '');
+		$q = $request->query->get('q', '');
 
 		// Parse facets
 		$facets = null;
@@ -308,7 +308,7 @@ class SearchUtils {
 		}
 
 		// Compute excluded IDs
-		$ex = $request->get('ex');
+		$ex = $request->query->get('ex');
 		$excludedIds = array();
 		$strIds = explode(',', $ex);
 		foreach ($strIds as $strId) {
