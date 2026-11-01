@@ -8,6 +8,7 @@ use Ladb\CoreBundle\Utils\VideoHostingUtils;
 use Symfony\Component\DomCrawler\Crawler;
 use Tests\Double\OfflineLocalisableUtils;
 use Tests\Double\OfflineOpenGraphUtils;
+use Tests\DoUpTrait;
 use Tests\PublicationTestCase;
 
 /**
@@ -15,6 +16,8 @@ use Tests\PublicationTestCase;
  */
 final class FindTest extends PublicationTestCase
 {
+    use DoUpTrait;
+
     protected static function getRoutePrefix(): string
     {
         return 'core_find';

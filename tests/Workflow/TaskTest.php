@@ -57,6 +57,34 @@ final class TaskTest extends WebTestCase
     }
 
     /**
+     * The workspace in read-only mode asks for the tasks without their buttons (readOnly, in the
+     * query).
+     *
+     * @dataProvider provideReadOnly
+     */
+    public function testListReadOnly(array $query, bool $readOnly): void
+    {
+        $client = static::createClientAs(UserFixtures::USER);
+        static::xhr($client, 'GET', $this->path('list', $query));
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        $widgets = array_column(json_decode($client->getResponse()->getContent(), true)['taskInfos'], 'widget');
+        self::assertCount(2, $widgets);
+        foreach ($widgets as $widget) {
+            self::assertSame($readOnly, str_contains($widget, 'ladb-workflow-task-widget ladb-readonly'));
+        }
+    }
+
+    /**
+     * @return iterable<string, array{array<string, int>, bool}>
+     */
+    public static function provideReadOnly(): iterable
+    {
+        yield 'editable' => [[], false];
+        yield 'read-only' => [['readOnly' => 1], true];
+    }
+
+    /**
      * @return iterable<string, array{?string, bool}>
      */
     public static function provideUsers(): iterable
@@ -294,15 +322,18 @@ final class TaskTest extends WebTestCase
     }
 
     /**
-     * Without the first one, the next task is workable.
+     * Without the first one, the next task is workable. The site deletes by the link of the form
+     * of the task (taskId in the query), the other actions send it in the body of a POST.
+     *
+     * @dataProvider provideDeleteMethods
      */
-    public function testDelete(): void
+    public function testDelete(string $method): void
     {
         $first = $this->findTask(self::FIRST);
         $second = $this->findTask(self::SECOND);
 
         $client = static::createClientAs(UserFixtures::USER);
-        static::xhr($client, 'POST', $this->path('delete'), ['taskId' => $first->getId()]);
+        static::xhr($client, $method, $this->path('delete'), ['taskId' => $first->getId()]);
 
         self::assertSame(['success' => true], json_decode($client->getResponse()->getContent(), true));
         static::getEntityManager()->clear();
@@ -313,6 +344,15 @@ final class TaskTest extends WebTestCase
         self::assertSame(['workflowInfos', 'updatedTaskInfos', 'deletedTaskId'], array_keys($data));
         self::assertSame($first->getId(), $data['deletedTaskId']);
         self::assertSame([$second->getId()], array_column($data['updatedTaskInfos'], 'id'));
+    }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function provideDeleteMethods(): iterable
+    {
+        yield 'link of the site' => ['GET'];
+        yield 'body' => ['POST'];
     }
 
     /**

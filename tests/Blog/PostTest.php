@@ -3,10 +3,13 @@
 namespace Tests\Blog;
 
 use Ladb\CoreBundle\Entity\Blog\Post;
+use Tests\DoUpTrait;
 use Tests\EditorialTestCase;
 
 final class PostTest extends EditorialTestCase
 {
+    use DoUpTrait;
+
     protected const NOTIFIES_THE_FOLLOWERS = true;
 
     protected static function getRoutePrefix(): string

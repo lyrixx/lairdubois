@@ -264,6 +264,31 @@ final class FundingTest extends WebTestCase
     }
 
     /**
+     * The dashboard opens the form of a donation of the amount it is given (amount_eur and
+     * auto_show, in the query of the redirection above).
+     *
+     * @dataProvider provideDashboardDonations
+     */
+    public function testDashboardOpensTheDonation(array $query, string $amount, bool $autoShow): void
+    {
+        $client = static::createClientAs(UserFixtures::USER);
+        $crawler = $client->request('GET', static::generatePath('core_funding_dashboard', $query));
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertSame($amount, $crawler->filter('#ladb_donate_amount_input')->attr('value'));
+        self::assertStringContainsString('autoShow: '.($autoShow ? 'true' : 'false').',', $client->getResponse()->getContent());
+    }
+
+    /**
+     * @return iterable<string, array{array<string, int|bool>, string, bool}>
+     */
+    public static function provideDashboardDonations(): iterable
+    {
+        yield 'default' => [[], '5', false];
+        yield 'redirection of the form' => [['amount_eur' => 10, 'auto_show' => true], '10', true];
+    }
+
+    /**
      * The form of a donation creates a payment intent of the amount on Stripe.
      */
     public function testDonationNewXhr(): void
