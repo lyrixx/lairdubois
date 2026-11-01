@@ -732,9 +732,10 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `services.yml` sont privés. `LadbExtension`, que Twig crée avec lui-même à chaque requête, lit
   `TypableUtils` et `UserManager` (le gestionnaire d'entités) et `VideoHostingUtils` (qui reçoit
   Twig) dans `ladb.twig.ladb_extension.service_locator`, au moment de s'en servir.
-- PHPStan lit la version de PHP dans `composer.json` (`>=7.3`) : la syntaxe PHP 8 (propriétés
-  promues, `readonly`, virgule finale dans une signature) y est une erreur, même si tout tourne en
-  8.5.
+- PHPStan analyse pour le PHP qui le lance, 8.5 dans le builder (`phpstan diagnose`) : la syntaxe
+  PHP 8 (propriétés promues, `readonly`, virgule finale dans une signature) passe. Il ne prend du
+  `composer.json` du site que les bornes de `PHP_VERSION_ID` (`>=8.5` depuis #182 :
+  `int<80500, 80699>`).
 - `ruflin/elastica` déclare `Elastica\Query\Match` jusqu'en 6.1 : `match` est un mot réservé depuis
   PHP 8, d'où une erreur de parsing (500) dès qu'une page avec des tags cherche des contenus
   similaires. Utiliser `Elastica\Query\MatchQuery`.
@@ -831,7 +832,8 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   d'une localisation (`LocalisableUtils`) change pour trois pays, Biélorussie (rue en tête), Irlande
   (code postal sur sa ligne) et Namibie (la 1.0.9 écrivait un `n` à la place du saut de ligne).
   Les adresses de la base ne bougent pas, seulement celles qui sont géocodées ensuite.
-- doctrine/migrations 3 lit la table des 1.x et 2.x (`storage.table_storage.table_name:
+- doctrine/migrations 3 (3.9, avec DoctrineMigrationsBundle 4.0 depuis #224 : la 3.7.1 borne
+  HttpKernel à la 7) lit la table des 1.x et 2.x (`storage.table_storage.table_name:
   migration_versions`) : la sienne par défaut, `doctrine_migration_versions`, lui ferait rejouer
   toutes les migrations de la prod. Le premier `doctrine:migrations:migrate` (ou
   `sync-metadata-storage`) la convertit : `version` en `VARCHAR(191)`, qui porte le nom de la
@@ -921,10 +923,11 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `http-client`, `expression-language` pour `@Security`). En dev, ceux des tests (`browser-kit`,
   `css-selector`, `dom-crawler`, `finder`) et `stopwatch` (services de debug et timeline du
   profiler, comme le `profiler-pack` de Symfony). Le reste vient des dépendances. Celles qui
-  acceptent aussi la 8.x (`cache`, `clock`, `process`, `property-info`, `string`, `twig-bridge`,
-  `type-info`, `var-dumper`, `var-exporter`, `web-link`) sont bornées par le `conflict` de
-  `composer.json`, à monter avec les composants. Les contrats sont en 3.x, séparés
-  (`service-contracts`…).
+  acceptent aussi la 8.x (`cache`, `clock`, `monolog-bridge` depuis monolog-bundle 4, `process`,
+  `property-info`, `string`, `twig-bridge`, `type-info`, `var-dumper`, `var-exporter`,
+  `web-link`) sont bornées par le `conflict` de `composer.json`, à monter avec les composants. Les
+  contrats sont en 3.x, séparés (`service-contracts`…). Toutes les autres dépendances acceptent
+  déjà la 8 (#224) : le saut ne monte plus que les composants.
 - Sans `symfony/symfony` (sa classe `FullStack`), FrameworkBundle active d'office chaque fonction
   dont le composant est installé : `lock`, `property_info`, `type_info` (que tire `property-info`
   7.x) et `web_link`, que tirent des dépendances, sont coupés dans `config.yml`, comme avant. Un
@@ -999,6 +1002,13 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   - Le contrôleur redirige en 301 (`controller.redirect_response_code`), le défaut d'avant Liip 2.7
     (302 depuis). `twig.mode: lazy` (le mode `legacy` est déprécié) : `imagine_filter` exige une
     chaîne (un chemin `null` donne une `TypeError`) et ne retire plus la query string du chemin.
+- Captures de Chromium (`WebScreenshotUtils`, chrome-php 1.16 depuis #224) : miniatures des
+  processus (`ladb:cron:workflow:thumbnails`, 600×600) et des vidéos des trouvailles sans vignette
+  d'hébergeur (1280×1024) ; celle des liens est coupée dans `FindUtils`. Le mode headless des
+  Chromium récents compte l'interface dans `windowSize` : `setViewport()` donne sa taille à la page
+  (#155). Le vrai Chromium appelle Google dès son démarrage : en test, le double de
+  `config_test.yml`. Une vraie capture se vérifie à la main, `captureToPicture()` sur une page
+  servie par `php -S` dans le builder (#155, #224).
 - Plus de composant `templating` : les templates se nomment dans la notation de Twig
   (`@LadbCore/Dir/file.html.twig`, `@FOSUser/…`, `base.html.twig` pour `templates/`), la
   notation de bundle (`LadbCoreBundle:Dir:file.html.twig`, `::base.html.twig`) ne les trouve plus.
@@ -1047,9 +1057,13 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   et le `ReaderPass` de StofDoctrineExtensionsBundle donne aux listeners de Gedmo son
   `AttributeReader`. Une annotation oubliée (`@Assert`, `@ORM`, `@Route`…) est ignorée sans rien
   dire.
-- symfony/monolog-bundle 3.11 (#177, #28) passe au container les niveaux des handlers tels qu'écrits
-  (`notice`, que Monolog convertit) et le `action_level` du `fingers_crossed` en
-  `ErrorLevelActivationStrategy` : mêmes niveaux et mêmes fichiers que la 3.6.
+- symfony/monolog-bundle 4.1 (#224), comme la 3.11 (#177, #28), passe au container les niveaux des
+  handlers tels qu'écrits (`notice`, que Monolog convertit) et le `action_level` du
+  `fingers_crossed` en `ErrorLevelActivationStrategy` : mêmes niveaux et mêmes fichiers que la 3.6.
+  La 4.0 retire des options et des types de handler que la config n'utilise pas (`excluded_404s`,
+  `elasticsearch`, `sentry`…). La 4.1 ferme les handlers déjà créés à l'arrêt du kernel
+  (`monolog.handler_lifecycle_manager`) : à chaque reboot du client d'un test, jamais sous FPM ni
+  dans un worker.
 - Depuis Symfony 6 (`framework.form.legacy_error_messages`, sans effet), une valeur qu'un type de
   formulaire ne peut pas transformer (langue inconnue, nombre mal écrit, choix hors liste) donne le
   message du type (« Cette langue n'est pas valide. ») au lieu de « Cette valeur n'est pas
