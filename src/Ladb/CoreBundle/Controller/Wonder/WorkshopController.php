@@ -152,7 +152,7 @@ class WorkshopController extends AbstractController {
 		$this->addFlash('success', $translator->trans('wonder.workshop.form.alert.unpublish_success', array( '%title%' => $workshop->getTitle() )));
 
 		// Return to
-		$returnToUrl = $request->get('rtu');
+		$returnToUrl = $request->query->get('rtu');
 		if (is_null($returnToUrl)) {
 			$returnToUrl = $this->getRefererUrl($request);
 		}

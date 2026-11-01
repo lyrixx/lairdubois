@@ -102,7 +102,7 @@ class VoteController extends AbstractController {
 		$parentEntity = $this->_retrieveRelatedParentEntity($parentEntityRepository, $entity);
 
 		// Get orientation parameter
-		$orientation = $request->get('orientation', 'auto');
+		$orientation = $request->query->get('orientation', 'auto');
 
 		$newVote = new NewVote();
 		$form = $this->createForm(NewVoteType::class, $newVote);
@@ -140,7 +140,7 @@ class VoteController extends AbstractController {
 		$parentEntity = $this->_retrieveRelatedParentEntity($parentEntityRepository, $entity);
 
 		// Get orientation parameter
-		$orientation = $request->get('orientation', 'auto');
+		$orientation = $request->query->get('orientation', 'auto');
 
 		// Compute score
 		$score = $way == 'down' ? -1 : 1;
@@ -307,7 +307,7 @@ class VoteController extends AbstractController {
 
 		// Return to
 
-		$returnToUrl = $request->get('rtu');
+		$returnToUrl = $request->query->get('rtu');
 		if (is_null($returnToUrl)) {
 			$returnToUrl = $this->getRefererUrl($request);
 		}
@@ -322,7 +322,7 @@ class VoteController extends AbstractController {
 		}
 
 		// Get orientation parameter
-		$orientation = $request->get('orientation', 'auto');
+		$orientation = $request->query->get('orientation', 'auto');
 
 		$voteRepository = $om->getRepository(Vote::CLASS_NAME);
 

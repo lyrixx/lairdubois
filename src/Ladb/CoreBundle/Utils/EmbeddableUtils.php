@@ -253,7 +253,7 @@ class EmbeddableUtils {
 	}
 
 	public function processReferer(EmbeddableInterface $embeddable, Request $request) {
-		if ($request->get('referer', '0') == '1') {
+		if ($request->query->get('referer', '0') == '1') {
 
 			// Ignore bots
 			$userAgent = $request->headers->get('User-Agent');
@@ -333,7 +333,7 @@ class EmbeddableUtils {
 
 				}
 				$referral->incrementAccessCount();
-				$referral->setDisplayRedirectionWarning($request->get('displayRedirectionWarning', '1') == '1');	// By default redirection warning is displayed
+				$referral->setDisplayRedirectionWarning($request->query->get('displayRedirectionWarning', '1') == '1');	// By default redirection warning is displayed
 
 				$om->flush();
 

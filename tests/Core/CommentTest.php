@@ -124,6 +124,20 @@ final class CommentTest extends InteractionTestCase
         self::assertSame(404, $client->getResponse()->getStatusCode());
     }
 
+    /**
+     * Some contents warn above the form of a new comment (alertTransKey, in the query of its URL):
+     * the comments of a question are not for its answers.
+     */
+    public function testNewWithAlert(): void
+    {
+        $client = static::createClientAs(UserFixtures::USER2);
+
+        $crawler = static::xhr($client, 'GET', static::generatePath('core_comment_new', $this->getNewParameters() + ['alertTransKey' => 'qa.question.comment_alert']));
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertStringContainsString('N\'apportez pas votre réponse ici.', $crawler->filter('.alert-info')->text(null, false));
+    }
+
     public function testReply(): void
     {
         $client = static::createClientAs(UserFixtures::ADMIN);

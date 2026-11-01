@@ -5,10 +5,13 @@ namespace Tests\Wonder;
 use Ladb\CoreBundle\DataFixtures\UserFixtures;
 use Ladb\CoreBundle\Entity\Wonder\Creation;
 use Ladb\CoreBundle\Entity\Wonder\Plan;
+use Tests\DoUpTrait;
 use Tests\PublicationTestCase;
 
 final class CreationTest extends PublicationTestCase
 {
+    use DoUpTrait;
+
     protected static function getRoutePrefix(): string
     {
         return 'core_creation';

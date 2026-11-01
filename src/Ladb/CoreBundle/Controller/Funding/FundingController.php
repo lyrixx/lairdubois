@@ -32,8 +32,8 @@ class FundingController extends AbstractController {
 		$userRepository = $om->getRepository(User::CLASS_NAME);
 
 		// Retrieve parameters
-		$amountEur = $request->get('amount_eur', 5);	// default amount = 5€
-		$autoShow = $request->get('auto_show', false);
+		$amountEur = $request->query->get('amount_eur', 5);	// default amount = 5€
+		$autoShow = $request->query->get('auto_show', false);
 
 		if (is_null($year) || is_null($month)) {
 			$funding = $fundingManager->getOrCreateCurrent();
@@ -266,7 +266,7 @@ class FundingController extends AbstractController {
 	public function donationNewAction(Request $request) {
 
 		// Retrieve parameters
-		$amountEur = intval($request->get('amount_eur', 5));	// Default 5 euros
+		$amountEur = intval($request->query->get('amount_eur', 5));	// Default 5 euros
 
 		if ($request->isXmlHttpRequest()) {
 
@@ -323,7 +323,7 @@ class FundingController extends AbstractController {
 		}
 
 		// Retrieve parameters
-		$intentId = $request->get('intent_id');
+		$intentId = $request->request->get('intent_id');
 		if (is_null($intentId)) {
 			throw $this->createNotFoundException('No intentId (core_funding_donation_confirmed)');
 		}

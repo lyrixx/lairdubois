@@ -58,7 +58,8 @@ trait PublicationControllerTrait {
 	protected function retrieveOwner(Request $request) {
 
 		// Try to get owner user from parameters and returns it if it exists (and if it's a team) else return session user
-		$username = $request->get('owner');
+		// In the query of new, chown and the picture upload, in the body of create (hidden field of the form)
+		$username = $request->query->get('owner') ?? $request->request->get('owner');
 		if (!is_null($username)) {
 			$user = $this->retrieveUserByUsername($username);
 			if (!is_null($user) && !$this->isGranted('ROLE_ADMIN')) {

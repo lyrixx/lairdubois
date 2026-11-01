@@ -147,7 +147,7 @@ class FindController extends AbstractController {
 		$this->addFlash('success', $translator->trans('find.find.form.alert.unpublish_success', array( '%title%' => $find->getTitle() )));
 
 		// Return to
-		$returnToUrl = $request->get('rtu');
+		$returnToUrl = $request->query->get('rtu');
 		if (is_null($returnToUrl)) {
 			$returnToUrl = $this->getRefererUrl($request);
 		}
@@ -175,7 +175,7 @@ class FindController extends AbstractController {
 	#[Template('@LadbCore/Find/Find/edit.html.twig')]
 	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, FindUtils $findUtils, EntityManagerInterface $om, PicturedUtils $picturedUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
-		$doUp = $request->get('ladb_do_up', false) && $this->isGranted('ROLE_ADMIN');
+		$doUp = $request->request->get('ladb_do_up', false) && $this->isGranted('ROLE_ADMIN');
 
 		$find = $this->retrievePublication($id, Find::CLASS_NAME);
 		$this->assertEditabable($find);

@@ -166,7 +166,7 @@ class CreationController extends AbstractController {
 		$this->addFlash('success', $translator->trans('wonder.creation.form.alert.unpublish_success', array( '%title%' => $creation->getTitle() )));
 
 		// Return to
-		$returnToUrl = $request->get('rtu');
+		$returnToUrl = $request->query->get('rtu');
 		if (is_null($returnToUrl)) {
 			$returnToUrl = $this->getRefererUrl($request);
 		}
@@ -194,7 +194,7 @@ class CreationController extends AbstractController {
 	#[Template('@LadbCore/Wonder/Creation/edit.html.twig')]
 	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, EmbeddableUtils $embeddableUtils, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, PicturedUtils $picturedUtils, StripableUtils $stripableUtils, TagUtils $tagUtils, TranslatorInterface $translator) {
 
-		$doUp = $request->get('ladb_do_up', false) && $this->isGranted('ROLE_ADMIN');
+		$doUp = $request->request->get('ladb_do_up', false) && $this->isGranted('ROLE_ADMIN');
 
 		$creation = $this->retrievePublication($id, Creation::CLASS_NAME);
 		$this->assertEditabable($creation);
@@ -641,8 +641,8 @@ class CreationController extends AbstractController {
 			throw $this->createNotFoundException('Page limit reached (core_creation_list_page)');
 		}
 
-		$layout = $request->get('layout', 'view');
-		$homepage = $request->get('homepage', false);
+		$layout = $request->query->get('layout', 'view');
+		$homepage = $request->attributes->get('homepage', false);	// Set by the forward() of core_welcome
 
 		$routeParameters = array();
 		if ($layout != 'view') {

@@ -22,10 +22,10 @@ class OpencutlistController extends AbstractController {
     const DEV_LANGUAGES = [ 'fr' ];
 
 	private function _createAccess(Request $request, $env, $kind, EntityManagerInterface $om) {
-		$oclVersion = $request->get('v');
-		$oclBuild = $request->get('build');
-		$oclLanguage = $request->get('language');
-		$sketchupLocale = $request->get('locale');
+		$oclVersion = $request->query->get('v');
+		$oclBuild = $request->query->get('build');
+		$oclLanguage = $request->query->get('language');
+		$sketchupLocale = $request->query->get('locale');
 
 		if (strlen($oclLanguage) != 2) {
 			$oclLanguage = null;
@@ -110,7 +110,7 @@ class OpencutlistController extends AbstractController {
 		$access = $this->_createAccess($request, $env, Access::KIND_DOCS, $om);
 
 		$path = '';
-		switch ($request->get('page', '')) {
+		switch ($request->query->get('page', '')) {
             case 'core.upgrade':
                 $path = '/getting-started/updating';
                 break;
@@ -206,7 +206,7 @@ class OpencutlistController extends AbstractController {
 
         $url = 'https://docs.opencutlist.org'.$path;
 
-        if ($request->get('redirect', false)) {
+        if ($request->query->get('redirect', false)) {
             return $this->redirect($url);
         }
 		return JsonResponse::fromJsonString('{ "url": "'.$url.'" }');
@@ -240,11 +240,11 @@ class OpencutlistController extends AbstractController {
 
         set_time_limit(300); // Et time limit to 5 min
 
-		$env = $request->get('env', 'prod');
-		$days = intval($request->get('days', '28'));
-		$continent = $request->get('continent', null);
-		$language = $request->get('language', null);
-		$locale = $request->get('locale', null);
+		$env = $request->query->get('env', 'prod');
+		$days = intval($request->query->get('days', '28'));
+		$continent = $request->query->get('continent', null);
+		$language = $request->query->get('language', null);
+		$locale = $request->query->get('locale', null);
 
 		$accessRepository = $om->getRepository(Access::CLASS_NAME);
 

@@ -160,7 +160,7 @@ class PlanController extends AbstractController {
 		$this->addFlash('success', $translator->trans('wonder.plan.form.alert.unpublish_success', array( '%title%' => $plan->getTitle() )));
 
 		// Return to
-		$returnToUrl = $request->get('rtu');
+		$returnToUrl = $request->query->get('rtu');
 		if (is_null($returnToUrl)) {
 			$returnToUrl = $this->getRefererUrl($request);
 		}
@@ -661,7 +661,7 @@ class PlanController extends AbstractController {
 			throw $this->createNotFoundException('Page limit reached (core_plan_list_page)');
 		}
 
-		$layout = $request->get('layout', 'view');
+		$layout = $request->query->get('layout', 'view');
 
 		$routeParameters = array();
 		if ($layout != 'view') {

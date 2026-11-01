@@ -78,8 +78,8 @@ class PictureController extends AbstractController {
 		return array(
 			'picture'     => $picture,
 			'form'        => $form->createView(),
-			'formSection' => $request->get('formSection', 'pictures'),
-			'sortable'    => $request->get('sortable', false),
+			'formSection' => $request->query->get('formSection', 'pictures'),
+			'sortable'    => $request->query->get('sortable', false),
 		);
 	}
 
@@ -169,16 +169,16 @@ class PictureController extends AbstractController {
 
 			return $this->render('@LadbCore/Core/Picture/update-success-xhr.html.twig', array(
 				'picture'     => $picture,
-				'formSection' => $request->get('formSection', 'pictures'),
-				'sortable'    => $request->get('sortable', false),
+				'formSection' => $request->query->get('formSection', 'pictures'),
+				'sortable'    => $request->query->get('sortable', false),
 			));
 		}
 
 		return array(
 			'picture'     => $picture,
 			'form'        => $form->createView(),
-			'formSection' => $request->get('formSection', 'pictures'),
-			'sortable'    => $request->get('sortable', false),
+			'formSection' => $request->query->get('formSection', 'pictures'),
+			'sortable'    => $request->query->get('sortable', false),
 		);
 	}
 

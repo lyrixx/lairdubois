@@ -142,7 +142,7 @@ class QuestionController extends AbstractController {
 		$this->addFlash('success', $translator->trans('faq.question.form.alert.unpublish_success', array( '%title%' => $question->getTitle() )));
 
 		// Return to
-		$returnToUrl = $request->get('rtu');
+		$returnToUrl = $request->query->get('rtu');
 		if (is_null($returnToUrl)) {
 			$returnToUrl = $this->getRefererUrl($request);
 		}

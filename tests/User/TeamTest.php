@@ -125,7 +125,8 @@ final class TeamTest extends WebTestCase
         $client->request('GET', "/members/{$team->getId()}/invitation/new");
         self::assertSame(200, $client->getResponse()->getStatusCode());
 
-        $client->request('POST', "/members/{$team->getId()}/invitation/create", ['recipients' => 'apprenti,admin,user2']);
+        // As the site: in the query string (window.location of invitation-new.html.twig)
+        $client->request('GET', "/members/{$team->getId()}/invitation/create", ['recipients' => 'apprenti,admin,user2']);
 
         self::assertSame('/@team/invitations', $client->getResponse()->headers->get('Location'));
         self::assertNotNull($this->findInvitation('apprenti'));
@@ -148,7 +149,7 @@ final class TeamTest extends WebTestCase
         $client->request('GET', "/members/{$team->getId()}/invitation/new");
         self::assertSame(404, $client->getResponse()->getStatusCode());
 
-        $client->request('POST', "/members/{$team->getId()}/invitation/create", ['recipients' => 'admin']);
+        $client->request('GET', "/members/{$team->getId()}/invitation/create", ['recipients' => 'admin']);
         self::assertSame(404, $client->getResponse()->getStatusCode());
     }
 

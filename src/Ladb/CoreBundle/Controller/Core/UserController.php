@@ -487,7 +487,7 @@ class UserController extends AbstractController {
 		$listedCounterValue = null;
 
 		// Check if a listed entity type is provided (to retrieve counter before computing a new one)
-		$listedEntityType = $request->get('listed_entity_type', false);
+		$listedEntityType = $request->query->get('listed_entity_type', false);
 		if ($listedEntityType) {
 
 			$listedEntityStrippedName = $typableUtils->getStrippedNameByType($listedEntityType);

@@ -220,6 +220,36 @@ final class LikeTest extends InteractionTestCase
         yield 'admin' => [UserFixtures::ADMIN];
     }
 
+    /**
+     * The widget of the header of a content hides its text on mobile (noTextOnMobile, in the query
+     * of its links): the widget sent back after a like or its deletion keeps it.
+     *
+     * @dataProvider provideNoTextOnMobile
+     */
+    public function testCreateAndDeleteKeepNoTextOnMobile(array $query, bool $hidden): void
+    {
+        $client = static::createClientAs(UserFixtures::ADMIN);
+
+        $crawler = static::xhr($client, 'GET', $this->getCreatePath($query));
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertCount($hidden ? 1 : 0, $crawler->filter('a.ladb-like-widget span.ladb-hidden-mobile'));
+
+        $crawler = static::xhr($client, 'GET', static::generatePath('core_like_delete', ['id' => $this->findLikeOf(UserFixtures::ADMIN)->getId()] + $query));
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertCount($hidden ? 1 : 0, $crawler->filter('a.ladb-like-widget span.ladb-hidden-mobile'));
+    }
+
+    /**
+     * @return iterable<string, array{array<string, int>, bool}>
+     */
+    public static function provideNoTextOnMobile(): iterable
+    {
+        yield 'text' => [[], false];
+        yield 'no text on mobile' => [['noTextOnMobile' => 1], true];
+    }
+
     private function getCreatePath(array $parameters = []): string
     {
         return static::generatePath('core_like_create', ['entityType' => Creation::TYPE, 'entityId' => self::CREATION_ID] + $parameters);

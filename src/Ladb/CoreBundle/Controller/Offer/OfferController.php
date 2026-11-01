@@ -149,7 +149,7 @@ class OfferController extends AbstractController {
 		$this->addFlash('success', $translator->trans('offer.offer.form.alert.unpublish_success', array( '%title%' => $offer->getTitle() )));
 
 		// Return to
-		$returnToUrl = $request->get('rtu');
+		$returnToUrl = $request->query->get('rtu');
 		if (is_null($returnToUrl)) {
 			$returnToUrl = $this->getRefererUrl($request);
 		}

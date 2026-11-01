@@ -44,8 +44,8 @@ class CollectionController extends AbstractCollectionBasedController {
 		return array(
 			'form'         => $form->createView(),
 			'tagProposals' => $tagUtils->getProposals($collection),
-			'entityType'   => $request->get('entityType', null),
-			'entityId'     => $request->get('entityId', null),
+			'entityType'   => $request->query->get('entityType', null),
+			'entityId'     => $request->query->get('entityId', null),
 		);
 	}
 
@@ -73,8 +73,8 @@ class CollectionController extends AbstractCollectionBasedController {
 			$dispatcher->dispatch(new PublicationEvent($collection), PublicationListener::PUBLICATION_CREATED);
 
 			// Check auto add
-			$entityType = $request->get('entityType', null);
-			$entityId = $request->get('entityId', null);
+			$entityType = $request->query->get('entityType', null);
+			$entityId = $request->query->get('entityId', null);
 			if (!is_null($entityType) && !is_null($entityId)) {
 
 				// Retrieve related entity
@@ -103,8 +103,8 @@ class CollectionController extends AbstractCollectionBasedController {
 			'collection'   => $collection,
 			'form'         => $form->createView(),
 			'tagProposals' => $tagUtils->getProposals($collection),
-			'entityType'   => $request->get('entityType', null),
-			'entityId'     => $request->get('entityId', null),
+			'entityType'   => $request->query->get('entityType', null),
+			'entityId'     => $request->query->get('entityId', null),
 		);
 	}
 
@@ -160,7 +160,7 @@ class CollectionController extends AbstractCollectionBasedController {
 		$this->addFlash('success', $translator->trans('collection.collection.form.alert.unpublish_success', array( '%title%' => $collection->getTitle() )));
 
 		// Return to
-		$returnToUrl = $request->get('rtu');
+		$returnToUrl = $request->query->get('rtu');
 		if (is_null($returnToUrl)) {
 			$returnToUrl = $this->getRefererUrl($request);
 		}

@@ -140,7 +140,7 @@ class HowtoController extends AbstractHowtoBasedController {
 		$this->addFlash('success', $translator->trans('howto.howto.form.alert.unpublish_success', array( '%title%' => $howto->getTitle() )));
 
 		// Return to
-		$returnToUrl = $request->get('rtu');
+		$returnToUrl = $request->query->get('rtu');
 		if (is_null($returnToUrl)) {
 			$returnToUrl = $this->getRefererUrl($request);
 		}
@@ -332,7 +332,7 @@ class HowtoController extends AbstractHowtoBasedController {
 			throw $this->createNotFoundException('Page limit reached (core_howto_list_page)');
 		}
 
-		$layout = $request->get('layout', 'view');
+		$layout = $request->query->get('layout', 'view');
 
 		$routeParameters = array();
 		if ($layout != 'view') {

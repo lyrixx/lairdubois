@@ -19,15 +19,15 @@ class ReportController extends AbstractController {
 
 		$this->createLock('core_report_create', false, self::LOCK_TTL_CREATE_ACTION, false);
 
-		$entityType = intval($request->get('entity_type'));
+		$entityType = intval($request->query->get('entity_type'));
 		if (is_null($entityType)) {
 			throw $this->createNotFoundException('No entityType');
 		}
-		$entityId = intval($request->get('entity_id'));
+		$entityId = intval($request->query->get('entity_id'));
 		if (is_null($entityId)) {
 			throw $this->createNotFoundException('No entityId');
 		}
-		$reason = intval($request->get('reason'));
+		$reason = intval($request->query->get('reason'));
 		if (is_null($reason)) {
 			throw $this->createNotFoundException('No reason');
 		}
@@ -58,7 +58,7 @@ class ReportController extends AbstractController {
 		$this->addFlash('success', $translator->trans('report.created'));
 
 		// Return to
-		$returnToUrl = $request->get('rtu');
+		$returnToUrl = $request->query->get('rtu');
 		if (is_null($returnToUrl)) {
 			$returnToUrl = $this->getRefererUrl($request);
 		}

@@ -134,6 +134,47 @@ final class VoteTest extends InteractionTestCase
     }
 
     /**
+     * The widget beside a value lays out its buttons in a row (orientation, in the query of the
+     * form and of its action, then of the links of the widget sent back).
+     *
+     * @dataProvider provideOrientations
+     */
+    public function testVoteKeepsTheOrientation(array $query, string $orientation): void
+    {
+        $client = static::createClientAs(UserFixtures::USER2);
+        $parameters = ['entityType' => $this->findNameValue()->getType(), 'entityId' => $this->findNameValue()->getId(), 'way' => 'up'];
+
+        $crawler = static::xhr($client, 'GET', static::generatePath('core_vote_new', $parameters + $query));
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        $form = $crawler->filter(\sprintf('form[action="%s"]', static::generatePath('core_vote_create', $parameters + ['orientation' => $orientation])))->form();
+
+        $crawler = static::xhr($client, 'POST', $form->getUri(), $form->getPhpValues());
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        $vote = $this->findVoteOf(UserFixtures::USER2);
+        self::assertNotNull($vote);
+        self::assertCount(1, $crawler->filter('.ladb-vote-score'));
+        self::assertCount('horizontal' === $orientation ? 0 : 1, $crawler->filter('.ladb-vote-score.col-sm-12'));
+        self::assertStringContainsString(static::generatePath('core_vote_delete', ['id' => $vote->getId(), 'orientation' => $orientation]), $client->getResponse()->getContent());
+
+        $crawler = static::xhr($client, 'GET', static::generatePath('core_vote_delete', ['id' => $vote->getId()] + $query));
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertNull($this->findVoteOf(UserFixtures::USER2));
+        self::assertCount('horizontal' === $orientation ? 0 : 1, $crawler->filter('.ladb-vote-score.col-sm-12'));
+    }
+
+    /**
+     * @return iterable<string, array{array<string, string>, string}>
+     */
+    public static function provideOrientations(): iterable
+    {
+        yield 'auto' => [[], 'auto'];
+        yield 'horizontal' => [['orientation' => 'horizontal'], 'horizontal'];
+    }
+
+    /**
      * A vote for the name, without the controller, whose lock against double submissions would
      * refuse the next vote of the same user for 3 seconds.
      */

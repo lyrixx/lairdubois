@@ -49,7 +49,7 @@ class CommentController extends AbstractController {
 			throw $this->createNotFoundException('Only XML request allowed (core_comment_new)');
 		}
 
-		$alertTransKey = $request->get('alertTransKey', '');
+		$alertTransKey = $request->query->get('alertTransKey', '');
 
 		// Retrieve related entity
 

@@ -14,7 +14,7 @@ class ApiController extends AbstractController {
 	#[Template('@LadbCore/Core/Api/networkShareCount.json.twig')]
 	public function networkShareCountAction(Request $request, $network) {
 
-		$url = $request->get('url');
+		$url = $request->query->get('url');
 		$count = 0;
 
 		if (strpos($url, 'https://www.lairdubois.fr/') !== 0) {

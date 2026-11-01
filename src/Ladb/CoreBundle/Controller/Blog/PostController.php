@@ -140,7 +140,7 @@ class PostController extends AbstractController {
 		$this->addFlash('success', $translator->trans('blog.post.form.alert.unpublish_success', array( '%title%' => $post->getTitle() )));
 
 		// Return to
-		$returnToUrl = $request->get('rtu');
+		$returnToUrl = $request->query->get('rtu');
 		if (is_null($returnToUrl)) {
 			$returnToUrl = $this->getRefererUrl($request);
 		}
@@ -170,7 +170,7 @@ class PostController extends AbstractController {
 	#[IsGranted(new Expression("is_granted('ROLE_ADMIN') or is_granted('ROLE_BLOG')"), statusCode: 404, message: 'Not allowed (core_blog_post_update)')]
 	public function updateAction(Request $request, $id, BlockBodiedUtils $blockUtils, EventDispatcherInterface $dispatcher, FieldPreprocessorUtils $fieldPreprocessorUtils, EntityManagerInterface $om, TagUtils $tagUtils, TranslatorInterface $translator) {
 
-		$doUp = $request->get('ladb_do_up', false);
+		$doUp = $request->request->get('ladb_do_up', false);
 
 		$post = $this->retrievePublication($id, Post::CLASS_NAME);
 		$this->assertEditabable($post);

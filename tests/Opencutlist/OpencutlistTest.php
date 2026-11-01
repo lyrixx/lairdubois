@@ -204,6 +204,43 @@ final class OpencutlistTest extends WebTestCase
         self::assertSame(200, $client->getResponse()->getStatusCode());
     }
 
+    /**
+     * The filters of the stats, in the query of their links: environment, days, continent and
+     * languages of OpenCutList and SketchUp. On a download of 10 days ago.
+     *
+     * @dataProvider provideStatsFilters
+     */
+    public function testStatsFilters(array $filters, int $count): void
+    {
+        $client = static::createClient();
+        $client->request('GET', static::generatePath('core_opencutlist_download', ['v' => '7.0.0', 'language' => 'fr', 'locale' => 'fr']));
+        $access = $this->findLastAccess();
+        $access->setAnalyzed(true);
+        $access->setContinentCode('EU');
+        $access->setCountryCode('FR');
+        $access->setCreatedAt(new \DateTime('-10 days'));
+        static::getEntityManager()->flush();
+
+        $client = static::createClientAs(UserFixtures::ADMIN);
+        $crawler = $client->request('GET', static::generatePath('core_opencutlist_stats', $filters));
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertStringContainsString($count.' requêtes', $crawler->filter('h2')->text(null, false));
+    }
+
+    /**
+     * @return iterable<string, array{array<string, int|string>, int}>
+     */
+    public static function provideStatsFilters(): iterable
+    {
+        yield 'all' => [['env' => 'prod', 'days' => 28, 'continent' => 'EU', 'language' => 'fr', 'locale' => 'fr'], 1];
+        yield 'other environment' => [['env' => 'dev'], 0];
+        yield 'fewer days' => [['days' => 7], 0];
+        yield 'other continent' => [['continent' => 'NA'], 0];
+        yield 'other language of OpenCutList' => [['language' => 'en'], 0];
+        yield 'other language of SketchUp' => [['locale' => 'en'], 0];
+    }
+
     private function findLastAccess(): ?Access
     {
         return static::getEntityManager()->getRepository(Access::class)->findOneBy([], ['id' => 'DESC']);
