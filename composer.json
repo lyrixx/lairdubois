@@ -126,6 +126,7 @@
     "conflict": {
         "symfony/cache": ">=8.0",
         "symfony/clock": ">=8.0",
+        "symfony/monolog-bridge": ">=8.0",
         "symfony/process": ">=8.0",
         "symfony/property-info": ">=8.0",
         "symfony/string": ">=8.0",
