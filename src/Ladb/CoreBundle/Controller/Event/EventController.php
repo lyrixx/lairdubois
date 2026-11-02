@@ -182,6 +182,8 @@ class EventController extends AbstractController {
 		$originalBodyBlocks = $event->getBodyBlocks()->toArray();	// Need to be an array to copy values
 		$previouslyUsedTags = $event->getTags()->toArray();	// Need to be an array to copy values
 
+		$event->resetBodyBlocks(); // Reset bodyBlocks array to consider form bodyBlocks order
+
 		$form = $this->createForm(EventType::class, $event);
 		$form->handleRequest($request);
 
