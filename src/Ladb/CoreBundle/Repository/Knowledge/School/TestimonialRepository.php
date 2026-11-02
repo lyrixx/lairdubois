@@ -38,7 +38,7 @@ class TestimonialRepository extends AbstractEntityRepository {
 			->innerJoin('t.school', 's')
 			->where('t.user = :user')
 			->setParameter('user', $user)
-			->orderBy('t.fromYear', 'DESC')
+			->orderBy('t.fromYear', \SortDirection::Descending)
 		;
 
 		try {

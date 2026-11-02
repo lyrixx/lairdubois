@@ -76,7 +76,7 @@ class Workflow extends AbstractAuthoredPublication implements IndexableInterface
 	private $duration = 0;
 
 	#[ORM\OneToMany(targetEntity: \Ladb\CoreBundle\Entity\Workflow\Task::class, mappedBy: 'workflow', cascade: ['all'])]
-	#[ORM\OrderBy(['positionTop' => 'ASC', 'positionLeft' => 'ASC'])]
+	#[ORM\OrderBy(['positionTop' => \SortDirection::Ascending, 'positionLeft' => \SortDirection::Ascending])]
 	protected $tasks;
 
 	#[ORM\Column(type: 'integer', name: 'task_count')]

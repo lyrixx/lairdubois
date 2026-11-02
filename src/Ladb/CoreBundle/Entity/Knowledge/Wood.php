@@ -63,7 +63,7 @@ class Wood extends AbstractKnowledge {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_wood_value_name')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Text::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $nameValues;
 
 	#[ORM\Column(type: 'boolean', nullable: false, name: 'name_rejected')]
@@ -75,7 +75,7 @@ class Wood extends AbstractKnowledge {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_wood_value_scientificname')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Text::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $scientificnameValues;
 
 
@@ -84,13 +84,13 @@ class Wood extends AbstractKnowledge {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_wood_value_englishname')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Text::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $englishnameValues;
 
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_wood_value_grain')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Picture::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $grainValues;
 
 	#[ORM\Column(type: 'boolean', nullable: false, name: 'grain_rejected')]
@@ -104,7 +104,7 @@ class Wood extends AbstractKnowledge {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_wood_value_endgrain')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Picture::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $endgrainValues;
 
 
@@ -115,7 +115,7 @@ class Wood extends AbstractKnowledge {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_wood_value_lumber')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Picture::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $lumberValues;
 
 
@@ -126,7 +126,7 @@ class Wood extends AbstractKnowledge {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_wood_value_tree')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Picture::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $treeValues;
 
 
@@ -137,7 +137,7 @@ class Wood extends AbstractKnowledge {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_wood_value_leaf')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Picture::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $leafValues;
 
 
@@ -148,7 +148,7 @@ class Wood extends AbstractKnowledge {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_wood_value_bark')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Picture::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $barkValues;
 
 
@@ -157,7 +157,7 @@ class Wood extends AbstractKnowledge {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_wood_value_family')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Integer::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $familyValues;
 
 
@@ -166,7 +166,7 @@ class Wood extends AbstractKnowledge {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_wood_value_density')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Integer::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $densityValues;
 
 
@@ -175,7 +175,7 @@ class Wood extends AbstractKnowledge {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_wood_value_availability')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Integer::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $availabilityValues;
 
 
@@ -184,7 +184,7 @@ class Wood extends AbstractKnowledge {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_wood_value_price')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Integer::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $priceValues;
 
 
@@ -193,7 +193,7 @@ class Wood extends AbstractKnowledge {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_wood_value_origin')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Text::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $originValues;
 
 
@@ -202,7 +202,7 @@ class Wood extends AbstractKnowledge {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_wood_value_utilization')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Text::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $utilizationValues;
 
 
@@ -211,7 +211,7 @@ class Wood extends AbstractKnowledge {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_wood_value_database_link')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Url::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $databaseLinkValues;
 
 

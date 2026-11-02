@@ -52,7 +52,7 @@ class MemberRequestRepository extends AbstractEntityRepository {
 
 	private function _applyCommonFilter(&$queryBuilder, $filter) {
 		$queryBuilder
-			->addOrderBy('u.createdAt', 'DESC')
+			->addOrderBy('u.createdAt', \SortDirection::Descending)
 		;
 	}
 

@@ -83,7 +83,7 @@ class Provider extends AbstractKnowledge implements LocalisableInterface, Review
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_provider_value_sign')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Sign::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $signValues;
 
 	#[ORM\Column(type: 'boolean', nullable: false, name: 'sign_rejected')]
@@ -92,7 +92,7 @@ class Provider extends AbstractKnowledge implements LocalisableInterface, Review
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_provider_value_logo')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Picture::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $logoValues;
 
 	#[ORM\Column(type: 'boolean', nullable: false, name: 'logo_rejected')]
@@ -106,7 +106,7 @@ class Provider extends AbstractKnowledge implements LocalisableInterface, Review
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_provider_value_photo')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Picture::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $photoValues;
 
 
@@ -115,7 +115,7 @@ class Provider extends AbstractKnowledge implements LocalisableInterface, Review
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_provider_value_website')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Url::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $websiteValues;
 	
 
@@ -142,7 +142,7 @@ class Provider extends AbstractKnowledge implements LocalisableInterface, Review
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_provider_value_address')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Location::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $addressValues;
 
 
@@ -151,7 +151,7 @@ class Provider extends AbstractKnowledge implements LocalisableInterface, Review
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_provider_value_phone')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Phone::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $phoneValues;
 
 
@@ -160,7 +160,7 @@ class Provider extends AbstractKnowledge implements LocalisableInterface, Review
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_provider_value_description')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Longtext::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $descriptionValues;
 
 
@@ -169,7 +169,7 @@ class Provider extends AbstractKnowledge implements LocalisableInterface, Review
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_provider_value_video')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Video::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $videoValues;
 
 
@@ -178,7 +178,7 @@ class Provider extends AbstractKnowledge implements LocalisableInterface, Review
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_provider_value_in_store_selling')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Integer::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $inStoreSellingValues;
 
 
@@ -187,7 +187,7 @@ class Provider extends AbstractKnowledge implements LocalisableInterface, Review
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_provider_value_mail_order_selling')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Integer::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $mailOrderSellingValues;
 
 
@@ -196,7 +196,7 @@ class Provider extends AbstractKnowledge implements LocalisableInterface, Review
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_provider_value_sale_to_individuals')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Integer::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $saleToIndividualsValues;
 
 
@@ -205,7 +205,7 @@ class Provider extends AbstractKnowledge implements LocalisableInterface, Review
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_provider_value_products')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Integer::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $productsValues;
 
 
@@ -214,7 +214,7 @@ class Provider extends AbstractKnowledge implements LocalisableInterface, Review
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_provider_value_services')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Integer::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $servicesValues;
 
 
@@ -223,7 +223,7 @@ class Provider extends AbstractKnowledge implements LocalisableInterface, Review
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_provider_value_woods')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Text::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $woodsValues;
 
 
@@ -232,7 +232,7 @@ class Provider extends AbstractKnowledge implements LocalisableInterface, Review
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_provider_value_branches')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Text::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $branchesValues;
 
 
@@ -241,7 +241,7 @@ class Provider extends AbstractKnowledge implements LocalisableInterface, Review
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_provider_value_state')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Integer::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $stateValues;
 
 

@@ -83,50 +83,50 @@ class FollowerRepository extends AbstractEntityRepository {
 	private function _applyCommonFilter(&$queryBuilder, $filter) {
 		if ('contributors-all' == $filter) {
 			$queryBuilder
-				->addOrderBy('m.contributionCount', 'DESC')
-				->addOrderBy('u.createdAt', 'DESC')
+				->addOrderBy('m.contributionCount', \SortDirection::Descending)
+				->addOrderBy('u.createdAt', \SortDirection::Descending)
 			;
 		} else if ('contributors-creations' == $filter) {
 			$queryBuilder
-				->addOrderBy('m.publicCreationCount', 'DESC')
-				->addOrderBy('u.createdAt', 'DESC')
+				->addOrderBy('m.publicCreationCount', \SortDirection::Descending)
+				->addOrderBy('u.createdAt', \SortDirection::Descending)
 			;
 		} else if ('contributors-plans' == $filter) {
 			$queryBuilder
-				->addOrderBy('m.publicPlanCount', 'DESC')
-				->addOrderBy('u.createdAt', 'DESC')
+				->addOrderBy('m.publicPlanCount', \SortDirection::Descending)
+				->addOrderBy('u.createdAt', \SortDirection::Descending)
 			;
 		} else if ('contributors-howtos' == $filter) {
 			$queryBuilder
-				->addOrderBy('m.publicHowtoCount', 'DESC')
-				->addOrderBy('u.createdAt', 'DESC')
+				->addOrderBy('m.publicHowtoCount', \SortDirection::Descending)
+				->addOrderBy('u.createdAt', \SortDirection::Descending)
 			;
 		} else if ('contributors-workshops' == $filter) {
 			$queryBuilder
-				->addOrderBy('m.publicWorkshopCount', 'DESC')
-				->addOrderBy('u.createdAt', 'DESC')
+				->addOrderBy('m.publicWorkshopCount', \SortDirection::Descending)
+				->addOrderBy('u.createdAt', \SortDirection::Descending)
 			;
 		} else if ('contributors-comments' == $filter) {
 			$queryBuilder
-				->addOrderBy('m.commentCount', 'DESC')
-				->addOrderBy('u.createdAt', 'DESC')
+				->addOrderBy('m.commentCount', \SortDirection::Descending)
+				->addOrderBy('u.createdAt', \SortDirection::Descending)
 			;
 		} else if ('contributors-finds' == $filter) {
 			$queryBuilder
-				->addOrderBy('m.publicFindCount', 'DESC')
-				->addOrderBy('u.createdAt', 'DESC')
+				->addOrderBy('m.publicFindCount', \SortDirection::Descending)
+				->addOrderBy('u.createdAt', \SortDirection::Descending)
 			;
 		} else if ('popular-followers' == $filter) {
 			$queryBuilder
-				->addOrderBy('m.followerCount', 'DESC')
+				->addOrderBy('m.followerCount', \SortDirection::Descending)
 			;
 		} else if ('popular-likes' == $filter) {
 			$queryBuilder
-				->addOrderBy('m.recievedLikeCount', 'DESC')
+				->addOrderBy('m.recievedLikeCount', \SortDirection::Descending)
 			;
 		} else {
 			$queryBuilder
-				->addOrderBy('u.createdAt', 'DESC')
+				->addOrderBy('u.createdAt', \SortDirection::Descending)
 			;
 		}
 	}

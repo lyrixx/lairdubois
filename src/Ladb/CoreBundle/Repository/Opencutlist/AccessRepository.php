@@ -127,7 +127,7 @@ class AccessRepository extends AbstractEntityRepository {
 			->from($this->getEntityName(), 'a')
 			->setFirstResult($offset)
 			->setMaxResults($limit)
-			->addOrderBy('a.createdAt', 'DESC')
+			->addOrderBy('a.createdAt', \SortDirection::Descending)
 		;
 
 		$startAt = (new \DateTime())->sub(new \DateInterval('P'.$backwardDays.'D'));

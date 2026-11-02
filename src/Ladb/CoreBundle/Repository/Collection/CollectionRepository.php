@@ -27,7 +27,7 @@ class CollectionRepository extends AbstractEntityRepository {
 		// Do not retrieve user viewed tips
 		if (!is_null($user)) {
 			$queryBuilder
-				->leftJoin(View::class, 'v', 'WITH', 'v.entityId = c.id AND v.entityType = '.Collection::TYPE.' AND v.kind = :kind AND v.user = :user')
+				->leftJoin(View::class, 'v', 'ON', 'v.entityId = c.id AND v.entityType = '.Collection::TYPE.' AND v.kind = :kind AND v.user = :user')
 				->andWhere('v.id IS NULL')
 				->setParameter('user', $user)
 				->setParameter('kind', View::KIND_SHOWN)
@@ -55,7 +55,7 @@ class CollectionRepository extends AbstractEntityRepository {
 			->innerJoin('c.user', 'u')
 			->where('c.user = :user')
 			->setParameter('user', $user)
-			->orderBy('c.title', 'ASC')
+			->orderBy('c.title', \SortDirection::Ascending)
 			->setFirstResult($offset)
 			->setMaxResults($limit)
 		;
@@ -75,7 +75,7 @@ class CollectionRepository extends AbstractEntityRepository {
 			->setParameter('entityType', $entity->getType())
 			->setParameter('entityId', $entity->getId())
 			->setParameter('visibility', HiddableInterface::VISIBILITY_PUBLIC)
-			->orderBy('c.changedAt', 'DESC')
+			->orderBy('c.changedAt', \SortDirection::Descending)
 			->setFirstResult($offset)
 			->setMaxResults($limit)
 		;

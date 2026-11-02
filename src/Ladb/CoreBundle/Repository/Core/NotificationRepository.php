@@ -80,7 +80,7 @@ class NotificationRepository extends AbstractEntityRepository {
 			->where('n.createdAt > :date')
 			->andWhere('n.groupIdentifier = :groupIdentifier')
 			->andWhere('n.user = :user')
-			->orderBy('n.id', 'DESC')
+			->orderBy('n.id', \SortDirection::Descending)
 			->setParameter('date', $date)
 			->setParameter('groupIdentifier', $groupIdentifier)
 			->setParameter('user', $user)
@@ -104,7 +104,7 @@ class NotificationRepository extends AbstractEntityRepository {
 			->where('n.isPendingEmail = 1')
 			->andWhere('n.isListed = 0')
 			->andWhere('a INSTANCE OF '.$activityInstanceOf)
-			->orderBy('u.id', 'ASC')
+			->orderBy('u.id', \SortDirection::Ascending)
 		;
 
 		try {
@@ -127,7 +127,7 @@ class NotificationRepository extends AbstractEntityRepository {
 			->where('n.user = :user')
 			->andWhere('n.folder IS NULL')
 			->setParameter('user', $user)
-			->orderBy('a.id', 'DESC')
+			->orderBy('a.id', \SortDirection::Descending)
 			->setFirstResult($offset)
 			->setMaxResults($limit)
 		;
@@ -192,7 +192,7 @@ class NotificationRepository extends AbstractEntityRepository {
 			;
 		}
 		$queryBuilder
-			->addOrderBy('a.createdAt', 'DESC')
+			->addOrderBy('a.createdAt', \SortDirection::Descending)
 		;
 	}
 

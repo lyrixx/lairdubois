@@ -152,7 +152,7 @@ EOT
 				->andWhere('c.likeCount >= 15')		// 15 or more likes
 				->andWhere('c.createdAt > :retrieveDate')
 				->andWhere('c.spotlight IS NULL')
-				->orderBy('score', 'DESC')
+				->orderBy('score', \SortDirection::Descending)
 				->setParameter('retrieveDate', $retrieveDate)
 				->setMaxResults(1)
 			;
@@ -179,7 +179,7 @@ EOT
 				->andWhere('h.changedAt > :retrieveDate')
 				->andWhere('h.spotlight IS NULL')
 				->andWhere('h.isWorkInProgress = 0')
-				->orderBy('score', 'DESC')
+				->orderBy('score', \SortDirection::Descending)
 				->setParameter('retrieveDate', $retrieveDate)
 				->setMaxResults(1)
 			;

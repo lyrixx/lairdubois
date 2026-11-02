@@ -151,7 +151,7 @@ class ThreadRepository extends AbstractEntityRepository {
 		}
 
 		$queryBuilder
-			->addOrderBy('t.lastMessageDate', 'DESC');
+			->addOrderBy('t.lastMessageDate', \SortDirection::Descending);
 
 		return new Paginator($queryBuilder->getQuery());
 	}

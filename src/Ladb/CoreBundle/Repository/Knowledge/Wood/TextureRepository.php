@@ -63,7 +63,7 @@ class TextureRepository extends AbstractEntityRepository {
 		}
 		$queryBuilder
 			->andWhere('v.voteScore >= 0')
-			->addOrderBy('v.voteScore', 'DESC')
+			->addOrderBy('v.voteScore', \SortDirection::Descending)
 		;
 	}
 

@@ -69,7 +69,7 @@ class Collection extends AbstractAuthoredPublication implements IndexableInterfa
 	private $entryTypeCounters;
 
 	#[ORM\OneToMany(targetEntity: \Ladb\CoreBundle\Entity\Collection\Entry::class, mappedBy: 'collection', cascade: ['all'])]
-	#[ORM\OrderBy(['sortIndex' => 'ASC'])]
+	#[ORM\OrderBy(['sortIndex' => \SortDirection::Ascending])]
 	private $entries;
 
 	#[Assert\Count(min: 2, groups: ['public'])]

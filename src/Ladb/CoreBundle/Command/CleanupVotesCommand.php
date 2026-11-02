@@ -77,7 +77,7 @@ EOT
 					->setParameter('entityType', $result['entity_type'])
 					->setParameter('entityId', $result['entity_id'])
 					->setParameter('user', $user)
-					->orderBy('l.id', 'ASC')
+					->orderBy('l.id', \SortDirection::Ascending)
 				;
 
 				$votes = $queryBuilder->getQuery()->getResult();

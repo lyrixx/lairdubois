@@ -93,19 +93,19 @@ class QuestionRepository extends AbstractEntityRepository {
 	private function _applyCommonFilter(&$queryBuilder, $filter) {
 		if ('popular-views' == $filter) {
 			$queryBuilder
-				->addOrderBy('q.viewCount', 'DESC')
+				->addOrderBy('q.viewCount', \SortDirection::Descending)
 			;
 		} else if ('popular-likes' == $filter) {
 			$queryBuilder
-				->addOrderBy('q.likeCount', 'DESC')
+				->addOrderBy('q.likeCount', \SortDirection::Descending)
 			;
 		} else if ('popular-comments' == $filter) {
 			$queryBuilder
-				->addOrderBy('q.commentCount', 'DESC')
+				->addOrderBy('q.commentCount', \SortDirection::Descending)
 			;
 		}
 		$queryBuilder
-			->addOrderBy('q.weight', 'DESC')
+			->addOrderBy('q.weight', \SortDirection::Descending)
 		;
 	}
 

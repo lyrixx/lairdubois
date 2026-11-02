@@ -67,7 +67,7 @@ class OfferRepository extends AbstractEntityRepository {
 			->leftJoin('o.mainPicture', 'mp')
 			->where('o.isDraft = false')
 			->andWhere('o.user = :user')
-			->orderBy('o.id', 'ASC')
+			->orderBy('o.id', \SortDirection::Ascending)
 			->setParameter('user', $user)
 			->setMaxResults(1);
 
@@ -87,7 +87,7 @@ class OfferRepository extends AbstractEntityRepository {
 			->leftJoin('o.mainPicture', 'mp')
 			->where('o.isDraft = false')
 			->andWhere('o.user = :user')
-			->orderBy('o.id', 'DESC')
+			->orderBy('o.id', \SortDirection::Descending)
 			->setParameter('user', $user)
 			->setMaxResults(1);
 
@@ -108,7 +108,7 @@ class OfferRepository extends AbstractEntityRepository {
 			->where('o.isDraft = false')
 			->andWhere('o.user = :user')
 			->andWhere('o.id < :id')
-			->orderBy('o.id', 'DESC')
+			->orderBy('o.id', \SortDirection::Descending)
 			->setParameter('user', $user)
 			->setParameter('id', $id)
 			->setMaxResults(1);
@@ -130,7 +130,7 @@ class OfferRepository extends AbstractEntityRepository {
 			->where('o.isDraft = false')
 			->andWhere('o.user = :user')
 			->andWhere('o.id > :id')
-			->orderBy('o.id', 'ASC')
+			->orderBy('o.id', \SortDirection::Ascending)
 			->setParameter('user', $user)
 			->setParameter('id', $id)
 			->setMaxResults(1);
@@ -158,7 +158,7 @@ class OfferRepository extends AbstractEntityRepository {
 		// Do not retrieve user viewed tips
 		if (!is_null($user)) {
 			$queryBuilder
-				->leftJoin(View::class, 'v', 'WITH', 'v.entityId = o.id AND v.entityType = :entityType AND v.kind = :kind AND v.user = :user')
+				->leftJoin(View::class, 'v', 'ON', 'v.entityId = o.id AND v.entityType = :entityType AND v.kind = :kind AND v.user = :user')
 				->andWhere('v.id IS NULL')
 				->setParameter('entityType', Offer::TYPE)
 				->setParameter('user', $user)
@@ -201,19 +201,19 @@ class OfferRepository extends AbstractEntityRepository {
 	private function _applyCommonFilter(&$queryBuilder, $filter) {
 		if ('popular-views' == $filter) {
 			$queryBuilder
-				->addOrderBy('o.viewCount', 'DESC')
+				->addOrderBy('o.viewCount', \SortDirection::Descending)
 			;
 		} else if ('popular-likes' == $filter) {
 			$queryBuilder
-				->addOrderBy('o.likeCount', 'DESC')
+				->addOrderBy('o.likeCount', \SortDirection::Descending)
 			;
 		} else if ('popular-comments' == $filter) {
 			$queryBuilder
-				->addOrderBy('o.commentCount', 'DESC')
+				->addOrderBy('o.commentCount', \SortDirection::Descending)
 			;
 		}
 		$queryBuilder
-			->addOrderBy('o.changedAt', 'DESC')
+			->addOrderBy('o.changedAt', \SortDirection::Descending)
 		;
 	}
 

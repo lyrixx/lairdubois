@@ -62,7 +62,7 @@ class QuestionRepository extends AbstractEntityRepository {
 			->innerJoin('q.user', 'u')
 			->where('q.isDraft = false')
 			->andWhere('q.user = :user')
-			->orderBy('q.id', 'ASC')
+			->orderBy('q.id', \SortDirection::Ascending)
 			->setParameter('user', $user)
 			->setMaxResults(1);
 
@@ -81,7 +81,7 @@ class QuestionRepository extends AbstractEntityRepository {
 			->innerJoin('q.user', 'u')
 			->where('q.isDraft = false')
 			->andWhere('q.user = :user')
-			->orderBy('q.id', 'DESC')
+			->orderBy('q.id', \SortDirection::Descending)
 			->setParameter('user', $user)
 			->setMaxResults(1);
 
@@ -101,7 +101,7 @@ class QuestionRepository extends AbstractEntityRepository {
 			->where('q.isDraft = false')
 			->andWhere('q.user = :user')
 			->andWhere('q.id < :id')
-			->orderBy('q.id', 'DESC')
+			->orderBy('q.id', \SortDirection::Descending)
 			->setParameter('user', $user)
 			->setParameter('id', $id)
 			->setMaxResults(1);
@@ -122,7 +122,7 @@ class QuestionRepository extends AbstractEntityRepository {
 			->where('q.isDraft = false')
 			->andWhere('q.user = :user')
 			->andWhere('q.id > :id')
-			->orderBy('q.id', 'ASC')
+			->orderBy('q.id', \SortDirection::Ascending)
 			->setParameter('user', $user)
 			->setParameter('id', $id)
 			->setMaxResults(1);
@@ -157,19 +157,19 @@ class QuestionRepository extends AbstractEntityRepository {
 	private function _applyCommonFilter(&$queryBuilder, $filter) {
 		if ('popular-views' == $filter) {
 			$queryBuilder
-				->addOrderBy('q.viewCount', 'DESC')
+				->addOrderBy('q.viewCount', \SortDirection::Descending)
 			;
 		} else if ('popular-likes' == $filter) {
 			$queryBuilder
-				->addOrderBy('q.likeCount', 'DESC')
+				->addOrderBy('q.likeCount', \SortDirection::Descending)
 			;
 		} else if ('popular-comments' == $filter) {
 			$queryBuilder
-				->addOrderBy('q.commentCount', 'DESC')
+				->addOrderBy('q.commentCount', \SortDirection::Descending)
 			;
 		}
 		$queryBuilder
-			->addOrderBy('q.changedAt', 'DESC')
+			->addOrderBy('q.changedAt', \SortDirection::Descending)
 		;
 	}
 

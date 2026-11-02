@@ -18,7 +18,7 @@ class Gallery extends AbstractContent implements MultiPicturedInterface, Localis
 	#[Assert\Count(min: 1, max: 5, groups: ['gallery'])]
 	#[ORM\JoinTable(name: 'tbl_find_data_gallery_picture')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Picture::class, cascade: ['persist'])]
-	#[ORM\OrderBy(['sortIndex' => 'ASC'])]
+	#[ORM\OrderBy(['sortIndex' => \SortDirection::Ascending])]
 	private $pictures;
 
 	#[ORM\Column(type: 'string', length: 100, nullable: true)]

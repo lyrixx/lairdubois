@@ -36,8 +36,8 @@ class TagUsageRepository extends AbstractEntityRepository {
 			->from($this->getEntityName(), 'tu')
 			->innerJoin('tu.tag', 't')
 			->andWhere('tu.entityType = :entityType')
-			->addOrderBy('tu.highlighted', 'DESC')
-			->addOrderBy('tu.score', 'DESC')
+			->addOrderBy('tu.highlighted', \SortDirection::Descending)
+			->addOrderBy('tu.score', \SortDirection::Descending)
 			->setParameter('entityType', $entityType)
 			->setMaxResults($maxResults)
 		;

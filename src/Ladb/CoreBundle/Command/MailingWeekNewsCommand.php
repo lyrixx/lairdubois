@@ -65,10 +65,10 @@ EOT
 			->innerJoin('c.mainPicture', 'mp')
 			->where('c.isDraft = false')
 			->andWhere('c.createdAt > :date')
-			->orderBy('c.likeCount', 'DESC')
-			->addOrderBy('c.commentCount', 'DESC')
-			->addOrderBy('c.viewCount', 'DESC')
-			->addOrderBy('c.createdAt', 'DESC')
+			->orderBy('c.likeCount', \SortDirection::Descending)
+			->addOrderBy('c.commentCount', \SortDirection::Descending)
+			->addOrderBy('c.viewCount', \SortDirection::Descending)
+			->addOrderBy('c.createdAt', \SortDirection::Descending)
 			->setParameter('date', $date)
 		;
 
@@ -91,8 +91,8 @@ EOT
 			->innerJoin('q.user', 'u')
 			->where('q.isDraft = false')
 			->andWhere('q.createdAt > :date')
-			->orderBy('q.answerCount', 'ASC')
-			->addOrderBy('q.likeCount', 'DESC')
+			->orderBy('q.answerCount', \SortDirection::Ascending)
+			->addOrderBy('q.likeCount', \SortDirection::Descending)
 			->setParameter('date', $date)
 		;
 
@@ -116,10 +116,10 @@ EOT
 			->innerJoin('p.mainPicture', 'mp')
 			->where('p.isDraft = false')
 			->andWhere('p.createdAt > :date')
-			->orderBy('p.likeCount', 'DESC')
-			->addOrderBy('p.commentCount', 'DESC')
-			->addOrderBy('p.viewCount', 'DESC')
-			->addOrderBy('p.createdAt', 'DESC')
+			->orderBy('p.likeCount', \SortDirection::Descending)
+			->addOrderBy('p.commentCount', \SortDirection::Descending)
+			->addOrderBy('p.viewCount', \SortDirection::Descending)
+			->addOrderBy('p.createdAt', \SortDirection::Descending)
 			->setParameter('date', $date)
 		;
 
@@ -143,10 +143,10 @@ EOT
 			->innerJoin('w.mainPicture', 'mp')
 			->where('w.isDraft = false')
 			->andWhere('w.createdAt > :date')
-			->orderBy('w.likeCount', 'DESC')
-			->addOrderBy('w.commentCount', 'DESC')
-			->addOrderBy('w.viewCount', 'DESC')
-			->addOrderBy('w.createdAt', 'DESC')
+			->orderBy('w.likeCount', \SortDirection::Descending)
+			->addOrderBy('w.commentCount', \SortDirection::Descending)
+			->addOrderBy('w.viewCount', \SortDirection::Descending)
+			->addOrderBy('w.createdAt', \SortDirection::Descending)
 			->setParameter('date', $date)
 		;
 
@@ -170,10 +170,10 @@ EOT
 			->leftJoin('h.mainPicture', 'mp')
 			->where('h.isDraft = false')
 			->andWhere('h.createdAt > :date')
-			->orderBy('h.likeCount', 'DESC')
-			->addOrderBy('h.commentCount', 'DESC')
-			->addOrderBy('h.viewCount', 'DESC')
-			->addOrderBy('h.createdAt', 'DESC')
+			->orderBy('h.likeCount', \SortDirection::Descending)
+			->addOrderBy('h.commentCount', \SortDirection::Descending)
+			->addOrderBy('h.viewCount', \SortDirection::Descending)
+			->addOrderBy('h.createdAt', \SortDirection::Descending)
 			->setParameter('date', $date)
 		;
 
@@ -198,7 +198,7 @@ EOT
 			->where('a.isDraft = false')
 			->andWhere('h.isDraft = false')
 			->andWhere('a.createdAt > :date')
-			->orderBy('a.createdAt', 'DESC')
+			->orderBy('a.createdAt', \SortDirection::Descending)
 			->setParameter('date', $date)
 		;
 
@@ -236,10 +236,10 @@ EOT
 			->innerJoin('f.user', 'u')
 			->where('f.isDraft = false')
 			->andWhere('f.createdAt > :date')
-			->orderBy('f.likeCount', 'DESC')
-			->addOrderBy('f.commentCount', 'DESC')
-			->addOrderBy('f.viewCount', 'DESC')
-			->addOrderBy('f.createdAt', 'DESC')
+			->orderBy('f.likeCount', \SortDirection::Descending)
+			->addOrderBy('f.commentCount', \SortDirection::Descending)
+			->addOrderBy('f.viewCount', \SortDirection::Descending)
+			->addOrderBy('f.createdAt', \SortDirection::Descending)
 			->setParameter('date', $date)
 		;
 
@@ -263,7 +263,7 @@ EOT
 			->leftJoin('p.mainPicture', 'mp')
 			->where('p.isDraft = false')
 			->andWhere('p.createdAt > :date')
-			->orderBy('p.createdAt', 'DESC')
+			->orderBy('p.createdAt', \SortDirection::Descending)
 			->setParameter('date', $date)
 		;
 
@@ -287,10 +287,10 @@ EOT
 			->where('w.nameRejected = false')
 			->andWhere('w.grainRejected = false')
 			->andWhere('w.createdAt > :date')
-			->orderBy('w.likeCount', 'DESC')
-			->addOrderBy('w.commentCount', 'DESC')
-			->addOrderBy('w.viewCount', 'DESC')
-			->addOrderBy('w.createdAt', 'DESC')
+			->orderBy('w.likeCount', \SortDirection::Descending)
+			->addOrderBy('w.commentCount', \SortDirection::Descending)
+			->addOrderBy('w.viewCount', \SortDirection::Descending)
+			->addOrderBy('w.createdAt', \SortDirection::Descending)
 			->setParameter('date', $date)
 		;
 
@@ -314,10 +314,10 @@ EOT
 			->where('p.signRejected = false')
 			->andWhere('p.logoRejected = false')
 			->andWhere('p.createdAt > :date')
-			->orderBy('p.likeCount', 'DESC')
-			->addOrderBy('p.commentCount', 'DESC')
-			->addOrderBy('p.viewCount', 'DESC')
-			->addOrderBy('p.createdAt', 'DESC')
+			->orderBy('p.likeCount', \SortDirection::Descending)
+			->addOrderBy('p.commentCount', \SortDirection::Descending)
+			->addOrderBy('p.viewCount', \SortDirection::Descending)
+			->addOrderBy('p.createdAt', \SortDirection::Descending)
 			->setParameter('date', $date)
 		;
 
@@ -341,10 +341,10 @@ EOT
 			->where('s.nameRejected = false')
 			->andWhere('s.logoRejected = false')
 			->andWhere('s.createdAt > :date')
-			->orderBy('s.likeCount', 'DESC')
-			->addOrderBy('s.commentCount', 'DESC')
-			->addOrderBy('s.viewCount', 'DESC')
-			->addOrderBy('s.createdAt', 'DESC')
+			->orderBy('s.likeCount', \SortDirection::Descending)
+			->addOrderBy('s.commentCount', \SortDirection::Descending)
+			->addOrderBy('s.viewCount', \SortDirection::Descending)
+			->addOrderBy('s.createdAt', \SortDirection::Descending)
 			->setParameter('date', $date)
 		;
 

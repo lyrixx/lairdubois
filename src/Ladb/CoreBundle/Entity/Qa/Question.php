@@ -73,7 +73,7 @@ class Question extends AbstractDraftableAuthoredPublication implements TitledInt
 	#[ORM\JoinTable(name: 'tbl_qa_question_body_block')]
 	#[ORM\InverseJoinColumn(name: 'block_id', referencedColumnName: 'id', unique: true, onDelete: 'cascade')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Block\AbstractBlock::class, cascade: ['persist', 'remove'])]
-	#[ORM\OrderBy(['sortIndex' => 'ASC'])]
+	#[ORM\OrderBy(['sortIndex' => \SortDirection::Ascending])]
 	private $bodyBlocks;
 
 	#[ORM\Column(type: 'integer', name: 'body_block_picture_count')]
@@ -102,7 +102,7 @@ class Question extends AbstractDraftableAuthoredPublication implements TitledInt
 	private $bestAnswer;
 
 	#[ORM\OneToMany(targetEntity: \Ladb\CoreBundle\Entity\Qa\Answer::class, mappedBy: 'question', cascade: ['all'])]
-	#[ORM\OrderBy(['isBestAnswer' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['isBestAnswer' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $answers;
 
 	#[ORM\JoinTable(name: 'tbl_qa_question_tag')]

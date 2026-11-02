@@ -38,7 +38,7 @@ class Plan extends AbstractWonder implements HtmlBodiedInterface, InspirableInte
 	#[Assert\Count(min: 1, max: 5)]
 	#[ORM\JoinTable(name: 'tbl_wonder_plan_picture')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Picture::class, cascade: ['persist'])]
-	#[ORM\OrderBy(['sortIndex' => 'ASC'])]
+	#[ORM\OrderBy(['sortIndex' => \SortDirection::Ascending])]
 	protected $pictures;
 
 	#[Assert\Count(min: 1, max: 10)]
@@ -74,7 +74,7 @@ class Plan extends AbstractWonder implements HtmlBodiedInterface, InspirableInte
 	#[ORM\JoinTable(name: 'tbl_wonder_plan_referral')]
 	#[ORM\InverseJoinColumn(name: 'referral_id', referencedColumnName: 'id', unique: true)]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Referer\Referral::class, cascade: ['persist', 'remove'])]
-	#[ORM\OrderBy(['accessCount' => 'DESC'])]
+	#[ORM\OrderBy(['accessCount' => \SortDirection::Descending])]
 	protected $referrals;
 
 	#[ORM\Column(type: 'integer', name: 'rebound_count')]

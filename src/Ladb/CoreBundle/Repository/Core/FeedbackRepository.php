@@ -44,7 +44,7 @@ class FeedbackRepository extends AbstractEntityRepository {
 			->andWhere('f.entityId = :entityId')
 			->setParameter('entityType', $entityType)
 			->setParameter('entityId', $entityId)
-			->orderBy('f.createdAt', 'ASC')
+			->orderBy('f.createdAt', \SortDirection::Ascending)
 		;
 
 		try {
@@ -65,7 +65,7 @@ class FeedbackRepository extends AbstractEntityRepository {
 			->from($this->getEntityName(), 'f')
 			->where('f.user = :user')
 			->groupBy('f.entityType, f.entityId')
-			->orderBy('mx', 'DESC')
+			->orderBy('mx', \SortDirection::Descending)
 			->setParameter('user', $user)
 			->setFirstResult($offset)
 			->setMaxResults($limit)
@@ -102,7 +102,7 @@ class FeedbackRepository extends AbstractEntityRepository {
 				$feedbacks = array( $concatResult[0] );
 			} else {
 				$feedbackIds = explode(',', $concatResult[2]);
-				$feedbacks = $this->findByIds($feedbackIds, 'f.createdAt', 'ASC');
+				$feedbacks = $this->findByIds($feedbackIds, 'f.createdAt', \SortDirection::Ascending);
 			}
 
 			$items[] = array(
@@ -124,7 +124,7 @@ class FeedbackRepository extends AbstractEntityRepository {
 	 * ]
 	 */
 
-	public function findByIds(array $ids, $orderBySort = null, $orderByOrder = null) {
+	public function findByIds(array $ids, $orderBySort = null, ?\SortDirection $orderByOrder = null) {
 		$queryBuilder = $this->getEntityManager()->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'f', 'u', 'ua' ))

@@ -44,7 +44,7 @@ class ReviewRepository extends AbstractEntityRepository {
 			->andWhere('r.entityId = :entityId')
 			->setParameter('entityType', $entityType)
 			->setParameter('entityId', $entityId)
-			->orderBy('r.createdAt', 'DESC')
+			->orderBy('r.createdAt', \SortDirection::Descending)
 		;
 
 		try {
@@ -65,7 +65,7 @@ class ReviewRepository extends AbstractEntityRepository {
 			->from($this->getEntityName(), 'r')
 			->where('r.user = :user')
 			->groupBy('r.entityType, r.entityId')
-			->orderBy('mx', 'DESC')
+			->orderBy('mx', \SortDirection::Descending)
 			->setParameter('user', $user)
 			->setFirstResult($offset)
 			->setMaxResults($limit)
@@ -102,7 +102,7 @@ class ReviewRepository extends AbstractEntityRepository {
 				$reviews = array( $concatResult[0] );
 			} else {
 				$reviewIds = explode(',', $concatResult[2]);
-				$reviews = $this->findByIds($reviewIds, 'r.createdAt', 'ASC');
+				$reviews = $this->findByIds($reviewIds, 'r.createdAt', \SortDirection::Ascending);
 			}
 
 			$items[] = array(
@@ -124,7 +124,7 @@ class ReviewRepository extends AbstractEntityRepository {
 	 * ]
 	 */
 
-	public function findByIds(array $ids, $orderBySort = null, $orderByOrder = null) {
+	public function findByIds(array $ids, $orderBySort = null, ?\SortDirection $orderByOrder = null) {
 		$queryBuilder = $this->getEntityManager()->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'r', 'u', 'ua' ))

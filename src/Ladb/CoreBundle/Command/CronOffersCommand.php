@@ -74,7 +74,7 @@ EOT
 			->from(Offer::class, 'o')
 			->where('o.publishCount > 0')
 			->andWhere('o.changedAt < :retrieveDate')
-            ->orderBy('o.changedAt', 'ASC')
+            ->orderBy('o.changedAt', \SortDirection::Ascending)
 			->setParameter('retrieveDate', $retrieveDate)
 		;
 

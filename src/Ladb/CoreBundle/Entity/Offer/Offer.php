@@ -91,7 +91,7 @@ class Offer extends AbstractDraftableAuthoredPublication implements TitledInterf
 	#[ORM\JoinTable(name: 'tbl_offer_body_block')]
 	#[ORM\InverseJoinColumn(name: 'block_id', referencedColumnName: 'id', unique: true, onDelete: 'cascade')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Block\AbstractBlock::class, cascade: ['persist', 'remove'])]
-	#[ORM\OrderBy(['sortIndex' => 'ASC'])]
+	#[ORM\OrderBy(['sortIndex' => \SortDirection::Ascending])]
 	private $bodyBlocks;
 
 	#[ORM\Column(type: 'integer', name: 'body_block_picture_count')]
@@ -108,7 +108,7 @@ class Offer extends AbstractDraftableAuthoredPublication implements TitledInterf
 	#[Assert\Count(min: 0, max: 5, groups: ['request'])]
 	#[ORM\JoinTable(name: 'tbl_offer_picture')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Picture::class, cascade: ['persist'])]
-	#[ORM\OrderBy(['sortIndex' => 'ASC'])]
+	#[ORM\OrderBy(['sortIndex' => \SortDirection::Ascending])]
 	protected $pictures;
 
 	#[Assert\NotBlank(message: 'Vous devez définir un type.')]

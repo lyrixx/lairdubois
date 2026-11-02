@@ -208,7 +208,7 @@ castor qa:phpunit [-- --filter …]
 castor qa:deprecations       # var/deprecations/report.md, et le résumé du job en CI
 castor qa:install            # outils de tools/ (PHPStan, PHPUnit), installés à la volée sinon
 castor qa:e2e [-- --grep …]  # tests E2E (Playwright) : recharge la base du dev, hors qa:all, job E2E en CI
-castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et getDoctrine() des actions → arguments (#16, #177), des utils, managers, listeners et validateurs → constructeur (#118), dépréciations de 4.x (#133), routes, contraintes, `@required` et mapping de Doctrine et Gedmo en attributs (#25), commandes en `#[AsCommand]` (#28), `@Template` et `@Security` de Sensio en attributs natifs (#27), types de retour natifs de 5.4 et 6.4 (#177, #205), handlers de Messenger en `#[AsMessageHandler]` (#205), `Routing\Annotation\Route` en `Routing\Attribute\Route` (#205)
+castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et getDoctrine() des actions → arguments (#16, #177), des utils, managers, listeners et validateurs → constructeur (#118), dépréciations de 4.x (#133), routes, contraintes, `@required` et mapping de Doctrine et Gedmo en attributs (#25), commandes en `#[AsCommand]` (#28), `@Template` et `@Security` de Sensio en attributs natifs (#27), types de retour natifs de 5.4 et 6.4 (#177, #205), handlers de Messenger en `#[AsMessageHandler]` (#205), `Routing\Annotation\Route` en `Routing\Attribute\Route` (#205), directions de tri en `\SortDirection` (#217)
 ```
 
 - PHPUnit 9.6, dans `tools/phpunit` et pas dans le `composer.json` de l'application : c'est la
@@ -302,6 +302,10 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et get
   `tools/rector`. Elles typent par PHPStan :
   `MakeDispatchFirstArgumentEventRector` ne reconnaît pas le dispatcher d'une propriété sans type
   (`$this->dispatcher` des managers).
+- Directions de tri (#217) : les règles de rector-doctrine n'écrivent `\SortDirection` que si le
+  `require` du `composer.json` du site a `symfony/polyfill-php86`, et sautent un query builder que
+  PHPStan ne type pas : la nôtre, `UntypedQueryBuilderSortDirectionRector`, prend les
+  `$queryBuilder` sans type des `_applyCommonFilter()` des repositories.
 - Types de retour natifs annoncés par le DebugClassLoader (« might add … as a native return type
   declaration ») : le rapport ne voit que les classes que la suite charge. La liste complète vient du
   script `patch-type-declarations` d'ErrorHandler en mode rapport, qui parcourt le classmap
@@ -791,6 +795,13 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `__serialize()` la charge.
 - DBAL 4 refuse un type de paramètre de PDO (`\PDO::PARAM_INT`) : `ParameterType::INTEGER`,
   `ArrayParameterType::INTEGER`.
+- Une direction de tri est un `\SortDirection` (`Ascending`, `Descending`) : `orderBy()`,
+  `addOrderBy()`, `#[ORM\OrderBy]` (#217). Une chaîne (`'DESC'`) est dépréciée par l'ORM 3.7, pour
+  l'ORM 4. L'enum est natif en PHP 8.6, `symfony/polyfill-php86` le donne avant (dans le `require`).
+  Une jointure arbitraire (`leftJoin(View::class, …)`) prend `ON` ; `WITH` reste aux associations.
+- Reste au rapport une dépréciation de DBAL 4.5 que l'ORM 3.7.6 déclenche lui-même (un objet `Type`
+  sous la clé `type` d'une colonne) : la table temporaire d'un `UPDATE` ou `DELETE` en DQL sur une
+  entité `JOINED` (dans la suite, celui de `CrontabTest`).
 - `doctrine:database:create` (#178) lit la plateforme avant de créer la base, et DBAL 4 se connecte
   à la base pour connaître la version du serveur (DBAL 3 réessayait sans elle) : sur une base qui
   n'existe pas, « Unknown database ». Le paramètre `database_server_version` (`server_version` de
@@ -804,9 +815,11 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   (`castor app:db:fixtures`, la CI), deux différences de forme avec la prod, sans effet : un booléen
   est un `TINYINT` (`tinyint(4)`, `tinyint(1)` en prod) et les colonnes des associations héritées
   d'une mapped superclass viennent après les autres (113 tables).
-- `Doctrine\ORM\Tools\Pagination\Paginator` est déprécié par une docblock de l'ORM 3.7, pour l'ORM 4
-  (`OffsetPaginator`), sans dépréciation à l'exécution : ses 91 usages sont dans la baseline de
-  PHPStan.
+- `Doctrine\ORM\Tools\Pagination\Paginator` est déprécié par une docblock de l'ORM 3.7, pour
+  l'ORM 4, sans dépréciation à l'exécution : ses 91 usages sont dans la baseline de PHPStan. Son
+  remplaçant, `OffsetPaginator` (3.7), ne s'y substitue pas tel quel : `paginate()` rend une
+  `WindowPage`, dont `count()` est le nombre d'éléments de la page (le total : `getTotalCount()`),
+  et lance toujours la requête de comptage.
 - Bornes de `composer.json` : `behat/transliterator` à `1.3.0` exactement (#219), la
   translittération des slugs et des labels de tags, que gedmo n'exige plus : la 1.5 change ses
   tables (`x02` à `x0a`) ; `dama/doctrine-test-bundle` `~8.4.1` (la 8.4 refuse PHPUnit 9 par un

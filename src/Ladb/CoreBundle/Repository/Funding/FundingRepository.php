@@ -40,8 +40,8 @@ class FundingRepository extends AbstractEntityRepository {
 		$queryBuilder
 			->select(array( 'f', ))
 			->from($this->getEntityName(), 'f')
-			->orderBy('f.year', 'DESC')
-			->addOrderBy('f.month', 'DESC')
+			->orderBy('f.year', \SortDirection::Descending)
+			->addOrderBy('f.month', \SortDirection::Descending)
 			->setMaxResults(1)
 		;
 

@@ -56,7 +56,7 @@ class HowtoRepository extends AbstractEntityRepository {
 			->leftJoin('h.mainPicture', 'mp')
 			->where('h.isDraft = false')
 			->andWhere('h.user = :user')
-			->orderBy('h.id', 'ASC')
+			->orderBy('h.id', \SortDirection::Ascending)
 			->setParameter('user', $user)
 			->setMaxResults(1);
 
@@ -76,7 +76,7 @@ class HowtoRepository extends AbstractEntityRepository {
 			->leftJoin('h.mainPicture', 'mp')
 			->where('h.isDraft = false')
 			->andWhere('h.user = :user')
-			->orderBy('h.id', 'DESC')
+			->orderBy('h.id', \SortDirection::Descending)
 			->setParameter('user', $user)
 			->setMaxResults(1);
 
@@ -97,7 +97,7 @@ class HowtoRepository extends AbstractEntityRepository {
 			->where('h.isDraft = false')
 			->andWhere('h.user = :user')
 			->andWhere('h.id < :id')
-			->orderBy('h.id', 'DESC')
+			->orderBy('h.id', \SortDirection::Descending)
 			->setParameter('user', $user)
 			->setParameter('id', $id)
 			->setMaxResults(1);
@@ -119,7 +119,7 @@ class HowtoRepository extends AbstractEntityRepository {
 			->where('h.isDraft = false')
 			->andWhere('h.user = :user')
 			->andWhere('h.id > :id')
-			->orderBy('h.id', 'ASC')
+			->orderBy('h.id', \SortDirection::Ascending)
 			->setParameter('user', $user)
 			->setParameter('id', $id)
 			->setMaxResults(1);
@@ -180,19 +180,19 @@ class HowtoRepository extends AbstractEntityRepository {
 	private function _applyCommonFilter(&$queryBuilder, $filter) {
 		if ('popular-views' == $filter) {
 			$queryBuilder
-				->addOrderBy('h.viewCount', 'DESC')
+				->addOrderBy('h.viewCount', \SortDirection::Descending)
 			;
 		} else if ('popular-likes' == $filter) {
 			$queryBuilder
-				->addOrderBy('h.likeCount', 'DESC')
+				->addOrderBy('h.likeCount', \SortDirection::Descending)
 			;
 		} else if ('popular-comments' == $filter) {
 			$queryBuilder
-				->addOrderBy('h.commentCount', 'DESC')
+				->addOrderBy('h.commentCount', \SortDirection::Descending)
 			;
 		}
 		$queryBuilder
-			->addOrderBy('h.changedAt', 'DESC');
+			->addOrderBy('h.changedAt', \SortDirection::Descending);
 	}
 
 	public function findPaginedByUser(User $user, $offset, $limit, $filter = 'recent', $includeDrafts = false) {

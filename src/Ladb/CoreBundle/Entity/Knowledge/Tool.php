@@ -71,7 +71,7 @@ class Tool extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_tool_value_name')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Text::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $nameValues;
 
 	#[ORM\Column(name: 'name_rejected', type: 'boolean', nullable: false)]
@@ -80,7 +80,7 @@ class Tool extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_tool_value_photo')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Picture::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $photoValues;
 
 	#[ORM\Column(name: 'photo_rejected', type: 'boolean', nullable: false)]
@@ -94,7 +94,7 @@ class Tool extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_tool_value_manual')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Pdf::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $manualValues;
 
 
@@ -103,7 +103,7 @@ class Tool extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_tool_value_brand')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Text::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $brandValues;
 
 
@@ -112,7 +112,7 @@ class Tool extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_tool_value_english_name')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Text::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $englishNameValues;
 
 
@@ -121,7 +121,7 @@ class Tool extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_tool_value_product_name')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Text::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $productNameValues;
 
 
@@ -130,7 +130,7 @@ class Tool extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_tool_value_description')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Longtext::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $descriptionValues;
 
 
@@ -139,7 +139,7 @@ class Tool extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_tool_value_family')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Integer::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $familyValues;
 
 
@@ -148,7 +148,7 @@ class Tool extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_tool_value_power_supply')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Integer::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $powerSupplyValues;
 
 
@@ -157,7 +157,7 @@ class Tool extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_tool_value_power')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Integer::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $powerValues;
 
 
@@ -166,7 +166,7 @@ class Tool extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_tool_value_voltage')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Integer::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $voltageValues;
 
 
@@ -175,7 +175,7 @@ class Tool extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_tool_value_weight')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Decimal::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $weightValues;
 
 
@@ -184,7 +184,7 @@ class Tool extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_tool_value_docs')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Url::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $docsValues;
 
 
@@ -193,7 +193,7 @@ class Tool extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_tool_value_catalog_link')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Url::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $catalogLinkValues;
 
 
@@ -202,7 +202,7 @@ class Tool extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_tool_value_video')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Video::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $videoValues;
 
 
@@ -211,7 +211,7 @@ class Tool extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_tool_value_utilization')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Text::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $utilizationValues;
 
 

@@ -86,7 +86,7 @@ class Software extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_identity')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\SoftwareIdentity::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $identityValues;
 
 	#[ORM\Column(type: 'boolean', nullable: false, name: 'name_rejected')]
@@ -95,7 +95,7 @@ class Software extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_icon')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Picture::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $iconValues;
 
 	#[ORM\Column(type: 'boolean', nullable: false, name: 'icon_rejected')]
@@ -109,7 +109,7 @@ class Software extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_screenshot')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Picture::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $screenshotValues;
 
 
@@ -118,7 +118,7 @@ class Software extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_authors')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Text::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $authorsValues;
 
 
@@ -127,7 +127,7 @@ class Software extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_last_version')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Text::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $lastVersionValues;
 
 
@@ -136,7 +136,7 @@ class Software extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_publisher')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Text::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $publisherValues;
 
 
@@ -145,7 +145,7 @@ class Software extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_website')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Url::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $websiteValues;
 
 
@@ -154,7 +154,7 @@ class Software extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_description')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Longtext::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $descriptionValues;
 
 
@@ -163,7 +163,7 @@ class Software extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_open_source')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Integer::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $openSourceValues;
 
 
@@ -172,7 +172,7 @@ class Software extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_source_code_repository')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Url::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $sourceCodeRepositoryValues;
 
 
@@ -181,7 +181,7 @@ class Software extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_docs')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Url::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $docsValues;
 
 
@@ -190,7 +190,7 @@ class Software extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_video')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Video::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $videoValues;
 
 
@@ -199,7 +199,7 @@ class Software extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_operating_systems')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Integer::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $operatingSystemsValues;
 
 
@@ -208,7 +208,7 @@ class Software extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_license_type')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\LinkableText::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $licenseTypeValues;
 
 
@@ -217,7 +217,7 @@ class Software extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_pricings')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Integer::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $pricingsValues;
 
 
@@ -226,7 +226,7 @@ class Software extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_features')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Text::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $featuresValues;
 
 
@@ -235,7 +235,7 @@ class Software extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_languages')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\Language::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $languagesValues;
 
 
@@ -244,7 +244,7 @@ class Software extends AbstractKnowledge implements ReviewableInterface {
 
 	#[ORM\JoinTable(name: 'tbl_knowledge2_software_value_supported_files')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Knowledge\Value\FileExtension::class, cascade: ['all'])]
-	#[ORM\OrderBy(['moderationScore' => 'DESC', 'voteScore' => 'DESC', 'createdAt' => 'DESC'])]
+	#[ORM\OrderBy(['moderationScore' => \SortDirection::Descending, 'voteScore' => \SortDirection::Descending, 'createdAt' => \SortDirection::Descending])]
 	private $supportedFilesValues;
 
 

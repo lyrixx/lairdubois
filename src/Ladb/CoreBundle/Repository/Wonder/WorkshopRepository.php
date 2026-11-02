@@ -71,7 +71,7 @@ class WorkshopRepository extends AbstractEntityRepository {
 			->innerJoin('w.mainPicture', 'mp')
 			->where('w.isDraft = false')
 			->andWhere('w.user = :user')
-			->orderBy('w.id', 'ASC')
+			->orderBy('w.id', \SortDirection::Ascending)
 			->setParameter('user', $user)
 			->setMaxResults(1);
 
@@ -91,7 +91,7 @@ class WorkshopRepository extends AbstractEntityRepository {
 			->innerJoin('w.mainPicture', 'mp')
 			->where('w.isDraft = false')
 			->andWhere('w.user = :user')
-			->orderBy('w.id', 'DESC')
+			->orderBy('w.id', \SortDirection::Descending)
 			->setParameter('user', $user)
 			->setMaxResults(1);
 
@@ -112,7 +112,7 @@ class WorkshopRepository extends AbstractEntityRepository {
 			->where('w.isDraft = false')
 			->andWhere('w.user = :user')
 			->andWhere('w.id < :id')
-			->orderBy('w.id', 'DESC')
+			->orderBy('w.id', \SortDirection::Descending)
 			->setParameter('user', $user)
 			->setParameter('id', $id)
 			->setMaxResults(1);
@@ -134,7 +134,7 @@ class WorkshopRepository extends AbstractEntityRepository {
 			->where('w.isDraft = false')
 			->andWhere('w.user = :user')
 			->andWhere('w.id > :id')
-			->orderBy('w.id', 'ASC')
+			->orderBy('w.id', \SortDirection::Ascending)
 			->setParameter('user', $user)
 			->setParameter('id', $id)
 			->setMaxResults(1);
@@ -193,19 +193,19 @@ class WorkshopRepository extends AbstractEntityRepository {
 	private function _applyCommonFilter(&$queryBuilder, $filter) {
 		if ('popular-views' == $filter) {
 			$queryBuilder
-				->addOrderBy('w.viewCount', 'DESC')
+				->addOrderBy('w.viewCount', \SortDirection::Descending)
 			;
 		} else if ('popular-likes' == $filter) {
 			$queryBuilder
-				->addOrderBy('w.likeCount', 'DESC')
+				->addOrderBy('w.likeCount', \SortDirection::Descending)
 			;
 		} else if ('popular-comments' == $filter) {
 			$queryBuilder
-				->addOrderBy('w.commentCount', 'DESC')
+				->addOrderBy('w.commentCount', \SortDirection::Descending)
 			;
 		}
 		$queryBuilder
-			->addOrderBy('w.changedAt', 'DESC')
+			->addOrderBy('w.changedAt', \SortDirection::Descending)
 		;
 	}
 

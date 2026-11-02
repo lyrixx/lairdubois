@@ -83,7 +83,7 @@ class EntryRepository extends AbstractEntityRepository {
 			->andWhere('e.collection = :collection')
 			->setParameter('entityType', $entityType)
 			->setParameter('collection', $collection)
-			->orderBy('e.createdAt', 'DESC')
+			->orderBy('e.createdAt', \SortDirection::Descending)
 			->setFirstResult($offset)
 			->setMaxResults($limit)
 		;

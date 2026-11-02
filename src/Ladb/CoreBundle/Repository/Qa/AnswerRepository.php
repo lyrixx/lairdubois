@@ -88,17 +88,17 @@ class AnswerRepository extends AbstractEntityRepository {
 
 		if ('score' == $sorter) {
 			$queryBuilder
-				->addOrderBy('a.isBestAnswer', 'DESC')
-				->addOrderBy('a.voteScore', 'DESC')
-				->addOrderBy('a.createdAt', 'DESC')
+				->addOrderBy('a.isBestAnswer', \SortDirection::Descending)
+				->addOrderBy('a.voteScore', \SortDirection::Descending)
+				->addOrderBy('a.createdAt', \SortDirection::Descending)
 			;
 		} else if ('older' == $sorter) {
 			$queryBuilder
-				->addOrderBy('a.createdAt', 'ASC')
+				->addOrderBy('a.createdAt', \SortDirection::Ascending)
 			;
 		} else if ('recent' == $sorter) {
 			$queryBuilder
-				->addOrderBy('a.createdAt', 'DESC')
+				->addOrderBy('a.createdAt', \SortDirection::Descending)
 			;
 		}
 
@@ -122,7 +122,7 @@ class AnswerRepository extends AbstractEntityRepository {
 			->setParameter('user', $user)
 			->setFirstResult($offset)
 			->setMaxResults($limit)
-			->addOrderBy('a.createdAt', 'DESC')
+			->addOrderBy('a.createdAt', \SortDirection::Descending)
 		;
 
 		return new Paginator($queryBuilder->getQuery());

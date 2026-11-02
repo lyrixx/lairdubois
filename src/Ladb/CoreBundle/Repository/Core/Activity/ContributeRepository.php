@@ -36,7 +36,7 @@ class ContributeRepository extends AbstractEntityRepository {
 			->andWhere('v.parentEntityId = :entityId')
 			->setParameter('entityType', $entityType)
 			->setParameter('entityId', $entityId)
-			->orderBy('a.createdAt', 'ASC')
+			->orderBy('a.createdAt', \SortDirection::Ascending)
 		;
 
 		try {

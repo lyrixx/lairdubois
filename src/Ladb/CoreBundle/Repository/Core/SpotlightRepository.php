@@ -16,7 +16,7 @@ class SpotlightRepository extends AbstractEntityRepository {
 			->from($this->getEntityName(), 's')
 			->where('s.enabled = 1')
 			->andWhere('s.finishedAt IS NULL')
-			->orderBy('s.createdAt', 'ASC')
+			->orderBy('s.createdAt', \SortDirection::Ascending)
 			->setMaxResults(1);
 
 		try {
@@ -34,7 +34,7 @@ class SpotlightRepository extends AbstractEntityRepository {
 			->select(array( 's' ))
 			->from($this->getEntityName(), 's')
 			->where('s.enabled = true')
-			->orderBy('s.createdAt', 'DESC')
+			->orderBy('s.createdAt', \SortDirection::Descending)
 			->setFirstResult($offset)
 			->setMaxResults($limit)
 		;

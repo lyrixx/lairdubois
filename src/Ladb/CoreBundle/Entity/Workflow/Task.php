@@ -60,12 +60,12 @@ class Task {
 
 	#[ORM\JoinTable(name: 'tbl_workflow_task_label')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Workflow\Label::class, cascade: ['persist'])]
-	#[ORM\OrderBy(['id' => 'ASC'])]
+	#[ORM\OrderBy(['id' => \SortDirection::Ascending])]
 	private $labels;
 
 	#[ORM\JoinTable(name: 'tbl_workflow_task_part')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Workflow\Part::class, cascade: ['persist'])]
-	#[ORM\OrderBy(['name' => 'ASC'])]
+	#[ORM\OrderBy(['name' => \SortDirection::Ascending])]
 	private $parts;
 
 	#[ORM\Column(type: 'integer', name: 'part_count')]
