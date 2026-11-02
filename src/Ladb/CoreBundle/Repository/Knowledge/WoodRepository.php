@@ -101,31 +101,31 @@ class WoodRepository extends AbstractKnowledgeRepository {
 	private function _applyCommonFilter(&$queryBuilder, $filter) {
 		if ('popular-views' == $filter) {
 			$queryBuilder
-				->addOrderBy('w.viewCount', 'DESC')
+				->addOrderBy('w.viewCount', \SortDirection::Descending)
 			;
 		} else if ('popular-likes' == $filter) {
 			$queryBuilder
-				->addOrderBy('w.likeCount', 'DESC')
+				->addOrderBy('w.likeCount', \SortDirection::Descending)
 			;
 		} else if ('popular-comments' == $filter) {
 			$queryBuilder
-				->addOrderBy('w.commentCount', 'DESC')
+				->addOrderBy('w.commentCount', \SortDirection::Descending)
 			;
 		} else if ('collaborative-contributors' == $filter) {
 			$queryBuilder
-				->addOrderBy('w.contributorCount', 'DESC')
+				->addOrderBy('w.contributorCount', \SortDirection::Descending)
 			;
 		} else if ('order-alphabetical' == $filter) {
 			$queryBuilder
-				->addOrderBy('w.title', 'ASC')
+				->addOrderBy('w.title', \SortDirection::Ascending)
 			;
 		} else if ('order-density' == $filter) {
 			$queryBuilder
-				->addOrderBy('w.density', 'DESC')
+				->addOrderBy('w.density', \SortDirection::Descending)
 			;
 		}
 		$queryBuilder
-			->addOrderBy('w.changedAt', 'DESC')
+			->addOrderBy('w.changedAt', \SortDirection::Descending)
 		;
 	}
 

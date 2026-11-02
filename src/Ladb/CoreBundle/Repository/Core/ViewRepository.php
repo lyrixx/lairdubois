@@ -153,7 +153,7 @@ class ViewRepository extends AbstractEntityRepository {
 			->where('v.entityType = :entityType')
 			->andWhere('v.user = :user')
 			->andWhere('v.kind >= :kind')
-			->orderBy('v.createdAt', 'DESC')
+			->orderBy('v.createdAt', \SortDirection::Descending)
 			->setMaxResults(1)
 			->setParameter('entityType', $entityType)
 			->setParameter('user', $user)

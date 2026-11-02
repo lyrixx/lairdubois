@@ -104,27 +104,27 @@ class ProviderRepository extends AbstractKnowledgeRepository {
 	private function _applyCommonFilter(&$queryBuilder, $filter) {
 		if ('popular-views' == $filter) {
 			$queryBuilder
-				->addOrderBy('p.viewCount', 'DESC')
+				->addOrderBy('p.viewCount', \SortDirection::Descending)
 			;
 		} else if ('popular-likes' == $filter) {
 			$queryBuilder
-				->addOrderBy('p.likeCount', 'DESC')
+				->addOrderBy('p.likeCount', \SortDirection::Descending)
 			;
 		} else if ('popular-comments' == $filter) {
 			$queryBuilder
-				->addOrderBy('p.commentCount', 'DESC')
+				->addOrderBy('p.commentCount', \SortDirection::Descending)
 			;
 		} else if ('collaborative-contributors' == $filter) {
 			$queryBuilder
-				->addOrderBy('p.contributorCount', 'DESC')
+				->addOrderBy('p.contributorCount', \SortDirection::Descending)
 			;
 		} else if ('order-alphabetical' == $filter) {
 			$queryBuilder
-				->addOrderBy('p.title', 'ASC')
+				->addOrderBy('p.title', \SortDirection::Ascending)
 			;
 		}
 		$queryBuilder
-			->addOrderBy('p.changedAt', 'DESC')
+			->addOrderBy('p.changedAt', \SortDirection::Descending)
 		;
 	}
 

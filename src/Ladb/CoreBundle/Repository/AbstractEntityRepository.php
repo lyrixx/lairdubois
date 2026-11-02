@@ -83,7 +83,7 @@ abstract class AbstractEntityRepository extends EntityRepository {
 		$queryBuilder
 			->select(array( 'e' ))
 			->from($this->getEntityName(), 'e')
-			->orderBy('e.createdAt', 'DESC')
+			->orderBy('e.createdAt', \SortDirection::Descending)
 			->setMaxResults(1)
 		;
 		try {
@@ -98,7 +98,7 @@ abstract class AbstractEntityRepository extends EntityRepository {
 		$queryBuilder
 			->select(array( 'e' ))
 			->from($this->getEntityName(), 'e')
-			->orderBy('e.updatedAt', 'DESC')
+			->orderBy('e.updatedAt', \SortDirection::Descending)
 			->setMaxResults(1)
 		;
 		try {

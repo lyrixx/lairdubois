@@ -54,7 +54,7 @@ class Notification {
 	private $folder;
 
 	#[ORM\OneToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Notification::class, mappedBy: 'folder')]
-	#[ORM\OrderBy(['id' => 'DESC'])]
+	#[ORM\OrderBy(['id' => \SortDirection::Descending])]
 	private $children;
 
 	/////

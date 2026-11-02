@@ -108,7 +108,7 @@ class LikeRepository extends AbstractEntityRepository {
 			->select(array( 'l', 'eu', 'MAX(l.id) AS mx', 'COUNT(l.id)', 'GROUP_CONCAT(l.entityType ORDER BY l.id ASC)', 'GROUP_CONCAT(l.entityId ORDER BY l.id ASC)' ))
 			->from($this->getEntityName(), 'l')
 			->leftJoin('l.entityUser', 'eu')
-			->orderBy('mx', 'DESC')
+			->orderBy('mx', \SortDirection::Descending)
 			->setParameter('user', $user)
 			->setFirstResult($offset)
 			->setMaxResults($limit)

@@ -68,7 +68,7 @@ class TookRepository extends AbstractEntityRepository {
 
 	private function _applyCommonFilter(&$queryBuilder, $filter) {
 		$queryBuilder
-			->addOrderBy('t.changedAt', 'DESC')
+			->addOrderBy('t.changedAt', \SortDirection::Descending)
 		;
 	}
 

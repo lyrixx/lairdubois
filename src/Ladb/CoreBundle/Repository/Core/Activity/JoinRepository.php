@@ -36,7 +36,7 @@ class JoinRepository extends AbstractEntityRepository {
 			->andWhere('j.entityId = :entityId')
 			->setParameter('entityType', $entityType)
 			->setParameter('entityId', $entityId)
-			->orderBy('a.createdAt', 'ASC')
+			->orderBy('a.createdAt', \SortDirection::Ascending)
 		;
 
 		try {

@@ -54,7 +54,7 @@ class Message implements TypableInterface, MultiPicturedInterface, HtmlBodiedInt
 	#[Assert\Count(min: 0, max: 4)]
 	#[ORM\JoinTable(name: 'tbl_message_picture')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Picture::class, cascade: ['persist'])]
-	#[ORM\OrderBy(['sortIndex' => 'ASC'])]
+	#[ORM\OrderBy(['sortIndex' => \SortDirection::Ascending])]
 	protected $pictures;
 
 	#[ORM\OneToMany(targetEntity: \Ladb\CoreBundle\Entity\Message\MessageMeta::class, mappedBy: 'message', cascade: ['all'])]

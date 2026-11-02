@@ -145,7 +145,7 @@ class UserRepository extends AbstractEntityRepository implements UserLoaderInter
 			->leftJoin('u.meta', 'm')
 			->where('m.donationCount > 0')
 			->andWhere('u.enabled = 1')
-			->orderBy('u.displayname', 'ASC')
+			->orderBy('u.displayname', \SortDirection::Ascending)
 			->setFirstResult($offset)
 			->setMaxResults($limit)
 		;
@@ -177,46 +177,46 @@ class UserRepository extends AbstractEntityRepository implements UserLoaderInter
 	private function _applyCommonFilter(&$queryBuilder, $filter, $isAdmin) {
 		if ('contributors-all' == $filter) {
 			$queryBuilder
-				->addOrderBy('u.contributionCount', 'DESC')
-				->addOrderBy('u.createdAt', 'DESC')
+				->addOrderBy('u.contributionCount', \SortDirection::Descending)
+				->addOrderBy('u.createdAt', \SortDirection::Descending)
 			;
 		} else if ('contributors-creations' == $filter) {
 			$queryBuilder
-				->addOrderBy('u.publishedCreationCount', 'DESC')
-				->addOrderBy('u.createdAt', 'DESC')
+				->addOrderBy('u.publishedCreationCount', \SortDirection::Descending)
+				->addOrderBy('u.createdAt', \SortDirection::Descending)
 			;
 		} else if ('contributors-plans' == $filter) {
 			$queryBuilder
-				->addOrderBy('u.publishedPlanCount', 'DESC')
-				->addOrderBy('u.createdAt', 'DESC')
+				->addOrderBy('u.publishedPlanCount', \SortDirection::Descending)
+				->addOrderBy('u.createdAt', \SortDirection::Descending)
 			;
 		} else if ('contributors-howtos' == $filter) {
 			$queryBuilder
-				->addOrderBy('u.publishedHowtoCount', 'DESC')
-				->addOrderBy('u.createdAt', 'DESC')
+				->addOrderBy('u.publishedHowtoCount', \SortDirection::Descending)
+				->addOrderBy('u.createdAt', \SortDirection::Descending)
 			;
 		} else if ('contributors-workshops' == $filter) {
 			$queryBuilder
-				->addOrderBy('u.publishedWorkshopCount', 'DESC')
-				->addOrderBy('u.createdAt', 'DESC')
+				->addOrderBy('u.publishedWorkshopCount', \SortDirection::Descending)
+				->addOrderBy('u.createdAt', \SortDirection::Descending)
 			;
 		} else if ('contributors-comments' == $filter) {
 			$queryBuilder
-				->addOrderBy('u.commentCount', 'DESC')
-				->addOrderBy('u.createdAt', 'DESC')
+				->addOrderBy('u.commentCount', \SortDirection::Descending)
+				->addOrderBy('u.createdAt', \SortDirection::Descending)
 			;
 		} else if ('contributors-finds' == $filter) {
 			$queryBuilder
-				->addOrderBy('u.publishedFindCount', 'DESC')
-				->addOrderBy('u.createdAt', 'DESC')
+				->addOrderBy('u.publishedFindCount', \SortDirection::Descending)
+				->addOrderBy('u.createdAt', \SortDirection::Descending)
 			;
 		} else if ('popular-followers' == $filter) {
 			$queryBuilder
-				->addOrderBy('u.followerCount', 'DESC')
+				->addOrderBy('u.followerCount', \SortDirection::Descending)
 			;
 		} else if ('popular-likes' == $filter) {
 			$queryBuilder
-				->addOrderBy('u.recievedLikeCount', 'DESC')
+				->addOrderBy('u.recievedLikeCount', \SortDirection::Descending)
 			;
 		} else if ('type-asso' == $filter) {
 			$queryBuilder
@@ -272,7 +272,7 @@ class UserRepository extends AbstractEntityRepository implements UserLoaderInter
 			;
 		} else {
 			$queryBuilder
-				->addOrderBy('u.createdAt', 'DESC')
+				->addOrderBy('u.createdAt', \SortDirection::Descending)
 			;
 		}
 	}

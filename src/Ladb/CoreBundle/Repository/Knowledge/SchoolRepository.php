@@ -105,27 +105,27 @@ class SchoolRepository extends AbstractKnowledgeRepository {
 	private function _applyCommonFilter(&$queryBuilder, $filter) {
 		if ('popular-views' == $filter) {
 			$queryBuilder
-				->addOrderBy('s.viewCount', 'DESC')
+				->addOrderBy('s.viewCount', \SortDirection::Descending)
 			;
 		} else if ('popular-likes' == $filter) {
 			$queryBuilder
-				->addOrderBy('s.likeCount', 'DESC')
+				->addOrderBy('s.likeCount', \SortDirection::Descending)
 			;
 		} else if ('popular-comments' == $filter) {
 			$queryBuilder
-				->addOrderBy('s.commentCount', 'DESC')
+				->addOrderBy('s.commentCount', \SortDirection::Descending)
 			;
 		} else if ('collaborative-contributors' == $filter) {
 			$queryBuilder
-				->addOrderBy('s.contributorCount', 'DESC')
+				->addOrderBy('s.contributorCount', \SortDirection::Descending)
 			;
 		} else if ('order-alphabetical' == $filter) {
 			$queryBuilder
-				->addOrderBy('s.title', 'ASC')
+				->addOrderBy('s.title', \SortDirection::Ascending)
 			;
 		}
 		$queryBuilder
-			->addOrderBy('s.changedAt', 'DESC')
+			->addOrderBy('s.changedAt', \SortDirection::Descending)
 		;
 	}
 

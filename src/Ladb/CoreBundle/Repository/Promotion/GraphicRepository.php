@@ -59,7 +59,7 @@ class GraphicRepository extends AbstractEntityRepository {
 			->innerJoin('g.mainPicture', 'mp')
 			->where('g.isDraft = false')
 			->andWhere('g.user = :user')
-			->orderBy('g.id', 'ASC')
+			->orderBy('g.id', \SortDirection::Ascending)
 			->setParameter('user', $user)
 			->setMaxResults(1);
 
@@ -79,7 +79,7 @@ class GraphicRepository extends AbstractEntityRepository {
 			->innerJoin('g.mainPicture', 'mp')
 			->where('g.isDraft = false')
 			->andWhere('g.user = :user')
-			->orderBy('g.id', 'DESC')
+			->orderBy('g.id', \SortDirection::Descending)
 			->setParameter('user', $user)
 			->setMaxResults(1);
 
@@ -100,7 +100,7 @@ class GraphicRepository extends AbstractEntityRepository {
 			->where('g.isDraft = false')
 			->andWhere('g.user = :user')
 			->andWhere('g.id < :id')
-			->orderBy('g.id', 'DESC')
+			->orderBy('g.id', \SortDirection::Descending)
 			->setParameter('user', $user)
 			->setParameter('id', $id)
 			->setMaxResults(1);
@@ -122,7 +122,7 @@ class GraphicRepository extends AbstractEntityRepository {
 			->where('g.isDraft = false')
 			->andWhere('g.user = :user')
 			->andWhere('g.id > :id')
-			->orderBy('g.id', 'ASC')
+			->orderBy('g.id', \SortDirection::Ascending)
 			->setParameter('user', $user)
 			->setParameter('id', $id)
 			->setMaxResults(1);
@@ -158,23 +158,23 @@ class GraphicRepository extends AbstractEntityRepository {
 	private function _applyCommonFilter(&$queryBuilder, $filter) {
 		if ('popular-views' == $filter) {
 			$queryBuilder
-				->addOrderBy('g.viewCount', 'DESC')
+				->addOrderBy('g.viewCount', \SortDirection::Descending)
 			;
 		} else if ('popular-likes' == $filter) {
 			$queryBuilder
-				->addOrderBy('g.likeCount', 'DESC')
+				->addOrderBy('g.likeCount', \SortDirection::Descending)
 			;
 		} else if ('popular-comments' == $filter) {
 			$queryBuilder
-				->addOrderBy('g.commentCount', 'DESC')
+				->addOrderBy('g.commentCount', \SortDirection::Descending)
 			;
 		} else if ('popular-downloads' == $filter) {
 			$queryBuilder
-				->addOrderBy('g.downloadCount', 'DESC')
+				->addOrderBy('g.downloadCount', \SortDirection::Descending)
 			;
 		}
 		$queryBuilder
-			->addOrderBy('g.changedAt', 'DESC')
+			->addOrderBy('g.changedAt', \SortDirection::Descending)
 		;
 	}
 

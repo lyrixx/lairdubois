@@ -83,7 +83,7 @@ class Event extends AbstractDraftableAuthoredPublication implements TitledInterf
 	#[ORM\JoinTable(name: 'tbl_event_body_block')]
 	#[ORM\InverseJoinColumn(name: 'block_id', referencedColumnName: 'id', unique: true, onDelete: 'cascade')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Block\AbstractBlock::class, cascade: ['persist', 'remove'])]
-	#[ORM\OrderBy(['sortIndex' => 'ASC'])]
+	#[ORM\OrderBy(['sortIndex' => \SortDirection::Ascending])]
 	private $bodyBlocks;
 
 	#[ORM\Column(type: 'integer', name: 'body_block_picture_count')]
@@ -99,7 +99,7 @@ class Event extends AbstractDraftableAuthoredPublication implements TitledInterf
 	#[Assert\Count(min: 1, max: 5)]
 	#[ORM\JoinTable(name: 'tbl_event_picture')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Picture::class, cascade: ['persist'])]
-	#[ORM\OrderBy(['sortIndex' => 'ASC'])]
+	#[ORM\OrderBy(['sortIndex' => \SortDirection::Ascending])]
 	private $pictures;
 
 	#[ORM\Column(type: 'string', length: 100, nullable: true)]

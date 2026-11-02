@@ -65,7 +65,7 @@ class PostRepository extends AbstractEntityRepository {
 			->innerJoin('p.mainPicture', 'mp')
 			->where('p.isDraft = 0')
 			->andWhere('p.highlightLevel >= :highlightLevel')
-			->orderBy('p.changedAt', 'DESC')
+			->orderBy('p.changedAt', \SortDirection::Descending)
 			->setParameter('highlightLevel', $highlightLevel)
 			->setMaxResults(1)
 		;
@@ -101,19 +101,19 @@ class PostRepository extends AbstractEntityRepository {
 	private function _applyCommonFilter(&$queryBuilder, $filter) {
 		if ('popular-views' == $filter) {
 			$queryBuilder
-				->addOrderBy('p.viewCount', 'DESC')
+				->addOrderBy('p.viewCount', \SortDirection::Descending)
 			;
 		} else if ('popular-likes' == $filter) {
 			$queryBuilder
-				->addOrderBy('p.likeCount', 'DESC')
+				->addOrderBy('p.likeCount', \SortDirection::Descending)
 			;
 		} else if ('popular-comments' == $filter) {
 			$queryBuilder
-				->addOrderBy('p.commentCount', 'DESC')
+				->addOrderBy('p.commentCount', \SortDirection::Descending)
 			;
 		}
 		$queryBuilder
-			->addOrderBy('p.changedAt', 'DESC')
+			->addOrderBy('p.changedAt', \SortDirection::Descending)
 		;
 	}
 

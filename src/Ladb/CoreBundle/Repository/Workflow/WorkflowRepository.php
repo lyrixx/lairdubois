@@ -49,18 +49,18 @@ class WorkflowRepository extends AbstractEntityRepository {
 	private function _applyCommonFilter(&$queryBuilder, $filter) {
 		if ('popular-views' == $filter) {
 			$queryBuilder
-				->addOrderBy('w.viewCount', 'DESC')
+				->addOrderBy('w.viewCount', \SortDirection::Descending)
 			;
 		} else if ('popular-likes' == $filter) {
 			$queryBuilder
-				->addOrderBy('w.likeCount', 'DESC')
+				->addOrderBy('w.likeCount', \SortDirection::Descending)
 			;
 		} else if ('popular-comments' == $filter) {
 			$queryBuilder
-				->addOrderBy('w.commentCount', 'DESC');
+				->addOrderBy('w.commentCount', \SortDirection::Descending);
 		}
 		$queryBuilder
-			->addOrderBy('w.changedAt', 'DESC')
+			->addOrderBy('w.changedAt', \SortDirection::Descending)
 		;
 	}
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Ladb\Rector\ControllerGetToActionArgumentRector;
 use Ladb\Rector\ContainerToConstructorRector;
+use Ladb\Rector\UntypedQueryBuilderSortDirectionRector;
 use PhpParser\PrettyPrinterAbstract;
 use PHPStan\Type\ArrayType;
 use PHPStan\Type\MixedType;
@@ -13,6 +14,8 @@ use PHPStan\Type\UnionType;
 use PHPStan\Type\VoidType;
 use Rector\Composer\InstalledPackageResolver;
 use Rector\Config\RectorConfig;
+use Rector\Doctrine\Orm37\Rector\Attribute\DoctrineOrderByAttributeSortDirectionRector;
+use Rector\Doctrine\Orm37\Rector\MethodCall\DoctrineQueryBuilderSortDirectionRector;
 use Rector\Php80\Rector\Class_\AnnotationToAttributeRector;
 use Rector\Php80\Rector\Property\NestedAnnotationToAttributeRector;
 use Rector\Php80\ValueObject\AnnotationPropertyToAttributeClass;
@@ -56,6 +59,12 @@ return static function (RectorConfig $rectorConfig): void {
             // 6.2) → #[AsMessageHandler] (#205)
             MessageHandlerInterfaceToAttributeRector::class,
             MessageSubscriberInterfaceToAttributeRector::class,
+            // Sort directions as strings, deprecated in the ORM 3.7 (#217): SortDirection of
+            // symfony/polyfill-php86, that Rector only uses when the composer.json requires it.
+            // The rule of rector-doctrine skips a query builder without a known type: ours.
+            DoctrineOrderByAttributeSortDirectionRector::class,
+            DoctrineQueryBuilderSortDirectionRector::class,
+            UntypedQueryBuilderSortDirectionRector::class,
         ])
         // Of the renames of symfony/security-core 5.3 (composer-based set of rector-symfony), the
         // one that the code needs (#177). The #[Template] of SensioFrameworkExtraBundle → that of

@@ -98,31 +98,31 @@ class BookRepository extends AbstractKnowledgeRepository {
 	private function _applyCommonFilter(&$queryBuilder, $filter) {
 		if ('popular-views' == $filter) {
 			$queryBuilder
-				->addOrderBy('b.viewCount', 'DESC')
+				->addOrderBy('b.viewCount', \SortDirection::Descending)
 			;
 		} else if ('popular-likes' == $filter) {
 			$queryBuilder
-				->addOrderBy('b.likeCount', 'DESC')
+				->addOrderBy('b.likeCount', \SortDirection::Descending)
 			;
 		} else if ('popular-comments' == $filter) {
 			$queryBuilder
-				->addOrderBy('b.commentCount', 'DESC')
+				->addOrderBy('b.commentCount', \SortDirection::Descending)
 			;
 		} else if ('collaborative-contributors' == $filter) {
 			$queryBuilder
-				->addOrderBy('b.contributorCount', 'DESC')
+				->addOrderBy('b.contributorCount', \SortDirection::Descending)
 			;
 		} else if ('order-alphabetical' == $filter) {
 			$queryBuilder
-				->addOrderBy('b.title', 'ASC')
+				->addOrderBy('b.title', \SortDirection::Ascending)
 			;
 		} else if ('order-density' == $filter) {
 			$queryBuilder
-				->addOrderBy('b.density', 'DESC')
+				->addOrderBy('b.density', \SortDirection::Descending)
 			;
 		}
 		$queryBuilder
-			->addOrderBy('b.changedAt', 'DESC')
+			->addOrderBy('b.changedAt', \SortDirection::Descending)
 		;
 	}
 

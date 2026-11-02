@@ -52,7 +52,7 @@ class CommentRepository extends AbstractEntityRepository {
 			->andWhere('c.entityId = :entityId')
 			->setParameter('entityType', $entityType)
 			->setParameter('entityId', $entityId)
-			->orderBy('c.createdAt', 'ASC')
+			->orderBy('c.createdAt', \SortDirection::Ascending)
 		;
 
 		if ($parentOnly) {
@@ -83,7 +83,7 @@ class CommentRepository extends AbstractEntityRepository {
 			->from($this->getEntityName(), 'c')
 			->where('c.user = :user')
 			->groupBy('c.entityType, c.entityId')
-			->orderBy('mx', 'DESC')
+			->orderBy('mx', \SortDirection::Descending)
 			->setParameter('user', $user)
 			->setFirstResult($offset)
 			->setMaxResults($limit)
@@ -120,7 +120,7 @@ class CommentRepository extends AbstractEntityRepository {
 				$comments = array( $concatResult[0] );
 			} else {
 				$commentIds = explode(',', $concatResult[2]);
-				$comments = $this->findByIds($commentIds, 'c.createdAt', 'ASC');
+				$comments = $this->findByIds($commentIds, 'c.createdAt', \SortDirection::Ascending);
 			}
 
 			$items[] = array(
@@ -142,7 +142,7 @@ class CommentRepository extends AbstractEntityRepository {
 	 * ]
 	 */
 
-	public function findByIds(array $ids, $orderBySort = null, $orderByOrder = null) {
+	public function findByIds(array $ids, $orderBySort = null, ?\SortDirection $orderByOrder = null) {
 		$queryBuilder = $this->getEntityManager()->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'c', 'u', 'ps', 'ua' ))

@@ -39,7 +39,7 @@ class PublishRepository extends AbstractEntityRepository {
 			->setParameter('user', $user)
 			->setParameter('entityType', $entityType)
 			->setParameter('entityId', $entityId)
-			->orderBy('a.createdAt', 'ASC')
+			->orderBy('a.createdAt', \SortDirection::Ascending)
 		;
 
 		try {

@@ -38,7 +38,7 @@ class ArticleRepository extends AbstractEntityRepository {
 			->from($this->getEntityName(), 'a')
 			->where('a.isDraft = false')
 			->andWhere('a.howto = :howto')
-			->orderBy('a.createdAt', 'DESC')
+			->orderBy('a.createdAt', \SortDirection::Descending)
 			->setParameter('howto', $howto)
 			->setMaxResults(1);
 

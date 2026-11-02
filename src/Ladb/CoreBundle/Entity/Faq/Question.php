@@ -78,7 +78,7 @@ class Question extends AbstractDraftableAuthoredPublication implements TitledInt
 	#[ORM\JoinTable(name: 'tbl_faq_question_body_block')]
 	#[ORM\InverseJoinColumn(name: 'block_id', referencedColumnName: 'id', unique: true, onDelete: 'cascade')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Block\AbstractBlock::class, cascade: ['persist', 'remove'])]
-	#[ORM\OrderBy(['sortIndex' => 'ASC'])]
+	#[ORM\OrderBy(['sortIndex' => \SortDirection::Ascending])]
 	private $bodyBlocks;
 
 	#[ORM\Column(type: 'integer', name: 'body_block_picture_count')]

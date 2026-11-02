@@ -63,7 +63,7 @@ class Comment implements TypableInterface, BasicTimestampableInterface, Authored
 	#[Assert\Count(min: 0, max: 4)]
 	#[ORM\JoinTable(name: 'tbl_core_comment_picture')]
 	#[ORM\ManyToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Picture::class, cascade: ['persist'])]
-	#[ORM\OrderBy(['sortIndex' => 'ASC'])]
+	#[ORM\OrderBy(['sortIndex' => \SortDirection::Ascending])]
 	protected $pictures;
 
 	#[ORM\JoinColumn(nullable: true)]
@@ -71,7 +71,7 @@ class Comment implements TypableInterface, BasicTimestampableInterface, Authored
 	private $parent;
 
 	#[ORM\OneToMany(targetEntity: \Ladb\CoreBundle\Entity\Core\Comment::class, mappedBy: 'parent', cascade: ['persist'])]
-	#[ORM\OrderBy(['createdAt' => 'ASC'])]
+	#[ORM\OrderBy(['createdAt' => \SortDirection::Ascending])]
 	private $children;
 
 	#[ORM\Column(type: 'integer')]
