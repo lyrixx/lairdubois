@@ -116,7 +116,7 @@ class OfferController extends AbstractController {
 		}
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('offer.offer.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $offer->getTitle() )));
+		$this->addFlash('success', $translator->trans('offer.offer.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => htmlspecialchars($offer->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_offer_show', array( 'id' => $offer->getSluggedId() )));
 	}
@@ -131,7 +131,7 @@ class OfferController extends AbstractController {
 		$offerManager->publish($offer);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('offer.offer.form.alert.publish_success', array( '%title%' => $offer->getTitle() )));
+		$this->addFlash('success', $translator->trans('offer.offer.form.alert.publish_success', array( '%title%' => htmlspecialchars($offer->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_offer_show', array( 'id' => $offer->getSluggedId() )));
 	}
@@ -146,7 +146,7 @@ class OfferController extends AbstractController {
 		$offerManager->unpublish($offer);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('offer.offer.form.alert.unpublish_success', array( '%title%' => $offer->getTitle() )));
+		$this->addFlash('success', $translator->trans('offer.offer.form.alert.unpublish_success', array( '%title%' => htmlspecialchars($offer->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		// Return to
 		$returnToUrl = $request->query->get('rtu');
@@ -207,7 +207,7 @@ class OfferController extends AbstractController {
 			$dispatcher->dispatch(new PublicationEvent($offer, array( 'previouslyUsedTags' => $previouslyUsedTags )), PublicationListener::PUBLICATION_UPDATED);
 
 			// Flashbag
-			$this->addFlash('success', $translator->trans('offer.offer.form.alert.update_success', array( '%title%' => $offer->getTitle() )));
+			$this->addFlash('success', $translator->trans('offer.offer.form.alert.update_success', array( '%title%' => htmlspecialchars($offer->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 			// Regenerate the form
 			$form = $this->createForm(OfferType::class, $offer);
@@ -236,7 +236,7 @@ class OfferController extends AbstractController {
 		$offerManager->delete($offer);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('offer.offer.form.alert.delete_success', array( '%title%' => $offer->getTitle() )));
+		$this->addFlash('success', $translator->trans('offer.offer.form.alert.delete_success', array( '%title%' => htmlspecialchars($offer->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_offer_list'));
 	}
@@ -253,7 +253,7 @@ class OfferController extends AbstractController {
 		$offerManager->changeOwner($offer, $targetUser);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('offer.offer.form.alert.chown_success', array( '%title%' => $offer->getTitle() )));
+		$this->addFlash('success', $translator->trans('offer.offer.form.alert.chown_success', array( '%title%' => htmlspecialchars($offer->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_offer_show', array( 'id' => $offer->getSluggedId() )));
 	}
@@ -609,7 +609,7 @@ class OfferController extends AbstractController {
 		$question = $offerManager->convertToQuestion($offer);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('offer.offer.admin.alert.converttoquestion_success', array( '%title%' => $offer->getTitle() )));
+		$this->addFlash('success', $translator->trans('offer.offer.admin.alert.converttoquestion_success', array( '%title%' => htmlspecialchars($offer->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_qa_question_show', array( 'id' => $question->getSluggedId() )));
 	}

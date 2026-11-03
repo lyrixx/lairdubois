@@ -118,7 +118,7 @@ class TipController extends AbstractController {
 			$dispatcher->dispatch(new PublicationEvent($tip), PublicationListener::PUBLICATION_UPDATED);
 
 			// Flashbag
-			$this->addFlash('success', $translator->trans('core.tip.form.alert.update_success', array( '%title%' => $tip->getTitle() )));
+			$this->addFlash('success', $translator->trans('core.tip.form.alert.update_success', array( '%title%' => htmlspecialchars($tip->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 			// Regenerate the form
 			$form = $this->createForm(TipType::class, $tip);
@@ -150,7 +150,7 @@ class TipController extends AbstractController {
 		$tipManager->delete($tip);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('core.tip.form.alert.delete_success', array( '%title%' => $tip->getTitle() )));
+		$this->addFlash('success', $translator->trans('core.tip.form.alert.delete_success', array( '%title%' => htmlspecialchars($tip->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_tip_list'));
 	}

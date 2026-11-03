@@ -346,7 +346,7 @@ class AnswerController extends AbstractController {
 		$find = $answerManager->convertToComment($answer, $question);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('qa.answer.admin.alert.converttocomment_success', array( '%title%' => $answer->getTitle() )));
+		$this->addFlash('success', $translator->trans('qa.answer.admin.alert.converttocomment_success', array( '%title%' => htmlspecialchars($answer->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_qa_question_show', array( 'id' => $question->getSluggedId() )));
 	}

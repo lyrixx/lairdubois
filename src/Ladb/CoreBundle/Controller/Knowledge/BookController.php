@@ -142,7 +142,7 @@ class BookController extends AbstractController {
 		$bookMananger->delete($book);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('knowledge.book.form.alert.delete_success', array( '%title%' => $book->getTitle() )));
+		$this->addFlash('success', $translator->trans('knowledge.book.form.alert.delete_success', array( '%title%' => htmlspecialchars($book->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_book_list'));
 	}

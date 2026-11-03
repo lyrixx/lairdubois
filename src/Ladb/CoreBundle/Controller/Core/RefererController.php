@@ -32,7 +32,7 @@ class RefererController extends AbstractController {
 		$om->flush();
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('referer.referral.alert.delete_success', array( '%title%' => $referral->getTitle() )));
+		$this->addFlash('success', $translator->trans('referer.referral.alert.delete_success', array( '%title%' => htmlspecialchars($referral->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($typableUtils->getUrlAction($entity));
 	}

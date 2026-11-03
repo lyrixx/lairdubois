@@ -140,7 +140,7 @@ class SchoolController extends AbstractController {
 		$schoolManager->delete($school);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('knowledge.school.form.alert.delete_success', array( '%title%' => $school->getTitle() )));
+		$this->addFlash('success', $translator->trans('knowledge.school.form.alert.delete_success', array( '%title%' => htmlspecialchars($school->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_school_list'));
 	}

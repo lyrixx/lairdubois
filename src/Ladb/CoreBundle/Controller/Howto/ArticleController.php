@@ -119,7 +119,7 @@ class ArticleController extends AbstractHowtoBasedController {
 		$this->_updateHowtoBlockVideoCount($howto);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('howto.article.form.alert.publish_success', array( '%title%' => $article->getTitle() )));
+		$this->addFlash('success', $translator->trans('howto.article.form.alert.publish_success', array( '%title%' => htmlspecialchars($article->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_howto_show', array( 'id' => $article->getHowto()->getSluggedId() )).'#'.$article->getSluggedId());
 	}
@@ -135,7 +135,7 @@ class ArticleController extends AbstractHowtoBasedController {
 		$articleManager->unpublish($article);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('howto.article.form.alert.unpublish_success', array( '%title%' => $article->getTitle() )));
+		$this->addFlash('success', $translator->trans('howto.article.form.alert.unpublish_success', array( '%title%' => htmlspecialchars($article->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		// Return to
 		$returnToUrl = $request->query->get('rtu');
@@ -209,7 +209,7 @@ class ArticleController extends AbstractHowtoBasedController {
 			$searchUtils->replaceEntityInIndex($howto);
 
 			// Flashbag
-			$this->addFlash('success', $translator->trans('howto.article.form.alert.update_success', array( '%title%' => $article->getTitle() )));
+			$this->addFlash('success', $translator->trans('howto.article.form.alert.update_success', array( '%title%' => htmlspecialchars($article->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 			// Regenerate the form
 			$form = $this->createForm(HowtoArticleType::class, $article);
@@ -247,7 +247,7 @@ class ArticleController extends AbstractHowtoBasedController {
 		$searchUtils->replaceEntityInIndex($howto);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('howto.article.form.alert.delete_success', array( '%title%' => $article->getTitle() )));
+		$this->addFlash('success', $translator->trans('howto.article.form.alert.delete_success', array( '%title%' => htmlspecialchars($article->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_howto_edit', array( 'id' => $howto->getId() )));
 	}

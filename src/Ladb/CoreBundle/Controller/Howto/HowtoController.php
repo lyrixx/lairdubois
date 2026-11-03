@@ -107,7 +107,7 @@ class HowtoController extends AbstractHowtoBasedController {
 		}
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('howto.howto.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $howto->getTitle() )));
+		$this->addFlash('success', $translator->trans('howto.howto.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => htmlspecialchars($howto->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_howto_show', array( 'id' => $howto->getSluggedId() )));
 	}
@@ -122,7 +122,7 @@ class HowtoController extends AbstractHowtoBasedController {
 		$howtoManager->publish($howto);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('howto.howto.form.alert.publish_success', array( '%title%' => $howto->getTitle() )));
+		$this->addFlash('success', $translator->trans('howto.howto.form.alert.publish_success', array( '%title%' => htmlspecialchars($howto->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_howto_show', array( 'id' => $howto->getSluggedId() )));
 	}
@@ -137,7 +137,7 @@ class HowtoController extends AbstractHowtoBasedController {
 		$howtoManager->unpublish($howto);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('howto.howto.form.alert.unpublish_success', array( '%title%' => $howto->getTitle() )));
+		$this->addFlash('success', $translator->trans('howto.howto.form.alert.unpublish_success', array( '%title%' => htmlspecialchars($howto->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		// Return to
 		$returnToUrl = $request->query->get('rtu');
@@ -194,7 +194,7 @@ class HowtoController extends AbstractHowtoBasedController {
 			$dispatcher->dispatch(new PublicationEvent($howto, array( 'previouslyUsedTags' => $previouslyUsedTags )), PublicationListener::PUBLICATION_UPDATED);
 
 			// Flashbag
-			$this->addFlash('success', $translator->trans('howto.howto.form.alert.update_success', array( '%title%' => $howto->getTitle() )));
+			$this->addFlash('success', $translator->trans('howto.howto.form.alert.update_success', array( '%title%' => htmlspecialchars($howto->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 			// Regenerate the form
 			$form = $this->createForm(HowtoType::class, $howto);
@@ -223,7 +223,7 @@ class HowtoController extends AbstractHowtoBasedController {
 		$howtoManager->delete($howto);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('howto.howto.form.alert.delete_success', array( '%title%' => $howto->getTitle() )));
+		$this->addFlash('success', $translator->trans('howto.howto.form.alert.delete_success', array( '%title%' => htmlspecialchars($howto->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_howto_list'));
     }
@@ -240,7 +240,7 @@ class HowtoController extends AbstractHowtoBasedController {
 		$howtoManager->changeOwner($howto, $targetUser);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('howto.howto.form.alert.chown_success', array( '%title%' => $howto->getTitle() )));
+		$this->addFlash('success', $translator->trans('howto.howto.form.alert.chown_success', array( '%title%' => htmlspecialchars($howto->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_howto_show', array( 'id' => $howto->getSluggedId() )));
 	}

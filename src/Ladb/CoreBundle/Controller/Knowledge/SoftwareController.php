@@ -143,7 +143,7 @@ class SoftwareController extends AbstractController {
 		$softwareMananger->delete($software);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('knowledge.software.form.alert.delete_success', array( '%title%' => $software->getTitle() )));
+		$this->addFlash('success', $translator->trans('knowledge.software.form.alert.delete_success', array( '%title%' => htmlspecialchars($software->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_software_list'));
 	}

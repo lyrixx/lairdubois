@@ -133,7 +133,7 @@ class CreationController extends AbstractController {
 		}
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('wonder.creation.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $creation->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.creation.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => htmlspecialchars($creation->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_creation_show', array( 'id' => $creation->getSluggedId() )));
 	}
@@ -148,7 +148,7 @@ class CreationController extends AbstractController {
 		$creationManager->publish($creation);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('wonder.creation.form.alert.publish_success', array( '%title%' => $creation->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.creation.form.alert.publish_success', array( '%title%' => htmlspecialchars($creation->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_creation_show', array( 'id' => $creation->getSluggedId() )));
 	}
@@ -163,7 +163,7 @@ class CreationController extends AbstractController {
 		$creationManager->unpublish($creation);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('wonder.creation.form.alert.unpublish_success', array( '%title%' => $creation->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.creation.form.alert.unpublish_success', array( '%title%' => htmlspecialchars($creation->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		// Return to
 		$returnToUrl = $request->query->get('rtu');
@@ -236,7 +236,7 @@ class CreationController extends AbstractController {
 			$dispatcher->dispatch(new PublicationEvent($creation, array( 'previouslyUsedTags' => $previouslyUsedTags )), PublicationListener::PUBLICATION_UPDATED);
 
 			// Flashbag
-			$this->addFlash('success', $translator->trans('wonder.creation.form.alert.update_success', array( '%title%' => $creation->getTitle() )));
+			$this->addFlash('success', $translator->trans('wonder.creation.form.alert.update_success', array( '%title%' => htmlspecialchars($creation->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 			// Regenerate the form
 			$form = $this->createForm(CreationType::class, $creation);
@@ -265,7 +265,7 @@ class CreationController extends AbstractController {
 		$creationManager->delete($creation);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('wonder.creation.form.alert.delete_success', array( '%title%' => $creation->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.creation.form.alert.delete_success', array( '%title%' => htmlspecialchars($creation->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_creation_list'));
 	}
@@ -282,7 +282,7 @@ class CreationController extends AbstractController {
 		$creationManager->changeOwner($creation, $targetUser);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('wonder.creation.form.alert.chown_success', array( '%title%' => $creation->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.creation.form.alert.chown_success', array( '%title%' => htmlspecialchars($creation->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_creation_show', array( 'id' => $creation->getSluggedId() )));
 	}
@@ -1107,7 +1107,7 @@ class CreationController extends AbstractController {
 		$workshop = $creationManager->convertToWorkshop($creation);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('wonder.creation.admin.alert.converttoworkshop_success', array( '%title%' => $creation->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.creation.admin.alert.converttoworkshop_success', array( '%title%' => htmlspecialchars($creation->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_workshop_show', array( 'id' => $workshop->getSluggedId() )));
 	}
@@ -1126,7 +1126,7 @@ class CreationController extends AbstractController {
 		$howto = $creationManager->convertToHowto($creation);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('wonder.creation.admin.alert.converttohowto_success', array( '%title%' => $creation->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.creation.admin.alert.converttohowto_success', array( '%title%' => htmlspecialchars($creation->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_howto_show', array( 'id' => $howto->getSluggedId() )));
 	}
@@ -1145,7 +1145,7 @@ class CreationController extends AbstractController {
 		$find = $creationManager->convertToFind($creation);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('wonder.creation.admin.alert.converttofind_success', array( '%title%' => $creation->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.creation.admin.alert.converttofind_success', array( '%title%' => htmlspecialchars($creation->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_find_show', array( 'id' => $find->getSluggedId() )));
 	}
@@ -1164,7 +1164,7 @@ class CreationController extends AbstractController {
 		$question = $creationManager->convertToQuestion($creation);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('wonder.creation.admin.alert.converttoquestion_success', array( '%title%' => $creation->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.creation.admin.alert.converttoquestion_success', array( '%title%' => htmlspecialchars($creation->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_qa_question_show', array( 'id' => $question->getSluggedId() )));
 	}
@@ -1183,7 +1183,7 @@ class CreationController extends AbstractController {
 		$offer = $creationManager->convertToOffer($creation);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('wonder.creation.admin.alert.converttooffer_success', array( '%title%' => $offer->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.creation.admin.alert.converttooffer_success', array( '%title%' => htmlspecialchars($offer->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_offer_show', array( 'id' => $offer->getSluggedId() )));
 	}

@@ -93,7 +93,7 @@ class ThreadController extends AbstractThreadController {
 				}
 				$recipientNames .= $recipient->getDisplayname();
 			}
-			$this->addFlash('success', 'Votre message a été envoyé à <strong>'.$recipientNames.'</strong>.');
+			$this->addFlash('success', 'Votre message a été envoyé à <strong>'.htmlspecialchars($recipientNames, ENT_QUOTES | ENT_SUBSTITUTE).'</strong>.');
 
 			if (!$sender->getEmailConfirmed() && $sender->getMeta()->getIncomingMessageEmailNotificationEnabled()) {
 				$this->addFlash('error', $translator->trans('default.alert.email_not_confirmed_error'));

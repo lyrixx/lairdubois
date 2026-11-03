@@ -119,7 +119,7 @@ class WorkshopController extends AbstractController {
 		}
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('wonder.creation.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $workshop->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.creation.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => htmlspecialchars($workshop->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_workshop_show', array( 'id' => $workshop->getSluggedId() )));
 	}
@@ -134,7 +134,7 @@ class WorkshopController extends AbstractController {
 		$workshopManager->publish($workshop);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('wonder.workshop.form.alert.publish_success', array( '%title%' => $workshop->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.workshop.form.alert.publish_success', array( '%title%' => htmlspecialchars($workshop->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_workshop_show', array( 'id' => $workshop->getSluggedId() )));
 	}
@@ -149,7 +149,7 @@ class WorkshopController extends AbstractController {
 		$workshopManager->unpublish($workshop);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('wonder.workshop.form.alert.unpublish_success', array( '%title%' => $workshop->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.workshop.form.alert.unpublish_success', array( '%title%' => htmlspecialchars($workshop->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		// Return to
 		$returnToUrl = $request->query->get('rtu');
@@ -214,7 +214,7 @@ class WorkshopController extends AbstractController {
 			$dispatcher->dispatch(new PublicationEvent($workshop, array( 'previouslyUsedTags' => $previouslyUsedTags )), PublicationListener::PUBLICATION_UPDATED);
 
 			// Flashbag
-			$this->addFlash('success', $translator->trans('wonder.workshop.form.alert.update_success', array( '%title%' => $workshop->getTitle() )));
+			$this->addFlash('success', $translator->trans('wonder.workshop.form.alert.update_success', array( '%title%' => htmlspecialchars($workshop->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 			// Regenerate the form
 			$form = $this->createForm(WorkshopType::class, $workshop);
@@ -243,7 +243,7 @@ class WorkshopController extends AbstractController {
 		$workshopManager->delete($workshop);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('wonder.workshop.form.alert.delete_success', array( '%title%' => $workshop->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.workshop.form.alert.delete_success', array( '%title%' => htmlspecialchars($workshop->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_workshop_list'));
 	}
@@ -260,7 +260,7 @@ class WorkshopController extends AbstractController {
 		$workshopManager->changeOwner($workshop, $targetUser);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('wonder.workshop.form.alert.chown_success', array( '%title%' => $workshop->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.workshop.form.alert.chown_success', array( '%title%' => htmlspecialchars($workshop->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_workshop_show', array( 'id' => $workshop->getSluggedId() )));
 	}
@@ -805,7 +805,7 @@ class WorkshopController extends AbstractController {
 		$creation = $workshopManager->convertToCreation($workshop);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('wonder.workshop.admin.alert.converttocreation_success', array( '%title%' => $workshop->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.workshop.admin.alert.converttocreation_success', array( '%title%' => htmlspecialchars($workshop->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_creation_show', array( 'id' => $creation->getSluggedId() )));
 	}
@@ -824,7 +824,7 @@ class WorkshopController extends AbstractController {
 		$howto = $workshopManager->convertToHowto($workshop);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('wonder.workshop.admin.alert.converttohowto_success', array( '%title%' => $workshop->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.workshop.admin.alert.converttohowto_success', array( '%title%' => htmlspecialchars($workshop->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_howto_show', array( 'id' => $howto->getSluggedId() )));
 	}

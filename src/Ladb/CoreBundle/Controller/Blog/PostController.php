@@ -106,7 +106,7 @@ class PostController extends AbstractController {
 		}
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('wonder.creation.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $post->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.creation.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => htmlspecialchars($post->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_blog_post_show', array( 'id' => $post->getSluggedId() )));
 	}
@@ -122,7 +122,7 @@ class PostController extends AbstractController {
 		$postManager->publish($post);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('blog.post.form.alert.publish_success', array( '%title%' => $post->getTitle() )));
+		$this->addFlash('success', $translator->trans('blog.post.form.alert.publish_success', array( '%title%' => htmlspecialchars($post->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_blog_post_show', array( 'id' => $post->getSluggedId() )));
 	}
@@ -137,7 +137,7 @@ class PostController extends AbstractController {
 		$postManager->unpublish($post);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('blog.post.form.alert.unpublish_success', array( '%title%' => $post->getTitle() )));
+		$this->addFlash('success', $translator->trans('blog.post.form.alert.unpublish_success', array( '%title%' => htmlspecialchars($post->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		// Return to
 		$returnToUrl = $request->query->get('rtu');
@@ -203,7 +203,7 @@ class PostController extends AbstractController {
 			$dispatcher->dispatch(new PublicationEvent($post, array( 'previouslyUsedTags' => $previouslyUsedTags )), PublicationListener::PUBLICATION_UPDATED);
 
 			// Flashbag
-			$this->addFlash('success', $translator->trans('blog.post.form.alert.update_success', array( '%title%' => $post->getTitle() )));
+			$this->addFlash('success', $translator->trans('blog.post.form.alert.update_success', array( '%title%' => htmlspecialchars($post->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 			// Regenerate the form
 			$form = $this->createForm(PostType::class, $post);
@@ -232,7 +232,7 @@ class PostController extends AbstractController {
 		$postManager->delete($post);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('blog.post.form.alert.delete_success', array( '%title%' => $post->getTitle() )));
+		$this->addFlash('success', $translator->trans('blog.post.form.alert.delete_success', array( '%title%' => htmlspecialchars($post->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_blog_post_list'));
 	}

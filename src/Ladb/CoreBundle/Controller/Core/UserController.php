@@ -167,7 +167,7 @@ class UserController extends AbstractController {
 			$userManager->updateUser($user);
 
 			// Flashbag
-			$this->addFlash('success', $translator->trans('user.email_confirmation.confirm.success', array( '%email%' => $user->getEmail() )));
+			$this->addFlash('success', $translator->trans('user.email_confirmation.confirm.success', array( '%email%' => htmlspecialchars($user->getEmail(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 			return $this->redirect($this->generateUrl('core_welcome'));
 		}
@@ -1645,7 +1645,7 @@ class UserController extends AbstractController {
 			$searchUtils->insertEntityToIndex($team);
 
 			// Flashbag
-			$this->addFlash('success', $translator->trans('user.form.alert.team_success', array( '%displayname%' => $team->getDisplayname() )));
+			$this->addFlash('success', $translator->trans('user.form.alert.team_success', array( '%displayname%' => htmlspecialchars($team->getDisplayname(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 			/////
 
@@ -1742,7 +1742,7 @@ class UserController extends AbstractController {
 		$searchUtils->insertEntityToIndex($user);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('user.admin.alert.converttoteam_success', array( '%displayname%' => $user->getDisplayname() )));
+		$this->addFlash('success', $translator->trans('user.admin.alert.converttoteam_success', array( '%displayname%' => htmlspecialchars($user->getDisplayname(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_user_show_admin', array( 'username' => $username )));
 	}
@@ -1765,7 +1765,7 @@ class UserController extends AbstractController {
 		$searchUtils->insertEntityToIndex($user);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('user.admin.alert.activate_success', array( '%displayname%' => $user->getDisplayname() )));
+		$this->addFlash('success', $translator->trans('user.admin.alert.activate_success', array( '%displayname%' => htmlspecialchars($user->getDisplayname(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_user_show_admin', array( 'username' => $username )));
 	}
@@ -1788,7 +1788,7 @@ class UserController extends AbstractController {
 		$searchUtils->deleteEntityFromIndex($user);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('user.admin.alert.deactivate_success', array( '%displayname%' => $user->getDisplayname() )));
+		$this->addFlash('success', $translator->trans('user.admin.alert.deactivate_success', array( '%displayname%' => htmlspecialchars($user->getDisplayname(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_user_show_admin', array( 'username' => $username )));
 	}
@@ -1819,7 +1819,7 @@ class UserController extends AbstractController {
 		$searchUtils->replaceEntityInIndex($user);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('user.admin.alert.empty_success', array( '%displayname%' => $user->getDisplayname() )));
+		$this->addFlash('success', $translator->trans('user.admin.alert.empty_success', array( '%displayname%' => htmlspecialchars($user->getDisplayname(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_user_show_admin', array( 'username' => $username )));
 	}
@@ -1843,7 +1843,7 @@ class UserController extends AbstractController {
 		if ($userRepository->existsReferences($user, array_filter(array( $avatar, $banner )))) {
 
 			// Flashbag
-			$this->addFlash('error', $translator->trans('user.admin.alert.delete_error', array( '%displayname%' => $user->getDisplayname() )));
+			$this->addFlash('error', $translator->trans('user.admin.alert.delete_error', array( '%displayname%' => htmlspecialchars($user->getDisplayname(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 			return $this->redirect($this->generateUrl('core_user_show_admin', array( 'username' => $username )));
 		}
@@ -1874,7 +1874,7 @@ class UserController extends AbstractController {
 		$searchUtils->deleteEntityFromIndex($user);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('user.admin.alert.delete_success', array( '%displayname%' => $user->getDisplayname() )));
+		$this->addFlash('success', $translator->trans('user.admin.alert.delete_success', array( '%displayname%' => htmlspecialchars($user->getDisplayname(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_welcome'));
 	}

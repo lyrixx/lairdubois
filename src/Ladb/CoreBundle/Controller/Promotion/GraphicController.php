@@ -112,7 +112,7 @@ class GraphicController extends AbstractController {
 		}
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('promotion.graphic.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $graphic->getTitle() )));
+		$this->addFlash('success', $translator->trans('promotion.graphic.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => htmlspecialchars($graphic->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_promotion_graphic_show', array( 'id' => $graphic->getSluggedId() )));
 	}
@@ -127,7 +127,7 @@ class GraphicController extends AbstractController {
 		$graphicManager->publish($graphic);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('promotion.graphic.form.alert.publish_success', array( '%title%' => $graphic->getTitle() )));
+		$this->addFlash('success', $translator->trans('promotion.graphic.form.alert.publish_success', array( '%title%' => htmlspecialchars($graphic->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_promotion_graphic_show', array( 'id' => $graphic->getSluggedId() )));
 	}
@@ -142,7 +142,7 @@ class GraphicController extends AbstractController {
 		$graphicManager->unpublish($graphic);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('promotion.graphic.form.alert.unpublish_success', array( '%title%' => $graphic->getTitle() )));
+		$this->addFlash('success', $translator->trans('promotion.graphic.form.alert.unpublish_success', array( '%title%' => htmlspecialchars($graphic->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		// Return to
 		$returnToUrl = $request->query->get('rtu');
@@ -200,7 +200,7 @@ class GraphicController extends AbstractController {
 			$dispatcher->dispatch(new PublicationEvent($graphic, array( 'previouslyUsedTags' => $previouslyUsedTags )), PublicationListener::PUBLICATION_UPDATED);
 
 			// Flashbag
-			$this->addFlash('success', $translator->trans('promotion.graphic.form.alert.update_success', array( '%title%' => $graphic->getTitle() )));
+			$this->addFlash('success', $translator->trans('promotion.graphic.form.alert.update_success', array( '%title%' => htmlspecialchars($graphic->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 			// Regenerate the form
 			$form = $this->createForm(GraphicType::class, $graphic);
@@ -229,7 +229,7 @@ class GraphicController extends AbstractController {
 		$graphicManager->delete($graphic);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('promotion.graphic.form.alert.delete_success', array( '%title%' => $graphic->getTitle() )));
+		$this->addFlash('success', $translator->trans('promotion.graphic.form.alert.delete_success', array( '%title%' => htmlspecialchars($graphic->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_promotion_graphic_list'));
 	}
@@ -246,7 +246,7 @@ class GraphicController extends AbstractController {
 		$graphicManager->changeOwner($graphic, $targetUser);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('promotion.graphic.form.alert.chown_success', array( '%title%' => $graphic->getTitle() )));
+		$this->addFlash('success', $translator->trans('promotion.graphic.form.alert.chown_success', array( '%title%' => htmlspecialchars($graphic->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_promotion_graphic_show', array( 'id' => $graphic->getSluggedId() )));
 	}

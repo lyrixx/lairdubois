@@ -85,22 +85,23 @@ class MemberController extends AbstractController {
 			$recipient = $userManager->findUserByUsername($username);
 			// Check if recipient exists or is enabled or is team
 			if (is_null($recipient) || !$recipient->isEnabled() || $recipient->getIsTeam()) {
-				$this->addFlash('error', '<i class="ladb-icon-warning"></i> '.$recipient.' est invalide.');
+				// The username (User::__toString()), or nothing for an unknown one
+				$this->addFlash('error', '<i class="ladb-icon-warning"></i> '.htmlspecialchars((string) $recipient, ENT_QUOTES | ENT_SUBSTITUTE).' est invalide.');
 				continue;
 			}
 			// Check if recipient already invited
 			if ($memberInvitationRepository->existsByTeamAndRecipient($team, $recipient)) {
-				$this->addFlash('error', '<i class="ladb-icon-warning"></i> '.$recipient.' est déjà invité.');
+				$this->addFlash('error', '<i class="ladb-icon-warning"></i> '.htmlspecialchars((string) $recipient, ENT_QUOTES | ENT_SUBSTITUTE).' est déjà invité.');
 				continue;
 			}
 			// Check if recipient already requested
 			if ($memberRequestRepository->existsByTeamAndSender($team, $recipient)) {
-				$this->addFlash('error', '<i class="ladb-icon-warning"></i> '.$recipient.' a déjà envoyé une demande.');
+				$this->addFlash('error', '<i class="ladb-icon-warning"></i> '.htmlspecialchars((string) $recipient, ENT_QUOTES | ENT_SUBSTITUTE).' a déjà envoyé une demande.');
 				continue;
 			}
 			// Check if recipient already member
 			if ($memberRepository->existsByTeamAndUser($team, $recipient)) {
-				$this->addFlash('error', '<i class="ladb-icon-warning"></i> '.$recipient.' est déjà membre.');
+				$this->addFlash('error', '<i class="ladb-icon-warning"></i> '.htmlspecialchars((string) $recipient, ENT_QUOTES | ENT_SUBSTITUTE).' est déjà membre.');
 				continue;
 			}
 
@@ -293,9 +294,9 @@ class MemberController extends AbstractController {
 
 		// Flashbag
 		if ($user == $this->getUser()) {
-			$this->addFlash('success', 'Bienvenue dans le collectif <strong>'.$team->getDisplayName().'</strong>.');
+			$this->addFlash('success', 'Bienvenue dans le collectif <strong>'.htmlspecialchars($team->getDisplayName(), ENT_QUOTES | ENT_SUBSTITUTE).'</strong>.');
 		} else {
-			$this->addFlash('success', '<strong>'.$user->getDisplayName().'</strong> a rejoint le collectif <strong>'.$team->getDisplayName().'</strong>.');
+			$this->addFlash('success', '<strong>'.htmlspecialchars($user->getDisplayName(), ENT_QUOTES | ENT_SUBSTITUTE).'</strong> a rejoint le collectif <strong>'.htmlspecialchars($team->getDisplayName(), ENT_QUOTES | ENT_SUBSTITUTE).'</strong>.');
 		}
 
 		return $this->redirect($this->generateUrl('core_user_show', array( 'username' => $team->getUsernameCanonical() )));
@@ -323,7 +324,7 @@ class MemberController extends AbstractController {
 		}
 
 		// Flashbag
-		$this->addFlash('success', 'Vous avez quitté le collectif <strong>'.$team->getDisplayName().'</strong>.');
+		$this->addFlash('success', 'Vous avez quitté le collectif <strong>'.htmlspecialchars($team->getDisplayName(), ENT_QUOTES | ENT_SUBSTITUTE).'</strong>.');
 
 		return $this->redirect($this->generateUrl('core_user_show', array( 'username' => $team->getUsernameCanonical() )));
 	}

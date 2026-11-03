@@ -144,7 +144,7 @@ class WoodController extends AbstractController {
 		$woodMananger->delete($wood);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('knowledge.wood.form.alert.delete_success', array( '%title%' => $wood->getTitle() )));
+		$this->addFlash('success', $translator->trans('knowledge.wood.form.alert.delete_success', array( '%title%' => htmlspecialchars($wood->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_wood_list'));
 	}

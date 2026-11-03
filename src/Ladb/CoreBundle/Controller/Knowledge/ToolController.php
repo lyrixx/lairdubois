@@ -167,7 +167,7 @@ class ToolController extends AbstractController {
 		$toolMananger->delete($tool);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('knowledge.tool.form.alert.delete_success', array( '%title%' => $tool->getTitle() )));
+		$this->addFlash('success', $translator->trans('knowledge.tool.form.alert.delete_success', array( '%title%' => htmlspecialchars($tool->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_tool_list'));
 	}

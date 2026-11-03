@@ -108,7 +108,7 @@ class QuestionController extends AbstractController {
 		}
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('wonder.creation.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $question->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.creation.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => htmlspecialchars($question->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_faq_question_show', array( 'id' => $question->getSluggedId() )));
 	}
@@ -124,7 +124,7 @@ class QuestionController extends AbstractController {
 		$questionManager->publish($question);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('faq.question.form.alert.publish_success', array( '%title%' => $question->getTitle() )));
+		$this->addFlash('success', $translator->trans('faq.question.form.alert.publish_success', array( '%title%' => htmlspecialchars($question->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_faq_question_show', array( 'id' => $question->getSluggedId() )));
 	}
@@ -139,7 +139,7 @@ class QuestionController extends AbstractController {
 		$questionManager->unpublish($question);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('faq.question.form.alert.unpublish_success', array( '%title%' => $question->getTitle() )));
+		$this->addFlash('success', $translator->trans('faq.question.form.alert.unpublish_success', array( '%title%' => htmlspecialchars($question->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		// Return to
 		$returnToUrl = $request->query->get('rtu');
@@ -203,7 +203,7 @@ class QuestionController extends AbstractController {
 			$dispatcher->dispatch(new PublicationEvent($question, array( 'previouslyUsedTags' => $previouslyUsedTags )), PublicationListener::PUBLICATION_UPDATED);
 
 			// Flashbag
-			$this->addFlash('success', $translator->trans('faq.question.form.alert.update_success', array( '%title%' => $question->getTitle() )));
+			$this->addFlash('success', $translator->trans('faq.question.form.alert.update_success', array( '%title%' => htmlspecialchars($question->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 			// Regenerate the form
 			$form = $this->createForm(QuestionType::class, $question);
@@ -232,7 +232,7 @@ class QuestionController extends AbstractController {
 		$questionManager->delete($question);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('faq.question.form.alert.delete_success', array( '%title%' => $question->getTitle() )));
+		$this->addFlash('success', $translator->trans('faq.question.form.alert.delete_success', array( '%title%' => htmlspecialchars($question->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_faq_question_list'));
 	}

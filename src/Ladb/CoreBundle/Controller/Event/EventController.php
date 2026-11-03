@@ -115,7 +115,7 @@ class EventController extends AbstractController {
 		}
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('event.event.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $event->getTitle() )));
+		$this->addFlash('success', $translator->trans('event.event.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => htmlspecialchars($event->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_event_show', array( 'id' => $event->getSluggedId() )));
 	}
@@ -130,7 +130,7 @@ class EventController extends AbstractController {
 		$eventManager->publish($event);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('event.event.form.alert.publish_success', array( '%title%' => $event->getTitle() )));
+		$this->addFlash('success', $translator->trans('event.event.form.alert.publish_success', array( '%title%' => htmlspecialchars($event->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_event_show', array( 'id' => $event->getSluggedId() )));
 	}
@@ -145,7 +145,7 @@ class EventController extends AbstractController {
 		$eventManager->unpublish($event);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('event.event.form.alert.unpublish_success', array( '%title%' => $event->getTitle() )));
+		$this->addFlash('success', $translator->trans('event.event.form.alert.unpublish_success', array( '%title%' => htmlspecialchars($event->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		// Return to
 		$returnToUrl = $request->query->get('rtu');
@@ -204,7 +204,7 @@ class EventController extends AbstractController {
 			$dispatcher->dispatch(new PublicationEvent($event, array( 'previouslyUsedTags' => $previouslyUsedTags )), PublicationListener::PUBLICATION_UPDATED);
 
 			// Flashbag
-			$this->addFlash('success', $translator->trans('event.event.form.alert.update_success', array( '%title%' => $event->getTitle() )));
+			$this->addFlash('success', $translator->trans('event.event.form.alert.update_success', array( '%title%' => htmlspecialchars($event->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 			// Regenerate the form
 			$form = $this->createForm(EventType::class, $event);
@@ -233,7 +233,7 @@ class EventController extends AbstractController {
 		$eventManager->delete($event);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('event.event.form.alert.delete_success', array( '%title%' => $event->getTitle() )));
+		$this->addFlash('success', $translator->trans('event.event.form.alert.delete_success', array( '%title%' => htmlspecialchars($event->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_event_list'));
 	}
@@ -250,7 +250,7 @@ class EventController extends AbstractController {
 		$eventManager->changeOwner($event, $targetUser);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('event.event.form.alert.chown_success', array( '%title%' => $event->getTitle() )));
+		$this->addFlash('success', $translator->trans('event.event.form.alert.chown_success', array( '%title%' => htmlspecialchars($event->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_event_show', array( 'id' => $event->getSluggedId() )));
 	}
