@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use Ladb\Rector\ControllerGetToActionArgumentRector;
 use Ladb\Rector\ContainerToConstructorRector;
+use Ladb\Rector\FlashMessageParameterToEscapedRector;
 use Ladb\Rector\UntypedQueryBuilderSortDirectionRector;
 use PhpParser\PrettyPrinterAbstract;
 use PHPStan\Type\ArrayType;
@@ -65,6 +66,8 @@ return static function (RectorConfig $rectorConfig): void {
             DoctrineOrderByAttributeSortDirectionRector::class,
             DoctrineQueryBuilderSortDirectionRector::class,
             UntypedQueryBuilderSortDirectionRector::class,
+            // Translation parameters of the flash messages, rendered as HTML: escaped
+            FlashMessageParameterToEscapedRector::class,
         ])
         // Of the renames of symfony/security-core 5.3 (composer-based set of rector-symfony), the
         // one that the code needs (#177). The #[Template] of SensioFrameworkExtraBundle → that of

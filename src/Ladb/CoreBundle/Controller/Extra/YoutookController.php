@@ -121,7 +121,7 @@ class YoutookController extends AbstractController {
 			$dispatcher->dispatch(new PublicationEvent($took), PublicationListener::PUBLICATION_UPDATED);
 
 			// Flashbag
-			$this->addFlash('success', $translator->trans('youtook.form.alert.update_success', array( '%title%' => $took->getTitle() )));
+			$this->addFlash('success', $translator->trans('youtook.form.alert.update_success', array( '%title%' => htmlspecialchars($took->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 			// Regenerate the form
 			$form = $this->createForm(EditTookType::class, $took);
@@ -155,7 +155,7 @@ class YoutookController extends AbstractController {
 		$tookManager->delete($took);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('youtook.form.alert.delete_success', array( '%title%' => $took->getTitle() )));
+		$this->addFlash('success', $translator->trans('youtook.form.alert.delete_success', array( '%title%' => htmlspecialchars($took->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_youtook_user_list'));
 	}

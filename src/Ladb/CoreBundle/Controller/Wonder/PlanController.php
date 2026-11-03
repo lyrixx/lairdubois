@@ -127,7 +127,7 @@ class PlanController extends AbstractController {
 		}
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('wonder.plan.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $plan->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.plan.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => htmlspecialchars($plan->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_plan_show', array( 'id' => $plan->getSluggedId() )));
 	}
@@ -142,7 +142,7 @@ class PlanController extends AbstractController {
 		$planManager->publish($plan);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('wonder.plan.form.alert.publish_success', array( '%title%' => $plan->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.plan.form.alert.publish_success', array( '%title%' => htmlspecialchars($plan->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_plan_show', array( 'id' => $plan->getSluggedId() )));
 	}
@@ -157,7 +157,7 @@ class PlanController extends AbstractController {
 		$planManager->unpublish($plan);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('wonder.plan.form.alert.unpublish_success', array( '%title%' => $plan->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.plan.form.alert.unpublish_success', array( '%title%' => htmlspecialchars($plan->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		// Return to
 		$returnToUrl = $request->query->get('rtu');
@@ -222,7 +222,7 @@ class PlanController extends AbstractController {
 			$dispatcher->dispatch(new PublicationEvent($plan, array( 'previouslyUsedTags' => $previouslyUsedTags )), PublicationListener::PUBLICATION_UPDATED);
 
 			// Flashbag
-			$this->addFlash('success', $translator->trans('wonder.plan.form.alert.update_success', array( '%title%' => $plan->getTitle() )));
+			$this->addFlash('success', $translator->trans('wonder.plan.form.alert.update_success', array( '%title%' => htmlspecialchars($plan->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 			// Regenerate the form
 			$form = $this->createForm(PlanType::class, $plan);
@@ -251,7 +251,7 @@ class PlanController extends AbstractController {
 		$planManager->delete($plan);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('wonder.plan.form.alert.delete_success', array( '%title%' => $plan->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.plan.form.alert.delete_success', array( '%title%' => htmlspecialchars($plan->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_plan_list'));
 	}
@@ -268,7 +268,7 @@ class PlanController extends AbstractController {
 		$planManager->changeOwner($plan, $targetUser);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('wonder.plan.form.alert.chown_success', array( '%title%' => $plan->getTitle() )));
+		$this->addFlash('success', $translator->trans('wonder.plan.form.alert.chown_success', array( '%title%' => htmlspecialchars($plan->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_plan_show', array( 'id' => $plan->getSluggedId() )));
 	}

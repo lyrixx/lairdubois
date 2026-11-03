@@ -114,7 +114,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		}
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('workflow.workflow.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $workflow->getTitle() )));
+		$this->addFlash('success', $translator->trans('workflow.workflow.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => htmlspecialchars($workflow->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_workflow_show', array( 'id' => $workflow->getSluggedId() )));
 	}
@@ -129,7 +129,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		$workflowManager->publish($workflow);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('workflow.workflow.form.alert.publish_success', array( '%title%' => $workflow->getTitle() )));
+		$this->addFlash('success', $translator->trans('workflow.workflow.form.alert.publish_success', array( '%title%' => htmlspecialchars($workflow->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_workflow_show', array( 'id' => $workflow->getSluggedId() )));
 	}
@@ -144,7 +144,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		$workflowManager->unpublish($workflow);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('workflow.workflow.form.alert.unpublish_success', array( '%title%' => $workflow->getTitle() )));
+		$this->addFlash('success', $translator->trans('workflow.workflow.form.alert.unpublish_success', array( '%title%' => htmlspecialchars($workflow->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		// Return to
 		$returnToUrl = $request->query->get('rtu');
@@ -197,7 +197,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 			$dispatcher->dispatch(new PublicationEvent($workflow, array( 'previouslyUsedTags' => $previouslyUsedTags )), PublicationListener::PUBLICATION_UPDATED);
 
 			// Flashbag
-			$this->addFlash('success', $translator->trans('workflow.workflow.form.alert.update_success', array( '%title%' => $workflow->getTitle() )));
+			$this->addFlash('success', $translator->trans('workflow.workflow.form.alert.update_success', array( '%title%' => htmlspecialchars($workflow->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 			// Regenerate the form
 			$form = $this->createForm(WorkflowType::class, $workflow);
@@ -226,7 +226,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		$workflowManager->delete($workflow);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('workflow.workflow.form.alert.delete_success', array( '%title%' => $workflow->getTitle() )));
+		$this->addFlash('success', $translator->trans('workflow.workflow.form.alert.delete_success', array( '%title%' => htmlspecialchars($workflow->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_workflow_list'));
 	}
@@ -243,7 +243,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		$workflowManager->changeOwner($workflow, $targetUser);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('workflow.workflow.form.alert.chown_success', array( '%title%' => $workflow->getTitle() )));
+		$this->addFlash('success', $translator->trans('workflow.workflow.form.alert.chown_success', array( '%title%' => htmlspecialchars($workflow->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_workflow_show', array( 'id' => $workflow->getSluggedId() )));
 	}
@@ -497,7 +497,7 @@ class WorkflowController extends AbstractWorkflowBasedController {
 		$newWorkflow = $workflowManager->copy($workflow, $this->getUser());
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('workflow.workflow.form.alert.copy_success', array( '%title%' => $workflow->getTitle() )));
+		$this->addFlash('success', $translator->trans('workflow.workflow.form.alert.copy_success', array( '%title%' => htmlspecialchars($workflow->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_workflow_show', array( 'id' => $newWorkflow->getSluggedId() )));
 	}

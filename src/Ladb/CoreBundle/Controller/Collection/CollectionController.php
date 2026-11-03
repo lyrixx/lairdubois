@@ -88,7 +88,7 @@ class CollectionController extends AbstractCollectionBasedController {
 				}
 
 				// Flashbag
-				$this->addFlash('success', $translator->trans('collection.collection.form.alert.auto_add_success', array( '%title%' => $entity->getTitle(), '%collection%' => $collection->getTitle() )));
+				$this->addFlash('success', $translator->trans('collection.collection.form.alert.auto_add_success', array( '%title%' => htmlspecialchars($entity->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE), '%collection%' => htmlspecialchars($collection->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 				return $this->redirect($typableUtils->getUrlAction($entity));
 			}
@@ -127,7 +127,7 @@ class CollectionController extends AbstractCollectionBasedController {
 		}
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('collection.collection.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $collection->getTitle() )));
+		$this->addFlash('success', $translator->trans('collection.collection.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => htmlspecialchars($collection->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_collection_show', array( 'id' => $collection->getSluggedId() )));
 	}
@@ -142,7 +142,7 @@ class CollectionController extends AbstractCollectionBasedController {
 		$collectionManager->publish($collection);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('collection.collection.form.alert.publish_success', array( '%title%' => $collection->getTitle() )));
+		$this->addFlash('success', $translator->trans('collection.collection.form.alert.publish_success', array( '%title%' => htmlspecialchars($collection->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_collection_show', array( 'id' => $collection->getSluggedId() )));
 	}
@@ -157,7 +157,7 @@ class CollectionController extends AbstractCollectionBasedController {
 		$collectionManager->unpublish($collection);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('collection.collection.form.alert.unpublish_success', array( '%title%' => $collection->getTitle() )));
+		$this->addFlash('success', $translator->trans('collection.collection.form.alert.unpublish_success', array( '%title%' => htmlspecialchars($collection->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		// Return to
 		$returnToUrl = $request->query->get('rtu');
@@ -209,7 +209,7 @@ class CollectionController extends AbstractCollectionBasedController {
 			$dispatcher->dispatch(new PublicationEvent($collection, array( 'previouslyUsedTags' => $previouslyUsedTags )), PublicationListener::PUBLICATION_UPDATED);
 
 			// Flashbag
-			$this->addFlash('success', $translator->trans('collection.collection.form.alert.update_success', array( '%title%' => $collection->getTitle() )));
+			$this->addFlash('success', $translator->trans('collection.collection.form.alert.update_success', array( '%title%' => htmlspecialchars($collection->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 			// Regenerate the form
 			$form = $this->createForm(CollectionType::class, $collection);
@@ -238,7 +238,7 @@ class CollectionController extends AbstractCollectionBasedController {
 		$collectionManager->delete($collection);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('collection.collection.form.alert.delete_success', array( '%title%' => $collection->getTitle() )));
+		$this->addFlash('success', $translator->trans('collection.collection.form.alert.delete_success', array( '%title%' => htmlspecialchars($collection->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_collection_list'));
 	}

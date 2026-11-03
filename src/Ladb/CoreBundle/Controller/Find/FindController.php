@@ -114,7 +114,7 @@ class FindController extends AbstractController {
 		}
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('find.find.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => $find->getTitle() )));
+		$this->addFlash('success', $translator->trans('find.find.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => htmlspecialchars($find->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_find_show', array( 'id' => $find->getSluggedId() )));
 	}
@@ -129,7 +129,7 @@ class FindController extends AbstractController {
 		$findManager->publish($find);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('find.find.form.alert.publish_success', array( '%title%' => $find->getTitle() )));
+		$this->addFlash('success', $translator->trans('find.find.form.alert.publish_success', array( '%title%' => htmlspecialchars($find->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_find_show', array( 'id' => $find->getSluggedId() )));
 	}
@@ -144,7 +144,7 @@ class FindController extends AbstractController {
 		$findManager->unpublish($find);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('find.find.form.alert.unpublish_success', array( '%title%' => $find->getTitle() )));
+		$this->addFlash('success', $translator->trans('find.find.form.alert.unpublish_success', array( '%title%' => htmlspecialchars($find->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		// Return to
 		$returnToUrl = $request->query->get('rtu');
@@ -216,7 +216,7 @@ class FindController extends AbstractController {
 			$dispatcher->dispatch(new PublicationEvent($find, array( 'previouslyUsedTags' => $previouslyUsedTags )), PublicationListener::PUBLICATION_UPDATED);
 
 			// Flashbag
-			$this->addFlash('success', $translator->trans('find.find.form.alert.update_success', array( '%title%' => $find->getTitle() )));
+			$this->addFlash('success', $translator->trans('find.find.form.alert.update_success', array( '%title%' => htmlspecialchars($find->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 			// Regenerate the form
 			$form = $this->createForm(FindType::class, $find);
@@ -245,7 +245,7 @@ class FindController extends AbstractController {
 		$findManager->delete($find);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('find.find.form.alert.delete_success', array( '%title%' => $find->getTitle() )));
+		$this->addFlash('success', $translator->trans('find.find.form.alert.delete_success', array( '%title%' => htmlspecialchars($find->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_find_list'));
 	}
@@ -262,7 +262,7 @@ class FindController extends AbstractController {
 		$findManager->changeOwner($find, $targetUser);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('find.find.form.alert.chown_success', array( '%title%' => $find->getTitle() )));
+		$this->addFlash('success', $translator->trans('find.find.form.alert.chown_success', array( '%title%' => htmlspecialchars($find->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_find_show', array( 'id' => $find->getSluggedId() )));
 	}

@@ -143,7 +143,7 @@ class ProviderController extends AbstractController {
 		$providerManager->delete($provider);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('knowledge.provider.form.alert.delete_success', array( '%title%' => $provider->getTitle() )));
+		$this->addFlash('success', $translator->trans('knowledge.provider.form.alert.delete_success', array( '%title%' => htmlspecialchars($provider->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_provider_list'));
 	}
