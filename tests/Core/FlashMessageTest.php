@@ -4,12 +4,15 @@ namespace Tests\Core;
 
 use Ladb\CoreBundle\DataFixtures\UserFixtures;
 use Ladb\CoreBundle\Entity\Event\Event;
+use Ladb\CoreBundle\Model\ReviewableInterface;
+use Ladb\CoreBundle\Utils\TypableUtils;
 use PhpParser\Node;
 use PhpParser\Node\Expr;
 use PhpParser\Node\Expr\Array_;
 use PhpParser\Node\Expr\BinaryOp\Concat;
 use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Expr\MethodCall;
+use PhpParser\Node\Expr\Ternary;
 use PhpParser\Node\Expr\Variable;
 use PhpParser\Node\Scalar\String_;
 use PhpParser\NodeFinder;
@@ -97,6 +100,76 @@ final class FlashMessageTest extends WebTestCase
     }
 
     /**
+     * An unknown username, written in the invitation form of a team: the message names it.
+     *
+     * @dataProvider provideValues
+     */
+    public function testUnknownUsernameOfAnInvitation(string $username): void
+    {
+        $team = static::findUser(UserFixtures::TEAM);
+
+        $client = static::createClientAs(UserFixtures::USER);
+        $client->request('GET', static::generatePath('core_member_invitation_create', ['teamId' => $team->getId(), 'recipients' => $username]));
+        $client->followRedirect();
+
+        // The first message of each type: the one of the username, before the count of invitations
+        $alert = $client->getCrawler()->filter('.alert-error');
+        self::assertCount(1, $alert);
+        self::assertSame($username.' est invalide.', $alert->text());
+        self::assertCount(0, $alert->filter('b'));
+    }
+
+    /**
+     * Every translated flash message of the code has a French translation, with the parameters
+     * that the code gives: without a translation, the page shows the key, and a placeholder
+     * without a parameter shows as is (%name%). A key built from a value of the code takes the
+     * values of getKeyPartsOfTheCode().
+     */
+    public function testEveryFlashMessageHasATranslationWithItsParameters(): void
+    {
+        $catalogue = static::getContainer()->get('translator')->getCatalogue('fr');
+        $keyParts = self::getKeyPartsOfTheCode();
+        $parser = (new ParserFactory())->createForHostVersion();
+        $nodeFinder = new NodeFinder();
+        $keyCount = 0;
+        $errors = [];
+        foreach ((new Finder())->files()->name('*.php')->in(\dirname(__DIR__, 2).'/src') as $file) {
+            foreach ($nodeFinder->find($parser->parse($file->getContents()), static fn (Node $node): bool => self::isFlash($node)) as $call) {
+                foreach ($nodeFinder->find($call->getArgs()[1]->value, static fn (Node $node): bool => self::isTrans($node)) as $trans) {
+                    $location = \sprintf('%s:%d', $file->getRelativePathname(), $trans->getStartLine());
+                    $args = $trans->getArgs();
+                    $keys = self::findStrings($args[0]->value, $keyParts);
+                    $parameters = self::findParameterNames($args[1]->value ?? new Array_());
+                    $domain = $args[2]->value ?? new String_('messages');
+                    if (null === $keys || null === $parameters || !$domain instanceof String_) {
+                        $errors[] = \sprintf('%s %s: unreadable', $location, (new Standard())->prettyPrintExpr($trans));
+
+                        continue;
+                    }
+                    foreach ($keys as $key) {
+                        ++$keyCount;
+                        if (!$catalogue->defines($key, $domain->value)) {
+                            $errors[] = \sprintf('%s %s: no translation', $location, $key);
+
+                            continue;
+                        }
+                        preg_match_all('/%\w+%/', $catalogue->get($key, $domain->value), $matches);
+                        $placeholders = array_values(array_unique($matches[0]));
+                        sort($placeholders);
+                        if ($placeholders !== $parameters) {
+                            $errors[] = \sprintf('%s %s: takes [%s], given [%s]', $location, $key, implode(', ', $placeholders), implode(', ', $parameters));
+                        }
+                    }
+                }
+            }
+        }
+
+        // The translated messages of the controllers, found
+        self::assertGreaterThan(150, $keyCount);
+        self::assertSame([], $errors);
+    }
+
+    /**
      * Every flash message of the code, in the parameters of its translation or in its
      * concatenation: a value that is not a literal goes through htmlspecialchars(), as the "e"
      * filter of Twig, except the plural number of the translator (%count%) and the values of the
@@ -141,6 +214,90 @@ final class FlashMessageTest extends WebTestCase
             || ('add' === $node->name->toString() && $node->var instanceof MethodCall && $node->var->name instanceof Node\Identifier && 'getFlashBag' === $node->var->name->toString());
     }
 
+    private static function isTrans(Node $node): bool
+    {
+        return $node instanceof MethodCall && $node->name instanceof Node\Identifier && 'trans' === $node->name->toString();
+    }
+
+    /**
+     * The values of the parts of the translation keys that the code builds, by part.
+     *
+     * @return array<string, list<string>>
+     */
+    private static function getKeyPartsOfTheCode(): array
+    {
+        $reviewableTypes = [];
+        foreach (static::getEntityManager()->getMetadataFactory()->getAllMetadata() as $metadata) {
+            if (is_subclass_of($metadata->getName(), ReviewableInterface::class)) {
+                $reviewableTypes[] = TypableUtils::getStrippedNameByType($metadata->getName()::TYPE);
+            }
+        }
+
+        return [
+            // ReviewController::deleteAction()
+            '$typableUtils->getStrippedNameByType($entity->getType())' => $reviewableTypes,
+        ];
+    }
+
+    /**
+     * The strings that an expression of literals gives, null for another expression.
+     *
+     * @param array<string, list<string>> $keyParts
+     *
+     * @return list<string>|null
+     */
+    private static function findStrings(Expr $expr, array $keyParts): ?array
+    {
+        if ($expr instanceof String_) {
+            return [$expr->value];
+        }
+        if ($expr instanceof Concat) {
+            $lefts = self::findStrings($expr->left, $keyParts);
+            $rights = self::findStrings($expr->right, $keyParts);
+            if (null === $lefts || null === $rights) {
+                return null;
+            }
+            $strings = [];
+            foreach ($lefts as $left) {
+                foreach ($rights as $right) {
+                    $strings[] = $left.$right;
+                }
+            }
+
+            return $strings;
+        }
+        if ($expr instanceof Ternary && null !== $expr->if) {
+            $ifs = self::findStrings($expr->if, $keyParts);
+            $elses = self::findStrings($expr->else, $keyParts);
+
+            return null === $ifs || null === $elses ? null : [...$ifs, ...$elses];
+        }
+
+        return $keyParts[(new Standard())->prettyPrintExpr($expr)] ?? null;
+    }
+
+    /**
+     * The sorted names of the parameters of a translation, null when they are not literals.
+     *
+     * @return list<string>|null
+     */
+    private static function findParameterNames(Expr $parameters): ?array
+    {
+        if (!$parameters instanceof Array_) {
+            return null;
+        }
+        $names = [];
+        foreach ($parameters->items as $parameter) {
+            if (!$parameter->key instanceof String_) {
+                return null;
+            }
+            $names[] = $parameter->key->value;
+        }
+        sort($names);
+
+        return $names;
+    }
+
     /**
      * @return iterable<Expr>
      */
@@ -149,7 +306,7 @@ final class FlashMessageTest extends WebTestCase
         if ($message instanceof Concat) {
             yield from self::findUnescapedValues($message->left);
             yield from self::findUnescapedValues($message->right);
-        } elseif ($message instanceof MethodCall && $message->name instanceof Node\Identifier && 'trans' === $message->name->toString()) {
+        } elseif (self::isTrans($message)) {
             $parameters = $message->getArgs()[1]->value ?? new Array_();
             if (!$parameters instanceof Array_) {
                 yield $parameters;
