@@ -186,7 +186,7 @@
                 "rabbitmq_host": "RABBITMQ_HOST",
                 "rabbitmq_password": "RABBITMQ_PASSWORD",
                 "rabbitmq_user": "RABBITMQ_USER",
-                "router.request_context.host": "ROUTER_REQUEST_CONTEXT_HOST"
+                "router_default_uri": "ROUTER_DEFAULT_URI"
             }
         }
     }
