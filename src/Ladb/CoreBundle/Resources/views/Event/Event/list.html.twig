@@ -48,7 +48,7 @@
                     <tr>
                         <% for(var j = 0; j < 7; j++){ %>
                             <% var d = j + i * 7; %>
-                            <td class="<%= days[d].classes %>" data-tooltip="tooltip" data-html="true" title="<% for(var e = 0; e < days[d].events.length; e++){ %><%= days[d].events[e].title %><br><% } %>">
+                            <td class="<%= days[d].classes %>" data-tooltip="tooltip" data-html="true" title="<% for(var e = 0; e < days[d].events.length; e++){ %><%- days[d].events[e].title %><br><% } %>">
                                 <div class="day-contents">
                                     <%= days[d].day %>
                                 </div>
