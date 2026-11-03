@@ -649,6 +649,8 @@ blog:
     has_toc: Afficher la table des matières
     form:
       alert:
+        lock_success: Le sujet <strong>%title%</strong> a été vérrouillé.
+        unlock_success: Le sujet <strong>%title%</strong> a été dévérrouillé.
         publish_success: Le sujet <strong>%title%</strong> a été publié.
         unpublish_success: Le sujet <strong>%title%</strong> a été dépublié.
         update_success: Le sujet <strong>%title%</strong> a été mis à jour.
@@ -675,6 +677,8 @@ faq:
     links: Questions associées
     form:
       alert:
+        lock_success: La question <strong>%title%</strong> a été vérrouillée.
+        unlock_success: La question <strong>%title%</strong> a été dévérrouillée.
         publish_success: La question <strong>%title%</strong> a été publiée.
         unpublish_success: La question <strong>%title%</strong> a été dépubliée.
         update_success: La question <strong>%title%</strong> a été mise à jour.
