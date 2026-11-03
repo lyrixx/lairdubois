@@ -30,7 +30,8 @@ framework:
         base_urls:  ["%router.request_context.scheme%://%router.request_context.host%"]
         packages:
              # The CSS and JS of Vite (vite.config.js, castor app:assets:build): the manifest gives
-             # the hashed file of each one, e.g. asset('build/base.css', 'build')
+             # the hashed file of each one, e.g. asset('build/base.js', 'build'). The CSS goes
+             # through Reprise (reprise_entry_link_tags(), below), with this package
              build:
                 json_manifest_path: "%kernel.project_dir%/web/build/manifest.json"
                 base_urls:  ["%router.request_context.scheme%://%router.request_context.host%"]
@@ -151,6 +152,17 @@ twig:
     globals:
         ga_tracking_id: "%ga_tracking_id%"
         stripe_publishable_key: "%stripe_publishable_key%"
+
+# The <link> tags of the CSS of Vite: reprise_entry_link_tags('base', …), from the entrypoints.json
+# of the build. The scripts keep asset(): Reprise would write them as <script type="module">, and
+# they are written for the global scope
+reprise:
+    output_path: "%kernel.project_dir%/web/build"
+    # The hashed file of an entry (build/base-<hash>.css) is not a key of the manifest of this
+    # package: it comes out as it is, with the base URL. The default package would add ?v=<version>
+    asset_package: build
+    # Not added to the links of the request (_links, for the Link header of WebLink, which is off)
+    preload: false
 
 # Doctrine Configuration
 doctrine:

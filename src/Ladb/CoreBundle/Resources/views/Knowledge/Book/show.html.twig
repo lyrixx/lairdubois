@@ -38,7 +38,7 @@
 
 {% block headStylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" type="text/css" href="{{ asset('build/stars.css', 'build') }}" media="screen" />
+    {{ reprise_entry_link_tags('stars', attributes: { type: 'text/css', media: 'screen' }) }}
 {% endblock %}
 
 {% block bodyMetas %}{% endblock %}

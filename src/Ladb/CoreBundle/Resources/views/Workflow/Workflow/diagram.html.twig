@@ -4,7 +4,7 @@
 
 {% block headStylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" type="text/css" href="{{ asset('build/workflow-diagram.css', 'build') }}" media="screen,print" />
+    {{ reprise_entry_link_tags('workflow-diagram', attributes: { type: 'text/css', media: 'screen,print' }) }}
 {% endblock %}
 
 {% block bodyJavascripts %}

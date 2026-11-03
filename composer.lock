@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1d59758eadceee15d1be828b63995de6",
+    "content-hash": "13630fb2e0414f8405d2792ca452f70b",
     "packages": [
         {
             "name": "afarkas/html5shiv",
@@ -9824,6 +9824,94 @@
                 }
             ],
             "time": "2026-10-25T14:40:16+00:00"
+        },
+        {
+            "name": "symfony/reprise",
+            "version": "v1.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/reprise.git",
+                "reference": "76527bd850678ac4b2c526062d955fa93ff4bd8a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/reprise/zipball/76527bd850678ac4b2c526062d955fa93ff4bd8a",
+                "reference": "76527bd850678ac4b2c526062d955fa93ff4bd8a",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.4",
+                "symfony/asset": "^7.4|^8.0",
+                "symfony/config": "^7.4|^8.0",
+                "symfony/dependency-injection": "^7.4|^8.0",
+                "symfony/event-dispatcher": "^7.4|^8.0",
+                "symfony/http-foundation": "^7.4|^8.0",
+                "symfony/http-kernel": "^7.4|^8.0",
+                "symfony/service-contracts": "^3",
+                "twig/twig": "^3.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.95",
+                "phpstan/phpstan": "^2.2",
+                "phpunit/phpunit": "^13.2",
+                "shipmonk/composer-dependency-analyser": "^1.8",
+                "symfony/cache": "^7.4|^8.0",
+                "symfony/error-handler": "^7.4|^8.0",
+                "symfony/framework-bundle": "^7.4|^8.0",
+                "symfony/twig-bundle": "^7.4|^8.0",
+                "symfony/web-link": "^7.4|^8.0"
+            },
+            "type": "symfony-bundle",
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Reprise\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Hugo Alliaume",
+                    "email": "hugo@alliau.me"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Integrate Vite and Rsbuild with Symfony, a reprise of Webpack Encore Bundle.",
+            "keywords": [
+                "assets",
+                "encore",
+                "rsbuild",
+                "symfony",
+                "vite"
+            ],
+            "support": {
+                "issues": "https://github.com/symfony/reprise/issues",
+                "source": "https://github.com/symfony/reprise/tree/v1.3.0"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2026-09-26T17:46:02+00:00"
         },
         {
             "name": "symfony/routing",

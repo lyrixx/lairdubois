@@ -154,12 +154,14 @@ function assets_watch(): void
 }
 
 /**
- * The template helper asset() fails without the manifest of the build (web/build/manifest.json):
- * every page, the tests included.
+ * Every page fails without the entrypoints of the build (web/build/entrypoints.json, read by
+ * reprise_entry_link_tags()), the tests included, and loses its scripts without its manifest
+ * (manifest.json, asset()).
  */
 function assets_build_if_missing(): void
 {
-    if (!is_file(variable('root_dir') . '/web/build/manifest.json')) {
+    $buildDir = variable('root_dir') . '/web/build';
+    if (!is_file($buildDir . '/entrypoints.json') || !is_file($buildDir . '/manifest.json')) {
         assets_build();
     }
 }

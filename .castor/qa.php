@@ -96,7 +96,7 @@ function phpstan(
 function phpunit(#[AsRawTokens] array $rawTokens = []): int
 {
     install_if_missing();
-    // The pages need the manifest of the assets
+    // The pages need the entrypoints and the manifest of the assets
     assets_build_if_missing();
 
     // The tests have their own database and index (config_test.yml), loaded once: each test rolls

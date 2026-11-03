@@ -60,7 +60,7 @@
 
 {% block headStylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" type="text/css" href="{{ asset('build/school.css', 'build') }}" media="screen" />
+    {{ reprise_entry_link_tags('school', attributes: { type: 'text/css', media: 'screen' }) }}
     {{ block('mapAreaStylesheets') }}
 {% endblock %}
 

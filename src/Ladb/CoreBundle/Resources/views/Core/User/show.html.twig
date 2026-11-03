@@ -26,7 +26,7 @@
     {{ parent() }}
     {{ block('blueimpGalleryStylesheets') }}
     <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.4/css/selectize.bootstrap3.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="{{ asset('build/selectize.css', 'build') }}" media="screen" />
+    {{ reprise_entry_link_tags('selectize', attributes: { type: 'text/css', media: 'screen' }) }}
 {% endblock %}
 
 {% block bodyJavascripts %}

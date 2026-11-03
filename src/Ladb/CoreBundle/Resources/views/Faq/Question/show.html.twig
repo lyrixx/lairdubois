@@ -13,7 +13,7 @@
 {% block headStylesheets %}
     {{ parent() }}
     {% if question.hasToc %}
-        <link rel="stylesheet" type="text/css" href="{{ asset('build/tocify.css', 'build') }}" media="screen" />
+        {{ reprise_entry_link_tags('tocify', attributes: { type: 'text/css', media: 'screen' }) }}
     {% endif %}
 {% endblock %}
 

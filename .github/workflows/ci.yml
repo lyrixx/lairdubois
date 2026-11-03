@@ -91,7 +91,7 @@ jobs:
               name: Install the application
               run: castor app:install
 
-            # The pages need the manifest of the build (asset())
+            # The pages need the entrypoints and the manifest of the build (Reprise, asset())
             - &assets
               name: Build the assets
               run: castor app:assets:build

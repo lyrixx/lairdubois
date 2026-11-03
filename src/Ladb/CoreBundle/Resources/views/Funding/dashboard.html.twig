@@ -4,7 +4,7 @@
 
 {% block headStylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" type="text/css" href="{{ asset('build/funding.css', 'build') }}" media="screen" />
+    {{ reprise_entry_link_tags('funding', attributes: { type: 'text/css', media: 'screen' }) }}
 {% endblock %}
 
 {% block bodyJavascripts %}

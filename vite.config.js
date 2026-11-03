@@ -4,8 +4,9 @@ import Symfony from '@symfony/reprise/vite';
 import { minify } from 'terser';
 import { createLogger, defineConfig } from 'vite';
 
-// The CSS and JS of the site, written in web/build/ with their manifest.json, that the "build"
-// package of the assets reads (app/config/config.yml): {{ asset('build/<name>.css', 'build') }}.
+// The CSS and JS of the site, written in web/build/ with their entrypoints.json and manifest.json:
+// {{ reprise_entry_link_tags('<name>', …) }} for the CSS (the bundle of Reprise), and
+// {{ asset('build/<name>.js', 'build') }} for the JS (the "build" package of app/config/config.yml).
 // One entry per group of files of the former {% stylesheets %} and {% javascripts %} tags of
 // Assetic, with the same files in the same order: keep in sync with the templates that use them.
 // castor app:assets:build (minified, as on the production server) and app:assets:watch.
