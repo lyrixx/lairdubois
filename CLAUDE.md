@@ -1137,10 +1137,12 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   annonce gardaient les leurs jusqu'à #228, un retour d'expérience jusqu'à #230 : tout suivait
   l'ordre de l'enregistrement précédent, un bloc ajouté en fin de collection, une galerie remontée
   en tête passait, et un bloc retiré d'un retour d'expérience restait dans `tbl_core_block`. Le
-  retour d'expérience (`Feedback`) n'a pas de `BodyBlocks` : une galerie en tête passe encore à
-  sa mise à jour. Les pages les rangent par `sortIndex`. `Tests\Block\BodyBlocksTest` : types
-  des blocs, ajout, retrait, ordre, fusion et validation, sur une création, un événement, une
-  trouvaille, une annonce et un retour d'expérience.
+  retour d'expérience (`Feedback`) n'a pas de `BodyBlocks` : une galerie ou une vidéo en tête (ou
+  seule) passe à sa mise à jour, qui garde l'extrait précédent, et à sa création depuis #235 (500
+  avant), avec un extrait vide (`''`, le défaut de `Feedback::$bodyExtract`). Cet extrait n'est
+  affiché ni indexé nulle part. Les pages les rangent par `sortIndex`.
+  `Tests\Block\BodyBlocksTest` : types des blocs, ajout, retrait, ordre, fusion et validation, sur
+  une création, un événement, une trouvaille, une annonce et un retour d'expérience.
 - Défauts que la 8.x change, écrits à leur valeur de la 7.4 (#223), vérifiés par
   `Tests\Form\DefaultsTest` :
   - `requireTld: false` sur chaque `#[Assert\Url]` (la 8.0 passe à `true`), à écrire aussi sur une

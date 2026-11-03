@@ -348,6 +348,58 @@ final class BodyBlocksTest extends WebTestCase
     }
 
     /**
+     * A new feedback, of "user" (the author of the creation, the only one who writes one), that
+     * starts with a gallery or has only one, as its update allows: its extract is empty.
+     *
+     * @dataProvider provideNewFeedbacksStartingWithAGallery
+     *
+     * @param list<string> $rowBlocks
+     */
+    public function testCreateOfAFeedbackStartingWithAGallery(?string $textBody, array $rowBlocks): void
+    {
+        $factory = static::getContainer()->get('tests.fixture_factory');
+        $picture = $factory->picture(static::findUser(UserFixtures::USER), 'wood-4.jpg', 'test-body-blocks');
+        static::getEntityManager()->flush();
+        $gallery = $factory->galleryBlock([$picture], 0);
+        $blocks = [0 => self::gallery($gallery, 0)];
+        if (null !== $textBody) {
+            $blocks[1] = self::text($textBody, 1);
+        }
+
+        $client = static::createClientAs(UserFixtures::USER);
+        $parameters = ['entityType' => Creation::TYPE, 'entityId' => self::ID];
+        $crawler = static::xhr($client, 'GET', static::generatePath('core_feedback_new', $parameters));
+        $form = $crawler->filter(\sprintf('form[action="%s"]', static::generatePath('core_feedback_create', $parameters)))->form();
+        $values = $form->getPhpValues();
+        $values['ladb_core_feedback'] = array_replace($values['ladb_core_feedback'], ['title' => 'Deux ans plus tard', 'bodyBlocks' => $blocks]);
+        $crawler = static::xhr($client, 'POST', $form->getUri(), $values);
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        // The row of the new feedback, that the widget shows in place of the form
+        self::assertSame($rowBlocks, self::getRowBlocks($crawler));
+
+        static::getEntityManager()->clear();
+        $feedback = $this->findFeedback(UserFixtures::USER);
+        $saved = $feedback->getBodyBlocks()->toArray();
+        self::assertSame(null === $textBody ? [Gallery::class] : [Gallery::class, Text::class], array_map('get_class', $saved));
+        self::assertSame([$picture->getId()], self::getPictureIds($saved[0]));
+        self::assertSame($textBody ?? '', $feedback->getBody());
+        self::assertSame('', $feedback->getBodyExtract());
+    }
+
+    /**
+     * The body of the text block that follows the gallery (none for a gallery alone), and what
+     * the row of the new feedback shows.
+     *
+     * @return iterable<string, array{?string, list<string>}>
+     */
+    public static function provideNewFeedbacksStartingWithAGallery(): iterable
+    {
+        yield 'gallery then text' => [self::LAST_BODY, ['gallery', 'Un dernier bloc, sous la galerie.']];
+        yield 'gallery only' => [null, ['gallery']];
+    }
+
+    /**
      * Makes the blocks of a content of the fixtures a text block (the one of the fixtures), a
      * gallery block (the one of the fixtures, or a new one) and a text block, as the controller
      * saves them.
@@ -488,14 +540,14 @@ final class BodyBlocksTest extends WebTestCase
     }
 
     /**
-     * The feedback of the fixtures, of "user2" on creation 1.
+     * The feedback of an account on creation 1: the one of the fixtures for "user2".
      */
-    private function findFeedback(): Feedback
+    private function findFeedback(string $username = UserFixtures::USER2): Feedback
     {
         return static::getEntityManager()->getRepository(Feedback::class)->findOneBy([
             'entityType' => Creation::TYPE,
             'entityId' => self::ID,
-            'user' => static::findUser(UserFixtures::USER2),
+            'user' => static::findUser($username),
         ]);
     }
 }
