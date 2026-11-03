@@ -47,10 +47,10 @@ class ArticlesToIdsTransformer implements DataTransformerInterface {
 				continue;
 			}
 			$article = $repository->find($id);
-			$article->setSortIndex($sortIndex++);
 			if (is_null($article)) {
 				throw new TransformationFailedException();
 			}
+			$article->setSortIndex($sortIndex++);
 			$articles[] = $article;
 		}
 
