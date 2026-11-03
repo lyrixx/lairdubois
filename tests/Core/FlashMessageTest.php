@@ -170,6 +170,51 @@ final class FlashMessageTest extends WebTestCase
     }
 
     /**
+     * A flash message of a controller takes the keys of its own type (wonder.workshop for
+     * Wonder/WorkshopController), never those of another controller, which name the other type
+     * (« La création … » for a workshop). The keys of no controller (default.…) are shared.
+     */
+    public function testEveryFlashMessageOfAControllerTakesTheKeysOfItsType(): void
+    {
+        $finder = (new Finder())->files()->name('*Controller.php')->in(\dirname(__DIR__, 2).'/src/Ladb/CoreBundle/Controller');
+        $types = [];
+        foreach ($finder as $file) {
+            // Knowledge/School/TestimonialController.php: knowledge.school.testimonial
+            $types[$file->getRelativePathname()] = strtolower(preg_replace('/\B[A-Z]/', '_$0', str_replace(['Controller.php', '/'], ['', '.'], $file->getRelativePathname())));
+        }
+        $keyParts = self::getKeyPartsOfTheCode();
+        $parser = (new ParserFactory())->createForHostVersion();
+        $nodeFinder = new NodeFinder();
+        $ownKeyCount = 0;
+        $errors = [];
+        foreach ($finder as $file) {
+            foreach ($nodeFinder->find($parser->parse($file->getContents()), static fn (Node $node): bool => self::isFlash($node)) as $call) {
+                foreach ($nodeFinder->find($call->getArgs()[1]->value, static fn (Node $node): bool => self::isTrans($node)) as $trans) {
+                    // An unreadable key fails testEveryFlashMessageHasATranslationWithItsParameters()
+                    foreach (self::findStrings($trans->getArgs()[0]->value, $keyParts) ?? [] as $key) {
+                        // The longest type: knowledge.school.testimonial, not knowledge.school
+                        $keyType = null;
+                        foreach ($types as $type) {
+                            if (str_starts_with($key, $type.'.') && \strlen($type) > \strlen($keyType ?? '')) {
+                                $keyType = $type;
+                            }
+                        }
+                        if ($types[$file->getRelativePathname()] === $keyType) {
+                            ++$ownKeyCount;
+                        } elseif (null !== $keyType) {
+                            $errors[] = \sprintf('%s:%d %s: a key of %s', $file->getRelativePathname(), $trans->getStartLine(), $key, $keyType);
+                        }
+                    }
+                }
+            }
+        }
+
+        // The keys of their own type, found
+        self::assertGreaterThan(100, $ownKeyCount);
+        self::assertSame([], $errors);
+    }
+
+    /**
      * Every flash message of the code, in the parameters of its translation or in its
      * concatenation: a value that is not a literal goes through htmlspecialchars(), as the "e"
      * filter of Twig, except the plural number of the translator (%count%) and the values of the
