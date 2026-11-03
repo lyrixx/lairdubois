@@ -318,7 +318,7 @@ final class ThreadTest extends WebTestCase
         }
         static::getEntityManager()->flush();
 
-        [$exitCode, $output] = static::runCommand('ladb:reset:unreadmessagecount --force');
+        [$exitCode, $output] = static::runCommandLine('ladb:reset:unreadmessagecount --force');
 
         self::assertSame(0, $exitCode, $output);
         static::getEntityManager()->clear();

@@ -127,7 +127,7 @@ final class CommandTest extends WebTestCase
     public function testCommandRuns(string $commandLine): void
     {
         try {
-            [$exitCode, $output] = static::runCommand("{$commandLine} --verbose");
+            [$exitCode, $output] = static::runCommandLine("{$commandLine} --verbose");
             $failure = 0 === $exitCode ? null : "{$commandLine} exits with {$exitCode}:\n{$output}";
         } catch (\Throwable $e) {
             $failure = "{$commandLine} throws ".self::describe($e);
@@ -151,7 +151,7 @@ final class CommandTest extends WebTestCase
      */
     public function testInitHasNothingToUpdate(): void
     {
-        [$exitCode, $output] = static::runCommand('ladb:init');
+        [$exitCode, $output] = static::runCommandLine('ladb:init');
 
         self::assertSame(0, $exitCode, $output);
         self::assertStringContainsString('Nothing to update', $output);
@@ -174,18 +174,18 @@ final class CommandTest extends WebTestCase
         try {
             static::bootKernel();
             if (!self::tableExists('migration_versions')) {
-                [$exitCode, $output] = static::runCommand('doctrine:migrations:sync-metadata-storage');
+                [$exitCode, $output] = static::runCommandLine('doctrine:migrations:sync-metadata-storage');
                 self::assertSame(0, $exitCode, $output);
                 $createdMigrationVersions = true;
             }
             self::assertTrue(self::tableExists('migration_versions'));
             self::assertTrue(self::tableExists('sessions'));
 
-            [$exitCode, $output] = static::runCommand('doctrine:schema:update --dump-sql');
+            [$exitCode, $output] = static::runCommandLine('doctrine:schema:update --dump-sql');
             self::assertSame(0, $exitCode, $output);
             self::assertStringContainsString('Nothing to update', $output);
 
-            // With the signal handlers of the console, which static::runCommand() leaves out: once
+            // With the signal handlers of the console, which static::runCommandLine() leaves out: once
             // the nested command is over, the rest of ladb:init runs with its own handlers
             $application = new Application(static::bootKernel());
             $application->setAutoExit(false);
@@ -230,7 +230,7 @@ final class CommandTest extends WebTestCase
 
     public function testChangeOwner(): void
     {
-        [$exitCode, $output] = static::runCommand('ladb:change:owner --target-username='.UserFixtures::USER2.' --entity-type='.Creation::TYPE.' --entity-id=1 --force');
+        [$exitCode, $output] = static::runCommandLine('ladb:change:owner --target-username='.UserFixtures::USER2.' --entity-type='.Creation::TYPE.' --entity-id=1 --force');
 
         self::assertSame(0, $exitCode, $output);
         static::getEntityManager()->clear();

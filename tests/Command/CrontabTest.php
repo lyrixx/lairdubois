@@ -77,7 +77,7 @@ final class CrontabTest extends WebTestCase
     public function testCronRuns(string $commandLine): void
     {
         try {
-            [$exitCode, $output] = static::runCommand($commandLine);
+            [$exitCode, $output] = static::runCommandLine($commandLine);
             $failure = 0 === $exitCode ? null : "{$commandLine} exits with {$exitCode}:\n{$output}";
         } catch (\Throwable $e) {
             $failure = "{$commandLine} throws ".\get_class($e).': '.$e->getMessage();
@@ -120,7 +120,7 @@ final class CrontabTest extends WebTestCase
     {
         $this->update(Creation::class, 1, ['likeCount' => 15, 'createdAt' => new \DateTime()]);
 
-        [$exitCode, $output] = static::runCommand(self::getCron('ladb:cron:spotlight'));
+        [$exitCode, $output] = static::runCommandLine(self::getCron('ladb:cron:spotlight'));
 
         self::assertSame(0, $exitCode, $output);
         $spotlight = static::getEntityManager()->getRepository(Spotlight::class)->findOneLast();
@@ -137,7 +137,7 @@ final class CrontabTest extends WebTestCase
     {
         $this->update(Offer::class, 1, ['changedAt' => (new \DateTime())->modify('-'.Offer::ACTIVE_LIFETIME)->modify('-1 day')]);
 
-        [$exitCode, $output] = static::runCommand(self::getCron('ladb:cron:offers'));
+        [$exitCode, $output] = static::runCommandLine(self::getCron('ladb:cron:offers'));
 
         self::assertSame(0, $exitCode, $output);
         self::assertTrue(static::getEntityManager()->find(Offer::class, 1)->getIsDraft());
@@ -151,7 +151,7 @@ final class CrontabTest extends WebTestCase
     {
         $this->update(Offer::class, 1, ['changedAt' => (new \DateTime())->modify('-'.Offer::FULL_LIFETIME)->modify('-1 day')]);
 
-        [$exitCode, $output] = static::runCommand(self::getCron('ladb:cron:offers'));
+        [$exitCode, $output] = static::runCommandLine(self::getCron('ladb:cron:offers'));
 
         self::assertSame(0, $exitCode, $output);
         static::getEntityManager()->clear();
@@ -169,7 +169,7 @@ final class CrontabTest extends WebTestCase
         static::getEntityManager()->createQuery('DELETE '.Notification::class.' n')->execute();
         static::getEntityManager()->createQuery('UPDATE '.AbstractActivity::class.' a SET a.isPendingNotifications = true')->execute();
 
-        [$exitCode, $output] = static::runCommand(self::getCron('ladb:cron:notification:populate'));
+        [$exitCode, $output] = static::runCommandLine(self::getCron('ladb:cron:notification:populate'));
 
         self::assertSame(0, $exitCode, $output);
         self::assertSame($notificationCount, $this->countNotifications());
@@ -184,7 +184,7 @@ final class CrontabTest extends WebTestCase
     {
         self::assertGreaterThan(0, $this->countNotificationsPendingEmail());
 
-        [$exitCode, $output] = static::runCommand(self::getCron('ladb:cron:notification:email'));
+        [$exitCode, $output] = static::runCommandLine(self::getCron('ladb:cron:notification:email'));
 
         self::assertSame(0, $exitCode, $output);
         self::assertNotEmpty(static::getSentEmailsByCommand());
@@ -198,7 +198,7 @@ final class CrontabTest extends WebTestCase
     {
         $this->update(Creation::class, 1, ['createdAt' => new \DateTime()]);
 
-        [$exitCode, $output] = static::runCommand(self::getCron('ladb:mailing:weeknews'));
+        [$exitCode, $output] = static::runCommandLine(self::getCron('ladb:mailing:weeknews'));
 
         self::assertSame(0, $exitCode, $output);
         self::assertNotEmpty(static::getSentEmailsByCommand());
@@ -219,7 +219,7 @@ final class CrontabTest extends WebTestCase
         $creation->addBodyBlock($video);
         static::getEntityManager()->flush();
 
-        [$exitCode, $output] = static::runCommand(self::getCron('ladb:cron:sitemaps'));
+        [$exitCode, $output] = static::runCommandLine(self::getCron('ladb:cron:sitemaps'));
 
         self::assertSame(0, $exitCode, $output);
         self::assertStringContainsString('/sitemap-wonder-creations.xml', file_get_contents(\dirname(self::SITEMAPS).'/sitemap-index.xml'));
@@ -236,7 +236,7 @@ final class CrontabTest extends WebTestCase
     {
         $this->update(Workflow::class, 1, ['mainPicture' => null]);
 
-        [$exitCode, $output] = static::runCommand(self::getCron('ladb:cron:workflow:thumbnails'));
+        [$exitCode, $output] = static::runCommandLine(self::getCron('ladb:cron:workflow:thumbnails'));
 
         self::assertSame(0, $exitCode, $output);
         self::assertNotNull(static::getEntityManager()->find(Workflow::class, 1)->getMainPicture());
@@ -259,7 +259,7 @@ final class CrontabTest extends WebTestCase
             'http://ip-api.com/json/192.0.2.1?lang=fr&fields=status,message,continentCode,country,countryCode,city,lat,lon' => json_encode(['status' => 'success', 'continentCode' => 'EU', 'country' => 'France', 'countryCode' => 'FR', 'city' => 'Bordeaux', 'lat' => 44.84, 'lon' => -0.58]),
         ]);
         try {
-            [$exitCode, $output] = static::runCommand(self::getCron('ladb:cron:opencutlist:access:analyze'));
+            [$exitCode, $output] = static::runCommandLine(self::getCron('ladb:cron:opencutlist:access:analyze'));
         } finally {
             OfflineHttpStream::unregister();
         }

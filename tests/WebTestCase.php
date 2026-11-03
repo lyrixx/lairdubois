@@ -206,11 +206,12 @@ abstract class WebTestCase extends BaseWebTestCase
      * Runs a console command line ("ladb:cron:offers --force") in a new kernel, in the
      * transaction of the test: its changes are rolled back with it. Its exceptions are not
      * caught. The kernel stays booted after it: static::getEntityManager() and the services are
-     * the ones of the command.
+     * the ones of the command. Not runCommand(): the one of KernelTestCase (Symfony 8.1) runs the
+     * command alone (CommandTester), without the events of the console.
      *
      * @return array{int, string} The exit code and the output
      */
-    protected static function runCommand(string $commandLine): array
+    protected static function runCommandLine(string $commandLine): array
     {
         $application = new Application(static::bootKernel());
         $application->setAutoExit(false);
@@ -225,7 +226,7 @@ abstract class WebTestCase extends BaseWebTestCase
     }
 
     /**
-     * The emails sent by the last static::runCommand(). Nothing is delivered (config_test.yml).
+     * The emails sent by the last static::runCommandLine(). Nothing is delivered (config_test.yml).
      *
      * @return list<Email>
      */
