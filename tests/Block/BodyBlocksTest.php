@@ -5,6 +5,7 @@ namespace Tests\Block;
 use Ladb\CoreBundle\DataFixtures\UserFixtures;
 use Ladb\CoreBundle\Entity\Core\Block\Gallery;
 use Ladb\CoreBundle\Entity\Core\Block\Text;
+use Ladb\CoreBundle\Entity\Core\Feedback;
 use Ladb\CoreBundle\Entity\Event\Event;
 use Ladb\CoreBundle\Entity\Find\Find;
 use Ladb\CoreBundle\Entity\Offer\Offer;
@@ -23,7 +24,8 @@ use Tests\XhrTrait;
  * under their keys, their sortIndex renumbered, a new row under the next key.
  *
  * At the update, every type recreates its blocks from the form (resetBodyBlocks()), in the order
- * of the page: the validation and the merge of neighbour text blocks follow it.
+ * of the page: the validation and the merge of neighbour text blocks follow it. A feedback, of
+ * "user2" on creation 1, has no BodyBlocks: its form is the one of its widget, in XHR.
  */
 final class BodyBlocksTest extends WebTestCase
 {
@@ -59,7 +61,7 @@ final class BodyBlocksTest extends WebTestCase
      */
     public function testUpdateAddsRemovesAndReordersBlocks(string $class, string $routePrefix, string $formName): void
     {
-        [$first, $gallery] = $this->addLastBlocks($class);
+        [$first, $gallery] = $this->addLastBlocks($this->find($class));
         $firstId = $first->getId();
 
         $client = static::createClientAs(UserFixtures::USER);
@@ -101,7 +103,7 @@ final class BodyBlocksTest extends WebTestCase
      */
     public function testUpdateRefusesAGalleryAtTheTop(string $class, string $routePrefix, string $formName): void
     {
-        [$first, $gallery, $last] = $this->addLastBlocks($class);
+        [$first, $gallery, $last] = $this->addLastBlocks($this->find($class));
         $blockIds = [$first->getId(), $gallery->getId(), $last->getId()];
         $firstBody = $first->getBody();
 
@@ -130,7 +132,7 @@ final class BodyBlocksTest extends WebTestCase
      */
     public function testUpdateMergesNeighbourTextBlocks(string $class, string $routePrefix, string $formName): void
     {
-        [$first, $gallery] = $this->addLastBlocks($class);
+        [$first, $gallery] = $this->addLastBlocks($this->find($class));
         $firstBody = $first->getBody();
 
         $client = static::createClientAs(UserFixtures::USER);
@@ -162,7 +164,7 @@ final class BodyBlocksTest extends WebTestCase
      */
     public function testInvalidUpdateShowsTheSubmittedBlocks(string $class, string $routePrefix, string $formName): void
     {
-        [$first, $gallery] = $this->addLastBlocks($class);
+        [$first, $gallery] = $this->addLastBlocks($this->find($class));
         $submitted = [
             2 => self::text(self::LAST_BODY, 0),
             1 => self::gallery($gallery, 1),
@@ -194,16 +196,116 @@ final class BodyBlocksTest extends WebTestCase
     }
 
     /**
-     * Makes the blocks of the content of id 1 a text block (the one of the fixtures), a gallery
-     * block (the one of the fixtures, or a new one) and a text block, as the controller saves them.
-     *
-     * @param class-string<BlockBodiedInterface> $class
+     * The last block of a feedback deleted: it is deleted from the database too.
+     */
+    public function testUpdateOfAFeedbackDeletesTheRemovedBlock(): void
+    {
+        [$first, $gallery, $last] = $this->addLastBlocks($this->findFeedback());
+        $lastId = $last->getId();
+
+        $client = static::createClientAs(UserFixtures::USER2);
+        $this->submitFeedbackBlocks($client, [
+            0 => self::text($first->getBody(), 0),
+            1 => self::gallery($gallery, 1),
+        ]);
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        static::getEntityManager()->clear();
+        self::assertSame([Text::class, Gallery::class], array_map('get_class', $this->findFeedback()->getBodyBlocks()->toArray()));
+        self::assertNull(static::getEntityManager()->find(Text::class, $lastId));
+    }
+
+    /**
+     * The first block of a feedback deleted, the last one moved to the top, a block added at the
+     * end.
+     */
+    public function testUpdateOfAFeedbackAddsRemovesAndReordersBlocks(): void
+    {
+        [$first, $gallery] = $this->addLastBlocks($this->findFeedback());
+        $firstId = $first->getId();
+
+        $client = static::createClientAs(UserFixtures::USER2);
+        $crawler = $this->submitFeedbackBlocks($client, [
+            2 => self::text(self::LAST_BODY, 0),
+            1 => self::gallery($gallery, 1),
+            3 => self::text(self::NEW_BODY, 2),
+        ]);
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        // The row of the updated feedback, that the widget shows in place of the form
+        self::assertSame(['Un dernier bloc, sous la galerie.', 'gallery', 'Un bloc ajouté.'], self::getRowBlocks($crawler));
+
+        static::getEntityManager()->clear();
+        $feedback = $this->findFeedback();
+        $blocks = $feedback->getBodyBlocks()->toArray();
+        self::assertSame([Text::class, Gallery::class, Text::class], array_map('get_class', $blocks));
+        self::assertSame(self::LAST_BODY, $blocks[0]->getBody());
+        self::assertSame(self::getPictureIds($gallery), self::getPictureIds($blocks[1]));
+        self::assertSame(self::NEW_BODY, $blocks[2]->getBody());
+        self::assertNull(static::getEntityManager()->find(Text::class, $firstId));
+        self::assertSame(self::LAST_BODY."\n".self::NEW_BODY, $feedback->getBody());
+        self::assertSame('Un dernier bloc, sous la galerie.', trim($feedback->getBodyExtract()));
+    }
+
+    /**
+     * The last block of a feedback moved between the first one and the gallery: the two text
+     * blocks, neighbours on the page, are merged.
+     */
+    public function testUpdateOfAFeedbackMergesNeighbourTextBlocks(): void
+    {
+        [$first, $gallery] = $this->addLastBlocks($this->findFeedback());
+        $firstBody = $first->getBody();
+
+        $client = static::createClientAs(UserFixtures::USER2);
+        $this->submitFeedbackBlocks($client, [
+            0 => self::text($firstBody, 0),
+            2 => self::text(self::LAST_BODY, 1),
+            1 => self::gallery($gallery, 2),
+        ]);
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        static::getEntityManager()->clear();
+        $feedback = $this->findFeedback();
+        $blocks = $feedback->getBodyBlocks()->toArray();
+        self::assertSame([Text::class, Gallery::class], array_map('get_class', $blocks));
+        self::assertSame($firstBody."\n\n".self::LAST_BODY, $blocks[0]->getBody());
+        self::assertSame(self::getPictureIds($gallery), self::getPictureIds($blocks[1]));
+        self::assertSame($firstBody."\n\n".self::LAST_BODY, $feedback->getBody());
+    }
+
+    /**
+     * An invalid form of a feedback shows the submitted blocks, under their keys and in their
+     * order.
+     */
+    public function testInvalidUpdateOfAFeedbackShowsTheSubmittedBlocks(): void
+    {
+        [$first, $gallery] = $this->addLastBlocks($this->findFeedback());
+        $submitted = [
+            2 => self::text(self::LAST_BODY, 0),
+            1 => self::gallery($gallery, 1),
+            3 => self::text(self::NEW_BODY, 2),
+        ];
+
+        $client = static::createClientAs(UserFixtures::USER2);
+        $crawler = $this->submitFeedbackBlocks($client, $submitted, ['title' => '']);
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertCount(0, $crawler->filter('.ladb-feedback-row'));
+        self::assertSame($submitted, self::getFormBlocks($crawler, 'ladb_core_feedback'));
+
+        static::getEntityManager()->clear();
+        self::assertSame($first->getId(), $this->findFeedback()->getBodyBlocks()->first()->getId());
+    }
+
+    /**
+     * Makes the blocks of a content of the fixtures a text block (the one of the fixtures), a
+     * gallery block (the one of the fixtures, or a new one) and a text block, as the controller
+     * saves them.
      *
      * @return list<Text|Gallery>
      */
-    private function addLastBlocks(string $class): array
+    private function addLastBlocks(BlockBodiedInterface $content): array
     {
-        $content = $this->find($class);
         $factory = static::getContainer()->get('tests.fixture_factory');
         if (1 === $content->getBodyBlocks()->count()) {
             $picture = $factory->picture(static::findUser(UserFixtures::USER), 'wood-4.jpg', 'test-body-blocks');
@@ -213,7 +315,7 @@ final class BodyBlocksTest extends WebTestCase
         $factory->preprocess($content);
         static::getEntityManager()->flush();
 
-        return $this->findBlocks($class);
+        return $content->getBodyBlocks()->toArray();
     }
 
     /**
@@ -230,6 +332,24 @@ final class BodyBlocksTest extends WebTestCase
         $values[$formName] = array_replace($values[$formName], $fields, ['bodyBlocks' => $blocks]);
 
         return $client->request('POST', $form->getUri(), $values);
+    }
+
+    /**
+     * Submits the form of the feedback in XHR, as its widget, with these blocks instead of the
+     * ones it shows.
+     *
+     * @param array<int, array<string, string>> $blocks
+     * @param array<string, string>             $fields
+     */
+    private function submitFeedbackBlocks(KernelBrowser $client, array $blocks, array $fields = []): Crawler
+    {
+        $parameters = ['id' => $this->findFeedback()->getId()];
+        $crawler = static::xhr($client, 'GET', static::generatePath('core_feedback_edit', $parameters));
+        $form = $crawler->filter(\sprintf('form[action="%s"]', static::generatePath('core_feedback_update', $parameters)))->form();
+        $values = $form->getPhpValues();
+        $values['ladb_core_feedback'] = array_replace($values['ladb_core_feedback'], $fields, ['bodyBlocks' => $blocks]);
+
+        return static::xhr($client, 'POST', $form->getUri(), $values);
     }
 
     /**
@@ -283,6 +403,17 @@ final class BodyBlocksTest extends WebTestCase
     }
 
     /**
+     * What the row of a feedback shows, in the order of the page: the text of each paragraph of
+     * its text blocks, "gallery" for a gallery block.
+     *
+     * @return list<string>
+     */
+    private static function getRowBlocks(Crawler $crawler): array
+    {
+        return $crawler->filter('.ladb-feedback-row .ladb-content > div:not(.ladb-title) > *')->each(static fn (Crawler $node): string => 'p' === $node->nodeName() ? $node->text() : 'gallery');
+    }
+
+    /**
      * The blocks of the content of id 1, ordered by sortIndex.
      *
      * @param class-string<BlockBodiedInterface> $class
@@ -304,5 +435,17 @@ final class BodyBlocksTest extends WebTestCase
     private function find(string $class): BlockBodiedInterface
     {
         return static::getEntityManager()->getRepository($class)->find(self::ID);
+    }
+
+    /**
+     * The feedback of the fixtures, of "user2" on creation 1.
+     */
+    private function findFeedback(): Feedback
+    {
+        return static::getEntityManager()->getRepository(Feedback::class)->findOneBy([
+            'entityType' => Creation::TYPE,
+            'entityId' => self::ID,
+            'user' => static::findUser(UserFixtures::USER2),
+        ]);
     }
 }

@@ -169,6 +169,10 @@ class FeedbackController extends AbstractController {
 			throw $this->createNotFoundException('Not allowed (core_knowledge_book_feedback_update)');
 		}
 
+		$originalBodyBlocks = $feedback->getBodyBlocks()->toArray();	// Need to be an array to copy values
+
+		$feedback->resetBodyBlocks(); // Reset bodyBlocks array to consider form bodyBlocks order
+
 		$form = $this->createForm(FeedbackType::class, $feedback);
 		$form->handleRequest($request);
 
@@ -177,7 +181,7 @@ class FeedbackController extends AbstractController {
 			// Retrieve related entity
 			$entity = $this->_retrieveRelatedEntity($feedback->getEntityType(), $feedback->getEntityId(), $typableUtils);
 
-			$blockUtils->preprocessBlocks($feedback);
+			$blockUtils->preprocessBlocks($feedback, $originalBodyBlocks);
 
 			$fieldPreprocessorUtils->preprocessFields($feedback);
 
