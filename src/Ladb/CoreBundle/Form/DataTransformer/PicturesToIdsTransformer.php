@@ -47,10 +47,10 @@ class PicturesToIdsTransformer implements DataTransformerInterface {
 				continue;
 			}
 			$picture = $repository->find($id);
-			$picture->setSortIndex($sortIndex++);
 			if (is_null($picture)) {
 				throw new TransformationFailedException();
 			}
+			$picture->setSortIndex($sortIndex++);
 			$pictures[] = $picture;
 		}
 
