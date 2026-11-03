@@ -135,7 +135,7 @@ final class RabbitMqTest extends InteractionTestCase
         $application = new Application(static::$booted ? static::$kernel : static::bootKernel());
         $application->setAutoExit(false);
         $application->setCatchExceptions(false);
-        // As static::runCommand()
+        // As static::runCommandLine()
         $application->setSignalsToDispatchEvent();
         $exitCode = $application->run(new StringInput("messenger:consume {$transportName} --limit=1 --time-limit=10"), $output = new BufferedOutput());
 
