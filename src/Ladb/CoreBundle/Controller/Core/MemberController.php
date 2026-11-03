@@ -85,8 +85,7 @@ class MemberController extends AbstractController {
 			$recipient = $userManager->findUserByUsername($username);
 			// Check if recipient exists or is enabled or is team
 			if (is_null($recipient) || !$recipient->isEnabled() || $recipient->getIsTeam()) {
-				// The username (User::__toString()), or nothing for an unknown one
-				$this->addFlash('error', '<i class="ladb-icon-warning"></i> '.htmlspecialchars((string) $recipient, ENT_QUOTES | ENT_SUBSTITUTE).' est invalide.');
+				$this->addFlash('error', '<i class="ladb-icon-warning"></i> '.htmlspecialchars($username, ENT_QUOTES | ENT_SUBSTITUTE).' est invalide.');
 				continue;
 			}
 			// Check if recipient already invited

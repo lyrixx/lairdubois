@@ -153,6 +153,10 @@ core:
     edit: Edition de l'astuce
     list: Les astuces
     nav: Astuces
+    form:
+      alert:
+        update_success: L'astuce <strong>%title%</strong> a été mise à jour.
+        delete_success: L'astuce <strong>%title%</strong> a été supprimée.
 
 wonder:
   creation:
@@ -477,6 +481,9 @@ qa:
         delete_success: La réponse a été supprimée.
     choice:
       entities: '[0,1]réponse|]1,Inf]réponses'
+    admin:
+      alert:
+        converttocomment_success: La réponse %title% a été convertie en commentaire avec succès.
 
 workflow:
   description: Retrouvez ici tous les processus de fabrication partagés par la communauté.
@@ -968,6 +975,9 @@ knowledge:
     testimonial:
       new: Ajouter mon témoignage
       edit: Editer mon témoignage
+      form:
+        alert:
+          delete_success: Le témoignage a été supprimé.
     choice:
       entities: '[0,1]école|]1,Inf]écoles'
       new_schools: '[0,1]nouvelle école|]1,Inf]nouvelles écoles'
@@ -1184,7 +1194,7 @@ knowledge:
       help: Saisissez un outil et cliquez sur la flèche pour l'ajouter
     form:
       alert:
-        delete_success: L'outil <strong>%name%</strong> a été supprimé.
+        delete_success: L'outil <strong>%title%</strong> a été supprimé.
       help:
         legend: La **légende** vous permet d'apporter un complément d'information à la valeur du champ *%field%*.
         source: La **source** vous permet d'indiquer l'origine de votre information (connaissances personnelles, site web ou autre document référent).
@@ -1365,7 +1375,7 @@ comment:
     children: '[0,1]réponse|]1,Inf]réponses'
   admin:
     alert:
-      converttoanwser_success: Le commentaire a été converti en réponse avec succès.
+      converttoanswer_success: Le commentaire a été converti en réponse avec succès.
 
 review:
   default:
