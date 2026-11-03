@@ -1100,11 +1100,13 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   repart d'une collection vide (`resetBodyBlocks()`) et recrée ses blocs, avec de nouveaux ids,
   dans l'ordre de la page : la validation (`BodyBlocks`), la fusion des textes voisins, le corps et
   l'extrait (`bodyExtract`, le premier bloc) le suivent. Un événement, une trouvaille et une
-  annonce gardaient les leurs jusqu'à #228 : tout suivait l'ordre de l'enregistrement précédent,
-  un bloc ajouté en fin de collection, et une galerie remontée en tête passait. Seul le retour
-  d'expérience (`Feedback`, sans `BodyBlocks`) garde encore les siens. Les pages les rangent par
-  `sortIndex`. `Tests\Block\BodyBlocksTest` : types des blocs, ajout, retrait, ordre, fusion et
-  validation, sur une création, un événement, une trouvaille et une annonce.
+  annonce gardaient les leurs jusqu'à #228, un retour d'expérience jusqu'à #230 : tout suivait
+  l'ordre de l'enregistrement précédent, un bloc ajouté en fin de collection, une galerie remontée
+  en tête passait, et un bloc retiré d'un retour d'expérience restait dans `tbl_core_block`. Le
+  retour d'expérience (`Feedback`) n'a pas de `BodyBlocks` : une galerie en tête passe encore à
+  sa mise à jour. Les pages les rangent par `sortIndex`. `Tests\Block\BodyBlocksTest` : types
+  des blocs, ajout, retrait, ordre, fusion et validation, sur une création, un événement, une
+  trouvaille, une annonce et un retour d'expérience.
 - Défauts que la 8.x change, écrits à leur valeur de la 7.4 (#223), vérifiés par
   `Tests\Form\DefaultsTest` :
   - `requireTld: false` sur chaque `#[Assert\Url]` (la 8.0 passe à `true`), à écrire aussi sur une
