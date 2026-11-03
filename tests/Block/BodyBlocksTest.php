@@ -123,6 +123,56 @@ final class BodyBlocksTest extends WebTestCase
     }
 
     /**
+     * The pictures of a gallery, in the order of the field: their sortIndex renumbered from 0.
+     */
+    public function testUpdateSortsThePicturesOfAGallery(): void
+    {
+        [$text, $gallery] = $this->findBlocks(Creation::class);
+        $factory = static::getContainer()->get('tests.fixture_factory');
+        $gallery->addPicture($factory->picture(static::findUser(UserFixtures::USER), 'wood-4.jpg', 'test-body-blocks'));
+        static::getEntityManager()->flush();
+        $pictureIds = array_reverse(self::getPictureIds($gallery));
+
+        $client = static::createClientAs(UserFixtures::USER);
+        $crawler = $this->submitBlocks($client, 'core_creation', 'ladb_wonder_creation', [
+            0 => self::text($text->getBody(), 0),
+            1 => ['pictures' => implode(',', $pictureIds)] + self::gallery($gallery, 1),
+        ]);
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertCount(1, $crawler->filter('.alert-success'));
+
+        static::getEntityManager()->clear();
+        $pictures = $this->findBlocks(Creation::class)[1]->getPictures()->toArray();
+        self::assertSame($pictureIds, array_map(static fn ($picture) => $picture->getId(), $pictures));
+        self::assertSame([0, 1], array_map(static fn ($picture) => $picture->getSortIndex(), $pictures));
+    }
+
+    /**
+     * A picture id that no picture has (a forged request, a picture deleted in the meantime): an
+     * error on the field of the gallery, as for the other ids of the forms, and nothing saved.
+     */
+    public function testUpdateRefusesAnUnknownPicture(): void
+    {
+        [$text, $gallery] = $this->findBlocks(Creation::class);
+        $blockIds = [$text->getId(), $gallery->getId()];
+        $unknownId = static::getEntityManager()->createQuery('SELECT MAX(p.id) FROM Ladb\CoreBundle\Entity\Core\Picture p')->getSingleScalarResult() + 1;
+
+        $client = static::createClientAs(UserFixtures::USER);
+        $crawler = $this->submitBlocks($client, 'core_creation', 'ladb_wonder_creation', [
+            0 => self::text($text->getBody(), 0),
+            1 => ['pictures' => implode(',', [...self::getPictureIds($gallery), $unknownId])] + self::gallery($gallery, 1),
+        ]);
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertSame(['Cette valeur n\'est pas valide.'], self::getErrors($crawler));
+        self::assertCount(0, $crawler->filter('.alert-success'));
+
+        static::getEntityManager()->clear();
+        self::assertSame($blockIds, array_map(static fn ($block) => $block->getId(), $this->findBlocks(Creation::class)));
+    }
+
+    /**
      * The last block moved between the first one and the gallery: the two text blocks, neighbours
      * on the page, are merged.
      *

@@ -6,6 +6,7 @@ use Ladb\CoreBundle\DataFixtures\UserFixtures;
 use Ladb\CoreBundle\Entity\AbstractDraftableAuthoredPublication;
 use Ladb\CoreBundle\Entity\Howto\Article;
 use Ladb\CoreBundle\Entity\Howto\Howto;
+use Symfony\Component\DomCrawler\Crawler;
 use Tests\PublicationTestCase;
 
 final class HowtoTest extends PublicationTestCase
@@ -45,6 +46,31 @@ final class HowtoTest extends PublicationTestCase
             'id' => $publication->getId(),
             'owner' => $publication->getUser()->getUsernameCanonical(),
         ]);
+    }
+
+    /**
+     * An article id that no article has (a forged request, an article deleted in the meantime):
+     * an error on the field of the articles, as for the other ids of the forms, and nothing saved.
+     */
+    public function testUpdateRefusesAnUnknownArticle(): void
+    {
+        $articleIds = array_map(fn (Article $article) => $article->getId(), $this->find(static::ID)->getArticles()->toArray());
+        $unknownId = static::getEntityManager()->createQuery('SELECT MAX(a.id) FROM Ladb\CoreBundle\Entity\Howto\Article a')->getSingleScalarResult() + 1;
+
+        $client = static::createClientAs(UserFixtures::USER);
+        $crawler = $client->request('GET', $this->path('edit', ['id' => static::ID]));
+        $form = $this->selectForm($crawler, $this->path('update', ['id' => static::ID]));
+        $field = $this->getFieldName($form, 'articles');
+        $form[$field] = implode(',', [...$articleIds, $unknownId]);
+
+        $crawler = $client->submit($form);
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertSame(['Cette valeur n\'est pas valide.'], $crawler->filter('#articles_section .alert-danger li')->each(fn (Crawler $node): string => $node->text()));
+        self::assertCount(0, $crawler->filter('.alert-success'));
+
+        static::getEntityManager()->clear();
+        self::assertSame($articleIds, array_map(fn (Article $article) => $article->getId(), $this->find(static::ID)->getArticles()->toArray()));
     }
 
     public function testDeleteDeletesTheArticles(): void
