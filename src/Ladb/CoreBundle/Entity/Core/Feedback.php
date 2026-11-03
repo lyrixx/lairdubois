@@ -61,8 +61,9 @@ class Feedback implements TypableInterface, BasicTimestampableInterface, Authore
 	#[ORM\Column(type: 'text', nullable: false)]
 	protected $body;
 
+	// Empty until a text block leads the body: a feedback may start with a gallery (no BodyBlocks)
 	#[ORM\Column(type: 'string', length: 255, nullable: false)]
-	private $bodyExtract;
+	private $bodyExtract = '';
 
 	#[Assert\Count(min: 1)]
 	#[ORM\JoinTable(name: 'tbl_core_feedback_body_block')]
