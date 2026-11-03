@@ -69,7 +69,8 @@ final class NotificationTest extends WebTestCase
         self::assertSame(1, openssl_verify($jwtHeader.'.'.$jwtClaims, self::toDerSignature(self::base64UrlDecode($jwtSignature)), self::toPem($vapidPublicKey), \OPENSSL_ALGO_SHA256));
         $claims = json_decode(self::base64UrlDecode($jwtClaims), true);
         self::assertSame('https://push.example.test', $claims['aud']);
-        self::assertSame($container->getParameter('router.request_context.host'), $claims['sub']);
+        self::assertSame($container->getParameter('router_default_uri'), $claims['sub']);
+        self::assertStringStartsWith('https://', $claims['sub']);
         self::assertGreaterThan(time(), $claims['exp']);
         self::assertLessThanOrEqual(time() + 86400, $claims['exp']);
 

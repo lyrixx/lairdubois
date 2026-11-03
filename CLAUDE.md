@@ -182,7 +182,8 @@ Plusieurs worktrees git tournent en même temps (`.castor/worktree.php`, celui d
 - Worktree : projet `lairdubois-wt-<worktree>` (nom du dossier dans `.git/worktrees/`), donc
   conteneurs, volumes, réseau et images propres. Même domaine, mais ports HTTP, HTTPS et admin
   dérivés de ce nom (crc32, entre 10000 et 60000) : `https://lairdubois.test:<port>`, voir `castor
-  docker:ports`. Les URL des assets et du hub Mercure portent ce port (`parameters.yml`).
+  docker:ports`. Les URL des assets, celles générées hors requête et celle du hub Mercure portent
+  ce port (`router_default_uri` et `mercure_public_url` de `parameters.yml`).
 - Seuls les worktrees sont isolés : deux clones du repo ont le même projet et les mêmes ports.
 - Pour lire une page sans toucher à `/etc/hosts` : `curl --resolve lairdubois.test:<port>:127.0.0.1
   https://lairdubois.test:<port>/` (`-k` sans mkcert).
@@ -620,10 +621,13 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
 - `trusted_hosts` vaut `^(dev|www)\.lairdubois\.fr$`, plus `^lairdubois\.test$` en dev et en
   test : une requête sur un autre host répond 400, y compris `localhost`, le host par défaut du
   client de `WebTestCase`.
-- Les URL des assets sont absolues (`base_urls` de `config.yml`, depuis
-  `router.request_context.host`) : dans un worktree, ce paramètre vaut `lairdubois.test:<port>`.
-  Après un changement de ports (renommage du worktree), `castor app:install` réécrit
-  `parameters.yml`.
+- Les URL des assets sont absolues (`base_urls` de `config.yml`), comme celles générées hors
+  requête (`framework.router.default_uri` : mails des crons et des workers, sitemaps). Toutes
+  viennent de `router_default_uri` (`parameters.yml`), qui vaut `https://lairdubois.test:<port>`
+  dans un worktree. Il remplace `router.request_context.host` et `.scheme`, dépréciés en 8.1
+  (#240) : Symfony leur garde une valeur (`localhost`, `http`), qui ne sert plus, l'URI donnant
+  le schéma et l'hôte. Après un changement de ports (renommage du worktree), `castor app:install`
+  réécrit `parameters.yml`.
 - Le `fastcgi_params` de Debian passe `HTTP_HOST` sans le port (`$host`) : le nginx du `frontend`
   le remplace par `$http_host`, sinon les URL absolues et les redirections d'un worktree visent
   le port 443, celui de la copie principale.
@@ -1010,7 +1014,10 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
 - Les notifications web push sont signées avec les clés VAPID de la prod (`bentools_webpush.*` de
   `parameters.yml`) : avec celles de `parameters.yml.dist`, le worker `webpush_notification`
   échoue sur chaque message. `castor app:install` y écrit une paire jetable, que les `composer
-  install` suivants gardent.
+  install` suivants gardent. Le `sub` du JWT VAPID, le contact du site pour les services de push,
+  est `router_default_uri` (`bentools_webpush.settings.subject`), une URL https comme le veut la
+  RFC 8292 : c'était l'hôte nu jusqu'à #240 (le bundle lisait `router.request_context.host`). Un
+  abonnement ne dépend que de la clé publique (`applicationServerKey`), pas du `sub`.
 - Le géocodage (`geocoder-php/common-http`) trouve sa fabrique PSR-17 par `php-http/discovery`, à
   l'exécution : `GuzzleHttp\Psr7\HttpFactory` de `guzzlehttp/psr7` 2. Le plugin Composer de
   discovery est coupé dans `allow-plugins`.

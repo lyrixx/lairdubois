@@ -366,6 +366,11 @@ This will auto generate the `app/config/parameters.yml` file.
 
 For the Mercure hub: `mercure_url` is `http://127.0.0.1:3000/.well-known/mercure`, `mercure_public_url` is `https://www.lairdubois.fr/.well-known/mercure`, and `mercure_jwt_secret` is the secret of `/etc/mercure.env`.
 
+`router_default_uri` is the URL of the site: `https://www.lairdubois.fr` (the default) on the
+**PROD** server, `http://dev.lairdubois.fr` on the **DEV** server. The URLs of the assets come
+from it, as do the URLs that the crons and workers write (emails, sitemaps) and the contact of
+the web push notifications.
+
 Now you are ready to configure Nginx to access to the webroot directory.
 
 ## Step 5 - Generate HTTPS certificates (Not necessary on the **DEV** server)

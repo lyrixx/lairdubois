@@ -15,6 +15,8 @@ framework:
         log: '%kernel.debug%'
     router:
         resource: "%kernel.project_dir%/app/config/routing.yml"
+        # Scheme, host and port of the URLs generated without a request (commands, workers)
+        default_uri: '%router_default_uri%'
         strict_requirements: "%kernel.debug%"
         # Not the default of Symfony 6 (true): the requirements of the routes keep matching bytes,
         # not UTF-8 characters
@@ -27,17 +29,17 @@ framework:
     assets:
         version:    "20230707"
         version_format: '%%s?v=%%s'
-        base_urls:  ["%router.request_context.scheme%://%router.request_context.host%"]
+        base_urls:  ["%router_default_uri%"]
         packages:
              # The CSS and JS of Vite (vite.config.js, castor app:assets:build): the manifest gives
              # the hashed file of each one, e.g. asset('build/base.js', 'build'). The CSS goes
              # through Reprise (reprise_entry_link_tags(), below), with this package
              build:
                 json_manifest_path: "%kernel.project_dir%/web/build/manifest.json"
-                base_urls:  ["%router.request_context.scheme%://%router.request_context.host%"]
+                base_urls:  ["%router_default_uri%"]
              sitemaps:
                 version:    ""
-                base_urls:  ["%router.request_context.scheme%://%router.request_context.host%"]
+                base_urls:  ["%router_default_uri%"]
     default_locale:  "%locale%"
     session:
         storage_factory_id: session.storage.factory.native
@@ -1308,5 +1310,8 @@ mercure:
 # BentoolsWebpushBundle
 bentools_webpush:
     settings:
+        # The contact of the site for the push services ("sub" claim of the VAPID JWT), an https:
+        # URL as RFC 8292 asks. Without it, the bundle reads router.request_context.host, deprecated
+        subject: '%router_default_uri%'
         public_key: '%bentools_webpush.public_key%'
         private_key: '%bentools_webpush.private_key%'

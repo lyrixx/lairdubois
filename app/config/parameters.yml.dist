@@ -33,8 +33,9 @@ parameters:
     admin_username:                 admin
     ga_tracking_id:                 YOUR_GOOGLE_ANALYTICS_TRACKING_CODE
 
-    router.request_context.host:    www.lairdubois.fr
-    router.request_context.scheme:  https
+    # Scheme, host and port of the site: the URLs generated without a request (mails of the crons,
+    # sitemaps) and those of the assets
+    router_default_uri:             https://www.lairdubois.fr
 
     chromium:                       /usr/bin/chromium
 
