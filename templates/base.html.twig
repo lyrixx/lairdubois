@@ -118,7 +118,7 @@
             <meta name="theme-color" content="#3E3B33">
             <meta name="application-name" content="L'Air du Bois">
             {% block headStylesheets %}
-                <link rel="stylesheet" type="text/css" href="{{ asset('build/base.css', 'build') }}" media="screen,print" />
+                {{ reprise_entry_link_tags('base', attributes: { type: 'text/css', media: 'screen,print' }) }}
             {% endblock %}
             {% block headJavascripts %}
                 {% if pageSectionUrl and pageSectionName %}

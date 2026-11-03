@@ -1,5 +1,5 @@
 {% block mapAreaStylesheets %}
-    <link rel="stylesheet" type="text/css" href="{{ asset('build/map.css', 'build') }}" media="screen" />
+    {{ reprise_entry_link_tags('map', attributes: { type: 'text/css', media: 'screen' }) }}
 {% endblock %}
 
 {% block mapAreaJavascripts %}

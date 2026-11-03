@@ -1,5 +1,5 @@
 {% block blueimpGalleryStylesheets %}
-    <link rel="stylesheet" type="text/css" href="{{ asset('build/blueimp-gallery.css', 'build') }}" media="screen" />
+    {{ reprise_entry_link_tags('blueimp-gallery', attributes: { type: 'text/css', media: 'screen' }) }}
 {% endblock %}
 
 {% block blueimpGalleryJavascripts %}

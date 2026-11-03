@@ -23,6 +23,8 @@ class AppKernel extends Kernel
 
 			new BenTools\WebPushBundle\WebPushBundle(),
 
+			new Symfony\Reprise\RepriseBundle(),
+
             new Ladb\CoreBundle\LadbCoreBundle(),
         );
 

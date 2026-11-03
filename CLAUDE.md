@@ -132,12 +132,14 @@ Contextes : `--context=test` (`SYMFONY_ENV=test`), `--context=ci` (le même, san
   nginx et php-fpm. Node 24 dans le builder seulement, pour Vite : les autres images servent les
   fichiers de `web/build/`. Pas de Java.
 - Assets (CSS et JS) : Vite et le plugin npm de Symfony Reprise (`package.json`, `vite.config.js`),
-  dans `web/build/` avec `manifest.json`, hors git. Une entrée par groupe des anciennes balises
-  `{% stylesheets %}` et `{% javascripts %}` d'Assetic, mêmes fichiers dans le même ordre, et des
-  balises écrites à la main : `{{ asset('build/base.css', 'build') }}` (package `build` de
-  `config.yml`, `json_manifest_path`). Un fichier LESS ou JS ajouté à un groupe va dans
-  `vite.config.js`. Le dev sert le build : `castor app:assets:watch` pendant qu'on modifie un
-  LESS ou un JS, pas de serveur de Vite.
+  dans `web/build/` avec `entrypoints.json` et `manifest.json`, hors git. Une entrée par groupe des
+  anciennes balises `{% stylesheets %}` et `{% javascripts %}` d'Assetic, mêmes fichiers dans le
+  même ordre. Le CSS par le bundle `symfony/reprise` (#29) : `{{ reprise_entry_link_tags('base',
+  attributes: { type: 'text/css', media: 'screen,print' }) }}` ; le JS par des balises écrites à
+  la main : `{{ asset('build/base.js', 'build') }}` (package `build` de `config.yml`,
+  `json_manifest_path`). Un fichier LESS ou JS ajouté à un groupe va dans `vite.config.js`. Le dev
+  sert le build : `castor app:assets:watch` pendant qu'on modifie un LESS ou un JS, pas de serveur
+  de Vite.
 - MariaDB 10.11 (`root`/`app`), Elasticsearch 9.5 (un nœud, sans sécurité, un volume par version
   majeure), RabbitMQ 3.13 (`app`/`app`), Memcached. Workers
   (profil `worker`) : les trois de Messenger (`messenger:consume mailer`, `messenger:consume view`,
@@ -240,8 +242,9 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et get
 - Cache GitHub Actions : couches Docker (`type=gha`, un scope par cible du Dockerfile, via un
   `docker-compose.override.yml` écrit par le workflow), cache Composer (`.home/.cache/composer`)
   et cache npm (`.home/.npm`).
-- Les deux jobs construisent les assets (`castor app:assets:build`) : `asset()` lit leur manifest
-  sur chaque page. `qa:phpunit` et `qa:e2e` les construisent aussi s'il manque.
+- Les deux jobs construisent les assets (`castor app:assets:build`) : Reprise lit leur
+  `entrypoints.json` et `asset()` leur manifest sur chaque page. `qa:phpunit` et `qa:e2e` les
+  construisent aussi s'ils manquent.
 - Rector 2 dans `tools/rector`, hors `qa:install` (la CI n'en a pas besoin), avec les règles du
   projet (`tools/rector/src/`). `ControllerGetToActionArgumentRector` laisse
   `__RECTOR_REMOVED_LINE__;` à la place des lignes qu'il supprime, que `qa:rector` retire ensuite :
@@ -584,16 +587,23 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `eonasdan/bootstrap-datetimepicker`) : toutes ses versions tirent `kriswallsmith/assetic` 1.x,
   qui refuse `symfony/process` 4. Il reste à `false` dans `allow-plugins` : sinon, sur une copie
   où il est encore installé, `composer install` s'arrête avant de le retirer.
-- Le bundle `symfony/reprise` exige Symfony `^7.4` et PHP 8.4 : installable depuis le saut en 7.4
-  (#28), il n'est pas encore là (#29) ; seul le côté JS (Vite et le plugin npm `@symfony/reprise`)
-  sert. Ce plugin demande Node 22.18 ou plus.
-- Sans `web/build/manifest.json`, `asset(…, 'build')` lève une exception : toute page répond 500.
-  Après un `git pull` qui touche aux assets, `castor app:assets:build`.
+- Bundle `symfony/reprise` (#29), pour le CSS seulement. Il relit `web/build/entrypoints.json` à
+  chaque requête (pas de `cache`, comme `asset()` et le manifest) et résout l'URL du fichier haché
+  (`build/base-<hash>.css`) par le package `build` (`asset_package`) : ce n'est pas une clé du
+  manifest, elle ressort telle quelle, avec les `base_urls`. Le package par défaut y ajouterait
+  `?v=20230707`, et un package à `version: false`, que propose la doc de Reprise, `?v=` (notre
+  `version_format`). `preload: false` : sinon chaque balise ajoute un lien aux attributs de la
+  requête (`_links`, `symfony/web-link` est installé), pour un en-tête `Link` que rien n'écrit
+  (`web_link` coupé). Une entrée déjà rendue dans la requête principale, sous-requêtes comprises,
+  ne l'est pas une seconde fois. Le plugin npm demande Node 22.18 ou plus.
+- Sans `web/build/entrypoints.json`, `reprise_entry_link_tags()` lève une exception : toute page
+  répond 500. Sans `manifest.json`, `asset(…, 'build')` rend le nom sans hash (`build/base.js`,
+  404). Après un `git pull` qui touche aux assets, `castor app:assets:build`.
 - Les scripts du site sont écrits pour la portée globale (`var` et `function` en tête de fichier,
   jQuery et ses plugins en globales) : Vite en ferait des modules. `vite.config.js` les concatène
   tels quels et les écrit comme fichiers du build, que le plugin de Reprise met dans le manifest ;
   terser les minifie (le minifieur de Vite écrit des template literals et `**`). Le bundle de
-  Reprise (#29) rend des `<script type="module">` : ces groupes garderont `asset()`.
+  Reprise rend des `<script type="module">` : ces groupes gardent `asset()`.
 - Vite 8 déclare `less ^4` en dépendance optionnelle : l'`overrides` de `package.json` lui donne
   `less@3.13.1`, celle d'Assetic, pour un CSS identique.
 - Le CSS n'est minifié que de ses espaces et commentaires (esbuild, sans cible ni `minifySyntax`).

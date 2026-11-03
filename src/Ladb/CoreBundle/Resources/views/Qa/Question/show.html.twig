@@ -19,7 +19,7 @@
 
 {% block headStylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" type="text/css" href="{{ asset('build/qa.css', 'build') }}" media="screen" />
+    {{ reprise_entry_link_tags('qa', attributes: { type: 'text/css', media: 'screen' }) }}
 {% endblock %}
 
 {% block bodyJavascripts %}

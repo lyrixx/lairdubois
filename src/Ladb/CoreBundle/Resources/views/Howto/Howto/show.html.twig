@@ -54,7 +54,7 @@
 
 {% block headStylesheets %}
     {{ parent() }}
-    <link rel="stylesheet" type="text/css" href="{{ asset('build/tocify.css', 'build') }}" media="screen" />
+    {{ reprise_entry_link_tags('tocify', attributes: { type: 'text/css', media: 'screen' }) }}
 {% endblock %}
 
 {% block bodyJavascripts %}
