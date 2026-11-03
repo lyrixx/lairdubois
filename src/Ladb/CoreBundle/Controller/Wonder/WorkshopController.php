@@ -119,7 +119,7 @@ class WorkshopController extends AbstractController {
 		}
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('wonder.creation.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => htmlspecialchars($workshop->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
+		$this->addFlash('success', $translator->trans('wonder.workshop.form.alert.'.($lock ? 'lock' : 'unlock').'_success', array( '%title%' => htmlspecialchars($workshop->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_workshop_show', array( 'id' => $workshop->getSluggedId() )));
 	}

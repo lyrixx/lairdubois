@@ -214,7 +214,7 @@ class QuestionController extends AbstractController {
 			$dispatcher->dispatch(new PublicationEvent($question, array( 'previouslyUsedTags' => $previouslyUsedTags )), PublicationListener::PUBLICATION_UPDATED);
 
 			// Flashbag
-			$this->addFlash('success', $translator->trans('blog.post.form.alert.update_success', array( '%title%' => htmlspecialchars($question->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
+			$this->addFlash('success', $translator->trans('qa.question.form.alert.update_success', array( '%title%' => htmlspecialchars($question->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 			// Regenerate the form
 			$form = $this->createForm(QuestionType::class, $question);
@@ -243,7 +243,7 @@ class QuestionController extends AbstractController {
 		$questionManager->delete($question);
 
 		// Flashbag
-		$this->addFlash('success', $translator->trans('blog.post.form.alert.delete_success', array( '%title%' => htmlspecialchars($question->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
+		$this->addFlash('success', $translator->trans('qa.question.form.alert.delete_success', array( '%title%' => htmlspecialchars($question->getTitle(), ENT_QUOTES | ENT_SUBSTITUTE) )));
 
 		return $this->redirect($this->generateUrl('core_qa_question_list'));
 	}
