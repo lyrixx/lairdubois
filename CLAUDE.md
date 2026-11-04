@@ -208,7 +208,7 @@ castor -c ci qa:all          # qa:lint, qa:phpstan, qa:phpunit, puis qa:deprecat
 castor -c ci qa:lint         # lint:twig, lint:yaml, doctrine:schema:validate, cache:warmup et lint:container --env=prod, composer validate
 castor qa:phpstan [-b]       # niveau 0, phpstan-baseline.neon ; -b la régénère
 castor qa:phpunit [-- --filter …]
-castor qa:deprecations       # var/deprecations/report.md, et le résumé du job en CI
+castor qa:deprecations       # var/deprecations/report.md et le résumé du job en CI, php.md (PHP)
 castor qa:install            # outils de tools/ (PHPStan, PHPUnit), installés à la volée sinon
 castor qa:e2e [-- --grep …]  # tests E2E (Playwright) : recharge la base du dev, hors qa:all, job E2E en CI
 castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et getDoctrine() des actions → arguments (#16, #177), des utils, managers, listeners et validateurs → constructeur (#118), dépréciations de 4.x (#133), routes, contraintes, `@required` et mapping de Doctrine et Gedmo en attributs (#25), commandes en `#[AsCommand]` (#28), `@Template` et `@Security` de Sensio en attributs natifs (#27), types de retour natifs de 5.4 et 6.4 (#177, #205), handlers de Messenger en `#[AsMessageHandler]` (#205), `Routing\Annotation\Route` en `Routing\Attribute\Route` (#205), directions de tri en `\SortDirection` (#217)
@@ -235,7 +235,13 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et get
   il compte les dépréciations par message. Le `SYMFONY_DEPRECATIONS_SERIALIZE` du bridge garde
   chaque occurrence en mémoire, des centaines par requête : le smoke test dépasse la limite de
   mémoire. Les dépréciations de PHP lui-même (`E_DEPRECATED`, d'où `error_reporting=-1` dans
-  `phpunit.xml.dist`) sont comptées, pas listées. Le rapport ne fait jamais échouer la CI.
+  `phpunit.xml.dist`) sont comptées dans le rapport, et listées dans `var/deprecations/php.md`
+  (#248, aussi dans l'artifact) : par message, où PHP les lève (paquet et version dans `vendor/`,
+  ligne du template pour un template Twig compilé) et l'appelant (le premier frame hors de
+  `vendor/` pour une dépendance, sinon l'appelant de la fonction, souvent celui qui passe `null`).
+  Le collecteur les compte par origine et par appelant, sans garder les occurrences. Celles de la
+  compilation d'une classe ne sortent qu'au premier chargement, et le kernel ne garde que la
+  première origine de celles du container. Le rapport ne fait jamais échouer la CI.
 - Les dépréciations d'un template Twig ne sortent qu'à sa compilation : `qa:deprecations` vide le
   cache de test sans les warmers optionnels, pour que le `qa:phpunit` suivant les voie.
 - `lint:yaml` compte les dépréciations comme des erreurs. Sans chemin, `lint:twig` lit tous les
