@@ -323,10 +323,11 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et get
   Le collecteur les compte par origine et par appelant, sans garder les occurrences. Celles de la
   compilation d'une classe ne sortent qu'au premier chargement, et le kernel ne garde que la
   première origine de celles du container. Le rapport ne fait jamais échouer la CI.
-- Depuis la 8.2 (#30), un `addListener()` sur `event_dispatcher` est déprécié : ceux des tests
-  (une par requête du smoke test, `CommandTest`, `PhpErrorTest`, `RabbitMqTest`) et ceux de
-  `fos:elastica:populate` (FOSElasticaBundle, avec ses `removeListener()`), quelque 2 700 dans le
-  rapport. Ceux des tests seraient à remplacer par des listeners de `config_test.yml` (9.0).
+- Depuis la 8.2 (#30), `addListener()` et `removeListener()` sur `event_dispatcher` sont
+  dépréciés. Les tests n'en font plus (#265, voir « Tests »). Restent ceux de
+  `fos:elastica:populate` (FOSElasticaBundle), 3 `addListener()` et 2 `removeListener()` par index
+  rempli, dans le `tearDownAfterClass()` de `Tests\WebTestCase` : 324 et 216 dans le rapport,
+  jusqu'à ce que le bundle change.
 - `E_DEPRECATED` de notre code (#248) : un `null` qu'une fonction de PHP attend en chaîne (paramètre
   absent de la requête, colonne nullable, champ vide) passe par `?? ''` ou par le défaut de
   `query->get()`, pour garder le `''` que PHP en faisait. Celles qui restent viennent de
@@ -544,6 +545,19 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   celles de PHP (comme `ClockMock` du bridge). Il connaît le compteur de partages de
   `OfflineFacebookGraph::URL`, répond une erreur pour `ERROR_URL` et pour toute autre requête, et
   rend les URL appelées (`popRequests()`).
+- Pas d'`addListener()` sur `event_dispatcher` dans un test : la 8.2 le déprécie sur le dispatcher
+  compilé (#265), dont le premier appel copie tous les listeners dans un dispatcher ordinaire. Les
+  listeners des tests sont des services de `config_test.yml` (`#[AsEventListener]`,
+  `tests/Double/`), qu'un test lit ou active dans le container de la requête ou de la commande, et
+  qui gardent ce qu'ils voient jusqu'au reboot suivant :
+  - `tests.exception_listener` : la première exception d'une requête, avant les autres listeners
+    (priorité 2048), pour le smoke test ;
+  - `tests.controller_listener` : `failWith($error)` la lève avant le controller de la requête
+    principale (`PhpErrorTest`) ;
+  - `tests.signal_listener` : après `catchSignals()`, garde la commande de chaque signal et empêche
+    la sortie du process (`CommandTest`) ; sinon, un signal l'arrête, comme sans le listener ;
+  - `tests.message_listener` : les mails tels que le transport les envoie, signés, que
+    `reset_on_message` ne vide pas, au contraire du logger de Mailer (`RabbitMqTest`).
 - Une `\Error` PHP donne une 500, comme une exception (`framework.handle_all_throwables`, #205) :
   `$client->request()` rend la page d'erreur au lieu de la lever (`Tests\Error\PhpErrorTest`). Un
   warning PHP devient une exception (gestionnaire d'erreurs de PHPUnit) : 500.
@@ -606,7 +620,8 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   `static::consumeMessage($message, 'mailer')` l'envoie comme le worker, par le transport
   (`null://` en test, rien ne part), qui signe une copie, un `Message`, que
   `Tests\Mail\DkimSignatureTest` vérifie. Dans le worker, `reset_on_message` vide
-  `mailer.message_logger_listener` après chaque message : `RabbitMqTest` écoute le `MessageEvent`.
+  `mailer.message_logger_listener` après chaque message : `RabbitMqTest` lit
+  `tests.message_listener`.
 - Commandes (`tests/Command/`) : `static::runCommandLine('ladb:cron:offers --force')` lance une
   ligne de commande dans la transaction du test et rend son code de sortie et sa sortie (le
   `runCommand()` de `KernelTestCase`, depuis la 8.1, lance la commande seule par un `CommandTester`,
