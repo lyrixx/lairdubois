@@ -166,10 +166,11 @@ function smoke(): int
         $results = [];
         foreach ($checks as $name => $check) {
             io()->section($name);
+            // A failed expectation, command or request does not stop the next checks
             try {
                 $check();
                 $results[] = [$name, '<info>OK</info>', ''];
-            } catch (\Throwable $e) {
+            } catch (\RuntimeException|\JsonException $e) {
                 io()->error($e->getMessage());
                 $results[] = [$name, '<error>failed</error>', mb_strimwidth(strtok($e->getMessage(), "\n"), 0, 100, '…')];
             }
