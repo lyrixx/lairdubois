@@ -69,11 +69,15 @@ runtime, in every container of the image `php`. The ones with a default can be l
 | `INTERNAL_IPS` | the addresses allowed on the `/internal/` pages without an account (`security.yml`) | `127.0.0.1, ::1` |
 | `WEBPUSH_PUBLIC_KEY`, `WEBPUSH_PRIVATE_KEY` | `bentools_webpush.*` (VAPID) | |
 | `ADMIN_USERNAME` | `admin_username` | `admin` |
-| `GA_TRACKING_ID`, `GOOGLE_API_KEY`, `TWITTER_*`, `FACEBOOK_*`, `PINTEREST_*`, `MASTODON_*`, `STRIPE_*` | the accounts of the site on these services | the placeholders of `parameters.yml.dist` |
+| `GA_MEASUREMENT_ID` | `ga_measurement_id`: Google Analytics (`G-…`) | empty: none |
+| `GOOGLE_API_KEY`, `TWITTER_*`, `FACEBOOK_*`, `PINTEREST_*`, `MASTODON_*`, `STRIPE_*` | the accounts of the site on these services | the placeholders of `parameters.yml.dist` |
 
 Give the accounts of the site on other services only to a server that may use them: with them,
 `ladb:cron:spotlight` publishes on Twitter, Facebook and Mastodon, and the funding takes real
-payments. `MASTODON_INSTANCE=offline://mastodon` keeps the cron from calling Mastodon.
+payments. `MASTODON_INSTANCE=offline://mastodon` keeps the cron from calling Mastodon. The same
+for Google Analytics, on the pages but for the admins: `GA_MEASUREMENT_ID=G-HZ1ZEPHSFS` (the one of
+`parameters.yml.dist`) on the production server only, a preprod would count its visits in those of
+the site.
 
 ## Files
 

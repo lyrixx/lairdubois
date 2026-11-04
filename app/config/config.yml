@@ -155,7 +155,7 @@ twig:
     paths:
         '%kernel.project_dir%/templates/bundles/FOSUserBundle': FOSUser
     globals:
-        ga_tracking_id: "%ga_tracking_id%"
+        ga_measurement_id: "%ga_measurement_id%"
         stripe_publishable_key: "%stripe_publishable_key%"
 
 # The <link> tags of the CSS of Vite: reprise_entry_link_tags('base', …), from the entrypoints.json

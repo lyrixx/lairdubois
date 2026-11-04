@@ -262,10 +262,10 @@ castor -c prod docker:push --tag=… # REGISTRY=ghcr.io/…, la CI seulement
   écrit leurs fichiers dans les volumes (`uploads`, `downloads`, `web/media`).
 - `qa:prod-smoke` : l'image (utilisateur, prod sans debug, rien en trop, rien d'écrit hors des
   volumes), la crontab (supercronic), Chromium (capture d'une page de nginx), Liip (un JPEG et un
-  PNG résolus par PHP, servis ensuite par nginx), une vue comptée par le worker `view`, la suite
-  E2E entière sur la stack (`E2E_PROD` y ajoute `pages.spec.ts` : listes et contenus en anonyme,
-  `user` et `admin`, sans les hosts tiers, qui retiendraient l'événement `load`), chaque ligne de
-  la crontab puis leurs effets (sitemaps servis par nginx,
+  PNG résolus par PHP, servis ensuite par nginx), une vue comptée par le worker `view`, Google
+  Analytics (plus bas), la suite E2E entière sur la stack (`E2E_PROD` y ajoute `pages.spec.ts` :
+  listes et contenus en anonyme, `user` et `admin`, sans les hosts tiers, qui retiendraient
+  l'événement `load`), chaque ligne de la crontab puis leurs effets (sitemaps servis par nginx,
   vignette d'un processus capturée sur le site), les mails dans Mailpit (signés DKIM) et les
   notifications web push reçues par `push` (signées VAPID). Un tableau en fin de tâche.
 - CI : job `prod` (build, `castor app:install` pour les fixtures, `qa:prod-smoke`,
@@ -274,9 +274,15 @@ castor -c prod docker:push --tag=… # REGISTRY=ghcr.io/…, la CI seulement
   et `…/nginx`, tags `next` et le SHA, avec le `GITHUB_TOKEN` (`packages: write`). Les paquets
   GHCR d'un dépôt public sont publics. Cache `gha` des étapes de prod par
   `docker-compose.prod.override.yml`, écrit par le workflow.
-- Google Analytics n'est rendu qu'hors debug, avec l'identifiant de la prod en dur
-  (`base.html.twig`) : la préprod compterait ses visites dans celles de la prod. Les tests E2E
-  bloquent `www.googletagmanager.com`.
+- Google Analytics (#266) : `ga_measurement_id` (GA4, `G-…`), rendu hors debug sauf pour un
+  admin (`base.html.twig`), rien quand il est vide. Le dist a celui de la prod, `G-HZ1ZEPHSFS`,
+  qu'incenteev ajoute à son `parameters.yml` : même rendu, sans rien y changer. `ga_tracking_id`
+  (l'UA d'analytics.js, arrêté par Google en 2023, en commentaire dans le template) est parti. Les
+  images lisent `GA_MEASUREMENT_ID`, vide par défaut, pas la valeur du dist : une préprod
+  compterait ses visites dans celles de la prod. `qa:prod-smoke` lit l'accueil de la stack, sans
+  la variable, puis celui d'un conteneur qui l'a, rendu par `web/app.php` : le bloc d'avant,
+  octet pour octet. Une requête à `www.googletagmanager.com` fait échouer un test E2E
+  (`support/test.ts`).
 
 ## CI et QA
 
@@ -670,7 +676,8 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   même version (`package.json`, un alias par version quand le site en charge deux : Chart.js,
   jsPlumb), sinon une copie dans `cdn/<host>/<chemin>` (paquet sans le fichier, fichier différent
   ou paquet trop gros). Une URL de ces CDN sans copie fait échouer le test. Aucun autre host n'est
-  appelé : Google Analytics est coupé en debug, Stripe, Google Maps et Facebook sont sur des pages
+  appelé : Google Analytics n'est rendu ni en debug ni sans identifiant (la stack de prod n'en a
+  pas), et le charger fait échouer le test ; Stripe, Google Maps et Facebook sont sur des pages
   qu'aucun test n'ouvre.
 - `auth.setup.ts` connecte chaque compte une fois par le formulaire et garde ses cookies
   (`var/e2e/auth/`) ; un test les prend avec `test.use({ storageState: storageStateOf(USER) })`.

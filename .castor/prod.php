@@ -41,6 +41,20 @@ const PUSH_SUBSCRIPTION_KEYS = [
     'auth' => 'PbPBY0VewTVZ-S6wnkqrOA',
 ];
 
+// Google Analytics (templates/base.html.twig) with GA_MEASUREMENT_ID=G-HZ1ZEPHSFS, from the end of
+// the inline script of the page: the HTML of the production before the variable (#266), byte for
+// byte, the indentation of the Twig tags included
+const GOOGLE_ANALYTICS_BLOCK = <<<'HTML'
+            </script>
+                                                                    <script async src="https://www.googletagmanager.com/gtag/js?id=G-HZ1ZEPHSFS"></script>
+                    <script>
+                        window.dataLayer = window.dataLayer || [];
+                        function gtag(){dataLayer.push(arguments);}
+                        gtag('js', new Date());
+                        gtag('config', 'G-HZ1ZEPHSFS');
+                    </script>
+HTML;
+
 /**
  * castor -c prod start: the production images, built, and started with the fixtures.
  */
@@ -158,6 +172,7 @@ function smoke(): int
             'chromium' => check_chromium(...),
             'images (Liip)' => check_liip(...),
             'view (worker view)' => check_view(...),
+            'Google Analytics' => check_google_analytics(...),
             'pages, login, uploads, Mercure (Playwright)' => check_e2e(...),
             'crons' => check_crons(...),
             'mails (worker mailer, Mailpit)' => check_mails(...),
@@ -350,6 +365,21 @@ function check_view(): void
     expect(200 === $page->getStatusCode() && '' !== $page->getContent(), 'The creation does not answer 200.');
 
     wait_for(static fn () => (int) sql_value('SELECT view_count FROM tbl_wonder_creation WHERE id = 1') === $before + 1, 'The view is not counted.');
+}
+
+/**
+ * Google Analytics: nothing on the pages without GA_MEASUREMENT_ID, that the stack does not give,
+ * as a preprod (the browser does not load it either, tests/e2e/support/test.ts). With it, the home
+ * page has the block of before the variable: web/app.php of the image in a container of its own,
+ * the request in its environment.
+ */
+function check_google_analytics(): void
+{
+    $page = request('GET', '/')->getContent();
+    expect(1 === preg_match('{\n            </script>\s*</body>}', $page) && !str_contains($page, 'googletagmanager'), 'The home page has Google Analytics without GA_MEASUREMENT_ID.');
+
+    $page = capture_php(['env', 'GA_MEASUREMENT_ID=G-HZ1ZEPHSFS', 'REQUEST_METHOD=GET', 'REQUEST_URI=/', 'HTTPS=on', 'HTTP_HOST=' . variable('root_domain'), 'php', 'web/app.php']);
+    expect(str_contains($page, GOOGLE_ANALYTICS_BLOCK), "The home page with GA_MEASUREMENT_ID has not the Google Analytics of before:\n" . substr($page, -1000));
 }
 
 /**

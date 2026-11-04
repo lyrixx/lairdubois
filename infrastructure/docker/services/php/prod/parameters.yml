@@ -36,7 +36,7 @@ parameters:
     locale:                         fr
     secret:                         '%env(SECRET)%'
     admin_username:                 '%env(ADMIN_USERNAME)%'
-    ga_tracking_id:                 '%env(GA_TRACKING_ID)%'
+    ga_measurement_id:              '%env(GA_MEASUREMENT_ID)%'
 
     router_default_uri:             '%env(ROUTER_DEFAULT_URI)%'
 
@@ -81,7 +81,9 @@ parameters:
     env(RABBITMQ_PORT):             '5672'
     env(RABBITMQ_VHOST):            /
     env(ADMIN_USERNAME):            admin
-    env(GA_TRACKING_ID):            YOUR_GOOGLE_ANALYTICS_TRACKING_CODE
+    # No Google Analytics unless given, not the one of the dist: a preprod would count its visits in
+    # those of the production
+    env(GA_MEASUREMENT_ID):         ''
     env(GOOGLE_API_KEY):            YOUR_GOOGLE_API_KEY
     env(TWITTER_CONSUMER_KEY):      YOUR_TWITTER_CONSUMER_KEY
     env(TWITTER_CONSUMER_SECRET):   YOUR_TWITTER_CONSUMER_SECRET
