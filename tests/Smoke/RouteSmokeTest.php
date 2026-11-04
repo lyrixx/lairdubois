@@ -12,8 +12,6 @@ use Ladb\CoreBundle\Entity\Qa\Question;
 use Ladb\CoreBundle\Entity\Wonder\Creation;
 use Ladb\CoreBundle\Utils\CryptoUtils;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
-use Symfony\Component\HttpKernel\Event\ExceptionEvent;
-use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\Route;
 use Tests\WebTestCase;
 
@@ -176,11 +174,6 @@ final class RouteSmokeTest extends WebTestCase
      */
     private function request(KernelBrowser $client, string $url, array $server = []): ?string
     {
-        $this->exception = null;
-        $client->getContainer()->get('event_dispatcher')->addListener(KernelEvents::EXCEPTION, function (ExceptionEvent $event): void {
-            $this->exception ??= $event->getThrowable();
-        }, 2048);
-
         // A \Throwable thrown while a response streams its content leaves the output buffer of
         // the client open
         $obLevel = ob_get_level();
@@ -192,6 +185,8 @@ final class RouteSmokeTest extends WebTestCase
             while (ob_get_level() > $obLevel) {
                 ob_end_clean();
             }
+            // The container of the request: the client reboots the kernel before the next one
+            $this->exception = $client->getContainer()->get('tests.exception_listener')->getThrowable();
         }
 
         $status = $client->getResponse()->getStatusCode();

@@ -2,8 +2,6 @@
 
 namespace Tests\Error;
 
-use Symfony\Component\HttpKernel\Event\ControllerEvent;
-use Symfony\Component\HttpKernel\KernelEvents;
 use Tests\WebTestCase;
 
 /**
@@ -15,12 +13,7 @@ final class PhpErrorTest extends WebTestCase
     public function testPhpErrorGivesTheErrorPage(): void
     {
         $client = static::createClient();
-        $client->getContainer()->get('event_dispatcher')->addListener(KernelEvents::CONTROLLER, static function (ControllerEvent $event): void {
-            // Not in the subrequest of the error controller
-            if ($event->isMainRequest()) {
-                throw new \TypeError('A PHP error of the test.');
-            }
-        });
+        $client->getContainer()->get('tests.controller_listener')->failWith(new \TypeError('A PHP error of the test.'));
 
         $client->request('GET', '/');
 
