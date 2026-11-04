@@ -187,8 +187,9 @@ services:
         command: supercronic /etc/lairdubois/crontab
 
     # The builder of the dev, for what the images do not have: the fixtures (dev packages, vendor/
-    # of the repository, castor app:install). As the user of the image "php", which owns the
-    # volumes; its var/ (dev cache) in memory, apart from the one of the repository
+    # of the repository, castor app:install), with the volumes they write in. As the user of the
+    # image "php", which owns the volumes; its var/ (dev cache) in memory, apart from the one of the
+    # repository
     builder:
         build:
             context: services/php
@@ -199,6 +200,8 @@ services:
             SYMFONY_ENV: dev
         volumes:
             - "../..:/var/www:cached"
+            - downloads:/var/www/downloads
+            - media:/var/www/web/media
             - uploads:/var/www/uploads
         tmpfs:
             - /var/www/var:mode=1777
