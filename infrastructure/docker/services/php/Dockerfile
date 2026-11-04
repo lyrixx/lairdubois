@@ -148,3 +148,128 @@ RUN cat >> /etc/bash.bashrc <<'EOF'
 
 PS1='\[\e[01;33m\]builder \[\e[00;32m\]\w\[\e[0m\] '
 EOF
+
+# ------------------------- Production stages -------------------------
+#
+# From docker-starter: two images, "php" and "nginx", with the code of the site (no bind mount), its
+# dependencies without the dev packages, its CSS and JS, its cache warmed. "php" runs php-fpm as the
+# user 1000, and with another command the workers of Messenger (bin/console messenger:consume ...)
+# and the crontab (supercronic prod/crontab). "nginx" serves web/, and passes the rest to php-fpm
+# through its unix socket /var/run/php/php-fpm.sock, in a volume shared by the two containers.
+#
+# Nothing secret in them: app/config/parameters.yml (prod/parameters.yml) reads its values in the
+# environment of the containers, at runtime, and the DKIM key is mounted in keys/.
+#
+# The repository is the additional build context "app" (its .dockerignore applies), see
+# docker-compose.prod.yml:
+#   docker buildx build --build-context app=../../../.. --target php .
+
+FROM builder AS app-build
+
+ENV SYMFONY_ENV=prod
+
+# Dependencies first, for the cache of the layers. "app" is a build context, not a stage. Most of
+# the locked packages only declare PHP 7: "php+" ignores their upper bound (castor app:install)
+# hadolint ignore=DL3022
+COPY --from=app composer.json composer.lock ./
+RUN composer install --no-dev --prefer-dist --no-interaction --no-progress --no-scripts --no-autoloader --ignore-platform-req=php+
+
+# hadolint ignore=DL3022
+COPY --from=app package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund
+
+# hadolint ignore=DL3022
+COPY --from=app . .
+COPY prod/parameters.yml app/config/parameters.yml
+
+# The scripts of composer.json without the ones of the dev: parameters.yml is the one above, and the
+# assets of the bundles are copies, the image "nginx" has no vendor/. The warmers of the cache create
+# services (the entity manager...) without calling them: placeholders for the variables they read,
+# which the cache does not keep (the version of MariaDB only gives Doctrine its platform). var/ is
+# put aside for the image "php", where it is the only directory of the code that PHP writes in.
+RUN composer dump-autoload --no-dev --optimize \
+    && npx vite build \
+    && rm -rf node_modules \
+    && bin/console assets:install web
+RUN env \
+        DATABASE_HOST=placeholder DATABASE_USER=placeholder DATABASE_PASSWORD=placeholder \
+        DATABASE_SERVER_VERSION=10.11.19-MariaDB \
+        ELASTICSEARCH_HOST=placeholder MAILER_DSN=null://null MEMCACHED_HOST=placeholder \
+        MERCURE_JWT_SECRET=placeholder MERCURE_PUBLIC_URL=https://placeholder MERCURE_URL=https://placeholder \
+        RABBITMQ_HOST=placeholder RABBITMQ_PASSWORD=placeholder RABBITMQ_USER=placeholder \
+        ROUTER_DEFAULT_URI=https://placeholder SECRET=placeholder \
+        WEBPUSH_PRIVATE_KEY=placeholder WEBPUSH_PUBLIC_KEY=placeholder \
+        bin/console cache:warmup \
+    && rm -rf var/logs \
+    && mkdir var/logs \
+    && mv var /var/www-var
+
+FROM php-base AS php
+
+ENV SYMFONY_ENV=prod
+# The sitemaps (ladb:cron:sitemaps) go to their volume, served by the image "nginx"
+ENV SITEMAPS_DIR=/var/www/sitemaps
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        "php${PHP_VERSION}-fpm" \
+        libfcgi-bin \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/* \
+    && rm -r "/etc/php/${PHP_VERSION}/fpm/pool.d/"
+
+# supercronic runs the crontab without root, and writes the output of the commands in the log of
+# the container
+ARG SUPERCRONIC_VERSION=0.2.51
+RUN arch="$(dpkg --print-architecture)" \
+    && case "${arch}" in \
+        amd64) sha256=cc232108374e8e2b537045f2d5eaa1229f619db314c3ba6a14d38b35dc0aa123 ;; \
+        arm64) sha256=4ae22576a78223d8ccdf5f3b3660a5cbb5288416bf0ca96afc4a36d195932b94 ;; \
+        *) echo "No supercronic for ${arch}." >&2; exit 1 ;; \
+    esac \
+    && curl -sSLo /usr/local/bin/supercronic "https://github.com/aptible/supercronic/releases/download/v${SUPERCRONIC_VERSION}/supercronic-linux-${arch}" \
+    && echo "${sha256}  /usr/local/bin/supercronic" | sha256sum -c - \
+    && chmod +x /usr/local/bin/supercronic
+COPY prod/crontab /etc/lairdubois/crontab
+
+# Flags of Chromium given by the deployment, in CHROMIUM_EXTRA_FLAGS: the /usr/bin/chromium of Debian
+# reads /etc/chromium.d/
+# hadolint ignore=SC2016
+RUN echo 'CHROMIUM_FLAGS="$CHROMIUM_FLAGS ${CHROMIUM_EXTRA_FLAGS:-}"' > /etc/chromium.d/lairdubois
+
+# The php-fpm pool of the dev "frontend" stage, plus the production settings
+COPY php/fpm/php-fpm.conf /etc/php/${PHP_VERSION}/fpm/php-fpm.conf
+COPY prod/app-prod.ini /etc/php/${PHP_VERSION}/mods-available/app-prod.ini
+RUN phpenmod app-default \
+    && phpenmod -s fpm app-fpm \
+    && phpenmod app-prod
+
+RUN groupadd -g 1000 app \
+    && useradd -m -d /home/app -u 1000 -g 1000 -s /bin/false app \
+    && mkdir -p /var/run/php \
+    && chown app:app /var/run/php
+
+# The code belongs to root: PHP only writes in var/ (cache, logs) and in the volumes of
+# docker-compose.prod.yml, mounted on these directories
+COPY --from=app-build /var/www /var/www
+COPY --from=app-build --chown=app:app /var/www-var /var/www/var
+RUN mkdir -p downloads keys sitemaps uploads web/media \
+    && chown app:app downloads sitemaps uploads web/media
+
+USER 1000:1000
+
+HEALTHCHECK --interval=10s --timeout=5s --retries=3 \
+    CMD ["sh", "-c", "SCRIPT_NAME=/ping SCRIPT_FILENAME=/ping REQUEST_METHOD=GET cgi-fcgi -bind -connect /var/run/php/php-fpm.sock || exit 1"]
+
+CMD ["sh", "-c", "exec /usr/sbin/php-fpm${PHP_VERSION}"]
+
+FROM nginx:1.29-alpine AS nginx
+
+COPY prod/nginx.conf /etc/nginx/conf.d/default.conf
+
+COPY --from=app-build /var/www/web /var/www/web
+
+EXPOSE 8080
+
+HEALTHCHECK --interval=10s --timeout=5s --retries=3 \
+    CMD ["wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/ping"]

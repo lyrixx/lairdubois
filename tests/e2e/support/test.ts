@@ -8,7 +8,7 @@ export { expect, type Page } from '@playwright/test';
 // of the CDN (sha256 compared when added): a CDN that does not answer would hold the event "load"
 // of the page, and the test with it (#143). A file of an npm package, at the version of the URL
 // (package.json), or else a copy of the file of the CDN, in cdn/<host>/<path>.
-const CDN_HOSTS = ['cdn.jsdelivr.net', 'cdnjs.cloudflare.com'];
+export const CDN_HOSTS = ['cdn.jsdelivr.net', 'cdnjs.cloudflare.com'];
 const CDN_COPIES = path.join(__dirname, '../cdn');
 const NPM_FILES = new Map(Object.entries({
     'https://cdn.jsdelivr.net/npm/emojione@4.5/lib/js/emojione.min.js': 'emojione/lib/js/emojione.min.js',
@@ -35,6 +35,9 @@ export const test = base.extend({
                 document.head.append(style);
             });
         });
+
+        // Google Analytics, in prod only (templates/base.html.twig): not called
+        await context.route('https://www.googletagmanager.com/**', (route) => route.abort());
 
         const withoutCopy = new Set<string>();
         for (const host of CDN_HOSTS) {

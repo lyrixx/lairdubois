@@ -166,3 +166,89 @@ jobs:
                   name: e2e-test-results
                   path: var/e2e/test-results/
                   if-no-files-found: ignore
+
+    # The production images (php, nginx), built and checked in their stack
+    # (infrastructure/docker/docker-compose.prod.yml), never pushed from a pull request
+    prod:
+        name: Production images
+        runs-on: ubuntu-latest
+        steps:
+            - *checkout
+            - *buildx
+            - *runtime
+            - *castor
+            # The builder of the dev installs vendor/ for the fixtures (castor app:install)
+            - *docker_cache
+
+            # The override of the stack of prod, loaded by its context (.castor/context.php)
+            - &prod_docker_cache
+              name: Cache the Docker layers of the production images in the GitHub Actions cache
+              run: |
+                  cat > infrastructure/docker/docker-compose.prod.override.yml <<'EOF'
+                  services:
+                      php:
+                          build:
+                              cache_from: ["type=gha,scope=prod-php"]
+                              cache_to: ["type=gha,scope=prod-php,mode=max,ignore-error=true"]
+                      nginx:
+                          build:
+                              cache_from: ["type=gha,scope=prod-nginx"]
+                              cache_to: ["type=gha,scope=prod-nginx,mode=max,ignore-error=true"]
+                      builder:
+                          build:
+                              cache_from: ["type=gha,scope=builder"]
+                  EOF
+
+            - *composer_cache
+            - *npm_cache
+
+            - name: Build the production images
+              run: castor -c prod docker:build
+
+            # The builder of the dev and vendor/, for the fixtures
+            - name: Install the application
+              run: |
+                  castor docker:build --service=builder
+                  castor app:install
+
+            - name: Check the site in the production images
+              run: castor qa:prod-smoke
+
+            - name: Describe the images (size, content)
+              if: ${{ !cancelled() }}
+              run: castor -c prod app:prod:describe >> "$GITHUB_STEP_SUMMARY"
+
+            - name: Upload the traces and screenshots of the failed tests
+              if: ${{ failure() }}
+              uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+              with:
+                  name: prod-e2e-test-results
+                  path: var/e2e/test-results/
+                  if-no-files-found: ignore
+
+    # The images checked by the job "prod", pushed to the registry of the repository (GHCR) on each
+    # push to next, tagged "next" and with the commit
+    push:
+        name: Push the production images
+        if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/next' }}
+        needs: [ci, e2e, prod]
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            packages: write
+        env:
+            REGISTRY: "ghcr.io/${{ github.repository }}"
+        steps:
+            - *checkout
+            - *buildx
+            - *runtime
+            - *castor
+            - *prod_docker_cache
+
+            - name: Log in to the registry
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+
+            - name: Build and push the production images
+              run: castor -c prod docker:push --tag=next --tag="$GITHUB_SHA"

@@ -39,6 +39,13 @@ function create_default_variables(): array
 #[AsTask(description: 'Builds and starts the infrastructure, then installs the application (composer, assets, database, fixtures if empty, index, workers)')]
 function start(): void
 {
+    // castor -c prod start: the production images, with the fixtures (.castor/prod.php)
+    if ('prod' === context()->name) {
+        prod\start();
+
+        return;
+    }
+
     io()->title('Starting the stack');
 
     build();

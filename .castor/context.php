@@ -53,6 +53,9 @@ function create_default_context(): Context
     if (null !== $worktreeName) {
         $data['project_name'] .= '-wt-' . $worktreeName;
     }
+    // The ports of the router derive from this name (worktree\get_worktree_ports()): those of the
+    // worktree, the default ones (80, 443, 8080) for the main copy
+    $data['ports_name'] = $worktreeName;
 
     // Only when someone can answer the prompts of the commands: stdin is a terminal, outside of
     // a CI (as for Castor). Otherwise (CI, pipes, AI agents...), a PTY would give them a terminal
@@ -65,6 +68,37 @@ function create_default_context(): Context
         environment: [
             'BUILDKIT_PROGRESS' => 'plain',
         ]
+    );
+}
+
+/**
+ * The production images (the "Production stages" of the Dockerfile) in a stack of their own,
+ * docker-compose.prod.yml: castor -c prod docker:build, castor -c prod start, castor qa:prod-smoke.
+ * Its project and its ports are not those of the dev stack of the copy: both can run at once.
+ */
+#[AsContext(name: 'prod')]
+function create_prod_context(): Context
+{
+    $c = create_default_context();
+
+    $files = ['docker-compose.prod.yml'];
+    // The cache of the CI (.github/workflows/ci.yml): the override of the dev names its services
+    if (file_exists($c['root_dir'] . '/infrastructure/docker/docker-compose.prod.override.yml')) {
+        $files[] = 'docker-compose.prod.override.yml';
+    }
+
+    return $c->withData(
+        [
+            'project_name' => $c['project_name'] . '-prod',
+            'ports_name' => ($c['ports_name'] ?? 'main') . '-prod',
+            'docker_compose_files' => $files,
+            // No builder: the commands run in the image "php", the fixtures excepted (.castor/prod.php)
+            'docker_compose_run_service' => 'php',
+            // Where castor docker:push pushes the images: GHCR wants it in lowercase, which
+            // github.repository may not be
+            'registry' => false !== getenv('REGISTRY') ? strtolower(getenv('REGISTRY')) : null,
+        ],
+        recursive: false,
     );
 }
 

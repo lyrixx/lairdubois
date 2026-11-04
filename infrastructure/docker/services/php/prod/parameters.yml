@@ -1,0 +1,101 @@
+# app/config/parameters.yml of the production images (the "app-build" stage of the Dockerfile): the
+# values that change from one deployment to another, secrets included, come from the environment of
+# the containers, read at runtime. The image holds none of them, and its cache is warmed at build
+# time without them. Same keys as app/config/parameters.yml.dist: keep them in sync. The list of the
+# variables is in CLAUDE.md ("Prod").
+parameters:
+    database_driver:                pdo_mysql
+    database_host:                  '%env(DATABASE_HOST)%'
+    database_port:                  '%env(DATABASE_PORT)%'
+    database_name:                  '%env(DATABASE_NAME)%'
+    database_user:                  '%env(DATABASE_USER)%'
+    database_password:              '%env(DATABASE_PASSWORD)%'
+    database_path:                  null
+    # "10.11.19-MariaDB": Doctrine knows the platform without connecting (doctrine:database:create);
+    # not set: it connects to find it
+    database_server_version:        '%env(default::DATABASE_SERVER_VERSION)%'
+
+    mailer_dsn:                     '%env(MAILER_DSN)%'
+
+    elasticsearch_host:             '%env(ELASTICSEARCH_HOST)%'
+    elasticsearch_port:             '%env(ELASTICSEARCH_PORT)%'
+
+    memcached_host:                 '%env(MEMCACHED_HOST)%'
+    memcached_port:                 '%env(int:MEMCACHED_PORT)%'
+
+    mercure_url:                    '%env(MERCURE_URL)%'
+    mercure_public_url:             '%env(MERCURE_PUBLIC_URL)%'
+    mercure_jwt_secret:             '%env(MERCURE_JWT_SECRET)%'
+
+    rabbitmq_host:                  '%env(RABBITMQ_HOST)%'
+    rabbitmq_port:                  '%env(int:RABBITMQ_PORT)%'
+    rabbitmq_user:                  '%env(RABBITMQ_USER)%'
+    rabbitmq_password:              '%env(RABBITMQ_PASSWORD)%'
+    rabbitmq_vhost:                 '%env(RABBITMQ_VHOST)%'
+
+    locale:                         fr
+    secret:                         '%env(SECRET)%'
+    admin_username:                 '%env(ADMIN_USERNAME)%'
+    ga_tracking_id:                 '%env(GA_TRACKING_ID)%'
+
+    router_default_uri:             '%env(ROUTER_DEFAULT_URI)%'
+
+    chromium:                       /usr/bin/chromium
+
+    google_api_key:                 '%env(GOOGLE_API_KEY)%'
+
+    twitter_consumer_key:           '%env(TWITTER_CONSUMER_KEY)%'
+    twitter_consumer_secret:        '%env(TWITTER_CONSUMER_SECRET)%'
+    twitter_access_token:           '%env(TWITTER_ACCESS_TOKEN)%'
+    twitter_access_secret:          '%env(TWITTER_ACCESS_SECRET)%'
+
+    facebook_app_id:                '%env(FACEBOOK_APP_ID)%'
+    facebook_app_secret:            '%env(FACEBOOK_APP_SECRET)%'
+    facebook_page_id:               '%env(FACEBOOK_PAGE_ID)%'
+    facebook_access_token:          '%env(FACEBOOK_ACCESS_TOKEN)%'
+
+    pinterest_client_id:            '%env(PINTEREST_CLIENT_ID)%'
+    pinterest_client_secret:        '%env(PINTEREST_CLIENT_SECRET)%'
+    pinterest_access_token:         '%env(PINTEREST_ACCESS_TOKEN)%'
+
+    mastodon_instance:              '%env(MASTODON_INSTANCE)%'
+    mastodon_access_token:          '%env(MASTODON_ACCESS_TOKEN)%'
+
+    stripe_secret_key:              '%env(STRIPE_SECRET_KEY)%'
+    stripe_publishable_key:         '%env(STRIPE_PUBLISHABLE_KEY)%'
+    stripe_endpoint_secret:         '%env(STRIPE_ENDPOINT_SECRET)%'
+
+    funding_min_amount_eur:         1
+    funding_max_amount_eur:         250
+
+    bentools_webpush.public_key:    '%env(WEBPUSH_PUBLIC_KEY)%'
+    bentools_webpush.private_key:   '%env(WEBPUSH_PRIVATE_KEY)%'
+
+    # Defaults, those of parameters.yml.dist. The accounts of the site on other services (Google,
+    # Twitter, Facebook, Pinterest, Mastodon, Stripe) keep the placeholders unless given: a preprod
+    # would publish on them (ladb:cron:spotlight) or take real payments
+    env(DATABASE_PORT):             '3306'
+    env(DATABASE_NAME):             db_fr_lairdubois_www
+    env(ELASTICSEARCH_PORT):        '9200'
+    env(MEMCACHED_PORT):            '11211'
+    env(RABBITMQ_PORT):             '5672'
+    env(RABBITMQ_VHOST):            /
+    env(ADMIN_USERNAME):            admin
+    env(GA_TRACKING_ID):            YOUR_GOOGLE_ANALYTICS_TRACKING_CODE
+    env(GOOGLE_API_KEY):            YOUR_GOOGLE_API_KEY
+    env(TWITTER_CONSUMER_KEY):      YOUR_TWITTER_CONSUMER_KEY
+    env(TWITTER_CONSUMER_SECRET):   YOUR_TWITTER_CONSUMER_SECRET
+    env(TWITTER_ACCESS_TOKEN):      YOUR_TWITTER_ACCESS_TOKEN
+    env(TWITTER_ACCESS_SECRET):     YOUR_TWITTER_ACCESS_SECRET
+    env(FACEBOOK_APP_ID):           YOUR_FACEBOOK_APP_ID
+    env(FACEBOOK_APP_SECRET):       YOUR_FACEBOOK_APP_SECRET
+    env(FACEBOOK_PAGE_ID):          YOUR_FACEBOOK_PAGE_ID
+    env(FACEBOOK_ACCESS_TOKEN):     YOUR_FACEBOOK_ACCESS_TOKEN
+    env(PINTEREST_CLIENT_ID):       YOUR_PINTEREST_CLIENT_ID
+    env(PINTEREST_CLIENT_SECRET):   YOUR_PINTEREST_CLIENT_SECRET
+    env(PINTEREST_ACCESS_TOKEN):    YOUR_PINTEREST_ACCESS_TOKEN
+    env(MASTODON_INSTANCE):         https://mastodon.social
+    env(MASTODON_ACCESS_TOKEN):     YOUR_MASTODON_ACCESS_TOKEN
+    env(STRIPE_SECRET_KEY):         YOUR_STRIPE_SECRET_KEY
+    env(STRIPE_PUBLISHABLE_KEY):    YOUR_STRIPE_PUBLISHABLE_KEY
+    env(STRIPE_ENDPOINT_SECRET):    YOUR_STRIPE_ENDPOINT_SECRET
