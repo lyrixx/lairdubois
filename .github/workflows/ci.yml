@@ -205,8 +205,11 @@ jobs:
             - name: Build the production images
               run: castor -c prod docker:build
 
-            - name: Install the application (vendor/ of the dev, for the fixtures)
-              run: castor app:install
+            # The builder of the dev and vendor/, for the fixtures
+            - name: Install the application
+              run: |
+                  castor docker:build --service=builder
+                  castor app:install
 
             - name: Check the site in the production images
               run: castor qa:prod-smoke

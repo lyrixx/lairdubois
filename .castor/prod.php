@@ -135,7 +135,10 @@ function builder_install_if_missing(): void
         return;
     }
 
-    with(static fn () => install(), context: create_default_context());
+    with(static function (): void {
+        build(service: 'builder');
+        install();
+    }, context: create_default_context());
 }
 
 #[AsTask(description: 'Starts the production stack with the fixtures, then checks the site in it: pages, login, workers, crons, Mercure, Elasticsearch, images, Chromium, mails', namespace: 'qa', name: 'prod-smoke')]
