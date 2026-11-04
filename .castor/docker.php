@@ -53,8 +53,8 @@ function about(): void
 
     $urls = [variable('root_domain'), ...variable('extra_domains')];
 
-    $worktreeName = get_worktree_name();
-    $adminPort = get_worktree_ports($worktreeName)['admin'];
+    $portsName = variable('ports_name');
+    $adminPort = get_worktree_ports($portsName)['admin'];
 
     try {
         $routers = http_client()
@@ -82,7 +82,7 @@ function about(): void
     } catch (HttpExceptionInterface) {
     }
 
-    $httpsPort = null !== $worktreeName ? get_worktree_ports($worktreeName)['https'] : null;
+    $httpsPort = null !== $portsName ? get_worktree_ports($portsName)['https'] : null;
     $formatUrl = static function (string $host) use ($httpsPort): string {
         return null !== $httpsPort ? "https://{$host}:{$httpsPort}" : "https://{$host}";
     };
@@ -337,6 +337,61 @@ function workers_stop(): void
 }
 
 /**
+ * Builds the production images and pushes them to the registry (REGISTRY), with each of the given
+ * tags: the CI does it on each push to next (.github/workflows/ci.yml). From docker-starter.
+ *
+ * @param list<string> $tag
+ */
+#[AsTask(description: 'Builds the production images and pushes them to the registry, with the given tags (castor -c prod docker:push --tag=…)', namespace: 'docker', name: 'push')]
+function push(
+    #[AsOption(description: 'A tag of the images (repeatable)', mode: InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED)]
+    array $tag = [],
+    #[AsOption(description: 'Prints the configuration of the build, without building nor pushing')]
+    bool $dryRun = false,
+): void {
+    $registry = variable('registry');
+    if (!$registry) {
+        throw new \RuntimeException('The registry is not set: REGISTRY=ghcr.io/<owner>/<repository> castor -c prod docker:push --tag=….');
+    }
+    if (!$tag) {
+        throw new \RuntimeException('No tag: castor -c prod docker:push --tag=….');
+    }
+
+    $c = context()
+        ->withEnvironment(get_compose_environment(context()))
+        ->withWorkingDirectory(variable('root_dir') . '/infrastructure/docker')
+    ;
+
+    // The build context "app" is the root of the repository, outside of the directory of the compose
+    // files: bake would ask for the access
+    $command = ['docker', 'buildx', 'bake', '--allow=fs.read=' . variable('root_dir')];
+    foreach ($c['docker_compose_files'] as $file) {
+        $command[] = '-f';
+        $command[] = $file;
+    }
+    $command[] = '--set';
+    $command[] = '*.args.PHP_VERSION=' . $c['php_version'];
+
+    $services = ['php', 'nginx'];
+    foreach ($services as $service) {
+        foreach ($tag as $t) {
+            $command[] = '--set';
+            $command[] = "{$service}.tags={$registry}/{$service}:{$t}";
+        }
+        $command[] = '--set';
+        $command[] = "{$service}.output=type=registry";
+    }
+
+    if ($dryRun) {
+        $command[] = '--print';
+    }
+
+    io()->title('Pushing the production images');
+
+    run([...$command, ...$services], context: $c);
+}
+
+/**
  * @return array<string, string>
  */
 function get_compose_environment(Context $c): array
@@ -350,6 +405,7 @@ function get_compose_environment(Context $c): array
         'PROJECT_DOMAINS' => $domains,
         'USER_ID' => $c['user_id'],
         'PHP_VERSION' => $c['php_version'],
+        'REGISTRY' => $c['registry'] ?? '',
     ];
 }
 
@@ -364,9 +420,9 @@ function docker_compose(array $subCommand, ?Context $c = null, array $profiles =
 
     $c = $c->withEnvironment(get_compose_environment($c));
 
-    $worktreeName = get_worktree_name();
-    if ($worktreeName) {
-        $ports = get_worktree_ports($worktreeName);
+    $portsName = $c['ports_name'];
+    if ($portsName) {
+        $ports = get_worktree_ports($portsName);
         $portsEnv = [];
         foreach (get_port_specs() as $key => $spec) {
             $portsEnv[$spec['env']] = (string) $ports[$key];
@@ -529,7 +585,7 @@ function ports(): void
     $project = variable('project_name');
     $domain = variable('root_domain');
     $name = get_worktree_name();
-    $ports = get_worktree_ports($name);
+    $ports = get_worktree_ports(variable('ports_name'));
 
     io()->title('Ports');
     $list = [['Project' => $project]];

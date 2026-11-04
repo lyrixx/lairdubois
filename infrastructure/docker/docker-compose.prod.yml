@@ -1,0 +1,208 @@
+# The production images ("Production stages" of services/php/Dockerfile) in a stack, for local
+# tests and the CI only, through the Castor context "prod": castor -c prod docker:build, castor -c
+# prod start, castor qa:prod-smoke. The services of the dev (docker-compose.yml), behind the router
+# of the copy, on ports of their own (.castor/context.php), with throwaway secrets (var/prod/,
+# written by castor -c prod start). The preprod runs the same images with its own services and
+# secrets: CLAUDE.md, "Prod".
+
+x-templates:
+    php_build: &php_build
+        context: services/php
+        # The repository, with its .dockerignore
+        additional_contexts:
+            app: ../..
+        args:
+            PHP_VERSION: "${PHP_VERSION}"
+    # What each container of the image "php" needs: the parameters (services/php/prod/parameters.yml),
+    # the secrets in var/prod/secrets.env, the DKIM key in keys/, and the directories the site
+    # writes in, shared by the containers and kept from one deployment to the next
+    php_base: &php_base
+        image: "${REGISTRY:-${PROJECT_NAME}}/php:${TAG:-latest}"
+        init: true
+        environment:
+            DATABASE_HOST: mariadb
+            DATABASE_PASSWORD: app
+            # The version of the server of the service "mariadb": doctrine:database:create
+            DATABASE_SERVER_VERSION: 10.11.19-MariaDB
+            DATABASE_USER: root
+            ELASTICSEARCH_HOST: elasticsearch
+            MAILER_DSN: smtp://mailpit:1025
+            # No toot from ladb:cron:spotlight: a protocol that curl does not know (config_test.yml)
+            MASTODON_INSTANCE: offline://mastodon
+            MEMCACHED_HOST: memcached
+            # The certificate of the router is not one that Chromium trusts, and the domain of the
+            # stack leads to the router (the thumbnails of the workflows, a capture of the site)
+            CHROMIUM_EXTRA_FLAGS: "--ignore-certificate-errors --host-resolver-rules=MAP ${PROJECT_ROOT_DOMAIN} router:443"
+            # The dev key of the hub (docker-compose.yml)
+            MERCURE_JWT_SECRET: lairdubois-dev-mercure-jwt-secret-not-secret
+            MERCURE_PUBLIC_URL: "https://${PROJECT_ROOT_DOMAIN}${PROJECT_HTTPS_PORT:+:${PROJECT_HTTPS_PORT}}/.well-known/mercure"
+            MERCURE_URL: http://mercure/.well-known/mercure
+            RABBITMQ_HOST: rabbitmq
+            RABBITMQ_PASSWORD: app
+            RABBITMQ_USER: app
+            ROUTER_DEFAULT_URI: "https://${PROJECT_ROOT_DOMAIN}${PROJECT_HTTPS_PORT:+:${PROJECT_HTTPS_PORT}}"
+            TRUSTED_HOSTS: "^${PROJECT_ROOT_DOMAIN}$$"
+        env_file:
+            # SECRET, WEBPUSH_PUBLIC_KEY, WEBPUSH_PRIVATE_KEY
+            - path: ../../var/prod/secrets.env
+              required: false
+        volumes:
+            - downloads:/var/www/downloads
+            - logs:/var/www/var/logs
+            - media:/var/www/web/media
+            - sitemaps:/var/www/sitemaps
+            - uploads:/var/www/uploads
+            - "../../var/prod/keys:/var/www/keys:ro"
+        depends_on: &php_depends_on
+            elasticsearch:
+                condition: service_healthy
+            mariadb:
+                condition: service_healthy
+            memcached:
+                condition: service_started
+            mercure:
+                condition: service_healthy
+            rabbitmq:
+                condition: service_healthy
+    # The workers and the cron: no php-fpm to check
+    php_command: &php_command
+        <<: *php_base
+        healthcheck:
+            disable: true
+        restart: unless-stopped
+        profiles:
+            - worker
+
+volumes:
+    downloads: {}
+    elasticsearch-9-data: {}
+    logs: {}
+    mariadb-data: {}
+    media: {}
+    # The unix socket of php-fpm, shared by the containers php and nginx
+    php-socket: {}
+    rabbitmq-data: {}
+    sitemaps: {}
+    uploads: {}
+
+services:
+    router:
+        extends: { file: docker-compose.dev.yml, service: router }
+
+    mariadb:
+        extends: { file: docker-compose.yml, service: mariadb }
+
+    elasticsearch:
+        extends: { file: docker-compose.yml, service: elasticsearch }
+
+    rabbitmq:
+        extends: { file: docker-compose.yml, service: rabbitmq }
+
+    memcached:
+        extends: { file: docker-compose.yml, service: memcached }
+
+    mercure:
+        extends: { file: docker-compose.yml, service: mercure }
+
+    mailpit:
+        extends: { file: docker-compose.yml, service: mailpit }
+
+    # The push service of the browsers, for the web push notifications: answers 201 to every
+    # request, and logs it with its headers (castor qa:prod-smoke reads them)
+    push:
+        image: nginx:1.29-alpine
+        command:
+            - sh
+            - -c
+            - |
+              cat > /etc/nginx/conf.d/default.conf <<'EOF'
+              log_format push '$$request_method $$request_uri ttl=$$http_ttl encoding=$$http_content_encoding authorization=$$http_authorization';
+              server { listen 80; access_log /dev/stdout push; location / { return 201; } }
+              EOF
+              exec nginx -g 'daemon off;'
+        profiles:
+            - default
+
+    php:
+        <<: *php_base
+        build:
+            <<: *php_build
+            target: php
+        volumes:
+            - downloads:/var/www/downloads
+            - logs:/var/www/var/logs
+            - media:/var/www/web/media
+            - php-socket:/var/run/php
+            - sitemaps:/var/www/sitemaps
+            - uploads:/var/www/uploads
+            - "../../var/prod/keys:/var/www/keys:ro"
+        profiles:
+            - default
+
+    nginx:
+        build:
+            <<: *php_build
+            target: nginx
+        image: "${REGISTRY:-${PROJECT_NAME}}/nginx:${TAG:-latest}"
+        volumes:
+            - "media:/var/www/web/media:ro"
+            - "php-socket:/var/run/php"
+            - "sitemaps:/var/www/sitemaps:ro"
+        depends_on:
+            php:
+                condition: service_healthy
+        profiles:
+            - default
+        labels:
+            - "traefik.enable=true"
+            - "project-name=${PROJECT_NAME}"
+            - "traefik.http.routers.${PROJECT_NAME}-nginx.rule=Host(${PROJECT_DOMAINS})"
+            - "traefik.http.routers.${PROJECT_NAME}-nginx.tls=true"
+            - "traefik.http.routers.${PROJECT_NAME}-nginx-unsecure.rule=Host(${PROJECT_DOMAINS})"
+            - "traefik.http.routers.${PROJECT_NAME}-nginx-unsecure.middlewares=redirect-to-https@file"
+            # The image of nginx also exposes the port 80
+            - "traefik.http.services.${PROJECT_NAME}-nginx.loadbalancer.server.port=8080"
+
+    worker_consumer_mailer:
+        <<: *php_command
+        command: bin/console messenger:consume mailer
+
+    worker_consumer_view:
+        <<: *php_command
+        command: bin/console messenger:consume view
+
+    worker_consumer_webpush_notification:
+        <<: *php_command
+        command: bin/console messenger:consume webpush_notification
+
+    cron:
+        <<: *php_command
+        command: supercronic /etc/lairdubois/crontab
+
+    # The builder of the dev, for what the images do not have: the fixtures (dev packages, vendor/
+    # of the repository, castor app:install). As the user of the image "php", which owns the
+    # volumes; its var/ (dev cache) in memory, apart from the one of the repository
+    builder:
+        build:
+            context: services/php
+            target: builder
+        init: true
+        user: "1000:1000"
+        environment:
+            SYMFONY_ENV: dev
+        volumes:
+            - "../..:/var/www:cached"
+            - uploads:/var/www/uploads
+        tmpfs:
+            - /var/www/var:mode=1777
+        depends_on:
+            - mariadb
+        profiles:
+            - builder
+
+    # The end-to-end tests (castor qa:prod-smoke), the same as in dev, on the ports of this stack
+    playwright:
+        extends: { file: docker-compose.yml, service: playwright }
+        environment:
+            # tests/e2e/tests/pages.spec.ts
+            E2E_PROD: "1"

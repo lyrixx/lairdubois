@@ -36,6 +36,9 @@ export const test = base.extend({
             });
         });
 
+        // Google Analytics, in prod only (templates/base.html.twig): not called
+        await context.route('https://www.googletagmanager.com/**', (route) => route.abort());
+
         const withoutCopy = new Set<string>();
         for (const host of CDN_HOSTS) {
             await context.route(`https://${host}/**`, (route) => serveFromCopy(route, withoutCopy));

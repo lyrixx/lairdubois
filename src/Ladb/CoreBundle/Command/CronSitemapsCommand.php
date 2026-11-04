@@ -11,6 +11,7 @@ use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Ladb\CoreBundle\Model\BlockBodiedInterface;
 use Ladb\CoreBundle\Model\MultiPicturedInterface;
@@ -27,6 +28,7 @@ class CronSitemapsCommand extends Command {
 	private $packages;
 	private $picturedUtils;
 	private $router;
+	private $sitemapsDir;
 	private $twig;
 	private $videoHostingUtils;
 
@@ -36,12 +38,15 @@ class CronSitemapsCommand extends Command {
 		PicturedUtils $picturedUtils,
 		UrlGeneratorInterface $router,
 		Environment $twig,
-		VideoHostingUtils $videoHostingUtils
+		VideoHostingUtils $videoHostingUtils,
+		// web/, or the volume of the production images
+		#[Autowire(env: 'SITEMAPS_DIR')] string $sitemapsDir
 	) {
 		$this->om = $om;
 		$this->packages = $packages;
 		$this->picturedUtils = $picturedUtils;
 		$this->router = $router;
+		$this->sitemapsDir = $sitemapsDir;
 		$this->twig = $twig;
 		$this->videoHostingUtils = $videoHostingUtils;
 		parent::__construct();
@@ -199,7 +204,7 @@ EOT
 
 		if ($forced) {
 
-			$filename = dirname(__FILE__).'/../../../../web/sitemap-index.xml';
+			$filename = $this->sitemapsDir.'/sitemap-index.xml';
 
 			if ($verbose) {
 				$output->write('<info> -> Wrinting '.$filename.' file...</info>');
@@ -239,7 +244,7 @@ EOT
 
 		if ($forced) {
 
-			$filename = dirname(__FILE__).'/../../../../web/sitemap-'.$section.'.xml';
+			$filename = $this->sitemapsDir.'/sitemap-'.$section.'.xml';
 
 			if ($verbose) {
 				$output->write('<info> -> Wrinting '.$filename.' file...</info>');

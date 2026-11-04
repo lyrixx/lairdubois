@@ -25,7 +25,9 @@ framework:
     csrf_protection: true
     # html5, the default of Symfony 7, for the Email constraints without a mode (registration)
     validation:      { enable_attributes: true, email_validation_mode: html5 }
-    trusted_hosts: ['^(dev|www)\.lairdubois\.fr$']
+    # The hosts of the production and dev servers, or the regex of TRUSTED_HOSTS (production images,
+    # parameters below)
+    trusted_hosts: ['%env(TRUSTED_HOSTS)%']
     assets:
         version:    "20230707"
         version_format: '%%s?v=%%s'
@@ -422,6 +424,11 @@ liip_imagine:
 parameters:
     # Prefix of the names of the indexes (config_test.yml: their own in test)
     elasticsearch_index_prefix: ladb_
+    # Defaults of the variables of the production images (infrastructure/docker): the hosts of
+    # framework.trusted_hosts, and the directory of the sitemaps (ladb:cron:sitemaps), that nginx
+    # serves at the root of the site
+    env(TRUSTED_HOSTS): '^(dev|www)\.lairdubois\.fr$'
+    env(SITEMAPS_DIR): '%kernel.project_dir%/web'
 
 fos_elastica:
     clients:

@@ -1,0 +1,55 @@
+# The build context "app" of the production images (the "Production stages" of
+# infrastructure/docker/services/php/Dockerfile): only what the site needs at runtime, and nothing
+# secret. The dev images do not read it (their context is infrastructure/docker/services/*).
+
+# Tooling, tests and dev data
+/.castor/
+/.castor.stub.php
+/.claude/
+/.git/
+/.github/
+/.home/
+/castor.php
+/infrastructure/
+/phpstan*.neon
+/phpunit.xml.dist
+/scripts/
+/src/Ladb/CoreBundle/DataFixtures/
+/tests/
+/tools/
+/web/app_beta.php
+/web/app_dev.php
+*.md
+.dockerignore
+.gitignore
+.idea
+.DS_Store
+
+# Documentation, except the SQL of the sessions table (docs/01-installation.md, step 8)
+/docs/*
+!/docs/database/
+
+# Installed or built by the image itself
+/bin/*
+!/bin/console
+/node_modules/
+/vendor/
+/web/build/
+/web/bundles/
+
+# Written by the site, or secrets: volumes and environment of the containers
+/app/cache/
+/app/config/parameters.yml
+/app/logs/
+/app/sessions/
+/app/spool/
+/backups/
+/build/
+/components/
+/downloads/
+/keys/
+/uploads/
+/var/
+/web/.htaccess
+/web/media/
+/web/sitemap-*
