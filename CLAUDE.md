@@ -242,6 +242,14 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et get
   Le collecteur les compte par origine et par appelant, sans garder les occurrences. Celles de la
   compilation d'une classe ne sortent qu'au premier chargement, et le kernel ne garde que la
   première origine de celles du container. Le rapport ne fait jamais échouer la CI.
+- `E_DEPRECATED` de notre code (#248) : un `null` qu'une fonction de PHP attend en chaîne (paramètre
+  absent de la requête, colonne nullable, champ vide) passe par `?? ''` ou par le défaut de
+  `query->get()`, pour garder le `''` que PHP en faisait. Celles qui restent viennent des
+  dépendances : crawler-detect (1.4.2 les corrige, dans `1.*`), stripe (7.128), geojson (1.2) ;
+  hors de nos bornes, hashids (4.1, à vérifier : les identifiants encodés), geocoder (5.0),
+  addressing (2.x, dont `get()` refuse le pays `null` d'une adresse sans pays) et web-push (10,
+  que webpush-bundle 0.14 refuse) ; graph-sdk et emojione sont abandonnés, php-rss-writer est à
+  sa dernière version.
 - Les dépréciations d'un template Twig ne sortent qu'à sa compilation : `qa:deprecations` vide le
   cache de test sans les warmers optionnels, pour que le `qa:phpunit` suivant les voie.
 - `lint:yaml` compte les dépréciations comme des erreurs. Sans chemin, `lint:twig` lit tous les
