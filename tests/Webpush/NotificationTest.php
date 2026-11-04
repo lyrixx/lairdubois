@@ -125,7 +125,7 @@ final class NotificationTest extends WebTestCase
     private static function decrypt(string $body, string $salt, string $serverPublicKey, $subscriptionKey, string $authSecret): string
     {
         $subscriptionPublicKey = self::getPoint($subscriptionKey);
-        $sharedSecret = openssl_pkey_derive(self::toPem($serverPublicKey), $subscriptionKey, 32);
+        $sharedSecret = openssl_pkey_derive(self::toPem($serverPublicKey), $subscriptionKey);
         $ikm = hash_hkdf('sha256', $sharedSecret, 32, "Content-Encoding: auth\0", $authSecret);
         $context = "P-256\0".pack('n', \strlen($subscriptionPublicKey)).$subscriptionPublicKey.pack('n', \strlen($serverPublicKey)).$serverPublicKey;
         $contentEncryptionKey = hash_hkdf('sha256', $ikm, 16, "Content-Encoding: aesgcm\0".$context, $salt);

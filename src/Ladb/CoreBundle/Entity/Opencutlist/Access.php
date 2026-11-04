@@ -257,7 +257,7 @@ class Access implements LocalisableInterface {
 	// ClientOclVersion /////
 
 	public function setClientOclVersion($clientOclVersion) {
-		$this->clientOclVersion = substr($clientOclVersion, 0, 15);
+		$this->clientOclVersion = substr($clientOclVersion ?? '', 0, 15);
 		return $this;
 	}
 
@@ -268,7 +268,7 @@ class Access implements LocalisableInterface {
 	// ClientOclBuild /////
 
 	public function setClientOclBuild($clientOclBuild) {
-		$this->clientOclBuild = substr($clientOclBuild, 0, 16);
+		$this->clientOclBuild = substr($clientOclBuild ?? '', 0, 16);
 		return $this;
 	}
 
@@ -279,7 +279,7 @@ class Access implements LocalisableInterface {
 	// ClientOclLanguage /////
 
 	public function setClientOclLanguage($clientOclLanguage) {
-		$this->clientOclLanguage = substr($clientOclLanguage, 0, 2);
+		$this->clientOclLanguage = substr($clientOclLanguage ?? '', 0, 2);
 		return $this;
 	}
 
@@ -367,7 +367,7 @@ class Access implements LocalisableInterface {
 	// ClientSketchupLocale /////
 
 	public function setClientSketchupLocale($clientSketchupLocale) {
-		$this->clientSketchupLocale = substr($clientSketchupLocale, 0, 5);
+		$this->clientSketchupLocale = substr($clientSketchupLocale ?? '', 0, 5);
 		return $this;
 	}
 

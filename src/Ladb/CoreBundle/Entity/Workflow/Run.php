@@ -61,7 +61,7 @@ class Run {
 		return $this->task;
 	}
 
-	public function setTask(\Ladb\CoreBundle\Entity\Workflow\Task $task = null) {
+	public function setTask(?\Ladb\CoreBundle\Entity\Workflow\Task $task = null) {
 		$this->task = $task;
 		return $this;
 	}

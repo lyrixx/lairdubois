@@ -49,7 +49,7 @@ class Texture {
 		return $this->wood;
 	}
 
-	public function setWood(\Ladb\CoreBundle\Entity\Knowledge\Wood $wood = null) {
+	public function setWood(?\Ladb\CoreBundle\Entity\Knowledge\Wood $wood = null) {
 		$this->wood = $wood;
 		return $this;
 	}
@@ -71,7 +71,7 @@ class Texture {
 		return $this->singlePicture;
 	}
 
-	public function setSinglePicture(\Ladb\CoreBundle\Entity\Core\Picture $singlePicture = null) {
+	public function setSinglePicture(?\Ladb\CoreBundle\Entity\Core\Picture $singlePicture = null) {
 		$this->singlePicture = $singlePicture;
 		return $this;
 	}
@@ -82,7 +82,7 @@ class Texture {
 		return $this->mosaicPicture;
 	}
 
-	public function setMosaicPicture(\Ladb\CoreBundle\Entity\Core\Picture $mosaicPicture = null) {
+	public function setMosaicPicture(?\Ladb\CoreBundle\Entity\Core\Picture $mosaicPicture = null) {
 		$this->mosaicPicture = $mosaicPicture;
 		return $this;
 	}

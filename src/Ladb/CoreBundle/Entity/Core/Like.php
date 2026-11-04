@@ -71,7 +71,7 @@ class Like implements AuthoredInterface {
 		return $this->entityUser;
 	}
 
-	public function setEntityUser(\Ladb\CoreBundle\Entity\Core\User $entityUser = null) {
+	public function setEntityUser(?\Ladb\CoreBundle\Entity\Core\User $entityUser = null) {
 		$this->entityUser = $entityUser;
 		return $this;
 	}

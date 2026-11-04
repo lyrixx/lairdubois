@@ -224,7 +224,7 @@ class LadbExtension extends AbstractExtension {
 
 	// Copy of twig_truncate_filter() of twig/extensions 1.5
 	public function truncateFilter(Environment $env, $value, $length = 30, $preserve = false, $separator = '...') {
-		if (mb_strlen($value, $env->getCharset()) > $length) {
+		if (mb_strlen($value ?? '', $env->getCharset()) > $length) {
 			if ($preserve) {
 				// If breakpoint is on the last word, return the value without separator.
 				if (false === ($breakpoint = mb_strpos($value, ' ', $length, $env->getCharset()))) {

@@ -149,7 +149,6 @@ class User implements UserInterface, LegacyPasswordAuthenticatedUserInterface, E
 	public function __construct() {
 		$this->enabled = false;
 		$this->roles = array();
-		$this->skills = new \Doctrine\Common\Collections\ArrayCollection();
 	}
 
 	public function __toString() {
@@ -535,7 +534,7 @@ class User implements UserInterface, LegacyPasswordAuthenticatedUserInterface, E
 
 	// Avatar /////
 
-	public function setAvatar(\Ladb\CoreBundle\Entity\Core\Picture $avatar = null) {
+	public function setAvatar(?\Ladb\CoreBundle\Entity\Core\Picture $avatar = null) {
 		$this->avatar = $avatar;
 		return $this;
 	}

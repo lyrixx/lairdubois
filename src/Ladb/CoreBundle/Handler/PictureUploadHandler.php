@@ -24,7 +24,7 @@ class PictureUploadHandler extends \UploadHandler {
 		$this->pictureManager = $pictureManager;
 	}
 
-	public function handle($quality = Picture::QUALITY_SD, $postProcessor = Picture::POST_PROCESSOR_NONE, User $owner = null) {
+	public function handle($quality = Picture::QUALITY_SD, $postProcessor = Picture::POST_PROCESSOR_NONE, ?User $owner = null) {
 		parent::__construct(array(
 			'script_url'                   => '',
 			'upload_dir'                   => sys_get_temp_dir().DIRECTORY_SEPARATOR,

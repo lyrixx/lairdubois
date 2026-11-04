@@ -112,7 +112,7 @@ class Task {
 
 	// Workflow /////
 
-	public function setWorkflow(\Ladb\CoreBundle\Entity\Workflow\Workflow $workflow = null) {
+	public function setWorkflow(?\Ladb\CoreBundle\Entity\Workflow\Workflow $workflow = null) {
 		$this->workflow = $workflow;
 		return $this;
 	}
@@ -276,7 +276,7 @@ class Task {
 
 	// TargetTasks /////
 
-	public function addTargetTask(\Ladb\CoreBundle\Entity\Workflow\Task $targetTask = null) {
+	public function addTargetTask(?\Ladb\CoreBundle\Entity\Workflow\Task $targetTask = null) {
 		if (!$this->targetTasks->contains($targetTask)) {
 			$this->targetTasks[] = $targetTask;
 		}
@@ -293,7 +293,7 @@ class Task {
 
 	// Runs /////
 
-	public function addRun(\Ladb\CoreBundle\Entity\Workflow\Run $run = null) {
+	public function addRun(?\Ladb\CoreBundle\Entity\Workflow\Run $run = null) {
 		if (!$this->runs->contains($run)) {
 			$this->runs[] = $run;
 			$run->setTask($this);

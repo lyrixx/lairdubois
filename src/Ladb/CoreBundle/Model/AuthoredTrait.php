@@ -17,7 +17,7 @@ trait AuthoredTrait {
 
 	// IsOwner /////
 
-	public function getIsOwner(\Ladb\CoreBundle\Entity\Core\User $user = null) {
+	public function getIsOwner(?\Ladb\CoreBundle\Entity\Core\User $user = null) {
 		return $user == $this->getUser();
 	}
 

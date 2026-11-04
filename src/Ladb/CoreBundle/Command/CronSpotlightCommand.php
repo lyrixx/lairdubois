@@ -504,8 +504,6 @@ EOT
 			}
 		}
 
-		curl_close ($ch_status);
-
 	}
 
 }

@@ -10,7 +10,7 @@ trait SpotlightableTrait {
 		return $this->spotlight;
 	}
 
-	public function setSpotlight(\Ladb\CoreBundle\Entity\Core\Spotlight $spotlight = null) {
+	public function setSpotlight(?\Ladb\CoreBundle\Entity\Core\Spotlight $spotlight = null) {
 		$this->spotlight = $spotlight;
 		return $this;
 	}

@@ -27,10 +27,10 @@ class OpencutlistController extends AbstractController {
 		$oclLanguage = $request->query->get('language');
 		$sketchupLocale = $request->query->get('locale');
 
-		if (strlen($oclLanguage) != 2) {
+		if (strlen($oclLanguage ?? '') != 2) {
 			$oclLanguage = null;
 		}
-		if (strlen($sketchupLocale) > 5) {
+		if (strlen($sketchupLocale ?? '') > 5) {
 			$sketchupLocale = null;
 		}
 

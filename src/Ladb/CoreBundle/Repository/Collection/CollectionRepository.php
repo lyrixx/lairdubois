@@ -14,7 +14,7 @@ class CollectionRepository extends AbstractEntityRepository {
 
 	/////
 
-	public function findOneByIdAndUser($id, User $user = null) {
+	public function findOneByIdAndUser($id, ?User $user = null) {
 		$queryBuilder = $this->getEntityManager()->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'c' ))

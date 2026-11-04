@@ -267,7 +267,6 @@ class Software extends AbstractKnowledge implements ReviewableInterface {
 		$this->descriptionValues = new \Doctrine\Common\Collections\ArrayCollection();
 		$this->openSourceValues = new \Doctrine\Common\Collections\ArrayCollection();
 		$this->sourceCodeRepositoryValues = new \Doctrine\Common\Collections\ArrayCollection();
-		$this->sourceDocsValues = new \Doctrine\Common\Collections\ArrayCollection();
 		$this->operatingSystemsValues = new \Doctrine\Common\Collections\ArrayCollection();
 		$this->licenseTypeValues = new \Doctrine\Common\Collections\ArrayCollection();
 		$this->pricingsValues = new \Doctrine\Common\Collections\ArrayCollection();

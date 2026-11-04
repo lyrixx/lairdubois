@@ -100,7 +100,7 @@ class Article extends AbstractPublication implements AuthoredInterface, TitledIn
 
 	// Howto /////
 
-    public function setHowto(\Ladb\CoreBundle\Entity\Howto\Howto $howto = null) {
+    public function setHowto(?\Ladb\CoreBundle\Entity\Howto\Howto $howto = null) {
         $this->howto = $howto;
         return $this;
     }

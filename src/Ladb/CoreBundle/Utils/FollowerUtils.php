@@ -71,7 +71,7 @@ class FollowerUtils {
 
 	/////
 
-	public function getFollowerContext(User $followingUser, User $followerUser = null) {
+	public function getFollowerContext(User $followingUser, ?User $followerUser = null) {
 		$om = $this->doctrine->getManager();
 		if (!is_null($followerUser) && $followingUser->getId() == $followerUser->getId()) {
 			return null;

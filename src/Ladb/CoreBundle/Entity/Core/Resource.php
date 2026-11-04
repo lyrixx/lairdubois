@@ -187,7 +187,7 @@ class Resource {
 
 	// Thumbnail /////
 
-	public function setThumbnail(\Ladb\CoreBundle\Entity\Core\Picture $thumbnail = null) {
+	public function setThumbnail(?\Ladb\CoreBundle\Entity\Core\Picture $thumbnail = null) {
 		$this->thumbnail = $thumbnail;
 		return $this;
 	}

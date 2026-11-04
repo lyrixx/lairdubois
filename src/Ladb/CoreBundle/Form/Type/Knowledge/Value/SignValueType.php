@@ -23,12 +23,12 @@ class SignValueType extends AbstractValueType {
 			FormEvents::SUBMIT,
 			function(FormEvent $event) {
 				$value = $event->getData();
-				$value->setBrand(ucfirst($value->getBrand()));
+				$value->setBrand(ucfirst($value->getBrand() ?? ''));
 				if (!$value->getIsAffiliate()) {
 					$value->setStore(null);
 					$value->setData($value->getBrand());
 				} else {
-					$value->setStore(ucfirst($value->getStore()));
+					$value->setStore(ucfirst($value->getStore() ?? ''));
 					$value->setData($value->getBrand().','.$value->getStore());
 				}
 			}

@@ -84,7 +84,7 @@ class LikableUtils {
 
 	/////
 
-	public function getLikeContext(LikableInterface $likable, User $user = null) {
+	public function getLikeContext(LikableInterface $likable, ?User $user = null) {
 		$om = $this->doctrine->getManager();
 		$likeRepository = $om->getRepository(Like::CLASS_NAME);
 
