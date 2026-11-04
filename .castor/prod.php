@@ -190,13 +190,20 @@ function describe(): void
             $markdown .= \sprintf("| %s | %d MB |\n", $service, $size / 1_000_000);
         }
 
-        $markdown .= "\nLayers of php (the largest):\n\n```\n";
-        $layers = explode("\n", trim(capture(['docker', 'history', '--format', '{{.Size}}\t{{.CreatedBy}}', $services['php']['image']])));
-        $markdown .= implode("\n", array_map(static fn (string $layer) => mb_strimwidth($layer, 0, 120, '…'), \array_slice(array_filter($layers, static fn (string $layer) => !str_starts_with($layer, '0B')), 0, 10)));
+        $markdown .= "\nThe largest layers of php:\n\n```\n";
+        $layers = array_map(
+            static fn (string $layer) => explode("\t", $layer, 2),
+            explode("\n", trim(capture(['docker', 'history', '--human=false', '--no-trunc', '--format', '{{.Size}}\t{{.CreatedBy}}', $services['php']['image']]))),
+        );
+        usort($layers, static fn (array $a, array $b) => (int) $b[0] <=> (int) $a[0]);
+        foreach (\array_slice($layers, 0, 6) as [$size, $createdBy]) {
+            $markdown .= \sprintf("%5d MB  %s\n", (int) $size / 1_000_000, mb_strimwidth(preg_replace('{^RUN \|\d+ \S+ \S+ (/bin/bash -o pipefail -c )?}', 'RUN ', $createdBy), 0, 100, '…'));
+        }
+        $markdown = rtrim($markdown);
         $markdown .= "\n```\n\nThe code in php (/var/www):\n\n```\n";
-        $markdown .= trim(capture_php(['sh', '-c', 'du -sh $(ls -d /var/www/* /var/www/vendor/* | grep -v "^/var/www/vendor$") 2>/dev/null | sort -rh | head -15']));
-        $markdown .= "\n```\n\nweb/ in nginx:\n\n```\n";
-        $markdown .= trim(capture(['docker', 'run', '--rm', '--entrypoint', 'sh', $services['nginx']['image'], '-c', 'du -sh /var/www/web /var/www/web/* | sort -rh | head -8']));
+        $markdown .= trim(capture_php(['sh', '-c', 'du -sh /var/www && du -sh $(ls -d /var/www/* /var/www/vendor/* | grep -v "^/var/www/vendor$") 2>/dev/null | sort -rh | head -12']));
+        $markdown .= "\n```\n\nweb/ in nginx (KB):\n\n```\n";
+        $markdown .= trim(capture(['docker', 'run', '--rm', '--entrypoint', 'sh', $services['nginx']['image'], '-c', 'du -sk /var/www/web && du -sk /var/www/web/* | sort -rn | head -5']));
         $markdown .= "\n```\n";
 
         io()->write($markdown);
