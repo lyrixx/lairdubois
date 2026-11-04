@@ -246,10 +246,10 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et get
   absent de la requête, colonne nullable, champ vide) passe par `?? ''` ou par le défaut de
   `query->get()`, pour garder le `''` que PHP en faisait. Celles qui restent viennent de
   dépendances dont la correction est hors de nos bornes (crawler-detect 1.4, stripe 7.128 et
-  geojson 1.2, dans nos bornes, n'en lèvent plus, #252) : hashids (4.1, à vérifier : les
-  identifiants encodés), geocoder (5.0), addressing (2.x, dont `get()` refuse le pays `null`
-  d'une adresse sans pays) et web-push (10, que webpush-bundle 0.14 refuse) ; graph-sdk et
-  emojione sont abandonnés, php-rss-writer est à sa dernière version.
+  geojson 1.2, dans nos bornes, n'en lèvent plus, #252, ni hashids 4.1, #255) : geocoder (5.0),
+  addressing (2.x, dont `get()` refuse le pays `null` d'une adresse sans pays) et web-push (10,
+  que webpush-bundle 0.14 refuse) ; graph-sdk et emojione sont abandonnés, php-rss-writer est à
+  sa dernière version.
 - Les dépréciations d'un template Twig ne sortent qu'à sa compilation : `qa:deprecations` vide le
   cache de test sans les warmers optionnels, pour que le `qa:phpunit` suivant les voie.
 - `lint:yaml` compte les dépréciations comme des erreurs. Sans chemin, `lint:twig` lit tous les
@@ -883,6 +883,15 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   d'une localisation (`LocalisableUtils`) change pour trois pays, Biélorussie (rue en tête), Irlande
   (code postal sur sa ligne) et Namibie (la 1.0.9 écrivait un `n` à la place du saut de ligne).
   Les adresses de la base ne bougent pas, seulement celles qui sont géocodées ensuite.
+- Hashids 4.1 (#255) encode le numéro d'un don (`Donation::$hashid`, dans le reçu envoyé par
+  mail) et l'identifiant de groupe des notifications (`CronNotificationPopulateCommand`), avec le
+  `secret` en sel, une longueur minimale de 5 et l'alphabet `A…Z1…90` (l'ordre compte). Il donne
+  les mêmes que la 1.0.6 quand le `secret` est en ASCII : depuis la 4.0, le sel est lu en
+  caractères UTF-8, plus en octets. La 4.x exige l'extension gmp ou bcmath (`RuntimeException`
+  sinon : 500 à la confirmation d'un don, après le paiement, et cron des notifications en échec) :
+  `ext-gmp` est exigée par le `composer.json`, la 4.x la prend avant bcmath. Un saut de version se
+  vérifie en encodant avec les deux versions (`encode()` d'un id et d'un tableau d'ids), et en
+  décodant.
 - doctrine/migrations 3 (3.9, avec DoctrineMigrationsBundle 4.0 depuis #224 : la 3.7.1 borne
   HttpKernel à la 7) lit la table des 1.x et 2.x (`storage.table_storage.table_name:
   migration_versions`) : la sienne par défaut, `doctrine_migration_versions`, lui ferait rejouer
