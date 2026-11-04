@@ -358,6 +358,9 @@ function check_liip(): void
  */
 function check_view(): void
 {
+    // The page of check_liip() is a view too (Castor is not a crawler), that the worker may not have
+    // counted yet: the count before is the one once it has consumed every view
+    wait_for(static fn () => 0 === view_messages(), 'The worker "view" does not consume its queue.');
     $before = (int) sql_value('SELECT view_count FROM tbl_wonder_creation WHERE id = 1');
     // A browser, not a crawler (CrawlerDetect)
     $page = request('GET', '/creations/1.html', ['User-Agent' => 'Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0']);
@@ -365,6 +368,18 @@ function check_view(): void
     expect(200 === $page->getStatusCode() && '' !== $page->getContent(), 'The creation does not answer 200.');
 
     wait_for(static fn () => (int) sql_value('SELECT view_count FROM tbl_wonder_creation WHERE id = 1') === $before + 1, 'The view is not counted.');
+}
+
+/**
+ * The messages of the worker "view" that it has not handled yet: in its queue, ready or being
+ * handled (unacknowledged), or waiting for a retry ("delay_view__1000_retry"…).
+ */
+function view_messages(): int
+{
+    $queues = json_decode(capture_compose(['exec', '-T', 'rabbitmq', 'rabbitmqctl', 'list_queues', '--quiet', '--formatter', 'json', 'name', 'messages']), true, flags: \JSON_THROW_ON_ERROR);
+    $queues = array_filter($queues, static fn (array $queue) => 'view' === $queue['name'] || str_starts_with($queue['name'], 'delay_view_'));
+
+    return array_sum(array_column($queues, 'messages'));
 }
 
 /**
