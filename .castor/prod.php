@@ -333,7 +333,9 @@ function check_view(): void
 {
     $before = (int) sql_value('SELECT view_count FROM tbl_wonder_creation WHERE id = 1');
     // A browser, not a crawler (CrawlerDetect)
-    request('GET', '/creations/1.html', ['User-Agent' => 'Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0']);
+    $page = request('GET', '/creations/1.html', ['User-Agent' => 'Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0']);
+    // The whole response: the client would close the connection before the end of the request
+    expect(200 === $page->getStatusCode() && '' !== $page->getContent(), 'The creation does not answer 200.');
 
     wait_for(static fn () => (int) sql_value('SELECT view_count FROM tbl_wonder_creation WHERE id = 1') === $before + 1, 'The view is not counted.');
 }

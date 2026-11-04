@@ -126,7 +126,8 @@ castor docker:destroy --force     # conteneurs, volumes, réseau, images et cert
 castor docker:generate-certificates [--force]
 ```
 
-Contextes : `--context=test` (`SYMFONY_ENV=test`), `--context=ci` (le même, sans couleurs).
+Contextes : `--context=test` (`SYMFONY_ENV=test`), `--context=ci` (le même, sans couleurs),
+`--context=prod` (la stack des images de prod, voir « Prod »).
 
 - Application à la racine, docroot `web/`, front controller `app_dev.php`. Service `frontend` :
   nginx et php-fpm. Node 24 dans le builder seulement, pour Vite : les autres images servent les
@@ -196,6 +197,84 @@ Conventions :
 2. Jamais de nom de projet, de domaine ni de port en dur : `variable('project_name')`,
    `variable('root_domain')`, `get_worktree_ports()`.
 3. Une tâche récurrente est une tâche Castor (`castor.php` ou `.castor/*.php`), pas un script.
+
+## Prod
+
+Images de prod pour la préprod (#261), sur le modèle de docker-starter (`ramener.md` de la PR) :
+étapes `app-build`, `php` et `nginx` du Dockerfile de `services/php`, avec le dépôt en contexte
+de build `app` (son `.dockerignore`). Déploiement, variables et volumes : `docs/03-docker.md`.
+
+```bash
+castor -c prod docker:build        # php, nginx, et le builder du dev (fixtures)
+castor -c prod start               # secrets jetables, schéma, fixtures si la base est vide, workers
+castor qa:prod-smoke               # recharge les fixtures, puis vérifie tout le site dans la stack
+castor qa:prod-e2e [-- --grep …]   # Playwright sur la stack de prod, sur ses données
+castor -c prod app:prod:fixtures   # recharge les fixtures de la stack de prod
+castor -c prod app:prod:describe   # taille et contenu des images, en Markdown (résumé de la CI)
+castor -c prod docker:push --tag=… # REGISTRY=ghcr.io/…, la CI seulement
+```
+
+- `php` : `php-base` (PHP 8.5, les extensions et les binaires du dev : Chromium, ImageMagick,
+  Ghostscript, `rsvg-convert`, `jpegoptim`, `pngquant`), php-fpm et supercronic. Le code dans
+  `/var/www`, à root : l'utilisateur 1000 n'écrit que dans `var/` et dans les volumes. Sans les
+  paquets de dev (`--no-dev`), `tests/`, `tools/`, `DataFixtures/`, `app_dev.php`, `node_modules`,
+  `.git`, ni le `parameters.yml` ou les clés du dépôt. Vite tourne dans `app-build`, seule étape
+  avec Node, `assets:install` y copie les assets des bundles. Une seule image pour php-fpm (sa
+  commande par défaut), les trois workers (`bin/console messenger:consume …`) et le cron
+  (`supercronic /etc/lairdubois/crontab`, `prod/crontab`, que `qa:prod-smoke` compare à l'étape
+  13 de `docs/01-installation.md`, en heure de Paris).
+- `nginx` : `nginx:1.29-alpine` et le `web/` de l'image, la conf de la prod
+  (`docs/nginx/conf/www.lairdubois.fr.conf`) dans `prod/nginx.conf`, en HTTP sur 8080 : le TLS et
+  `/.well-known/mercure` sont au proxy de devant (le routeur de la stack). Il prend l'adresse du
+  client dans `X-Forwarded-For` depuis les réseaux privés (`REMOTE_ADDR` des inscriptions).
+- Paramètres : le `parameters.yml` de l'image (`prod/parameters.yml`, mêmes clés que le dist) lit
+  chaque valeur dans l'environnement du conteneur (`%env()%`), à l'exécution. Le cache de prod est
+  chauffé au build : l'image démarre tout de suite, la même pour tous les conteneurs, sans secret.
+  Les warmers créent des services sans les appeler : des valeurs factices pour leurs variables, que
+  le cache ne garde pas (la version de MariaDB donne la plateforme à Doctrine). Sans défaut, une
+  variable manquante est une erreur à la première requête qui la lit. Les comptes du site sur
+  d'autres services (Google, Twitter, Facebook, Pinterest, Mastodon, Stripe) gardent les valeurs
+  du dist si on ne les donne pas : la préprod ne publie ni ne fait payer.
+- `trusted_hosts` lit `TRUSTED_HOSTS` (défaut dans `config.yml` : `^(dev|www)\.lairdubois\.fr$`,
+  la valeur d'avant), `ladb:cron:sitemaps` écrit dans `SITEMAPS_DIR` (défaut `web/`, volume
+  `/var/www/sitemaps` dans l'image, que nginx sert à la racine du site), et les pages
+  `/internal/` sont publiques pour les adresses d'`INTERNAL_IPS` (`security.yml`, défaut
+  `127.0.0.1, ::1` : la prod y vient d'elle-même par `/etc/hosts`). La stack de test y met les
+  réseaux privés : chez elle, le navigateur de l'hôte aussi y a accès.
+- Chromium (vignettes des processus) charge une page du site par son URL : le domaine doit mener
+  au proxy depuis les conteneurs, avec un certificat de confiance. `CHROMIUM_EXTRA_FLAGS` s'ajoute
+  aux options de Chromium (`/etc/chromium.d/lairdubois`, que lit le `/usr/bin/chromium` de
+  Debian, qui coupe ses options aux espaces) : la stack de test y met
+  `--ignore-certificate-errors`, et mène le domaine à l'hôte (`extra_hosts`, `host-gateway`), où
+  le routeur publie son port. La requête arrive à nginx avec l'adresse de la passerelle du réseau
+  de la stack (`INTERNAL_IPS`).
+- Volumes, à l'utilisateur 1000 (l'image crée les répertoires) : `uploads`, `downloads`,
+  `web/media` (Liip, en lecture seule pour nginx), `sitemaps`, `var/logs` (`prod.log`), et le
+  socket de php-fpm entre php et nginx. Clé DKIM montée en lecture seule sur `keys/`.
+- Stack de test (`docker-compose.prod.yml`) : les services du dev par `extends` (MariaDB,
+  Elasticsearch, RabbitMQ, Memcached, Mercure, Mailpit, routeur), projet `<projet>-prod`, ports
+  dérivés de `<worktree>-prod` (`main-prod` pour la copie principale, `ports_name` du contexte) :
+  elle tourne à côté du dev sans conflit. Secrets jetables dans `var/prod/` (`secrets.env` : SECRET
+  et VAPID, `keys/private.pem`), écrits au premier `castor -c prod start`. Le service `push`, un
+  nginx qui répond 201 et journalise les en-têtes, double le service de push des navigateurs.
+  `builder` : celui du dev, en utilisateur 1000 (celui des volumes) avec son `var/` en mémoire,
+  charge les fixtures (paquets de dev, `vendor/` du dépôt, `castor app:install` s'il manque).
+- `qa:prod-smoke` : l'image (utilisateur, prod sans debug, rien en trop, rien d'écrit hors des
+  volumes), la crontab (supercronic), Chromium (capture d'une page de nginx), Liip (un JPEG et un
+  PNG résolus par PHP, servis ensuite par nginx), une vue comptée par le worker `view`, la suite
+  E2E entière sur la stack (`E2E_PROD` y ajoute `pages.spec.ts` : listes et contenus en anonyme,
+  `user` et `admin`), chaque ligne de la crontab puis leurs effets (sitemaps servis par nginx,
+  vignette d'un processus capturée sur le site), les mails dans Mailpit (signés DKIM) et les
+  notifications web push reçues par `push` (signées VAPID). Un tableau en fin de tâche.
+- CI : job `prod` (build, `castor app:install` pour les fixtures, `qa:prod-smoke`,
+  `app:prod:describe` dans le résumé) sur chaque PR et push ; job `push` sur push vers `next`
+  seulement, après `ci`, `e2e` et `prod` : `docker:push` (bake) vers `ghcr.io/lyrixx/lairdubois/php`
+  et `…/nginx`, tags `next` et le SHA, avec le `GITHUB_TOKEN` (`packages: write`). Les paquets
+  GHCR d'un dépôt public sont publics. Cache `gha` des étapes de prod par
+  `docker-compose.prod.override.yml`, écrit par le workflow.
+- Google Analytics n'est rendu qu'hors debug, avec l'identifiant de la prod en dur
+  (`base.html.twig`) : la préprod compterait ses visites dans celles de la prod. Les tests E2E
+  bloquent `www.googletagmanager.com`.
 
 ## CI et QA
 

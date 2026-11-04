@@ -33,6 +33,10 @@ x-templates:
             # Chromium does not trust the certificate of the router (the thumbnails of the workflows,
             # a capture of the site)
             CHROMIUM_EXTRA_FLAGS: --ignore-certificate-errors
+            # The address of the requests of Chromium for nginx, through the host and the router:
+            # the gateway of the network of the stack. And of the browser of the host, on this
+            # stack only
+            INTERNAL_IPS: "127.0.0.1, ::1, 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16"
             # The dev key of the hub (docker-compose.yml)
             MERCURE_JWT_SECRET: lairdubois-dev-mercure-jwt-secret-not-secret
             MERCURE_PUBLIC_URL: "https://${PROJECT_ROOT_DOMAIN}${PROJECT_HTTPS_PORT:+:${PROJECT_HTTPS_PORT}}/.well-known/mercure"

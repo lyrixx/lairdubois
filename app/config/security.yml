@@ -82,6 +82,8 @@ security:
         - { path: /accept, role: ROLE_USER }
         - { path: /upload$, role: ROLE_USER }
 
-        - { path: /internal/, role: PUBLIC_ACCESS, ips: [127.0.0.1, ::1] }
+        # The pages that Chromium captures (WebScreenshotUtils): from the server itself, or from the
+        # addresses of INTERNAL_IPS (the containers of the production images, config.yml)
+        - { path: /internal/, role: PUBLIC_ACCESS, ips: '%env(INTERNAL_IPS)%' }
         - { path: /internal/, role: ROLE_ADMIN }
 

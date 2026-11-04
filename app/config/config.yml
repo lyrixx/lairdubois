@@ -425,9 +425,10 @@ parameters:
     # Prefix of the names of the indexes (config_test.yml: their own in test)
     elasticsearch_index_prefix: ladb_
     # Defaults of the variables of the production images (infrastructure/docker): the hosts of
-    # framework.trusted_hosts, and the directory of the sitemaps (ladb:cron:sitemaps), that nginx
-    # serves at the root of the site
+    # framework.trusted_hosts, the addresses allowed on the /internal/ pages (security.yml), and
+    # the directory of the sitemaps (ladb:cron:sitemaps), that nginx serves at the root of the site
     env(TRUSTED_HOSTS): '^(dev|www)\.lairdubois\.fr$'
+    env(INTERNAL_IPS): '127.0.0.1, ::1'
     env(SITEMAPS_DIR): '%kernel.project_dir%/web'
 
 fos_elastica:
