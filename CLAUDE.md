@@ -855,6 +855,9 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   remplaçant, `OffsetPaginator` (3.7), ne s'y substitue pas tel quel : `paginate()` rend une
   `WindowPage`, dont `count()` est le nombre d'éléments de la page (le total : `getTotalCount()`),
   et lance toujours la requête de comptage.
+- `GeoJson\CoordinateReferenceSystem\Named`, le `crs` du GeoJSON des cartes, est déprécié par une
+  docblock de geojson 1.1 (la RFC 7946 n'a plus de `crs`), sans dépréciation à l'exécution : ses
+  14 usages sont dans la baseline de PHPStan (#252), et le JSON garde son `crs`.
 - Bornes de `composer.json` : `behat/transliterator` à `1.3.0` exactement (#219), la
   translittération des slugs et des labels de tags, que gedmo n'exige plus : la 1.5 change ses
   tables (`x02` à `x0a`) ; `dama/doctrine-test-bundle` `~8.4.1` (la 8.4 refuse PHPUnit 9 par un
