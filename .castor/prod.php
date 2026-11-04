@@ -2,9 +2,11 @@
 
 namespace prod;
 
+use Castor\Attribute\AsRawTokens;
 use Castor\Attribute\AsTask;
 use Symfony\Contracts\HttpClient\ResponseInterface;
 
+use function Castor\capture;
 use function Castor\context;
 use function Castor\fs;
 use function Castor\http_client;
@@ -21,6 +23,7 @@ use function docker\build;
 use function docker\docker_compose;
 use function docker\docker_compose_run;
 use function docker\docker_exit_code;
+use function docker\get_services;
 use function docker\up;
 use function docker\workers_start;
 use function elasticsearch_populate;
@@ -165,7 +168,7 @@ function smoke(): int
                 $results[] = [$name, '<info>OK</info>', ''];
             } catch (\Throwable $e) {
                 io()->error($e->getMessage());
-                $results[] = [$name, '<error>failed</error>', $e->getMessage()];
+                $results[] = [$name, '<error>failed</error>', mb_strimwidth(strtok($e->getMessage(), "\n"), 0, 100, '…')];
             }
         }
 
@@ -173,6 +176,30 @@ function smoke(): int
         io()->table(['Check', 'Result', ''], $results);
 
         return \in_array('<error>failed</error>', array_column($results, 1), true) ? 1 : 0;
+    }, context: create_prod_context());
+}
+
+#[AsTask(description: 'Describes the production images in Markdown: size, layers, what the code weighs (the summary of the CI)', namespace: 'app:prod', name: 'describe')]
+function describe(): void
+{
+    with(static function (): void {
+        $services = get_services();
+        $markdown = "## Production images\n\n| Image | Size |\n| --- | ---: |\n";
+        foreach (['php', 'nginx'] as $service) {
+            $size = (int) trim(capture(['docker', 'image', 'inspect', '--format', '{{.Size}}', $services[$service]['image']]));
+            $markdown .= \sprintf("| %s | %d MB |\n", $service, $size / 1_000_000);
+        }
+
+        $markdown .= "\nLayers of php (the largest):\n\n```\n";
+        $layers = explode("\n", trim(capture(['docker', 'history', '--format', '{{.Size}}\t{{.CreatedBy}}', $services['php']['image']])));
+        $markdown .= implode("\n", array_map(static fn (string $layer) => mb_strimwidth($layer, 0, 120, '…'), \array_slice(array_filter($layers, static fn (string $layer) => !str_starts_with($layer, '0B')), 0, 10)));
+        $markdown .= "\n```\n\nThe code in php (/var/www):\n\n```\n";
+        $markdown .= trim(capture_php(['sh', '-c', 'du -sh $(ls -d /var/www/* /var/www/vendor/* | grep -v "^/var/www/vendor$") 2>/dev/null | sort -rh | head -15']));
+        $markdown .= "\n```\n\nweb/ in nginx:\n\n```\n";
+        $markdown .= trim(capture(['docker', 'run', '--rm', '--entrypoint', 'sh', $services['nginx']['image'], '-c', 'du -sh /var/www/web /var/www/web/* | sort -rh | head -8']));
+        $markdown .= "\n```\n";
+
+        io()->write($markdown);
     }, context: create_prod_context());
 }
 
@@ -200,7 +227,7 @@ function check_image(): void
     expect(!str_contains($output, 'found='), 'The image has files it should not have.');
     expect(!str_contains($output, 'not-writable'), 'PHP cannot write in var/ or in a volume.');
     expect(!str_contains($output, 'writable='), 'PHP can write in the code.');
-    expect(1 === preg_match('{Environment prod Debug false}', $output), 'The kernel is not in prod, without debug.');
+    expect(1 === preg_match('{Environment\s+prod\s+Debug\s+false}', $output), 'The kernel is not in prod, without debug.');
 }
 
 /**
@@ -294,8 +321,8 @@ function check_liip(): void
         $headers = $image->getHeaders(false);
         io()->text("{$url} → {$location}: {$image->getStatusCode()}, {$headers['content-type'][0]}, " . \strlen($image->getContent(false)) . ' bytes');
         expect(200 === $image->getStatusCode() && $type === $headers['content-type'][0], "{$location} is not a {$type}.");
-        // The static location of nginx, not PHP
-        expect('public' === ($headers['cache-control'][0] ?? null), "nginx does not serve {$location} from the volume.");
+        // The location of nginx for the files of the volume, not PHP
+        expect(\in_array('public', $headers['cache-control'] ?? [], true), "nginx does not serve {$location} from the volume.");
     }
 }
 
@@ -325,10 +352,20 @@ function check_e2e(): void
         sql(\sprintf("INSERT INTO tbl_webpush_user_subscription (user_id, subscription_hash, subscription) VALUES (%d, '%s', '%s')", $id, md5($endpoint), $subscription));
     }
 
-    e2e_install_if_missing();
+    expect(0 === e2e(), 'The end-to-end tests failed (var/e2e/test-results/).');
+}
 
-    $exitCode = docker_exit_code(['npx', 'playwright', 'test'], c: context()->withEnvironment(['E2E_PROD' => '1']), service: 'playwright');
-    expect(0 === $exitCode, 'The end-to-end tests failed (var/e2e/test-results/).');
+/**
+ * @param list<string> $rawTokens
+ */
+#[AsTask(description: 'Runs the end-to-end tests (Playwright, tests/e2e) on the production stack, on its data as they are', namespace: 'qa', name: 'prod-e2e')]
+function e2e(#[AsRawTokens] array $rawTokens = []): int
+{
+    return with(static function () use ($rawTokens): int {
+        e2e_install_if_missing();
+
+        return docker_exit_code(['npx', 'playwright', 'test', ...$rawTokens], service: 'playwright');
+    }, context: create_prod_context());
 }
 
 /**

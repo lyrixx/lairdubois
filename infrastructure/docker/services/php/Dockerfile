@@ -200,7 +200,8 @@ RUN env \
         ROUTER_DEFAULT_URI=https://placeholder SECRET=placeholder \
         WEBPUSH_PRIVATE_KEY=placeholder WEBPUSH_PUBLIC_KEY=placeholder \
         bin/console cache:warmup \
-    && rm -rf var/logs/* \
+    && rm -rf var/logs \
+    && mkdir var/logs \
     && mv var /var/www-var
 
 FROM php-base AS php

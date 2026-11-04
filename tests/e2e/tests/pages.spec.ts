@@ -35,12 +35,12 @@ const PAGES = [
 
 const SITE_HOST = new URL(process.env.E2E_BASE_URL ?? 'https://localhost').host;
 
-// Only for an account
-const ACCOUNT_PAGES = ['/notifications/', '/messagerie/', '/messagerie/thread/1', '/@me/parametres'];
+// Only for an account (the thread of the fixtures is the one of user and user2)
+const ACCOUNT_PAGES = ['/messagerie/', '/@me/parametres'];
 
 const ROLES = [
     { name: 'anonymous', storageState: { cookies: [], origins: [] }, pages: PAGES },
-    { name: USER, storageState: storageStateOf(USER), pages: [...PAGES, ...ACCOUNT_PAGES] },
+    { name: USER, storageState: storageStateOf(USER), pages: [...PAGES, ...ACCOUNT_PAGES, '/messagerie/thread/1'] },
     { name: ADMIN, storageState: storageStateOf(ADMIN), pages: [...PAGES, ...ACCOUNT_PAGES] },
 ];
 
