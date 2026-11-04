@@ -1,4 +1,4 @@
-import { test, expect, CDN_HOSTS } from '../support/test';
+import { test, expect, CDN_HOSTS, GOOGLE_ANALYTICS_HOST } from '../support/test';
 import { ADMIN, USER, storageStateOf } from '../support/accounts';
 
 // The pages of the production stack (castor qa:prod-smoke sets E2E_PROD): its cache, its CSS and
@@ -54,11 +54,12 @@ for (const role of ROLES) {
                 // the bundles, images of Liip Imagine
                 const failures: string[] = [];
                 // The other hosts (YouTube, Google Maps, Facebook...) would hold the event "load"
-                // as long as they answer: not called. The CDNs are served by support/test.ts
+                // as long as they answer: not called. The CDNs are served by support/test.ts, and
+                // Google Analytics fails the test there: the stack has no GA_MEASUREMENT_ID
                 await page.route('**', (route) => {
                     const host = new URL(route.request().url()).host;
 
-                    return host === SITE_HOST || CDN_HOSTS.includes(host) ? route.fallback() : route.abort();
+                    return host === SITE_HOST || CDN_HOSTS.includes(host) || host === GOOGLE_ANALYTICS_HOST ? route.fallback() : route.abort();
                 });
                 page.on('response', (response) => {
                     if (new URL(response.url()).host === SITE_HOST && response.status() >= 400) {

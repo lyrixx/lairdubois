@@ -31,7 +31,9 @@ parameters:
     locale:                         fr
     secret:                         THIS_TOKEN_IS_NOT_SECRET_CHANGE_IT
     admin_username:                 admin
-    ga_tracking_id:                 YOUR_GOOGLE_ANALYTICS_TRACKING_CODE
+    # The measurement ID of Google Analytics (GA4), on the pages out of debug but for the admins;
+    # empty: no Google Analytics
+    ga_measurement_id:              G-HZ1ZEPHSFS
 
     # Scheme, host and port of the site: the URLs generated without a request (mails of the crons,
     # sitemaps) and those of the assets

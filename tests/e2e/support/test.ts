@@ -24,6 +24,9 @@ const NPM_FILES = new Map(Object.entries({
     'https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js': 'underscore/underscore-min.js',
 }).map(([url, file]) => [url, require.resolve(file)]));
 
+// Google Analytics: a test that loads it fails (the context below)
+export const GOOGLE_ANALYTICS_HOST = 'www.googletagmanager.com';
+
 export const test = base.extend({
     context: async ({ context }, use) => {
         // The site serves the dev environment: the web debug toolbar of Symfony would cover the
@@ -36,8 +39,15 @@ export const test = base.extend({
             });
         });
 
-        // Google Analytics, in prod only (templates/base.html.twig): not called
-        await context.route('https://www.googletagmanager.com/**', (route) => route.abort());
+        // Google Analytics (templates/base.html.twig), out of debug with a GA_MEASUREMENT_ID only:
+        // never on the stacks of the tests, the dev is in debug and the production stack has none,
+        // as a preprod (#266). Not called
+        const googleAnalytics = new Set<string>();
+        await context.route(`https://${GOOGLE_ANALYTICS_HOST}/**`, (route) => {
+            googleAnalytics.add(route.request().url());
+
+            return route.abort();
+        });
 
         const withoutCopy = new Set<string>();
         for (const host of CDN_HOSTS) {
@@ -48,6 +58,9 @@ export const test = base.extend({
 
         if (withoutCopy.size > 0) {
             throw new Error(`The page requested files of a CDN without local copy, add one (tests/e2e/support/test.ts): ${[...withoutCopy].join(', ')}.`);
+        }
+        if (googleAnalytics.size > 0) {
+            throw new Error(`The page loaded Google Analytics: ${[...googleAnalytics].join(', ')}.`);
         }
     },
 });
