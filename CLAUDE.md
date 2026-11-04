@@ -244,12 +244,12 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et get
   première origine de celles du container. Le rapport ne fait jamais échouer la CI.
 - `E_DEPRECATED` de notre code (#248) : un `null` qu'une fonction de PHP attend en chaîne (paramètre
   absent de la requête, colonne nullable, champ vide) passe par `?? ''` ou par le défaut de
-  `query->get()`, pour garder le `''` que PHP en faisait. Celles qui restent viennent des
-  dépendances : crawler-detect (1.4.2 les corrige, dans `1.*`), stripe (7.128), geojson (1.2) ;
-  hors de nos bornes, hashids (4.1, à vérifier : les identifiants encodés), geocoder (5.0),
-  addressing (2.x, dont `get()` refuse le pays `null` d'une adresse sans pays) et web-push (10,
-  que webpush-bundle 0.14 refuse) ; graph-sdk et emojione sont abandonnés, php-rss-writer est à
-  sa dernière version.
+  `query->get()`, pour garder le `''` que PHP en faisait. Celles qui restent viennent de
+  dépendances dont la correction est hors de nos bornes (crawler-detect 1.4, stripe 7.128 et
+  geojson 1.2, dans nos bornes, n'en lèvent plus, #252) : hashids (4.1, à vérifier : les
+  identifiants encodés), geocoder (5.0), addressing (2.x, dont `get()` refuse le pays `null`
+  d'une adresse sans pays) et web-push (10, que webpush-bundle 0.14 refuse) ; graph-sdk et
+  emojione sont abandonnés, php-rss-writer est à sa dernière version.
 - Les dépréciations d'un template Twig ne sortent qu'à sa compilation : `qa:deprecations` vide le
   cache de test sans les warmers optionnels, pour que le `qa:phpunit` suivant les voie.
 - `lint:yaml` compte les dépréciations comme des erreurs. Sans chemin, `lint:twig` lit tous les
@@ -755,6 +755,12 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   envoie alors le mail en direct. `SearchUtils` reçoit un index par l'id de son service
   (`fos_elastica.index.<type>`) : un index par type de contenu (#31), `ladb_<type>` dans
   Elasticsearch (`elasticsearch_index_prefix`).
+- Robots (`CrawlerDetect` de crawler-detect) : leur vue d'un contenu n'est pas comptée
+  (`ViewableUtils::processShownView()`), et le profil d'un compte leur montre sa page « à propos »
+  (`UserController::showAction()`). Il lit `$_SERVER`, pas la requête : dans un `WebTestCase`, pas
+  de User-Agent, donc pas de robot, sauf un `$_SERVER['HTTP_USER_AGENT']` posé par le test. Depuis
+  la 1.4 (#252), il lit aussi `Sec-CH-UA`, où un Chrome sans interface peut se dire
+  `HeadlessChrome` sans le dire dans son User-Agent. Chaque version allonge sa liste de robots.
 - Managers : dépendances par le constructeur (`Manager/`, sans container). Les classes abstraites
   (`AbstractManager`, `AbstractPublicationManager`…) les reçoivent par des setters `#[Required]`,
   dans des propriétés protégées que leurs sous-classes lisent sans les redemander : le
