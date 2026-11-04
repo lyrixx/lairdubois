@@ -339,7 +339,7 @@ class Wood extends AbstractKnowledge {
 	// Scientificname /////
 
 	public function setScientificname($name) {
-		$this->scientificname = ucfirst($name);
+		$this->scientificname = ucfirst($name ?? '');
 		return $this;
 	}
 

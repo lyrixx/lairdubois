@@ -23,7 +23,7 @@ class BookIdentityValueType extends AbstractValueType {
 			FormEvents::SUBMIT,
 			function(FormEvent $event) {
 				$value = $event->getData();
-				$value->setWork(ucfirst($value->getWork()));
+				$value->setWork(ucfirst($value->getWork() ?? ''));
 				if (!$value->getIsVolume()) {
 					$value->setVolume(null);
 					$value->setData($value->getWork());

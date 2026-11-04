@@ -239,7 +239,7 @@ class YoutookController extends AbstractController {
 			throw $this->createNotFoundException('Unable to find Took entity (id='.$id.').');
 		}
 
-		$referer = $request->headers->get('referer');
+		$referer = $request->headers->get('referer', '');
 		$userAgent = $request->headers->get('User-Agent');
 
 		$isFacebookBotUserAgent = preg_match('/facebookexternalhit/', $userAgent);

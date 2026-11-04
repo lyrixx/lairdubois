@@ -324,7 +324,7 @@ class EmbeddableUtils {
 					$referral->setEntityId($embeddable->getId());
 					$referral->setReferer($referer);
 
-					if (strlen($referer->getRoutePattern()) > 0 && preg_match($referer->getRoutePattern(), $route)) {
+					if (strlen($referer->getRoutePattern() ?? '') > 0 && preg_match($referer->getRoutePattern(), $route)) {
 						$referral->setEnabled(true);
 						$embeddable->addReferral($referral);
 					}

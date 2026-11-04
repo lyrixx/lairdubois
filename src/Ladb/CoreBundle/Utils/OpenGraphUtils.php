@@ -64,8 +64,6 @@ class OpenGraphUtils {
 
 		$response = curl_exec($curl);
 
-		curl_close($curl);
-
 		if (!empty($response)) {
 
 			libxml_use_internal_errors(true);

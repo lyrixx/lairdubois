@@ -52,7 +52,7 @@ class FieldPreprocessorUtils {
 		$replacements = array(
 			"\n\n", ' '
 		);
-		$body = trim(preg_replace($patterns, $replacements, $bodied->getBody()));
+		$body = trim(preg_replace($patterns, $replacements, $bodied->getBody() ?? ''));
 		$body = (new \Emojione\Client(new \Emojione\Ruleset()))->toShort($body);
 		$bodied->setBody($body);
 

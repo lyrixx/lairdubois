@@ -73,7 +73,7 @@ class MemberController extends AbstractController {
 			throw $this->createNotFoundException('Not allowed (core_member_invitation_create)');
 		}
 
-		$recipientUsernames = $request->query->get('recipients');
+		$recipientUsernames = $request->query->get('recipients', '');
 
 		$invitationCount = 0;
 		foreach (explode(',', $recipientUsernames) as $username) {

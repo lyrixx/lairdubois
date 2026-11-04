@@ -149,7 +149,6 @@ class User implements UserInterface, LegacyPasswordAuthenticatedUserInterface, E
 	public function __construct() {
 		$this->enabled = false;
 		$this->roles = array();
-		$this->skills = new \Doctrine\Common\Collections\ArrayCollection();
 	}
 
 	public function __toString() {

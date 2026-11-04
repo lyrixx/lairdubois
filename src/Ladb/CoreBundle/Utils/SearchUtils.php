@@ -310,7 +310,7 @@ class SearchUtils {
 		// Compute excluded IDs
 		$ex = $request->query->get('ex');
 		$excludedIds = array();
-		$strIds = explode(',', $ex);
+		$strIds = explode(',', $ex ?? '');
 		foreach ($strIds as $strId) {
 			$intId = intval(trim($strId));
 			if ($intId > 0) {
@@ -343,8 +343,8 @@ class SearchUtils {
 
 		// Extract Ids
 		$ids = array();
-		foreach ($resultSet->getResults() as $result) {
-			$ids[] = $result->getId();
+		foreach ($resultSet->getResults() as $hit) {
+			$ids[] = $hit->getId();
 		}
 
 		// Retrieve entities
@@ -355,7 +355,7 @@ class SearchUtils {
 		$propertyAccessor = PropertyAccess::createPropertyAccessor();
 		$idPos = array_flip($ids);
 		usort($entities, function($a, $b) use ($idPos, $identifierPropertyPath, $propertyAccessor) {
-			return $idPos[$propertyAccessor->getValue($a, $identifierPropertyPath)] > $idPos[$propertyAccessor->getValue($b, $identifierPropertyPath)];
+			return $idPos[$propertyAccessor->getValue($a, $identifierPropertyPath)] <=> $idPos[$propertyAccessor->getValue($b, $identifierPropertyPath)];
 		});
 
 		$result->resultSet = $resultSet;
