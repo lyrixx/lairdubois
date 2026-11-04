@@ -258,7 +258,8 @@ castor -c prod docker:push --tag=… # REGISTRY=ghcr.io/…, la CI seulement
   et VAPID, `keys/private.pem`), écrits au premier `castor -c prod start`. Le service `push`, un
   nginx qui répond 201 et journalise les en-têtes, double le service de push des navigateurs.
   `builder` : celui du dev, en utilisateur 1000 (celui des volumes) avec son `var/` en mémoire,
-  charge les fixtures (paquets de dev, `vendor/` du dépôt, `castor app:install` s'il manque).
+  charge les fixtures (paquets de dev, `vendor/` du dépôt, `castor app:install` s'il manque) et
+  écrit leurs fichiers dans les volumes (`uploads`, `downloads`, `web/media`).
 - `qa:prod-smoke` : l'image (utilisateur, prod sans debug, rien en trop, rien d'écrit hors des
   volumes), la crontab (supercronic), Chromium (capture d'une page de nginx), Liip (un JPEG et un
   PNG résolus par PHP, servis ensuite par nginx), une vue comptée par le worker `view`, la suite
