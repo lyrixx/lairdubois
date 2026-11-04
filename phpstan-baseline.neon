@@ -7,6 +7,146 @@ parameters:
 			path: src/Ladb/CoreBundle/Composer/ScriptHandler.php
 
 		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class GeoJson\\CoordinateReferenceSystem\\Named\:
+				1\.1 Specification of coordinate reference systems has been removed, i\.e\.,
+				                the 'crs' member of \[GJ2008\] is no longer used\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Controller/Core/UserController.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class GeoJson\\CoordinateReferenceSystem\\Named\:
+				1\.1 Specification of coordinate reference systems has been removed, i\.e\.,
+				                the 'crs' member of \[GJ2008\] is no longer used\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Controller/Core/UserController.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class GeoJson\\CoordinateReferenceSystem\\Named\:
+				1\.1 Specification of coordinate reference systems has been removed, i\.e\.,
+				                the 'crs' member of \[GJ2008\] is no longer used\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Controller/Event/EventController.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class GeoJson\\CoordinateReferenceSystem\\Named\:
+				1\.1 Specification of coordinate reference systems has been removed, i\.e\.,
+				                the 'crs' member of \[GJ2008\] is no longer used\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Controller/Event/EventController.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class GeoJson\\CoordinateReferenceSystem\\Named\:
+				1\.1 Specification of coordinate reference systems has been removed, i\.e\.,
+				                the 'crs' member of \[GJ2008\] is no longer used\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Controller/Find/FindController.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class GeoJson\\CoordinateReferenceSystem\\Named\:
+				1\.1 Specification of coordinate reference systems has been removed, i\.e\.,
+				                the 'crs' member of \[GJ2008\] is no longer used\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Controller/Find/FindController.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class GeoJson\\CoordinateReferenceSystem\\Named\:
+				1\.1 Specification of coordinate reference systems has been removed, i\.e\.,
+				                the 'crs' member of \[GJ2008\] is no longer used\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Controller/Knowledge/ProviderController.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class GeoJson\\CoordinateReferenceSystem\\Named\:
+				1\.1 Specification of coordinate reference systems has been removed, i\.e\.,
+				                the 'crs' member of \[GJ2008\] is no longer used\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Controller/Knowledge/ProviderController.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class GeoJson\\CoordinateReferenceSystem\\Named\:
+				1\.1 Specification of coordinate reference systems has been removed, i\.e\.,
+				                the 'crs' member of \[GJ2008\] is no longer used\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Controller/Knowledge/SchoolController.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class GeoJson\\CoordinateReferenceSystem\\Named\:
+				1\.1 Specification of coordinate reference systems has been removed, i\.e\.,
+				                the 'crs' member of \[GJ2008\] is no longer used\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Controller/Knowledge/SchoolController.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class GeoJson\\CoordinateReferenceSystem\\Named\:
+				1\.1 Specification of coordinate reference systems has been removed, i\.e\.,
+				                the 'crs' member of \[GJ2008\] is no longer used\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Controller/Offer/OfferController.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class GeoJson\\CoordinateReferenceSystem\\Named\:
+				1\.1 Specification of coordinate reference systems has been removed, i\.e\.,
+				                the 'crs' member of \[GJ2008\] is no longer used\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Controller/Offer/OfferController.php
+
+		-
+			message: '''
+				#^Call to method __construct\(\) of deprecated class GeoJson\\CoordinateReferenceSystem\\Named\:
+				1\.1 Specification of coordinate reference systems has been removed, i\.e\.,
+				                the 'crs' member of \[GJ2008\] is no longer used\.$#
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Controller/Wonder/WorkshopController.php
+
+		-
+			message: '''
+				#^Instantiation of deprecated class GeoJson\\CoordinateReferenceSystem\\Named\:
+				1\.1 Specification of coordinate reference systems has been removed, i\.e\.,
+				                the 'crs' member of \[GJ2008\] is no longer used\.$#
+			'''
+			identifier: new.deprecatedClass
+			count: 2
+			path: src/Ladb/CoreBundle/Controller/Wonder/WorkshopController.php
+
+		-
 			message: '#^Class Ladb\\CoreBundle\\Entity\\Workflow\\Run referenced with incorrect case\: ladb\\CoreBundle\\Entity\\Workflow\\Run\.$#'
 			identifier: class.nameCase
 			count: 1
