@@ -922,8 +922,10 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   initialisées que sur une entité chargée depuis la base : `FixtureFactory::create()` fait un
   `refresh()` après le premier `flush()`.
 - Doctrine (#177, #178) : ORM 3.7, DBAL 4.5, DoctrineBundle 3.3, `doctrine/persistence` 4.2,
-  `doctrine/collections` 2 (`commerceguys/addressing` 1.4 refusait la 3 ; depuis la 2.3, #257,
-  aucun paquet installé ne refuse la 3.1, à monter à part) et `doctrine/lexer` 3.
+  `doctrine/collections` 3.1 (#264, hors du `require`) et `doctrine/lexer` 3. Le site ne se sert
+  que d'`ArrayCollection` et de `Collection`, dont la 3 ne change que les types de retour. Un
+  `Criteria` (`matching()`) y lit les propriétés par réflexion, plus par leurs getters, et trie
+  par `\SortDirection` (`Criteria::ASC` est parti).
   `doctrine/common` est parti, et `ClassUtils` avec lui. DoctrineBundle ajoute depuis la 7.4 le
   listener `IdleConnection\Listener` de DoctrineBridge (`kernel.request`) : il ferme une connexion
   restée inutilisée plus de 10 minutes, ce qui n'arrive pas sous FPM. Les proxys sont les lazy
