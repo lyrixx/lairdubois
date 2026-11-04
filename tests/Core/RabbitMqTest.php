@@ -10,7 +10,6 @@ use Ladb\CoreBundle\Entity\Wonder\Creation;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\BufferedOutput;
-use Symfony\Component\Mailer\Event\MessageEvent;
 
 /**
  * The messages of the pages go through RabbitMQ, and the worker of the stack consumes them
@@ -113,14 +112,13 @@ final class RabbitMqTest extends InteractionTestCase
         self::assertSame(200, $client->getResponse()->getStatusCode());
         self::assertSame(1, self::countMessages(self::MAILER_QUEUE));
 
-        // The message logger of Mailer is reset after each message (reset_on_message)
-        $sent = [];
-        static::bootKernel()->getContainer()->get('event_dispatcher')->addListener(MessageEvent::class, static function (MessageEvent $event) use (&$sent): void {
-            $sent[] = $event->getMessage();
-        }, -1024);
+        // The message logger of Mailer is reset after each message (reset_on_message). Read before
+        // countMessages(), which shuts the kernel down
+        $messageListener = static::bootKernel()->getContainer()->get('tests.message_listener');
         self::consume('mailer');
 
         self::assertSame(0, self::countMessages(self::MAILER_QUEUE));
+        $sent = $messageListener->getMessages();
         self::assertCount(1, $sent);
         $headers = $sent[0]->getHeaders();
         self::assertSame('Confirmation de votre adresse e-mail', $headers->getHeaderBody('Subject'));

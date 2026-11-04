@@ -6,8 +6,6 @@ use DAMA\DoctrineTestBundle\Doctrine\DBAL\StaticDriver;
 use Ladb\CoreBundle\DataFixtures\UserFixtures;
 use Ladb\CoreBundle\Entity\Wonder\Creation;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
-use Symfony\Component\Console\ConsoleEvents;
-use Symfony\Component\Console\Event\ConsoleSignalEvent;
 use Symfony\Component\Console\Input\StringInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Tests\WebTestCase;
@@ -190,11 +188,8 @@ final class CommandTest extends WebTestCase
             $application = new Application(static::bootKernel());
             $application->setAutoExit(false);
             $application->setCatchExceptions(false);
-            $signaledCommands = [];
-            static::getContainer()->get('event_dispatcher')->addListener(ConsoleEvents::SIGNAL, static function (ConsoleSignalEvent $event) use (&$signaledCommands): void {
-                $signaledCommands[] = $event->getCommand()->getName();
-                $event->abortExit();
-            });
+            $signalListener = static::getContainer()->get('tests.signal_listener');
+            $signalListener->catchSignals();
             $output = new class extends BufferedOutput {
                 public ?\Closure $onInitComplete = null;
 
@@ -215,7 +210,7 @@ final class CommandTest extends WebTestCase
 
             self::assertSame(0, $exitCode, $output);
             self::assertMatchesRegularExpression('/Nothing to update.*Ladb init complete/s', $output);
-            self::assertSame(['ladb:init'], $signaledCommands);
+            self::assertSame(['ladb:init'], $signalListener->getSignaledCommands());
             self::assertTrue(self::tableExists('migration_versions'));
             self::assertTrue(self::tableExists('sessions'));
         } finally {

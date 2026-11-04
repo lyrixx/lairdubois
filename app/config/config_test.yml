@@ -144,3 +144,18 @@ services:
     tests.twig_template_iterator:
         alias: twig.template_iterator
         public: true
+
+    # Listeners of the tests (#[AsEventListener]), which a test reads or enables: an addListener()
+    # on event_dispatcher, compiled, is deprecated since Symfony 8.2
+    tests.controller_listener:
+        class: Tests\Double\FailingControllerListener
+        public: true
+    tests.exception_listener:
+        class: Tests\Double\RecordingExceptionListener
+        public: true
+    tests.message_listener:
+        class: Tests\Double\RecordingMessageListener
+        public: true
+    tests.signal_listener:
+        class: Tests\Double\RecordingSignalListener
+        public: true
