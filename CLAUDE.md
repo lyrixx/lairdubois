@@ -247,9 +247,8 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et get
   `query->get()`, pour garder le `''` que PHP en faisait. Celles qui restent viennent de
   dépendances dont la correction est hors de nos bornes (crawler-detect 1.4, stripe 7.128 et
   geojson 1.2, dans nos bornes, n'en lèvent plus, #252, ni hashids 4.1, #255, ni geocoder 5.0,
-  #256) : addressing (2.x, dont `get()` refuse le pays `null` d'une adresse sans pays) et web-push
-  (10, que webpush-bundle 0.14 refuse) ; graph-sdk et emojione sont abandonnés, php-rss-writer est
-  à sa dernière version.
+  #256, ni addressing 2.3, #257) : web-push (10, que webpush-bundle 0.14 refuse) ; graph-sdk et
+  emojione sont abandonnés, php-rss-writer est à sa dernière version.
 - Les dépréciations d'un template Twig ne sortent qu'à sa compilation : `qa:deprecations` vide le
   cache de test sans les warmers optionnels, pour que le `qa:phpunit` suivant les voie.
 - `lint:yaml` compte les dépréciations comme des erreurs. Sans chemin, `lint:twig` lit tous les
@@ -820,7 +819,8 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   initialisées que sur une entité chargée depuis la base : `FixtureFactory::create()` fait un
   `refresh()` après le premier `flush()`.
 - Doctrine (#177, #178) : ORM 3.7, DBAL 4.5, DoctrineBundle 3.3, `doctrine/persistence` 4.2,
-  `doctrine/collections` 2 (`commerceguys/addressing` 1.4 refuse la 3) et `doctrine/lexer` 3.
+  `doctrine/collections` 2 (`commerceguys/addressing` 1.4 refusait la 3 ; depuis la 2.3, #257,
+  aucun paquet installé ne refuse la 3.1, à monter à part) et `doctrine/lexer` 3.
   `doctrine/common` est parti, et `ClassUtils` avec lui. DoctrineBundle ajoute depuis la 7.4 le
   listener `IdleConnection\Listener` de DoctrineBridge (`kernel.request`) : il ferme une connexion
   restée inutilisée plus de 10 minutes, ce qui n'arrive pas sous FPM. Les proxys sont les lazy
@@ -879,9 +879,18 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `kernel.request`, et abonne SoftDeleteable à `postFlush` (`handle_post_flush_event: false`, sans
   effet). Aucune entité n'est Loggable ni SoftDeleteable (`ext_log_entries` reste vide), Tree ne
   sert que par son mapping.
-- `commerceguys/addressing` 1.4.2 (#178, `doctrine/collections` 2 de l'ORM 3) : l'adresse formatée
-  d'une localisation (`LocalisableUtils`) change pour trois pays, Biélorussie (rue en tête), Irlande
-  (code postal sur sa ligne) et Namibie (la 1.0.9 écrivait un `n` à la place du saut de ligne).
+- `commerceguys/addressing` 2.3.2 (#257, 1.4.2 depuis #178) : l'adresse formatée d'une
+  localisation (`LocalisableUtils`). La locale passée au formateur (`'fr_FR'`, guillemets compris)
+  n'existe pas : noms de pays en anglais (« United Kingdom »). Sans pays, `withCountryCode()`, qui
+  n'accepte qu'une chaîne en 2.x, n'est pas appelé, et `format()` lève une
+  `InvalidArgumentException`, attrapée : l'adresse formatée reste telle quelle, comme en 1.4.2.
+  La 2.x retire le séparateur devant un champ vide et met à jour formats et subdivisions : sur
+  74 422 adresses comparées, celle de 42 pays change pour une adresse type (28 de plus pour une
+  région donnée en code ISO, ce que Google ne fait pas). France, Belgique, Suisse, Canada et Union
+  européenne ne bougent pas, sauf la Lettonie (sans code postal, plus de virgule après la ville) ;
+  le Royaume-Uni affiche la région (`England`), les Émirats la ville, le Kazakhstan va de la rue au
+  pays, des virgules et tirets finaux partent (Brésil, Japon, Mexique…), « Turkey » devient
+  « Türkiye ». La 1.4.2 avait changé celle de trois pays (Biélorussie, Irlande, Namibie).
   Les adresses de la base ne bougent pas, seulement celles qui sont géocodées ensuite.
 - Hashids 4.1 (#255) encode le numéro d'un don (`Donation::$hashid`, dans le reçu envoyé par
   mail) et l'identifiant de groupe des notifications (`CronNotificationPopulateCommand`), avec le

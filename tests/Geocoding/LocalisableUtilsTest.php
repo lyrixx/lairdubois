@@ -101,7 +101,8 @@ final class LocalisableUtilsTest extends TestCase
             'geographicalAreas' => 'Montréal,Québec,Communauté-Urbaine-de-Montréal,Canada',
             'formattedAddress' => "4200 Rue Saint-Denis\nMontréal Québec H2W 2M5\nCanada",
         ], []];
-        // willdurand/geocoder 3 ignored postal_town (United Kingdom, Sweden...): no locality
+        // willdurand/geocoder 3 ignored postal_town (United Kingdom, Sweden...): no locality.
+        // commerceguys/addressing 2 adds the administrative area (England) to the British format.
         yield 'postal town' => ['10 Downing Street, London', $this->createResponse('london.json'), true, [
             'latitude' => 51.5033635,
             'longitude' => -0.1276248,
@@ -109,10 +110,11 @@ final class LocalisableUtilsTest extends TestCase
             'locality' => 'London',
             'country' => 'Royaume-Uni',
             'geographicalAreas' => 'London,England,Greater London,Royaume-Uni',
-            'formattedAddress' => "10 Downing Street\nLondon\nSW1A 2AA\nUnited Kingdom",
+            'formattedAddress' => "10 Downing Street\nLondon\nEngland\nSW1A 2AA\nUnited Kingdom",
         ], []];
-        // No country: the address cannot be formatted. willdurand/geocoder 3 gave an empty
-        // country, hence empty geographical areas instead of none.
+        // No country: the address cannot be formatted (the formatter throws), the formatted
+        // address is left as it is. willdurand/geocoder 3 gave an empty country, hence empty
+        // geographical areas instead of none.
         yield 'without country' => ['Océan Atlantique', $this->createResponse('atlantic-ocean.json'), true, [
             'latitude' => -14.5994134,
             'longitude' => -28.6731465,
