@@ -15,7 +15,7 @@ use Ladb\CoreBundle\Form\Type\Knowledge\School\TestimonialType;
 use Ladb\CoreBundle\Manager\Knowledge\School\TestimonialManager;
 use Ladb\CoreBundle\Event\PublicationEvent;
 use Ladb\CoreBundle\Event\PublicationListener;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
