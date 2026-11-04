@@ -28,6 +28,7 @@
         "ext-memcached": "*",
         "ext-libxml": "*",
         "ext-fileinfo": "*",
+        "ext-gmp": "*",
         "ext-iconv": "*",
 
         "doctrine/dbal": "^4.5",
@@ -101,7 +102,7 @@
         "giggsey/libphonenumber-for-php": "^7.2",
         "cebe/markdown": "1.2.1",
         "stripe/stripe-php": "^7.27.3",
-        "hashids/hashids": "^1.0",
+        "hashids/hashids": "^4.1",
         "dirkgroenen/pinterest-api-php": "^0.2.11",
         "biblys/isbn": "2.0.6",
         "jaybizzle/crawler-detect" :"1.*",
