@@ -111,7 +111,10 @@ class LocalisableUtils {
 
 					$a = new Address();
 
-					$a = $a->withCountryCode($country ? $country->getCode() : null);
+					// Without a country code, the formatter throws (caught below): the formatted address is left as it is
+					if ($country) {
+						$a = $a->withCountryCode($country->getCode());
+					}
 					if ($address->getStreetNumber() && $address->getStreetName()) {
 						$a = $a->withAddressLine1($address->getStreetNumber().' '.$address->getStreetName());
 					} else if ($address->getStreetName()) {
