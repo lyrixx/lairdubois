@@ -88,8 +88,9 @@ function fixtures(): void
         docker_compose_run(['bin/console', 'doctrine:database:drop', '--force', '--if-exists']);
         db_schema();
         docker_compose_run(['bin/console', 'doctrine:fixtures:load', '--append', '--no-interaction'], service: 'builder');
-        // The rest by the commands of the image
+        // The rest by the commands of the image, and the thumbnails of Liip Imagine resolved again
         docker_compose_run(['bin/console', 'ladb:cron:notification:populate', '--force']);
+        docker_compose_run(['bin/console', 'liip:imagine:cache:remove']);
         elasticsearch_populate();
     }, context: create_prod_context());
 }

@@ -209,7 +209,7 @@ castor -c prod docker:build        # php, nginx, et le builder du dev (fixtures)
 castor -c prod start               # secrets jetables, schéma, fixtures si la base est vide, workers
 castor qa:prod-smoke               # recharge les fixtures, puis vérifie tout le site dans la stack
 castor qa:prod-e2e [-- --grep …]   # Playwright sur la stack de prod, sur ses données
-castor -c prod app:prod:fixtures   # recharge les fixtures de la stack de prod
+castor -c prod app:prod:fixtures   # recharge les fixtures de la stack de prod, vide celui de Liip
 castor -c prod app:prod:describe   # taille et contenu des images, en Markdown (résumé de la CI)
 castor -c prod docker:push --tag=… # REGISTRY=ghcr.io/…, la CI seulement
 ```
@@ -264,7 +264,8 @@ castor -c prod docker:push --tag=… # REGISTRY=ghcr.io/…, la CI seulement
   volumes), la crontab (supercronic), Chromium (capture d'une page de nginx), Liip (un JPEG et un
   PNG résolus par PHP, servis ensuite par nginx), une vue comptée par le worker `view`, la suite
   E2E entière sur la stack (`E2E_PROD` y ajoute `pages.spec.ts` : listes et contenus en anonyme,
-  `user` et `admin`), chaque ligne de la crontab puis leurs effets (sitemaps servis par nginx,
+  `user` et `admin`, sans les hosts tiers, qui retiendraient l'événement `load`), chaque ligne de
+  la crontab puis leurs effets (sitemaps servis par nginx,
   vignette d'un processus capturée sur le site), les mails dans Mailpit (signés DKIM) et les
   notifications web push reçues par `push` (signées VAPID). Un tableau en fin de tâche.
 - CI : job `prod` (build, `castor app:install` pour les fixtures, `qa:prod-smoke`,

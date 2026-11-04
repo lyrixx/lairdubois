@@ -371,6 +371,11 @@ function push(
     }
     $command[] = '--set';
     $command[] = '*.args.PHP_VERSION=' . $c['php_version'];
+    // In GitHub Actions: GHCR links the packages to the repository (permissions, visibility)
+    if (false !== getenv('GITHUB_REPOSITORY')) {
+        $command[] = '--set';
+        $command[] = '*.labels.org.opencontainers.image.source=' . getenv('GITHUB_SERVER_URL') . '/' . getenv('GITHUB_REPOSITORY');
+    }
 
     $services = ['php', 'nginx'];
     foreach ($services as $service) {

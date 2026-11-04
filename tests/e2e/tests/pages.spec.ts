@@ -1,4 +1,4 @@
-import { test, expect } from '../support/test';
+import { test, expect, CDN_HOSTS } from '../support/test';
 import { ADMIN, USER, storageStateOf } from '../support/accounts';
 
 // The pages of the production stack (castor qa:prod-smoke sets E2E_PROD): its cache, its CSS and
@@ -53,6 +53,13 @@ for (const role of ROLES) {
                 // The files of the site that the page loads: CSS and JS of the build, assets of
                 // the bundles, images of Liip Imagine
                 const failures: string[] = [];
+                // The other hosts (YouTube, Google Maps, Facebook...) would hold the event "load"
+                // as long as they answer: not called. The CDNs are served by support/test.ts
+                await page.route('**', (route) => {
+                    const host = new URL(route.request().url()).host;
+
+                    return host === SITE_HOST || CDN_HOSTS.includes(host) ? route.fallback() : route.abort();
+                });
                 page.on('response', (response) => {
                     if (new URL(response.url()).host === SITE_HOST && response.status() >= 400) {
                         failures.push(`${response.status()} ${response.url()}`);
