@@ -246,10 +246,10 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et get
   absent de la requête, colonne nullable, champ vide) passe par `?? ''` ou par le défaut de
   `query->get()`, pour garder le `''` que PHP en faisait. Celles qui restent viennent de
   dépendances dont la correction est hors de nos bornes (crawler-detect 1.4, stripe 7.128 et
-  geojson 1.2, dans nos bornes, n'en lèvent plus, #252, ni hashids 4.1, #255) : geocoder (5.0),
-  addressing (2.x, dont `get()` refuse le pays `null` d'une adresse sans pays) et web-push (10,
-  que webpush-bundle 0.14 refuse) ; graph-sdk et emojione sont abandonnés, php-rss-writer est à
-  sa dernière version.
+  geojson 1.2, dans nos bornes, n'en lèvent plus, #252, ni hashids 4.1, #255, ni geocoder 5.0,
+  #256) : addressing (2.x, dont `get()` refuse le pays `null` d'une adresse sans pays) et web-push
+  (10, que webpush-bundle 0.14 refuse) ; graph-sdk et emojione sont abandonnés, php-rss-writer est
+  à sa dernière version.
 - Les dépréciations d'un template Twig ne sortent qu'à sa compilation : `qa:deprecations` vide le
   cache de test sans les warmers optionnels, pour que le `qa:phpunit` suivant les voie.
 - `lint:yaml` compte les dépréciations comme des erreurs. Sans chemin, `lint:twig` lit tous les
@@ -1050,9 +1050,12 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   est `router_default_uri` (`bentools_webpush.settings.subject`), une URL https comme le veut la
   RFC 8292 : c'était l'hôte nu jusqu'à #240 (le bundle lisait `router.request_context.host`). Un
   abonnement ne dépend que de la clé publique (`applicationServerKey`), pas du `sub`.
-- Le géocodage (`geocoder-php/common-http`) trouve sa fabrique PSR-17 par `php-http/discovery`, à
-  l'exécution : `GuzzleHttp\Psr7\HttpFactory` de `guzzlehttp/psr7` 2. Le plugin Composer de
-  discovery est coupé dans `allow-plugins`.
+- Géocodage : `willdurand/geocoder` 5.0 (#256), `geocoder-php/google-maps-provider` 4.8 et
+  `geocoder-php/common-http` 4.7. La 5.0 n'ajoute que des types natifs (nullables explicites, types
+  de retour) et rend final le constructeur d'`Address` : mêmes objets pour les mêmes réponses de
+  l'API. `common-http` trouve sa fabrique PSR-17 par `php-http/discovery` 1.20, à l'exécution :
+  `GuzzleHttp\Psr7\HttpFactory` de `guzzlehttp/psr7` 2. Le plugin Composer de discovery est coupé
+  dans `allow-plugins`.
 - `bentools/webpush-bundle` est en 0.14 (#177), avec `minishlink/web-push` 6 et `web-token/jwt-*`
   2.2 (abandonné) : web-push 9, qui passe à `web-token/jwt-library`, monterait aussi `psr/cache`,
   `brick/math` et quatre polyfills de Symfony. Jusqu'à la 0.10, le bundle appelait `GuzzleHttp\Promise\settle()`, supprimée de `guzzlehttp/promises` 2,
