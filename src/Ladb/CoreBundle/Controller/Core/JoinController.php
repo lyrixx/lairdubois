@@ -20,7 +20,7 @@ use Ladb\CoreBundle\Utils\JoinableUtils;
 use Ladb\CoreBundle\Utils\PaginatorUtils;
 use Ladb\CoreBundle\Utils\ActivityUtils;
 use Ladb\CoreBundle\Utils\TypableUtils;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
 #[Route(path: '/joins')]

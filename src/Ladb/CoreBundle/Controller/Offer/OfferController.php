@@ -34,7 +34,7 @@ use Ladb\CoreBundle\Utils\BlockBodiedUtils;
 use Ladb\CoreBundle\Utils\OfferUtils;
 use Ladb\CoreBundle\Utils\JoinableUtils;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 

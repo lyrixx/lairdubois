@@ -12,7 +12,7 @@ use Ladb\CoreBundle\Manager\Core\PictureManager;
 use Ladb\CoreBundle\Model\CollectionnableInterface;
 use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Model\PicturedInterface;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
 class CollectionnableUtils {
 

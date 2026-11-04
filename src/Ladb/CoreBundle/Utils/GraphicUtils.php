@@ -2,7 +2,6 @@
 
 namespace Ladb\CoreBundle\Utils;
 
-use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Ladb\CoreBundle\Entity\Promotion\Graphic;
 use Twig\Environment;
 

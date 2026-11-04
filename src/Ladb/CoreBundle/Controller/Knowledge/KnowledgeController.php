@@ -26,7 +26,7 @@ use Ladb\CoreBundle\Utils\SearchUtils;
 use Ladb\CoreBundle\Utils\TypableUtils;
 use Ladb\CoreBundle\Utils\ActivityUtils;
 use Ladb\CoreBundle\Utils\PropertyUtils;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
 

@@ -33,7 +33,7 @@ use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Utils\BlockBodiedUtils;
 use Ladb\CoreBundle\Utils\EventUtils;
 use Ladb\CoreBundle\Utils\JoinableUtils;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 

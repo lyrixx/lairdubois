@@ -28,7 +28,7 @@ use Ladb\CoreBundle\Event\PublicationsEvent;
 use Ladb\CoreBundle\Manager\Howto\HowtoManager;
 use Ladb\CoreBundle\Manager\Core\WitnessManager;
 use Liip\ImagineBundle\Controller\ImagineController;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 

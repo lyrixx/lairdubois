@@ -3,7 +3,7 @@
 namespace Ladb\CoreBundle\Handler;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
-use Symfony\Component\Routing\Router;
+use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
@@ -11,7 +11,7 @@ class AuthenticationHandler implements EventSubscriberInterface {
 
 	protected $router;
 
-	public function __construct(\Symfony\Bundle\FrameworkBundle\Routing\Router $router) {
+	public function __construct(RouterInterface $router) {
 		$this->router = $router;
 	}
 

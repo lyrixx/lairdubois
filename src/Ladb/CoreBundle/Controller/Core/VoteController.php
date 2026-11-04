@@ -21,7 +21,7 @@ use Ladb\CoreBundle\Utils\TypableUtils;
 use Ladb\CoreBundle\Entity\Core\Vote;
 use Ladb\CoreBundle\Event\VotableEvent;
 use Ladb\CoreBundle\Event\VotableListener;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Doctrine\ORM\EntityManagerInterface;
 
 #[Route(path: '/votes')]

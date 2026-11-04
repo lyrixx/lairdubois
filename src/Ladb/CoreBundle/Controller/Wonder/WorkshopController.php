@@ -37,7 +37,7 @@ use Ladb\CoreBundle\Entity\Workflow\Workflow;
 use Ladb\CoreBundle\Model\HiddableInterface;
 use Ladb\CoreBundle\Utils\LocalisableUtils;
 use Liip\ImagineBundle\Controller\ImagineController;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 

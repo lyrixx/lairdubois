@@ -217,7 +217,7 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et get
 - PHPUnit 9.6, dans `tools/phpunit` et pas dans le `composer.json` de l'application : c'est la
   dernière version qui marche avec `Tests\DeprecationCollector` (`TestResult` et `ErrorHandler`
   de PHPUnit, supprimés en 10). `symfony/phpunit-bridge`, qui n'est pas un des composants en
-  `8.1.*` de `composer.json`, est en 8.1 : il ne dépend d'aucun composant de Symfony, n'exige que
+  `8.2.*` de `composer.json`, est en 8.1 : il ne dépend d'aucun composant de Symfony, n'exige que
   PHP 8.1 et marche encore avec PHPUnit 9.6, rien à y changer aux sauts de version. Le collecteur ne
   l'appelle plus : il construit lui-même le gestionnaire d'erreurs de PHPUnit du test en cours,
   comme le `getPhpUnitErrorHandler()` du bridge, privé depuis 4.4.
@@ -242,6 +242,10 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et get
   Le collecteur les compte par origine et par appelant, sans garder les occurrences. Celles de la
   compilation d'une classe ne sortent qu'au premier chargement, et le kernel ne garde que la
   première origine de celles du container. Le rapport ne fait jamais échouer la CI.
+- Depuis la 8.2 (#30), un `addListener()` sur `event_dispatcher` est déprécié : ceux des tests
+  (une par requête du smoke test, `CommandTest`, `PhpErrorTest`, `RabbitMqTest`) et ceux de
+  `fos:elastica:populate` (FOSElasticaBundle, avec ses `removeListener()`), quelque 2 700 dans le
+  rapport. Ceux des tests seraient à remplacer par des listeners de `config_test.yml` (9.0).
 - `E_DEPRECATED` de notre code (#248) : un `null` qu'une fonction de PHP attend en chaîne (paramètre
   absent de la requête, colonne nullable, champ vide) passe par `?? ''` ou par le défaut de
   `query->get()`, pour garder le `''` que PHP en faisait. Celles qui restent viennent de
@@ -719,12 +723,15 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `secret` de l'expiration, de l'identifiant et du hash du mot de passe, `signature_properties`) ne
   change pas de la 7.4 à la 8.2 (`SignatureHasher`, réécrit en 8.2 pour la rotation des secrets) :
   un cookie posé par la 7.4 est relu en 8.x. `LoginTest::testRememberMeOfSymfony74` rejoue un cookie
-  capturé en 7.4, relu en 8.1 (#30) ; le même cookie a été relu par les classes de la 8.2, lancées
-  sans les installer. À revérifier au saut en 8.2, avec ses changements sans effet ici, que la 8.1
-  n'a pas : `use_referer` garde le referer d'un échec de connexion (le seul formulaire est sur
-  `/login`, exclu), `#[IsGranted(statusCode: 404)]` lève une `NotFoundHttpException` (même
-  réponse ; une `HttpException` en 8.1), et les hashers prennent le coût minimal quand
-  `framework.test` est activé.
+  capturé en 7.4, relu en 8.1 et en 8.2 (#30), comme un cookie et une session ouverts en 8.1.
+- Sécurité en 8.2 (#30) : `use_referer` garde le referer d'un échec de connexion comme page de
+  retour, sauf `login_path` et l'URL du formulaire, et seulement si aucune n'est posée : le seul
+  formulaire est sur `/login`, et `/connexion` pose la sienne. `#[IsGranted(statusCode: 404)]` lève
+  une `NotFoundHttpException` (une `HttpException` en 8.1) : même page d'erreur. Le token en
+  session porte en plus `auth_proofs` (date de la connexion par mot de passe). Avec
+  `framework.test`, les hashers prennent le coût minimal (bcrypt 4, 13 ailleurs) : sur une base de
+  test chargée avant la 8.2, chaque connexion par le formulaire refait le hash (`upgradePassword()`,
+  dans la transaction du test), et `castor -c test app:db:fixtures` la recharge au coût 4.
 - Controllers : services autowirés (prototype `Ladb\CoreBundle\Controller\`), une action reçoit ses
   services en arguments, un helper de la classe de l'action qui l'appelle (en dernier argument),
   un trait ou un controller abstrait par un setter `#[Required]`. L'entity manager est un service
@@ -964,8 +971,8 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   (`TransportInterface` de Mailer, le transport de `mailer_dsn`) : le spool fichier de Swiftmailer
   ne tombait jamais. Les messages de la file sont sérialisés en PHP (`PhpSerializer`) : la vider
   avant un saut de Symfony, par précaution (un message de chaque file mis par la 6.4 est lu et
-  traité par la 7.4, #28, un de la 7.4 par la 8.1, #30). Un seul paramètre, `mailer_dsn`
-  (`framework.mailer.dsn`). Mailer lance
+  traité par la 7.4, #28, un de la 7.4 par la 8.1 et un de la 8.1 par la 8.2, #30). Un seul
+  paramètre, `mailer_dsn` (`framework.mailer.dsn`). Mailer lance
   STARTTLS dès que le serveur SMTP l'annonce et vérifie son certificat, ce que Swiftmailer ne
   faisait pas sans `encryption` : `?verify_peer=0` pour un Postfix au certificat autosigné (l'option
   `auto_tls` n'arrive qu'en 7.1).
@@ -986,23 +993,41 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   la dernière connexion). Le namespace
   `@FOSUser` est un chemin Twig de `config.yml` (`templates/bundles/FOSUserBundle/`), les traductions
   utilisées sont dans les domaines `FOSUserBundle` et `validators` du bundle.
-- Symfony en composants séparés (#26), en 8.1 depuis #30 (7.4 avec #28) : plus de
-  `symfony/symfony`, que Symfony 7 refuse. `composer.json` exige en `8.1.*` les bundles
+- Symfony en composants séparés (#26), en 8.2 depuis #30 (7.4 avec #28, puis 8.1) : plus de
+  `symfony/symfony`, que Symfony 7 refuse. `composer.json` exige en `8.2.*` les bundles
   (framework, security, twig ; debug et
   web-profiler en dev) et les composants dont le site se sert lui-même : les `use` de `src/`,
   `app/`, `tests/` et `bin/`, et ce que la config demande (`yaml`, `translation`, `asset`,
   `http-client`, `expression-language` pour `@Security`). En dev, ceux des tests (`browser-kit`,
   `css-selector`, `dom-crawler`, `finder`) et `stopwatch` (services de debug et timeline du
-  profiler, comme le `profiler-pack` de Symfony). Le reste vient des dépendances. Celles qui
-  acceptent aussi la 8.2 (`cache`, `clock`, `monolog-bridge` depuis monolog-bundle 4, `process`,
-  `property-info`, `string`, `twig-bridge`, `type-info`, `var-dumper`, `var-exporter`,
-  `web-link`) sont bornées à la 8.1 par le `conflict` de `composer.json` (`>=8.2`), à monter avec
-  les composants. Les contrats sont en 3.x, séparés (`service-contracts`…). Les autres dépendances
-  acceptent la 8 (#224) : le saut en 8.1 n'a monté que les composants, `symfony/polyfill-deepclone`
-  arrive (var-exporter 8.1), `masterminds/html5` et `symfony/polyfill-php83` partent.
+  profiler, comme le `profiler-pack` de Symfony). Le reste vient des dépendances. Celles qu'elles
+  tirent (`cache`, `clock`, `monolog-bridge` depuis monolog-bundle 4, `process`, `property-info`,
+  `string`, `twig-bridge`, `type-info`, `var-dumper`, `var-exporter`, `web-link`) sont tenues à la
+  8.2 par le `conflict` de `composer.json` (`<8.2 || >=8.3`), à monter avec les composants :
+  `prefer-stable` laisserait en 8.1 celles qu'aucun paquet n'exige en 8.2. Les contrats sont en
+  3.x, séparés (`service-contracts`…, 3.8 depuis la 8.2). Les autres dépendances acceptent la 8
+  (#224) : les sauts en 8.1 et en 8.2 n'ont monté que les composants et les contrats ; en 8.1,
+  `symfony/polyfill-deepclone` arrive (var-exporter 8.1), `masterminds/html5` et
+  `symfony/polyfill-php83` partent.
+- 8.2.0-BETA1 (#30) : `minimum-stability: beta` et `prefer-stable: true` dans `composer.json`,
+  aucun autre paquet du lock en version instable. À la sortie de la 8.2.0 : retirer ces deux
+  lignes, puis `composer update` des paquets en `v8.2.0-BETA1` du lock.
 - Bundles requis (8.1) : le kernel ajoute de lui-même ceux qu'un bundle exige par
   `#[RequiredBundle]`, `ServicesBundle` (DependencyInjection) et `ConsoleBundle` (Console) pour
   FrameworkBundle, sans qu'`AppKernel` les déclare (`kernel.bundles`).
+- Bundles des composants (8.2, #30) : la config de FrameworkBundle passe dans un bundle par
+  composant installé (`asset`, `cache`, `http_client`, `lock`, `mailer`, `messenger`, `mime`,
+  `process`, `property_access`, `property_info`, `router`, `translation`, `type_info`,
+  `validation`, `web_link`), que le kernel ajoute de lui-même. `framework.<clé>` en reste un alias
+  (`assets` pour `asset`, `translator` pour `translation`), et `debug:config <clé>` remplace
+  `debug:config framework <clé>`. Le service `router` est un
+  `Symfony\Component\Routing\DependencyInjection\Router` : un service demande `RouterInterface`.
+- Console 8.2 (#30) : une commande démarre dans la locale `fr` (`framework.default_locale`), plus
+  dans celle de PHP (`en_US_POSIX` dans les images) : rien de ce qu'écrivent les crons ne la lit
+  (`localizeddate` ne sert que sur la page d'un événement). `list` replie les sous-commandes
+  (`ladb:cron:notification:email` et `:populate` sous `ladb:cron:notification`), `list ladb` les
+  montre toutes. Un worker arrêté par SIGTERM (`systemctl stop`) sort toujours en 0 :
+  `messenger:consume` gère le signal (une commande qui ne le gère pas sort en 143).
 - Attributs des controllers (8.1) : `#[IsGranted]` est vérifié à la priorité -10000 de
   `kernel.controller_arguments` (20 avant), `#[Template]` rendu à la priorité 10000 de
   `kernel.view` (-128 avant), tous deux par `ControllerAttributesListener`. Un listener qui
@@ -1010,9 +1035,10 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
 - Un cache de prod (`var/cache/prod`, sans debug) d'une autre version de Symfony ne se reconstruit
   pas : `cache:warmup --env=prod` (`qa:lint`) échoue sur une classe disparue. Le supprimer après
   une montée, comme le fait le déploiement (`cache:clear`).
-- Sans `symfony/symfony` (sa classe `FullStack`), FrameworkBundle active d'office chaque fonction
-  dont le composant est installé : `lock`, `property_info`, `type_info` (que tire `property-info`
-  7.x) et `web_link`, que tirent des dépendances, sont coupés dans `config.yml`, comme avant. Un
+- Sans `symfony/symfony` (sa classe `FullStack`), FrameworkBundle, puis en 8.2 le bundle du
+  composant, active d'office chaque fonction dont le composant est installé : `lock`,
+  `property_info`, `type_info` (que tire `property-info` 7.x) et `web_link`, que tirent des
+  dépendances, sont coupés dans `config.yml`, comme avant. Un
   paquet ajouté peut en allumer une autre : comparer `debug:container` et `debug:config` avant et
   après.
 - Services lazy (l'entity manager de DoctrineBundle) : depuis la 6.4, Symfony fait ses proxys
@@ -1035,21 +1061,23 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   Symfony 5.4 à 8.2 gardent une classe `Role` pour les relire (vide depuis 6.4, `@internal`,
   « Allows migrating session payloads from v4 »), et elles restent connectées (`LoginTest`, avec
   un token capturé sur la vraie 4.4 ; le cookie remember_me capturé avec lui est refusé et supprimé
-  depuis l'authenticator manager, qui signe autrement, #177). Vérifié en 7.4 (#28) et en 8.1
-  (#30), où le token d'une session de la 7.4 est écrit à l'identique et reste connecté. Pour la
-  8.2, vérifié sur le code (#222) : `Role` est le même fichier en 8.0, 8.1 et 8.2. Ne changent pas
-  non plus `AbstractToken::__unserialize()`, `UsernamePasswordToken`, `SwitchUserToken`, ni
+  depuis l'authenticator manager, qui signe autrement, #177). Vérifié en 7.4 (#28), en 8.1 (#30,
+  le token d'une session de la 7.4 y est écrit à l'identique et reste connecté) et en 8.2 (#30, où
+  une session de la 8.1 reste connectée). `Role` est le même fichier en 8.0, 8.1 et 8.2. Ne changent
+  pas non plus `AbstractToken::__unserialize()`, `UsernamePasswordToken`, `SwitchUserToken`, ni
   `ContextListener::safelyUnserialize()` (au contexte d'un log près en 8.0) et `hasUserChanged()`,
   qui ne fait qu'appeler `isEqualTo()`. `RememberMeToken` ignore depuis la 8.0 le secret que la 7.4
-  sérialisait. À revérifier au saut en 8.2 (#30), par `LoginTest`.
+  sérialisait.
 - Messenger (#22) : trois transports AMQP (`config.yml`), chacun avec son échange et sa file du
   même nom, `mailer` (#19), `view` et `webpush_notification`. Les anciennes files de RabbitMqBundle
   (`view_queue`…) ne servent plus : le `PhpSerializer` lit un de leurs messages comme un array, et
   le worker s'arrêterait sans le retirer. La connexion est en options : dans le DSN, le mot de passe
   et le vhost `/` seraient à encoder. Un handler en échec est rejoué 3 fois (échange `delays`), un
   mail 5 fois, puis le message est supprimé (log critical) ; depuis la 8.1, un message qui ne se
-  décode pas (classe disparue) suit le même chemin au lieu d'être supprimé aussitôt. Après chaque
-  message, le worker vide
+  décode pas (classe disparue) suit le même chemin au lieu d'être supprimé aussitôt. Avant chaque
+  message, le worker reconnecte la base si elle a coupé (`DoctrineDbalPingConnectionMiddleware` de
+  `services.yml` : le `doctrine_ping_connection` de DoctrineBundle 3.3 est déprécié en 8.2). Après
+  chaque message, le worker vide
   l'entity manager et remet à zéro les services (`reset_on_message`, toujours depuis 6.0 : l'option, qui ne fait plus rien, est retirée de `config.yml`) : un handler flush ce qu'il
   persiste, sinon c'est perdu, et ne garde rien d'un message à l'autre.
 - Les notifications web push sont signées avec les clés VAPID de la prod (`bentools_webpush.*` de
@@ -1162,6 +1190,10 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `elasticsearch`, `sentry`…). La 4.1 ferme les handlers déjà créés à l'arrêt du kernel
   (`monolog.handler_lifecycle_manager`) : à chaque reboot du client d'un test, jamais sous FPM ni
   dans un worker.
+- Depuis la 8.2 (#30), `ErrorListener` journalise une exception HTTP < 500 (404, 403, dont les
+  `#[IsGranted(statusCode: 404)]`) en `warning`, plus en `error` : le `fingers_crossed` de la prod
+  (`action_level: error`) ne se déclenche plus, et une requête en 404 ou 403 n'écrit plus rien dans
+  `prod.log` (en 8.1, une ligne `request.ERROR`, avec les warnings de la requête).
 - Depuis Symfony 6 (`framework.form.legacy_error_messages`, sans effet), une valeur qu'un type de
   formulaire ne peut pas transformer (langue inconnue, nombre mal écrit, choix hors liste) donne le
   message du type (« Cette langue n'est pas valide. ») au lieu de « Cette valeur n'est pas

@@ -3,7 +3,7 @@
 namespace Ladb\CoreBundle\Utils;
 
 use Ladb\CoreBundle\Entity\Core\Resource;
-use Symfony\Bundle\FrameworkBundle\Routing\Router;
+use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Ladb\CoreBundle\Entity\Wonder\Plan;
 use Twig\Environment;
@@ -15,7 +15,7 @@ class PlanUtils {
 	protected $twig;
 	protected $router;
 
-	public function __construct(Environment $twig, Router $router) {
+	public function __construct(Environment $twig, RouterInterface $router) {
 		$this->twig = $twig;
 		$this->router = $router;
 	}

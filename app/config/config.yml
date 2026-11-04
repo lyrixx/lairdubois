@@ -91,7 +91,8 @@ framework:
         buses:
             messenger.bus.default:
                 # A worker runs for days: reconnects to the database after a long idle time
-                middleware: [doctrine_ping_connection]
+                # (services.yml)
+                middleware: [Symfony\Bridge\Doctrine\Messenger\DoctrineDbalPingConnectionMiddleware]
         transports:
             mailer:
                 dsn: 'amqp://'

@@ -28,7 +28,7 @@ use Ladb\CoreBundle\Utils\LikableUtils;
 use Ladb\CoreBundle\Utils\MentionUtils;
 use Ladb\CoreBundle\Utils\ReportableUtils;
 use Ladb\CoreBundle\Utils\WatchableUtils;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\Service\Attribute\Required;
 
 abstract class AbstractPublicationManager extends AbstractManager {
