@@ -142,7 +142,7 @@ class OfferRepository extends AbstractEntityRepository {
 		}
 	}
 
-	public function findOneRandomByCategoryAndUser($category, User $user = null) {
+	public function findOneRandomByCategoryAndUser($category, ?User $user = null) {
 		$queryBuilder = $this->getEntityManager()->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'o' ))

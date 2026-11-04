@@ -237,7 +237,7 @@ class Question extends AbstractDraftableAuthoredPublication implements TitledInt
 		return $this->bestAnswer;
 	}
 
-	public function setBestAnswer(\Ladb\CoreBundle\Entity\Qa\Answer $bestAnswer = null) {
+	public function setBestAnswer(?\Ladb\CoreBundle\Entity\Qa\Answer $bestAnswer = null) {
 		if (!is_null($this->getBestAnswer())) {
 			$this->getBestAnswer()->setIsBestAnswer(false);
 		}

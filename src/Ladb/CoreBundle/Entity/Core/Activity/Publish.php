@@ -32,7 +32,7 @@ class Publish extends AbstractActivity {
 
 	// PublisherUser /////
 
-	public function setPublisherUser(\Ladb\CoreBundle\Entity\Core\User $user = null) {
+	public function setPublisherUser(?\Ladb\CoreBundle\Entity\Core\User $user = null) {
 		$this->publisherUser = $user;
 		return $this;
 	}

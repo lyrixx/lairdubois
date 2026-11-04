@@ -389,7 +389,7 @@ class UserMeta {
 
 	// Banner /////
 
-	public function setBanner(\Ladb\CoreBundle\Entity\Core\Picture $banner = null) {
+	public function setBanner(?\Ladb\CoreBundle\Entity\Core\Picture $banner = null) {
 		$this->banner = $banner;
 		return $this;
 	}
@@ -401,7 +401,7 @@ class UserMeta {
 
 	// Biography /////
 
-	public function setBiography(\Ladb\CoreBundle\Entity\Core\Biography $biography = null) {
+	public function setBiography(?\Ladb\CoreBundle\Entity\Core\Biography $biography = null) {
 		$this->biography = $biography;
 	}
 

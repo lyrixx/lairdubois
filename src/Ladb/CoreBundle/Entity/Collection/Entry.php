@@ -67,7 +67,7 @@ class Entry implements IdentifiableInterface {
 
 	// Collection /////
 
-	public function setCollection(\Ladb\CoreBundle\Entity\Collection\Collection $collection = null) {
+	public function setCollection(?\Ladb\CoreBundle\Entity\Collection\Collection $collection = null) {
 		$this->collection = $collection;
 		return $this;
 	}

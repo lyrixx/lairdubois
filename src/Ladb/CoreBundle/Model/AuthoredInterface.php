@@ -10,6 +10,6 @@ interface AuthoredInterface {
 
 	// IsOwner /////
 
-	public function getIsOwner(\Ladb\CoreBundle\Entity\Core\User $user = null);
+	public function getIsOwner(?\Ladb\CoreBundle\Entity\Core\User $user = null);
 
 }

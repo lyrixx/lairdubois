@@ -104,7 +104,7 @@ class Testimonial implements TypableInterface, HtmlBodiedInterface {
 		return $this->school;
 	}
 
-	public function setSchool(\Ladb\CoreBundle\Entity\Knowledge\School $school = null) {
+	public function setSchool(?\Ladb\CoreBundle\Entity\Knowledge\School $school = null) {
 		$this->school = $school;
 		return $this;
 	}

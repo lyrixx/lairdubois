@@ -155,7 +155,7 @@ class Vote implements AuthoredInterface {
 
 	// Comment /////
 
-	public function setComment(\Ladb\CoreBundle\Entity\Core\Comment $comment = null) {
+	public function setComment(?\Ladb\CoreBundle\Entity\Core\Comment $comment = null) {
 		$this->comment = $comment;
 		return $this;
 	}

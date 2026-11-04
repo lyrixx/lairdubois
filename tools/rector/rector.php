@@ -22,6 +22,7 @@ use Rector\Php80\Rector\Property\NestedAnnotationToAttributeRector;
 use Rector\Php80\ValueObject\AnnotationPropertyToAttributeClass;
 use Rector\Php80\ValueObject\AnnotationToAttribute;
 use Rector\Php80\ValueObject\NestedAnnotationToAttribute;
+use Rector\Php84\Rector\Param\ExplicitNullableParamTypeRector;
 use Rector\PhpParser\Printer\BetterStandardPrinter;
 use Rector\Renaming\Rector\Name\RenameClassRector;
 use Rector\Symfony\Symfony42\Rector\New_\RootNodeTreeBuilderRector;
@@ -68,6 +69,8 @@ return static function (RectorConfig $rectorConfig): void {
             UntypedQueryBuilderSortDirectionRector::class,
             // Translation parameters of the flash messages, rendered as HTML: escaped
             FlashMessageParameterToEscapedRector::class,
+            // Parameters implicitly nullable by a null default value, deprecated in PHP 8.4 (#248)
+            ExplicitNullableParamTypeRector::class,
         ])
         // Of the renames of symfony/security-core 5.3 (composer-based set of rector-symfony), the
         // one that the code needs (#177). The #[Template] of SensioFrameworkExtraBundle → that of

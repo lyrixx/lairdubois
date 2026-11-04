@@ -125,7 +125,7 @@ class Comment implements TypableInterface, BasicTimestampableInterface, Authored
 
 	// Parent /////
 
-	public function setParent(\Ladb\CoreBundle\Entity\Core\Comment $parent = null) {
+	public function setParent(?\Ladb\CoreBundle\Entity\Core\Comment $parent = null) {
 		$this->parent = $parent;
 		return $this;
 	}
@@ -175,7 +175,7 @@ class Comment implements TypableInterface, BasicTimestampableInterface, Authored
 
 	// Vote /////
 
-	public function setVote(\Ladb\CoreBundle\Entity\Core\Vote $vote = null) {
+	public function setVote(?\Ladb\CoreBundle\Entity\Core\Vote $vote = null) {
 		$this->vote = $vote;
 		return $this;
 	}

@@ -60,7 +60,7 @@ class WatchableUtils {
 
 	/////
 
-	public function getWatchContext(WatchableInterface $watchable, User $user = null) {
+	public function getWatchContext(WatchableInterface $watchable, ?User $user = null) {
 		$om = $this->doctrine->getManager();
 		$watchRepository = $om->getRepository(Watch::CLASS_NAME);
 		$watch = null;

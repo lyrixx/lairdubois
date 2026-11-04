@@ -69,7 +69,7 @@ class VotableUtils {
 
 	/////
 
-	public function getVoteContexts($votables, User $user = null) {
+	public function getVoteContexts($votables, ?User $user = null) {
 		$voteContexts = array();
 		foreach ($votables as $votable) {
 			$voteContexts[$votable->getId()] = $this->getVoteContext($votable, $user);
@@ -77,7 +77,7 @@ class VotableUtils {
 		return $voteContexts;
 	}
 
-	public function getVoteContext(VotableInterface $votable, User $user = null) {
+	public function getVoteContext(VotableInterface $votable, ?User $user = null) {
 		$om = $this->doctrine->getManager();
 		$voteRepository = $om->getRepository(Vote::CLASS_NAME);
 

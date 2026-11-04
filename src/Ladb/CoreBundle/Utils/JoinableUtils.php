@@ -73,7 +73,7 @@ class JoinableUtils {
 
 	/////
 
-	public function getJoinContext(JoinableInterface $joinable, User $user = null) {
+	public function getJoinContext(JoinableInterface $joinable, ?User $user = null) {
 		$om = $this->doctrine->getManager();
 		$joinRepository = $om->getRepository(Join::CLASS_NAME);
 

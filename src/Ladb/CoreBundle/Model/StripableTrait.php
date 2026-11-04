@@ -6,7 +6,7 @@ trait StripableTrait {
 
 // Strip /////
 
-	public function setStrip(\Ladb\CoreBundle\Entity\Core\Picture $strip = null) {
+	public function setStrip(?\Ladb\CoreBundle\Entity\Core\Picture $strip = null) {
 		$this->strip = $strip;
 		return $this;
 	}

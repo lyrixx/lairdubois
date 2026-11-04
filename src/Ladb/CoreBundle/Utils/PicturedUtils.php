@@ -33,7 +33,7 @@ class PicturedUtils {
 		}
 	}
 
-	public function getPictureSitemapData(Picture $picture = null) {
+	public function getPictureSitemapData(?Picture $picture = null) {
 		if (is_null($picture)) {
 			return null;
 		}

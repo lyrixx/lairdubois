@@ -63,7 +63,7 @@ class Label {
 
 	// Workflow /////
 
-	public function setWorkflow(\Ladb\CoreBundle\Entity\Workflow\Workflow $workflow = null) {
+	public function setWorkflow(?\Ladb\CoreBundle\Entity\Workflow\Workflow $workflow = null) {
 		$this->workflow = $workflow;
 		return $this;
 	}

@@ -160,7 +160,7 @@ class EventRepository extends AbstractEntityRepository {
 		}
 	}
 
-	public function findByRunningNowByUser(User $user = null) {
+	public function findByRunningNowByUser(?User $user = null) {
 		$queryBuilder = $this->getEntityManager()->createQueryBuilder();
 		$queryBuilder
 			->select(array( 'e', 'u', 'mp' ))

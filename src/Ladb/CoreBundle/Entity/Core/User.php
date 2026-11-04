@@ -534,7 +534,7 @@ class User implements UserInterface, LegacyPasswordAuthenticatedUserInterface, E
 
 	// Avatar /////
 
-	public function setAvatar(\Ladb\CoreBundle\Entity\Core\Picture $avatar = null) {
+	public function setAvatar(?\Ladb\CoreBundle\Entity\Core\Picture $avatar = null) {
 		$this->avatar = $avatar;
 		return $this;
 	}

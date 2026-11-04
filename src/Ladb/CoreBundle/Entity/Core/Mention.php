@@ -71,7 +71,7 @@ class Mention implements AuthoredInterface {
 		return $this->mentionedUser;
 	}
 
-	public function setMentionedUser(\Ladb\CoreBundle\Entity\Core\User $mentionedUser = null) {
+	public function setMentionedUser(?\Ladb\CoreBundle\Entity\Core\User $mentionedUser = null) {
 		$this->mentionedUser = $mentionedUser;
 		return $this;
 	}
