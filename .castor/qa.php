@@ -22,6 +22,7 @@ use function docker\docker_exit_code;
 // Deprecations collected by the last PHPUnit run (see phpunit()), relative to the root directory
 const PHPUNIT_DEPRECATIONS_FILE = 'var/deprecations/phpunit.ser';
 const DEPRECATIONS_REPORT_FILE = 'var/deprecations/report.md';
+const PHP_DEPRECATIONS_REPORT_FILE = 'var/deprecations/php.md';
 
 #[AsTask(description: 'Runs all the QA tasks, as the CI does', aliases: ['qa'])]
 function all(): int
@@ -128,7 +129,7 @@ function phpunit(#[AsRawTokens] array $rawTokens = []): int
     ]);
 }
 
-#[AsTask(description: 'Reports the Symfony deprecations grouped by message: container compilation and last PHPUnit run (never fails)')]
+#[AsTask(description: 'Reports the Symfony deprecations grouped by message, and lists those of PHP: container compilation and last PHPUnit run (never fails)')]
 function deprecations(): void
 {
     io()->section('Reporting the Symfony deprecations');
@@ -142,11 +143,16 @@ function deprecations(): void
 
     $counts = [];
     $phpCounts = [];
+    // By message, then by origin and caller (Tests\DeprecationCollector), for php_deprecations()
+    $phpOrigins = [];
 
     foreach (glob($rootDir . '/var/cache/test/*Deprecations.log') ?: [] as $file) {
         foreach (unserialize(file_get_contents($file), ['allowed_classes' => false]) as $log) {
             if (\E_USER_DEPRECATED !== $log['type']) {
                 $phpCounts[$log['message']] = ($phpCounts[$log['message']] ?? 0) + $log['count'];
+                // The kernel only keeps the file and the line of the first occurrence
+                $origin = preg_replace('{^/var/www/}', '', $log['file']) . ':' . $log['line'];
+                $phpOrigins[$log['message']]['container'][$origin][''] = $log['count'];
 
                 continue;
             }
@@ -160,9 +166,10 @@ function deprecations(): void
         // error_reporting is -1 in phpunit.xml.dist: the first value is E_DEPRECATED for the
         // deprecations of PHP itself, 0 for the ones Symfony silences (@trigger_error())
         // (Tests\DeprecationCollector)
-        foreach (unserialize(file_get_contents($phpunitFile), ['allowed_classes' => false]) as [$unsilenced, $message, $count]) {
+        foreach (unserialize(file_get_contents($phpunitFile), ['allowed_classes' => false]) as [$unsilenced, $message, $count, $origins]) {
             if (\E_DEPRECATED === $unsilenced) {
                 $phpCounts[$message] = ($phpCounts[$message] ?? 0) + $count;
+                $phpOrigins[$message]['phpunit'] = $origins;
 
                 continue;
             }
@@ -197,6 +204,80 @@ function deprecations(): void
     }
 
     io()->text(\sprintf('%d Symfony deprecations, %d distinct messages: see %s.', $total, \count($rows), DEPRECATIONS_REPORT_FILE));
+
+    php_deprecations($phpOrigins, $phpunitRun);
+}
+
+/**
+ * Lists the deprecations of PHP itself (E_DEPRECATED), which the report only counts, by where PHP
+ * raises them (with the package and its version for a file of vendor/) and their caller
+ * (Tests\DeprecationCollector::getCaller()).
+ *
+ * @param array<string, array<'container'|'phpunit', array<string, array<string, int>>>> $phpOrigins
+ */
+function php_deprecations(array $phpOrigins, ?string $phpunitRun): void
+{
+    $rootDir = variable('root_dir');
+
+    // Install path of each package, relative to the root directory, for its name and version
+    $packages = [];
+    foreach (['', 'tools/phpstan/', 'tools/phpunit/'] as $dir) {
+        $installed = $rootDir . '/' . $dir . 'vendor/composer/installed.json';
+        if (!is_file($installed)) {
+            continue;
+        }
+        foreach (json_decode(file_get_contents($installed), true)['packages'] as $package) {
+            $packages[$dir . 'vendor/' . $package['name'] . '/'] = $package['name'] . ' ' . $package['version'];
+        }
+    }
+    $packageOf = static function (string $origin) use ($packages): ?string {
+        foreach ($packages as $path => $package) {
+            if (str_starts_with($origin, $path)) {
+                return $package;
+            }
+        }
+
+        return null;
+    };
+
+    $rows = [];
+    foreach ($phpOrigins as $message => $sources) {
+        $counts = ['container' => 0, 'phpunit' => 0];
+        $lines = [];
+        $where = [];
+        foreach ($sources as $source => $origins) {
+            foreach ($origins as $origin => $callers) {
+                foreach ($callers as $caller => $count) {
+                    $counts[$source] += $count;
+                    $package = $packageOf($origin);
+                    $lines[] = [$count, "{$count} × `{$origin}`" . (null === $package ? '' : " ({$package})") . ('' === $caller ? '' : ", called from `{$caller}`") . ('container' === $source ? ' (container)' : '')];
+                    $where[] = $package ?? explode('/', $origin)[0] . '/';
+                }
+            }
+        }
+        rsort($lines);
+        $where = array_unique($where);
+        sort($where);
+        $rows[] = [$counts['container'] + $counts['phpunit'], $counts['container'], $counts['phpunit'], $message, $where, array_column($lines, 1)];
+    }
+    // Most frequent first, then by message
+    usort($rows, static fn (array $a, array $b) => [$b[0], $a[3]] <=> [$a[0], $b[3]]);
+
+    $escape = static fn (string $text): string => str_replace(['|', "\r", "\n"], ['\|', '', ' '], htmlspecialchars($text, \ENT_NOQUOTES));
+    $total = array_sum(array_column($rows, 0));
+    $report = "## PHP deprecations\n\n";
+    $report .= \sprintf("%d deprecations (E_DEPRECATED), %d distinct messages: container compilation (test environment) and %s.\n", $total, \count($rows), null === $phpunitRun ? 'no PHPUnit run' : "last PHPUnit run ({$phpunitRun})");
+    $report .= "Origins: file and line where PHP raises them; only the first one for the container compilation.\n\n";
+    if ($rows) {
+        $report .= "| Total | Container | PHPUnit | Message | Where | Origins |\n| ---: | ---: | ---: | --- | --- | --- |\n";
+        foreach ($rows as [$count, $container, $tests, $message, $where, $origins]) {
+            $report .= \sprintf("| %d | %d | %d | %s | %s | %s |\n", $count, $container, $tests, $escape($message), $escape(implode(', ', $where)), implode('<br>', array_map($escape, $origins)));
+        }
+    }
+
+    fs()->dumpFile($rootDir . '/' . PHP_DEPRECATIONS_REPORT_FILE, $report);
+
+    io()->text(\sprintf('%d PHP deprecations, %d distinct messages: see %s.', $total, \count($rows), PHP_DEPRECATIONS_REPORT_FILE));
 }
 
 /**

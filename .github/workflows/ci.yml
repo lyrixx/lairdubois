@@ -133,7 +133,9 @@ jobs:
               uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
               with:
                   name: deprecations
-                  path: var/deprecations/report.md
+                  path: |
+                      var/deprecations/report.md
+                      var/deprecations/php.md
                   if-no-files-found: ignore
 
     # The end-to-end tests (tests/e2e) beside the QA: same setup (YAML anchors of the job "ci"),
