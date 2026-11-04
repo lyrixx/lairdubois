@@ -74,10 +74,10 @@ runtime, in every container of the image `php`. The ones with a default can be l
 
 Give the accounts of the site on other services only to a server that may use them: with them,
 `ladb:cron:spotlight` publishes on Twitter, Facebook and Mastodon, and the funding takes real
-payments. `MASTODON_INSTANCE=offline://mastodon` keeps the cron from calling Mastodon. The same
-for Google Analytics, on the pages but for the admins: `GA_MEASUREMENT_ID=G-HZ1ZEPHSFS` (the one of
-`parameters.yml.dist`) on the production server only, a preprod would count its visits in those of
-the site.
+payments. `MASTODON_INSTANCE=offline://mastodon` keeps the cron from calling Mastodon. Google
+Analytics likewise: give `GA_MEASUREMENT_ID` (`G-HZ1ZEPHSFS`, the one of `parameters.yml.dist`)
+to the production server only, a preprod would count its visits in those of the site. Every page
+has it, but for the admins.
 
 ## Files
 
