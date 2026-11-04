@@ -262,12 +262,13 @@ castor -c prod docker:push --tag=… # REGISTRY=ghcr.io/…, la CI seulement
   écrit leurs fichiers dans les volumes (`uploads`, `downloads`, `web/media`).
 - `qa:prod-smoke` : l'image (utilisateur, prod sans debug, rien en trop, rien d'écrit hors des
   volumes), la crontab (supercronic), Chromium (capture d'une page de nginx), Liip (un JPEG et un
-  PNG résolus par PHP, servis ensuite par nginx), une vue comptée par le worker `view`, Google
-  Analytics (plus bas), la suite E2E entière sur la stack (`E2E_PROD` y ajoute `pages.spec.ts` :
-  listes et contenus en anonyme, `user` et `admin`, sans les hosts tiers, qui retiendraient
-  l'événement `load`), chaque ligne de la crontab puis leurs effets (sitemaps servis par nginx,
-  vignette d'un processus capturée sur le site), les mails dans Mailpit (signés DKIM) et les
-  notifications web push reçues par `push` (signées VAPID). Un tableau en fin de tâche.
+  PNG résolus par PHP, servis ensuite par nginx), une vue comptée par le worker `view` (le compteur
+  d'avant lu une fois ses files vides, par `rabbitmqctl` : la page de Liip est aussi une vue),
+  Google Analytics (plus bas), la suite E2E entière sur la stack (`E2E_PROD` y ajoute
+  `pages.spec.ts` : listes et contenus en anonyme, `user` et `admin`, sans les hosts tiers, qui
+  retiendraient l'événement `load`), chaque ligne de la crontab puis leurs effets (sitemaps servis
+  par nginx, vignette d'un processus capturée sur le site), les mails dans Mailpit (signés DKIM) et
+  les notifications web push reçues par `push` (signées VAPID). Un tableau en fin de tâche.
 - CI : job `prod` (build, `castor app:install` pour les fixtures, `qa:prod-smoke`,
   `app:prod:describe` dans le résumé) sur chaque PR et push ; job `push` sur push vers `next`
   seulement, après `ci`, `e2e` et `prod` : `docker:push` (bake) vers `ghcr.io/lyrixx/lairdubois/php`
