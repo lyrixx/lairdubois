@@ -519,11 +519,14 @@ MariaDB et Elasticsearch. Avec `-c prod`, dans la stack de prod, chargé par le 
   Symfony ne le reconstruit jamais, et `cache:clear` le laisse quand celui avec debug vient d'être
   reconstruit (« Cache is fresh »). `castor app:elasticsearch:populate` reste en debug, il ne tient
   pas ce volume.
-- Sans objet à ce volume : financement, spotlights, referers, signalements, vues, mentions,
-  témoins, collectifs, accès OpenCutList, statistiques de recherche, abonnements web push. Les
-  `Input` (bois, outils…) sont une liste courte, les tags un pour dix contenus, et ni les usages de
-  tags (`tbl_core_tag_usage`), ni les archives zip des plans et des graphismes, ni les textures de
-  la xylothèque ne sont générés.
+- Hors du jeu : financement, spotlights, referers, signalements, mentions, témoins, collectifs,
+  accès OpenCutList, statistiques de recherche, abonnements web push, et les vues
+  (`tbl_core_view`, remplie à l'usage : à compter à part pour dimensionner). Les `Input` (bois,
+  outils…) sont une liste courte, les tags un pour dix contenus. Ni usages de tags
+  (`tbl_core_tag_usage`), ni archives zip des plans et des graphismes, ni textures de la
+  xylothèque.
+- Les tailles sous-estiment la prod : les textes viennent de 12 phrases, le vocabulaire et le
+  `_source` d'Elasticsearch sont donc bien plus petits que ceux de vrais textes.
 
 ## Tests
 
