@@ -556,8 +556,8 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   `getVideoSitemapData()` (`SITEMAP_TITLE`) et `getVideoGwData()` (Youtook), et ne donne pas de
   vignette pour `VIMEO_WITHOUT_THUMBNAIL` et `PLAYLIST_WITHOUT_THUMBNAIL` ; la capture
   Chromium de `WebScreenshotUtils` copie une image des fixtures et garde les URL
-  (`tests.web_screenshot_utils`, `getUrls()`, avant le reboot suivant). Stripe, appelé en statique par
-  `FundingController` : un listener de `kernel.request` lui donne le client HTTP
+  (`tests.web_screenshot_utils`, `getUrls()`, avant le reboot suivant). Stripe, appelé en statique
+  par `FundingController` : un listener de `kernel.request` lui donne le client HTTP
   `Tests\Double\OfflineStripeClient`, qui ne connaît que le payment intent qu'il crée
   (`PAYMENT_INTENT_ID`) et garde les requêtes (`tests.stripe_client`, `getRequests()`).
 - Graph API de Facebook (`ApiController`, `OpenGraphUtils`) : le SDK est créé dans le code du site,
@@ -1247,8 +1247,9 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   Chromium récents compte l'interface dans `windowSize` : `setViewport()` donne sa taille à la page
   (#155). Le vrai Chromium appelle Google dès son démarrage : en test, le double de
   `config_test.yml`. Une vraie capture se vérifie à la main, `captureToPicture()` sur une page
-  servie par `php -S` dans le builder (#155, #224) ; Chromium passe `vimeo.com` et `youtube.com`
-  en HTTPS de lui-même (HSTS), `--host-resolver-rules` les mène à ce serveur sans `dai.ly`.
+  servie par `php -S` dans le builder (#155, #224). Pour un hébergeur de vidéos :
+  `--host-resolver-rules` vers ce serveur, sur `dai.ly` (Chromium passe `vimeo.com` et
+  `youtube.com` en HTTPS de lui-même, HSTS).
   - `captureToPicture()` donne son URL à Chromium telle quelle : une page du site, jamais une URL
     écrite par un membre. Celles-ci passent par `captureVideoToPicture()` :
     `VideoHostingUtils::isHostedVideoUrl()` veut la page d'une vidéo sur son hébergeur, ancrée de
