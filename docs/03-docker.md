@@ -15,6 +15,11 @@ Tags: `next` (the last push) and the full SHA of the commit. The images, the Doc
 stack that runs them are in `infrastructure/docker/` (`docker-compose.prod.yml`, for the tests:
 throwaway secrets, Mailpit instead of a SMTP server).
 
+The system packages of the images (Debian in `php`, Alpine in `nginx`) are upgraded once a week:
+the first build of each week installs them again, the next ones of the week reuse those layers.
+An image has the packages of the week of its push: deploy the last `next` to get the security
+updates of Debian and Alpine.
+
 ## Containers
 
 All of them from the image `php`, but `nginx`, in `/var/www`:

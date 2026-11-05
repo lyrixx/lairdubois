@@ -4,7 +4,14 @@ FROM debian:13.7-slim AS php-base
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-RUN apt-get update \
+# The week of the build (2026-W45), given by castor docker:build and docker:push: on the first build
+# of each week, every layer from here is built again, with the system packages of the day, instead
+# of keeping those of its first build in the cache of the layers (local, and GitHub Actions'). The
+# upgrade brings the packages of the image debian up to date
+ARG SYSTEM_PACKAGES_WEEK
+RUN : "${SYSTEM_PACKAGES_WEEK:?castor docker:build gives the week of the build.}" \
+    && apt-get update \
+    && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends \
         curl \
         ca-certificates \
@@ -162,7 +169,8 @@ EOF
 #
 # The repository is the additional build context "app" (its .dockerignore applies), see
 # docker-compose.prod.yml:
-#   docker buildx build --build-context app=../../../.. --target php .
+#   docker buildx build --build-context app=../../../.. --build-arg PHP_VERSION=8.5 \
+#       --build-arg SYSTEM_PACKAGES_WEEK="$(date -u +%G-W%V)" --target php .
 
 FROM builder AS app-build
 
@@ -263,7 +271,12 @@ HEALTHCHECK --interval=10s --timeout=5s --retries=3 \
 
 CMD ["sh", "-c", "exec /usr/sbin/php-fpm${PHP_VERSION}"]
 
-FROM nginx:1.29-alpine AS nginx
+FROM nginx:1.30-alpine AS nginx
+
+# The packages of Alpine upgraded past those of the image, once a week (see php-base)
+ARG SYSTEM_PACKAGES_WEEK
+RUN : "${SYSTEM_PACKAGES_WEEK:?castor docker:build gives the week of the build.}" \
+    && apk upgrade --no-cache
 
 COPY prod/nginx.conf /etc/nginx/conf.d/default.conf
 
