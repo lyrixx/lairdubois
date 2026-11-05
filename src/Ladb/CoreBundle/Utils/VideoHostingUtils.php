@@ -15,6 +15,15 @@ class VideoHostingUtils {
 	const KIND_YOUTUBEPLAYLIST = 4;
 	const KIND_FACEBOOK = 5;
 
+	// A video in a URL, from the domain of its host on. A playlist has a longer identifier than a
+	// YouTube video: it comes first
+	private const VIDEO_PATTERNS = array(
+		VideoHostingUtils::KIND_YOUTUBEPLAYLIST => '(?:youtu\.be\/|youtube\.com(?:\/embed\/|\/v\/|\/watch\?v=|\/playlist\?list=|\/ytscreeningroom\?v=|\/feeds\/api\/videos\/))([\w\-]{12,})',
+		VideoHostingUtils::KIND_YOUTUBE => '(?:youtu\.be\/|youtube\.com(?:\/embed\/|\/v\/|\/watch\?v=|\/ytscreeningroom\?v=|\/feeds\/api\/videos\/))([\w\-]{11})',
+		VideoHostingUtils::KIND_DAILYMOTION => '(?:dailymotion\.com\/video|dai\.ly)\/([a-zA-Z0-9]{7}|[A-Za-z0-9]{6})',
+		VideoHostingUtils::KIND_VIMEO => 'vimeo\.com\/([0-9]{1,10})',
+	);
+
 	private $googleApiKey;
 	private $twig;
 
@@ -32,28 +41,12 @@ class VideoHostingUtils {
 
 		if (!is_null($url)) {
 
-			// YouTube Playlist
-			if (preg_match('~(?:http|https|)(?::\/\/|)(?:www.|)(?:youtu\.be\/|youtube\.com(?:\/embed\/|\/v\/|\/watch\?v=|\/playlist\?list=|\/ytscreeningroom\?v=|\/feeds\/api\/videos\/))([\w\-]{12,})[a-z0-9;:@#?&%=+\/\$_.-]*~i', $url, $match)) {
-				$kind = VideoHostingUtils::KIND_YOUTUBEPLAYLIST;
-				$embedIdentifier = $match[1];
-			}
-
-			// YouTube
-			else if (preg_match('~(?:http|https|)(?::\/\/|)(?:www.|)(?:youtu\.be\/|youtube\.com(?:\/embed\/|\/v\/|\/watch\?v=|\/ytscreeningroom\?v=|\/feeds\/api\/videos\/))([\w\-]{11})[a-z0-9;:@#?&%=+\/\$_.-]*~i', $url, $match)) {
-				$kind = VideoHostingUtils::KIND_YOUTUBE;
-				$embedIdentifier = $match[1];
-			}
-
-			// Dailymotion
-			else if (preg_match('%(?:dailymotion\.com/video|dai\.ly)/([a-zA-Z0-9]{7}|[A-Za-z0-9]{6})%i', $url, $match)) {
-				$kind = VideoHostingUtils::KIND_DAILYMOTION;
-				$embedIdentifier = $match[1];
-			}
-
-			// Vimeo
-			else if (preg_match('%vimeo\.com\/([0-9]{1,10})%i', $url, $match)) {
-				$kind = VideoHostingUtils::KIND_VIMEO;
-				$embedIdentifier = $match[1];
+			foreach (VideoHostingUtils::VIDEO_PATTERNS as $patternKind => $pattern) {
+				if (preg_match('~'.$pattern.'~i', $url, $match)) {
+					$kind = $patternKind;
+					$embedIdentifier = $match[1];
+					break;
+				}
 			}
 
 			// Facebook
@@ -68,6 +61,28 @@ class VideoHostingUtils {
 			'kind' => $kind,
 			'embedIdentifier' => $embedIdentifier,
 		);
+	}
+
+	/**
+	 * Whether a URL is the one of a video on its host, in http or https, and nothing else:
+	 * getKindAndEmbedIdentifier() finds a video anywhere in a URL, whatever its host. Chromium opens
+	 * this URL (WebScreenshotUtils::captureVideoToPicture()) and reads it its own way: the pattern
+	 * goes from its first character to its last, without \ (a / to Chromium) or anything out of
+	 * printable ASCII, and without dot segments, that Chromium resolves.
+	 */
+	public function isHostedVideoUrl($url) {
+
+		if (preg_match('~\/\.|%2e~i', $url)) {
+			return false;
+		}
+
+		foreach (VideoHostingUtils::VIDEO_PATTERNS as $pattern) {
+			if (preg_match('~^https?:\/\/(?:(?:www|m|music|touch)\.)?'.$pattern.'[\x21-\x5b\x5d-\x7e]*\z~i', $url)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	public function getPlayerFrame($kind, $embedIdentifier, $width = '560', $height = '420', $styleClass = '', $autoplay = false, $format = '16by9' /* or 4by3 */, $itemprop = 'video') {

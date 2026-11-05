@@ -16,8 +16,18 @@ final class OfflineVideoHostingUtils extends VideoHostingUtils
      */
     public const SITEMAP_TITLE = 'Vidéo hors ligne';
 
+    /**
+     * A video and a playlist that the APIs of Vimeo and YouTube do not know: no thumbnail.
+     */
+    public const VIMEO_WITHOUT_THUMBNAIL = '404404';
+    public const PLAYLIST_WITHOUT_THUMBNAIL = 'PLwithoutThumbnail';
+
     public function getThumbnailUrl($kind, $embedIdentifier)
     {
+        if (\in_array($embedIdentifier, [self::VIMEO_WITHOUT_THUMBNAIL, self::PLAYLIST_WITHOUT_THUMBNAIL], true)) {
+            return null;
+        }
+
         if (self::KIND_YOUTUBEPLAYLIST === $kind || self::KIND_VIMEO === $kind) {
             return 'https://video.example/'.$kind.'/'.$embedIdentifier.'.jpg';
         }
