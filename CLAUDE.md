@@ -117,6 +117,7 @@ castor logs [--service=frontend]
 castor app:install                # composer install, clés DKIM et VAPID jetables si absentes
 castor app:db:schema              # base, schéma (doctrine:schema:update) et table sessions
 castor app:db:fixtures           # recrée la base avec les fixtures, notifications, index
+castor app:db:fixtures-volume [--count=10000]  # démarre la stack, puis la même chose avec le jeu de volume
 castor app:elasticsearch:populate # fos:elastica:populate
 castor app:assets:build           # CSS et JS minifiés dans web/build/ (npm ci si besoin, Vite)
 castor app:assets:watch           # les reconstruit à chaque modification, sans minifier
@@ -210,6 +211,7 @@ castor -c prod start               # secrets jetables, schéma, fixtures si la b
 castor qa:prod-smoke               # recharge les fixtures, puis vérifie tout le site dans la stack
 castor qa:prod-e2e [-- --grep …]   # Playwright sur la stack de prod, sur ses données
 castor -c prod app:prod:fixtures   # recharge les fixtures de la stack de prod, vide celui de Liip
+castor -c prod app:db:fixtures-volume [--count=10000]  # la même chose avec le jeu de volume (voir « Fixtures »)
 castor -c prod app:prod:describe   # taille et contenu des images, en Markdown (résumé de la CI)
 castor -c prod docker:push --tag=… # REGISTRY=ghcr.io/…, la CI seulement
 ```
@@ -486,6 +488,42 @@ identifiants des comptes sont des constantes : `UserFixtures::ADMIN`, `USER`, `U
 Les autres tables (commentaires, likes, votes, avis, feedbacks, valeurs de la xylothèque,
 notifications…) ont aussi une ligne d'id 1, mais son contenu dépend de l'ordre de chargement :
 le retrouver par requête plutôt que de supposer ce qu'elle porte.
+
+Jeu de volume (#281) : `castor app:db:fixtures-volume [--count=10000]` démarre la stack, recharge
+les fixtures et ajoute `--count` éléments par entité, pour voir le site avec du volume et mesurer
+MariaDB et Elasticsearch. Avec `-c prod`, dans la stack de prod, chargé par le builder.
+
+- Ce n'est pas une fixture, mais la commande `ladb:fixtures:volume` (`VolumeFixturesCommand`, dans
+  `DataFixtures/` : absente de l'image de prod) : `doctrine:fixtures:load` sans `--group` charge
+  toutes les fixtures, celles d'un groupe comprises, qui finiraient dans les tests, la CI et
+  `qa:prod-smoke`. Les fixtures par défaut ne bougent pas : elle s'ajoute après elles, ses ids
+  commencent juste après les leurs.
+- Comptes `membre1`, `membre2`…, mot de passe `volume`, un seul hash pour tous (`native`, au coût 13 :
+  0,4 s le hash, plus d'une heure pour 10 000).
+- Contenus par l'ORM, par lots (`flush()`, `clear()`), sans événements ni index
+  (`VolumeContentFactory`) : les rejouer par `FixtureFactory` prend 44 ms par contenu, plus de
+  deux heures pour 10 000 de chaque. Un nouveau type de contenu s'y ajoute, et dans `SHOW_PAGES` de
+  `Tests\Command\VolumeFixturesTest`, qui charge deux éléments par entité et ouvre leurs pages.
+- Interactions et compteurs en SQL (`VolumeInteractions`) : 1 à 3 commentaires et likes par
+  contenu, un suivi par auteur, un abonnement par compte, participations, avis, témoignages et votes.
+  Leurs activités ne sont pas en attente, et leurs notifications sont écrites là, déjà vues :
+  `ladb:cron:notification:populate` lit en mémoire toutes les activités en attente, et rien ne part
+  par mail.
+- Images : une ligne de `tbl_core_picture` par image, sur une dizaine de fichiers
+  (`fixture-volume-*`) : `uploads/` et `web/media/` ne grossissent pas, leur taille ne dit rien.
+  Supprimer un contenu du jeu supprime le fichier de tous ceux qui le partagent
+  (`#[ORM\PostRemove]` de `Picture`).
+- En debug, `ElasticaLogger` garde chaque requête en mémoire : `fos:elastica:populate` s'arrête sur
+  `memory_limit` dès le troisième index. `castor start` et la tâche le lancent en `--no-debug`
+  (`console_without_debug()`), après avoir retiré le container sans debug de la fois d'avant :
+  Symfony ne le reconstruit jamais, et `cache:clear` le laisse quand celui avec debug vient d'être
+  reconstruit (« Cache is fresh »). `castor app:elasticsearch:populate` reste en debug, il ne tient
+  pas ce volume.
+- Sans objet à ce volume : financement, spotlights, referers, signalements, vues, mentions,
+  témoins, collectifs, accès OpenCutList, statistiques de recherche, abonnements web push. Les
+  `Input` (bois, outils…) sont une liste courte, les tags un pour dix contenus, et ni les usages de
+  tags (`tbl_core_tag_usage`), ni les archives zip des plans et des graphismes, ni les textures de
+  la xylothèque ne sont générés.
 
 ## Tests
 
