@@ -107,6 +107,7 @@ function build(
         'build',
         '--build-arg', 'PHP_VERSION=' . variable('php_version'),
         '--build-arg', 'PROJECT_NAME=' . variable('project_name'),
+        '--build-arg', 'SYSTEM_PACKAGES_WEEK=' . get_system_packages_week(),
     ];
 
     if ($service) {
@@ -371,6 +372,8 @@ function push(
     }
     $command[] = '--set';
     $command[] = '*.args.PHP_VERSION=' . $c['php_version'];
+    $command[] = '--set';
+    $command[] = '*.args.SYSTEM_PACKAGES_WEEK=' . get_system_packages_week();
     // In GitHub Actions: GHCR links the packages to the repository (permissions, visibility)
     if (false !== getenv('GITHUB_REPOSITORY')) {
         $command[] = '--set';
@@ -394,6 +397,15 @@ function push(
     io()->title('Pushing the production images');
 
     run([...$command, ...$services], context: $c);
+}
+
+/**
+ * The ISO week of the build, in UTC (2026-W45): the layers of the system packages are built again
+ * once a week (Dockerfile of services/php).
+ */
+function get_system_packages_week(): string
+{
+    return gmdate('o-\WW');
 }
 
 /**

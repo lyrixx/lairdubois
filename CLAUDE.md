@@ -223,10 +223,21 @@ castor -c prod docker:push --tag=… # REGISTRY=ghcr.io/…, la CI seulement
   commande par défaut), les trois workers (`bin/console messenger:consume …`) et le cron
   (`supercronic /etc/lairdubois/crontab`, `prod/crontab`, que `qa:prod-smoke` compare à l'étape
   13 de `docs/01-installation.md`, en heure de Paris).
-- `nginx` : `nginx:1.29-alpine` et le `web/` de l'image, la conf de la prod
-  (`docs/nginx/conf/www.lairdubois.fr.conf`) dans `prod/nginx.conf`, en HTTP sur 8080 : le TLS et
-  `/.well-known/mercure` sont au proxy de devant (le routeur de la stack). Il prend l'adresse du
-  client dans `X-Forwarded-For` depuis les réseaux privés (`REMOTE_ADDR` des inscriptions).
+- `nginx` : `nginx:1.30-alpine` (la ligne stable, la 1.29 n'est plus maintenue) et le `web/` de
+  l'image, la conf de la prod (`docs/nginx/conf/www.lairdubois.fr.conf`) dans `prod/nginx.conf`, en
+  HTTP sur 8080 : le TLS et `/.well-known/mercure` sont au proxy de devant (le routeur de la stack).
+  Il prend l'adresse du client dans `X-Forwarded-For` depuis les réseaux privés (`REMOTE_ADDR` des
+  inscriptions).
+- Paquets système : `castor docker:build` et `docker:push` donnent au Dockerfile la semaine ISO du
+  build, en UTC (`SYSTEM_PACKAGES_WEEK=2026-W45`), déclarée en tête de `php-base` et de l'étape
+  `nginx`. Au premier build de chaque semaine, ces couches et tout ce qui en descend sont
+  reconstruits avec les paquets du jour (`apt-get upgrade` pour ceux de l'image debian, `apk
+  upgrade` pour ceux de l'image nginx), au lieu de garder dans le cache des couches (local et
+  `gha`) ceux de leur premier build. Les images de dev aussi (même `php-base`). `app-build` descend
+  du builder : composer, npm et Vite repartent de zéro avec elles, une fois par semaine (DURATION),
+  puis le cache resert. Pas de job planifié (`schedule`) : il ne tourne que sur la branche par
+  défaut, `master`. Les images du GHCR ont les paquets du dernier push sur `next`. Sans castor, le
+  build échoue sans la semaine (`${SYSTEM_PACKAGES_WEEK:?}`).
 - Paramètres : le `parameters.yml` de l'image (`prod/parameters.yml`, mêmes clés que le dist) lit
   chaque valeur dans l'environnement du conteneur (`%env()%`), à l'exécution. Le cache de prod est
   chauffé au build : l'image démarre tout de suite, la même pour tous les conteneurs, sans secret.
@@ -348,7 +359,8 @@ castor qa:rector <chemin>… [--dry-run]  # Rector (tools/rector) : get() et get
   namespaces de Twig, bundles de `vendor/` compris : `qa:lint` lui donne les nôtres.
 - Cache GitHub Actions : couches Docker (`type=gha`, un scope par cible du Dockerfile, via un
   `docker-compose.override.yml` écrit par le workflow), cache Composer (`.home/.cache/composer`)
-  et cache npm (`.home/.npm`).
+  et cache npm (`.home/.npm`). Les couches des paquets système, et ce qui en descend, ne servent
+  qu'une semaine (`SYSTEM_PACKAGES_WEEK`, voir « Prod »).
 - Les deux jobs construisent les assets (`castor app:assets:build`) : Reprise lit leur
   `entrypoints.json` et `asset()` leur manifest sur chaque page. `qa:phpunit` et `qa:e2e` les
   construisent aussi s'ils manquent.

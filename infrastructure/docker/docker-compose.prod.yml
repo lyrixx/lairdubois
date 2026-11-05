@@ -117,7 +117,7 @@ services:
     # The push service of the browsers, for the web push notifications: answers 201 to every
     # request, and logs it with its headers (castor qa:prod-smoke reads them)
     push:
-        image: nginx:1.29-alpine
+        image: nginx:1.30-alpine
         command:
             - sh
             - -c
