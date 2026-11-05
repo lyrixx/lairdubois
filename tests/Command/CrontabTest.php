@@ -240,6 +240,7 @@ final class CrontabTest extends WebTestCase
 
         self::assertSame(0, $exitCode, $output);
         self::assertNotNull(static::getEntityManager()->find(Workflow::class, 1)->getMainPicture());
+        self::assertSame([static::getContainer()->getParameter('router_default_uri').'/processus/1/internal/diagram'], static::getContainer()->get('tests.web_screenshot_utils')->getUrls());
     }
 
     /**

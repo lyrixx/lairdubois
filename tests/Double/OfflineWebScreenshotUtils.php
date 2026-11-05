@@ -10,8 +10,13 @@ use Ladb\CoreBundle\Utils\WebScreenshotUtils;
  */
 final class OfflineWebScreenshotUtils extends WebScreenshotUtils
 {
+    /** @var list<string> */
+    private array $urls = [];
+
     public function captureToPicture($url, $width, $height, $clipWidth = 0, $clipHeight = 0, $waitBeforeCapture = 0)
     {
+        $this->urls[] = $url;
+
         $picture = $this->pictureManager->createEmpty('jpg', false);
         copy(OfflinePictureManager::PICTURE, $picture->getAbsoluteMasterPath());
         $this->pictureManager->computeSizes($picture);
@@ -21,5 +26,15 @@ final class OfflineWebScreenshotUtils extends WebScreenshotUtils
         $om->flush();
 
         return $picture;
+    }
+
+    /**
+     * The URLs given to Chromium, until the next reboot of the kernel.
+     *
+     * @return list<string>
+     */
+    public function getUrls(): array
+    {
+        return $this->urls;
     }
 }

@@ -8,8 +8,10 @@ use Ladb\CoreBundle\Utils\VideoHostingUtils;
 use Symfony\Component\DomCrawler\Crawler;
 use Tests\Double\OfflineLocalisableUtils;
 use Tests\Double\OfflineOpenGraphUtils;
+use Tests\Double\OfflineVideoHostingUtils;
 use Tests\DoUpTrait;
 use Tests\PublicationTestCase;
+use Tests\XhrTrait;
 
 /**
  * A find is a link (website or video) or a gallery. The find of the fixtures is a gallery.
@@ -17,6 +19,7 @@ use Tests\PublicationTestCase;
 final class FindTest extends PublicationTestCase
 {
     use DoUpTrait;
+    use XhrTrait;
 
     protected static function getRoutePrefix(): string
     {
@@ -101,6 +104,118 @@ final class FindTest extends PublicationTestCase
         yield 'YouTube' => ['https://www.youtube.com/watch?v=dQw4w9WgXcQ', VideoHostingUtils::KIND_YOUTUBE, 'dQw4w9WgXcQ', 'http://img.youtube.com/vi/dQw4w9WgXcQ/hqdefault.jpg'];
         // The thumbnail comes from the API of Vimeo: the one of the double
         yield 'Vimeo' => ['https://vimeo.com/76979871', VideoHostingUtils::KIND_VIMEO, '76979871', 'https://video.example/3/76979871.jpg'];
+    }
+
+    /**
+     * Without a thumbnail from its host, a video gets a screenshot of its page.
+     *
+     * @dataProvider provideVideosWithoutThumbnail
+     */
+    public function testCreateVideoWithoutThumbnail(string $url, int $kind): void
+    {
+        $client = static::createClientAs(UserFixtures::USER);
+
+        $this->submitNewForm($client, UserFixtures::USER, $this->getLinkFormValues($url));
+
+        self::assertSame([$url], $client->getContainer()->get('tests.web_screenshot_utils')->getUrls());
+        $find = $this->findLast();
+        self::assertSame($kind, $find->getContent()->getKind());
+        self::assertNotNull($find->getMainPicture()->getWidth());
+    }
+
+    /**
+     * @return iterable<string, array{string, int}>
+     */
+    public static function provideVideosWithoutThumbnail(): iterable
+    {
+        $video = OfflineVideoHostingUtils::VIMEO_WITHOUT_THUMBNAIL;
+        $playlist = OfflineVideoHostingUtils::PLAYLIST_WITHOUT_THUMBNAIL;
+
+        yield 'Vimeo' => ['https://vimeo.com/'.$video, VideoHostingUtils::KIND_VIMEO];
+        yield 'Vimeo, http' => ['http://vimeo.com/'.$video, VideoHostingUtils::KIND_VIMEO];
+        yield 'Vimeo, www' => ['https://www.vimeo.com/'.$video, VideoHostingUtils::KIND_VIMEO];
+        yield 'Vimeo, unlisted' => ['https://vimeo.com/'.$video.'/0123456789', VideoHostingUtils::KIND_VIMEO];
+        yield 'Vimeo, query' => ['https://vimeo.com/'.$video.'?share=copy&fl=sv', VideoHostingUtils::KIND_VIMEO];
+        yield 'Vimeo, fragment' => ['https://vimeo.com/'.$video.'#t=30s', VideoHostingUtils::KIND_VIMEO];
+        yield 'playlist' => ['https://www.youtube.com/playlist?list='.$playlist, VideoHostingUtils::KIND_YOUTUBEPLAYLIST];
+        yield 'playlist, http' => ['http://www.youtube.com/playlist?list='.$playlist, VideoHostingUtils::KIND_YOUTUBEPLAYLIST];
+        yield 'playlist, no subdomain' => ['https://youtube.com/playlist?list='.$playlist, VideoHostingUtils::KIND_YOUTUBEPLAYLIST];
+        yield 'playlist, mobile' => ['https://m.youtube.com/playlist?list='.$playlist, VideoHostingUtils::KIND_YOUTUBEPLAYLIST];
+        yield 'playlist, music' => ['https://music.youtube.com/playlist?list='.$playlist.'&si=abc', VideoHostingUtils::KIND_YOUTUBEPLAYLIST];
+        yield 'playlist, embed' => ['https://www.youtube.com/embed/'.$playlist, VideoHostingUtils::KIND_YOUTUBEPLAYLIST];
+        yield 'playlist, short' => ['https://youtu.be/'.$playlist, VideoHostingUtils::KIND_YOUTUBEPLAYLIST];
+    }
+
+    /**
+     * Chromium only opens the page of a video on its host. Any other URL with a video in it stays
+     * a video, without a thumbnail, as when a screenshot fails.
+     *
+     * @dataProvider provideVideosOutOfTheirHost
+     */
+    public function testCreateVideoOutOfItsHost(string $url, int $kind): void
+    {
+        $client = static::createClientAs(UserFixtures::USER);
+        $logFile = static::$kernel->getLogDir().'/test.log';
+        clearstatcache();
+        $logOffset = file_exists($logFile) ? filesize($logFile) : 0;
+
+        $this->submitNewForm($client, UserFixtures::USER, $this->getLinkFormValues($url));
+
+        self::assertSame([], $client->getContainer()->get('tests.web_screenshot_utils')->getUrls());
+        self::assertStringContainsString('app.WARNING: Screenshot refused: not the URL of a video on its host.', (string) file_get_contents($logFile, false, null, $logOffset));
+        $find = $this->findLast();
+        self::assertSame(Find::KIND_VIDEO, $find->getKind());
+        self::assertSame($url, $find->getContent()->getUrl());
+        self::assertSame($kind, $find->getContent()->getKind());
+        self::assertNull($find->getContent()->getThumbnail());
+        self::assertNull($find->getMainPicture());
+
+        $client->followRedirect();
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertStringContainsString('empty_find.png', (string) $client->getResponse()->getContent());
+    }
+
+    /**
+     * @return iterable<string, array{string, int}>
+     */
+    public static function provideVideosOutOfTheirHost(): iterable
+    {
+        $vimeo = 'vimeo.com/'.OfflineVideoHostingUtils::VIMEO_WITHOUT_THUMBNAIL;
+        $playlist = 'youtu.be/'.OfflineVideoHostingUtils::PLAYLIST_WITHOUT_THUMBNAIL;
+
+        yield 'other host' => ['https://example.test/'.$vimeo, VideoHostingUtils::KIND_VIMEO];
+        yield 'other host, playlist' => ['https://example.test/'.$playlist, VideoHostingUtils::KIND_YOUTUBEPLAYLIST];
+        yield 'other host, query' => ['https://example.test/?video='.$vimeo, VideoHostingUtils::KIND_VIMEO];
+        yield 'other domain' => ['https://example'.$vimeo, VideoHostingUtils::KIND_VIMEO];
+        yield 'user' => ['https://vimeo.com@example.test/'.$vimeo, VideoHostingUtils::KIND_VIMEO];
+        yield 'loopback' => ['http://127.0.0.1/'.$vimeo, VideoHostingUtils::KIND_VIMEO];
+        yield 'localhost' => ['http://localhost/'.$vimeo, VideoHostingUtils::KIND_VIMEO];
+        yield 'loopback, IPv6' => ['http://[::1]/'.$vimeo, VideoHostingUtils::KIND_VIMEO];
+        yield 'private address' => ['http://10.0.0.1/'.$vimeo, VideoHostingUtils::KIND_VIMEO];
+        yield 'private address, 192.168' => ['http://192.168.0.1/'.$playlist, VideoHostingUtils::KIND_YOUTUBEPLAYLIST];
+        yield 'name of a service' => ['http://nginx:8080/'.$vimeo, VideoHostingUtils::KIND_VIMEO];
+    }
+
+    /**
+     * The pages of a video without a thumbnail, once published: the picture is not required.
+     */
+    public function testPagesOfAVideoWithoutThumbnail(): void
+    {
+        $client = static::createClientAs(UserFixtures::USER);
+        $this->submitNewForm($client, UserFixtures::USER, $this->getLinkFormValues('https://example.test/vimeo.com/'.OfflineVideoHostingUtils::VIMEO_WITHOUT_THUMBNAIL));
+        $id = $this->findLast()->getId();
+
+        $client->request('GET', $this->path('publish', ['id' => $id]));
+        self::assertSame(302, $client->getResponse()->getStatusCode());
+
+        foreach (['show', 'card', 'widget'] as $action) {
+            static::xhr($client, 'GET', $this->path($action, ['id' => $id]));
+            self::assertSame(200, $client->getResponse()->getStatusCode(), $action);
+        }
+        foreach ([$this->path('list'), '/@user/trouvailles'] as $path) {
+            $client->request('GET', $path);
+            self::assertSame(200, $client->getResponse()->getStatusCode(), $path);
+        }
     }
 
     public function testCreateGallery(): void
