@@ -4131,16 +4131,16 @@
         },
         {
             "name": "moment/moment",
-            "version": "2.29.1",
+            "version": "2.29.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/moment/moment.git",
-                "reference": "b7ec8e2ec068e03de4f832f28362675bb9e02261"
+                "reference": "000ac1800e620f770f4eb31b5ae908f6167b0ab2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/moment/moment/zipball/b7ec8e2ec068e03de4f832f28362675bb9e02261",
-                "reference": "b7ec8e2ec068e03de4f832f28362675bb9e02261",
+                "url": "https://api.github.com/repos/moment/moment/zipball/000ac1800e620f770f4eb31b5ae908f6167b0ab2",
+                "reference": "000ac1800e620f770f4eb31b5ae908f6167b0ab2",
                 "shasum": ""
             },
             "require": {
@@ -4183,9 +4183,9 @@
             ],
             "support": {
                 "issues": "https://github.com/moment/moment/issues",
-                "source": "https://github.com/moment/moment/tree/2.29.1"
+                "source": "https://github.com/moment/moment/tree/2.29.4"
             },
-            "time": "2020-10-06T11:13:21+00:00"
+            "time": "2022-07-06T16:00:01+00:00"
         },
         {
             "name": "monolog/monolog",
