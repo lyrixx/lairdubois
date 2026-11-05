@@ -371,7 +371,7 @@ const defaultOptions = {
     kind: OptionKind.API
   },
   isEvalSupported: {
-    value: true,
+    value: false, // Not the default of PDF.js (CVE-2024-4367)
     kind: OptionKind.API
   },
   maxImageSize: {
