@@ -2,6 +2,8 @@
 
 namespace Tests\Search;
 
+use Elastica\Exception\ClientException;
+use Elastica\Query\MatchAll;
 use Ladb\CoreBundle\DataFixtures\UserFixtures;
 use Ladb\CoreBundle\Entity\Collection\Collection;
 use Ladb\CoreBundle\Entity\Find\Find;
@@ -30,6 +32,54 @@ use Tests\XhrTrait;
 final class SearchTest extends WebTestCase
 {
     use XhrTrait;
+
+    /**
+     * Texts that Elasticsearch refuses: the syntax of the query string, or a value that does not
+     * suit the type of a field. Each of them is a 500 before #279.
+     */
+    private const REFUSED_TEXTS = [
+        'a/b',
+        '1/2',
+        '/a',
+        '"a/b"',
+        '[a',
+        'a]',
+        '{a',
+        'a}',
+        '(a',
+        'a)',
+        ':',
+        'a:',
+        ':a',
+        '"',
+        '"a',
+        'a"',
+        'a"b',
+        '~',
+        '~a',
+        'tabel~x',
+        'a~3',
+        '^',
+        '^a',
+        'a^',
+        'a^b',
+        '!',
+        'a!',
+        '&&',
+        '||',
+        '+',
+        '-',
+        '\\',
+        'a\\',
+        'AND',
+        'OR',
+        'NOT',
+        'table AND basse',
+        'viewCount:abc',
+        'createdAt:abc',
+        'createdAt:"now+"',
+        '/[/',
+    ];
 
     /**
      * @dataProvider provideSearchRoutes
@@ -121,6 +171,111 @@ final class SearchTest extends WebTestCase
         yield 'sort by likes' => ['@sort-popular-likes', true];
         yield 'sort by comments' => ['@sort-popular-comments', true];
         yield 'sort by views' => ['@sort-popular-views', true];
+    }
+
+    /**
+     * A text that Elasticsearch refuses finds nothing, like a word of nothing.
+     *
+     * @dataProvider provideRefusedTexts
+     */
+    public function testRefusedText(string $route, string $query): void
+    {
+        $client = static::createClient();
+        $crawler = $client->request('GET', static::generatePath($route, ['q' => $query]));
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertSearchFoundNothing($client);
+        self::assertCount(1, $crawler->filter('#ladb_total_hits.ladb-total-hits-null'));
+        self::assertCount(0, $crawler->filter('link[rel="next"]'));
+    }
+
+    /**
+     * @return iterable<string, array{string, string}>
+     */
+    public static function provideRefusedTexts(): iterable
+    {
+        foreach (['core_creation_list', 'core_plan_list', 'core_wood_list'] as $route) {
+            foreach (self::REFUSED_TEXTS as $text) {
+                yield $route.' '.$text => [$route, $text];
+            }
+        }
+
+        // The value of a facet goes to Elasticsearch like a text, between quotes for some
+        yield 'tag' => ['core_creation_list', '@tag:a/b'];
+        yield 'tag with quotes' => ['core_creation_list', '@tag:"a/b"'];
+        yield 'author' => ['core_plan_list', '@author:a/b'];
+        yield 'authors' => ['core_book_list', '@authors:a"b'];
+        yield 'facet and text' => ['core_creation_list', '@tag:salon a/b'];
+        yield 'text and sort' => ['core_creation_list', '@sort-popular-views a/b'];
+        yield 'text and random sort' => ['core_creation_list', '@sort-random:42 a/b'];
+    }
+
+    /**
+     * The search box asks for the list in XHR, and reads its total in the response.
+     */
+    public function testRefusedTextInXhr(): void
+    {
+        $client = static::createClient();
+        $crawler = static::xhr($client, 'GET', static::generatePath('core_creation_list', ['q' => 'a/b']));
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertSearchFoundNothing($client);
+        self::assertCount(1, $crawler->filter('#ladb_total_hits.ladb-total-hits-null'));
+    }
+
+    public function testRefusedTextInTypeahead(): void
+    {
+        $client = static::createClient();
+        $client->request('GET', static::generatePath('core_search_typeahead_users_json', ['q' => 'a/b']));
+
+        self::assertSame(200, $client->getResponse()->getStatusCode());
+        self::assertSame(['suggestions' => ['']], json_decode($client->getResponse()->getContent(), true, 512, \JSON_THROW_ON_ERROR));
+    }
+
+    /**
+     * The syntax of the query string keeps working: what looks like a refused text and is not.
+     *
+     * @dataProvider provideTypedSyntax
+     */
+    public function testTypedSyntax(string $query, bool $listed): void
+    {
+        $client = static::createClient();
+
+        self::assertSame($listed, $this->isListed($client, 'core_creation_list', $query, $this->findCreation()));
+    }
+
+    /**
+     * @return iterable<string, array{string, bool}>
+     */
+    public static function provideTypedSyntax(): iterable
+    {
+        yield 'quotes' => ['"table basse"', true];
+        yield 'wildcard at the end' => ['ta*', true];
+        yield 'wildcard at the start' => ['*ble', true];
+        yield 'one character' => ['tab?e', true];
+        yield 'fuzzy' => ['tabel~', true];
+        yield 'fuzzy with a distance' => ['tabel~1', true];
+        yield 'boost' => ['table^2', true];
+        yield 'field' => ['title:basse', true];
+        yield 'regex' => ['/tab.*/', true];
+        yield 'group' => ['(table)', true];
+        yield 'required' => ['+table', true];
+        yield 'excluded' => ['-table', false];
+    }
+
+    /**
+     * Only a text refused by Elasticsearch finds nothing: a sort on a field out of the mapping of
+     * the index stays an error, the query being valid.
+     */
+    public function testSortOnUnmappedFieldStaysAnError(): void
+    {
+        static::createClient();
+        $filters = [new MatchAll()];
+        $sort = ['unmapped' => ['order' => 'desc']];
+
+        $this->expectException(ClientException::class);
+
+        static::getContainer()->get('tests.search_utils')->searchEntities($filters, $sort, 'fos_elastica.index.wonder_creation', Creation::class, 0, 15);
     }
 
     /**
@@ -234,6 +389,15 @@ final class SearchTest extends WebTestCase
         self::assertSame(200, $client->getResponse()->getStatusCode(), \sprintf('Search of "%s" in %s.', $query, $route));
 
         return 0 < $crawler->filter(\sprintf('a[href$="%s"]', $showPath))->count();
+    }
+
+    private static function assertSearchFoundNothing(KernelBrowser $client): void
+    {
+        $searches = $client->getContainer()->get('tests.search_utils')->getSearches();
+
+        self::assertCount(1, $searches);
+        self::assertSame([], $searches[0][2]);
+        self::assertSame(0, $searches[0][3]);
     }
 
     private function findCreation(): Creation
