@@ -110,6 +110,21 @@ function fixtures(): void
 }
 
 /**
+ * castor -c prod app:db:fixtures-volume: a dev command, as the fixtures.
+ */
+function fixtures_volume(int $count): void
+{
+    with(static function () use ($count): void {
+        fixtures();
+
+        io()->title('Loading the volume fixtures in the production stack');
+
+        docker_compose_run(['bin/console', 'ladb:fixtures:volume', "--count={$count}", '--no-debug'], service: 'builder');
+        elasticsearch_populate();
+    }, context: create_prod_context());
+}
+
+/**
  * Throwaway secrets for the stack, as the preprod gives its own: the variables of
  * var/prod/secrets.env, and the DKIM key in var/prod/keys/ (mounted on keys/).
  */

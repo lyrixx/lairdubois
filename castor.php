@@ -1,5 +1,6 @@
 <?php
 
+use Castor\Attribute\AsOption;
 use Castor\Attribute\AsTask;
 
 use function Castor\context;
@@ -55,7 +56,7 @@ function start(): void
     db_schema();
     // A new copy gets the fixtures, to be browsable at once: a database with accounts is kept as is
     if (db_has_users()) {
-        elasticsearch_populate();
+        elasticsearch_populate_without_debug();
     } else {
         db_fixtures();
     }
@@ -124,6 +125,29 @@ function db_fixtures(): void
     elasticsearch_populate();
 }
 
+#[AsTask(description: 'Starts the stack, recreates its database with the fixtures and a big set of data on top of them, then fills the Elasticsearch index (castor -c prod: the production stack)', namespace: 'app:db', name: 'fixtures-volume')]
+function db_fixtures_volume(
+    #[AsOption(description: 'Items per entity')]
+    int $count = 10000,
+): void {
+    // Installs what is missing on a new clone, and changes nothing on a running stack
+    start();
+
+    if ('prod' === context()->name) {
+        prod\fixtures_volume($count);
+
+        return;
+    }
+
+    db_fixtures();
+
+    io()->title('Loading the volume fixtures');
+
+    console_without_debug(['ladb:fixtures:volume', "--count={$count}"]);
+
+    elasticsearch_populate_without_debug();
+}
+
 function db_has_users(): bool
 {
     // The column name only shows in the output when a row is found. The query fails when the
@@ -139,6 +163,30 @@ function elasticsearch_populate(): void
     io()->title('Populating the Elasticsearch index');
 
     docker_compose_run(['bin/console', 'fos:elastica:populate']);
+}
+
+/**
+ * A database with the volume fixtures: with debug, memory_limit stops the command.
+ */
+function elasticsearch_populate_without_debug(): void
+{
+    io()->title('Populating the Elasticsearch index');
+
+    console_without_debug(['fos:elastica:populate']);
+}
+
+/**
+ * For a long command: with debug, the loggers of the profiler keep every query in memory
+ * (ElasticaLogger, some 170 MB per index of 10,000 documents). Symfony never rebuilds a container
+ * without debug, and cache:clear leaves it when the one with debug has just been rebuilt ("Cache
+ * is fresh"): the one of the last run goes first.
+ *
+ * @param list<string> $params
+ */
+function console_without_debug(array $params): void
+{
+    docker_compose_run(['rm', '-f', 'var/cache/dev/AppKernelDevContainer.php']);
+    docker_compose_run(['bin/console', ...$params, '--no-debug']);
 }
 
 #[AsTask(description: 'Builds the CSS and JS in web/build/, minified as on the production server (Vite, vite.config.js)', namespace: 'app:assets', name: 'build')]

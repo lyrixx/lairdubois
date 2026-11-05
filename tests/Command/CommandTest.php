@@ -53,6 +53,8 @@ final class CommandTest extends WebTestCase
         'ladb:cron:sitemaps' => [''],
         'ladb:cron:spotlight' => ['', '--force', '--force --no-posting', '--force-twitter --force-facebook --force-mastodon'],
         'ladb:cron:workflow:thumbnails' => self::DRY_RUN_AND_FORCE,
+        // The pages of its contents are in VolumeFixturesTest
+        'ladb:fixtures:volume' => ['--count=2'],
         'ladb:generate:articlessortindex' => self::DRY_RUN_AND_FORCE,
         'ladb:generate:bodyblockpicturecount' => self::DRY_RUN_AND_FORCE,
         'ladb:generate:changedat' => self::DRY_RUN_AND_FORCE,
