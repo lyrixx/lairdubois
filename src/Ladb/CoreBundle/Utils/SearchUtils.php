@@ -4,6 +4,9 @@ namespace Ladb\CoreBundle\Utils;
 
 use Doctrine\Persistence\ManagerRegistry;
 use Elastica\Document;
+use Elastica\Exception\ClientException;
+use Elastica\Response;
+use Elastica\ResultSet;
 use FOS\ElasticaBundle\Index\IndexManager;
 use FOS\ElasticaBundle\Persister\PersisterRegistry;
 use Ladb\CoreBundle\Entity\Stats\Search;
@@ -52,6 +55,15 @@ class SearchUtils {
 			throw new \LogicException(sprintf('"%s" is not the id of an index.', $indexServiceId));
 		}
 		return $this->indexManager->getIndex(substr($indexServiceId, strlen(self::INDEX_SERVICE_ID_PREFIX)));
+	}
+
+	// A 400 does not tell what Elasticsearch refuses: the query, or its sort (a field out of the mapping of the index), which stays an error
+	private function _isRefusedQuery($index, Query $elasticaQuery) {
+		$validation = $index->getClient()->indices()->validateQuery(array(
+			'index' => $index->getName(),
+			'body'  => array( 'query' => $elasticaQuery->toArray()['query'] ),
+		));
+		return !$validation['valid'];
 	}
 
 	private function _logSearch($context, $query, $totalHits) {
@@ -339,7 +351,17 @@ class SearchUtils {
 
 		// Search
 		$index = $this->_getIndex($indexServiceId);
-		$resultSet = $index->search($elasticaQuery);
+		try {
+			$resultSet = $index->search($elasticaQuery);
+		} catch (ClientException $e) {
+			if (!$this->_isRefusedQuery($index, $elasticaQuery)) {
+				throw $e;
+			}
+
+			// The text of a search goes to Elasticsearch as typed ("a/b", "(a", "AND"...): escaping it would take the grammar of the query string, to keep what it accepts ("/tab.*/", "title:basse")
+			$this->logger->warning('SearchUtils/searchEntities', array( 'exception' => $e ));
+			$resultSet = new ResultSet(new Response(array( 'hits' => array( 'total' => array( 'value' => 0 ), 'hits' => array() ) )), $elasticaQuery, array());
+		}
 
 		// Extract Ids
 		$ids = array();

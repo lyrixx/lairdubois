@@ -927,6 +927,14 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
 - Un index par type (#31) : ES ne trie pas sur un champ absent du mapping de l'index (500), alors
   que l'index unique d'avant partageait le mapping de tous les types. Un champ de tri va dans le
   mapping de chaque type qui le propose.
+- Texte d'une recherche (#279) : il part tel quel à Elasticsearch, dans la syntaxe de la query
+  string, depuis les listes, les facettes et les typeaheads. Ce qu'elle refuse (`a/b`, `(a`, `"a`,
+  `~a`, `a^b`, `a:`, `AND`, `createdAt:abc`…) répond 400 : `searchEntities()` rend alors un résultat
+  vide (warning), comme une recherche sans résultat. On n'échappe rien, il faudrait sa grammaire
+  pour garder ce qu'elle accepte (`/tab.*/`, `title:basse`, `table^2`, `tabel~1`, `(table)`).
+  `_validate/query` dit si c'est la requête qui est refusée : un tri sur un champ absent du mapping,
+  un 400 sur une requête valide, reste une 500. Le `resultSet` à `null` de `searchPaginedEntities()`
+  ne convient pas : il retire le total de la page et lui écrit un `<link rel="next" href="0">`.
 - `--context=test` et `--context=ci` visent la base et l'index de test (`config_test.yml`), pas ceux
   du dev : la CI charge les fixtures avec `castor app:db:fixtures` dans son contexte.
 - Une action qui finit par `exit(0)` (`PictureController::uploadAction()`,
