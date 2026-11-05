@@ -1281,6 +1281,12 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   (`castor qa:rector`) l'écrit pour chaque paramètre du `trans()` d'un `addFlash()`, sauf
   `%count%`. `Tests\Core\FlashMessageTest` lit les messages flash de `src/` et liste ceux qui ont
   une valeur non échappée.
+- Visionneuse des notices (`Resources/public/ladb/pdfjs/`, `Knowledge/value-view.html.twig`) : une
+  copie de PDF.js 2.7.570, pas une dépendance. Cette version peut exécuter du code contenu dans un
+  PDF (CVE-2024-4367) : `isEvalSupported` est à `false` dans `web/viewer.js`, à rendu identique. Les
+  `.js` restent un an en cache, l'ancien `viewer.js` avec eux : la CSP de `viewer.html`
+  (`script-src 'self'`) couvre ces navigateurs. Le fichier est statique, Symfony ne le voit pas :
+  elle vient du `map` `$pdf_viewer_csp` des nginx (dev, image de prod, `docs/nginx/conf/`).
 - Twig 3 donne à un filtre sans arguments un `EmptyNode`, auquel le
   `TranslationDefaultDomainNodeVisitor` du TwigBridge de 4.4 ne savait pas ajouter le domaine de
   `{% trans_default_domain %}` (`'x'|trans` des templates de FOSUserBundle) : le template ne
