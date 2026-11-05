@@ -234,8 +234,8 @@ castor -c prod docker:push --tag=… # REGISTRY=ghcr.io/…, la CI seulement
   reconstruits avec les paquets du jour (`apt-get upgrade` pour ceux de l'image debian, `apk
   upgrade` pour ceux de l'image nginx), au lieu de garder dans le cache des couches (local et
   `gha`) ceux de leur premier build. Les images de dev aussi (même `php-base`). `app-build` descend
-  du builder : composer et npm repartent de zéro avec elles, une fois par semaine (11 s en local,
-  contre 75 s pour les couches système), ce qui ne vaut pas une seconde base PHP pour lui. Pas de
+  du builder : composer et npm repartent de zéro avec elles, une fois par semaine (10 s en CI,
+  contre 55 s pour les couches système), ce qui ne vaut pas une seconde base PHP pour lui. Pas de
   job planifié (`schedule`) : il ne tourne que sur la branche par défaut, `master`. Les images du
   GHCR ont les paquets du dernier push sur `next`. Le build échoue sans la semaine.
 - Paramètres : le `parameters.yml` de l'image (`prod/parameters.yml`, mêmes clés que le dist) lit
