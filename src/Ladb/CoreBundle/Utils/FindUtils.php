@@ -83,7 +83,7 @@ class FindUtils {
 					if (!is_null($thumbnailUrl)) {
 						$mainPicture = $this->pictureManager->createFromUrl($thumbnailUrl, false);
 					} else {
-						$mainPicture = $this->webScreenshotUtils->captureToPicture($video->getUrl(), 1280, 1024, 1280, 1024);
+						$mainPicture = $this->webScreenshotUtils->captureVideoToPicture($video->getUrl(), 1280, 1024);
 					}
 					$video->setThumbnail($mainPicture);
 				} else {

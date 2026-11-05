@@ -553,8 +553,10 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   (`$client->getContainer()->get('tests.picture_manager')->getUrls()`, avant le reboot suivant) ;
   `OpenGraphUtils::fetchMetas()` ne trouve des métas qu'à `OfflineOpenGraphUtils::URL` ;
   `VideoHostingUtils::getThumbnailUrl()` répond sans les API (playlist YouTube, Vimeo), comme
-  `getVideoSitemapData()` (`SITEMAP_TITLE`) et `getVideoGwData()` (Youtook) ; la capture
-  Chromium de `WebScreenshotUtils` copie une image des fixtures. Stripe, appelé en statique par
+  `getVideoSitemapData()` (`SITEMAP_TITLE`) et `getVideoGwData()` (Youtook), et ne donne pas de
+  vignette pour `VIMEO_WITHOUT_THUMBNAIL` et `PLAYLIST_WITHOUT_THUMBNAIL` ; la capture
+  Chromium de `WebScreenshotUtils` copie une image des fixtures et garde les URL
+  (`tests.web_screenshot_utils`, `getUrls()`, avant le reboot suivant). Stripe, appelé en statique par
   `FundingController` : un listener de `kernel.request` lui donne le client HTTP
   `Tests\Double\OfflineStripeClient`, qui ne connaît que le payment intent qu'il crée
   (`PAYMENT_INTENT_ID`) et garde les requêtes (`tests.stripe_client`, `getRequests()`).
@@ -1245,7 +1247,21 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   Chromium récents compte l'interface dans `windowSize` : `setViewport()` donne sa taille à la page
   (#155). Le vrai Chromium appelle Google dès son démarrage : en test, le double de
   `config_test.yml`. Une vraie capture se vérifie à la main, `captureToPicture()` sur une page
-  servie par `php -S` dans le builder (#155, #224).
+  servie par `php -S` dans le builder (#155, #224) ; Chromium passe `vimeo.com` et `youtube.com`
+  en HTTPS de lui-même (HSTS), `--host-resolver-rules` les mène à ce serveur sans `dai.ly`.
+  - `captureToPicture()` donne son URL à Chromium telle quelle : une page du site, jamais une URL
+    écrite par un membre. Celles-ci passent par `captureVideoToPicture()` :
+    `VideoHostingUtils::isHostedVideoUrl()` veut la page d'une vidéo sur son hébergeur, ancrée de
+    `http://` ou `https://` à la fin de l'URL (motifs de `VIDEO_PATTERNS`, sous-domaines `www`, `m`,
+    `music` et `touch`, ni `\`, ni segments `..`, ni port). Sinon, un warning, et la vidéo reste
+    sans vignette, comme quand une capture échoue (`mainPicture` à `null`, sa page a le lecteur).
+  - `getKindAndEmbedIdentifier()` trouve toujours une vidéo n'importe où dans une URL : ancrer ses
+    motifs ferait passer ces URL de la vidéo au site web (lecteur perdu, requête Open Graph).
+  - Hors de l'hôte de la capture, Chromium ne charge un document (redirection, frame) que d'une
+    adresse publique (`Fetch.requestPaused`, `FILTER_FLAG_GLOBAL_RANGE`, nom résolu par PHP, un
+    nom inconnu est refusé) : une page refusée n'est pas capturée, une frame refusée reste vide.
+    L'hôte de la capture est accepté tel quel : le site peut être sur une adresse privée. Pas de
+    filtre sur les autres ressources (images, scripts) : c'est le rendu de la page.
 - Plus de composant `templating` : les templates se nomment dans la notation de Twig
   (`@LadbCore/Dir/file.html.twig`, `@FOSUser/…`, `base.html.twig` pour `templates/`), la
   notation de bundle (`LadbCoreBundle:Dir:file.html.twig`, `::base.html.twig`) ne les trouve plus.

@@ -169,10 +169,11 @@ final class FindTest extends PublicationTestCase
         self::assertSame($kind, $find->getContent()->getKind());
         self::assertNull($find->getContent()->getThumbnail());
         self::assertNull($find->getMainPicture());
+        $embedIdentifier = $find->getContent()->getEmbedIdentifier();
 
-        $client->followRedirect();
+        $crawler = $client->followRedirect();
         self::assertSame(200, $client->getResponse()->getStatusCode());
-        self::assertStringContainsString('empty_find.png', (string) $client->getResponse()->getContent());
+        self::assertStringContainsString($embedIdentifier, $crawler->filter('.ladb-find iframe')->attr('src'));
     }
 
     /**
