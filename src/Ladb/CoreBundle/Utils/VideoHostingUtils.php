@@ -17,7 +17,7 @@ class VideoHostingUtils {
 
 	// A video in a URL, from the domain of its host on. A playlist has a longer identifier than a
 	// YouTube video: it comes first
-	const VIDEO_PATTERNS = array(
+	private const VIDEO_PATTERNS = array(
 		VideoHostingUtils::KIND_YOUTUBEPLAYLIST => '(?:youtu\.be\/|youtube\.com(?:\/embed\/|\/v\/|\/watch\?v=|\/playlist\?list=|\/ytscreeningroom\?v=|\/feeds\/api\/videos\/))([\w\-]{12,})',
 		VideoHostingUtils::KIND_YOUTUBE => '(?:youtu\.be\/|youtube\.com(?:\/embed\/|\/v\/|\/watch\?v=|\/ytscreeningroom\?v=|\/feeds\/api\/videos\/))([\w\-]{11})',
 		VideoHostingUtils::KIND_DAILYMOTION => '(?:dailymotion\.com\/video|dai\.ly)\/([a-zA-Z0-9]{7}|[A-Za-z0-9]{6})',
