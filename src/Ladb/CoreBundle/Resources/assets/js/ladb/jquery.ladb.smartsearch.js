@@ -195,7 +195,10 @@
                 })
             ;
         } else if (facetDef.type === 'sorter') {
-            var $i = $('<i class="ladb-icon-sort-' + (value ? value : facetDef.defaultOrder) + '"></i>');
+            // The value comes from the URL: any other order is the default one for the server too
+            var $i = $('<i/>', {
+                'class': 'ladb-icon-sort-' + (value === 'asc' || value === 'desc' ? value : facetDef.defaultOrder)
+            });
             var $order = $('<a/>', {
                     'class': 'ladb-sorter-action'
                 })
@@ -230,6 +233,7 @@
             .prepend($repeat)
             .prepend($order)
             .prepend($input)
+            // Written in the templates, never by the URL: some labels have markup
             .prepend('<i class="ladb-icon-' + facetDef.icon + '"></i> <span class="ladb-facet-name">' + facetDef.label + (facetDef.editable ? ' : ' : '') + '</span>')
     };
 
