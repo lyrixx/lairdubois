@@ -68,9 +68,11 @@ EOT
 
 		$retrieveDate = (new \DateTime())->modify('-'.Offer::FULL_LIFETIME);
 
+		// Only the ids, each offer is read in its turn: every flush of the managers and of the
+		// listeners walks through all that the entity manager keeps
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
-			->select(array( 'o' ))
+			->select(array( 'o.id' ))
 			->from(Offer::class, 'o')
 			->where('o.publishCount > 0')
 			->andWhere('o.changedAt < :retrieveDate')
@@ -79,23 +81,30 @@ EOT
 		;
 
 		try {
-			$oudatedOffers = $queryBuilder->getQuery()->getResult();
+			$oudatedOfferIds = $queryBuilder->getQuery()->getSingleColumnResult();
 		} catch (\Doctrine\ORM\NoResultException $e) {
-			$oudatedOffers = array();
+			$oudatedOfferIds = array();
 		}
 
 		if ($verbose) {
-			$output->writeln('<comment> ['.count($oudatedOffers).' outdated offers]</comment>');
+			$output->writeln('<comment> ['.count($oudatedOfferIds).' outdated offers]</comment>');
 		}
 
-		foreach ($oudatedOffers as $offer) {
+		foreach ($oudatedOfferIds as $offerId) {
 
 			if ($verbose) {
-				$output->write('Deleting Offer id='.$offer->getId());
+				$output->write('Deleting Offer id='.$offerId);
 			}
 
-			// Delete Offer
-			$offerManager->delete($offer, false, $forced);
+			// Null when deleted since the query
+			$offer = $forced ? $om->find(Offer::class, $offerId) : null;
+			if (!is_null($offer)) {
+
+				// Delete Offer
+				$offerManager->delete($offer, false);
+
+				$om->clear();
+			}
 
 			if ($verbose) {
 				if ($forced) {
@@ -117,7 +126,7 @@ EOT
 
 		$queryBuilder = $om->createQueryBuilder();
 		$queryBuilder
-			->select(array( 'o' ))
+			->select(array( 'o.id' ))
 			->from(Offer::class, 'o')
 			->where('o.isDraft = false')
 			->andWhere('o.changedAt < :retrieveDate')
@@ -125,26 +134,33 @@ EOT
 		;
 
 		try {
-			$expiredOffers = $queryBuilder->getQuery()->getResult();
+			$expiredOfferIds = $queryBuilder->getQuery()->getSingleColumnResult();
 		} catch (\Doctrine\ORM\NoResultException $e) {
-			$expiredOffers = array();
+			$expiredOfferIds = array();
 		}
 
 		if ($verbose) {
-			$output->writeln('<comment> ['.count($expiredOffers).' expired offers]</comment>');
+			$output->writeln('<comment> ['.count($expiredOfferIds).' expired offers]</comment>');
 		}
 
-		foreach ($expiredOffers as $offer) {
+		foreach ($expiredOfferIds as $offerId) {
 
 			if ($verbose) {
-				$output->write('Unpublishing Offer id='.$offer->getId());
+				$output->write('Unpublishing Offer id='.$offerId);
 			}
 
-			// Unpublish offer
-			$offerManager->unpublish($offer, $forced);
+			// Null when deleted since the query
+			$offer = $forced ? $om->find(Offer::class, $offerId) : null;
+			if (!is_null($offer)) {
 
-			// Email notification
-			$mailerUtils->sendOfferExpiredEmailMessage($offer->getUser(), $offer);
+				// Unpublish offer
+				$offerManager->unpublish($offer);
+
+				// Email notification
+				$mailerUtils->sendOfferExpiredEmailMessage($offer->getUser(), $offer);
+
+				$om->clear();
+			}
 
 			if ($verbose) {
 				if ($forced) {
@@ -154,10 +170,6 @@ EOT
 				}
 			}
 
-		}
-
-		if ($forced) {
-			$om->flush();
 		}
 
 		return 0;

@@ -91,8 +91,11 @@ EOT
 				$output->write('<info> Capturing ['.$url.'] ...</info>');
 			}
 
-			$mainPicture = $webScreenshotUtils->captureToPicture($url, 600, 600, 600, 600, 3);
-			$workflow->setMainPicture($mainPicture);
+			// Writes the file and the picture itself
+			if ($forced) {
+				$mainPicture = $webScreenshotUtils->captureToPicture($url, 600, 600, 600, 600, 3);
+				$workflow->setMainPicture($mainPicture);
+			}
 
 			if ($verbose) {
 				if ($forced) {
