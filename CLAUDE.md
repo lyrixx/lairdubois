@@ -509,6 +509,9 @@ MariaDB et Elasticsearch. Avec `-c prod`, dans la stack de prod, chargé par le 
   Leurs activités ne sont pas en attente, et leurs notifications sont écrites là, déjà vues :
   `ladb:cron:notification:populate` lit en mémoire toutes les activités en attente, et rien ne part
   par mail.
+- Annonces (#286) : `publish_count` à 1, comme après `OfferManager::publish()`, et au plus 28 jours,
+  là où les autres contenus s'étalent sur 5 ans : `ladb:cron:offers` n'a rien à faire au premier
+  passage, puis dépublie chaque jour un vingt-huitième du jeu, avec un mail chacune.
 - Images : une ligne de `tbl_core_picture` par image, sur une dizaine de fichiers
   (`fixture-volume-*`) : `uploads/` et `web/media/` ne grossissent pas, leur taille ne dit rien.
   Supprimer un contenu du jeu supprime le fichier de tous ceux qui le partagent

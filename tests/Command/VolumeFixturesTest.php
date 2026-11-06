@@ -107,6 +107,25 @@ final class VolumeFixturesTest extends WebTestCase
     }
 
     /**
+     * Published once and recently: ladb:cron:offers has nothing to do after a load.
+     */
+    public function testTheOffersAreLeftAloneByTheirCron(): void
+    {
+        static::runCommandLine('ladb:fixtures:volume --count='.self::COUNT);
+
+        [$exitCode, $output] = static::runCommandLine('ladb:cron:offers --force');
+
+        self::assertSame(0, $exitCode, $output);
+        self::assertSame([], static::getSentEmailsByCommand());
+        $offers = static::getEntityManager()->getRepository(Offer::class)->findAll();
+        self::assertGreaterThan(self::COUNT, \count($offers));
+        foreach ($offers as $offer) {
+            self::assertFalse($offer->getIsDraft());
+            self::assertSame(1, $offer->getPublishCount());
+        }
+    }
+
+    /**
      * @param class-string $class
      */
     private function lastId(string $class): int

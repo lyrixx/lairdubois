@@ -86,6 +86,8 @@ final class VolumeContentFactory {
 
 	// The dates of a type go from this many days ago to now, in the order of its ids
 	private const SPREAD_IN_DAYS = 1825;
+	// Under Offer::ACTIVE_LIFETIME: older, ladb:cron:offers unpublishes them, with an email each
+	private const OFFER_SPREAD_IN_DAYS = 28;
 
 	private const FIRST_NAMES = array( 'Jeanne', 'Paul', 'Marie', 'Louis', 'Claire', 'Hugo', 'Alice', 'Marc', 'Léa', 'Pierre', 'Emma', 'Yves', 'Chloé', 'Rémi', 'Inès', 'Théo' );
 	private const LAST_NAMES = array( 'Martin', 'Bernard', 'Dubois', 'Durand', 'Lefebvre', 'Moreau', 'Laurent', 'Simon', 'Michel', 'Garcia', 'Roux', 'Fournier', 'Girard', 'Bonnet', 'Lambert', 'Fontaine' );
@@ -307,7 +309,15 @@ final class VolumeContentFactory {
 		$offer->setRawPrice($price);
 		$offer->setCurrency('EUR');
 		$offer->setPrice($price.' €');
-		return $this->publication($offer, $i);
+		$this->publication($offer, $i);
+
+		// As a first publication (OfferManager::publish())
+		$offer->incrementPublishCount();
+		$date = $this->date($i, self::OFFER_SPREAD_IN_DAYS);
+		$offer->setCreatedAt($date);
+		$offer->setChangedAt($date);
+
+		return $offer;
 	}
 
 	public function question(int $i): Question {
@@ -698,8 +708,8 @@ final class VolumeContentFactory {
 		return implode("\n\n", $paragraphs);
 	}
 
-	private function date(int $i): \DateTime {
-		$daysAgo = intdiv(self::SPREAD_IN_DAYS * max(0, $this->count - $i), $this->count);
+	private function date(int $i, int $spreadInDays = self::SPREAD_IN_DAYS): \DateTime {
+		$daysAgo = intdiv($spreadInDays * max(0, $this->count - $i), $this->count);
 		return new \DateTime(sprintf('-%d days', $daysAgo));
 	}
 
