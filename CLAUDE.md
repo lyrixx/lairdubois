@@ -931,6 +931,16 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   dans des propriétés protégées que leurs sous-classes lisent sans les redemander : le
   constructeur reste aux sous-classes. `Qa\AnswerManager` reçoit `Qa\QuestionManager` par un
   setter, qui le reçoit dans son constructeur (le container refuse un cycle de constructeurs).
+- Le `$flush = false` des managers de publication ne tient pas : `unpublishPublication()` flushe
+  par `deleteMentions()` et par le `WitnessManager` (`createUnpublishedByPublication($publication,
+  false)` passe `false` en `$reason`), et les listeners de `PublicationListener`, appelés dans tous
+  les cas, flushent aussi (`deleteViews()`) et écrivent dans l'index. Une commande qui ne doit rien
+  écrire n'appelle pas le manager : sans `--force`, `ladb:cron:offers` ne fait que lister (#285).
+  De même, `captureToPicture()` écrit le fichier et flushe sa `Picture` : sans `--force`,
+  `ladb:cron:workflow:thumbnails` ne capture rien.
+- Un `unpublish()` fait 7 flushs, dont chacun parcourt tout l'UnitOfWork : une commande qui traite
+  beaucoup de publications ne garde que leurs ids, lit chacune à son tour et fait un `clear()`
+  après (`ladb:cron:offers`, #285).
 - Listeners (`Event/`), validateurs, `WorkflowTopic` et `ViewConsumer` : dépendances et paramètres
   par le constructeur. Plus rien ne lit le container hors des controllers : les services de
   `services.yml` sont privés. `LadbExtension`, que Twig crée avec lui-même à chaque requête, lit

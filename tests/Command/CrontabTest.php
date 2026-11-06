@@ -7,6 +7,7 @@ use Ladb\CoreBundle\Entity\Core\Activity\AbstractActivity;
 use Ladb\CoreBundle\Entity\Core\Block\Video;
 use Ladb\CoreBundle\Entity\Core\Notification;
 use Ladb\CoreBundle\Entity\Core\Spotlight;
+use Ladb\CoreBundle\Entity\Core\Witness;
 use Ladb\CoreBundle\Entity\Offer\Offer;
 use Ladb\CoreBundle\Entity\Opencutlist\Access;
 use Ladb\CoreBundle\Entity\Wonder\Creation;
@@ -136,11 +137,15 @@ final class CrontabTest extends WebTestCase
     public function testExpiredOfferIsUnpublished(): void
     {
         $this->update(Offer::class, 1, ['changedAt' => (new \DateTime())->modify('-'.Offer::ACTIVE_LIFETIME)->modify('-1 day')]);
+        [$publicOfferCount, $privateOfferCount, $commentCount, $sentLikeCount] = self::getOfferCounters();
 
         [$exitCode, $output] = static::runCommandLine(self::getCron('ladb:cron:offers'));
 
         self::assertSame(0, $exitCode, $output);
         self::assertTrue(static::getEntityManager()->find(Offer::class, 1)->getIsDraft());
+        self::assertNotNull(self::findOfferWitness());
+        self::assertSame([$publicOfferCount - 1, $privateOfferCount + 1, $commentCount - 1, $sentLikeCount - 1], self::getOfferCounters());
+        self::assertSame(['ladb.publication.unpublished'], self::getPublicationEventsByCommand());
         $this->assertEmailsSentTo([UserFixtures::USER]);
     }
 
@@ -156,6 +161,77 @@ final class CrontabTest extends WebTestCase
         self::assertSame(0, $exitCode, $output);
         static::getEntityManager()->clear();
         self::assertNull(static::getEntityManager()->find(Offer::class, 1));
+        self::assertSame(['ladb.publication.deleted'], self::getPublicationEventsByCommand());
+    }
+
+    /**
+     * @return iterable<string, array{string}>
+     */
+    public static function provideOfferLifetimes(): iterable
+    {
+        yield 'expired' => [Offer::ACTIVE_LIFETIME];
+        yield 'outdated' => [Offer::FULL_LIFETIME];
+    }
+
+    /**
+     * Without --force, only the output tells what the cron would do.
+     *
+     * @dataProvider provideOfferLifetimes
+     */
+    public function testOffersCronChangesNothingWithoutForce(string $lifetime): void
+    {
+        $this->update(Offer::class, 1, ['changedAt' => (new \DateTime())->modify('-'.$lifetime)->modify('-1 day')]);
+        $counters = self::getOfferCounters();
+
+        [$exitCode, $output] = static::runCommandLine('ladb:cron:offers --verbose');
+
+        self::assertSame(0, $exitCode, $output);
+        self::assertStringContainsString('[FAKE]', $output);
+        static::getEntityManager()->clear();
+        $offer = static::getEntityManager()->find(Offer::class, 1);
+        self::assertNotNull($offer);
+        self::assertFalse($offer->getIsDraft());
+        self::assertTrue($offer->getIsPublic());
+        self::assertNull(self::findOfferWitness());
+        self::assertSame($counters, self::getOfferCounters());
+        self::assertSame([], self::getPublicationEventsByCommand());
+        self::assertSame([], static::getSentEmailsByCommand());
+    }
+
+    /**
+     * The entity manager forgets each offer once it is done: the next ones are unpublished too.
+     */
+    public function testEveryExpiredOfferIsUnpublished(): void
+    {
+        static::runCommandLine('ladb:fixtures:volume --count=2');
+        static::getEntityManager()->createQuery('UPDATE '.Offer::class.' o SET o.changedAt = :date')
+            ->setParameter('date', (new \DateTime())->modify('-'.Offer::ACTIVE_LIFETIME)->modify('-1 day'))
+            ->execute();
+        $offerCount = static::getEntityManager()->getRepository(Offer::class)->count();
+        self::assertGreaterThan(1, $offerCount);
+
+        [$exitCode, $output] = static::runCommandLine(self::getCron('ladb:cron:offers'));
+
+        self::assertSame(0, $exitCode, $output);
+        self::assertSame($offerCount, static::getEntityManager()->getRepository(Offer::class)->count(['isDraft' => true]));
+        self::assertCount($offerCount, static::getSentEmailsByCommand());
+    }
+
+    /**
+     * The entity manager forgets each offer once it is done: the next ones are deleted too.
+     */
+    public function testEveryOutdatedOfferIsDeleted(): void
+    {
+        static::runCommandLine('ladb:fixtures:volume --count=2');
+        static::getEntityManager()->createQuery('UPDATE '.Offer::class.' o SET o.changedAt = :date, o.publishCount = 1')
+            ->setParameter('date', (new \DateTime())->modify('-'.Offer::FULL_LIFETIME)->modify('-1 day'))
+            ->execute();
+        self::assertGreaterThan(1, static::getEntityManager()->getRepository(Offer::class)->count());
+
+        [$exitCode, $output] = static::runCommandLine(self::getCron('ladb:cron:offers'));
+
+        self::assertSame(0, $exitCode, $output);
+        self::assertSame(0, static::getEntityManager()->getRepository(Offer::class)->count());
     }
 
     /**
@@ -244,6 +320,20 @@ final class CrontabTest extends WebTestCase
     }
 
     /**
+     * Without --force, no capture: it would write the file and the picture.
+     */
+    public function testWorkflowThumbnailsCaptureNothingWithoutForce(): void
+    {
+        $this->update(Workflow::class, 1, ['mainPicture' => null]);
+
+        [$exitCode, $output] = static::runCommandLine('ladb:cron:workflow:thumbnails');
+
+        self::assertSame(0, $exitCode, $output);
+        self::assertSame([], static::getContainer()->get('tests.web_screenshot_utils')->getUrls());
+        self::assertNull(static::getEntityManager()->find(Workflow::class, 1)->getMainPicture());
+    }
+
+    /**
      * The downloads of OpenCutList get the OS and the version of SketchUp from their user agent,
      * and a location from their IP address (ip-api.com, offline: Tests\Double\OfflineHttpStream).
      */
@@ -313,6 +403,38 @@ final class CrontabTest extends WebTestCase
             $queryBuilder->set("e.{$field}", ":{$field}")->setParameter($field, $value);
         }
         $queryBuilder->getQuery()->execute();
+    }
+
+    /**
+     * What a change of the offer 1 moves: the counters of its author, then those of the author of
+     * its comment and its like.
+     *
+     * @return array{int, int, int, int}
+     */
+    private static function getOfferCounters(): array
+    {
+        static::getEntityManager()->clear();
+        $author = static::findUser(UserFixtures::USER)->getMeta();
+        $reader = static::findUser(UserFixtures::USER2)->getMeta();
+
+        return [$author->getPublicOfferCount(), $author->getPrivateOfferCount(), $reader->getCommentCount(), $reader->getSentLikeCount()];
+    }
+
+    private static function findOfferWitness(): ?Witness
+    {
+        return static::getEntityManager()->getRepository(Witness::class)->findOneByEntityTypeAndEntityId(Offer::TYPE, 1);
+    }
+
+    /**
+     * The publication events of the last static::runCommandLine().
+     *
+     * @return list<string>
+     */
+    private static function getPublicationEventsByCommand(): array
+    {
+        $events = array_column(static::getContainer()->get('event_dispatcher')->getCalledListeners(), 'event');
+
+        return array_values(array_unique(array_filter($events, static fn (string $event): bool => str_starts_with($event, 'ladb.publication.'))));
     }
 
     private function countNotifications(): int
