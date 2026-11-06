@@ -305,6 +305,28 @@ final class CrontabTest extends WebTestCase
     }
 
     /**
+     * More contents than a batch of the command: each of them once, in the order of their ids, and
+     * the entity manager does not keep them.
+     */
+    public function testSitemapsReadTheContentsByBatches(): void
+    {
+        $connection = static::getEntityManager()->getConnection();
+        $columns = array_diff(array_column($connection->fetchAllAssociative('SHOW COLUMNS FROM tbl_blog_post'), 'Field'), ['id', 'slug']);
+        $columns = implode(', ', $columns);
+        for ($i = 1; $i <= 450; $i++) {
+            $connection->executeStatement("INSERT INTO tbl_blog_post (slug, {$columns}) SELECT CONCAT(slug, '-', {$i}), {$columns} FROM tbl_blog_post WHERE id = 1");
+        }
+        $ids = array_map(intval(...), $connection->fetchFirstColumn('SELECT id FROM tbl_blog_post WHERE is_draft = 0 ORDER BY id'));
+
+        [$exitCode, $output] = static::runCommandLine(self::getCron('ladb:cron:sitemaps'));
+
+        self::assertSame(0, $exitCode, $output);
+        preg_match_all('~<loc>[^<]+/blog/(\d+)-[^<]+</loc>~', file_get_contents(\dirname(self::SITEMAPS).'/sitemap-blog-posts.xml'), $matches);
+        self::assertSame($ids, array_map(intval(...), $matches[1]));
+        self::assertLessThan(200, static::getEntityManager()->getUnitOfWork()->size());
+    }
+
+    /**
      * A workflow without a thumbnail gets a screenshot of its diagram (Chromium is offline:
      * Tests\Double\OfflineWebScreenshotUtils).
      */

@@ -1130,7 +1130,13 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
 - Les ex aequo d'un `ORDER BY` (tags proposés de même score, activités de la même seconde, images de
   même `sortIndex`) sortent dans l'ordre de MariaDB, qui peut changer d'un passage de la suite à
   l'autre selon ce qui a tourné avant : avec l'ORM 3, le SQL est le même, mais l'ordre de 218
-  réponses sur 4 717 a changé (#178).
+  réponses sur 4 717 a changé (#178). Dans le jeu de volume, toutes les images ont le `sortIndex` 0 :
+  celles d'une création, d'un plan, d'un atelier ou d'un événement changent d'ordre dans les
+  sitemaps d'un passage à l'autre, sans que rien ne change (#284).
+- `ladb:cron:sitemaps` lit chaque type par lots de 200, par id croissant, avec un `clear()` après
+  chaque lot (#284) : un `findAll()` gardait les contenus, leurs images et leurs blocs d'une
+  section à l'autre, jusqu'à `memory_limit` dès 10 000 contenus par type. Les URL d'une section
+  restent en mémoire, avec le fichier rendu.
 - `doctrine:schema:update` (#178) est toujours complet en ORM 3 (`--complete` ne fait plus rien,
   avec une dépréciation et un avertissement à l'écran) : il supprime les tables hors mapping, sauf
   celles que cachent le `schema_filter` (`sessions`) et le `SchemaFilterListener` de

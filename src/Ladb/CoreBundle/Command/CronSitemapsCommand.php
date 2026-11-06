@@ -24,6 +24,8 @@ use Ladb\CoreBundle\Utils\VideoHostingUtils;
 #[AsCommand(name: 'ladb:cron:sitemaps', description: 'Generate sitemaps')]
 class CronSitemapsCommand extends Command {
 
+	private const BATCH_SIZE = 200;
+
 	private $om;
 	private $packages;
 	private $picturedUtils;
@@ -275,12 +277,11 @@ EOT
 		$videoHostingUtils = $this->videoHostingUtils;
 
 		$urls = array();
-		$entities = $entityRepository->findAll();
 
-		$progress = new ProgressBar($output, count($entities));
+		$progress = new ProgressBar($output, $entityRepository->count());
 		$progress->start();
 
-		foreach ($entities as $entity) {
+		foreach ($this->_iterateEntities($entityClassName) as $entity) {
 
 			$progress->advance();
 
@@ -394,6 +395,33 @@ EOT
 		$progress->finish();
 
 		return $urls;
+	}
+
+	/**
+	 * In the order of their ids, by batches: the entity manager would keep every entity with its
+	 * pictures and blocks, section after section, until memory_limit.
+	 */
+	private function _iterateEntities($entityClassName) {
+		$lastId = 0;
+		do {
+			$queryBuilder = $this->om->createQueryBuilder();
+			$queryBuilder
+				->select(array( 'e' ))
+				->from($entityClassName, 'e')
+				->where('e.id > :lastId')
+				->orderBy('e.id', \SortDirection::Ascending)
+				->setParameter('lastId', $lastId)
+				->setMaxResults(self::BATCH_SIZE)
+			;
+			$entities = $queryBuilder->getQuery()->getResult();
+
+			foreach ($entities as $entity) {
+				$lastId = $entity->getId();
+				yield $entity;
+			}
+
+			$this->om->clear();
+		} while (count($entities) == self::BATCH_SIZE);
 	}
 
 	private function _isVideoAsExported($kind, $embedIdentifer) {
