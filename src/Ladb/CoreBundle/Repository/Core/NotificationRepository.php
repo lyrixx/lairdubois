@@ -94,25 +94,40 @@ class NotificationRepository extends AbstractEntityRepository {
 
 	}
 
-	public function findByPendingEmailAndActivityInstanceOf($activityInstanceOf) {
-		$queryBuilder = $this->getEntityManager()->createQueryBuilder();
-		$queryBuilder
+	public function countByPendingEmailAndActivityInstanceOf($activityInstanceOf) {
+		return $this->_createPendingEmailQueryBuilder($activityInstanceOf)
+			->select(array( 'count(n.id)' ))
+			->getQuery()
+			->getSingleScalarResult();
+	}
+
+	public function findUserIdsByPendingEmailAndActivityInstanceOf($activityInstanceOf) {
+		return $this->_createPendingEmailQueryBuilder($activityInstanceOf)
+			->select(array( 'u.id' ))
+			->distinct()
+			->orderBy('u.id', \SortDirection::Ascending)
+			->getQuery()
+			->getSingleColumnResult();
+	}
+
+	public function findByPendingEmailAndActivityInstanceOfAndUserId($activityInstanceOf, $userId) {
+		return $this->_createPendingEmailQueryBuilder($activityInstanceOf)
 			->select(array( 'n', 'a', 'u' ))
+			->andWhere('u.id = :userId')
+			->setParameter('userId', $userId)
+			->orderBy('n.id', \SortDirection::Ascending)
+			->getQuery()
+			->getResult();
+	}
+
+	private function _createPendingEmailQueryBuilder($activityInstanceOf) {
+		return $this->getEntityManager()->createQueryBuilder()
 			->from($this->getEntityName(), 'n')
 			->innerJoin('n.user', 'u')
 			->innerJoin('n.activity', 'a')
 			->where('n.isPendingEmail = 1')
 			->andWhere('n.isListed = 0')
-			->andWhere('a INSTANCE OF '.$activityInstanceOf)
-			->orderBy('u.id', \SortDirection::Ascending)
-		;
-
-		try {
-			return $queryBuilder->getQuery()->getResult();
-		} catch (\Doctrine\ORM\NoResultException $e) {
-			return null;
-		}
-
+			->andWhere('a INSTANCE OF '.$activityInstanceOf);
 	}
 
 	/////

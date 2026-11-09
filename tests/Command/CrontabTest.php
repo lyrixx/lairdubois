@@ -3,6 +3,7 @@
 namespace Tests\Command;
 
 use Ladb\CoreBundle\DataFixtures\UserFixtures;
+use Ladb\CoreBundle\Entity\Core\Activity;
 use Ladb\CoreBundle\Entity\Core\Activity\AbstractActivity;
 use Ladb\CoreBundle\Entity\Core\Block\Video;
 use Ladb\CoreBundle\Entity\Core\Notification;
@@ -38,6 +39,25 @@ final class CrontabTest extends WebTestCase
      * @var array<string, int>
      */
     private const KNOWN_FAILURES = [];
+
+    // The types of activity, in the order of ladb:cron:notification:email
+    private const NOTIFICATION_EMAIL_ACTIVITIES = [
+        Activity\Comment::class,
+        Activity\Contribute::class,
+        Activity\Follow::class,
+        Activity\Like::class,
+        Activity\Mention::class,
+        Activity\Publish::class,
+        Activity\Vote::class,
+        Activity\Join::class,
+        Activity\Write::class,
+        Activity\Answer::class,
+        Activity\Testify::class,
+        Activity\Review::class,
+        Activity\Feedback::class,
+        Activity\Invite::class,
+        Activity\Request::class,
+    ];
 
     /** @var array<string, string> */
     private array $sitemaps = [];
@@ -266,6 +286,44 @@ final class CrontabTest extends WebTestCase
         self::assertSame(0, $exitCode, $output);
         self::assertNotEmpty(static::getSentEmailsByCommand());
         self::assertSame(0, $this->countNotificationsPendingEmail());
+    }
+
+    /**
+     * Several recipients for most types of activity in the fixtures, read one after the other:
+     * one email by type and by recipient, with all its notifications, in the order of the types of
+     * the command, then of the ids of the recipients, and the entity manager does not keep them.
+     */
+    public function testNotificationEmailReadsTheNotificationsByRecipient(): void
+    {
+        $pendingEmails = $this->getPendingNotificationEmails();
+        self::assertGreaterThan(\count(array_unique(array_column($pendingEmails, 1))), \count($pendingEmails));
+
+        [$exitCode, $output] = static::runCommandLine(self::getCron('ladb:cron:notification:email'));
+
+        self::assertSame(0, $exitCode, $output);
+        $translator = static::getContainer()->get('translator');
+        self::assertSame(
+            array_map(fn (array $email): array => [$email[0], $translator->trans('notification.choice.'.$email[1], ['%count%' => $email[2]])], $pendingEmails),
+            array_map(fn (Email $message): array => [...static::getEmailRecipients($message), $message->getSubject()], static::getSentEmailsByCommand())
+        );
+        self::assertSame(0, $this->countNotificationsPendingEmail());
+        self::assertSame(0, static::getEntityManager()->getUnitOfWork()->size());
+    }
+
+    /**
+     * Without --force, only the output tells what the cron would do.
+     */
+    public function testNotificationEmailChangesNothingWithoutForce(): void
+    {
+        $pendingCount = $this->countNotificationsPendingEmail();
+        self::assertGreaterThan(0, $pendingCount);
+
+        [$exitCode, $output] = static::runCommandLine('ladb:cron:notification:email --verbose');
+
+        self::assertSame(0, $exitCode, $output);
+        self::assertStringContainsString('[Fake]', $output);
+        self::assertSame([], static::getSentEmailsByCommand());
+        self::assertSame($pendingCount, $this->countNotificationsPendingEmail());
     }
 
     /**
@@ -498,6 +556,26 @@ final class CrontabTest extends WebTestCase
     private function countNotificationsPendingEmail(): int
     {
         return (int) static::getEntityManager()->createQuery('SELECT COUNT(n.id) FROM '.Notification::class.' n WHERE n.isPendingEmail = true')->getSingleScalarResult();
+    }
+
+    /**
+     * The emails ladb:cron:notification:email has to send, in its order: recipient, type of
+     * activity and number of notifications. The accounts of the fixtures accept every notification
+     * by email.
+     *
+     * @return list<array{string, string, int}>
+     */
+    private function getPendingNotificationEmails(): array
+    {
+        $emails = [];
+        foreach (self::NOTIFICATION_EMAIL_ACTIVITIES as $activityClass) {
+            $rows = static::getEntityManager()->createQuery('SELECT u.email, COUNT(n.id) AS notificationCount FROM '.Notification::class.' n INNER JOIN n.user u INNER JOIN n.activity a WHERE n.isPendingEmail = true AND n.isListed = false AND a INSTANCE OF '.$activityClass.' GROUP BY u.id ORDER BY u.id')->getArrayResult();
+            foreach ($rows as $row) {
+                $emails[] = [$row['email'], $activityClass::STRIPPED_NAME, (int) $row['notificationCount']];
+            }
+        }
+
+        return $emails;
     }
 
     /**

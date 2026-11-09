@@ -83,29 +83,25 @@ EOT
 
 	private function _processActivityByActivityStrippedName($activityStrippedName, $output, $forced, $verbose, $om, $notificationRepository) {
 
-		$currentUser = null;
-		$currentNotifications = array();
+		$activityInstanceOf = '\\Ladb\\CoreBundle\\Entity\\Core\\Activity\\'.ucfirst($activityStrippedName);
 
-		$notifications = $notificationRepository->findByPendingEmailAndActivityInstanceOf('\\Ladb\\CoreBundle\\Entity\\Core\\Activity\\'.ucfirst($activityStrippedName));
 		if ($verbose) {
-			$output->writeln('<info>'.count($notifications).' notifications ('.$activityStrippedName.') to process...</info>');
+			$output->writeln('<info>'.$notificationRepository->countByPendingEmailAndActivityInstanceOf($activityInstanceOf).' notifications ('.$activityStrippedName.') to process...</info>');
 		}
-		foreach ($notifications as $notification) {
 
-			if (is_null($currentUser)) {
-				$currentUser = $notification->getUser();
-			}
-			if ($notification->getUser()->getId() == $currentUser->getId()) {
-				$currentNotifications[] = $notification;
-			} else {
-				$this->_processUserNotifications($currentUser, $currentNotifications, $activityStrippedName, $output, $forced, $verbose, $om);
-				$currentUser = $notification->getUser();
-				$currentNotifications = array( $notification );
+		// The notifications of one recipient at a time, forgotten once its email is sent: the entity
+		// manager kept them all, with their activities and what their emails show, and each flush
+		// walked through all of them
+		foreach ($notificationRepository->findUserIdsByPendingEmailAndActivityInstanceOf($activityInstanceOf) as $userId) {
+
+			$notifications = $notificationRepository->findByPendingEmailAndActivityInstanceOfAndUserId($activityInstanceOf, $userId);
+
+			// Empty when the recipient has listed them since the first query (notifications page)
+			if (count($notifications) > 0) {
+				$this->_processUserNotifications($notifications[0]->getUser(), $notifications, $activityStrippedName, $output, $forced, $verbose, $om);
 			}
 
-		}
-		if (!is_null($currentUser)) {
-			$this->_processUserNotifications($currentUser, $currentNotifications, $activityStrippedName, $output, $forced, $verbose, $om);
+			$om->clear();
 		}
 	}
 
