@@ -13,6 +13,7 @@ use Ladb\CoreBundle\Entity\Opencutlist\Access;
 use Ladb\CoreBundle\Entity\Wonder\Creation;
 use Ladb\CoreBundle\Entity\Workflow\Workflow;
 use Ladb\CoreBundle\Utils\VideoHostingUtils;
+use Symfony\Component\Mime\Email;
 use Tests\Double\OfflineHttpStream;
 use Tests\Double\OfflineVideoHostingUtils;
 use Tests\WebTestCase;
@@ -278,6 +279,36 @@ final class CrontabTest extends WebTestCase
 
         self::assertSame(0, $exitCode, $output);
         self::assertNotEmpty(static::getSentEmailsByCommand());
+    }
+
+    /**
+     * More accounts than a batch of the command: each of them gets the news once, in the order of
+     * their ids, the same news as the first one, and the entity manager does not keep them.
+     */
+    public function testWeekNewsReadsTheAccountsByBatches(): void
+    {
+        $this->update(Creation::class, 1, ['createdAt' => new \DateTime()]);
+        $connection = static::getEntityManager()->getConnection();
+        $columns = fn (string $table): array => array_column($connection->fetchAllAssociative("SHOW COLUMNS FROM {$table}"), 'Field');
+        $userColumns = implode(', ', array_diff($columns('tbl_core_user'), ['id', 'username', 'username_canonical', 'email', 'email_canonical', 'displayname', 'confirmation_token', 'meta_id']));
+        $metaColumns = implode(', ', array_diff($columns('tbl_core_user_meta'), ['id']));
+        for ($i = 1; $i <= 250; $i++) {
+            $connection->executeStatement("INSERT INTO tbl_core_user_meta ({$metaColumns}) SELECT {$metaColumns} FROM tbl_core_user_meta WHERE id = (SELECT meta_id FROM tbl_core_user WHERE id = 2)");
+            $connection->executeStatement("INSERT INTO tbl_core_user (username, username_canonical, email, email_canonical, displayname, meta_id, {$userColumns}) SELECT CONCAT(username, '-', {$i}), CONCAT(username_canonical, '-', {$i}), CONCAT({$i}, '-', email), CONCAT({$i}, '-', email_canonical), CONCAT(displayname, ' ', {$i}), LAST_INSERT_ID(), {$userColumns} FROM tbl_core_user WHERE id = 2");
+        }
+        $emails = $connection->fetchFirstColumn('SELECT u.email FROM tbl_core_user u INNER JOIN tbl_core_user_meta m ON m.id = u.meta_id WHERE u.enabled = 1 AND u.is_team = 0 AND u.email_confirmed = 1 AND m.week_news_email_enabled = 1 ORDER BY u.id');
+
+        [$exitCode, $output] = static::runCommandLine(self::getCron('ladb:mailing:weeknews'));
+
+        self::assertSame(0, $exitCode, $output);
+        $messages = static::getSentEmailsByCommand();
+        self::assertSame($emails, array_merge(...array_map(fn (Email $message): array => static::getEmailRecipients($message), $messages)));
+        // The greeting and the unsubscribe link are those of the account
+        $news = fn (Email $message): string => preg_replace('~^(Bonjour|Se désabonner) .*$~mu', '', $message->getTextBody());
+        foreach ($messages as $message) {
+            self::assertSame($news($messages[0]), $news($message));
+        }
+        self::assertLessThan(100, static::getEntityManager()->getUnitOfWork()->size());
     }
 
     /**
