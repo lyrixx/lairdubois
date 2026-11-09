@@ -21,13 +21,15 @@ class WebScreenshotUtils {
 	const NAME = 'ladb_core.web_screenshot_utils';
 
 	private $chromium;
+	private $chromiumSandbox;
 	protected $doctrine;
 	private $logger;
 	protected $pictureManager;
 	private $videoHostingUtils;
 
-	public function __construct($chromium, ManagerRegistry $doctrine, LoggerInterface $logger, PictureManager $pictureManager, VideoHostingUtils $videoHostingUtils) {
+	public function __construct($chromium, bool $chromiumSandbox, ManagerRegistry $doctrine, LoggerInterface $logger, PictureManager $pictureManager, VideoHostingUtils $videoHostingUtils) {
 		$this->chromium = $chromium;
+		$this->chromiumSandbox = $chromiumSandbox;
 		$this->doctrine = $doctrine;
 		$this->logger = $logger;
 		$this->pictureManager = $pictureManager;
@@ -69,9 +71,8 @@ class WebScreenshotUtils {
 			'windowSize' => array( $width, $height ),
 			'connectionDelay' => 2.0,
 			'sendSyncDefaultTimeout' => 5000,
-			'customFlags' => array(
-				'--no-sandbox',
-			),
+			// Without its sandbox where the system does not allow it (parameter chromium_sandbox)
+			'noSandbox' => !$this->chromiumSandbox,
 		));
 
 		try {

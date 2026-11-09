@@ -40,6 +40,10 @@ parameters:
     router_default_uri:             https://www.lairdubois.fr
 
     chromium:                       /usr/bin/chromium
+    # Chromium in its sandbox (WebScreenshotUtils), which needs the user namespaces of the kernel
+    # (docs/01-installation.md) and, in a container, the seccomp profile of docs/03-docker.md;
+    # false: --no-sandbox
+    chromium_sandbox:               false
 
     google_api_key:                 YOUR_GOOGLE_API_KEY
 

@@ -33,6 +33,8 @@ x-templates:
             # Chromium does not trust the certificate of the router (the thumbnails of the workflows,
             # a capture of the site)
             CHROMIUM_EXTRA_FLAGS: --ignore-certificate-errors
+            # Chromium in its sandbox, in the containers with the seccomp profile (php, cron)
+            CHROMIUM_SANDBOX: "true"
             # The address of the requests of Chromium for nginx, through the host and the router:
             # the gateway of the network of the stack. And of the browser of the host, on this
             # stack only
@@ -71,6 +73,10 @@ x-templates:
                 condition: service_healthy
             rabbitmq:
                 condition: service_healthy
+    # The default profile of Docker, plus what the sandbox of Chromium needs: the containers that
+    # capture a page (WebScreenshotUtils), php-fpm and the cron
+    chromium_security_opt: &chromium_security_opt
+        - "seccomp=services/php/chromium-seccomp.json"
     # The workers and the cron: no php-fpm to check
     php_command: &php_command
         <<: *php_base
@@ -135,6 +141,7 @@ services:
         build:
             <<: *php_build
             target: php
+        security_opt: *chromium_security_opt
         volumes:
             - downloads:/var/www/downloads
             - logs:/var/www/var/logs
@@ -185,6 +192,7 @@ services:
     cron:
         <<: *php_command
         command: supercronic /etc/lairdubois/crontab
+        security_opt: *chromium_security_opt
 
     # The builder of the dev, for what the images do not have: the fixtures (dev packages, vendor/
     # of the repository, castor app:install), with the volumes they write in. As the user of the

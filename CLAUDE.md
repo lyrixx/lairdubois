@@ -133,6 +133,10 @@ Contextes : `--context=test` (`SYMFONY_ENV=test`), `--context=ci` (le même, san
 - Application à la racine, docroot `web/`, front controller `app_dev.php`. Service `frontend` :
   nginx et php-fpm. Node 24 dans le builder seulement, pour Vite : les autres images servent les
   fichiers de `web/build/`. Pas de Java.
+- Chromium dans son bac à sable (#291) : le `builder` et le `frontend`, qui lancent les captures,
+  ont le profil seccomp `services/php/chromium-seccomp.json` (`security_opt`, voir « Prod »), et
+  `parameters.yml` a `chromium_sandbox: true` (`CHROMIUM_SANDBOX` de `parameters_environment`). Les
+  workers gardent le profil par défaut de Docker.
 - Assets (CSS et JS) : Vite et le plugin npm de Symfony Reprise (`package.json`, `vite.config.js`),
   dans `web/build/` avec `entrypoints.json` et `manifest.json`, hors git. Une entrée par groupe des
   anciennes balises `{% stylesheets %}` et `{% javascripts %}` d'Assetic, mêmes fichiers dans le
@@ -261,6 +265,13 @@ castor -c prod docker:push --tag=… # REGISTRY=ghcr.io/…, la CI seulement
   `--ignore-certificate-errors`, et mène le domaine à l'hôte (`extra_hosts`, `host-gateway`), où
   le routeur publie son port. La requête arrive à nginx avec l'adresse de la passerelle du réseau
   de la stack (`INTERNAL_IPS`).
+- Bac à sable de Chromium (#291) : `chromium_sandbox`, `CHROMIUM_SANDBOX` dans l'image, `false` par
+  défaut (`--no-sandbox`). Il crée des user, PID et network namespaces, que le profil seccomp par
+  défaut de Docker et le `RuntimeDefault` de Kubernetes réservent à `CAP_SYS_ADMIN` : la stack de
+  test donne à `php` et `cron` le profil `services/php/chromium-seccomp.json` (`security_opt`),
+  celui de Docker 29 (moby/profiles, `seccomp/v0.2.4`) plus `clone` et `unshare`, et
+  `CHROMIUM_SANDBOX=true`. La préprod (K3s) : le même profil sur chaque nœud, en `seccompProfile`
+  `Localhost` des conteneurs de php-fpm et du cron (`docs/03-docker.md`).
 - Volumes, à l'utilisateur 1000 (l'image crée les répertoires) : `uploads`, `downloads`,
   `web/media` (Liip, en lecture seule pour nginx), `sitemaps`, `var/logs` (`prod.log`), et le
   socket de php-fpm entre php et nginx. Clé DKIM montée en lecture seule sur `keys/`.
@@ -274,7 +285,8 @@ castor -c prod docker:push --tag=… # REGISTRY=ghcr.io/…, la CI seulement
   charge les fixtures (paquets de dev, `vendor/` du dépôt, `castor app:install` s'il manque) et
   écrit leurs fichiers dans les volumes (`uploads`, `downloads`, `web/media`).
 - `qa:prod-smoke` : l'image (utilisateur, prod sans debug, rien en trop, rien d'écrit hors des
-  volumes), la crontab (supercronic), Chromium (capture d'une page de nginx), Liip (un JPEG et un
+  volumes), la crontab (supercronic), Chromium (capture d'une page de nginx, puis
+  `chrome://sandbox` : dans son bac à sable), Liip (un JPEG et un
   PNG résolus par PHP, servis ensuite par nginx), une vue comptée par le worker `view` (le compteur
   d'avant lu une fois ses files vides, par `rabbitmqctl` : la page de Liip est aussi une vue),
   Google Analytics (plus bas), la suite E2E entière sur la stack (`E2E_PROD` y ajoute
@@ -1343,6 +1355,18 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
     nom inconnu est refusé) : une page refusée n'est pas capturée, une frame refusée reste vide.
     L'hôte de la capture est accepté tel quel : le site peut être sur une adresse privée. Pas de
     filtre sur les autres ressources (images, scripts) : c'est le rendu de la page.
+  - Bac à sable (#291) : `chromium_sandbox` donne l'option `noSandbox` de chrome-php, qui passe
+    avant sa variable `CHROME_NO_SANDBOX`. `false` dans `parameters.yml.dist` et dans l'image : sans
+    user namespaces ni profil seccomp, Chromium ne démarre pas (« No usable sandbox! »),
+    `createBrowser()` lève une exception hors du `try`, le cron des vignettes échoue et la création
+    d'une trouvaille dont la vidéo n'a pas de vignette répond 500. Le profil AppArmor
+    `docker-default` laisse passer le bac à sable sous
+    `kernel.apparmor_restrict_unprivileged_userns=1` (Ubuntu). Il faut `clone` et `unshare`, et
+    `clone` sans condition sur `CLONE_NEWUSER` : le zygote crée chaque processus dans un nouveau PID
+    namespace, sans nouveau user namespace. Preuve : `chrome://sandbox` par chrome-php (« You are
+    adequately sandboxed. » ; `--dump-dom` ne l'ouvre pas), et le `NSpid` des renderers
+    (`/proc/<pid>/status`, PID namespaces imbriqués). Le profil suit celui de Docker : à refaire
+    depuis moby/profiles quand Docker change le sien.
 - Plus de composant `templating` : les templates se nomment dans la notation de Twig
   (`@LadbCore/Dir/file.html.twig`, `@FOSUser/…`, `base.html.twig` pour `templates/`), la
   notation de bundle (`LadbCoreBundle:Dir:file.html.twig`, `::base.html.twig`) ne les trouve plus.

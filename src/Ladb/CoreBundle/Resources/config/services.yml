@@ -190,7 +190,7 @@ services:
   Ladb\CoreBundle\Utils\StripableUtils: '@ladb_core.stripable_utils'
   ladb_core.web_screenshot_utils:
     class: Ladb\CoreBundle\Utils\WebScreenshotUtils
-    arguments: { $chromium: '%chromium%' }
+    arguments: { $chromium: '%chromium%', $chromiumSandbox: '%chromium_sandbox%' }
   Ladb\CoreBundle\Utils\WebScreenshotUtils: '@ladb_core.web_screenshot_utils'
   ladb_core.open_graph_utils:
     class: Ladb\CoreBundle\Utils\OpenGraphUtils

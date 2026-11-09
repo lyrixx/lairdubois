@@ -288,21 +288,27 @@ function check_crontab(): void
 }
 
 /**
- * Chromium in the image, with the options of WebScreenshotUtils: a screenshot of a page that nginx
- * serves.
+ * Chromium in the image, in its sandbox as WebScreenshotUtils runs it in the stack (chromium_sandbox,
+ * the seccomp profile of docker-compose.prod.yml): a screenshot of a page that nginx serves, then
+ * chrome://sandbox.
  */
 function check_chromium(): void
 {
     $output = capture_php(['php', '-r', <<<'PHP'
         require 'vendor/autoload.php';
-        $browser = (new HeadlessChromium\BrowserFactory('/usr/bin/chromium'))->createBrowser(['windowSize' => [800, 600], 'customFlags' => ['--no-sandbox']]);
+        $kernel = new AppKernel('prod', false);
+        $kernel->boot();
+        $sandbox = $kernel->getContainer()->getParameter('chromium_sandbox');
+        $browser = (new HeadlessChromium\BrowserFactory('/usr/bin/chromium'))->createBrowser(['windowSize' => [800, 600], 'noSandbox' => !$sandbox]);
         try {
             $page = $browser->createPage();
             $page->setViewport(800, 600)->await();
             $page->navigate('http://nginx:8080/unsupported.html')->waitForNavigation();
             $file = sys_get_temp_dir().'/screenshot.png';
             $page->screenshot()->saveToFile($file);
-            echo json_encode(['title' => $page->evaluate('document.title')->getReturnValue(), 'size' => getimagesize($file)]);
+            $title = $page->evaluate('document.title')->getReturnValue();
+            $page->navigate('chrome://sandbox')->waitForNavigation();
+            echo json_encode(['title' => $title, 'size' => getimagesize($file), 'chromium_sandbox' => $sandbox, 'sandbox' => $page->evaluate('document.body.innerText')->getReturnValue()]);
         } finally {
             $browser->close();
         }
@@ -312,6 +318,8 @@ function check_chromium(): void
     $result = json_decode(trim($output), true, flags: \JSON_THROW_ON_ERROR);
     expect([800, 600] === \array_slice($result['size'], 0, 2), 'The screenshot is not 800×600.');
     expect('' !== $result['title'], 'Chromium did not load the page.');
+    expect(true === $result['chromium_sandbox'], 'WebScreenshotUtils runs Chromium without its sandbox (chromium_sandbox).');
+    expect(str_contains($result['sandbox'], 'You are adequately sandboxed.'), 'Chromium is not in its sandbox (chrome://sandbox).');
 }
 
 /**

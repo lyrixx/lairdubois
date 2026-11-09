@@ -279,6 +279,11 @@ The platform uses Chromium headless in order to auto generate screenshot of shar
     $ sudo apt-get install chromium chromium-l10n
 ```
 
+`chromium_sandbox` in `parameters.yml`: `true` runs Chromium in its sandbox, which needs the user of
+PHP to create user namespaces (`kernel.unprivileged_userns_clone`, `1` by default since Debian 11)
+or the package `chromium-sandbox`. Otherwise Chromium does not start (`No usable sandbox!`).
+`false`, the default, runs it with `--no-sandbox`.
+
 ## Step 0.1 - Some useful aliases
 
 To speedup command line typing you can add some aliases on your user bash profile.
