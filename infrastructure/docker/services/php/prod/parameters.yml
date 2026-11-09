@@ -41,6 +41,7 @@ parameters:
     router_default_uri:             '%env(ROUTER_DEFAULT_URI)%'
 
     chromium:                       /usr/bin/chromium
+    chromium_sandbox:               '%env(bool:CHROMIUM_SANDBOX)%'
 
     google_api_key:                 '%env(GOOGLE_API_KEY)%'
 
@@ -81,6 +82,9 @@ parameters:
     env(RABBITMQ_PORT):             '5672'
     env(RABBITMQ_VHOST):            /
     env(ADMIN_USERNAME):            admin
+    # Chromium without its sandbox unless given: the default seccomp profile of Docker, and the
+    # RuntimeDefault of Kubernetes, forbid it (docs/03-docker.md)
+    env(CHROMIUM_SANDBOX):          'false'
     # No Google Analytics unless given, not the one of the dist: a preprod would count its visits in
     # those of the production
     env(GA_MEASUREMENT_ID):         ''

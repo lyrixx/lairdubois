@@ -118,7 +118,7 @@ services:
     tests.web_screenshot_utils:
         class: Tests\Double\OfflineWebScreenshotUtils
         decorates: ladb_core.web_screenshot_utils
-        arguments: { $chromium: '%chromium%' }
+        arguments: { $chromium: '%chromium%', $chromiumSandbox: '%chromium_sandbox%' }
         public: true
 
     # No call to the API of Stripe (/financement): FundingController calls its static API, which

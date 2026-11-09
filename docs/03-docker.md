@@ -51,6 +51,35 @@ that these requests have for nginx (the one of the containers, or of the host if
 it), never one that a visitor may have: the diagram of any workflow would be public. Extra flags
 for Chromium go in `CHROMIUM_EXTRA_FLAGS`.
 
+## The sandbox of Chromium
+
+Chromium (the thumbnails of the workflows in the crontab, the videos of the finds without a
+thumbnail from their host in php-fpm) runs without its sandbox (`--no-sandbox`) unless
+`CHROMIUM_SANDBOX=true`. Its sandbox creates user, PID and network namespaces, which the default
+seccomp profile of Docker, and of Kubernetes (`RuntimeDefault`), only allows with `CAP_SYS_ADMIN`.
+Give the containers of php-fpm and of the crontab
+[`chromium-seccomp.json`](../infrastructure/docker/services/php/chromium-seccomp.json) instead: the
+default profile of Docker 29, plus `clone` and `unshare`. Neither `--privileged` nor
+`CAP_SYS_ADMIN`. The kernel of the host must allow the user namespaces (Debian:
+`kernel.unprivileged_userns_clone`, `1` by default since Debian 11). Without them or without the
+profile, Chromium does not start (`No usable sandbox!`): the cron of the thumbnails fails, and the
+creation of such a find answers 500.
+
+- Docker: `--security-opt seccomp=chromium-seccomp.json` (`security_opt` with Compose, as in
+  `docker-compose.prod.yml`).
+- Kubernetes (K3s): the file on each node, in the seccomp directory of the kubelet
+  (`/var/lib/kubelet/seccomp/`), and in the containers of php-fpm and of the crontab:
+
+  ```yaml
+  securityContext:
+      seccompProfile:
+          type: Localhost
+          localhostProfile: chromium-seccomp.json
+  ```
+
+  A container without a `seccompProfile` runs `Unconfined` unless the kubelet has
+  `seccompDefault`: no filter on the system calls at all, give it the profile anyway.
+
 ## Variables
 
 `app/config/parameters.yml` of the image
@@ -72,6 +101,7 @@ runtime, in every container of the image `php`. The ones with a default can be l
 | `ROUTER_DEFAULT_URI` | `router_default_uri`: `https://` and the host of the site | |
 | `TRUSTED_HOSTS` | `framework.trusted_hosts`, a regex | `^(dev\|www)\.lairdubois\.fr$` |
 | `INTERNAL_IPS` | the addresses allowed on the `/internal/` pages without an account (`security.yml`) | `127.0.0.1, ::1` |
+| `CHROMIUM_SANDBOX` | `chromium_sandbox`: Chromium in its sandbox, with the seccomp profile of [The sandbox of Chromium](#the-sandbox-of-chromium) | `false`: `--no-sandbox` |
 | `WEBPUSH_PUBLIC_KEY`, `WEBPUSH_PRIVATE_KEY` | `bentools_webpush.*` (VAPID) | |
 | `ADMIN_USERNAME` | `admin_username` | `admin` |
 | `GA_MEASUREMENT_ID` | `ga_measurement_id`: Google Analytics (`G-…`) | empty: none |
