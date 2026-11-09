@@ -865,12 +865,6 @@ parameters:
 			path: src/Ladb/CoreBundle/Utils/CommentableUtils.php
 
 		-
-			message: '#^Call to deprecated function utf8_decode\(\)\.$#'
-			identifier: function.deprecated
-			count: 1
-			path: src/Ladb/CoreBundle/Utils/OpenGraphUtils.php
-
-		-
 			message: '#^Class Ladb\\CoreBundle\\Entity\\Knowledge\\Value\\ToolIdentity not found\.$#'
 			identifier: class.notFound
 			count: 1

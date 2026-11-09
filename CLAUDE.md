@@ -621,6 +621,16 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   par `FundingController` : un listener de `kernel.request` lui donne le client HTTP
   `Tests\Double\OfflineStripeClient`, qui ne connaît que le payment intent qu'il crée
   (`PAYMENT_INTENT_ID`) et garde les requêtes (`tests.stripe_client`, `getRequests()`).
+- URL venues de l'extérieur (`ExternalUrlUtils`, le titre de la page d'un referer) : le transport
+  de `ladb_core.external_url_http_client` est remplacé par un `MockHttpClient`,
+  `tests.external_url_http_client`, derrière le `NoPrivateNetworkHttpClient` du site. Il fait
+  échouer chaque requête, sauf quand le test lui donne ses réponses (`setResponseFactory()`, dans
+  le container du client, avant la requête). Le `NoPrivateNetworkHttpClient` résout lui-même
+  l'hôte, pour refuser une adresse privée : le test donne les adresses de ses hôtes à
+  `DnsMock::withMockedHosts()` (enregistré par `tests/bootstrap.php`), puis les remet à `[]` (sans
+  hôte, `DnsMock` interroge le DNS). `Tests\Core\ExternalUrlTest` passe par le vrai
+  `OpenGraphUtils` et le vrai `PictureManager` (URL refusées, redirections, échecs), `ReferralTest`
+  par le site.
 - Graph API de Facebook (`ApiController`, `OpenGraphUtils`) : le SDK est créé dans le code du site,
   sans service à remplacer ; `Tests\Double\OfflineFacebookGraph`, chargé par
   `tests/bootstrap.php`, définit les fonctions `curl_*()` du namespace du SDK, qui passent avant
@@ -726,8 +736,9 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   `web/sitemap-*.xml` qu'écrit `ladb:cron:sitemaps`. Mastodon (curl dans `ladb:cron:spotlight`) est
   hors ligne par `mastodon_instance` (`config_test.yml`), un protocole que curl ne connaît pas ;
   Twitter et Facebook y sont coupés dans le code. Un `file_get_contents()` d'URL sans service à
-  doubler (ip-api.com) : `Tests\Double\OfflineHttpStream::register([$url => $body])`, puis
-  `unregister()` ; toute autre URL échoue.
+  doubler (ip-api.com, `CrontabTest`) : `Tests\Double\OfflineHttpStream::register([$url =>
+  $body])`, puis `unregister()` ; toute autre URL échoue. `ReferralTest` n'y passe plus : la page
+  d'un referer est lue par `ExternalUrlUtils`.
 - Géocodage (`LocalisableUtils`, profils, collectifs et tous les formulaires avec une
   localisation) : remplacé en test par `Tests\Double\OfflineLocalisableUtils`, qui connaît les
   adresses de sa constante `ADDRESSES` (`Bordeaux, France`) ; toute autre adresse n'a pas de
@@ -955,6 +966,17 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   envoie alors le mail en direct. `SearchUtils` reçoit un index par l'id de son service
   (`fos_elastica.index.<type>`) : un index par type de contenu (#31), `ladb_<type>` dans
   Elasticsearch (`elasticsearch_index_prefix`).
+- `ExternalUrlUtils::fetch()` (#304) lit les URL venues de l'extérieur du site : la page du lien
+  d'une trouvaille (`OpenGraphUtils::fetchMetas()`), l'image que `PictureManager::createFromUrl()`
+  copie (son `og:image`, une vignette de vidéo) et la page du referer d'un contenu
+  (`EmbeddableUtils`). Par `ladb_core.external_url_http_client` (`services.yml`), un
+  `NoPrivateNetworkHttpClient` de HttpClient sur son propre transport, pas celui du hub Mercure :
+  `http` et `https` seulement, aucune adresse privée, de loopback ni link-local, même après une
+  redirection, et pas de redirection de `https` vers `http`. Au plus 5 redirections, 5 s sans
+  réponse, 15 s et 8 Mo (`Picture::MAX_FILE_SIZE`) par requête, certificat vérifié. Un échec rend
+  `null` et laisse un warning dans le log. La page d'une trouvaille part avec le User-Agent du
+  membre, l'image et la page du referer avec celui de HttpClient. `LinkUtils` (URL canonique d'un
+  lien, que rien n'appelait) est supprimé.
 - Robots (`CrawlerDetect` de crawler-detect) : leur vue d'un contenu n'est pas comptée
   (`ViewableUtils::processShownView()`), et le profil d'un compte leur montre sa page « à propos »
   (`UserController::showAction()`). Il lit `$_SERVER`, pas la requête : dans un `WebTestCase`, pas

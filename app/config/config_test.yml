@@ -132,6 +132,15 @@ services:
         decorates: ladb_core.web_screenshot_utils
         arguments: { $chromium: '%chromium%', $chromiumSandbox: '%chromium_sandbox%' }
         public: true
+    # The other requests to a URL which comes from outside the site (ExternalUrlUtils: the title of
+    # the page of a referer) go to a MockHttpClient, behind NoPrivateNetworkHttpClient as on the
+    # site. It fails each request, unless the test gives it its responses (setResponseFactory())
+    # and the addresses of its hosts (DnsMock, tests/bootstrap.php)
+    tests.external_url_http_client:
+        class: Symfony\Component\HttpClient\MockHttpClient
+        decorates: ladb_core.external_url_http_client.transport
+        arguments: [[]]
+        public: true
 
     # No call to the API of Stripe (/financement): FundingController calls its static API, which
     # gets the HTTP client of Tests\Double\OfflineStripeClient at each request

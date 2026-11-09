@@ -2,9 +2,11 @@
 
 namespace Tests\OpenGraph;
 
+use Ladb\CoreBundle\Utils\ExternalUrlUtils;
 use Ladb\CoreBundle\Utils\OpenGraphUtils;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\AbstractLogger;
+use Symfony\Component\HttpClient\MockHttpClient;
 use Tests\Double\OfflineFacebookGraph;
 
 /**
@@ -31,7 +33,7 @@ final class OpenGraphUtilsTest extends TestCase
         };
         OfflineFacebookGraph::popRequests();
 
-        (new OpenGraphUtils('access-token', 'app-id', 'app-secret', $logger))->scrape(OfflineFacebookGraph::URL);
+        (new OpenGraphUtils('access-token', 'app-id', 'app-secret', $logger, new ExternalUrlUtils(new MockHttpClient(), $logger)))->scrape(OfflineFacebookGraph::URL);
 
         self::assertSame(['https://graph.facebook.com/v5.0/'], OfflineFacebookGraph::popRequests());
         self::assertSame([['error', 'OpenGraphUtils failed to scrape. Facebook SDK returned an error: Unsupported request (Tests\Double\OfflineFacebookGraph).']], $logger->records);

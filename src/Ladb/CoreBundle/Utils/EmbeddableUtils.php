@@ -30,12 +30,14 @@ class EmbeddableUtils {
 	const NAME = 'ladb_core.embeddable_utils';
 
 	private $doctrine;
+	private $externalUrlUtils;
 	private $pictureManager;
 	private $translator;
 	private $typableUtils;
 
-	public function __construct(ManagerRegistry $doctrine, PictureManager $pictureManager, TranslatorInterface $translator, TypableUtils $typableUtils) {
+	public function __construct(ManagerRegistry $doctrine, ExternalUrlUtils $externalUrlUtils, PictureManager $pictureManager, TranslatorInterface $translator, TypableUtils $typableUtils) {
 		$this->doctrine = $doctrine;
+		$this->externalUrlUtils = $externalUrlUtils;
 		$this->pictureManager = $pictureManager;
 		$this->translator = $translator;
 		$this->typableUtils = $typableUtils;
@@ -348,8 +350,8 @@ class EmbeddableUtils {
 
 	private function _retrievePageTitle($url, $pattern = null, $replacement = null) {
 		try {
-			$str = file_get_contents($url);
-			if (strlen($str) > 0) {
+			$str = $this->externalUrlUtils->fetch($url);
+			if (!is_null($str) && strlen($str) > 0) {
 				$matches = null;
 				if (preg_match("/\<title\>(.*)\<\/title\>/", $str, $matches)) {
 					$title = $matches[1];

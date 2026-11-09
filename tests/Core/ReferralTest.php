@@ -4,8 +4,10 @@ namespace Tests\Core;
 
 use Ladb\CoreBundle\Entity\Core\Referer\Referral;
 use Ladb\CoreBundle\Entity\Wonder\Creation;
+use Symfony\Bridge\PhpUnit\DnsMock;
 use Symfony\Component\DomCrawler\Crawler;
-use Tests\Double\OfflineHttpStream;
+use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Response\MockResponse;
 use Tests\WebTestCase;
 
 /**
@@ -17,6 +19,13 @@ use Tests\WebTestCase;
 final class ReferralTest extends WebTestCase
 {
     private const URL = 'https://example.org/forum/sujet-1';
+
+    private const PAGES = [
+        'https://example.org/' => '<html><head><title>Le forum</title></head></html>',
+        self::URL => '<html><head><title>Le sujet</title></head></html>',
+    ];
+
+    private MockHttpClient $externalUrlHttpClient;
 
     /**
      * @dataProvider provideWarnings
@@ -47,21 +56,20 @@ final class ReferralTest extends WebTestCase
         $crawler = $this->requestFromReferer('/creations/1.html');
 
         self::assertNull(static::getEntityManager()->getRepository(Referral::class)->findOneBy(['url' => self::URL]));
-        self::assertSame([], OfflineHttpStream::getUrls());
+        self::assertSame(0, $this->externalUrlHttpClient->getRequestsCount());
         self::assertCount(0, $crawler->filter('#referral_modal'));
     }
 
     private function requestFromReferer(string $uri): Crawler
     {
         $client = static::createClient();
-        OfflineHttpStream::register([
-            'https://example.org' => '<html><head><title>Le forum</title></head></html>',
-            self::URL => '<html><head><title>Le sujet</title></head></html>',
-        ]);
+        $this->externalUrlHttpClient = $client->getContainer()->get('tests.external_url_http_client');
+        $this->externalUrlHttpClient->setResponseFactory(static fn (string $method, string $url): MockResponse => new MockResponse(self::PAGES[$url]));
+        DnsMock::withMockedHosts(['example.org' => [['type' => 'A', 'ip' => '93.184.215.14']]]);
         try {
             $crawler = $client->request('GET', $uri, [], [], ['HTTP_REFERER' => self::URL]);
         } finally {
-            OfflineHttpStream::unregister();
+            DnsMock::withMockedHosts([]);
         }
         self::assertSame(200, $client->getResponse()->getStatusCode());
 

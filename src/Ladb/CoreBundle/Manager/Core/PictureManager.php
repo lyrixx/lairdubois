@@ -4,10 +4,17 @@ namespace Ladb\CoreBundle\Manager\Core;
 
 use Ladb\CoreBundle\Manager\AbstractManager;
 use Ladb\CoreBundle\Entity\Core\Picture;
+use Ladb\CoreBundle\Utils\ExternalUrlUtils;
 
 class PictureManager extends AbstractManager {
 
 	const NAME = 'ladb_core.core_picture_manager';
+
+	private $externalUrlUtils;
+
+	public function __construct(ExternalUrlUtils $externalUrlUtils) {
+		$this->externalUrlUtils = $externalUrlUtils;
+	}
 
 	/////
 
@@ -38,7 +45,8 @@ class PictureManager extends AbstractManager {
 
 		// Copy file content
 		try {
-			if (copy($url, $picture->getAbsolutePath())) {
+			$content = $this->externalUrlUtils->fetch($url);
+			if (!is_null($content) && file_put_contents($picture->getAbsolutePath(), $content) !== false) {
 				if ($this->computeSizes($picture)) {
 					if ($persist) {
 						$om = $this->doctrine->getManager();

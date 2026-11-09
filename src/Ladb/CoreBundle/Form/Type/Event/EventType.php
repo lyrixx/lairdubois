@@ -20,18 +20,15 @@ use Ladb\CoreBundle\Form\Type\PolyCollectionType;
 use Ladb\CoreBundle\Entity\Event\Event;
 use Ladb\CoreBundle\Utils\VideoHostingUtils;
 use Ladb\CoreBundle\Utils\LocalisableUtils;
-use Ladb\CoreBundle\Utils\LinkUtils;
 
 class EventType extends AbstractType {
 
 	private $om;
 	private $localisableUtils;
-	private $linkUtils;
 
-	public function __construct(ObjectManager $om, LocalisableUtils $localisableUtils, LinkUtils $linkUtils) {
+	public function __construct(ObjectManager $om, LocalisableUtils $localisableUtils) {
 		$this->om = $om;
 		$this->localisableUtils = $localisableUtils;
-		$this->linkUtils = $linkUtils;
 	}
 
 	public function buildForm(FormBuilderInterface $builder, array $options): void {
