@@ -1159,11 +1159,18 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   lots suivants les rendent tels quels (`CrontabTest::testWeekNewsReadsTheAccountsByBatches`).
   Sa requête des comptes n'a pas d'`ORDER BY` : MariaDB parcourt `tbl_core_user` dans l'ordre des
   ids, et les mails partent dans cet ordre.
-- `ladb:cron:notification:email` lit d'un coup toutes les notifications en attente d'un type et
-  garde tout dans l'UnitOfWork jusqu'au `flush()` final : 25 Ko par notification, 294 Mo pour
-  10 000 notifications de commentaires en attente (3 936 destinataires) sur le jeu de volume, sans
-  `--force` (#290). La limite de 512 Mo de l'image tombe vers 19 000 notifications en attente
-  entre deux passages.
+- `ladb:cron:notification:email` lit les ids des destinataires d'un type, puis les notifications
+  de chacun, avec un `clear()` après son mail (#293). Elle lisait d'un coup toutes les
+  notifications en attente du type et gardait tout dans l'UnitOfWork : 25 Ko par notification, et
+  chaque `flush()` (un par destinataire, avec `--force`) parcourait tout ce qu'il gardait. Sur le
+  jeu de volume, pour 20 055 notifications en attente (commentaires et likes, 7 838 mails) : 376 Mo
+  au pic et 3 h 14 avant, 44 Mo et 2 min 15 à `memory_limit=128M` après (42 Mo pour les 55 des
+  fixtures). Mêmes mails, dans le même ordre : destinataires par id, notifications d'un
+  destinataire par id (`ORDER BY n.id`, l'ordre que donnait déjà le plan de MariaDB, par l'index
+  de `user_id`). Les notifications d'un destinataire sont lues à son tour, plus au début du
+  passage : listées entre-temps (page des notifications), elles n'ont pas de mail ; arrivées
+  entre-temps (`ladb:cron:notification:populate`, toutes les 2 minutes), elles partent avec les
+  autres (`CrontabTest::testNotificationEmailReadsTheNotificationsByRecipient`).
 - `doctrine:schema:update` (#178) est toujours complet en ORM 3 (`--complete` ne fait plus rien,
   avec une dépréciation et un avertissement à l'écran) : il supprime les tables hors mapping, sauf
   celles que cachent le `schema_filter` (`sessions`) et le `SchemaFilterListener` de
