@@ -10,7 +10,14 @@ imports:
 
 monolog:
     handlers:
+        # Only the warnings and above wait for an error in the buffer of fingers_crossed: nested
+        # writes nothing below them, and the buffer kept every other record until the end of a
+        # command, such as the info of Messenger for each email sent (#290)
         main:
+            type:      filter
+            min_level: warning
+            handler:   fingers_crossed
+        fingers_crossed:
             type:         fingers_crossed
             action_level: error
             handler:      nested

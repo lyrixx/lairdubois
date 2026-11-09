@@ -1140,6 +1140,18 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   chaque lot (#284) : un `findAll()` gardait les contenus, leurs images et leurs blocs d'une
   section à l'autre, jusqu'à `memory_limit` dès 10 000 contenus par type. Les URL d'une section
   restent en mémoire, avec le fichier rendu.
+- `ladb:mailing:weeknews` fait un `clear()` après chaque lot de 100 comptes (#290) : le
+  `detach()` de chaque compte laissait dans l'UnitOfWork son `UserMeta` (le `select u, m`) et les
+  proxys de son avatar, de sa bannière et de sa biographie, 14 Ko par compte. Les contenus de la
+  semaine sont détachés avec eux : le premier mail a chargé ce que les templates en lisent, les
+  lots suivants les rendent tels quels (`CrontabTest::testWeekNewsReadsTheAccountsByBatches`).
+  Sa requête des comptes n'a pas d'`ORDER BY` : MariaDB parcourt `tbl_core_user` dans l'ordre des
+  ids, et les mails partent dans cet ordre.
+- `ladb:cron:notification:email` lit d'un coup toutes les notifications en attente d'un type et
+  garde tout dans l'UnitOfWork jusqu'au `flush()` final : 25 Ko par notification, 294 Mo pour
+  10 000 notifications de commentaires en attente (3 936 destinataires) sur le jeu de volume, sans
+  `--force` (#290). La limite de 512 Mo de l'image tombe vers 19 000 notifications en attente
+  entre deux passages.
 - `doctrine:schema:update` (#178) est toujours complet en ORM 3 (`--complete` ne fait plus rien,
   avec une dépréciation et un avertissement à l'écran) : il supprime les tables hors mapping, sauf
   celles que cachent le `schema_filter` (`sessions`) et le `SchemaFilterListener` de
@@ -1403,6 +1415,12 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `#[IsGranted(statusCode: 404)]`) en `warning`, plus en `error` : le `fingers_crossed` de la prod
   (`action_level: error`) ne se déclenche plus, et une requête en 404 ou 403 n'écrit plus rien dans
   `prod.log` (en 8.1, une ligne `request.ERROR`, avec les warnings de la requête).
+- En prod, le handler `main` est un `filter` à `warning` devant le `fingers_crossed` (#290) : seuls
+  les warnings et au-dessus attendent une erreur dans son tampon. `nested` n'écrit rien en dessous
+  de `warning`, mais le tampon (`buffer_size` à 0, sans limite) gardait tous les autres
+  enregistrements jusqu'à la fin d'une commande : l'`info` de Messenger de chaque mail envoyé,
+  9 Mo au pic pour les 10 000 mails de `ladb:mailing:weeknews`. `prod.log` reçoit les mêmes
+  lignes, au même moment. `config_beta.yml` garde l'ancienne configuration.
 - Depuis Symfony 6 (`framework.form.legacy_error_messages`, sans effet), une valeur qu'un type de
   formulaire ne peut pas transformer (langue inconnue, nombre mal écrit, choix hors liste) donne le
   message du type (« Cette langue n'est pas valide. ») au lieu de « Cette valeur n'est pas
