@@ -621,7 +621,8 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   `tests/bootstrap.php`, définit les fonctions `curl_*()` du namespace du SDK, qui passent avant
   celles de PHP (comme `ClockMock` du bridge). Il connaît le compteur de partages de
   `OfflineFacebookGraph::URL`, répond une erreur pour `ERROR_URL` et pour toute autre requête, et
-  rend les URL appelées (`popRequests()`).
+  rend les URL appelées (`popRequests()`). Le scrape d'une page publiée (`OpenGraphUtils::scrape()`,
+  hors debug seulement) reçoit donc une erreur, journalisée : `tests/OpenGraph/` (#294).
 - Pas d'`addListener()` sur `event_dispatcher` dans un test : la 8.2 le déprécie sur le dispatcher
   compilé (#265), dont le premier appel copie tous les listeners dans un dispatcher ordinaire. Les
   listeners des tests sont des services de `config_test.yml` (`#[AsEventListener]`,
@@ -1443,6 +1444,10 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `elasticsearch`, `sentry`…). La 4.1 ferme les handlers déjà créés à l'arrêt du kernel
   (`monolog.handler_lifecycle_manager`) : à chaque reboot du client d'un test, jamais sous FPM ni
   dans un worker.
+- Monolog 3 : un logger n'a que les méthodes de PSR-3 (`error()`, `warning()`…). Les `addError()`,
+  `addWarning()`… de Monolog 1, retirés en 2.0, donnent une `\Error` : le seul qui restait, dans
+  `OpenGraphUtils::scrape()`, aurait fait une 500 à la publication d'un contenu, hors debug, quand
+  Facebook répond une erreur (#294).
 - Depuis la 8.2 (#30), `ErrorListener` journalise une exception HTTP < 500 (404, 403, dont les
   `#[IsGranted(statusCode: 404)]`) en `warning`, plus en `error` : le `fingers_crossed` de la prod
   (`action_level: error`) ne se déclenche plus, et une requête en 404 ou 403 n'écrit plus rien dans
