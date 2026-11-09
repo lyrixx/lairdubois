@@ -46,7 +46,7 @@ class OpenGraphUtils {
 
 		} catch (\Facebook\Exceptions\FacebookSDKException $e) {
 			// When validation fails or other local issues
-			$this->logger->addError('OpenGraphUtils failed to scrape. Facebook SDK returned an error: '.$e->getMessage());
+			$this->logger->error('OpenGraphUtils failed to scrape. Facebook SDK returned an error: '.$e->getMessage());
 		}
 
 	}
