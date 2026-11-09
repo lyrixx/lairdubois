@@ -97,6 +97,34 @@ final class EventTest extends PublicationTestCase
     }
 
     /**
+     * The page writes the dates in full, in the locale of the request (format_datetime of
+     * twig/intl-extra, as localizeddate of twig/extensions before #150).
+     *
+     * @dataProvider provideFullDates
+     */
+    public function testShowWritesTheDatesInFull(string $startDate, string $endDate, string $fullDate): void
+    {
+        $client = static::createClient();
+        $event = $this->find(static::ID);
+        $event->setStartDate(new \DateTime($startDate));
+        $event->setEndDate(new \DateTime($endDate));
+        static::getEntityManager()->flush();
+
+        $crawler = $client->request('GET', $this->path('show', ['id' => static::ID]));
+
+        self::assertSame($fullDate, $crawler->filter('#ladb_event_datetime .ladb-full-date')->text());
+    }
+
+    /**
+     * @return iterable<string, array{string, string, string}>
+     */
+    public static function provideFullDates(): iterable
+    {
+        yield 'one day' => ['2030-06-15', '2030-06-15', 'le samedi 15 juin 2030 de 10:00 à 18:00'];
+        yield 'several days' => ['2030-12-31', '2031-01-01', 'du mardi 31 décembre 2030 à 10:00 au mercredi 1 janvier 2031 à 18:00'];
+    }
+
+    /**
      * @dataProvider provideUsers
      */
     public function testLocation(?string $username): void
