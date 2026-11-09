@@ -21,6 +21,8 @@ services:
         ladb_core.core_user_manager: '@ladb_core.core_user_manager'
         ladb_core.typable_utils: '@ladb_core.typable_utils'
         ladb_core.video_hosting_utils: '@ladb_core.video_hosting_utils'
+  # format_datetime and the other filters of twig/intl-extra: TwigBundle does not register its extension
+  Twig\Extra\Intl\IntlExtension: ~
 
   # Error pages: TwigErrorRenderer (error_renderer.html) only renders HTML
   ladb_core.request_format_error_renderer:

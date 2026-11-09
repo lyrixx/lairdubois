@@ -45,7 +45,6 @@ class LadbExtension extends AbstractExtension {
 			new TwigFilter('ladb_hours_minutes_duration', array( $this, 'hoursMinutesDurationFilter' )),
 
 			// Filters of the abandoned twig/extensions, with the same code
-			new TwigFilter('localizeddate', array( $this, 'localizedDateFilter' ), array( 'needs_environment' => true )),
 			new TwigFilter('time_diff', array( $this, 'timeDiffFilter' ), array( 'needs_environment' => true )),
 			new TwigFilter('truncate', array( $this, 'truncateFilter' ), array( 'needs_environment' => true )),
 		);
@@ -170,30 +169,6 @@ class LadbExtension extends AbstractExtension {
 			}
 		}
 		return $str;
-	}
-
-	// Copy of twig_localized_date_filter() of twig/extensions 1.5
-	public function localizedDateFilter(Environment $env, $date, $dateFormat = 'medium', $timeFormat = 'medium', $locale = null, $timezone = null, $format = null, $calendar = 'gregorian') {
-		$date = $env->getExtension(CoreExtension::class)->convertDate($date, $timezone);
-
-		$formatValues = array(
-			'none' => \IntlDateFormatter::NONE,
-			'short' => \IntlDateFormatter::SHORT,
-			'medium' => \IntlDateFormatter::MEDIUM,
-			'long' => \IntlDateFormatter::LONG,
-			'full' => \IntlDateFormatter::FULL,
-		);
-
-		$formatter = \IntlDateFormatter::create(
-			$locale,
-			$formatValues[$dateFormat],
-			$formatValues[$timeFormat],
-			\IntlTimeZone::createTimeZone($date->getTimezone()->getName()),
-			'gregorian' === $calendar ? \IntlDateFormatter::GREGORIAN : \IntlDateFormatter::TRADITIONAL,
-			$format
-		);
-
-		return $formatter->format($date->getTimestamp());
 	}
 
 	// Copy of Twig_Extensions_Extension_Date::diff() of twig/extensions 1.5

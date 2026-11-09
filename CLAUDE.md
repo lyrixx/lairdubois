@@ -1236,7 +1236,7 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `Symfony\Component\Routing\DependencyInjection\Router` : un service demande `RouterInterface`.
 - Console 8.2 (#30) : une commande démarre dans la locale `fr` (`framework.default_locale`), plus
   dans celle de PHP (`en_US_POSIX` dans les images) : rien de ce qu'écrivent les crons ne la lit
-  (`localizeddate` ne sert que sur la page d'un événement). `list` replie les sous-commandes
+  (`format_datetime` ne sert que sur la page d'un événement). `list` replie les sous-commandes
   (`ladb:cron:notification:email` et `:populate` sous `ladb:cron:notification`), `list ladb` les
   montre toutes. Un worker arrêté par SIGTERM (`systemctl stop`) sort toujours en 0 :
   `messenger:consume` gère le signal (une commande qui ne le gère pas sort en 143).
@@ -1376,6 +1376,14 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `{% set %}`), avant le doctype, là où la 3.27 les retirait comme Twig 2 : les balises qu'ils
   contiennent finissent par `-%}`. Un nouveau `{% if %}` hors des blocs d'un template enfant fait
   de même.
+- Filtres de dates (#150) : `format_datetime` de `twig/intl-extra` (date d'un événement),
+  `Twig\Extra\Intl\IntlExtension` dans `services.yml` : TwigBundle ne la branche pas, il faudrait
+  `twig/extra-bundle`. Sans `locale`, celle de PHP (`\Locale::getDefault()`), que
+  `Request::setLocale()` met à celle de la requête (`fr`). `time_diff` et `truncate` restent des
+  copies de `twig/extensions` (abandonné) dans `LadbExtension` : rien d'officiel ne rend pareil.
+  `u.truncate` de `twig/string-extra` compte le séparateur dans la longueur et garde l'espace qui le
+  précède, et `intl-extra` n'écrit pas « il y a 3 jours » (ses formats `relative_*` nomment
+  les jours d'« avant-hier » à « après-demain », la date au-delà).
 - Plus de `spaceless` (déprécié depuis Twig 3.12, #205) : le contrôle des espaces de Twig le
   remplace, à rendu identique. `{%- … -%}` sur les balises de Twig, `{# -#}` en fin de ligne entre
   deux balises HTML, et pas de saut de ligne final quand le `spaceless` entourait tout le fichier.
