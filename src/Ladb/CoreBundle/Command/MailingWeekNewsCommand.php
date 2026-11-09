@@ -430,10 +430,12 @@ EOT
 							$output->writeln('<fg=cyan>[Fake]</fg=cyan>');
 						}
 					}
-					// Free memory
-					$om->detach($user);
 				}
 
+				// Free memory: detaching each user left its meta, and the proxies of its avatar, banner
+				// and biography, in the unit of work. The contents of the news are detached too: the
+				// first email has loaded what the templates read of them
+				$om->clear();
 				unset($users);
 			}
 
