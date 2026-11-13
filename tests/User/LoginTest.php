@@ -305,6 +305,28 @@ final class LoginTest extends WebTestCase
     }
 
     /**
+     * The session cookie has a name of its own, the PHPSESSID of PHP before (#301): the delivery
+     * closes the sessions opened before it, and each account logs in again once.
+     */
+    public function testSessionCookieName(): void
+    {
+        $client = $this->login(static::createClient(), UserFixtures::USER, UserFixtures::USER);
+        $sessionCookie = $client->getCookieJar()->get('LADBSESSID');
+        self::assertNotNull($sessionCookie);
+        self::assertNull($client->getCookieJar()->get('PHPSESSID'));
+
+        // The session alone, without the remember me cookie
+        $client->getCookieJar()->clear();
+        $client->getCookieJar()->set(new Cookie('LADBSESSID', $sessionCookie->getValue()));
+        self::assertLoggedInAs($client, UserFixtures::USER);
+
+        // The same session under the name of before
+        $client->getCookieJar()->clear();
+        $client->getCookieJar()->set(new Cookie('PHPSESSID', $sessionCookie->getValue()));
+        self::assertNotLoggedIn($client);
+    }
+
+    /**
      * A session opened before the replacement of FOSUserBundle (#24) stays logged in, with the roles
      * of its token: an admin stays admin.
      *

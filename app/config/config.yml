@@ -47,6 +47,9 @@ framework:
         storage_factory_id: session.storage.factory.native
         handler_id: session.handler.pdo
         save_path: "%kernel.project_dir%/app/sessions"
+        # The PHPSESSID of PHP before: the new name closes at the delivery the sessions opened
+        # before it, in the format of Symfony 3.4 (#301)
+        name: LADBSESSID
         cookie_lifetime: 0
         cookie_samesite: 'strict'
         # Secure when the request is in HTTPS

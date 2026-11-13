@@ -4,7 +4,7 @@ imports:
 framework:
     test: ~
     session:
-        storage_factory_id: session.storage.factory.mock_file
+        storage_factory_id: tests.session.storage.factory
     # The profiler only collects on demand: $client->enableProfiler()
     profiler:
         collect: false
@@ -61,6 +61,12 @@ services:
         autowire: true
         autoconfigure: true
         public: false
+
+    # The storage of the tests, a file per session, under the name of framework.session.name, as
+    # in the dev and the prod (MOCKSESSID otherwise): LoginTest checks the name of the cookie (#301)
+    tests.session.storage.factory:
+        parent: session.storage.factory.mock_file
+        arguments: { index_1: "@=parameter('session.storage.options')['name']" }
 
     # The Mercure hub gets no updates from the tests either, as RabbitMQ (framework.messenger): they
     # are kept (getUpdates()). Decorated, not redefined: the definition of the bundle would win over

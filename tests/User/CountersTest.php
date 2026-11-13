@@ -79,7 +79,7 @@ final class CountersTest extends WebTestCase
     }
 
     /**
-     * In test, the session is a file (session.storage.factory.mock_file of config_test.yml).
+     * In test, the session is a file (tests.session.storage.factory of config_test.yml).
      */
     private function getSessionFile(KernelBrowser $client): string
     {
