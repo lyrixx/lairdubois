@@ -6,6 +6,7 @@ use DAMA\DoctrineTestBundle\Doctrine\DBAL\StaticDriver;
 use Doctrine\ORM\EntityManagerInterface;
 use Elastica\Index;
 use Ladb\CoreBundle\Entity\Core\User;
+use Ladb\CoreBundle\Scheduler\CronScheduleProvider;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase as BaseWebTestCase;
@@ -19,6 +20,9 @@ use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Stamp\ReceivedStamp;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
+use Symfony\Component\Scheduler\Generator\MessageContext;
+use Symfony\Component\Scheduler\Generator\MessageGeneratorInterface;
+use Symfony\Component\Scheduler\Messenger\SchedulerTransport;
 
 /**
  * Base class of the functional tests: a client on the host of the site, logged in or not, and
@@ -200,6 +204,41 @@ abstract class WebTestCase extends BaseWebTestCase
     protected static function consumeMessage(object $message, string $transportName): void
     {
         static::getContainer()->get('messenger.default_bus')->dispatch(new Envelope($message, [new ReceivedStamp($transportName)]));
+    }
+
+    /**
+     * Puts a run of a cron (its command line, "ladb:cron:offers --force") in the queue "cron", as
+     * the worker of the schedule does: the envelopes of SchedulerTransport, dispatched from the
+     * transport "scheduler_cron", in the container of the last client or kernel.
+     */
+    protected static function scheduleCron(string $commandLine): void
+    {
+        foreach ((new CronScheduleProvider())->getSchedule()->getRecurringMessages() as $recurringMessage) {
+            $context = new MessageContext('cron', $recurringMessage->getId(), $recurringMessage->getTrigger(), new \DateTimeImmutable());
+            $messages = iterator_to_array($recurringMessage->getMessages($context), false);
+            if ($commandLine !== $messages[0]->envelope->input) {
+                continue;
+            }
+            $generator = new class($context, $messages) implements MessageGeneratorInterface {
+                public function __construct(private MessageContext $context, private array $messages)
+                {
+                }
+
+                public function getMessages(): iterable
+                {
+                    foreach ($this->messages as $message) {
+                        yield $this->context => $message;
+                    }
+                }
+            };
+            foreach ((new SchedulerTransport($generator, true))->get() as $envelope) {
+                static::getContainer()->get('messenger.default_bus')->dispatch($envelope->with(new ReceivedStamp('scheduler_cron')));
+            }
+
+            return;
+        }
+
+        throw new \LogicException("The schedule does not run {$commandLine}.");
     }
 
     /**

@@ -655,6 +655,9 @@ services:
   Ladb\CoreBundle\Consumer\ViewConsumer: ~
   Ladb\CoreBundle\Consumer\WebpushNotificationConsumer: ~
 
+  # The schedule of the crons (tagged scheduler.schedule_provider by autoconfigure, #[AsSchedule])
+  Ladb\CoreBundle\Scheduler\CronScheduleProvider: ~
+
   # Middleware of the bus (config.yml): DoctrineBundle 3.3 only has doctrine_ping_connection, the
   # one of the entity manager, deprecated in Symfony 8.2. This one pings every DBAL connection, and
   # does not reset a closed entity manager: the worker resets it after each message.

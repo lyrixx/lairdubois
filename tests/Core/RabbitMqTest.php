@@ -3,6 +3,8 @@
 namespace Tests\Core;
 
 use Ladb\CoreBundle\DataFixtures\UserFixtures;
+use Ladb\CoreBundle\Entity\Core\Activity\AbstractActivity;
+use Ladb\CoreBundle\Entity\Core\Notification;
 use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Entity\Core\View;
 use Ladb\CoreBundle\Entity\Webpush\UserSubscription;
@@ -20,6 +22,7 @@ use Symfony\Component\Console\Output\BufferedOutput;
  */
 final class RabbitMqTest extends InteractionTestCase
 {
+    private const CRON_QUEUE = 'test_cron';
     private const MAILER_QUEUE = 'test_mailer';
     private const VIEW_QUEUE = 'test_view';
     private const WEBPUSH_NOTIFICATION_QUEUE = 'test_webpush_notification';
@@ -44,7 +47,7 @@ final class RabbitMqTest extends InteractionTestCase
             'password' => $container->getParameter('rabbitmq_password'),
         ];
         // The exchanges and the queues, empty: a failed run leaves its message
-        foreach (['mailer' => self::MAILER_QUEUE, 'view' => self::VIEW_QUEUE, 'webpush_notification' => self::WEBPUSH_NOTIFICATION_QUEUE] as $transportName => $queueName) {
+        foreach (['cron' => self::CRON_QUEUE, 'mailer' => self::MAILER_QUEUE, 'view' => self::VIEW_QUEUE, 'webpush_notification' => self::WEBPUSH_NOTIFICATION_QUEUE] as $transportName => $queueName) {
             $container->get("tests.{$transportName}_transport")->setup();
             self::onQueue($queueName, static fn (\AMQPQueue $queue) => $queue->purge());
         }
@@ -123,6 +126,25 @@ final class RabbitMqTest extends InteractionTestCase
         $headers = $sent[0]->getHeaders();
         self::assertSame('Confirmation de votre adresse e-mail', $headers->getHeaderBody('Subject'));
         self::assertTrue($headers->has('DKIM-Signature'));
+    }
+
+    /**
+     * A cron, as the worker of the schedule puts it in the queue (signed, a command line), run by
+     * the worker of the queue: the notifications of the activities come back.
+     */
+    public function testCron(): void
+    {
+        $notificationCount = (int) static::getEntityManager()->createQuery('SELECT COUNT(n.id) FROM '.Notification::class.' n')->getSingleScalarResult();
+        static::getEntityManager()->createQuery('DELETE '.Notification::class.' n')->execute();
+        static::getEntityManager()->createQuery('UPDATE '.AbstractActivity::class.' a SET a.isPendingNotifications = true')->execute();
+        static::scheduleCron('ladb:cron:notification:populate --force');
+
+        self::assertSame(1, self::countMessages(self::CRON_QUEUE));
+
+        self::consume('cron');
+
+        self::assertSame(0, self::countMessages(self::CRON_QUEUE));
+        self::assertSame($notificationCount, (int) static::getEntityManager()->createQuery('SELECT COUNT(n.id) FROM '.Notification::class.' n')->getSingleScalarResult());
     }
 
     /**

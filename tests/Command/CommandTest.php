@@ -14,7 +14,7 @@ use Tests\WebTestCase;
  * Runs every command of the ladb namespace on the fixtures, verbose, with its main options: none
  * may fail. The changes of --force are rolled back with the test.
  *
- * The lines of the crontab of the production are in CrontabTest, with the effects of the crons.
+ * The crons of the production (CronScheduleProvider) are in CrontabTest, with their effects.
  */
 final class CommandTest extends WebTestCase
 {

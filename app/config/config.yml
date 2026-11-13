@@ -63,11 +63,19 @@ framework:
         # php.ini of Debian (0) leaves the expired sessions in their table
         gc_probability: 1
     fragments:       ~
+    # The lock of the schedule of the crons (#300), shared by the servers and the containers: a single
+    # worker of the schedule at a time ("scheduler" below). The controllers make their own lock
+    # factory (AbstractController::createLock()), on the same Memcached
+    lock:            'memcached://%memcached_host%:%memcached_port%'
+    # The state of the schedule of the crons: the last run of each, for a worker that starts again
+    cache:
+        pools:
+            cache.scheduler_cron:
+                adapter: cache.adapter.memcached
+                provider: 'memcached://%memcached_host%:%memcached_port%'
     # Off, as they were with symfony/symfony: without it, FrameworkBundle turns on each of these
-    # features when its component is installed. Lock: the site makes its own lock factory
-    # (AbstractController::createLock()). PropertyInfo comes with PropertyAccess, TypeInfo with
-    # PropertyInfo (7.x), WebLink with Mercure
-    lock:            false
+    # features when its component is installed. PropertyInfo comes with PropertyAccess, TypeInfo
+    # with PropertyInfo (7.x), WebLink with Mercure
     property_info:   false
     type_info:       false
     web_link:        false
@@ -85,13 +93,13 @@ framework:
     mailer:
         dsn: '%mailer_dsn%'
 
-    # Three queues in RabbitMQ (the rabbitmq_* parameters), each with its exchange of the same name
+    # Four queues in RabbitMQ (the rabbitmq_* parameters), each with its exchange of the same name
     # and its worker: "messenger:consume mailer", "messenger:consume view", "messenger:consume
-    # webpush_notification". The connection is given as options: in the DSN, the password and the
-    # vhost ("/") would have to be URL-encoded. A message whose handler fails is retried 3 times
-    # (after 1, 2 and 4 seconds, by the exchange "delays" and its "delay_*" queues), an email 5
-    # times, then removed with a critical log. Each delay is 10% more or less, at random (the jitter
-    # of Symfony 7.1)
+    # webpush_notification", "messenger:consume cron". The connection is given as options: in the
+    # DSN, the password and the vhost ("/") would have to be URL-encoded. A message whose handler
+    # fails is retried 3 times (after 1, 2 and 4 seconds, by the exchange "delays" and its "delay_*"
+    # queues), an email 5 times, a cron never, then removed with a critical log. Each delay is 10%
+    # more or less, at random (the jitter of Symfony 7.1)
     messenger:
         buses:
             messenger.bus.default:
@@ -124,11 +132,39 @@ framework:
                     <<: *rabbitmq_connection
                     exchange: { name: webpush_notification }
                     queues: { webpush_notification: ~ }
+            # The runs of the crons (#300), put there by the worker of the schedule ("messenger:consume
+            # scheduler_cron", "scheduler" below), run by "messenger:consume cron". Not retried: a
+            # failed run is logged (critical), the next one comes at its time. A message that RabbitMQ
+            # delivers again (its worker died while running it) is not run again
+            # (reject_redelivered_messages). Signed with the secret: a message of this queue is a
+            # command line, and a message that is not signed is refused
+            cron:
+                dsn: 'amqp://'
+                sign: true
+                options:
+                    <<: *rabbitmq_connection
+                    exchange: { name: cron }
+                    queues: { cron: ~ }
+                retry_strategy: { max_retries: 0 }
         routing:
             'Ladb\CoreBundle\Message\ListedViewMessage': view
             'Ladb\CoreBundle\Message\ShownViewMessage': view
             'Ladb\CoreBundle\Message\WebpushNotificationMessage': webpush_notification
             'Symfony\Component\Mailer\Messenger\SendEmailMessage': mailer
+
+# The crons (Ladb\CoreBundle\Scheduler\CronScheduleProvider, #300), in the place of a crontab: its
+# worker is "messenger:consume scheduler_cron". Its state (cache.scheduler_cron) and its lock
+# (lock.factory) in Memcached: it runs in a single worker at a time, and a worker that starts again
+# runs the last missed run of each cron, not every one
+scheduler:
+    # The default of 9.0: a scheduled message goes to the transport configured for its class. The
+    # crons name theirs (RedispatchMessage)
+    use_messenger_routing: true
+    schedules:
+        cron:
+            stateful: true
+            cache_pool: cache.scheduler_cron
+            process_only_last_missed_run: true
 
 services:
     _defaults:

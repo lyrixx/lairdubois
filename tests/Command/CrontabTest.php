@@ -13,21 +13,27 @@ use Ladb\CoreBundle\Entity\Offer\Offer;
 use Ladb\CoreBundle\Entity\Opencutlist\Access;
 use Ladb\CoreBundle\Entity\Wonder\Creation;
 use Ladb\CoreBundle\Entity\Workflow\Workflow;
+use Ladb\CoreBundle\Scheduler\CronScheduleProvider;
 use Ladb\CoreBundle\Utils\VideoHostingUtils;
+use Symfony\Component\Console\Messenger\RunCommandMessage;
+use Symfony\Component\Messenger\Message\RedispatchMessage;
+use Symfony\Component\Messenger\Stamp\ReceivedStamp;
 use Symfony\Component\Mime\Email;
+use Symfony\Component\Scheduler\Generator\MessageContext;
+use Symfony\Component\Scheduler\RecurringMessage;
+use Symfony\Component\Scheduler\Schedule;
+use Symfony\Component\Scheduler\Trigger\CronExpressionTrigger;
 use Tests\Double\OfflineHttpStream;
 use Tests\Double\OfflineVideoHostingUtils;
 use Tests\WebTestCase;
 
 /**
- * The crons of the production, as the installation guide gives them (docs/01-installation.md,
- * step 13), on the fixtures; then what they do, on data prepared for each of them. The changes are
- * rolled back with the test.
+ * The crons of the production, as their schedule gives them (CronScheduleProvider, #300), on the
+ * fixtures; then what they do, on data prepared for each of them. The changes are rolled back with
+ * the test.
  */
 final class CrontabTest extends WebTestCase
 {
-    private const INSTALLATION_GUIDE = __DIR__.'/../../docs/01-installation.md';
-
     // Written by ladb:cron:sitemaps in web/, shared with the dev environment: put back after
     // each test
     private const SITEMAPS = __DIR__.'/../../web/sitemap-*.xml';
@@ -88,7 +94,7 @@ final class CrontabTest extends WebTestCase
      */
     public static function provideCrons(): iterable
     {
-        foreach (self::getCrontab() as $commandLine) {
+        foreach (self::getCommandLines() as $commandLine) {
             yield $commandLine => [$commandLine];
         }
     }
@@ -119,18 +125,71 @@ final class CrontabTest extends WebTestCase
     }
 
     /**
-     * Every line of the guide which starts with a schedule is a cron of the crontab: a line the
-     * pattern of getCrontab() misses would not be tested.
+     * Each cron, at its time in Paris, put in the queue "cron" by the worker of the schedule
+     * (RedispatchMessage), where it is a command line for the handler of Console.
      */
-    public function testCrontabIsComplete(): void
+    public function testEachCronIsRedispatchedToTheQueueCron(): void
     {
-        preg_match_all('~^(?:[\d*/,-]+ ){5}.*$~m', file_get_contents(self::INSTALLATION_GUIDE), $matches);
-
-        self::assertNotEmpty($matches[0]);
-        self::assertCount(\count($matches[0]), self::getCrontab());
-        foreach (array_keys(self::KNOWN_FAILURES) as $commandLine) {
-            self::assertContains($commandLine, self::getCrontab(), "{$commandLine} is not in the crontab anymore: remove it from the known failures.");
+        $nextRuns = [];
+        foreach (self::getRecurringMessages() as $recurringMessage) {
+            $trigger = $recurringMessage->getTrigger();
+            self::assertInstanceOf(CronExpressionTrigger::class, $trigger);
+            $messages = iterator_to_array(self::getMessages($recurringMessage), false);
+            self::assertCount(1, $messages);
+            self::assertInstanceOf(RedispatchMessage::class, $messages[0]);
+            self::assertSame('cron', $messages[0]->transportNames);
+            self::assertInstanceOf(RunCommandMessage::class, $messages[0]->envelope);
+            $commandLine = $messages[0]->envelope->input;
+            self::assertEquals(new RunCommandMessage($commandLine), $messages[0]->envelope);
+            $nextRuns[] = [(string) $trigger, $commandLine, $trigger->getNextRunDate(new \DateTimeImmutable('2026-11-13 00:30:00 UTC'))->format(\DATE_ATOM)];
         }
+
+        // The crontab of the production server, at the time of Paris: 03:00 is 02:00 UTC in November
+        self::assertSame([
+            ['0 4 * * 5', 'ladb:mailing:weeknews --force', '2026-11-13T04:00:00+01:00'],
+            ['0 * * * *', 'ladb:cron:spotlight --force', '2026-11-13T02:00:00+01:00'],
+            ['*/2 * * * *', 'ladb:cron:notification:populate --force', '2026-11-13T01:32:00+01:00'],
+            ['0 7,11,17,20 * * *', 'ladb:cron:notification:email --force', '2026-11-13T07:00:00+01:00'],
+            ['0 3 * * *', 'ladb:cron:sitemaps --force', '2026-11-13T03:00:00+01:00'],
+            ['*/5 * * * *', 'ladb:cron:workflow:thumbnails --force', '2026-11-13T01:35:00+01:00'],
+            ['0 3 * * *', 'ladb:cron:offers --force', '2026-11-13T03:00:00+01:00'],
+            ['*/5 * * * *', 'ladb:cron:opencutlist:access:analyze --force', '2026-11-13T01:35:00+01:00'],
+        ], $nextRuns);
+    }
+
+    /**
+     * The schedule of the container keeps its state and takes its lock (Memcached, config.yml), and
+     * runs only the last missed run of a cron.
+     */
+    public function testScheduleIsStatefulAndLocked(): void
+    {
+        $schedule = static::getContainer()->get(CronScheduleProvider::class);
+
+        self::assertInstanceOf(Schedule::class, $schedule);
+        self::assertCount(\count(self::getRecurringMessages()), $schedule->getRecurringMessages());
+        self::assertNotNull($schedule->getState());
+        self::assertNotNull($schedule->getLock());
+        self::assertTrue($schedule->shouldProcessOnlyLastMissedRun());
+    }
+
+    /**
+     * The worker of the queue "cron" runs the command of the cron (RunCommandMessageHandler of
+     * Console), in its kernel.
+     */
+    public function testCronRunsInTheWorker(): void
+    {
+        $notificationCount = $this->countNotifications();
+        static::getEntityManager()->createQuery('DELETE '.Notification::class.' n')->execute();
+        static::getEntityManager()->createQuery('UPDATE '.AbstractActivity::class.' a SET a.isPendingNotifications = true')->execute();
+        static::scheduleCron(self::getCron('ladb:cron:notification:populate'));
+
+        $queued = iterator_to_array(static::getContainer()->get('tests.cron_transport')->get(), false);
+        self::assertCount(1, $queued);
+        self::assertEquals(new RunCommandMessage('ladb:cron:notification:populate --force'), $queued[0]->getMessage());
+        // As the worker of the queue
+        static::getContainer()->get('messenger.default_bus')->dispatch($queued[0]->with(new ReceivedStamp('cron')));
+
+        self::assertSame($notificationCount, $this->countNotifications());
     }
 
     /**
@@ -476,29 +535,54 @@ final class CrontabTest extends WebTestCase
     }
 
     /**
-     * The command lines of the crontab, without "php bin/console --env=prod".
+     * The command lines of the crons, in the order of the schedule.
      *
      * @return list<string>
      */
-    private static function getCrontab(): array
+    private static function getCommandLines(): array
     {
-        preg_match_all('~^(?:\S+ ){5}php /var/www/www\.lairdubois\.fr/bin/console --env=prod (.+) &> /dev/null$~m', file_get_contents(self::INSTALLATION_GUIDE), $matches);
+        return array_map(static fn (RecurringMessage $recurringMessage): string => self::getCommandLine($recurringMessage), self::getRecurringMessages());
+    }
 
-        return $matches[1];
+    private static function getCommandLine(RecurringMessage $recurringMessage): string
+    {
+        foreach (self::getMessages($recurringMessage) as $message) {
+            return $message->envelope->input;
+        }
+
+        throw new \LogicException('A cron without message.');
     }
 
     /**
-     * The command line of the crontab which runs a command.
+     * The crons, as CronScheduleProvider gives them, without the state and the lock of the
+     * container: for the data providers.
+     *
+     * @return list<RecurringMessage>
      */
+    private static function getRecurringMessages(): array
+    {
+        return array_values((new CronScheduleProvider())->getSchedule()->getRecurringMessages());
+    }
+
+    /**
+     * The messages of a run of a cron, as the worker of the schedule gets them.
+     *
+     * @return iterable<object>
+     */
+    private static function getMessages(RecurringMessage $recurringMessage): iterable
+    {
+        return $recurringMessage->getMessages(new MessageContext('cron', $recurringMessage->getId(), $recurringMessage->getTrigger(), new \DateTimeImmutable()));
+    }
+
     private static function getCron(string $name): string
     {
-        foreach (self::getCrontab() as $commandLine) {
+        foreach (self::getCommandLines() as $commandLine) {
             if (str_starts_with($commandLine, $name.' ')) {
                 return $commandLine;
             }
         }
 
-        throw new \LogicException("The crontab does not run {$name}.");
+        throw new \LogicException("The schedule does not run {$name}.");
     }
 
     /**
