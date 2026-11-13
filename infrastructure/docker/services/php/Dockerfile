@@ -160,8 +160,8 @@ EOF
 #
 # From docker-starter: two images, "php" and "nginx", with the code of the site (no bind mount), its
 # dependencies without the dev packages, its CSS and JS, its cache warmed. "php" runs php-fpm as the
-# user 1000, and with another command the workers of Messenger (bin/console messenger:consume ...)
-# and the crontab (supercronic prod/crontab). "nginx" serves web/, and passes the rest to php-fpm
+# user 1000, and with another command the workers of Messenger (bin/console messenger:consume ...),
+# the scheduler of the crons among them. "nginx" serves web/, and passes the rest to php-fpm
 # through its unix socket /var/run/php/php-fpm.sock, in a volume shared by the two containers.
 #
 # Nothing secret in them: app/config/parameters.yml (prod/parameters.yml) reads its values in the
@@ -225,20 +225,6 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/* \
     && rm -r "/etc/php/${PHP_VERSION}/fpm/pool.d/"
-
-# supercronic runs the crontab without root, and writes the output of the commands in the log of
-# the container
-ARG SUPERCRONIC_VERSION=0.2.51
-RUN arch="$(dpkg --print-architecture)" \
-    && case "${arch}" in \
-        amd64) sha256=cc232108374e8e2b537045f2d5eaa1229f619db314c3ba6a14d38b35dc0aa123 ;; \
-        arm64) sha256=4ae22576a78223d8ccdf5f3b3660a5cbb5288416bf0ca96afc4a36d195932b94 ;; \
-        *) echo "No supercronic for ${arch}." >&2; exit 1 ;; \
-    esac \
-    && curl -sSLo /usr/local/bin/supercronic "https://github.com/aptible/supercronic/releases/download/v${SUPERCRONIC_VERSION}/supercronic-linux-${arch}" \
-    && echo "${sha256}  /usr/local/bin/supercronic" | sha256sum -c - \
-    && chmod +x /usr/local/bin/supercronic
-COPY prod/crontab /etc/lairdubois/crontab
 
 # Flags of Chromium given by the deployment, in CHROMIUM_EXTRA_FLAGS: the /usr/bin/chromium of Debian
 # reads /etc/chromium.d/

@@ -6,8 +6,8 @@ then pushed to the registry of the repository:
 
 - `ghcr.io/lyrixx/lairdubois/php:<tag>`: the code, `vendor/` without the dev packages, the CSS and
   JS, the warmed cache, PHP 8.5 with its extensions, Chromium, ImageMagick, Ghostscript,
-  `rsvg-convert`, `jpegoptim`, `pngquant` and supercronic. It runs php-fpm as the user 1000, and,
-  with another command, each worker and the crontab;
+  `rsvg-convert`, `jpegoptim` and `pngquant`. It runs php-fpm as the user 1000, and, with another
+  command, each worker, the scheduler of the crons among them;
 - `ghcr.io/lyrixx/lairdubois/nginx:<tag>`: nginx and `web/`, in HTTP on the port 8080, from
   [`www.lairdubois.fr.conf`](nginx/conf/www.lairdubois.fr.conf).
 
@@ -31,11 +31,15 @@ All of them from the image `php`, but `nginx`, in `/var/www`:
 | The mailer consumer (step 14.3) | `bin/console messenger:consume mailer` |
 | The view consumer (step 14.1) | `bin/console messenger:consume view` |
 | The webpush notification consumer (step 14.2) | `bin/console messenger:consume webpush_notification` |
-| The crontab (step 13) | `supercronic /etc/lairdubois/crontab` |
+| The scheduler of the crons (step 13.1), one at a time | `bin/console messenger:consume scheduler_cron` |
+| The cron consumer (step 13.2), one at a time | `bin/console messenger:consume cron` |
 
 The image has a `HEALTHCHECK` for php-fpm (its ping): disable it for the consumers and the
-crontab. They need MariaDB, Elasticsearch, RabbitMQ, Memcached and the Mercure hub (step 0), and
-a SMTP server.
+scheduler. They need MariaDB, Elasticsearch, RabbitMQ, Memcached and the Mercure hub (step 0), and
+a SMTP server. A second scheduler waits for the lock of the first one (Memcached), and does nothing
+in the meantime. The cron consumer runs the crons one after the other; stopped, it finishes the one
+it runs first: give it a grace period of an hour (`stop_grace_period` with Compose,
+`terminationGracePeriodSeconds` with Kubernetes), or a killed cron waits for its next time.
 
 ## Front
 
@@ -53,11 +57,11 @@ for Chromium go in `CHROMIUM_EXTRA_FLAGS`.
 
 ## The sandbox of Chromium
 
-Chromium (the thumbnails of the workflows in the crontab, the videos of the finds without a
+Chromium (the thumbnails of the workflows in the cron consumer, the videos of the finds without a
 thumbnail from their host in php-fpm) runs without its sandbox (`--no-sandbox`) unless
 `CHROMIUM_SANDBOX=true`. Its sandbox creates user, PID and network namespaces, which the default
 seccomp profile of Docker, and of Kubernetes (`RuntimeDefault`), only allows with `CAP_SYS_ADMIN`.
-Give the containers of php-fpm and of the crontab
+Give the containers of php-fpm and of the cron consumer
 [`chromium-seccomp.json`](../infrastructure/docker/services/php/chromium-seccomp.json) instead: the
 default profile of Docker 29, plus `clone` and `unshare`. Neither `--privileged` nor
 `CAP_SYS_ADMIN`. The kernel of the host must allow the user namespaces (Debian:
@@ -68,7 +72,7 @@ creation of such a find answers 500.
 - Docker: `--security-opt seccomp=chromium-seccomp.json` (`security_opt` with Compose, as in
   `docker-compose.prod.yml`).
 - Kubernetes (K3s): the file on each node, in the seccomp directory of the kubelet
-  (`/var/lib/kubelet/seccomp/`), and in the containers of php-fpm and of the crontab:
+  (`/var/lib/kubelet/seccomp/`), and in the containers of php-fpm and of the cron consumer:
 
   ```yaml
   securityContext:
@@ -131,10 +135,10 @@ creates them so, empty). The sessions are in the database.
 
 ## Deploying a version
 
-1. Pull the new images, stop the consumers and the crontab.
+1. Pull the new images, stop the consumers and the scheduler.
 2. Update the database, in a container of the new image `php`: `bin/console
    doctrine:migrations:migrate --no-interaction` (on a new database: `doctrine:database:create`,
    `doctrine:schema:update --force`, then the SQL of
    [`schema-sessions.sql`](database/schema-sessions.sql) with `bin/console dbal:run-sql`).
-3. Start php-fpm, then nginx, then the consumers and the crontab.
+3. Start php-fpm, then nginx, then the consumers and the scheduler.
 4. On a new index (a new database, Elasticsearch upgraded): `bin/console fos:elastica:populate`.

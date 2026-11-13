@@ -76,7 +76,7 @@ function start(): void
 }
 
 /**
- * The images, the secrets and the services, without the workers and the cron: they need the
+ * The images, the secrets and the services, without the workers and the scheduler: they need the
  * database.
  */
 function up_stack(): void
@@ -171,7 +171,7 @@ function builder_install_if_missing(): void
     }, context: create_default_context());
 }
 
-#[AsTask(description: 'Starts the production stack with the fixtures, then checks the site in it: pages, login, workers, crons, Mercure, Elasticsearch, images, Chromium, mails', namespace: 'qa', name: 'prod-smoke')]
+#[AsTask(description: 'Starts the production stack with the fixtures, then checks the site in it: pages, login, workers, schedule and crons, Mercure, Elasticsearch, images, Chromium, mails', namespace: 'qa', name: 'prod-smoke')]
 function smoke(): int
 {
     return with(static function (): int {
@@ -183,13 +183,13 @@ function smoke(): int
         // The end-to-end tests first, on the data of the fixtures: the crons change them
         $checks = [
             'image' => check_image(...),
-            'crontab' => check_crontab(...),
             'chromium' => check_chromium(...),
             'images (Liip)' => check_liip(...),
             'view (worker view)' => check_view(...),
             'Google Analytics' => check_google_analytics(...),
             'pages, login, uploads, Mercure (Playwright)' => check_e2e(...),
-            'crons' => check_crons(...),
+            'schedule (scheduler, worker cron)' => check_schedule(...),
+            'crons (worker cron)' => check_crons(...),
             'mails (worker mailer, Mailpit)' => check_mails(...),
             'web push (worker webpush_notification)' => check_webpush(...),
         ];
@@ -273,18 +273,20 @@ function check_image(): void
 }
 
 /**
- * The crontab of the image is the one of docs/01-installation.md, and supercronic reads it.
+ * The schedule of the crons in the image (CronScheduleProvider), and the chain of its workers: at
+ * the next even minute, the worker of the schedule puts ladb:cron:notification:populate in the
+ * queue "cron", and the worker of the queue runs it (the notifications of the activities come back).
  */
-function check_crontab(): void
+function check_schedule(): void
 {
-    $expected = crontab_of_documentation();
-    $crontab = file_get_contents(variable('root_dir') . '/infrastructure/docker/services/php/prod/crontab');
-    preg_match_all('{^((?:\S+ ){5})bin/console (.+)$}m', $crontab, $matches, \PREG_SET_ORDER);
-    $actual = array_map(static fn (array $m) => $m[1] . $m[2], $matches);
+    $output = capture_php(['bin/console', 'debug:scheduler', 'cron']);
+    io()->text($output);
+    expect(8 === preg_match_all('{ via cron\)}', $output), "debug:scheduler does not list the 8 crons:\n{$output}");
 
-    expect($expected === $actual, "The crontab of the image is not the one of docs/01-installation.md:\n" . implode("\n", $expected));
-
-    docker_compose_run(['supercronic', '-test', '/etc/lairdubois/crontab']);
+    // Not the count of before: after the end-to-end tests, populate gives back fewer notifications
+    sql('DELETE FROM tbl_core_notification; UPDATE tbl_core_activity SET is_pending_notifications = 1');
+    wait_for(static fn () => '0' === sql_value('SELECT COUNT(*) FROM tbl_core_activity WHERE is_pending_notifications = 1'), 'The crons of the schedule do not run: no notification:populate in 3 minutes.', 180);
+    expect('0' !== sql_value('SELECT COUNT(*) FROM tbl_core_notification'), 'notification:populate gave no notification.');
 }
 
 /**
@@ -323,19 +325,31 @@ function check_chromium(): void
 }
 
 /**
- * Each command of the crontab, then what it leaves: the sitemaps served by nginx, the thumbnail of
- * a workflow captured by Chromium from the site.
+ * Each cron of the schedule, put in the queue "cron" as the worker of the schedule does, and run by
+ * the worker of the queue (Chromium in its sandbox among them); then what they leave: the sitemaps
+ * served by nginx, the thumbnail of a workflow captured by Chromium from the site.
  */
 function check_crons(): void
 {
     // A workflow without thumbnail (CrontabTest)
     sql('UPDATE tbl_workflow SET main_picture_id = NULL WHERE id = 1');
+    $failures = cron_failures();
 
-    foreach (crontab_of_documentation() as $line) {
-        $command = explode(' ', explode(' ', $line, 6)[5]);
-        io()->text('bin/console ' . implode(' ', $command));
-        docker_compose_run(['bin/console', ...$command]);
-    }
+    io()->text(capture_php(['php', '-r', <<<'PHP'
+        require 'vendor/autoload.php';
+        $kernel = new AppKernel('prod', false);
+        $kernel->boot();
+        $bus = $kernel->getContainer()->get('messenger.default_bus');
+        foreach ((new Ladb\CoreBundle\Scheduler\CronScheduleProvider())->getSchedule()->getRecurringMessages() as $recurringMessage) {
+            $context = new Symfony\Component\Scheduler\Generator\MessageContext('cron', $recurringMessage->getId(), $recurringMessage->getTrigger(), new DateTimeImmutable());
+            foreach ($recurringMessage->getMessages($context) as $message) {
+                $bus->dispatch($message);
+                echo $message, "\n";
+            }
+        }
+        PHP]));
+    wait_for(static fn () => 0 === cron_messages(), 'The worker "cron" does not run the crons of its queue.', 600);
+    expect($failures === cron_failures(), 'A cron failed: see var/logs/prod.log (messenger.CRITICAL).');
 
     $index = request('GET', '/sitemap-index.xml');
     expect(200 === $index->getStatusCode() && str_contains($index->getContent(false), '/sitemap-wonder-creations.xml'), 'nginx does not serve the index of the sitemaps.');
@@ -345,6 +359,26 @@ function check_crons(): void
     expect('1' !== sql_value('SELECT main_picture_id IS NULL FROM tbl_workflow WHERE id = 1'), 'The workflow did not get a thumbnail.');
     $logs = capture_compose(['logs', '--no-log-prefix', 'nginx']);
     expect(1 === preg_match('{"GET /processus/1/internal/diagram HTTP/[^"]+" 200 .*HeadlessChrome}', $logs), 'Chromium did not load the diagram of the workflow from the site.');
+}
+
+/**
+ * The runs of the queue "cron" that its worker has not finished: waiting, or running
+ * (unacknowledged).
+ */
+function cron_messages(): int
+{
+    $queues = json_decode(capture_compose(['exec', '-T', 'rabbitmq', 'rabbitmqctl', 'list_queues', '--quiet', '--formatter', 'json', 'name', 'messages']), true, flags: \JSON_THROW_ON_ERROR);
+
+    return array_sum(array_column(array_filter($queues, static fn (array $queue) => 'cron' === $queue['name']), 'messages'));
+}
+
+/**
+ * The failed runs of the crons in var/logs/prod.log: Messenger removes them from the queue with a
+ * critical log.
+ */
+function cron_failures(): int
+{
+    return (int) trim(capture_php(['sh', '-c', 'grep -c "messenger.CRITICAL" var/logs/prod.log || true']));
 }
 
 /**
@@ -475,19 +509,6 @@ function check_webpush(): void
     preg_match_all('{^POST (/\S+) ttl=(\S+) encoding=(\S+) authorization=(vapid t=\S+, k=\S+|WebPush \S+)}m', $logs, $matches, \PREG_SET_ORDER);
     io()->text(\sprintf('%d notifications: %s', \count($matches), implode(', ', array_unique(array_column($matches, 1)))));
     expect([] !== $matches, "No notification signed with VAPID:\n{$logs}");
-}
-
-/**
- * The command lines of the crontab of docs/01-installation.md (step 13), with their schedule,
- * without "php …/bin/console --env=prod" (tests/Command/CrontabTest.php).
- *
- * @return list<string>
- */
-function crontab_of_documentation(): array
-{
-    preg_match_all('~^((?:\S+ ){5})php /var/www/www\.lairdubois\.fr/bin/console --env=prod (.+) &> /dev/null$~m', file_get_contents(variable('root_dir') . '/docs/01-installation.md'), $matches, \PREG_SET_ORDER);
-
-    return array_map(static fn (array $m) => $m[1] . $m[2], $matches);
 }
 
 /**

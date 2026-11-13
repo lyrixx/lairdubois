@@ -151,8 +151,8 @@ Contextes : `--context=test` (`SYMFONY_ENV=test`), `--context=ci` (le même, san
 - MariaDB 10.11 (`root`/`app`), Elasticsearch 9.5 (un nœud, sans sécurité, un volume par version
   majeure), RabbitMQ 3.13 (`app`/`app`), Memcached. Workers
   (profil `worker`) : les trois de Messenger (`messenger:consume mailer`, `messenger:consume view`,
-  `messenger:consume webpush_notification`). Extension PHP `amqp` dans les images, pour le transport
-  AMQP de Messenger.
+  `messenger:consume webpush_notification`), sans ceux des crons (#300, dans les pièges) : ils ne tournent pas
+  en dev. Extension PHP `amqp` dans les images, pour le transport AMQP de Messenger.
 - Hub Mercure (service `mercure`, profil `default`, #21) : l'image `dunglas/mercure` 1.x
   (protocole 1.0, #154), en HTTP (`SERVER_NAME=:80`), routé sur `/.well-known/mercure` du domaine
   et du port du site. Une clé JWT de dev fixe (`MERCURE_JWT_SECRET` de `docker-compose.yml`) signe
@@ -223,14 +223,13 @@ castor -c prod docker:push --tag=… # REGISTRY=ghcr.io/…, la CI seulement
 ```
 
 - `php` : `php-base` (PHP 8.5, les extensions et les binaires du dev : Chromium, ImageMagick,
-  Ghostscript, `rsvg-convert`, `jpegoptim`, `pngquant`), php-fpm et supercronic. Le code dans
+  Ghostscript, `rsvg-convert`, `jpegoptim`, `pngquant`) et php-fpm. Le code dans
   `/var/www`, à root : l'utilisateur 1000 n'écrit que dans `var/` et dans les volumes. Sans les
   paquets de dev (`--no-dev`), `tests/`, `tools/`, `DataFixtures/`, `app_dev.php`, `node_modules`,
   `.git`, ni le `parameters.yml` ou les clés du dépôt. Vite tourne dans `app-build`, seule étape
   avec Node, `assets:install` y copie les assets des bundles. Une seule image pour php-fpm (sa
-  commande par défaut), les trois workers (`bin/console messenger:consume …`) et le cron
-  (`supercronic /etc/lairdubois/crontab`, `prod/crontab`, que `qa:prod-smoke` compare à l'étape
-  13 de `docs/01-installation.md`, en heure de Paris).
+  commande par défaut) et les workers (`bin/console messenger:consume …`), ceux des crons compris :
+  `scheduler` (`scheduler_cron`) et `worker_cron` (`cron`, `stop_grace_period: 1h`).
 - `nginx` : `nginx:1.30-alpine` (la ligne stable, la 1.29 n'est plus maintenue) et le `web/` de
   l'image, la conf de la prod (`docs/nginx/conf/www.lairdubois.fr.conf`) dans `prod/nginx.conf`, en
   HTTP sur 8080 : le TLS et `/.well-known/mercure` sont au proxy de devant (le routeur de la stack).
@@ -270,10 +269,10 @@ castor -c prod docker:push --tag=… # REGISTRY=ghcr.io/…, la CI seulement
 - Bac à sable de Chromium (#291) : `chromium_sandbox`, `CHROMIUM_SANDBOX` dans l'image, `false` par
   défaut (`--no-sandbox`). Il crée des user, PID et network namespaces, que le profil seccomp par
   défaut de Docker et le `RuntimeDefault` de Kubernetes réservent à `CAP_SYS_ADMIN` : la stack de
-  test donne à `php` et `cron` le profil `services/php/chromium-seccomp.json` (`security_opt`),
+  test donne à `php` et `worker_cron` le profil `services/php/chromium-seccomp.json` (`security_opt`),
   celui de Docker 29 (moby/profiles, `seccomp/v0.2.4`) plus `clone` et `unshare`, et
   `CHROMIUM_SANDBOX=true`. La préprod (K3s) : le même profil sur chaque nœud, en `seccompProfile`
-  `Localhost` des conteneurs de php-fpm et du cron (`docs/03-docker.md`).
+  `Localhost` des conteneurs de php-fpm et du worker des crons (`docs/03-docker.md`).
 - Volumes, à l'utilisateur 1000 (l'image crée les répertoires) : `uploads`, `downloads`,
   `web/media` (Liip, en lecture seule pour nginx), `sitemaps`, `var/logs` (`prod.log`), et le
   socket de php-fpm entre php et nginx. Clé DKIM montée en lecture seule sur `keys/`.
@@ -287,14 +286,17 @@ castor -c prod docker:push --tag=… # REGISTRY=ghcr.io/…, la CI seulement
   charge les fixtures (paquets de dev, `vendor/` du dépôt, `castor app:install` s'il manque) et
   écrit leurs fichiers dans les volumes (`uploads`, `downloads`, `web/media`).
 - `qa:prod-smoke` : l'image (utilisateur, prod sans debug, rien en trop, rien d'écrit hors des
-  volumes), la crontab (supercronic), Chromium (capture d'une page de nginx, puis
+  volumes), Chromium (capture d'une page de nginx, puis
   `chrome://sandbox` : dans son bac à sable), Liip (un JPEG et un
   PNG résolus par PHP, servis ensuite par nginx), une vue comptée par le worker `view` (le compteur
   d'avant lu une fois ses files vides, par `rabbitmqctl` : la page de Liip est aussi une vue),
   Google Analytics (plus bas), la suite E2E entière sur la stack (`E2E_PROD` y ajoute
   `pages.spec.ts` : listes et contenus en anonyme, `user` et `admin`, sans les hosts tiers, qui
-  retiendraient l'événement `load`), chaque ligne de la crontab puis leurs effets (sitemaps servis
-  par nginx, vignette d'un processus capturée sur le site), les mails dans Mailpit (signés DKIM) et
+  retiendraient l'événement `load`), le schedule des crons (`debug:scheduler`, puis un
+  `ladb:cron:notification:populate` qu'il déclenche à la minute paire suivante et que `worker_cron`
+  lance), chaque cron mis dans la file `cron` comme le fait le worker du schedule, puis leurs effets
+  (sitemaps servis par nginx, vignette d'un processus capturée sur le site, aucun `messenger.CRITICAL`
+  dans `prod.log`), les mails dans Mailpit (signés DKIM) et
   les notifications web push reçues par `push` (signées VAPID). Un tableau en fin de tâche.
 - CI : job `prod` (build, `castor app:install` pour les fixtures, `qa:prod-smoke`,
   `app:prod:describe` dans le résumé) sur chaque PR et push ; job `push` sur push vers `next`
@@ -713,8 +715,10 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   enregistre un par exécution (pcntl), qui garde l'application, le kernel et la commande jusqu'à
   la fin du process (`setSignalsToDispatchEvent()`). `CommandTest` lance chaque commande `ladb:` en verbeux avec
   ses options (`COMMANDS`, une nouvelle commande sans entrée fait échouer le test), `UNTESTED` et
-  `KNOWN_FAILURES` comme le smoke test. `CrontabTest` lance les lignes de la crontab de
-  `docs/01-installation.md` (étape 13) et vérifie l'effet de chaque cron ; il remet les
+  `KNOWN_FAILURES` comme le smoke test. `CrontabTest` lance les crons du schedule
+  (`CronScheduleProvider`), vérifie leurs heures (Paris), leur `RedispatchMessage` vers la file
+  `cron`, l'état et le verrou du schedule, un cron passé au handler de Console comme le fait le
+  worker, et l'effet de chaque cron ; il remet les
   `web/sitemap-*.xml` qu'écrit `ladb:cron:sitemaps`. Mastodon (curl dans `ladb:cron:spotlight`) est
   hors ligne par `mastodon_instance` (`config_test.yml`), un protocole que curl ne connaît pas ;
   Twitter et Facebook y sont coupés dans le code. Un `file_get_contents()` d'URL sans service à
@@ -728,8 +732,9 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   qu'il donne.
 - `AbstractController::createLock()` pose un verrou Memcached de 3 secondes par action et par
   compte, contre le double envoi : la deuxième création d'un même compte dans un test répond 404.
-  `Tests\WebTestCase` vide Memcached après chaque test (il ne sert qu'à ces verrous et aux dates de
-  recalcul des compteurs de `UserUtils`, par compte).
+  `Tests\WebTestCase` vide Memcached après chaque test (il ne sert qu'à ces verrous, aux dates de
+  recalcul des compteurs de `UserUtils`, par compte, et à l'état et au verrou du schedule des
+  crons).
 - Bug connu d'un test fonctionnel : vérifier le mauvais comportement avec le message « passes now:
   remove the known failure (#N) », puis `self::markTestIncomplete('Known failure, see #N.')`. Le
   test échoue quand le bug est corrigé.
@@ -1266,9 +1271,10 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   pas : `cache:warmup --env=prod` (`qa:lint`) échoue sur une classe disparue. Le supprimer après
   une montée, comme le fait le déploiement (`cache:clear`).
 - Sans `symfony/symfony` (sa classe `FullStack`), FrameworkBundle, puis en 8.2 le bundle du
-  composant, active d'office chaque fonction dont le composant est installé : `lock`,
-  `property_info`, `type_info` (que tire `property-info` 7.x) et `web_link`, que tirent des
-  dépendances, sont coupés dans `config.yml`, comme avant. Un
+  composant, active d'office chaque fonction dont le composant est installé : `property_info`,
+  `type_info` (que tire `property-info` 7.x) et `web_link`, que tirent des dépendances, sont
+  coupés dans `config.yml`, comme avant ; `lock` aussi jusqu'à #300, qui l'allume sur Memcached
+  pour le schedule des crons. Un
   paquet ajouté peut en allumer une autre : comparer `debug:container` et `debug:config` avant et
   après.
 - Services lazy (l'entity manager de DoctrineBundle) : depuis la 6.4, Symfony fait ses proxys
@@ -1300,10 +1306,10 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   le secret que la 7.4 sérialisait. Ces tests ne couvrent que la 4.4 : le token de la 3.4, celui des
   sessions de la prod, est lui-même en `C:` (`\Serializable`), qu'aucun test ne rejoue. La
   livraison ferme de toute façon toutes les sessions (#301).
-- Messenger (#22) : trois transports AMQP (`config.yml`), chacun avec son échange et sa file du
-  même nom, `mailer` (#19), `view` et `webpush_notification`. Les anciennes files de RabbitMqBundle
-  (`view_queue`…) ne servent plus : le `PhpSerializer` lit un de leurs messages comme un array, et
-  le worker s'arrêterait sans le retirer. La connexion est en options : dans le DSN, le mot de passe
+- Messenger (#22) : quatre transports AMQP (`config.yml`), chacun avec son échange et sa file du
+  même nom, `mailer` (#19), `view`, `webpush_notification` et `cron` (#300, plus bas). Les anciennes
+  files de RabbitMqBundle (`view_queue`…) ne servent plus : le `PhpSerializer` lit un de leurs
+  messages comme un array, et le worker s'arrêterait sans le retirer. La connexion est en options : dans le DSN, le mot de passe
   et le vhost `/` seraient à encoder. Un handler en échec est rejoué 3 fois (échange `delays`), un
   mail 5 fois, puis le message est supprimé (log critical) ; depuis la 8.1, un message qui ne se
   décode pas (classe disparue) suit le même chemin au lieu d'être supprimé aussitôt. Avant chaque
@@ -1312,6 +1318,27 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   chaque message, le worker vide
   l'entity manager et remet à zéro les services (`reset_on_message`, toujours depuis 6.0 : l'option, qui ne fait plus rien, est retirée de `config.yml`) : un handler flush ce qu'il
   persiste, sinon c'est perdu, et ne garde rien d'un message à l'autre.
+- Crons (#300) : Symfony Scheduler et Messenger à la place d'une crontab (et de supercronic dans
+  les images). `Scheduler\CronScheduleProvider` (`#[AsSchedule('cron')]`) donne les huit crons, en
+  heure de Paris, chacun un `RedispatchMessage` d'un `RunCommandMessage` (sa ligne de commande)
+  vers le transport `cron` ; `bin/console debug:scheduler cron` les liste avec leur prochain
+  passage. Le worker du schedule, `messenger:consume scheduler_cron`, met chaque passage dans la
+  file `cron` à son heure, et `messenger:consume cron` le lance (`RunCommandMessageHandler` de
+  Console, dans le kernel du worker), un cron après l'autre : deux passages d'un même cron ne se
+  chevauchent pas tant qu'il n'y a qu'un worker de la file. Config `scheduler.schedules.cron` :
+  `stateful` (état dans `cache.scheduler_cron`, Memcached : un worker qui redémarre rattrape les
+  passages manqués, `process_only_last_missed_run`, le dernier de chaque cron seulement) et le
+  verrou `scheduler_cron` (`lock.factory`, Memcached) : un seul worker du schedule à la fois, les
+  autres attendent. La file `cron` n'est pas rejouée (`max_retries: 0` : un échec est journalisé en
+  critical, le passage suivant vient à son heure), et un message que RabbitMQ redonne après la
+  mort de son worker est refusé (`reject_redelivered_messages` de la 8.2). Elle est signée
+  (`sign: true`, le secret) : ses messages sont des lignes de commande, et la 8.2 déprécie un
+  `RunCommandMessage` sur un transport qui ne signe pas tout. Arrêté par SIGTERM, le worker finit le
+  cron en cours (la console de 8.2 laisse le signal au `messenger:consume` qui la lance) : une heure
+  de délai d'arrêt (`TimeoutStopSec`, `stop_grace_period`). La sortie des commandes n'est écrite
+  nulle part (en prod, la crontab l'envoyait à `/dev/null`). `DeduplicateStamp` ne sert pas : le
+  scheduler de la 8.2 renvoie l'enveloppe déjà reçue (`ReceivedStamp`), le middleware ne prend
+  jamais le verrou et le relâche aussitôt.
 - Les notifications web push sont signées avec les clés VAPID de la prod (`bentools_webpush.*` de
   `parameters.yml`) : avec celles de `parameters.yml.dist`, le worker `webpush_notification`
   échoue sur chaque message. `castor app:install` y écrit une paire jetable, que les `composer

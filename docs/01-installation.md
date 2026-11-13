@@ -523,23 +523,74 @@ This step will create an admin user for the platform. It will prompt you for :
     $ ladb ladb:user:create
 ```
 
-## Step 13 - Activate cron commands (Not necessary on the **DEV** server)
+## Step 13 - Activate the crons (Not necessary on the **DEV** server)
 
-Create crontab for www-data user
+The crons are a schedule of the application (`src/Ladb/CoreBundle/Scheduler/CronScheduleProvider.php`), in the time of Paris, run by two services: the scheduler puts each run in the RabbitMQ queue `cron` at its time, and the cron consumer runs its command. There is no crontab: if the one of www-data still runs `bin/console` (before the schedule), remove these lines (`sudo crontab -u www-data -e`).
+
+List the crons and their next run
 ``` bash
-    $ sudo crontab -u www-data -e
+    $ ladb debug:scheduler cron
+```
+
+### 13.1 The scheduler.
+
+Only one scheduler runs at a time, even on several servers: the others wait (a lock in Memcached). One that starts again runs the last run it missed of each cron.
+
+Create service file
+``` bash
+    $ sudo nano /etc/systemd/system/ladb_scheduler.service
 ```
 
 And add the following lines
 ```
-0 4 * * 5 php /var/www/www.lairdubois.fr/bin/console --env=prod ladb:mailing:weeknews --force &> /dev/null
-0 * * * * php /var/www/www.lairdubois.fr/bin/console --env=prod ladb:cron:spotlight --force &> /dev/null
-*/2 * * * * php /var/www/www.lairdubois.fr/bin/console --env=prod ladb:cron:notification:populate --force &> /dev/null
-0 7,11,17,20 * * * php /var/www/www.lairdubois.fr/bin/console --env=prod ladb:cron:notification:email --force &> /dev/null
-0 3 * * * php /var/www/www.lairdubois.fr/bin/console --env=prod ladb:cron:sitemaps --force &> /dev/null
-*/5 * * * * php /var/www/www.lairdubois.fr/bin/console --env=prod ladb:cron:workflow:thumbnails --force &> /dev/null
-0 3 * * * php /var/www/www.lairdubois.fr/bin/console --env=prod ladb:cron:offers --force &> /dev/null
-*/5 * * * * php /var/www/www.lairdubois.fr/bin/console --env=prod ladb:cron:opencutlist:access:analyze --force &> /dev/null
+[Unit]
+Description=The scheduler of the crons.
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/www.lairdubois.fr/
+ExecStart=/usr/bin/php bin/console --env=prod messenger:consume scheduler_cron
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### 13.2 The RabbitMQ cron consumer.
+
+It runs the commands of the crons, one at a time. A failed run is logged and not retried. Stopped (`systemctl stop`, a deployment), it finishes the cron it runs first: `TimeoutStopSec` leaves it an hour, systemd would kill it after 90 seconds.
+
+Create service file
+``` bash
+    $ sudo nano /etc/systemd/system/ladb_consumer_cron.service
+```
+
+And add the following lines
+```
+[Unit]
+Description=The RabbitMQ cron consumer.
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/www.lairdubois.fr/
+ExecStart=/usr/bin/php bin/console --env=prod messenger:consume cron
+Restart=always
+RestartSec=3
+TimeoutStopSec=1h
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### 13.3 Enable and start Services
+
+``` bash
+    $ sudo systemctl daemon-reload
+    $ sudo systemctl enable ladb_scheduler.service ladb_consumer_cron.service
+    $ sudo systemctl start ladb_scheduler.service ladb_consumer_cron.service
 ```
 
 ## Step 14 - Create services and launch it for background process

@@ -63,6 +63,7 @@
         "symfony/password-hasher": "8.2.*",
         "symfony/property-access": "8.2.*",
         "symfony/routing": "8.2.*",
+        "symfony/scheduler": "8.2.*",
         "symfony/security-bundle": "8.2.*",
         "symfony/security-core": "8.2.*",
         "symfony/security-csrf": "8.2.*",
@@ -109,6 +110,7 @@
         "jaybizzle/crawler-detect" :"1.*",
         "suin/php-rss-writer": "^1.6",
         "chrome-php/chrome": "^1.16",
+        "dragonmantank/cron-expression": "^3.4",
 
         "components/jquery": "3.3.1",
         "components/jqueryui": "1.12.1",
