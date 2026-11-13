@@ -32,12 +32,14 @@ All of them from the image `php`, but `nginx`, in `/var/www`:
 | The view consumer (step 14.1) | `bin/console messenger:consume view` |
 | The webpush notification consumer (step 14.2) | `bin/console messenger:consume webpush_notification` |
 | The scheduler of the crons (step 13.1), one at a time | `bin/console messenger:consume scheduler_cron` |
-| The cron consumer (step 13.2), one at a time | `bin/console messenger:consume cron` |
+| The cron consumer (step 13.2), one at a time | `bin/console messenger:consume cron --memory-limit=256M` |
 
 The image has a `HEALTHCHECK` for php-fpm (its ping): disable it for the consumers and the
 scheduler. They need MariaDB, Elasticsearch, RabbitMQ, Memcached and the Mercure hub (step 0), and
 a SMTP server. A second scheduler waits for the lock of the first one (Memcached), and does nothing
-in the meantime. The cron consumer runs the crons one after the other; stopped, it finishes the one
+in the meantime. The cron consumer runs the crons one after the other, in a process that lives for
+days: past 256 MB, it stops after the cron it runs, never during it, and must be restarted (a
+restart policy). Stopped, it finishes the one
 it runs first: give it a grace period of an hour (`stop_grace_period` with Compose,
 `terminationGracePeriodSeconds` with Kubernetes), or a killed cron waits for its next time.
 

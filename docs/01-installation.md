@@ -560,7 +560,7 @@ WantedBy=multi-user.target
 
 ### 13.2 The RabbitMQ cron consumer.
 
-It runs the commands of the crons, one at a time. A failed run is logged and not retried. Stopped (`systemctl stop`, a deployment), it finishes the cron it runs first: `TimeoutStopSec` leaves it an hour, systemd would kill it after 90 seconds.
+It runs the commands of the crons, one at a time, in a process that lives for days: what a command leaks adds up from one cron to the next. Past 256 MB, it stops after the cron it runs, never during it, and systemd starts it again (`Restart=always`). A failed run is logged and not retried. Stopped (`systemctl stop`, a deployment), it finishes the cron it runs first: `TimeoutStopSec` leaves it an hour, systemd would kill it after 90 seconds.
 
 Create service file
 ``` bash
@@ -576,7 +576,7 @@ Description=The RabbitMQ cron consumer.
 Type=simple
 User=www-data
 WorkingDirectory=/var/www/www.lairdubois.fr/
-ExecStart=/usr/bin/php bin/console --env=prod messenger:consume cron
+ExecStart=/usr/bin/php bin/console --env=prod messenger:consume cron --memory-limit=256M
 Restart=always
 RestartSec=3
 TimeoutStopSec=1h

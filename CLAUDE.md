@@ -229,7 +229,8 @@ castor -c prod docker:push --tag=… # REGISTRY=ghcr.io/…, la CI seulement
   `.git`, ni le `parameters.yml` ou les clés du dépôt. Vite tourne dans `app-build`, seule étape
   avec Node, `assets:install` y copie les assets des bundles. Une seule image pour php-fpm (sa
   commande par défaut) et les workers (`bin/console messenger:consume …`), ceux des crons compris :
-  `scheduler` (`scheduler_cron`) et `worker_cron` (`cron`, `stop_grace_period: 1h`).
+  `scheduler` (`scheduler_cron`) et `worker_cron` (`cron --memory-limit=256M`,
+  `stop_grace_period: 1h`).
 - `nginx` : `nginx:1.30-alpine` (la ligne stable, la 1.29 n'est plus maintenue) et le `web/` de
   l'image, la conf de la prod (`docs/nginx/conf/www.lairdubois.fr.conf`) dans `prod/nginx.conf`, en
   HTTP sur 8080 : le TLS et `/.well-known/mercure` sont au proxy de devant (le routeur de la stack).
@@ -1323,9 +1324,16 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   heure de Paris, chacun un `RedispatchMessage` d'un `RunCommandMessage` (sa ligne de commande)
   vers le transport `cron` ; `bin/console debug:scheduler cron` les liste avec leur prochain
   passage. Le worker du schedule, `messenger:consume scheduler_cron`, met chaque passage dans la
-  file `cron` à son heure, et `messenger:consume cron` le lance (`RunCommandMessageHandler` de
-  Console, dans le kernel du worker), un cron après l'autre : deux passages d'un même cron ne se
-  chevauchent pas tant qu'il n'y a qu'un worker de la file. Config `scheduler.schedules.cron` :
+  file `cron` à son heure, et `messenger:consume cron --memory-limit=256M` le lance
+  (`RunCommandMessageHandler` de Console, dans le kernel du worker), un cron après l'autre : deux
+  passages d'un même cron ne se chevauchent pas tant qu'il n'y a qu'un worker de la file. La crontab
+  partait d'un process neuf à chaque passage ; ce worker vit des jours, et ce que les commandes
+  laissent (métadonnées, templates compilés, caches statiques), que `reset_on_message` ne vide pas,
+  s'accumule : arrivé au `memory_limit` de PHP, un cron casserait en plein milieu (un sitemap ou une
+  lettre à moitié écrits). `--memory-limit` est vérifié après chaque message (`WorkerRunningEvent`,
+  après `handleMessage()`) : le worker s'arrête après le cron qui dépasse 256 Mo, jamais pendant, et
+  systemd (`Restart=always`) ou Docker (`restart: unless-stopped`) le relance. Le pic d'un cron à
+  10 000 éléments par type va jusqu'à 98 Mo (sitemaps). Config `scheduler.schedules.cron` :
   `stateful` (état dans `cache.scheduler_cron`, Memcached : un worker qui redémarre rattrape les
   passages manqués, `process_only_last_missed_run`, le dernier de chaque cron seulement) et le
   verrou `scheduler_cron` (`lock.factory`, Memcached) : un seul worker du schedule à la fois, les

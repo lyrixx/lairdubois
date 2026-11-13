@@ -194,11 +194,12 @@ services:
         <<: *php_command
         command: bin/console messenger:consume scheduler_cron
 
-    # Runs the crons of the queue "cron", the thumbnails of the workflows (Chromium) among them. On
-    # stop, it finishes the cron it runs first
+    # Runs the crons of the queue "cron", the thumbnails of the workflows (Chromium) among them. Past
+    # 256 MB (what the crons leak, in a process that lives for days), it stops after the cron it runs
+    # and restarts (restart of php_command). On stop, it finishes the cron it runs first
     worker_cron:
         <<: *php_command
-        command: bin/console messenger:consume cron
+        command: bin/console messenger:consume cron --memory-limit=256M
         security_opt: *chromium_security_opt
         stop_grace_period: 1h
 
