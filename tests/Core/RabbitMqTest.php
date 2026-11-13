@@ -9,12 +9,9 @@ use Ladb\CoreBundle\Entity\Core\User;
 use Ladb\CoreBundle\Entity\Core\View;
 use Ladb\CoreBundle\Entity\Webpush\UserSubscription;
 use Ladb\CoreBundle\Entity\Wonder\Creation;
-use Ladb\CoreBundle\Scheduler\CronScheduleProvider;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\StringInput;
-use Symfony\Component\Console\Messenger\RunCommandMessage;
 use Symfony\Component\Console\Output\BufferedOutput;
-use Symfony\Component\Scheduler\Generator\MessageContext;
 
 /**
  * The messages of the pages go through RabbitMQ, and the worker of the stack consumes them
@@ -140,13 +137,7 @@ final class RabbitMqTest extends InteractionTestCase
         $notificationCount = (int) static::getEntityManager()->createQuery('SELECT COUNT(n.id) FROM '.Notification::class.' n')->getSingleScalarResult();
         static::getEntityManager()->createQuery('DELETE '.Notification::class.' n')->execute();
         static::getEntityManager()->createQuery('UPDATE '.AbstractActivity::class.' a SET a.isPendingNotifications = true')->execute();
-        foreach ((new CronScheduleProvider())->getSchedule()->getRecurringMessages() as $recurringMessage) {
-            foreach ($recurringMessage->getMessages(new MessageContext('cron', $recurringMessage->getId(), $recurringMessage->getTrigger(), new \DateTimeImmutable())) as $message) {
-                if (new RunCommandMessage('ladb:cron:notification:populate --force') == $message->envelope) {
-                    static::getContainer()->get('messenger.default_bus')->dispatch($message);
-                }
-            }
-        }
+        static::scheduleCron('ladb:cron:notification:populate --force');
 
         self::assertSame(1, self::countMessages(self::CRON_QUEUE));
 

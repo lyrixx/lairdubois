@@ -719,7 +719,10 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
   `KNOWN_FAILURES` comme le smoke test. `CrontabTest` lance les crons du schedule
   (`CronScheduleProvider`), vérifie leurs heures (Paris), leur `RedispatchMessage` vers la file
   `cron`, l'état et le verrou du schedule, un cron passé au handler de Console comme le fait le
-  worker, et l'effet de chaque cron ; il remet les
+  worker, et l'effet de chaque cron. `static::scheduleCron('ladb:cron:offers --force')` met un
+  passage dans la file `cron` comme le worker du schedule : les enveloppes de `SchedulerTransport`
+  (`TrustStamp`, `RedispatchStamp`, `TransportNamesStamp`), pas le `RedispatchMessage` lui-même,
+  dont l'envoi sur le bus est déprécié en 8.2. Il remet les
   `web/sitemap-*.xml` qu'écrit `ladb:cron:sitemaps`. Mastodon (curl dans `ladb:cron:spotlight`) est
   hors ligne par `mastodon_instance` (`config_test.yml`), un protocole que curl ne connaît pas ;
   Twitter et Facebook y sont coupés dans le code. Un `file_get_contents()` d'URL sans service à

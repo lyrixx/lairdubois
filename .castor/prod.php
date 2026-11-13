@@ -340,12 +340,21 @@ function check_crons(): void
         $kernel = new AppKernel('prod', false);
         $kernel->boot();
         $bus = $kernel->getContainer()->get('messenger.default_bus');
-        foreach ((new Ladb\CoreBundle\Scheduler\CronScheduleProvider())->getSchedule()->getRecurringMessages() as $recurringMessage) {
-            $context = new Symfony\Component\Scheduler\Generator\MessageContext('cron', $recurringMessage->getId(), $recurringMessage->getTrigger(), new DateTimeImmutable());
-            foreach ($recurringMessage->getMessages($context) as $message) {
-                $bus->dispatch($message);
-                echo $message, "\n";
+        // Every cron now, as the transport of the schedule gives them to its worker
+        $generator = new class implements Symfony\Component\Scheduler\Generator\MessageGeneratorInterface {
+            public function getMessages(): iterable
+            {
+                foreach ((new Ladb\CoreBundle\Scheduler\CronScheduleProvider())->getSchedule()->getRecurringMessages() as $recurringMessage) {
+                    $context = new Symfony\Component\Scheduler\Generator\MessageContext('cron', $recurringMessage->getId(), $recurringMessage->getTrigger(), new DateTimeImmutable());
+                    foreach ($recurringMessage->getMessages($context) as $message) {
+                        yield $context => $message;
+                    }
+                }
             }
+        };
+        foreach ((new Symfony\Component\Scheduler\Messenger\SchedulerTransport($generator, true))->get() as $envelope) {
+            $bus->dispatch($envelope->with(new Symfony\Component\Messenger\Stamp\ReceivedStamp('scheduler_cron')));
+            echo $envelope->getMessage(), "\n";
         }
         PHP]));
     wait_for(static fn () => 0 === cron_messages(), 'The worker "cron" does not run the crons of its queue.', 600);

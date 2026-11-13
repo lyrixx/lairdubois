@@ -181,15 +181,13 @@ final class CrontabTest extends WebTestCase
         $notificationCount = $this->countNotifications();
         static::getEntityManager()->createQuery('DELETE '.Notification::class.' n')->execute();
         static::getEntityManager()->createQuery('UPDATE '.AbstractActivity::class.' a SET a.isPendingNotifications = true')->execute();
-        foreach (self::getMessages(self::getRecurringMessage('ladb:cron:notification:populate')) as $message) {
-            static::getContainer()->get('messenger.default_bus')->dispatch($message);
-        }
+        static::scheduleCron(self::getCron('ladb:cron:notification:populate'));
 
-        $sent = static::getContainer()->get('tests.cron_transport')->getSent();
-        self::assertCount(1, $sent);
-        self::assertEquals(new RunCommandMessage('ladb:cron:notification:populate --force'), $sent[0]->getMessage());
+        $queued = iterator_to_array(static::getContainer()->get('tests.cron_transport')->get(), false);
+        self::assertCount(1, $queued);
+        self::assertEquals(new RunCommandMessage('ladb:cron:notification:populate --force'), $queued[0]->getMessage());
         // As the worker of the queue
-        static::getContainer()->get('messenger.default_bus')->dispatch($sent[0]->with(new ReceivedStamp('cron')));
+        static::getContainer()->get('messenger.default_bus')->dispatch($queued[0]->with(new ReceivedStamp('cron')));
 
         self::assertSame($notificationCount, $this->countNotifications());
     }
@@ -564,17 +562,6 @@ final class CrontabTest extends WebTestCase
     private static function getRecurringMessages(): array
     {
         return array_values((new CronScheduleProvider())->getSchedule()->getRecurringMessages());
-    }
-
-    private static function getRecurringMessage(string $name): RecurringMessage
-    {
-        foreach (self::getRecurringMessages() as $recurringMessage) {
-            if (str_starts_with(self::getCommandLine($recurringMessage), $name.' ')) {
-                return $recurringMessage;
-            }
-        }
-
-        throw new \LogicException("The schedule does not run {$name}.");
     }
 
     /**
