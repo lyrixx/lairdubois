@@ -27,13 +27,15 @@ Une session pilote, des agents codent.
   sur un choix qui n'est pas tranché ici ou dans l'issue, il s'arrête et le remonte.
 - L'état fait foi sur GitHub (issues, PR), pas dans la mémoire de la session : une nouvelle
   session reprend depuis là.
-- Journal (#92, épinglé) : ce qui change pour un utilisateur ou un admin, ce qui est supprimé
-  (route, commande), les comportements gardés volontairement, les contournements temporaires et
-  les actions à faire en prod. Un agent le liste dans sa PR, section « À consigner » ; la session
-  principale met le journal à jour après chaque merge.
-- Suivi pour Boris (#95, épinglé) : état par étape, fait, prochaines étapes, à valider, à faire en
-  prod. La session principale le met à jour en fin de journée, et poste un commentaire court
-  quand une étape (milestone) est terminée : modifier la description ne notifie personne.
+- Guide de la mise en production (#92, épinglé) : les actions à faire en prod, ce qui est
+  supprimé (route, commande), ce qui change pour un utilisateur ou un admin et les comportements
+  gardés volontairement. Ni question ni décision, elles vont dans #95. Un agent le liste dans sa
+  PR, section « À consigner » ; la session principale met #92 à jour après chaque merge.
+- Suivi pour Boris (#95, épinglé) : état par étape, fait, prochaines étapes (dont ce qui reste
+  provisoire dans le code après la livraison), à valider (cases à cocher : coché, déjà en place ;
+  non coché, une question) et décidé. Ce qui est dans #92 n'y est pas recopié. La session
+  principale le met à jour en fin de journée, et poste un commentaire court quand une étape
+  (milestone) est terminée : modifier la description ne notifie personne.
 - Point d'avancement toutes les heures : mergé, en cours, bloqué, prochaine étape.
 - Budget de tokens, pour la migration seule : au plus 50 % de la limite sur 5 h, et 50 % de la
   limite hebdomadaire réparti sur les 7 jours de la fenêtre : au jour N, au plus N × 7,1 points du
