@@ -47,6 +47,40 @@ const MERCURE_SECRET = 'lairdubois-dev-mercure-jwt-secret-not-secret';
 // A browser, not a crawler (CrawlerDetect): its views are counted
 const USER_AGENT = 'Mozilla/5.0 (X11; Linux x86_64; rv:140.0) Gecko/20100101 Firefox/140.0';
 
+// Tables of entities that master removed from its mapping, as its migrations created them then
+// (Version20160830143152, Version20180425123105, Version20210222141757, removed since), with their
+// foreign keys: a database of the production may still have them. The migration of the delivery
+// drops them (Version20261115140000), the join tables first
+const ORPHAN_TABLES = [
+    'tbl_find_content_event' => [
+        'CREATE TABLE tbl_find_content_event (id INT NOT NULL, location VARCHAR(100) NOT NULL, latitude DOUBLE PRECISION DEFAULT NULL, longitude DOUBLE PRECISION DEFAULT NULL, start_at DATETIME NOT NULL, start_date DATE NOT NULL, start_time TIME DEFAULT NULL, end_at DATETIME NOT NULL, end_date DATE DEFAULT NULL, end_time TIME DEFAULT NULL, url VARCHAR(255) DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB',
+        'ALTER TABLE tbl_find_content_event ADD CONSTRAINT FK_FD47A7DDBF396750 FOREIGN KEY (id) REFERENCES tbl_find_content (id) ON DELETE CASCADE',
+    ],
+    'tbl_find_content_event_picture' => [
+        'CREATE TABLE tbl_find_content_event_picture (event_id INT NOT NULL, picture_id INT NOT NULL, INDEX IDX_DF7E8EE171F7E88B (event_id), INDEX IDX_DF7E8EE1EE45BDBF (picture_id), PRIMARY KEY(event_id, picture_id)) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB',
+        'ALTER TABLE tbl_find_content_event_picture ADD CONSTRAINT FK_DF7E8EE171F7E88B FOREIGN KEY (event_id) REFERENCES tbl_find_content_event (id) ON DELETE CASCADE',
+        'ALTER TABLE tbl_find_content_event_picture ADD CONSTRAINT FK_DF7E8EE1EE45BDBF FOREIGN KEY (picture_id) REFERENCES tbl_core_picture (id) ON DELETE CASCADE',
+    ],
+    'tbl_knowledge2_book_review' => [
+        'CREATE TABLE tbl_knowledge2_book_review (id INT AUTO_INCREMENT NOT NULL, book_id INT NOT NULL, user_id INT NOT NULL, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL, score INT DEFAULT NULL, body LONGTEXT DEFAULT NULL, html_body LONGTEXT DEFAULT NULL, INDEX IDX_AF0F87E316A2B381 (book_id), INDEX IDX_AF0F87E3A76ED395 (user_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET UTF8 COLLATE UTF8_unicode_ci ENGINE = InnoDB',
+        'ALTER TABLE tbl_knowledge2_book_review ADD CONSTRAINT FK_AF0F87E316A2B381 FOREIGN KEY (book_id) REFERENCES tbl_knowledge2_book (id)',
+        'ALTER TABLE tbl_knowledge2_book_review ADD CONSTRAINT FK_AF0F87E3A76ED395 FOREIGN KEY (user_id) REFERENCES tbl_core_user (id)',
+    ],
+    'tbl_knowledge2_value_tool_identity' => [
+        'CREATE TABLE tbl_knowledge2_value_tool_identity (id INT NOT NULL, data VARCHAR(100) NOT NULL, name VARCHAR(100) NOT NULL, is_product TINYINT(1) NOT NULL, productName VARCHAR(100) DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET UTF8 COLLATE `UTF8_unicode_ci` ENGINE = InnoDB',
+        'ALTER TABLE tbl_knowledge2_value_tool_identity ADD CONSTRAINT FK_5BFDAF3CBF396750 FOREIGN KEY (id) REFERENCES tbl_knowledge2_value (id) ON DELETE CASCADE',
+    ],
+    'tbl_knowledge2_tool_value_identity' => [
+        'CREATE TABLE tbl_knowledge2_tool_value_identity (tool_id INT NOT NULL, toolidentity_id INT NOT NULL, INDEX IDX_F8C2FB638F7B22CC (tool_id), INDEX IDX_F8C2FB6311D8CC51 (toolidentity_id), PRIMARY KEY(tool_id, toolidentity_id)) DEFAULT CHARACTER SET UTF8 COLLATE `UTF8_unicode_ci` ENGINE = InnoDB',
+        'ALTER TABLE tbl_knowledge2_tool_value_identity ADD CONSTRAINT FK_F8C2FB638F7B22CC FOREIGN KEY (tool_id) REFERENCES tbl_knowledge2_tool (id) ON DELETE CASCADE',
+        'ALTER TABLE tbl_knowledge2_tool_value_identity ADD CONSTRAINT FK_F8C2FB6311D8CC51 FOREIGN KEY (toolidentity_id) REFERENCES tbl_knowledge2_value_tool_identity (id) ON DELETE CASCADE',
+    ],
+];
+
+// The throwaway database and the folder of the copy of the code delivered (step 20 of the guide)
+const COPY_DATABASE = 'db_fr_lairdubois_www_livraison';
+const COPY_DIR = 'ladb-livraison';
+
 // The p256dh and auth keys of a browser (tests/Webpush/SubscriptionTest.php), for the
 // subscriptions of the accounts, to the double "push"
 const PUSH_SUBSCRIPTION_KEYS = [
@@ -100,7 +134,7 @@ function rehearsal(
             match ($part) {
                 'server' => part_server($report),
                 'setup' => part_setup($report),
-                'before' => part_before($report),
+                'before' => part_before($report, $delivered),
                 'during' => part_during($report),
                 'deploy' => part_deploy($report, $delivered),
                 'rollback' => part_rollback($report),
@@ -167,6 +201,7 @@ function part_setup(Report $r): void
     $r->check('Stack en 3.4 : castor start de la copie (fixtures, index Elasticsearch 5.6, workers)', static fn () => run(['castor', 'start'], context: context()->withWorkingDirectory(tree_dir())));
     $r->check('Paramètres de prod : secret, mails vers Mailpit (port 25, comme Postfix), Mastodon hors ligne', setup_parameters(...));
     $r->check('migration_versions de doctrine/migrations 1.8 : 51 lignes', setup_migration_versions(...));
+    $r->check('Tables d\'entités retirées de master, créées comme à l\'époque, avec leurs clés étrangères', setup_orphan_tables(...));
     $r->check('Abonnements web push (format du JS, vers le service de push factice)', setup_subscriptions(...));
     $r->check('Comptes au hash sha512 de FOSUserBundle', static fn () => expect('4' === sql("SELECT COUNT(*) FROM tbl_core_user WHERE salt IS NOT NULL AND password NOT LIKE '\$2y\$%'"), 'The accounts of the fixtures are not hashed by FOSUserBundle.'));
     $r->check('Session et cookie « se souvenir de moi » ouverts par le formulaire', setup_session(...));
@@ -176,28 +211,33 @@ function part_setup(Report $r): void
     $r->check('La 3.4 marche : connexion, pages, session écrite', check_old_site(...));
 }
 
-function part_before(Report $r): void
+function part_before(Report $r, string $delivered): void
 {
     $r->step('État du code', static function (): void {
         // On the host: the .git of the copy is a path of the host. The files of Docker (.home,
-        // certificates) are not on the server
-        guide_has('sudo --user=www-data git status --short');
+        // certificates) are not on the server; the binaries of Composer in bin/ are, that the
+        // .gitignore of master does not ignore, as the files of master written below (a
+        // rehearsal taken again with --from)
+        guide_has("sudo --user=www-data git status --short | grep -v '^?? bin/'");
         $status = array_filter(
             explode("\n", trim(run(['git', 'status', '--short'], context: context()->withWorkingDirectory(tree_dir())->withQuiet())->getOutput())),
-            static fn (string $line) => '' !== $line && !preg_match('{^\?\? (\.home/|infrastructure/docker/services/router/certs/)}', $line),
+            static fn (string $line) => '' !== $line && !preg_match('{^\?\? (\.home/|infrastructure/docker/services/router/certs/|bin/|web/css/|web/js/|components/)}', $line),
         );
         expect([] === $status, "The copy has changes:\n" . implode("\n", $status));
         guide_has('sudo --user=www-data git log -1 --format=%H');
         $head = trim(run(['git', 'log', '-1', '--format=%H'], context: context()->withWorkingDirectory(tree_dir())->withQuiet())->getOutput());
         expect(OLD_COMMIT === $head, "The copy is at {$head}.");
         // The files of master that the commit in 3.4 does not write (sensio/distribution-bundle,
-        // Assetic, robloach/component-installer), ignored by the .gitignore of master: step 24
+        // Assetic, robloach/component-installer), ignored by the .gitignore of master: step 32
         // removes them
         in_builder('mkdir -p web/css web/js components/jquery && touch var/bootstrap.php.cache var/SymfonyRequirements.php web/css/base.css web/js/base.js components/jquery/jquery.js');
     });
     $r->step('État de la base', static function (): void {
         $output = play('sudo --user=www-data bin/console --env=prod doctrine:schema:update --dump-sql');
         expect(str_contains($output, 'Nothing to update'), "The schema of the database is not the one of the mapping:\n{$output}");
+        check_complete_schema(play('sudo --user=www-data bin/console --env=prod doctrine:schema:update --complete --dump-sql'));
+        $collations = play('sudo mariadb db_fr_lairdubois_www -e "SELECT c.table_name, c.column_name, c.collation_name, t.table_collation FROM information_schema.columns c JOIN information_schema.tables t ON t.table_schema = c.table_schema AND t.table_name = c.table_name WHERE c.table_schema = DATABASE() AND c.collation_name IS NOT NULL AND c.collation_name <> t.table_collation"', 'mariadb');
+        expect('' === trim($collations), "Columns have another collation than their table:\n{$collations}");
         $output = play('sudo --user=www-data bin/console --env=prod doctrine:migrations:status');
         expect(1 === preg_match('{Executed Migrations:\s+51\b}', $output) && 1 === preg_match('{New Migrations:\s+0\b}', $output), "doctrine:migrations:status:\n{$output}");
         $output = play('sudo mariadb db_fr_lairdubois_www -e "SELECT COUNT(*), MIN(version), MAX(version) FROM migration_versions"', 'mariadb');
@@ -205,11 +245,14 @@ function part_before(Report $r): void
         play('sudo mariadb db_fr_lairdubois_www -e "SELECT table_name, table_rows, ROUND((data_length + index_length) / 1048576) AS mo FROM information_schema.tables WHERE table_schema = DATABASE() ORDER BY mo DESC LIMIT 15"', 'mariadb');
     });
     $r->step('Sauvegarder la configuration', static function (): void {
-        // The files of the server that Docker has: parameters.yml
+        // The files of the server that Docker has: parameters.yml. Neither crontab nor timedatectl
         play('mkdir -p ~/ladb-backup');
         guide_has('sudo cp -a app/config/parameters.yml /etc/nginx/sites-available/www.lairdubois.fr.conf /etc/nginx/sites-available/www.lairdubois.fr-maintenance.conf /etc/systemd/system/ladb_*.service ~/ladb-backup/');
         in_builder('cp -a app/config/parameters.yml ~/ladb-backup/');
         expect(is_file(backup_dir() . '/parameters.yml'), 'No parameters.yml in the backup.');
+        foreach (['sudo crontab -u www-data -l > ~/ladb-backup/crontab-www-data', "sudo grep -rls 'bin/console' /etc/crontab /etc/cron.d/ /var/spool/cron/crontabs/", "grep -vE '^\\s*(#|$)' ~/ladb-backup/crontab-www-data | grep -v 'bin/console'", 'timedatectl show -p Timezone'] as $command) {
+            guide_has($command);
+        }
     });
     $r->step('Vérifier les données', static function (): void {
         $invalid = play('sudo mariadb db_fr_lairdubois_www -e "SELECT COUNT(*) FROM tbl_webpush_user_subscription WHERE NOT JSON_VALID(subscription)"', 'mariadb');
@@ -223,11 +266,29 @@ function part_before(Report $r): void
         foreach (['mailer_transport:\s+smtp', 'mailer_host:\s+mailpit', 'mailer_user:\s+null', 'mailer_password:\s+null'] as $expected) {
             expect(1 === preg_match("{{$expected}}", $output), "The mailer_* parameters are not those of a local SMTP:\n{$output}");
         }
-        guide_has('sudo postconf smtpd_tls_security_level smtpd_tls_cert_file');
+        guide_has('`smtp://localhost:25?auto_tls=false`');
     });
     $r->step('Paramètres du code livré', static function (): void {
         add_delivery_parameters();
+        $percents = play("sed 's/%%//g' app/config/parameters.yml | grep -n '%' | cut -d: -f1,2", allowFailure: true);
+        expect('' === trim($percents), "A parameter has a single %:\n{$percents}");
         check_old_site();
+    });
+    $r->step('Durée du cron le plus long', static function (): void {
+        // The sitemaps of the 3.4, on the fixtures: a few seconds
+        $output = play('time sudo --user=www-data bin/console --env=prod ladb:cron:sitemaps --force');
+        expect(1 === preg_match('{real\s+(\d+)m([\d.]+)s}', $output, $matches), "No duration:\n{$output}");
+        io()->text("The sitemaps of the 3.4: {$matches[1]} min {$matches[2]} s.");
+        // The setting anyway, read when RabbitMQ starts again (step 25). /etc/rabbitmq/rabbitmq.conf
+        // is a file of the copy (write_override()): it stays when Compose creates the container
+        // again. It belongs to rabbitmq, as its folder: in a sticky folder open to all, the kernel
+        // refuses to root to write in a file of another user (fs.protected_regular). Once only, for
+        // a rehearsal taken again with --from
+        in_service('rabbitmq', 'chown rabbitmq:rabbitmq /etc/rabbitmq/rabbitmq.conf', quiet: true);
+        if (!str_contains(file_get_contents(tree_dir() . '/var/rabbitmq.conf'), 'consumer_timeout')) {
+            play("echo 'consumer_timeout = 14400000' | sudo tee -a /etc/rabbitmq/rabbitmq.conf", 'rabbitmq');
+        }
+        expect(str_contains(file_get_contents(tree_dir() . '/var/rabbitmq.conf'), 'consumer_timeout = 14400000'), 'The setting is not in rabbitmq.conf.');
     });
     $r->step('Sauvegarder la base', static function (): void {
         play('sudo mariadb-dump --single-transaction --quick --routines db_fr_lairdubois_www | gzip > ~/ladb-backup/db.sql.gz', 'mariadb');
@@ -237,7 +298,108 @@ function part_before(Report $r): void
         play('sudo tar -czf ~/ladb-backup/code-3.4.tar.gz --ignore-failed-read vendor web/bundles web/css web/js components app/config/parameters.yml var/bootstrap.php.cache');
         expect('1' === trim(play("tar -tzf ~/ladb-backup/code-3.4.tar.gz | grep -c '^vendor/autoload.php$'")), 'vendor/ is not in the backup of the code.');
     });
+    $r->step('Rejouer les migrations sur une copie de la base', static fn () => rehearse_migrations_on_a_copy($delivered));
     $r->check('La 3.4 marche après la phase 1 : connexion, pages, session écrite', check_old_site(...));
+}
+
+/**
+ * The output of doctrine:schema:update --complete --dump-sql of the 3.4: migration_versions, out
+ * of its mapping (DoctrineBundle leaves aside the table of PdoSessionHandler), and the tables of
+ * the entities removed by master that the migration of the delivery drops, with the foreign keys
+ * that reference them. Nothing else.
+ */
+function check_complete_schema(string $output): void
+{
+    $dropped = [];
+    $unexpected = [];
+    foreach (array_filter(array_map('trim', explode("\n", $output)), static fn (string $line) => str_ends_with($line, ';')) as $statement) {
+        if (preg_match('{^DROP TABLE (\w+);$}', $statement, $matches)) {
+            $dropped[] = $matches[1];
+            if (!\in_array($matches[1], ['migration_versions', ...delivery_dropped_tables()], true)) {
+                $unexpected[] = $statement;
+            }
+        } elseif (!preg_match('{^ALTER TABLE (\w+) DROP FOREIGN KEY \w+;$}', $statement, $matches) || !\in_array($matches[1], delivery_dropped_tables(), true)) {
+            $unexpected[] = $statement;
+        }
+    }
+    expect([] === $unexpected, "doctrine:schema:update --complete has more than the tables out of the mapping:\n" . implode("\n", $unexpected) . "\n\n{$output}");
+    sort($dropped);
+    $expected = ['migration_versions', ...orphan_tables()];
+    sort($expected);
+    expect($expected === $dropped, "doctrine:schema:update --complete drops:\n" . implode("\n", $dropped));
+}
+
+/**
+ * The tables that the migration of the delivery drops, if the database has them.
+ *
+ * @return list<string>
+ */
+function delivery_dropped_tables(): array
+{
+    $migration = file_get_contents(\dirname(__DIR__) . '/app/DoctrineMigrations/Version20261115140000.php');
+    preg_match('{const TABLES = \[(.*?)\];}s', $migration, $matches) or throw new \LogicException('No TABLES in Version20261115140000.');
+    preg_match_all("{'(\w+)'}", $matches[1], $tables);
+
+    return $tables[1];
+}
+
+/**
+ * Step 20 of the guide: the backup of the database in a throwaway one, migrated by a copy of the
+ * code delivered (git archive, its own composer install). The database of the 3.4 and its site do
+ * not change.
+ */
+function rehearse_migrations_on_a_copy(string $delivered): void
+{
+    // Nothing of a rehearsal taken again with --from
+    sql('DROP DATABASE IF EXISTS ' . COPY_DATABASE);
+    play('sudo mariadb -e "CREATE DATABASE db_fr_lairdubois_www_livraison"', 'mariadb');
+    play('zcat ~/ladb-backup/db.sql.gz | sudo mariadb db_fr_lairdubois_www_livraison', 'mariadb');
+    expect(\count(ORPHAN_TABLES) === \count(orphan_tables(COPY_DATABASE)), 'The throwaway database has not the tables of the backup.');
+
+    // /var/www/ladb-livraison in the builder: the commit delivered, by git archive on the host
+    foreach (['sudo mkdir /var/www/ladb-livraison', 'sudo chown www-data: /var/www/ladb-livraison', 'sudo --user=www-data git archive origin/master | sudo --user=www-data tar -x -C /var/www/ladb-livraison'] as $command) {
+        guide_has($command);
+    }
+    $copy = tree_dir() . '/' . COPY_DIR;
+    fs()->remove($copy);
+    fs()->mkdir($copy);
+    run(['sh', '-c', 'git archive ' . escapeshellarg($delivered) . ' | tar -x -C ' . escapeshellarg($copy)], context: context()->withQuiet());
+    play("sudo sed 's/^\\(\\s*database_name:\\s*\\).*/\\1db_fr_lairdubois_www_livraison/' app/config/parameters.yml | sudo --user=www-data tee /var/www/ladb-livraison/app/config/parameters.yml > /dev/null");
+    // The variables of the builder for parameters.yml go, those of the code delivered: its
+    // DATABASE_NAME would point the copy to the database of the 3.4. The builder of the 3.4 has
+    // not the extension amqp (php-amqplib), that the server has (P2), nor the migrations need
+    play('sudo --user=www-data env SYMFONY_ENV=prod php8.5 "$(command -v composer)" --working-dir=/var/www/ladb-livraison install --no-dev --optimize-autoloader --no-interaction --ignore-platform-req=php+', prefix: php85() . unset_parameter_variables($copy . '/composer.json'), suffix: ' --ignore-platform-req=ext-amqp');
+    $prefix = php85();
+    expect(1 === preg_match('{^\s+database_name:\s+db_fr_lairdubois_www_livraison$}m', file_get_contents($copy . '/app/config/parameters.yml')), 'The copy does not use the throwaway database.');
+
+    $output = play('time sudo --user=www-data php8.5 /var/www/ladb-livraison/bin/console --env=prod doctrine:migrations:migrate --no-interaction', prefix: $prefix);
+    preg_match_all('{Migrating up to (\S+)}', $output, $matches);
+    preg_match('{real\s+(\d+)m([\d.]+)s}', $output, $duration);
+    io()->text('Migrated up to ' . implode(', ', $matches[1]) . ' in ' . ($duration[1] ?? '?') . ' min ' . ($duration[2] ?? '?') . ' s.');
+    expect(str_contains(play('sudo --user=www-data php8.5 /var/www/ladb-livraison/bin/console --env=prod doctrine:migrations:up-to-date', prefix: $prefix), 'Up-to-date'), 'The migrations of the copy are not up to date.');
+    $output = play('sudo --user=www-data php8.5 /var/www/ladb-livraison/bin/console --env=prod doctrine:schema:update --dump-sql', prefix: $prefix);
+    expect(str_contains($output, 'Nothing to update'), "The schema of the copy is not the one of the mapping:\n{$output}");
+    expect([] === orphan_tables(COPY_DATABASE), 'The migration does not drop the tables of the entities removed by master: ' . implode(', ', orphan_tables(COPY_DATABASE)));
+    $counts = sql('SELECT COUNT(*), SUM(executed_at IS NOT NULL) FROM ' . COPY_DATABASE . '.migration_versions');
+    expect(1 === preg_match('{^55\s+4$}', $counts), "The copy has not the 4 migrations of the delivery: {$counts}");
+
+    play('sudo mariadb -e "DROP DATABASE db_fr_lairdubois_www_livraison"', 'mariadb');
+    guide_has('sudo rm -rf /var/www/ladb-livraison');
+    fs()->remove($copy);
+    $databases = play('sudo mariadb -e "SHOW DATABASES LIKE \'db_fr_lairdubois_www%\'"', 'mariadb');
+    expect(!str_contains($databases, COPY_DATABASE), "The throwaway database is still there:\n{$databases}");
+
+    // Nothing of the 3.4 changed: its migration_versions of doctrine/migrations 1.8, its tables
+    expect('51' === sql('SELECT COUNT(*) FROM migration_versions') && '' === sql("SHOW COLUMNS FROM migration_versions LIKE 'executed_at'"), 'The migration_versions of the 3.4 changed.');
+    expect(\count(ORPHAN_TABLES) === \count(orphan_tables()), 'The database of the 3.4 lost tables.');
+}
+
+/**
+ * A php8.5 for the commands of the guide that name it: the PHP of the builder.
+ */
+function php85(): string
+{
+    return 'mkdir -p /tmp/rehearsal-bin && ln -sf "$(command -v php)" /tmp/rehearsal-bin/php8.5 && export PATH="/tmp/rehearsal-bin:$PATH" && ';
 }
 
 function part_during(Report $r): void
@@ -266,6 +428,12 @@ function part_during(Report $r): void
         guide_has('sudo systemctl disable --now ladb_websocket');
         compose(['stop', 'worker_consumer_view', 'worker_consumer_webpush_notification', 'websocket']);
         expect('' === trim(compose(['ps', '--quiet', 'worker_consumer_view', 'worker_consumer_webpush_notification', 'websocket'])), 'An old consumer still runs.');
+        // The consumer_timeout of step 17, read by RabbitMQ when it starts again
+        guide_has('sudo systemctl restart rabbitmq-server');
+        compose(['restart', 'rabbitmq']);
+        wait_for(static fn () => in_service('rabbitmq', 'rabbitmq-diagnostics -q check_port_connectivity', quiet: true)->isSuccessful(), 'RabbitMQ does not start again.');
+        $environment = play('sudo rabbitmq-diagnostics environment | grep consumer_timeout', 'rabbitmq');
+        expect(str_contains($environment, '{consumer_timeout,14400000}'), "RabbitMQ has not the consumer_timeout of step 17:\n{$environment}");
     });
     $r->step('Sauvegarder les tables que les migrations modifient', static function (): void {
         play('sudo mariadb-dump --single-transaction db_fr_lairdubois_www migration_versions ext_log_entries tbl_webpush_user_subscription | gzip > ~/ladb-backup/db-migrations.sql.gz', 'mariadb');
@@ -323,7 +491,13 @@ function part_rollback(Report $r): void
         expect(str_contains($output, '"number" : "5.6.'), "Elasticsearch is not the 5.6 with its index:\n{$output}");
     });
     $r->step('La base', static function (): void {
-        // Nothing to do: the 3.4 on the migrated database, its consumers and its websocket
+        // migration_versions as the 3.4 reads it, and the two other tables of step 26
+        play('zcat ~/ladb-backup/db-migrations.sql.gz | sudo mariadb db_fr_lairdubois_www', 'mariadb');
+        $status = play('sudo --user=www-data bin/console --env=prod doctrine:migrations:status');
+        foreach (['Executed Migrations:\s+51\b', 'Executed Unavailable Migrations:\s+0\b', 'New Migrations:\s+0\b'] as $expected) {
+            expect(1 === preg_match("{{$expected}}", $status), "doctrine:migrations:status of the 3.4:\n{$status}");
+        }
+        // The 3.4 on the migrated database, its consumers and its websocket
         compose(['up', '--detach', '--no-build', 'worker_consumer_view', 'worker_consumer_webpush_notification', 'websocket']);
         check_old_site('user');
         $page = (new Browser())->request('GET', '/creations/?q=' . rawurlencode(search_word()));
@@ -340,17 +514,17 @@ function part_rollback(Report $r): void
 
 /**
  * The code delivered again, after the rollback: the steps of the maintenance from the
- * deployment, on a database already migrated.
+ * deployment, on the database that the rollback gave back to the 3.4.
  */
 function part_redeploy(Report $r, string $delivered): void
 {
-    deploy($r, $delivered, again: true);
+    deploy($r, $delivered);
 }
 
 /**
  * The steps of the maintenance from the deployment of the code to the reopening of the site.
  */
-function deploy(Report $r, string $delivered, bool $again = false): void
+function deploy(Report $r, string $delivered): void
 {
     $r->step('Déployer le code', static function () use ($delivered): void {
         guide_has('sudo --user=www-data git pull origin master');
@@ -379,26 +553,24 @@ function deploy(Report $r, string $delivered, bool $again = false): void
         expect(1 === preg_match('{Environment\s+prod.*Debug\s+false}s', $output), "The kernel is not in prod without debug:\n{$output}");
     });
     $r->step('Table des sessions', static function (): void {
-        play('sudo mariadb db_fr_lairdubois_www -e "DROP TABLE sessions"', 'mariadb');
+        play('sudo mariadb db_fr_lairdubois_www -e "DROP TABLE IF EXISTS sessions"', 'mariadb');
         play('sudo mariadb db_fr_lairdubois_www < docs/database/schema-sessions.sql', 'mariadb');
         $table = play('sudo mariadb db_fr_lairdubois_www -e "SHOW CREATE TABLE sessions\G"', 'mariadb');
         expect(str_contains($table, '`sess_lifetime` int(10) unsigned NOT NULL') && str_contains($table, 'KEY `sessions_sess_lifetime_idx`'), "The table sessions is not the new one:\n{$table}");
         expect('0' === sql('SELECT COUNT(*) FROM sessions'), 'The table sessions has rows.');
     });
-    $r->step('Migrations', static function () use ($again): void {
+    $r->step('Migrations', static function (): void {
+        // The 4 of the delivery, the second time too: the rollback gave back migration_versions
+        // to the 3.4 (R6)
         $output = play('sudo --user=www-data bin/console --env=prod doctrine:migrations:migrate --no-interaction');
-        if ($again) {
-            expect(str_contains($output, 'Already at the latest version'), "doctrine:migrations:migrate runs migrations again:\n{$output}");
-        } else {
-            // Only the 3 of the delivery
-            preg_match_all('{Migrating up to (\S+)}', $output, $matches);
-            io()->text('Migrated up to ' . implode(', ', $matches[1]));
-        }
+        preg_match_all('{Migrating up to (\S+)}', $output, $matches);
+        io()->text('Migrated up to ' . implode(', ', $matches[1]));
         expect(str_contains(play('sudo --user=www-data bin/console --env=prod doctrine:migrations:up-to-date'), 'Up-to-date'), 'The migrations are not up to date.');
         $counts = play('sudo mariadb db_fr_lairdubois_www -e "SELECT COUNT(*), SUM(executed_at IS NOT NULL) FROM migration_versions"', 'mariadb');
-        expect(1 === preg_match('{^54\s+3$}m', $counts), "migration_versions:\n{$counts}");
+        expect(1 === preg_match('{^55\s+4$}m', $counts), "migration_versions:\n{$counts}");
         $new = sql('SELECT GROUP_CONCAT(version ORDER BY version) FROM migration_versions WHERE executed_at IS NOT NULL');
-        expect('Application\Migrations\Version20261028193655,Application\Migrations\Version20261028235655,Application\Migrations\Version20261031093745' === $new, "The migrations played are not those of the delivery: {$new}");
+        expect('Application\Migrations\Version20261028193655,Application\Migrations\Version20261028235655,Application\Migrations\Version20261031093745,Application\Migrations\Version20261115140000' === $new, "The migrations played are not those of the delivery: {$new}");
+        expect([] === orphan_tables(), 'The migration does not drop the tables of the entities removed by master: ' . implode(', ', orphan_tables()));
         $output = play('sudo --user=www-data bin/console --env=prod doctrine:schema:update --dump-sql');
         expect(str_contains($output, 'Nothing to update'), "The schema of the database is not the one of the mapping:\n{$output}");
     });
@@ -428,6 +600,25 @@ function deploy(Report $r, string $delivered, bool $again = false): void
         compose(['up', '--detach', '--no-build', 'scheduler', 'worker_cron']);
         $output = play('sudo --user=www-data bin/console --env=prod debug:scheduler cron');
         expect(8 === preg_match_all('{ via cron\)}', $output), "debug:scheduler does not list the 8 crons:\n{$output}");
+        // The 4 hours of step 17 for the worker of the crons, RabbitMQ created again or not
+        $environment = in_service('rabbitmq', 'rabbitmq-diagnostics environment', quiet: true)->getOutput();
+        expect(str_contains($environment, '{consumer_timeout,14400000}'), 'RabbitMQ lost the consumer_timeout of step 17.');
+    });
+    $r->step('Envoyer un mail de test', static function (): void {
+        // To Mailpit, by the transport of mailer_dsn: signed with DKIM, as the worker sends them
+        $command = "sudo --user=www-data bin/console --env=prod mailer:test --from=noreply@lairdubois.fr --subject='Livraison : mail de test' UNE_ADRESSE";
+        guide_has($command);
+        $before = mailpit_total();
+        $output = in_builder(str_replace(['sudo --user=www-data ', 'UNE_ADRESSE'], ['', 'livraison@lairdubois.test'], $command));
+        expect($output->isSuccessful(), "mailer:test failed:\n" . tail($output->getOutput() . $output->getErrorOutput()));
+        wait_for(static fn () => mailpit_total() > $before, 'The mail of mailer:test is not in Mailpit.');
+        $messages = mailpit('/api/v1/messages?limit=1');
+        expect('Livraison : mail de test' === $messages['messages'][0]['Subject'], 'The last mail of Mailpit is not the one of mailer:test.');
+        $headers = array_change_key_case(mailpit('/api/v1/message/' . $messages['messages'][0]['ID'] . '/headers'));
+        expect(str_contains($headers['dkim-signature'][0] ?? '', 'd=lairdubois.fr'), 'The mail of mailer:test is not signed with DKIM.');
+        foreach (["sudo grep 'status=sent' /var/log/mail.log | tail -n 3", 'sudo journalctl -t postfix/smtp -n 20'] as $command) {
+            guide_has($command);
+        }
     });
 }
 
@@ -485,7 +676,8 @@ function part_after(Report $r): void
         play('sudo rabbitmqctl delete_queue view_queue', 'rabbitmq');
         play('sudo rabbitmqctl delete_queue webpush_notification_queue', 'rabbitmq');
         $plugins = play("sudo rabbitmq-plugins list '^rabbitmq_management\$'", 'rabbitmq');
-        if (!preg_match('{\[E\*\] rabbitmq_management\b}', $plugins)) {
+        $enabledBefore = 1 === preg_match('{\[E\*\] rabbitmq_management\b}', $plugins);
+        if (!$enabledBefore) {
             play('sudo rabbitmq-plugins enable rabbitmq_management', 'rabbitmq');
             wait_for(static fn () => in_builder('curl -s -o /dev/null -w "%{http_code}" -u app:app http://rabbitmq:15672/api/overview', quiet: true)->getOutput() === '200', 'The API of management does not answer.');
         }
@@ -504,6 +696,12 @@ function part_after(Report $r): void
         $queues = play('sudo rabbitmqctl list_queues name', 'rabbitmq', quiet: true);
         $exchanges = play('sudo rabbitmqctl list_exchanges name', 'rabbitmq', quiet: true);
         expect(0 === preg_match('{^(view_queue|webpush_notification_queue|view_exchange|webpush_notification_exchange)$}m', $queues . "\n" . $exchanges), "An old queue or exchange is still there:\n{$queues}\n{$exchanges}");
+        // Back to its state before: off, when it was (the image rabbitmq:*-alpine)
+        if (!$enabledBefore) {
+            play('sudo rabbitmq-plugins disable rabbitmq_management', 'rabbitmq');
+            $plugins = play("sudo rabbitmq-plugins list '^rabbitmq_management\$'", 'rabbitmq');
+            expect(1 === preg_match('{\[  \] rabbitmq_management\b}', $plugins), "The plugin rabbitmq_management is still on:\n{$plugins}");
+        }
     }, strict: false);
     $r->check('Une vue comptée par le nouveau worker', static function (): void {
         $before = (int) sql('SELECT view_count FROM tbl_wonder_creation WHERE id = 1');
@@ -574,6 +772,8 @@ function create_copy(): void
     expect(basename($tree) === get_worktree_name($tree), 'git named the worktree ' . get_worktree_name($tree) . ': castor qa:delivery-rehearsal-destroy.');
     fs()->mkdir(backup_dir(), 0o777);
     fs()->dumpFile($tree . '/var/ladb-backup.my.cnf', "[client]\nuser=root\npassword=app\n");
+    // /etc/rabbitmq/rabbitmq.conf of the server, empty as on Debian (step 17 adds to it)
+    fs()->dumpFile($tree . '/var/rabbitmq.conf', '');
     write_override(delivered: false);
 }
 
@@ -598,6 +798,24 @@ function setup_migration_versions(): void
 {
     in_builder('bin/console doctrine:migrations:version --add --all --no-interaction');
     expect('51' === sql('SELECT COUNT(*) FROM migration_versions'), 'migration_versions does not have the 51 migrations of master.');
+}
+
+function setup_orphan_tables(): void
+{
+    sql(implode(";\n", array_merge(...array_values(ORPHAN_TABLES))));
+    expect(\count(ORPHAN_TABLES) === \count(orphan_tables()), 'The tables of the entities removed by master are not all created.');
+}
+
+/**
+ * The tables of ORPHAN_TABLES the database has.
+ *
+ * @return list<string>
+ */
+function orphan_tables(string $database = 'db_fr_lairdubois_www'): array
+{
+    $names = implode("', '", array_keys(ORPHAN_TABLES));
+
+    return array_values(array_filter(explode("\n", sql("SELECT table_name FROM information_schema.tables WHERE table_schema = '{$database}' AND table_name IN ('{$names}') ORDER BY table_name"))));
 }
 
 function setup_subscriptions(): void
@@ -707,13 +925,16 @@ function add_delivery_parameters(): void
     $block = strtr($matches[1], [
         'LA_VERSION_DE_MARIADB' => $version,
         // The DSN of step 11: Mailpit instead of the Postfix of the server, on the same port
-        'LE_DSN_DES_MAILS' => 'smtp://mailpit:25',
+        'LE_DSN_DES_MAILS' => 'smtp://mailpit:25?auto_tls=false',
         'LE_SECRET_DE_MERCURE' => MERCURE_SECRET,
         'http://127.0.0.1:3000' => 'http://mercure',
         'https://www.lairdubois.fr' => $uri,
     ]);
     $file = tree_dir() . '/app/config/parameters.yml';
-    fs()->dumpFile($file, rtrim(file_get_contents($file)) . "\n" . $block);
+    // Once only, for a rehearsal taken again with --from
+    if (!str_contains(file_get_contents($file), 'database_server_version:')) {
+        fs()->dumpFile($file, rtrim(file_get_contents($file)) . "\n" . $block);
+    }
     $count = trim(play("grep -c -E '^\\s+(database_server_version|mailer_dsn|mercure_url|mercure_public_url|mercure_jwt_secret|ga_measurement_id|router_default_uri|chromium_sandbox):' app/config/parameters.yml"));
     expect('8' === $count, "{$count} parameters of the code delivered in parameters.yml, not 8.");
 }
@@ -774,7 +995,7 @@ function search_word(): string
  * versions read (gitignored): Mailpit on the port 25 (the Postfix of the server), the service of
  * push of the browsers, the backup folder of the guide, the client of MariaDB without password
  * (sudo mariadb on the server). For the code delivered: the workers in prod (the units of
- * docs/01-installation.md), the scheduler and the worker of the crons, and, from step 33, the site
+ * docs/01-installation.md), the scheduler and the worker of the crons, and, from step 40, the site
  * of the image nginx of production in the frontend.
  */
 function write_override(bool $delivered, bool $productionVhost = false): void
@@ -793,6 +1014,8 @@ function write_override(bool $delivered, bool $productionVhost = false): void
                     - "../../var/ladb-backup:/home/app/ladb-backup"
             rabbitmq:
                 image: rabbitmq:RABBITMQ_VERSION-alpine
+                volumes:
+                    - "../../var/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf"
             mailpit:
                 image: axllent/mailpit:v1.32.0
                 environment:
@@ -910,11 +1133,12 @@ function default_services(): array
 
 /**
  * The environment variables of the builder that composer writes in parameters.yml ("env-map" of
- * composer.json), unset: the server has none, its parameters.yml is the one of the guide.
+ * a composer.json, the one of the copy by default), unset: the server has none, its
+ * parameters.yml is the one of the guide.
  */
-function unset_parameter_variables(): string
+function unset_parameter_variables(?string $composerJson = null): string
 {
-    $map = json_decode(file_get_contents(tree_dir() . '/composer.json'), true, flags: \JSON_THROW_ON_ERROR)['extra']['incenteev-parameters']['env-map'] ?? [];
+    $map = json_decode(file_get_contents($composerJson ?? tree_dir() . '/composer.json'), true, flags: \JSON_THROW_ON_ERROR)['extra']['incenteev-parameters']['env-map'] ?? [];
 
     return 'env ' . implode(' ', array_map(static fn (string $variable) => "-u {$variable}", array_values($map))) . ' ';
 }
@@ -936,12 +1160,13 @@ function edit_parameters(array $values): void
 /**
  * Runs a command of the guide, written as in it: the guide must have it. In the builder (the files
  * of the site and bin/console, as www-data), or in the container of MariaDB or RabbitMQ for their
- * clients (as root). sudo goes: the containers run as the user of the files, or as root.
+ * clients (as root). sudo goes, after a time and in a pipe: the containers run as the user of the
+ * files, or as root.
  */
-function play(string $command, string $service = 'builder', string $prefix = '', bool $quiet = false, bool $allowFailure = false): string
+function play(string $command, string $service = 'builder', string $prefix = '', bool $quiet = false, bool $allowFailure = false, string $suffix = ''): string
 {
     guide_has($command);
-    $run = preg_replace('{^sudo (--user=www-data )?}', '', $command);
+    $run = preg_replace('{(^|\| )(time )?sudo (--user=www-data )?}', '$1$2', $command) . $suffix;
     $process = 'builder' === $service ? in_builder($prefix . $run, $quiet) : in_service($service, $run, $quiet);
     if (!$allowFailure && !$process->isSuccessful()) {
         throw new \RuntimeException("`{$command}` failed:\n" . tail($process->getOutput() . $process->getErrorOutput()));

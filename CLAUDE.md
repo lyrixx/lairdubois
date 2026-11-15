@@ -229,7 +229,7 @@ castor qa:delivery-rehearsal-destroy          # stack, copie en 3.4 et conteneur
 - Parties : `server` (conteneurs jetables), `setup` (copie en 3.4 et ses données), `before`
   (phase 1), `during` (phase 2 jusqu'au déploiement), `deploy` (du déploiement aux crons, puis
   une connexion avant la réouverture), `rollback` (de R2 à R6), `redeploy` (le code livré à
-  nouveau, sur la base déjà migrée), `after` (les vérifications sur les données migrées). Une
+  nouveau, sur la base que R6 a rendue à la 3.4), `after` (les vérifications sur les données migrées). Une
   étape en échec arrête la répétition, sauf dans `server` et `after` ; après un échec, la stack
   reste, et `--from` reprend à une partie (`deploy` se rejoue sur lui-même).
 - Copie en 3.4 : un worktree git de la copie qui répète (`var/delivery-rehearsal/delivery-rehearsal-<copie>`,
@@ -242,8 +242,22 @@ castor qa:delivery-rehearsal-destroy          # stack, copie en 3.4 et conteneur
   doctrine/migrations 1.8 (`doctrine:migrations:version --add --all`), session et cookie
   remember_me ouverts par le formulaire, spool, messages dans `view_queue` et
   `webpush_notification_queue` (workers arrêtés), abonnements web push, `web/media/`, fichiers de
-  `sensio/distribution-bundle`, d'Assetic et de `robloach/component-installer`. Une seule stack à
-  la fois : la 3.4 et le code livré sont le même projet, les conteneurs changent au déploiement.
+  `sensio/distribution-bundle`, d'Assetic et de `robloach/component-installer`, et des tables
+  d'entités retirées de `master` (`ORPHAN_TABLES`, avec leurs clés étrangères, créées par les
+  migrations de l'époque, retirées depuis), que l'étape 2 voit et que la migration
+  `Version20261115140000` supprime. Une seule stack à la fois : la 3.4 et le code livré sont le
+  même projet, les conteneurs changent au déploiement.
+- Étape 20 (les migrations sur une copie de la base) : une base `db_fr_lairdubois_www_livraison`
+  restaurée depuis `db.sql.gz`, et le code livré dans `/var/www/ladb-livraison` du builder (le
+  dossier `ladb-livraison` de la copie en 3.4, par `git archive` du commit livré), installé par
+  son propre composer : `php8.5` est un lien vers le PHP du builder, les variables de l'env-map
+  du code livré sont retirées (son `DATABASE_NAME` mènerait la copie à la base de la 3.4), et
+  `--ignore-platform-req=ext-amqp` s'ajoute à la commande (le builder de la 3.4 n'a pas
+  l'extension `amqp`, qu'a le serveur, P2, et dont les migrations ne se servent pas). Puis la base
+  de la 3.4 n'a pas changé (51 lignes de `migration_versions` au format 1.8, tables gardées).
+- Retour arrière (R6) : `migration_versions` remise depuis `db-migrations.sql.gz` (la 3.4 compte
+  alors 51 migrations jouées, 0 inconnue, 0 nouvelle) ; le second déploiement rejoue donc les
+  quatre migrations de la livraison, sur les tables que R6 a remises.
 - Les commandes du guide sont jouées telles qu'elles y sont écrites : `play()` et `server_run()`
   refusent une commande que le guide (ou `docs/01-installation.md`) n'a plus, et `guide_step()`
   un titre d'étape. Renuméroter le guide ne casse rien ; changer une commande, son bloc de
@@ -254,19 +268,39 @@ castor qa:delivery-rehearsal-destroy          # stack, copie en 3.4 et conteneur
   systemd = les services Compose, en `--env=prod` comme les unités (`docker-compose.override.yml`
   de la copie, écrit par la tâche) ; Mailpit sur le port 25 à la place de Postfix, et le double
   `push` des navigateurs ; composer sans les variables de l'env-map du builder (`env -u`), le
-  `parameters.yml` étant celui du guide. Depuis l'étape 37, le frontend sert la configuration
+  `parameters.yml` étant celui du guide. Depuis l'étape 40, le frontend sert la configuration
   nginx de l'image de prod (`services/php/prod/nginx.conf`, `web/app.php`) avec `TRUSTED_HOSTS`.
   Les paquets du serveur sont les images de la copie, reconstruites au déploiement ; MariaDB et
   RabbitMQ, ceux de Debian 13 (11.8 et 4.0, au lieu des 10.11 et 3.13 du dev), dès la 3.4.
+  `/etc/rabbitmq/rabbitmq.conf` est le fichier `var/rabbitmq.conf` de la copie : le
+  `consumer_timeout` de l'étape 17 (que la répétition pose toujours) reste quand Compose recrée
+  le conteneur, et l'étape 25 redémarre RabbitMQ. Il est donné à `rabbitmq` dans le conteneur :
+  `/etc/rabbitmq` est un dossier ouvert à tous avec le sticky bit, où le noyau refuse à root
+  d'écrire dans le fichier d'un autre (`fs.protected_regular`). Les étapes 11, 17 et 20 se
+  rejouent avec `--from` ; le tableau garde aussi les résultats des passages précédents.
 - Conteneurs jetables (`<projet>-check-*`, Debian 13 et 12, supprimés à la fin) : PHP 8.5 de Sury
   à côté de PHP 7.3 (l'alternative `php`, le pool et le `php.ini` repris), Composer, Node 24,
   Chromium et les optimiseurs, le vhost et la page de maintenance de `master` modifiés par le guide
   (identiques à `docs/nginx/conf/`, puis `nginx -t`), les unités de `docs/01-installation.md`
   (`systemd-analyze verify`, les `sed` du guide sur celles de `master`), le hub Mercure avec son
-  `mercure.env` (lu par le parseur de systemd), le code livré installé en www-data (composer
-  `--no-dev`, npm, Vite), le paquet d'Elasticsearch 9 configuré et démarré.
-- Pas joués : la montée de Debian, la crontab, l'échange de vhost de la maintenance, systemd et
-  les scripts de maintenance (seulement `bash -n`), Postfix, les durées et les volumes de la prod.
+  `mercure.env` (lu par le parseur de systemd) et l'empreinte de son archive, le code livré
+  installé en www-data (composer `--no-dev`, npm, Vite), un `%` seul dans `mailer_dsn` (cité par la
+  vérification de l'étape 11, container qui ne compile pas) puis `%%` (le container lit un `%`),
+  la page de maintenance servie par nginx (503 et `Retry-After`, sur `/`, une URL en `.html` et une
+  image). Elasticsearch, dans un conteneur Debian 13 : la 5.6 de son paquet, avec un Java 8
+  (Temurin) réglé dans `/etc/default/elasticsearch`, un réglage de systemd et un index, mise de
+  côté et purgée par le guide, puis la 9 installée, configurée et démarrée, puis R5 : la 5.6
+  réinstallée depuis son paquet, alors qu'un compte système a pris entre-temps le numéro de
+  l'utilisateur `elasticsearch` (les `chown` le lui rendent), retrouve son Java, son réglage de
+  systemd et son index. P7 : la commande du guide sur le `composer.lock` du commit livré, comparée
+  aux versions instables du lock ; tant que le lock en a, le tableau le dit (« prérequis non
+  rempli »), sans échec.
+- Pas joués : la montée de Debian, la crontab (et les autres crontabs), `timedatectl`, l'échange
+  de vhost de la maintenance, systemd et les scripts de maintenance (seulement `bash -n`), Postfix
+  et le relais (le mail de test de l'étape 44 va dans Mailpit), les durées et les volumes de la
+  prod. L'effet du `consumer_timeout` sur un cron de plus de 30 minutes n'est pas joué dans la
+  répétition : vérifié à part (#312), sur RabbitMQ 3.10 et 4.0 jetables, avec un message pris
+  comme le fait Messenger (`basic.get`), gardé au-delà du délai.
 
 ## Prod
 
@@ -812,8 +846,8 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
 - `AbstractController::createLock()` pose un verrou Memcached de 3 secondes par action et par
   compte, contre le double envoi : la deuxième création d'un même compte dans un test répond 404.
   `Tests\WebTestCase` vide Memcached après chaque test (il ne sert qu'à ces verrous, aux dates de
-  recalcul des compteurs de `UserUtils`, par compte, et à l'état et au verrou du schedule des
-  crons).
+  recalcul des compteurs de `UserUtils`, par compte, à l'état et au verrou du schedule des
+  crons, et à la fenêtre et au verrou de la limite des mails).
 - Bug connu d'un test fonctionnel : vérifier le mauvais comportement avec le message « passes now:
   remove the known failure (#N) », puis `self::markTestIncomplete('Known failure, see #N.')`. Le
   test échoue quand le bug est corrigé.
@@ -1221,8 +1255,17 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   l'appellent encore dans `up()` et `down()` : elles ne tournent plus. La prod les a toutes jouées,
   et elles ne tournaient déjà pas sur une base vide (elles modifient des tables que
   `schema:update` avait créées). PHPStan ne les lit pas (`paths` de `phpstan.neon`). Une migration
-  qui ne fait que des `ALTER TABLE` a `isTransactional()` à `false` : MariaDB valide la
-  transaction à chaque DDL, et doctrine/migrations le déprécie.
+  qui ne fait que des `ALTER TABLE` (ou des `DROP TABLE`) a `isTransactional()` à `false` :
+  MariaDB valide la transaction à chaque DDL, et doctrine/migrations le déprécie.
+- Tables d'entités retirées de `master` (#312) : seize tables que l'historique de `master` a
+  mappées et qu'aucune des 51 migrations ne supprime, dont celles de migrations retirées du dépôt le
+  2020-03-23 (`tbl_find_content_event`, `tbl_knowledge2_book_review`…) et celles de migrations de
+  développement jamais jouées en prod (`tbl_knowledge2_value_tool_identity`…), avec leurs tables
+  de jointure. La base de la prod en a peut-être : `doctrine:schema:update` de l'ORM 3, toujours
+  complet, les supprimerait, et son contrôle après les migrations arrêterait la livraison.
+  `Version20261115140000` les supprime (`DROP TABLE IF EXISTS`, une table de jointure avant celle
+  qu'elle référence, `down()` irréversible). Ne jamais lancer `doctrine:schema:update --force`
+  sur la prod.
 - `migration_versions` ne va pas dans le `schema_filter` : doctrine/migrations cherche sa table dans
   la liste filtrée (`tablesExist()`), et la recréerait.
 - DBAL 3 déclare une colonne `json` en `JSON` sur MariaDB (`LONGTEXT … utf8mb4_bin CHECK
@@ -1296,10 +1339,25 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   avant un saut de Symfony, par précaution (un message de chaque file mis par la 6.4 est lu et
   traité par la 7.4, #28, un de la 7.4 par la 8.1 et un de la 8.1 par la 8.2, #30). Un seul
   paramètre, `mailer_dsn` (`framework.mailer.dsn`). Mailer lance
-  STARTTLS dès que le serveur SMTP l'annonce et vérifie son certificat, ce que Swiftmailer ne
-  faisait pas sans `encryption` : `?verify_peer=0` pour un Postfix au certificat autosigné (l'option
-  `auto_tls` n'arrive qu'en 7.1). Depuis la 8.2.0-BETA2, `verify_peer` et `auto_tls` prennent un
-  booléen (`0`, `false`, `off`, `no`…), une autre valeur est dépréciée.
+  STARTTLS dès que le serveur SMTP l'annonce et vérifie que son certificat porte le nom de l'hôte du
+  DSN, ce que Swiftmailer ne faisait pas sans `encryption` : vers le Postfix du serveur,
+  `smtp://localhost:25?auto_tls=false` (`parameters.yml.dist`, #312), aucun certificat n'étant au
+  nom de `localhost`. Depuis la 8.2.0-BETA2, `verify_peer` et `auto_tls` prennent un booléen
+  (`0`, `false`, `off`, `no`…), une autre valeur est dépréciée. Un `%` de `parameters.yml` (un
+  caractère encodé d'un utilisateur ou d'un mot de passe) s'écrit `%%`, sinon le container ne
+  compile pas (`ParameterNotFoundException`).
+- Débit des mails (#312) : 100 toutes les 2 minutes au plus, celui du spool de Swiftmailer avant
+  (`swiftmailer:spool:send --message-limit=100` toutes les 2 minutes, posé par Boris en 2019),
+  gardé : `rate_limiter: mailer` du transport `mailer` (`framework.rate_limiter.mailer`,
+  `fixed_window`, `symfony/rate-limiter`). Le worker prend un message, attend la fenêtre suivante
+  quand la limite est atteinte (log `info` « Transport mailer is being rate limited »), puis
+  l'envoie. L'état (`cache.limiter_mailer`) et le verrou (`lock.factory`) sont dans Memcached :
+  une seule limite pour tous les workers de la file, sur tous les serveurs ; un redémarrage de
+  Memcached ouvre une nouvelle fenêtre. La lettre de la semaine met une demi-heure par tranche de
+  1 500 comptes, et les autres mails attendent leur tour derrière elle, comme avec le spool.
+  L'envoi direct de `MailerUtils`, quand RabbitMQ ne répond pas, n'est pas limité.
+  `Tests\Mail\RateLimiterTest` vérifie la limite et son partage entre workers ; un vrai worker
+  envoie 100 mails par fenêtre de 2 minutes (#312).
 - `Event\DkimSignedMessageListener` signe chaque mail avec la clé DKIM de la prod
   (`keys/private.pem`, hors git, `relaxed/relaxed`) quand le transport l'envoie (`MessageEvent` pas
   `isQueued()`, dans le worker), pas quand Mailer le met sur le bus : le message en file reste un
@@ -1322,7 +1380,7 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   (framework, security, twig ; debug et
   web-profiler en dev) et les composants dont le site se sert lui-même : les `use` de `src/`,
   `app/`, `tests/` et `bin/`, et ce que la config demande (`yaml`, `translation`, `asset`,
-  `http-client`, `expression-language` pour `@Security`). En dev, ceux des tests (`browser-kit`,
+  `http-client`, `expression-language` pour `@Security`, `rate-limiter` pour la limite des mails). En dev, ceux des tests (`browser-kit`,
   `css-selector`, `dom-crawler`, `finder`) et `stopwatch` (services de debug et timeline du
   profiler, comme le `profiler-pack` de Symfony). Le reste vient des dépendances. Celles qu'elles
   tirent (`cache`, `clock`, `monolog-bridge` depuis monolog-bundle 4, `process`, `property-info`,
@@ -1335,7 +1393,7 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `symfony/polyfill-php83` partent.
 - 8.2.0-BETA2 (#30) : `minimum-stability: beta` et `prefer-stable: true` dans `composer.json`,
   aucun autre paquet du lock en version instable. Symfony ne publie une version que des
-  composants qui ont changé : 32 paquets sont en `v8.2.0-BETA2`, les 19 autres restent en
+  composants qui ont changé : 33 paquets sont en `v8.2.0-BETA2`, les 19 autres restent en
   `v8.2.0-BETA1`, qui n'ont pas de BETA2 (`asset`, `clock`, `error-handler`, `event-dispatcher`,
   `string`…). À chaque nouvelle préversion, `composer update` des paquets en `v8.2.0-*` du lock ;
   à la sortie de la 8.2.0, retirer d'abord ces deux lignes.
@@ -1344,8 +1402,8 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   FrameworkBundle, sans qu'`AppKernel` les déclare (`kernel.bundles`).
 - Bundles des composants (8.2, #30) : la config de FrameworkBundle passe dans un bundle par
   composant installé (`asset`, `cache`, `http_client`, `lock`, `mailer`, `messenger`, `mime`,
-  `process`, `property_access`, `property_info`, `router`, `translation`, `type_info`,
-  `validation`, `web_link`), que le kernel ajoute de lui-même. `framework.<clé>` en reste un alias
+  `process`, `property_access`, `property_info`, `rate_limiter`, `router`, `translation`,
+  `type_info`, `validation`, `web_link`), que le kernel ajoute de lui-même. `framework.<clé>` en reste un alias
   (`assets` pour `asset`, `translator` pour `translation`), et `debug:config <clé>` remplace
   `debug:config framework <clé>`. Le service `router` est un
   `Symfony\Component\Routing\DependencyInjection\Router` : un service demande `RouterInterface`.
@@ -1429,7 +1487,14 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `RunCommandMessage` sur un transport qui ne signe pas tout. Arrêté par SIGTERM, le worker finit le
   cron en cours (la console de 8.2 laisse le signal au `messenger:consume` qui la lance) : une heure
   de délai d'arrêt (`TimeoutStopSec`, `stop_grace_period`). La sortie des commandes n'est écrite
-  nulle part (en prod, la crontab l'envoyait à `/dev/null`). `DeduplicateStamp` ne sert pas : le
+  nulle part (en prod, la crontab l'envoyait à `/dev/null`). Le worker garde le message du cron
+  sans l'acquitter tant qu'il tourne : au-delà du `consumer_timeout` de RabbitMQ (30 minutes, de
+  3.10 à 4.0, aussi pour le `basic.get` de Messenger), le canal est fermé, le cron va au bout mais
+  le worker s'arrête en erreur à l'acquittement, et le message rendu est rejeté. Sur le jeu de
+  volume, le plus long, les sitemaps, prend 1 min 41 s (38 s pour 20 000 notifications à envoyer,
+  17 s pour la lettre de 10 000 comptes, #312). Pour un cron plus long : `consumer_timeout` dans
+  `rabbitmq.conf` (étape 17 du guide) ; 3.10 refuse la politique `consumer-timeout`, que 4.0
+  connaît. `DeduplicateStamp` ne sert pas : le
   scheduler de la 8.2 renvoie l'enveloppe déjà reçue (`ReceivedStamp`), le middleware ne prend
   jamais le verrou et le relâche aussitôt.
 - Les notifications web push sont signées avec les clés VAPID de la prod (`bentools_webpush.*` de

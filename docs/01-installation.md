@@ -213,9 +213,14 @@ If you want to monitor RabbitMQ, enable the management plugin
 The hub is a single binary (a build of [Caddy](https://caddyserver.com/)), with its `Caddyfile`. Version 1.x: the protocol of Mercure 1.0, that `symfony/mercure-bundle` 0.6 speaks.
 
 ``` bash
+    $ curl -fsSL -O https://github.com/dunglas/mercure/releases/download/v1.1.5/mercure_Linux_x86_64.tar.gz
+    $ curl -fsSL -o mercure-checksums.txt https://github.com/dunglas/mercure/releases/download/v1.1.5/checksums.txt
+    $ grep ' mercure_Linux_x86_64.tar.gz$' mercure-checksums.txt | sha256sum -c
     $ sudo mkdir -p /opt/mercure
-    $ curl -fsSL https://github.com/dunglas/mercure/releases/download/v1.1.5/mercure_Linux_x86_64.tar.gz | sudo tar -xz -C /opt/mercure mercure Caddyfile
+    $ sudo tar -xzf mercure_Linux_x86_64.tar.gz -C /opt/mercure mercure Caddyfile
 ```
+
+The third command must answer `mercure_Linux_x86_64.tar.gz: OK` (the digest of the archive of the v1.1.5 is `a39416791da133775d1c81d1ec069f376cd938112a40a9bd7158a63771c7343b`): otherwise, do not extract it.
 
 Generate a random secret: the site signs with it the JWT of its updates and of the subscriptions of its workspaces. The same value goes in the `mercure_jwt_secret` parameter (Step 4).
 
@@ -772,7 +777,7 @@ And restart Postfix:
 
 Now, you have a SMTP server accessible in localhost without authentication. You can see sendings logs, and possible errors, in `/var/log/mail.log`.
 
-And don't forget to change the `mailer_dsn` in symfony configuration `/app/config/parameters.yml`: `smtp://localhost:25`. Symfony Mailer starts TLS when the server offers it, and checks its certificate: if Postfix offers TLS (`postconf smtpd_tls_security_level` gives `may`) with the self-signed certificate of Debian (`ssl-cert-snakeoil`), add `?verify_peer=0`.
+And don't forget to change the `mailer_dsn` in symfony configuration `/app/config/parameters.yml`: `smtp://localhost:25?auto_tls=false`. Symfony Mailer starts TLS when the server offers it, and checks that its certificate has the name of the host of the DSN, `localhost`, that no certificate has: between the site and the local Postfix, no TLS (Postfix keeps its own to the relay). A `%` of the DSN (an encoded user or password) is written `%%` in `parameters.yml`. The worker of the queue `mailer` sends 100 mails every 2 minutes at most (`rate_limiter` of its transport in `app/config/config.yml`), and `bin/console --env=prod mailer:test --from=noreply@lairdubois.fr YOUR_ADDRESS` sends a mail by the transport, signed with DKIM.
 
 ## Step 16 - System configuration tuning (Not necessary on the **DEV** server)
 
