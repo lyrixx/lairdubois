@@ -296,9 +296,10 @@ function part_before(Report $r, string $delivered): void
 }
 
 /**
- * The output of doctrine:schema:update --complete --dump-sql of the 3.4: the tables out of its
- * mapping (sessions, migration_versions), and those of the entities removed by master that the
- * migration of the delivery drops, with the foreign keys that reference them. Nothing else.
+ * The output of doctrine:schema:update --complete --dump-sql of the 3.4: migration_versions, out
+ * of its mapping (DoctrineBundle leaves aside the table of PdoSessionHandler), and the tables of
+ * the entities removed by master that the migration of the delivery drops, with the foreign keys
+ * that reference them. Nothing else.
  */
 function check_complete_schema(string $output): void
 {
@@ -307,7 +308,7 @@ function check_complete_schema(string $output): void
     foreach (array_filter(array_map('trim', explode("\n", $output)), static fn (string $line) => str_ends_with($line, ';')) as $statement) {
         if (preg_match('{^DROP TABLE (\w+);$}', $statement, $matches)) {
             $dropped[] = $matches[1];
-            if (!\in_array($matches[1], ['migration_versions', 'sessions', ...delivery_dropped_tables()], true)) {
+            if (!\in_array($matches[1], ['migration_versions', ...delivery_dropped_tables()], true)) {
                 $unexpected[] = $statement;
             }
         } elseif (!preg_match('{^ALTER TABLE (\w+) DROP FOREIGN KEY \w+;$}', $statement, $matches) || !\in_array($matches[1], delivery_dropped_tables(), true)) {
@@ -316,7 +317,7 @@ function check_complete_schema(string $output): void
     }
     expect([] === $unexpected, "doctrine:schema:update --complete has more than the tables out of the mapping:\n" . implode("\n", $unexpected) . "\n\n{$output}");
     sort($dropped);
-    $expected = ['migration_versions', 'sessions', ...orphan_tables()];
+    $expected = ['migration_versions', ...orphan_tables()];
     sort($expected);
     expect($expected === $dropped, "doctrine:schema:update --complete drops:\n" . implode("\n", $dropped));
 }

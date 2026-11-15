@@ -211,12 +211,11 @@ voient la base comme il la verra.
 Vérification :
 
 - `Nothing to update` ;
-- puis ces deux lignes, les tables que le code livré laisse de côté (`schema_filter` de
-  `config.yml`, doctrine/migrations) :
+- puis cette ligne, la table de doctrine/migrations, que le code livré laisse de côté (la 3.4
+  laisse aussi de côté celle des sessions) :
 
   ```
   DROP TABLE migration_versions;
-  DROP TABLE sessions;
   ```
 
   et, pour une table de la liste de `app/DoctrineMigrations/Version20261115140000.php` du code
