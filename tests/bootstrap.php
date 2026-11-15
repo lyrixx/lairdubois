@@ -11,3 +11,8 @@ require dirname(__DIR__).'/app/autoload.php';
 
 // No call to the Graph API of Facebook: its SDK has no service to replace (see the double)
 require __DIR__.'/Double/OfflineFacebookGraph.php';
+
+// The client of ExternalUrlUtils (NoPrivateNetworkHttpClient) resolves the host of a URL itself,
+// to refuse a private address: a test gives the addresses of its hosts to
+// DnsMock::withMockedHosts(), and resets them after (with no host, DnsMock asks the DNS)
+Symfony\Bridge\PhpUnit\DnsMock::register(Symfony\Component\HttpClient\NoPrivateNetworkHttpClient::class);

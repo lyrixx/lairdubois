@@ -18,20 +18,17 @@ use Ladb\CoreBundle\Entity\Find\Content\Website;
 use Ladb\CoreBundle\Entity\Find\Content\Video;
 use Ladb\CoreBundle\Utils\VideoHostingUtils;
 use Ladb\CoreBundle\Utils\LocalisableUtils;
-use Ladb\CoreBundle\Utils\LinkUtils;
 
 class FindType extends AbstractType {
 
 	private $om;
 	private $videoHostingUtils;
 	private $localisableUtils;
-	private $linkUtils;
 
-	public function __construct(ObjectManager $om, VideoHostingUtils $videoHostingUtils, LocalisableUtils $localisableUtils, LinkUtils $linkUtils) {
+	public function __construct(ObjectManager $om, VideoHostingUtils $videoHostingUtils, LocalisableUtils $localisableUtils) {
 		$this->om = $om;
 		$this->videoHostingUtils = $videoHostingUtils;
 		$this->localisableUtils = $localisableUtils;
-		$this->linkUtils = $linkUtils;
 	}
 
 	public function buildForm(FormBuilderInterface $builder, array $options): void {
@@ -103,7 +100,7 @@ class FindType extends AbstractType {
 					case Find::CONTENT_TYPE_LINK:
 
 						$link = $event->getForm()->get('link')->getData();
-						$canonicalUrl = $link->getUrl(); // TODO Google don't like this method : $this->linkUtils->getCanonicalUrl($link->getUrl());
+						$canonicalUrl = $link->getUrl();
 						$kindAndEmbedIdentifier = $this->videoHostingUtils->getKindAndEmbedIdentifier($link->getUrl());
 						if ($kindAndEmbedIdentifier['kind'] == VideoHostingUtils::KIND_UNKNOW) {
 							$website = new Website();

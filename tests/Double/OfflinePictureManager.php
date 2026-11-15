@@ -6,7 +6,8 @@ use Ladb\CoreBundle\Manager\Core\PictureManager;
 
 /**
  * Picture manager of the test environment (config_test.yml): a picture "downloaded" from a URL
- * is a copy of a picture of the fixtures.
+ * is a copy of a picture of the fixtures, without any request (ExternalUrlTest tests the real
+ * download).
  */
 final class OfflinePictureManager extends PictureManager
 {
@@ -19,7 +20,11 @@ final class OfflinePictureManager extends PictureManager
     {
         $this->urls[] = $url;
 
-        return parent::createFromUrl('file://'.self::PICTURE, $persist);
+        $picture = $this->createEmpty('jpg', $persist);
+        copy(self::PICTURE, $picture->getAbsolutePath());
+        $this->computeSizes($picture);
+
+        return $picture;
     }
 
     /**

@@ -11,12 +11,14 @@ class OpenGraphUtils {
 	private $facebookAppId;
 	private $facebookAppSecret;
 	private $logger;
+	private $externalUrlUtils;
 
-	public function __construct($facebookAccessToken, $facebookAppId, $facebookAppSecret, LoggerInterface $logger) {
+	public function __construct($facebookAccessToken, $facebookAppId, $facebookAppSecret, LoggerInterface $logger, ExternalUrlUtils $externalUrlUtils) {
 		$this->facebookAccessToken = $facebookAccessToken;
 		$this->facebookAppId = $facebookAppId;
 		$this->facebookAppSecret = $facebookAppSecret;
 		$this->logger = $logger;
+		$this->externalUrlUtils = $externalUrlUtils;
 	}
 
 	/////
@@ -52,23 +54,13 @@ class OpenGraphUtils {
 	}
 
 	public function fetchMetas($uri) {
-		$curl = curl_init($uri);
-
-		curl_setopt($curl, CURLOPT_FAILONERROR, true);
-		curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-		curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($curl, CURLOPT_TIMEOUT, 15);
-		curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-		curl_setopt($curl, CURLOPT_USERAGENT, $_SERVER['HTTP_USER_AGENT']);
-
-		$response = curl_exec($curl);
+		$response = $this->externalUrlUtils->fetch($uri, array( 'User-Agent' => $_SERVER['HTTP_USER_AGENT'] ));
 
 		if (!empty($response)) {
 
 			libxml_use_internal_errors(true);
 			$doc = new \DOMDocument();
-			$doc->loadHTML(utf8_decode($response));
+			$doc->loadHTML(mb_convert_encoding($response, 'ISO-8859-1', 'UTF-8'));
 			$xpath = new \DOMXPath($doc);
 			$query = '//*/meta[starts-with(@property, \'og:\')]';
 			$metas = $xpath->query($query);
