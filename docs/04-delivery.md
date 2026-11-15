@@ -56,8 +56,10 @@ et 40 s pour installer et démarrer Elasticsearch 9 : le reste de la coupure est
 les commandes et de lire les vérifications, une demi-heure environ. Sur le serveur, trois étapes
 dépendent du volume :
 
-- le spool (étape 20), selon le nombre de mails en attente : le vider site ouvert juste avant
-  (même commande), pour qu'il n'en reste que quelques-uns ;
+- le spool (étape 20), selon le nombre de mails en attente : le vider site ouvert juste avant, pour
+  qu'il n'en reste que quelques-uns, par `sudo --user=www-data bin/console --env=prod swiftmailer:spool:send`
+  (sans `--recover-timeout=0` : le cron envoie en même temps, un mail en cours d'envoi partirait
+  deux fois) ;
 - les téléchargements de `composer install` et `npm ci` (étapes 32 et 33), selon le réseau ;
 - la reconstruction de l'index (étape 38) : 89 s pour 210 000 documents sur une machine de
   24 cœurs (jeu de volume de #282), à multiplier selon le nombre de contenus de la prod (étape 2)
@@ -122,14 +124,19 @@ sudo composer self-update --2
 
 Répétition : vérifiée autrement (conteneurs Debian 13 et 12).
 
-P5. Elasticsearch 5.6 tourne toujours :
+P5. Les services de la 3.4 tournent sur la Debian montée :
 
 ```bash
 curl -s http://127.0.0.1:9200 | grep '"number"'
+sudo rabbitmqctl list_queues name messages
 ```
 
-Vérification : `"number" : "5.6.x"`. Sur une Debian montée, Elasticsearch 5.6 demande un Java 8
-jusqu'à la livraison : Debian 12 et 13 n'en ont plus dans leurs paquets. Répétition : non jouée.
+Vérification : `"number" : "5.6.x"`, puis `view_queue` et `webpush_notification_queue`. Sur une
+Debian montée, Elasticsearch 5.6 demande un Java 8 jusqu'à la livraison : Debian 12 et 13 n'en ont
+plus dans leurs paquets. RabbitMQ 4.0 (Debian 13) ne se monte que depuis une 3.13, pas depuis la
+3.10 de Debian 12 : s'il ne démarre pas après la montée, le repartir de données vides
+(RabbitMqBundle recrée ses files au démarrage de ses consumers). Répétition : non jouée (la
+répétition tourne sur RabbitMQ 4.0 dès la 3.4).
 
 P6. La version de nginx, qui décide d'une modification du vhost (étape 14) :
 
