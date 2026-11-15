@@ -39,7 +39,7 @@ const INSTALLATION = 'docs/01-installation.md';
 const WORK_DIR = 'var/delivery-rehearsal';
 
 // The parts of a rehearsal, in their order
-const PARTS = ['server', 'setup', 'before', 'during', 'rollback', 'redeploy', 'after'];
+const PARTS = ['server', 'setup', 'before', 'during', 'deploy', 'rollback', 'redeploy', 'after'];
 
 // The hub of the stack signs with it (MERCURE_JWT_SECRET of docker-compose.yml)
 const MERCURE_SECRET = 'lairdubois-dev-mercure-jwt-secret-not-secret';
@@ -65,7 +65,7 @@ const PUSH_SUBSCRIPTION_KEYS = [
 function rehearsal(
     #[AsOption(description: 'Keeps the stack and the copy in 3.4 at the end (castor qa:delivery-rehearsal-destroy removes them)')]
     bool $keep = false,
-    #[AsOption(description: 'Starts from this part, on a stack kept by --keep: server, setup, before, during, rollback, redeploy or after')]
+    #[AsOption(description: 'Starts from this part, on a stack kept by --keep: server, setup, before, during, deploy, rollback, redeploy or after')]
     ?string $from = null,
     #[AsOption(description: 'Stops after this part, and keeps the stack (server alone: the packages, systemd and nginx in the throwaway containers)')]
     ?string $to = null,
@@ -98,7 +98,8 @@ function rehearsal(
                 'server' => part_server($report),
                 'setup' => part_setup($report),
                 'before' => part_before($report),
-                'during' => part_during($report, $delivered),
+                'during' => part_during($report),
+                'deploy' => part_deploy($report, $delivered),
                 'rollback' => part_rollback($report),
                 'redeploy' => part_redeploy($report, $delivered),
                 'after' => part_after($report),
@@ -112,13 +113,15 @@ function rehearsal(
         $report->render();
     }
 
+    // A failed step keeps them too, to look at them
+    $failed = $failed || $report->hasFailures();
     if ($failed || $keep) {
         io()->note('The stack and the copy in 3.4 are kept (' . tree_dir() . '): castor qa:delivery-rehearsal-destroy removes them.');
     } else {
         destroy();
     }
 
-    return $failed || $report->hasFailures() ? 1 : 0;
+    return $failed ? 1 : 0;
 }
 
 #[AsTask(description: 'Removes the stack, the copy in 3.4 and the throwaway containers of the delivery rehearsal', namespace: 'qa', name: 'delivery-rehearsal-destroy')]
@@ -234,7 +237,7 @@ function part_before(Report $r): void
     $r->check('La 3.4 marche après la phase 1 : connexion, pages, session écrite', check_old_site(...));
 }
 
-function part_during(Report $r, string $delivered): void
+function part_during(Report $r): void
 {
     $r->step('Vider le spool de Swiftmailer', static function (): void {
         $spooled = count_spool();
@@ -275,6 +278,13 @@ function part_during(Report $r, string $delivered): void
         play('sudo rm -rf var/bootstrap.php.cache var/SymfonyRequirements.php web/css web/js components var/cache/prod var/cache/dev');
         expect(!file_exists(tree_dir() . '/var/cache/prod') && !file_exists(tree_dir() . '/web/css') && !file_exists(tree_dir() . '/components'), 'A file of the 3.4 is still there.');
     });
+}
+
+/**
+ * The code delivered, from the deployment to the reopening, then a login before the reopening.
+ */
+function part_deploy(Report $r, string $delivered): void
+{
     deploy($r, $delivered);
     $r->check('Avant la réouverture : connexion au code livré d\'un compte au hash sha512 (user2), refait en bcrypt', static function (): void {
         $browser = new Browser();
@@ -290,14 +300,18 @@ function part_during(Report $r, string $delivered): void
 function part_rollback(Report $r): void
 {
     $r->step('Le code de la 3.4', static function (): void {
-        compose(['stop', 'scheduler', 'worker_cron', 'worker_consumer_mailer', 'worker_consumer_view', 'worker_consumer_webpush_notification']);
+        // R1, the services of the code delivered stopped (a rehearsal taken again may be past it)
+        if (OLD_COMMIT !== tree_head()) {
+            compose(['stop', 'scheduler', 'worker_cron', 'worker_consumer_mailer', 'worker_consumer_view', 'worker_consumer_webpush_notification']);
+        }
         // git reset --hard on the branch of the server, a commit of the copy here
         guide_has('sudo --user=www-data git reset --hard b8848c0c05c3ec80ee1968db9f66ea28e38a5b1f');
         run(['git', 'checkout', '--detach', OLD_COMMIT], context: context()->withWorkingDirectory(tree_dir()));
+        // The compose files of the 3.4: its additions, before any command of Compose
+        write_override(delivered: false);
         play('sudo rm -rf vendor web/bundles var/cache/prod var/cache/dev');
         play('sudo tar -xzf ~/ladb-backup/code-3.4.tar.gz');
         // The packages of the server stay those of the delivery: the images are not built again
-        write_override(delivered: false);
         compose(['up', '--detach', '--no-build', '--remove-orphans', '--wait', ...default_services()]);
     });
     $r->step('Elasticsearch 5.6', static function (): void {
@@ -475,7 +489,13 @@ function part_after(Report $r): void
         // The account of the stack has the tag administrator (RABBITMQ_DEFAULT_USER)
         foreach (['view_exchange', 'webpush_notification_exchange'] as $exchange) {
             guide_has("curl -i -u UTILISATEUR:MOT_DE_PASSE -X DELETE http://127.0.0.1:15672/api/exchanges/%2F/{$exchange}");
-            $status = in_builder("curl -s -o /dev/null -w '%{http_code}' -u app:app -X DELETE http://rabbitmq:15672/api/exchanges/%2F/{$exchange}", quiet: true)->getOutput();
+            $status = '';
+            // The API answers once the plugin has started its listener
+            wait_for(static function () use ($exchange, &$status): bool {
+                $status = trim(in_builder("curl -sS -o /dev/null -w '%{http_code}' -u app:app -X DELETE http://rabbitmq:15672/api/exchanges/%2F/{$exchange}", quiet: true)->getOutput());
+
+                return '000' !== $status;
+            }, "The API of management does not answer to the deletion of {$exchange}.");
             expect('204' === $status, "The deletion of {$exchange} answers {$status}.");
         }
         $queues = play('sudo rabbitmqctl list_queues name', 'rabbitmq', quiet: true);
@@ -496,7 +516,12 @@ function part_after(Report $r): void
         $like = $browser->request('GET', '/likes/105/1/create', ['X-Requested-With' => 'XMLHttpRequest']);
         expect(200 === $like->getStatusCode(), "The like answers {$like->getStatusCode()}.");
         wait_for(static fn () => substr_count(compose(['logs', '--no-log-prefix', 'push']), 'POST /user ') > $before, 'The worker webpush_notification sent nothing to the subscription of user.');
-        expect(str_contains(compose(['logs', '--no-log-prefix', 'push']), 'authorization=vapid t='), 'The notification is not signed with VAPID.');
+        // VAPID: "vapid t=…, k=…" (aes128gcm), or "WebPush <JWT>" with Crypto-Key (aesgcm, the encoding of
+        // the subscriptions of the site, UserSubscription::getContentEncoding())
+        $posts = array_values(preg_grep('{^POST /user }', explode("\n", compose(['logs', '--no-log-prefix', 'push']))));
+        $last = $posts[\count($posts) - 1];
+        io()->text($last);
+        expect(1 === preg_match('{authorization=(vapid t=|WebPush ey)}', $last), 'The notification is not signed with VAPID.');
     }, strict: false);
     $r->check('Un mail envoyé par le nouveau worker mailer, signé DKIM', static function (): void {
         $before = mailpit_total();
@@ -561,6 +586,9 @@ function setup_parameters(): void
         'mailer_host' => 'mailpit',
         'mastodon_instance' => 'offline://mastodon',
     ]);
+    // The cache of prod (the workers) does not read parameters.yml again
+    in_builder('rm -rf var/cache/prod && bin/console --env=prod cache:warmup');
+    compose(['restart', 'worker_consumer_view', 'worker_consumer_webpush_notification', 'websocket']);
 }
 
 function setup_migration_versions(): void
@@ -913,7 +941,8 @@ function play(string $command, string $service = 'builder', string $prefix = '',
         throw new \RuntimeException("`{$command}` failed:\n" . tail($process->getOutput() . $process->getErrorOutput()));
     }
 
-    return $process->getOutput();
+    // The notes of the console (Nothing to update…) are on the error output
+    return $process->getOutput() . $process->getErrorOutput();
 }
 
 function in_builder(string $command, bool $quiet = false): Process
@@ -945,7 +974,7 @@ function compose(array $command): string
  */
 function sql(string $sql): string
 {
-    return trim(docker_compose(['exec', '-T', 'mariadb', 'mariadb', '-N', '-B', 'db_fr_lairdubois_www'], c: stack()->withQuiet()->withInput($sql), profiles: ['*'])->getOutput());
+    return trim(docker_compose(['exec', '-T', 'mariadb', 'mariadb', '--skip-column-names', '--batch', '--raw', 'db_fr_lairdubois_www'], c: stack()->withQuiet()->withInput($sql), profiles: ['*'])->getOutput());
 }
 
 function count_spool(): int
@@ -996,6 +1025,11 @@ function installation_has(string $command): void
     if (!str_contains(installation(), $command)) {
         throw new \LogicException("The installation (" . INSTALLATION . ") does not have the command `{$command}`: keep .castor/rehearsal.php in sync with it.");
     }
+}
+
+function tree_head(): string
+{
+    return trim(run(['git', 'rev-parse', 'HEAD'], context: context()->withWorkingDirectory(tree_dir())->withQuiet())->getOutput());
 }
 
 function stack(): Context
@@ -1223,9 +1257,8 @@ final class Report
             $durations = [];
             foreach ($records as $record) {
                 $results[] = $record['ok'] ? $record['kind'] : "ÉCHEC ({$record['kind']}) : " . mb_strimwidth(strtok($record['message'], "\n"), 0, 90, '…');
-                if (str_starts_with($record['kind'], 'jouée')) {
-                    $durations[] = format_duration($record['seconds']);
-                }
+                // In a throwaway container, the downloads of apt and curl count
+                $durations[] = format_duration($record['seconds']) . (str_starts_with($record['kind'], 'jouée') ? '' : ' (' . substr($record['kind'], \strlen('vérifiée autrement ('), -1) . ')');
             }
             $rows[] = ["{$key}. {$title}", implode(' ; ', array_unique($results)), implode(' + ', $durations)];
         }
