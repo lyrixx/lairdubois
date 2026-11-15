@@ -50,11 +50,15 @@ l'expliquent.
 ### Durée de la coupure
 
 Tout ce qui peut se faire site ouvert est dans la phase 1, les jours d'avant. La coupure va de
-l'étape 18 à l'étape 41. Dans la répétition (fixtures, une machine de développement), elle prend
-DUREE_COUPURE, dont DUREE_COMPOSER de `composer install` et DUREE_NPM pour le CSS et le JS. Sur le
-serveur, deux étapes dépendent du volume :
+l'étape 18 à l'étape 41. Dans la répétition (fixtures, une machine de développement), ses
+commandes prennent 1 min 30 s en tout, dont 10 s pour `composer install`, 8 s pour le CSS et le JS
+et 40 s pour installer et démarrer Elasticsearch 9 : le reste de la coupure est le temps de copier
+les commandes et de lire les vérifications, une demi-heure environ. Sur le serveur, trois étapes
+dépendent du volume :
 
-- le spool (étape 20), selon le nombre de mails en attente ;
+- le spool (étape 20), selon le nombre de mails en attente : le vider site ouvert juste avant
+  (même commande), pour qu'il n'en reste que quelques-uns ;
+- les téléchargements de `composer install` et `npm ci` (étapes 32 et 33), selon le réseau ;
 - la reconstruction de l'index (étape 38) : 89 s pour 210 000 documents sur une machine de
   24 cœurs (jeu de volume de #282), à multiplier selon le nombre de contenus de la prod (étape 2)
   et les cœurs du serveur. Tant qu'elle tourne, la recherche et les listes ne marchent pas : elle
@@ -338,7 +342,7 @@ connecte un compte par le formulaire et écrit sa session. (#19, #21, #178, #240
 
 Les réglages du pool et du `php.ini` de l'ancien PHP, repris pour la 8.5, plus ceux d'OPcache des
 images Docker (le code livré a plus de fichiers que les 10 000 par défaut). PHP-FPM 8.5 a son
-propre socket : rien ne passe par lui avant l'étape 37.
+propre socket : rien ne passe par lui avant la réouverture (étape 41).
 
 ```bash
 ( echo '[www]'; grep -E '^pm(\.[a-z_]+)? *=' /etc/php/7.3/fpm/pool.d/www.conf ) | sudo tee /etc/php/8.5/fpm/pool.d/zz-lairdubois.conf
@@ -576,8 +580,7 @@ sudo --user=www-data bin/console --env=prod swiftmailer:spool:send --recover-tim
 `--recover-timeout=0` renvoie aussi les mails qu'un envoi interrompu a laissés en `.sending`.
 
 Vérification : `find app/spool -type f | wc -l` affiche `0`. Sinon : relancer la commande. Durée :
-DUREE_20 pour DUREE_20_MAILS mails. Répétition : jouée, les mails arrivent dans Mailpit. (#19,
-#180)
+4 s pour 3 mails. Répétition : jouée, les mails arrivent dans Mailpit. (#19, #180)
 
 ### 21. Laisser les anciens consumers vider leurs files
 
@@ -643,7 +646,7 @@ sudo apt-get install ~/ladb-backup/elasticsearch-9.5.5-amd64.deb
 ```
 
 Vérification : `/usr/share/elasticsearch/bin/elasticsearch --version` affiche `Version: 9.5.5`. Le
-paquet a son propre Java. Durée : DUREE_26 (conteneur Debian 13). Répétition : vérifiée autrement
+paquet a son propre Java. Durée : 14 s (conteneur Debian 13). Répétition : vérifiée autrement
 (conteneur Debian 13). (#31, #161, #204)
 
 ### 27. Elasticsearch 9 : le configurer
@@ -684,7 +687,7 @@ sudo systemctl enable --now elasticsearch
 
 Vérification : `curl -s http://127.0.0.1:9200 | grep '"number"'` affiche `"number" : "9.5.5"`,
 sans demander de mot de passe. Sinon : `sudo journalctl -u elasticsearch` et
-`/var/log/elasticsearch/elasticsearch.log`. Durée : DUREE_28 (conteneur Debian 13). Répétition :
+`/var/log/elasticsearch/elasticsearch.log`. Durée : 21 s (conteneur Debian 13). Répétition :
 vérifiée autrement (conteneur Debian 13 : Elasticsearch 9 démarre avec cette configuration et
 répond sans mot de passe ; dans la répétition, c'est le conteneur `elasticsearch` en 9). (#204)
 
@@ -735,7 +738,7 @@ sudo --user=www-data env SYMFONY_ENV=prod composer install --no-dev --optimize-a
 
 Vérification : la commande finit sans erreur, et
 `grep -c -E '^\s+(mailer_host|websocket_uri|ga_tracking_id|node):' app/config/parameters.yml`
-affiche `0`. Durée : DUREE_COMPOSER. Répétition : jouée ; aussi dans un conteneur Debian 13, en
+affiche `0`. Durée : 10 s. Répétition : jouée ; aussi dans un conteneur Debian 13, en
 www-data avec un `/var/www` à root, sur une copie du code livré. (#101, #190)
 
 ### 33. CSS et JS
@@ -746,7 +749,7 @@ sudo --user=www-data env npm_config_cache=var/npm npx vite build
 ```
 
 Vérification : `ls web/build/manifest.json web/build/entrypoints.json` liste les deux fichiers.
-Sans eux, toutes les pages répondent 500. Durée : DUREE_NPM. Répétition : jouée ; aussi dans un
+Sans eux, toutes les pages répondent 500. Durée : 8 s. Répétition : jouée ; aussi dans un
 conteneur Debian 13, comme l'étape 32. (#17, #112)
 
 ### 34. Cache
@@ -799,7 +802,7 @@ sudo --user=www-data bin/console --env=prod doctrine:schema:update --dump-sql
 ```
 
 `Up-to-date!`, puis `54` et `3` (les 51 de la 3.4 gardent leur ligne, aucune n'est rejouée), puis
-`Nothing to update`. Sinon : ne pas rouvrir, envoyer la sortie. Durée : DUREE_36. Répétition :
+`Nothing to update`. Sinon : ne pas rouvrir, envoyer la sortie. Durée : 5 s. Répétition :
 jouée, sur la `migration_versions` de doctrine/migrations 1.8 avec ses 51 lignes. (#149, #190,
 #200)
 
@@ -822,7 +825,7 @@ sudo --user=www-data bin/console --env=prod fos:elastica:populate
 
 Tant qu'elle tourne, les listes et la recherche sont vides ou en erreur. Vérification :
 `curl -s 'http://127.0.0.1:9200/_cat/indices?v'` liste les index `ladb_…`, avec leurs documents.
-Durée : DUREE_38 sur les fixtures ; voir « Durée de la coupure » pour la prod. Répétition : jouée.
+Durée : 6 s sur les fixtures ; voir « Durée de la coupure » pour la prod. Répétition : jouée.
 (#31, #204)
 
 ### 39. Workers
@@ -905,13 +908,14 @@ sudo rabbitmqctl delete_queue view_queue
 sudo rabbitmqctl delete_queue webpush_notification_queue
 ```
 
-Les échanges se suppriment par l'API de management. D'abord vérifier que le plugin est actif :
+Les échanges se suppriment par l'API de management. D'abord vérifier que son plugin est actif :
 
 ```bash
-sudo rabbitmq-plugins list -e
+sudo rabbitmq-plugins list '^rabbitmq_management$'
 ```
 
-Sinon : `sudo rabbitmq-plugins enable rabbitmq_management`. Puis, avec un compte qui a le tag
+`[E*] rabbitmq_management` : il l'est. `[  ] rabbitmq_management` : l'activer,
+`sudo rabbitmq-plugins enable rabbitmq_management`. Puis, avec un compte qui a le tag
 `administrator` (`sudo rabbitmqctl list_users`) :
 
 ```bash

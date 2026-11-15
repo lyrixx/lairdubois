@@ -103,7 +103,7 @@ function server_checks(Report $r, string $debian): void
         $test = server_run($c, "sudo php-fpm8.5 -tt 2>&1 | grep -E 'pm.max_children|test is successful'");
         expect(str_contains($test, 'pm.max_children = 100') && str_contains($test, 'test is successful'), "php-fpm8.5 -tt:\n{$test}");
         $ini = in_container($c, "php-fpm8.5 -i | grep -E '^(upload_max_filesize|cgi.fix_pathinfo|opcache.max_accelerated_files|date.timezone) '");
-        foreach (['upload_max_filesize => 60M', 'cgi.fix_pathinfo => 0', 'opcache.max_accelerated_files => 20000', 'date.timezone => Europe/Paris'] as $expected) {
+        foreach (['upload_max_filesize => 60M', 'cgi.fix_pathinfo => Off', 'opcache.max_accelerated_files => 20000', 'date.timezone => Europe/Paris'] as $expected) {
             expect(str_contains($ini, $expected), "PHP-FPM 8.5 has not {$expected}:\n{$ini}");
         }
     });

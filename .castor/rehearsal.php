@@ -481,8 +481,8 @@ function part_after(Report $r): void
     $r->step('Anciennes files et échanges de RabbitMQ', static function (): void {
         play('sudo rabbitmqctl delete_queue view_queue', 'rabbitmq');
         play('sudo rabbitmqctl delete_queue webpush_notification_queue', 'rabbitmq');
-        $plugins = play('sudo rabbitmq-plugins list -e', 'rabbitmq');
-        if (!str_contains($plugins, 'rabbitmq_management')) {
+        $plugins = play("sudo rabbitmq-plugins list '^rabbitmq_management\$'", 'rabbitmq');
+        if (!preg_match('{\[E\*\] rabbitmq_management\b}', $plugins)) {
             play('sudo rabbitmq-plugins enable rabbitmq_management', 'rabbitmq');
             wait_for(static fn () => in_builder('curl -s -o /dev/null -w "%{http_code}" -u app:app http://rabbitmq:15672/api/overview', quiet: true)->getOutput() === '200', 'The API of management does not answer.');
         }

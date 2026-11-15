@@ -215,19 +215,23 @@ Le guide est `docs/04-delivery.md`, en français, pour Boris : les prérequis, p
 (avant la livraison site ouvert, la coupure, après) et le retour arrière. Chaque étape : la
 commande à copier, sa vérification, quoi faire sinon, et ce que la répétition en fait.
 `castor qa:delivery-rehearsal` (`.castor/rehearsal.php`, `rehearsal_server.php`) le rejoue, à la
-main, hors CI : DUREE_REPETITION et RAM_REPETITION au pic.
+main, hors CI : 14 min avec les images dans le cache de Docker (une vingtaine la première fois),
+2,5 Go de RAM au pic.
 
 ```bash
 castor qa:delivery-rehearsal [--keep]         # tout, puis le tableau des étapes (var/delivery-rehearsal/report.md)
 castor qa:delivery-rehearsal --to=server      # seulement les conteneurs Debian jetables
-castor qa:delivery-rehearsal --from=after     # reprend à une partie, sur la stack gardée (--keep, --to, ou un échec)
+castor qa:delivery-rehearsal --from=deploy    # reprend à une partie, sur la stack gardée (--keep, --to, ou un échec)
+castor qa:delivery-rehearsal --mariadb=10.11  # la MariaDB de Debian 12 (11.8, celle de Debian 13, par défaut)
 castor qa:delivery-rehearsal-destroy          # stack, copie en 3.4 et conteneurs jetables
 ```
 
-- Parties : `server` (conteneurs jetables), `setup` (copie en 3.4 et ses données), `before`,
-  `during`, `rollback` (de R2 à R6, juste avant la réouverture), `redeploy` (le code livré à
+- Parties : `server` (conteneurs jetables), `setup` (copie en 3.4 et ses données), `before`
+  (phase 1), `during` (phase 2 jusqu'au déploiement), `deploy` (du déploiement aux crons, puis
+  une connexion avant la réouverture), `rollback` (de R2 à R6), `redeploy` (le code livré à
   nouveau, sur la base déjà migrée), `after` (les vérifications sur les données migrées). Une
-  étape en échec arrête la répétition et garde la stack, sauf dans `server` et `after`.
+  étape en échec arrête la répétition, sauf dans `server` et `after` ; après un échec, la stack
+  reste, et `--from` reprend à une partie (`deploy` se rejoue sur lui-même).
 - Copie en 3.4 : un worktree git de la copie qui répète (`var/delivery-rehearsal/delivery-rehearsal-<copie>`,
   `main` pour la copie principale), donc son projet Compose (`lairdubois-wt-delivery-rehearsal-<copie>`)
   et ses ports, au commit 479b63ed, le dernier en 3.4 avant 552ee45f. Il a les mêmes versions que
