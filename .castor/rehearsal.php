@@ -762,8 +762,10 @@ function create_copy(): void
     expect(basename($tree) === get_worktree_name($tree), 'git named the worktree ' . get_worktree_name($tree) . ': castor qa:delivery-rehearsal-destroy.');
     fs()->mkdir(backup_dir(), 0o777);
     fs()->dumpFile($tree . '/var/ladb-backup.my.cnf', "[client]\nuser=root\npassword=app\n");
-    // /etc/rabbitmq/rabbitmq.conf of the server, empty as on Debian (step 17 adds to it)
+    // /etc/rabbitmq/rabbitmq.conf of the server, empty as on Debian (step 17 adds to it): writable
+    // by the user of the commands in the container of RabbitMQ
     fs()->dumpFile($tree . '/var/rabbitmq.conf', '');
+    fs()->chmod($tree . '/var/rabbitmq.conf', 0o666);
     write_override(delivered: false);
 }
 
