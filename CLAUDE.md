@@ -250,9 +250,11 @@ castor qa:delivery-rehearsal-destroy          # stack, copie en 3.4 et conteneur
 - Étape 20 (les migrations sur une copie de la base) : une base `db_fr_lairdubois_www_livraison`
   restaurée depuis `db.sql.gz`, et le code livré dans `/var/www/ladb-livraison` du builder (le
   dossier `ladb-livraison` de la copie en 3.4, par `git archive` du commit livré), installé par
-  son propre composer : `php8.5` est un lien vers le PHP du builder, et les variables de l'env-map
-  du code livré sont retirées (son `DATABASE_NAME` mènerait la copie à la base de la 3.4). Puis la
-  base de la 3.4 n'a pas changé (51 lignes de `migration_versions` au format 1.8, tables gardées).
+  son propre composer : `php8.5` est un lien vers le PHP du builder, les variables de l'env-map
+  du code livré sont retirées (son `DATABASE_NAME` mènerait la copie à la base de la 3.4), et
+  `--ignore-platform-req=ext-amqp` s'ajoute à la commande (le builder de la 3.4 n'a pas
+  l'extension `amqp`, qu'a le serveur, P2, et dont les migrations ne se servent pas). Puis la base
+  de la 3.4 n'a pas changé (51 lignes de `migration_versions` au format 1.8, tables gardées).
 - Retour arrière (R6) : `migration_versions` remise depuis `db-migrations.sql.gz` (la 3.4 compte
   alors 51 migrations jouées, 0 inconnue, 0 nouvelle) ; le second déploiement rejoue donc les
   quatre migrations de la livraison, sur les tables que R6 a remises.
@@ -272,7 +274,10 @@ castor qa:delivery-rehearsal-destroy          # stack, copie en 3.4 et conteneur
   RabbitMQ, ceux de Debian 13 (11.8 et 4.0, au lieu des 10.11 et 3.13 du dev), dès la 3.4.
   `/etc/rabbitmq/rabbitmq.conf` est le fichier `var/rabbitmq.conf` de la copie : le
   `consumer_timeout` de l'étape 17 (que la répétition pose toujours) reste quand Compose recrée
-  le conteneur, et l'étape 25 redémarre RabbitMQ.
+  le conteneur, et l'étape 25 redémarre RabbitMQ. Il est donné à `rabbitmq` dans le conteneur :
+  `/etc/rabbitmq` est un dossier ouvert à tous avec le sticky bit, où le noyau refuse à root
+  d'écrire dans le fichier d'un autre (`fs.protected_regular`). Les étapes 11, 17 et 20 se
+  rejouent avec `--from` ; le tableau garde aussi les résultats des passages précédents.
 - Conteneurs jetables (`<projet>-check-*`, Debian 13 et 12, supprimés à la fin) : PHP 8.5 de Sury
   à côté de PHP 7.3 (l'alternative `php`, le pool et le `php.ini` repris), Composer, Node 24,
   Chromium et les optimiseurs, le vhost et la page de maintenance de `master` modifiés par le guide
