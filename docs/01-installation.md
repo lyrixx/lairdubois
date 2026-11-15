@@ -2,7 +2,7 @@ Setting up L'Air du Bois
 ========================
 
 The following installation instruction suppose that your server is running under a Linux Operating System.
-To write this documentation the [Debian 10 "Buster"](https://www.debian.org) distribution is used.
+To write this documentation the [Debian 13 "Trixie"](https://www.debian.org) distribution is used (Debian 12 "Bookworm" works too).
 Else you need to adapt it to your configuration.
 
 ## Step 0 - Install required softwares
@@ -22,7 +22,7 @@ L'Air du Bois uses some important tools you need to install first.
 ```
 
 ``` bash
-    $ sudo mysql_secure_installation
+    $ sudo mariadb-secure-installation
 ```
 
 ### Install [Ningx](https://nginx.org/) - *The webserver*
@@ -53,65 +53,77 @@ Be sure you activate the following parameters (by uncomment or replace) :
 
 ```
 
-### Install [PHP](http://www.php.net/) - *The scripting language*
+### Install [PHP](http://www.php.net/) 8.5 - *The scripting language*
+
+PHP 8.5 comes from the repository of [Ondřej Surý](https://deb.sury.org/), the one of Debian is older.
 
 ``` bash
-    $ sudo apt-get install php7.3 php7.3-cli php7.3-curl php7.3-intl php7.3-gd php7.3-imagick php7.3-mysql php7.3-fpm php7.3-mbstring php7.3-xml php7.3-zip php7.3-bz2 php7.3-gmp php7.3-bcmath php7.3-amqp
+    $ sudo apt-get install ca-certificates curl
+    $ curl -sSLo ~/debsuryorg-archive-keyring.deb https://packages.sury.org/debsuryorg-archive-keyring.deb
+    $ sudo dpkg -i ~/debsuryorg-archive-keyring.deb
+    $ echo "deb [signed-by=/usr/share/keyrings/deb.sury.org-php.gpg] https://packages.sury.org/php/ $(. /etc/os-release && echo "$VERSION_CODENAME") main" | sudo tee /etc/apt/sources.list.d/php.list
+    $ sudo apt-get update
 ```
-
-You can now configure PHP.
 
 ``` bash
-    $ sudo nano /etc/php/7.3/fpm/php.ini
+    $ sudo apt-get install php8.5-cli php8.5-fpm php8.5-amqp php8.5-bcmath php8.5-bz2 php8.5-curl php8.5-gd php8.5-gmp php8.5-imagick php8.5-intl php8.5-mbstring php8.5-memcached php8.5-mysql php8.5-xml php8.5-zip
 ```
 
-Be sure you activate the following parameters (by uncomment or replace) :
+*⚠️&nbsp;️&nbsp;Note : With another PHP already installed, `php8.5-cli` makes `php` (`update-alternatives --display php`) point to PHP 8.5 when its alternative is in `auto` mode. To keep the other one: `sudo update-alternatives --set php /usr/bin/php7.3`.*
 
+You can now configure PHP, in a file of its own: the `php.ini` of the package stays as it is.
+
+``` bash
+    $ sudo nano /etc/php/8.5/fpm/conf.d/90-lairdubois.ini
 ```
-    # /etc/php/7.3/fpm/php.ini
 
-    date.timezone = Europe/Paris
-    upload_max_filesize = 60M
-    post_max_size = 60M
-    memory_limit = 256M
-    cgi.fix_pathinfo=0
+``` ini
+date.timezone = Europe/Paris
+upload_max_filesize = 60M
+post_max_size = 60M
+memory_limit = 256M
+cgi.fix_pathinfo = 0
+; The code and its dependencies have more files than the 10000 of the default
+opcache.memory_consumption = 256
+opcache.max_accelerated_files = 20000
+```
 
+And the time zone of the command line (the crons and the workers):
+
+``` bash
+    $ echo 'date.timezone = Europe/Paris' | sudo tee /etc/php/8.5/cli/conf.d/90-lairdubois.ini
 ```
 
 Now configure the process management. You need to adapt this to the available RAM on your server.
 
 ``` bash
-    $ sudo nano /etc/php/7.3/fpm/pool.d/www.conf
+    $ sudo nano /etc/php/8.5/fpm/pool.d/zz-lairdubois.conf
 ```
 
-```
-# /etc/php/7.3/fpm/pool.d/www.conf
-
+``` ini
+; The settings of the pool "www" of /etc/php/8.5/fpm/pool.d/www.conf that change
+[www]
 pm = dynamic
-pm.max_children = 100       # The hard-limit total number of processes allowed
-pm.start_servers = 20       # When php-fpm starts, have this many processes waiting for requests
-pm.min_spare_servers = 10   # Number spare processes php-fpm will create
-pm.max_spare_servers = 20   # Max number of spare (waiting for connections) processes allowed to be created
-
+; The hard-limit total number of processes allowed
+pm.max_children = 100
+; When php-fpm starts, have this many processes waiting for requests
+pm.start_servers = 20
+; Number spare processes php-fpm will create
+pm.min_spare_servers = 10
+; Max number of spare (waiting for connections) processes allowed to be created
+pm.max_spare_servers = 20
 ```
 
 Restart PHP FPM.
 
 ``` bash
-    $ sudo systemctl restart php7.3-fpm
+    $ sudo systemctl restart php8.5-fpm
 ```
 
 ### Install [Memcached](https://memcached.org/) - *The distributed memory object caching system*
 
 ``` bash
     $ sudo apt-get install memcached
-    $ sudo apt-get install php-memcached
-```
-
-Restart PHP FPM.
-
-``` bash
-    $ sudo systemctl restart php7.3-fpm
 ```
 
 ### Install [Git](https://git-scm.com/) - *The version control system*
@@ -141,17 +153,7 @@ Neither Less nor Java is needed any more for the assets: Less comes with the Nod
 
 The package comes with its own Java.
 
-*⚠️&nbsp;️&nbsp;Note : Upgrading from Elasticsearch 5.6, Elasticsearch 9 does not read its data. Stop it, put its data and its configuration aside (the indexes are built again from the database, step 11), then remove it and its repository, for a fresh install of 9 :*
-
-``` bash
-    $ sudo systemctl stop elasticsearch
-    $ sudo mv /var/lib/elasticsearch /var/lib/elasticsearch-5.6
-    $ sudo cp -a /etc/elasticsearch /etc/elasticsearch-5.6
-    $ sudo apt-get purge elasticsearch
-    $ sudo rm /etc/apt/sources.list.d/elastic-5.x.list
-```
-
-*To go back to 5.6 : stop Elasticsearch 9, reinstall 5.6 from its repository, put back `/var/lib/elasticsearch-5.6` and `/etc/elasticsearch-5.6`, deploy the previous code.*
+*⚠️&nbsp;️&nbsp;Note : Upgrading from Elasticsearch 5.6 (the server of the site in Symfony 3.4), follow [the delivery guide](04-delivery.md): Elasticsearch 9 does not read the data of 5.6.*
 
 ``` bash
     $ wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo gpg --dearmor -o /usr/share/keyrings/elasticsearch-keyring.gpg
@@ -163,7 +165,7 @@ The package comes with its own Java.
     $ sudo apt-get install elasticsearch
 ```
 
-The package turns on the security (TLS, password of the `elastic` user) and listens on every interface. The site connects without TLS nor password (`elasticsearch_host` and `elasticsearch_port` of `parameters.yml`), as with 5.6 : in `/etc/elasticsearch/elasticsearch.yml`, replace the block between `# BEGIN SECURITY AUTO CONFIGURATION` and `# END SECURITY AUTO CONFIGURATION` by :
+The package turns on the security (TLS, password of the `elastic` user) and listens on every interface. The site connects without TLS nor password (`elasticsearch_host` and `elasticsearch_port` of `parameters.yml`), as with 5.6 : in `/etc/elasticsearch/elasticsearch.yml`, replace the block between the lines `#----------------------- BEGIN SECURITY AUTO CONFIGURATION -----------------------` and `#----------------------- END SECURITY AUTO CONFIGURATION -------------------------` by :
 
 ``` yaml
 # Only the site, on this server: no TLS nor password
@@ -172,6 +174,12 @@ discovery.type: single-node
 xpack.security.enabled: false
 # No download of the GeoIP databases of the ingest pipelines, which the site does not use
 ingest.geoip.downloader.enabled: false
+```
+
+The package also put the passwords of its certificates in the keystore: as long as they are there, Elasticsearch does not start without TLS (`invalid configuration for xpack.security.transport.ssl`). Remove them:
+
+``` bash
+    $ sudo /usr/share/elasticsearch/bin/elasticsearch-keystore remove xpack.security.http.ssl.keystore.secure_password xpack.security.transport.ssl.keystore.secure_password xpack.security.transport.ssl.truststore.secure_password
 ```
 
 Fix the size of the heap, by default computed from the memory of the server (up to half of it), in `/etc/elasticsearch/jvm.options.d/heap.options` (the one of 5.6 is in `/etc/elasticsearch-5.6/jvm.options`) :
@@ -205,10 +213,8 @@ If you want to monitor RabbitMQ, enable the management plugin
 The hub is a single binary (a build of [Caddy](https://caddyserver.com/)), with its `Caddyfile`. Version 1.x: the protocol of Mercure 1.0, that `symfony/mercure-bundle` 0.6 speaks.
 
 ``` bash
-    $ cd /tmp
-    $ wget https://github.com/dunglas/mercure/releases/download/v1.1.5/mercure_Linux_x86_64.tar.gz
-    $ sudo mkdir /opt/mercure
-    $ sudo tar -xzf mercure_Linux_x86_64.tar.gz -C /opt/mercure mercure Caddyfile
+    $ sudo mkdir -p /opt/mercure
+    $ curl -fsSL https://github.com/dunglas/mercure/releases/download/v1.1.5/mercure_Linux_x86_64.tar.gz | sudo tar -xz -C /opt/mercure mercure Caddyfile
 ```
 
 Generate a random secret: the site signs with it the JWT of its updates and of the subscriptions of its workspaces. The same value goes in the `mercure_jwt_secret` parameter (Step 4).
@@ -250,7 +256,7 @@ XDG_CONFIG_HOME=/var/lib/ladb_mercure
 ``` bash
     $ sudo apt-get install imagemagick
 ```
-Allow ImageMagick to read PDFs : Depending ImageMagick versions, the default configuration may block access to PDFs. Open config file /etc/ImageMagick-6/policy.xml and if you find uncommented line :
+Allow ImageMagick to read PDFs : the policy of Debian 13 (`/etc/ImageMagick-7/policy.xml`) does not block them. With an older one (`/etc/ImageMagick-6/policy.xml` on Debian 12), if you find this uncommented line :
 ```
     <policy domain="coder" rights="none" pattern="PDF" />
 ```
@@ -260,9 +266,8 @@ So you must change it :
     <policy domain="coder" rights="read" pattern="PDF" />
 ```
 and restart php-fpm:
-```
-    bash
-    $ sudo systemctl restart php7.3-fpm
+``` bash
+    $ sudo systemctl restart php8.5-fpm
 ```
 
 ### Install [pngquant](https://pngquant.org/) and [jpegoptim](https://github.com/tjko/jpegoptim) - *The image optimizers*
@@ -303,9 +308,11 @@ alias ladb-maintenance-start='sudo scripts/maintenanceStart.sh'
 alias ladb-maintenance-stop='sudo scripts/maintenanceStop.sh'
 alias ladb-git-pull-master='sudo --user=www-data git pull origin master'
 alias ladb-log='sudo --user=www-data lnav var/logs/prod.log'
-alias ladb-install='sudo --user=www-data composer install'
-alias ladb-assets='sudo --user=www-data npm ci --no-audit --no-fund && sudo --user=www-data npx vite build'
+alias ladb-install='sudo --user=www-data env SYMFONY_ENV=prod composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-req=php+'
+alias ladb-assets='sudo --user=www-data env npm_config_cache=var/npm npm ci --no-audit --no-fund && sudo --user=www-data env npm_config_cache=var/npm npx vite build'
 ```
+
+`--ignore-platform-req=php+`: some dependencies (`facebook/graph-sdk`, `spomky-labs/base64url`) only declare PHP 7, and Composer refuses them in PHP 8.5 otherwise. `--no-dev` and `SYMFONY_ENV=prod`: no development packages (fixtures, profiler) on the **PROD** server, and the scripts of Composer (`cache:clear`, `assets:install`) in prod.
 
 > If you are on the **DEV** server :
 
@@ -315,8 +322,8 @@ alias ladb-cc='sudo --user=www-data bin/console --env=dev cache:clear --no-warmu
 alias ladb-git='sudo --user=www-data git'
 alias ladb-git-pull-master='sudo --user=www-data git pull origin master'
 alias ladb-log='sudo --user=www-data lnav var/logs/dev.log'
-alias ladb-install='sudo --user=www-data composer install'
-alias ladb-assets='sudo --user=www-data npm ci --no-audit --no-fund && sudo --user=www-data npx vite build'
+alias ladb-install='sudo --user=www-data composer install --ignore-platform-req=php+'
+alias ladb-assets='sudo --user=www-data env npm_config_cache=var/npm npm ci --no-audit --no-fund && sudo --user=www-data env npm_config_cache=var/npm npx vite build'
 ```
 
 Now you are ready to setup the website itself !
@@ -383,7 +390,7 @@ Now you are ready to configure Nginx to access to the webroot directory.
 First you need to install certbot.
 
 ``` bash
-    $ sudo apt-get install certbot python-certbot-nginx
+    $ sudo apt-get install certbot python3-certbot-nginx
     $ sudo mkdir -p /var/www/.well-known/acme-challenge
 ```
 
@@ -467,7 +474,7 @@ Set `database_server_version` in `app/config/parameters.yml` first (the result o
 Execute the SQL script located at [`docs/database/schema-sessions.sql`](database/schema-sessions.sql).
 
 ``` bash
-    $ sudo mysql db_fr_lairdubois_www < docs/database/schema-sessions.sql
+    $ sudo mariadb db_fr_lairdubois_www < docs/database/schema-sessions.sql
 ```
 
 ## Step 9 - Compile and Minimize CSS and JS
@@ -508,7 +515,7 @@ This step will create the initial Elasticsearch index.
     $ ladb fos:elastica:populate
 ```
 
-*⚠️&nbsp;️&nbsp;Note : Upgrading from Elasticsearch 5.6, run it during the maintenance, after the deployment of the code : until it ends, the lists and the search are empty or fail (no index yet).*
+*⚠️&nbsp;️&nbsp;Note : Upgrading from Elasticsearch 5.6, see [the delivery guide](04-delivery.md) : until it ends, the lists and the search are empty or fail (no index yet).*
 
 ## Step 12 - Create a first admin user
 
