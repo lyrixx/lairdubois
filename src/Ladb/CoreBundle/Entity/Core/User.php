@@ -26,7 +26,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 #[ORM\Table('tbl_core_user')]
 #[ORM\Entity(repositoryClass: \Ladb\CoreBundle\Repository\Core\UserRepository::class)]
 #[ORM\HasLifecycleCallbacks]
-class User implements UserInterface, LegacyPasswordAuthenticatedUserInterface, EquatableInterface, \Serializable, IndexableInterface, SitemapableInterface, LocalisableInterface {
+class User implements UserInterface, LegacyPasswordAuthenticatedUserInterface, EquatableInterface, IndexableInterface, SitemapableInterface, LocalisableInterface {
 
 	use IndexableTrait, SitemapableTrait, LocalisableTrait;
 
@@ -174,9 +174,6 @@ class User implements UserInterface, LegacyPasswordAuthenticatedUserInterface, E
 		);
 	}
 
-	/**
-	 * The roles are unknown in a session of FOSUserBundle (before #24): the 8 first values only.
-	 */
 	public function __unserialize(array $data): void {
 		list(
 			$this->password,
@@ -186,23 +183,9 @@ class User implements UserInterface, LegacyPasswordAuthenticatedUserInterface, E
 			$this->enabled,
 			$this->id,
 			$this->email,
-			$this->emailCanonical
+			$this->emailCanonical,
+			$this->roles
 		) = $data;
-		$this->roles = $data[8] ?? null;
-	}
-
-	/**
-	 * Never called: PHP prefers __serialize().
-	 */
-	public function serialize() {
-		return serialize($this->__serialize());
-	}
-
-	/**
-	 * A user in the "C:" format of \Serializable: the sessions of FOSUserBundle (#24).
-	 */
-	public function unserialize($serialized) {
-		$this->__unserialize(unserialize($serialized));
 	}
 
 	/**
@@ -220,14 +203,10 @@ class User implements UserInterface, LegacyPasswordAuthenticatedUserInterface, E
 		if ($this->salt !== $user->getSalt()) {
 			return false;
 		}
-		// Unknown in a session of FOSUserBundle: compared from its next request on, once the session
-		// holds the reloaded user
-		if (null !== $this->roles) {
-			$roles = $this->getRoles();
-			$userRoles = $user->getRoles();
-			if (count($userRoles) !== count($roles) || count($userRoles) !== count(array_intersect($userRoles, $roles))) {
-				return false;
-			}
+		$roles = $this->getRoles();
+		$userRoles = $user->getRoles();
+		if (count($userRoles) !== count($roles) || count($userRoles) !== count(array_intersect($userRoles, $roles))) {
+			return false;
 		}
 		if ($this->username !== $user->getUsername()) {
 			return false;
