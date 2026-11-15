@@ -10,7 +10,9 @@ parameters:
     # without connecting (doctrine:database:create, before the database exists); null: it connects
     database_server_version:        null
 
-    mailer_dsn:                     smtp://localhost:25
+    # The Postfix of the server, without TLS: Mailer would check its certificate against
+    # "localhost". A % is written %% (an encoded user or password)
+    mailer_dsn:                     smtp://localhost:25?auto_tls=false
 
     elasticsearch_host:             localhost
     elasticsearch_port:             9200

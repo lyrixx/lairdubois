@@ -67,9 +67,14 @@ framework:
     # worker of the schedule at a time ("scheduler" below). The controllers make their own lock
     # factory (AbstractController::createLock()), on the same Memcached
     lock:            'memcached://%memcached_host%:%memcached_port%'
-    # The state of the schedule of the crons: the last run of each, for a worker that starts again
     cache:
         pools:
+            # The state of the limit of the mails (rate_limiter below)
+            cache.limiter_mailer:
+                adapter: cache.adapter.memcached
+                provider: 'memcached://%memcached_host%:%memcached_port%'
+            # The state of the schedule of the crons: the last run of each, for a worker that starts
+            # again
             cache.scheduler_cron:
                 adapter: cache.adapter.memcached
                 provider: 'memcached://%memcached_host%:%memcached_port%'
@@ -88,10 +93,23 @@ framework:
             max_duration: 10
     # Put in the queue "mailer" of RabbitMQ (SendEmailMessage, below), and sent by its worker; sent
     # directly when RabbitMQ does not answer (MailerUtils). Mailer starts TLS when the SMTP server
-    # offers it, and checks its certificate (?verify_peer=0 in mailer_dsn for a self-signed one).
-    # Signed with DKIM when sent, by the worker (DkimSignedMessageListener)
+    # offers it, and checks its certificate against the host of mailer_dsn: ?auto_tls=false for the
+    # Postfix of the server, on localhost (parameters.yml.dist). Signed with DKIM when sent, by the
+    # worker (DkimSignedMessageListener)
     mailer:
         dsn: '%mailer_dsn%'
+    # 100 mails every 2 minutes at most, the throughput of the spool of Swiftmailer before
+    # (swiftmailer:spool:send --message-limit=100, every 2 minutes): the worker of the queue "mailer"
+    # waits for the next window (rate_limiter of its transport, below). Its state and its lock in
+    # Memcached: one limit for all the workers of the queue, on all the servers. A restart of
+    # Memcached starts a new window
+    rate_limiter:
+        mailer:
+            policy: fixed_window
+            limit: 100
+            interval: '2 minutes'
+            cache_pool: cache.limiter_mailer
+            lock_factory: lock.factory
 
     # Four queues in RabbitMQ (the rabbitmq_* parameters), each with its exchange of the same name
     # and its worker: "messenger:consume mailer", "messenger:consume view", "messenger:consume
@@ -120,6 +138,7 @@ framework:
                     queues: { mailer: ~ }
                 # After 1, 3, 9, 27 and 81 minutes: about 2 hours for the SMTP server to come back
                 retry_strategy: { max_retries: 5, delay: 60000, multiplier: 3 }
+                rate_limiter: mailer
             view:
                 dsn: 'amqp://'
                 options:
