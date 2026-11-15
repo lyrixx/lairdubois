@@ -216,11 +216,12 @@ function part_before(Report $r, string $delivered): void
     $r->step('État du code', static function (): void {
         // On the host: the .git of the copy is a path of the host. The files of Docker (.home,
         // certificates) are not on the server; the binaries of Composer in bin/ are, that the
-        // .gitignore of master does not ignore
+        // .gitignore of master does not ignore, as the files of master written below (a
+        // rehearsal taken again with --from)
         guide_has("sudo --user=www-data git status --short | grep -v '^?? bin/'");
         $status = array_filter(
             explode("\n", trim(run(['git', 'status', '--short'], context: context()->withWorkingDirectory(tree_dir())->withQuiet())->getOutput())),
-            static fn (string $line) => '' !== $line && !preg_match('{^\?\? (\.home/|infrastructure/docker/services/router/certs/|bin/)}', $line),
+            static fn (string $line) => '' !== $line && !preg_match('{^\?\? (\.home/|infrastructure/docker/services/router/certs/|bin/|web/css/|web/js/|components/)}', $line),
         );
         expect([] === $status, "The copy has changes:\n" . implode("\n", $status));
         guide_has('sudo --user=www-data git log -1 --format=%H');
