@@ -8,9 +8,9 @@ use Ladb\CoreBundle\Manager\Core\UserManager;
 use Tests\WebTestCase;
 
 /**
- * The plain password is erased once hashed (UserManager), and never written in the session: neither
- * __serialize() nor serialize() of User write it (#222). Symfony no longer erases it after the
- * authentication (User::eraseCredentials(), deprecated in 7.3, removed in 8.0).
+ * The plain password is erased once hashed (UserManager), and never written in the session:
+ * __serialize() of User leaves it out (#222). Symfony no longer erases it after the authentication
+ * (User::eraseCredentials(), deprecated in 7.3, removed in 8.0).
  */
 final class PlainPasswordTest extends WebTestCase
 {
@@ -35,7 +35,6 @@ final class PlainPasswordTest extends WebTestCase
         $user->setPlainPassword(self::PASSWORD);
 
         self::assertStringNotContainsString(self::PASSWORD, serialize($user));
-        self::assertStringNotContainsString(self::PASSWORD, $user->serialize());
         self::assertStringContainsString('hash', serialize($user));
     }
 

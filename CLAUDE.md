@@ -704,10 +704,11 @@ Tests fonctionnels (`WebTestCase`, PHPUnit 9.6) dans `tests/`, un dossier par fe
 - Logs de test au niveau `notice` (`var/logs/test.log`) : le niveau `debug` du dev écrit 200 Mo
   par passage du smoke test.
 - Comptes et profils (`tests/User/`) : connexion par le vrai formulaire (`form[action$="/login_check"]`),
-  dont un compte au hash sha512 de FOSUserBundle écrit tel quel en base, rehashé à sa connexion, et
-  des sessions ouvertes en 4.4, avant et après #24, au token sérialisé en dur (`LoginTest`). Le
-  stockage des sessions de test (`tests.session.storage.factory` de `config_test.yml`, en fichiers)
-  prend le nom du cookie de `config.yml`, `MOCKSESSID` sinon (#301).
+  dont un compte au hash sha512 de FOSUserBundle écrit tel quel en base, rehashé à sa connexion ;
+  un cookie remember_me au format de la 3.4, refusé et supprimé, et une session sous l'ancien nom
+  du cookie (`PHPSESSID`), anonyme (`LoginTest`). Le stockage des sessions de test
+  (`tests.session.storage.factory` de `config_test.yml`, en fichiers) prend le nom du cookie de
+  `config.yml`, `MOCKSESSID` sinon (#301).
 - Mails : `static::getSentEmails($client)` (après `$client->enableProfiler()`) et
   `static::getEmailRecipients($message)` (l'en-tête `To`). Ils lisent les `Email` que Mailer met dans
   la file `mailer` (`isQueued()` de `mailer.message_logger_listener`), sans signature. Rien ne part
@@ -907,12 +908,12 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   nom d'utilisateur ou e-mail), `Security\UserChecker` (compte désactivé refusé à la connexion),
   `Event\LastLoginListener`, `Manager\Core\UserManager` (canonisation, hash du mot de passe). Une
   session est déconnectée quand `User::isEqualTo()` voit changer le mot de passe, le sel, les rôles,
-  le nom ou `enabled` : ce que comparait `hasUserChanged()` de 4.4. Les sessions ouvertes avant #24
-  ont un `User` sérialisé par FOSUserBundle (format `C:` de `\Serializable`, sans les rôles) :
-  `User::unserialize()` les lit, et `isEqualTo()` ne compare pas leurs rôles. La livraison les
-  ferme toutes (nouveau nom du cookie, #301). Authenticator manager depuis #177 : un anonyme n'a
-  plus de token (`null`), et le cookie remember_me est reposé à chaque reconnexion automatique (un
-  an après la dernière visite).
+  le nom ou `enabled` : ce que comparait `hasUserChanged()` de 4.4. Le `User` du token est écrit en
+  session par `__serialize()`, rôles compris, et relu par `__unserialize()`. Le site ne lit que ses
+  propres sessions (`LADBSESSID`, #301) : pas de `\Serializable`, le format `C:` du token de la 3.4
+  n'est jamais relu. Authenticator manager depuis #177 : un anonyme n'a pas de token (`null`), et
+  le cookie remember_me est reposé à chaque reconnexion automatique (un an après la dernière
+  visite).
 - Mot de passe en clair (`plainPassword`, hors mapping, #222) : `UserManager` l'efface dès qu'il l'a
   haché, et `__serialize()` (que `serialize()` appelle) ne l'écrit pas, ni en session ni ailleurs :
   un formulaire de changement de mot de passe refusé le laisse sur le compte du token, que la
@@ -921,14 +922,12 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   (#30) : il n'y avait plus rien à effacer après une connexion, l'inscription et le nouveau mot de
   passe hachent avant `LoginUtils`. Pas de `security.erase_credentials`, que la 8.1 déprécie.
   `UserChecker::checkPostAuth()` a la signature de la 8.0 (`?TokenInterface $token = null`).
-- Cookie remember_me (#222) : la 7.4 y écrit encore la classe du compte
-  (`Ladb.CoreBundle.Entity.Core.User:<identifiant en base64>:<expiration>:<signature>`, celui de la
-  4.4 était tout entier en base64). La 8.0 ne l'écrit plus (`:<identifiant>:…`) et ignore la
-  première partie à la lecture (`RememberMeDetails::fromRawCookie()`). La signature (HMAC par le
-  `secret` de l'expiration, de l'identifiant et du hash du mot de passe, `signature_properties`) ne
-  change pas de la 7.4 à la 8.2 (`SignatureHasher`, réécrit en 8.2 pour la rotation des secrets) :
-  un cookie posé par la 7.4 est relu en 8.x. `LoginTest::testRememberMeOfSymfony74` rejoue un cookie
-  capturé en 7.4, relu en 8.1 et en 8.2 (#30), comme un cookie et une session ouverts en 8.1.
+- Cookie remember_me (`REMEMBERME`, #222) : `:<identifiant en base64>:<expiration>:<signature>`
+  (`RememberMeDetails`), la signature étant un HMAC par le `secret` de l'expiration, de l'identifiant
+  et du hash du mot de passe (`signature_properties`, `SignatureHasher`). Celui des membres de la
+  prod, posé par la 3.4 (`TokenBasedRememberMeServices`, le même format qu'en 4.4), est tout entier
+  en base64 et signé autrement : refusé sans erreur et supprimé (#177), le compte se reconnecte une
+  fois par le formulaire (`LoginTest::testRememberMeOfSymfony44`, un cookie capturé en 4.4).
 - Sécurité en 8.2 (#30) : `use_referer` garde le referer d'un échec de connexion comme page de
   retour, sauf `login_path` et l'URL du formulaire, et seulement si aucune n'est posée : le seul
   formulaire est sur `/login`, et `/connexion` pose la sienne. `#[IsGranted(statusCode: 404)]` lève
@@ -1326,19 +1325,6 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   commandes de schéma : `schema:update` (`castor app:db:schema`, doc d'installation) ne la supprime
   pas, et `migrations:diff` ne propose plus de la supprimer. Vérifié avec DBAL 4 et DoctrineBundle
   3, qui garde l'id du listener.
-- Les sessions ouvertes en 3.4 et 4.4 ont des objets `Security\Core\Role\Role` dans leur token :
-  Symfony 5.4 à 8.2 gardent une classe `Role` pour les relire (vide depuis 6.4, `@internal`,
-  « Allows migrating session payloads from v4 »), et une session de 4.4 reste connectée
-  (`LoginTest`, avec un token capturé sur la vraie 4.4 ; le cookie remember_me capturé avec lui est
-  refusé et supprimé depuis l'authenticator manager, qui signe autrement, #177). Vérifié en 7.4
-  (#28), en 8.1 (#30, le token d'une session de la 7.4 y est écrit à l'identique et reste connecté)
-  et en 8.2 (#30, où une session de la 8.1 reste connectée). `Role` est le même fichier en 8.0, 8.1
-  et 8.2. Ne changent pas non plus `AbstractToken::__unserialize()`, `UsernamePasswordToken`,
-  `SwitchUserToken`, ni `ContextListener::safelyUnserialize()` (au contexte d'un log près en 8.0) et
-  `hasUserChanged()`, qui ne fait qu'appeler `isEqualTo()`. `RememberMeToken` ignore depuis la 8.0
-  le secret que la 7.4 sérialisait. Ces tests ne couvrent que la 4.4 : le token de la 3.4, celui des
-  sessions de la prod, est lui-même en `C:` (`\Serializable`), qu'aucun test ne rejoue. La
-  livraison ferme de toute façon toutes les sessions (#301).
 - Messenger (#22) : quatre transports AMQP (`config.yml`), chacun avec son échange et sa file du
   même nom, `mailer` (#19), `view`, `webpush_notification` et `cron` (#300, plus bas). Les anciennes
   files de RabbitMqBundle (`view_queue`…) ne servent plus : le `PhpSerializer` lit un de leurs
