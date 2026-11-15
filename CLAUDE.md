@@ -1214,7 +1214,8 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   paramètre, `mailer_dsn` (`framework.mailer.dsn`). Mailer lance
   STARTTLS dès que le serveur SMTP l'annonce et vérifie son certificat, ce que Swiftmailer ne
   faisait pas sans `encryption` : `?verify_peer=0` pour un Postfix au certificat autosigné (l'option
-  `auto_tls` n'arrive qu'en 7.1).
+  `auto_tls` n'arrive qu'en 7.1). Depuis la 8.2.0-BETA2, `verify_peer` et `auto_tls` prennent un
+  booléen (`0`, `false`, `off`, `no`…), une autre valeur est dépréciée.
 - `Event\DkimSignedMessageListener` signe chaque mail avec la clé DKIM de la prod
   (`keys/private.pem`, hors git, `relaxed/relaxed`) quand le transport l'envoie (`MessageEvent` pas
   `isQueued()`, dans le worker), pas quand Mailer le met sur le bus : le message en file reste un
@@ -1248,9 +1249,12 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   (#224) : les sauts en 8.1 et en 8.2 n'ont monté que les composants et les contrats ; en 8.1,
   `symfony/polyfill-deepclone` arrive (var-exporter 8.1), `masterminds/html5` et
   `symfony/polyfill-php83` partent.
-- 8.2.0-BETA1 (#30) : `minimum-stability: beta` et `prefer-stable: true` dans `composer.json`,
-  aucun autre paquet du lock en version instable. À la sortie de la 8.2.0 : retirer ces deux
-  lignes, puis `composer update` des paquets en `v8.2.0-BETA1` du lock.
+- 8.2.0-BETA2 (#30) : `minimum-stability: beta` et `prefer-stable: true` dans `composer.json`,
+  aucun autre paquet du lock en version instable. Symfony ne publie une version que des
+  composants qui ont changé : 32 paquets sont en `v8.2.0-BETA2`, les 19 autres restent en
+  `v8.2.0-BETA1`, qui n'ont pas de BETA2 (`asset`, `clock`, `error-handler`, `event-dispatcher`,
+  `string`…). À chaque nouvelle préversion, `composer update` des paquets en `v8.2.0-*` du lock ;
+  à la sortie de la 8.2.0, retirer d'abord ces deux lignes.
 - Bundles requis (8.1) : le kernel ajoute de lui-même ceux qu'un bundle exige par
   `#[RequiredBundle]`, `ServicesBundle` (DependencyInjection) et `ConsoleBundle` (Console) pour
   FrameworkBundle, sans qu'`AppKernel` les déclare (`kernel.bundles`).
@@ -1261,6 +1265,9 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   (`assets` pour `asset`, `translator` pour `translation`), et `debug:config <clé>` remplace
   `debug:config framework <clé>`. Le service `router` est un
   `Symfony\Component\Routing\DependencyInjection\Router` : un service demande `RouterInterface`.
+  Depuis la BETA2, l'ancien nom d'une classe sortie de FrameworkBundle
+  (`Symfony\Bundle\FrameworkBundle\Routing\Router`…) est un alias de la nouvelle, déprécié, et
+  `routing.loader` redevient un `DelegatingLoader` (TwigBundle ne le décore plus).
 - Console 8.2 (#30) : une commande démarre dans la locale `fr` (`framework.default_locale`), plus
   dans celle de PHP (`en_US_POSIX` dans les images) : rien de ce qu'écrivent les crons ne la lit
   (`format_datetime` ne sert que sur la page d'un événement). `list` replie les sous-commandes
@@ -1340,8 +1347,12 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   `stateful` (état dans `cache.scheduler_cron`, Memcached : un worker qui redémarre rattrape les
   passages manqués, `process_only_last_missed_run`, le dernier de chaque cron seulement) et le
   verrou `scheduler_cron` (`lock.factory`, Memcached) : un seul worker du schedule à la fois, les
-  autres attendent. La file `cron` n'est pas rejouée (`max_retries: 0` : un échec est journalisé en
-  critical, le passage suivant vient à son heure), et un message que RabbitMQ redonne après la
+  autres attendent. Avant la 8.2.0-BETA2, un worker redémarré sautait des passages aux
+  changements d'heure de Paris (ceux d'avant 4 h après un passage de 3 h, le jour de l'heure
+  d'été ; ceux de l'heure répétée, le jour de l'heure d'hiver) : l'état garde depuis ses dates
+  aussi en UTC, après les trois éléments que lisent les versions d'avant. La file `cron` n'est pas
+  rejouée (`max_retries: 0` : un échec est journalisé en critical, le passage suivant vient à son
+  heure), et un message que RabbitMQ redonne après la
   mort de son worker est refusé (`reject_redelivered_messages` de la 8.2). Elle est signée
   (`sign: true`, le secret) : ses messages sont des lignes de commande, et la 8.2 déprécie un
   `RunCommandMessage` sur un transport qui ne signe pas tout. Arrêté par SIGTERM, le worker finit le
@@ -1528,7 +1539,11 @@ Symfony ni de PHP : le site par HTTPS, la même suite jusqu'en 8.2.
   met `aria-invalid` et `aria-describedby` (`<id>_error1`, que le `form_errors` du site n'écrit
   pas) sur un champ en erreur. `CurrencyType` ne liste plus que les devises en cours
   (`active_at`, `legal_tender` de 7.4) : les annonces et les prix des fiches gardent toutes les
-  devises (`null` aux deux).
+  devises (`null` aux deux). Depuis la 8.2.0-BETA2, les thèmes de TwigBridge ne mettent plus la
+  classe `required` sur le libellé de chaque option d'un choix déplié, seulement sur celui du
+  groupe. Ni le CSS ni le JS du site ne la lisent, et les formulaires des contenus, des
+  paramètres et du blog rendent le même HTML qu'en BETA1 : leurs choix dépliés passent par le
+  thème du site (`Common/_form-theme.twig.twig`), qui écrit lui-même les libellés des options.
 - `PolyCollectionResizeFormListener` (blocs des contenus) n'étend plus le `ResizeFormListener` de
   Symfony (#223) : la 8.0 rend final son `preSetData()` et son `postSetData()`, et ses autres
   méthodes lisent ses propriétés privées. Il construit les lignes en `POST_SET_DATA` (priorité
