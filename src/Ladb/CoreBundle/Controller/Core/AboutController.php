@@ -37,29 +37,26 @@ class AboutController extends AbstractController {
 		$credits = array(
 			array( 'name' => 'Symfony', 'url' => 'http://www.symfony.com', 'labels' => array( 'PHP' ) ),
 
-			array( 'name' => 'FOSUserBundle', 'url' => 'https://github.com/FriendsOfSymfony/FOSUserBundle', 'labels' => array( 'PHP' ) ),
 			array( 'name' => 'FOSElasticaBundle', 'url' => 'https://github.com/FriendsOfSymfony/FOSElasticaBundle', 'labels' => array( 'PHP' ) ),
-			array( 'name' => 'GOSWebSocketBundle', 'url' => 'https://github.com/GeniusesOfSymfony/WebSocketBundle', 'labels' => array( 'PHP' ) ),
 			array( 'name' => 'StofDoctrineExtensionsBundle', 'url' => 'https://github.com/stof/StofDoctrineExtensionsBundle', 'labels' => array( 'PHP' ) ),
 			array( 'name' => 'LiipImagineBundle', 'url' => 'https://github.com/liip/LiipImagineBundle', 'labels' => array( 'PHP' ) ),
-			array( 'name' => 'RabbitMqBundle', 'url' => 'https://github.com/php-amqplib/RabbitMqBundle', 'labels' => array( 'PHP' ) ),
 			array( 'name' => 'WebPushBundle', 'url' => 'https://github.com/bpolaszek/webpush-bundle', 'labels' => array( 'PHP' ) ),
 
 			array( 'name' => 'Geocoder-PHP', 'url' => 'http://geocoder-php.org/Geocoder/', 'labels' => array( 'PHP' ) ),
 			array( 'name' => 'Addressing', 'url' => 'https://github.com/commerceguys/addressing', 'labels' => array( 'PHP' ) ),
-			array( 'name' => 'Codebird-PHP', 'url' => 'http://www.jublo.net/projects/codebird/php', 'labels' => array( 'PHP' ) ),
+			array( 'name' => 'Codebird-PHP', 'url' => 'https://github.com/jublo/codebird-php', 'labels' => array( 'PHP' ) ),
 			array( 'name' => 'Facebook PHP SDK', 'url' => 'https://github.com/facebook/php-graph-sdk', 'labels' => array( 'PHP' ) ),
 			array( 'name' => 'Markdown', 'url' => 'http://markdown.cebe.cc/', 'labels' => array( 'PHP' ) ),
-			array( 'name' => 'PHP Phantomjs', 'url' => 'https://github.com/jonnnnyw/php-phantomjs', 'labels' => array( 'PHP' ) ),
-			array( 'name' => 'ImageOptimizer', 'url' => 'https://github.com/psliwa/image-optimizer', 'labels' => array( 'PHP' ) ),
+			array( 'name' => 'Chrome PHP', 'url' => 'https://github.com/chrome-php/chrome', 'labels' => array( 'PHP' ) ),
 			array( 'name' => 'EmailValidator', 'url' => 'https://github.com/egulias/EmailValidator', 'labels' => array( 'PHP' ) ),
-			array( 'name' => 'Hashids', 'url' => 'http://hashids.org/php/', 'labels' => array( 'PHP' ) ),
+			array( 'name' => 'Hashids', 'url' => 'https://github.com/vinkla/hashids', 'labels' => array( 'PHP' ) ),
 			array( 'name' => 'Stripe PHP', 'url' => 'https://github.com/stripe/stripe-php', 'labels' => array( 'PHP' ) ),
 
 			array( 'name' => 'libphonenumber for PHP', 'url' => 'https://github.com/giggsey/libphonenumber-for-php', 'labels' => array( 'PHP' ) ),
 			array( 'name' => 'biblys/isbn', 'url' => 'https://github.com/biblys/isbn', 'labels' => array( 'PHP' ) ),
 
 			array( 'name' => 'Elasticsearch', 'url' => 'https://www.elastic.co', 'labels' => array( 'JAVA' ) ),
+			array( 'name' => 'Mercure', 'url' => 'https://mercure.rocks/', 'labels' => array( 'GO' ) ),
 
 			array( 'name' => 'jQuery', 'url' => 'https://jquery.com/', 'labels' => array( 'JS' ) ),
 			array( 'name' => 'jQuery UI', 'url' => 'http://jqueryui.com/', 'labels' => array( 'JS' ) ),
@@ -71,7 +68,7 @@ class AboutController extends AbstractController {
 			array( 'name' => 'jquery-scrollto', 'url' => 'https://github.com/flesler/jquery.scrollTo', 'labels' => array( 'JS' ) ),
 			array( 'name' => 'jquery-tocify', 'url' => 'http://gregfranko.com/jquery.tocify.js/', 'labels' => array( 'JS' ) ),
 			array( 'name' => 'jquery-ui-touch-punch', 'url' => 'https://github.com/furf/jquery-ui-touch-punch/issues', 'labels' => array( 'JS' ) ),
-			array( 'name' => 'jquery-sticky', 'url' => 'http://stickyjs.com/', 'labels' => array( 'JS' ) ),
+			array( 'name' => 'jquery-sticky', 'url' => 'https://github.com/garand/sticky', 'labels' => array( 'JS' ) ),
 			array( 'name' => 'jquery-readmorejs', 'url' => 'http://jedfoster.com/Readmore.js/', 'labels' => array( 'JS' ) ),
 			array( 'name' => 'jquery-panzoom', 'url' => 'http://timmywil.github.io/jquery.panzoom/', 'labels' => array( 'JS' ) ),
 			array( 'name' => 'jquery-mousewheel', 'url' => 'https://github.com/jquery/jquery-mousewheel', 'labels' => array( 'JS' ) ),
@@ -94,12 +91,11 @@ class AboutController extends AbstractController {
 			array( 'name' => 'CLNDR.js', 'url' => 'https://kylestetz.github.io/CLNDR/', 'labels' => array( 'JS' ) ),
 			array( 'name' => 'autosize', 'url' => 'http://www.jacklmoore.com/autosize', 'labels' => array( 'JS' ) ),
 
-			array( 'name' => 'EmojiOne', 'url' => 'http://emojione.com/', 'labels' => array( 'PHP', 'CSS', 'JS' ) ),
+			array( 'name' => 'EmojiOne', 'url' => 'https://github.com/joypixels/emojione', 'labels' => array( 'PHP', 'CSS', 'JS' ) ),
 
 			array( 'name' => 'Leaflet', 'url' => 'http://leafletjs.com/', 'labels' => array( 'JS' ) ),
 
 			array( 'name' => 'pngquant', 'url' => 'https://pngquant.org/', 'labels' => array( 'TOOL' ) ),
-			array( 'name' => 'optipng', 'url' => 'http://optipng.sourceforge.net/', 'labels' => array( 'TOOL' ) ),
 			array( 'name' => 'jpegoptim', 'url' => 'https://github.com/tjko/jpegoptim', 'labels' => array( 'TOOL' ) ),
 		);
 
