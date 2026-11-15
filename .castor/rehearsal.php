@@ -280,8 +280,14 @@ function part_before(Report $r, string $delivered): void
         expect(1 === preg_match('{real\s+(\d+)m([\d.]+)s}', $output, $matches), "No duration:\n{$output}");
         io()->text("The sitemaps of the 3.4: {$matches[1]} min {$matches[2]} s.");
         // The setting anyway, read when RabbitMQ starts again (step 25). /etc/rabbitmq/rabbitmq.conf
-        // is a file of the copy (write_override()): it stays when Compose creates the container again
-        play("echo 'consumer_timeout = 14400000' | sudo tee -a /etc/rabbitmq/rabbitmq.conf", 'rabbitmq');
+        // is a file of the copy (write_override()): it stays when Compose creates the container
+        // again. It belongs to rabbitmq, as its folder: in a sticky folder open to all, the kernel
+        // refuses to root to write in a file of another user (fs.protected_regular). Once only, for
+        // a rehearsal taken again with --from
+        in_service('rabbitmq', 'chown rabbitmq:rabbitmq /etc/rabbitmq/rabbitmq.conf', quiet: true);
+        if (!str_contains(file_get_contents(tree_dir() . '/var/rabbitmq.conf'), 'consumer_timeout')) {
+            play("echo 'consumer_timeout = 14400000' | sudo tee -a /etc/rabbitmq/rabbitmq.conf", 'rabbitmq');
+        }
         expect(str_contains(file_get_contents(tree_dir() . '/var/rabbitmq.conf'), 'consumer_timeout = 14400000'), 'The setting is not in rabbitmq.conf.');
     });
     $r->step('Sauvegarder la base', static function (): void {
@@ -763,10 +769,8 @@ function create_copy(): void
     expect(basename($tree) === get_worktree_name($tree), 'git named the worktree ' . get_worktree_name($tree) . ': castor qa:delivery-rehearsal-destroy.');
     fs()->mkdir(backup_dir(), 0o777);
     fs()->dumpFile($tree . '/var/ladb-backup.my.cnf', "[client]\nuser=root\npassword=app\n");
-    // /etc/rabbitmq/rabbitmq.conf of the server, empty as on Debian (step 17 adds to it): writable
-    // by the user of the commands in the container of RabbitMQ
+    // /etc/rabbitmq/rabbitmq.conf of the server, empty as on Debian (step 17 adds to it)
     fs()->dumpFile($tree . '/var/rabbitmq.conf', '');
-    fs()->chmod($tree . '/var/rabbitmq.conf', 0o666);
     write_override(delivered: false);
 }
 
@@ -924,7 +928,10 @@ function add_delivery_parameters(): void
         'https://www.lairdubois.fr' => $uri,
     ]);
     $file = tree_dir() . '/app/config/parameters.yml';
-    fs()->dumpFile($file, rtrim(file_get_contents($file)) . "\n" . $block);
+    // Once only, for a rehearsal taken again with --from
+    if (!str_contains(file_get_contents($file), 'database_server_version:')) {
+        fs()->dumpFile($file, rtrim(file_get_contents($file)) . "\n" . $block);
+    }
     $count = trim(play("grep -c -E '^\\s+(database_server_version|mailer_dsn|mercure_url|mercure_public_url|mercure_jwt_secret|ga_measurement_id|router_default_uri|chromium_sandbox):' app/config/parameters.yml"));
     expect('8' === $count, "{$count} parameters of the code delivered in parameters.yml, not 8.");
 }
