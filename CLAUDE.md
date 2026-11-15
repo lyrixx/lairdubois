@@ -222,7 +222,7 @@ main, hors CI : 14 min avec les images dans le cache de Docker (une vingtaine la
 castor qa:delivery-rehearsal [--keep]         # tout, puis le tableau des étapes (var/delivery-rehearsal/report.md)
 castor qa:delivery-rehearsal --to=server      # seulement les conteneurs Debian jetables
 castor qa:delivery-rehearsal --from=deploy    # reprend à une partie, sur la stack gardée (--keep, --to, ou un échec)
-castor qa:delivery-rehearsal --mariadb=10.11  # la MariaDB de Debian 12 (11.8, celle de Debian 13, par défaut)
+castor qa:delivery-rehearsal --mariadb=10.11 --rabbitmq=3.10  # ceux de Debian 12 (11.8 et 4.0, ceux de Debian 13, par défaut)
 castor qa:delivery-rehearsal-destroy          # stack, copie en 3.4 et conteneurs jetables
 ```
 
@@ -256,7 +256,8 @@ castor qa:delivery-rehearsal-destroy          # stack, copie en 3.4 et conteneur
   `push` des navigateurs ; composer sans les variables de l'env-map du builder (`env -u`), le
   `parameters.yml` étant celui du guide. Depuis l'étape 37, le frontend sert la configuration
   nginx de l'image de prod (`services/php/prod/nginx.conf`, `web/app.php`) avec `TRUSTED_HOSTS`.
-  Les paquets du serveur sont les images de la copie, reconstruites au déploiement.
+  Les paquets du serveur sont les images de la copie, reconstruites au déploiement ; MariaDB et
+  RabbitMQ, ceux de Debian 13 (11.8 et 4.0, au lieu des 10.11 et 3.13 du dev), dès la 3.4.
 - Conteneurs jetables (`<projet>-check-*`, Debian 13 et 12, supprimés à la fin) : PHP 8.5 de Sury
   à côté de PHP 7.3 (l'alternative `php`, le pool et le `php.ini` repris), Composer, Node 24,
   Chromium et les optimiseurs, le vhost et la page de maintenance de `master` modifiés par le guide

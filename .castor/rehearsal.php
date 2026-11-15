@@ -71,6 +71,8 @@ function rehearsal(
     ?string $to = null,
     #[AsOption(description: 'The version of MariaDB of the server: 11.8 on Debian 13, 10.11 on Debian 12')]
     string $mariadb = '11.8',
+    #[AsOption(description: 'The version of RabbitMQ of the server: 4.0 on Debian 13, 3.10 on Debian 12')]
+    string $rabbitmq = '4.0',
 ): int {
     $start = array_search($from ?? PARTS[0], PARTS, true);
     $end = array_search($to ?? PARTS[\count(PARTS) - 1], PARTS, true);
@@ -89,6 +91,7 @@ function rehearsal(
     $report = Report::load($start > 0);
     // The one of the start for the next parts (--from)
     $report->state['mariadb'] ??= $mariadb;
+    $report->state['rabbitmq'] ??= $rabbitmq;
     $report->save();
     $failed = false;
     try {
@@ -788,6 +791,8 @@ function write_override(bool $delivered, bool $productionVhost = false): void
             builder:
                 volumes:
                     - "../../var/ladb-backup:/home/app/ladb-backup"
+            rabbitmq:
+                image: rabbitmq:RABBITMQ_VERSION-alpine
             mailpit:
                 image: axllent/mailpit:v1.32.0
                 environment:
@@ -818,8 +823,9 @@ function write_override(bool $delivered, bool $productionVhost = false): void
 
         YAML;
 
-    // The MariaDB of the Debian of the server
-    $common = str_replace('MARIADB_VERSION', Report::load(true)->state['mariadb'] ?? '11.8', $common);
+    // The MariaDB and the RabbitMQ of the Debian of the server
+    $state = Report::load(true)->state;
+    $common = strtr($common, ['MARIADB_VERSION' => $state['mariadb'] ?? '11.8', 'RABBITMQ_VERSION' => $state['rabbitmq'] ?? '4.0']);
 
     if (!$delivered) {
         // The commands of the units of master, in prod
