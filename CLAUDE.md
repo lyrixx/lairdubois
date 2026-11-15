@@ -27,13 +27,17 @@ Une session pilote, des agents codent.
   sur un choix qui n'est pas tranché ici ou dans l'issue, il s'arrête et le remonte.
 - L'état fait foi sur GitHub (issues, PR), pas dans la mémoire de la session : une nouvelle
   session reprend depuis là.
-- Guide de la mise en production (#92, épinglé) : les actions à faire en prod, ce qui est
-  supprimé (route, commande), ce qui change pour un utilisateur ou un admin et les comportements
-  gardés volontairement. Ni question ni décision, elles vont dans #95. Un agent le liste dans sa
-  PR, section « À consigner » ; la session principale met #92 à jour après chaque merge.
+- Guide de la mise en production : `docs/04-delivery.md`, la seule source, rejoué par
+  `castor qa:delivery-rehearsal` (voir « Mise en production »). Une PR qui change ce qu'il faut
+  faire en prod met à jour le guide et la répétition.
+- Journal des changements (#92, épinglé) : ce qui est supprimé (route, commande), ce qui change
+  pour un utilisateur ou un admin et les comportements gardés volontairement ; les actions à
+  faire en prod sont dans le guide. Ni question ni décision, elles vont dans #95. Un agent le
+  liste dans sa PR, section « À consigner » ; la session principale met #92 à jour après chaque
+  merge.
 - Suivi pour Boris (#95, épinglé) : état par étape, fait, prochaines étapes (dont ce qui reste
   provisoire dans le code après la livraison), à valider (cases à cocher : coché, déjà en place ;
-  non coché, une question) et décidé. Ce qui est dans #92 n'y est pas recopié. La session
+  non coché, une question) et décidé. Ce qui est dans #92 ou dans le guide n'y est pas recopié. La session
   principale le met à jour en fin de journée, et poste un commentaire court quand une étape
   (milestone) est terminée : modifier la description ne notifie personne.
 - Point d'avancement toutes les heures : mergé, en cours, bloqué, prochaine étape.
@@ -204,6 +208,65 @@ Conventions :
 2. Jamais de nom de projet, de domaine ni de port en dur : `variable('project_name')`,
    `variable('root_domain')`, `get_worktree_ports()`.
 3. Une tâche récurrente est une tâche Castor (`castor.php` ou `.castor/*.php`), pas un script.
+
+## Mise en production
+
+Le guide est `docs/04-delivery.md`, en français, pour Boris : les prérequis, puis trois phases
+(avant la livraison site ouvert, la coupure, après) et le retour arrière. Chaque étape : la
+commande à copier, sa vérification, quoi faire sinon, et ce que la répétition en fait.
+`castor qa:delivery-rehearsal` (`.castor/rehearsal.php`, `rehearsal_server.php`) le rejoue, à la
+main, hors CI : 12 à 14 min avec les images dans le cache de Docker (une vingtaine la première
+fois), 2 Go de RAM au pic.
+
+```bash
+castor qa:delivery-rehearsal [--keep]         # tout, puis le tableau des étapes (var/delivery-rehearsal/report.md)
+castor qa:delivery-rehearsal --to=server      # seulement les conteneurs Debian jetables
+castor qa:delivery-rehearsal --from=deploy    # reprend à une partie, sur la stack gardée (--keep, --to, ou un échec)
+castor qa:delivery-rehearsal --mariadb=10.11 --rabbitmq=3.10  # ceux de Debian 12 (11.8 et 4.0, ceux de Debian 13, par défaut)
+castor qa:delivery-rehearsal-destroy          # stack, copie en 3.4 et conteneurs jetables
+```
+
+- Parties : `server` (conteneurs jetables), `setup` (copie en 3.4 et ses données), `before`
+  (phase 1), `during` (phase 2 jusqu'au déploiement), `deploy` (du déploiement aux crons, puis
+  une connexion avant la réouverture), `rollback` (de R2 à R6), `redeploy` (le code livré à
+  nouveau, sur la base déjà migrée), `after` (les vérifications sur les données migrées). Une
+  étape en échec arrête la répétition, sauf dans `server` et `after` ; après un échec, la stack
+  reste, et `--from` reprend à une partie (`deploy` se rejoue sur lui-même).
+- Copie en 3.4 : un worktree git de la copie qui répète (`var/delivery-rehearsal/delivery-rehearsal-<copie>`,
+  `main` pour la copie principale), donc son projet Compose (`lairdubois-wt-delivery-rehearsal-<copie>`)
+  et ses ports, au commit 479b63ed, le dernier en 3.4 avant 552ee45f. Il a les mêmes versions que
+  `master` de Symfony, FOSUserBundle, Doctrine, doctrine/migrations, Swiftmailer, RabbitMqBundle
+  et FOSElasticaBundle, le même mapping, les mêmes 51 migrations et la même configuration des
+  sessions, des files et du spool, plus Docker : `master` ne tourne pas en PHP 8.5. Son propre
+  `castor start`, puis les données de la prod que les fixtures n'ont pas : `migration_versions` de
+  doctrine/migrations 1.8 (`doctrine:migrations:version --add --all`), session et cookie
+  remember_me ouverts par le formulaire, spool, messages dans `view_queue` et
+  `webpush_notification_queue` (workers arrêtés), abonnements web push, `web/media/`, fichiers de
+  `sensio/distribution-bundle`, d'Assetic et de `robloach/component-installer`. Une seule stack à
+  la fois : la 3.4 et le code livré sont le même projet, les conteneurs changent au déploiement.
+- Les commandes du guide sont jouées telles qu'elles y sont écrites : `play()` et `server_run()`
+  refusent une commande que le guide (ou `docs/01-installation.md`) n'a plus, et `guide_step()`
+  un titre d'étape. Renuméroter le guide ne casse rien ; changer une commande, son bloc de
+  paramètres ou ses extraits de vhost oblige à changer la répétition.
+- Adaptations à Docker : `sudo --user=www-data` = le builder, `sudo mariadb` et `sudo rabbitmqctl`
+  = leurs conteneurs (`/root/.my.cnf` et le code dans `/var/www` pour MariaDB), `~/ladb-backup`
+  monté dans les deux ; git sur l'hôte (`git checkout` à la place de `git pull` et `git reset`) ;
+  systemd = les services Compose, en `--env=prod` comme les unités (`docker-compose.override.yml`
+  de la copie, écrit par la tâche) ; Mailpit sur le port 25 à la place de Postfix, et le double
+  `push` des navigateurs ; composer sans les variables de l'env-map du builder (`env -u`), le
+  `parameters.yml` étant celui du guide. Depuis l'étape 37, le frontend sert la configuration
+  nginx de l'image de prod (`services/php/prod/nginx.conf`, `web/app.php`) avec `TRUSTED_HOSTS`.
+  Les paquets du serveur sont les images de la copie, reconstruites au déploiement ; MariaDB et
+  RabbitMQ, ceux de Debian 13 (11.8 et 4.0, au lieu des 10.11 et 3.13 du dev), dès la 3.4.
+- Conteneurs jetables (`<projet>-check-*`, Debian 13 et 12, supprimés à la fin) : PHP 8.5 de Sury
+  à côté de PHP 7.3 (l'alternative `php`, le pool et le `php.ini` repris), Composer, Node 24,
+  Chromium et les optimiseurs, le vhost et la page de maintenance de `master` modifiés par le guide
+  (identiques à `docs/nginx/conf/`, puis `nginx -t`), les unités de `docs/01-installation.md`
+  (`systemd-analyze verify`, les `sed` du guide sur celles de `master`), le hub Mercure avec son
+  `mercure.env` (lu par le parseur de systemd), le code livré installé en www-data (composer
+  `--no-dev`, npm, Vite), le paquet d'Elasticsearch 9 configuré et démarré.
+- Pas joués : la montée de Debian, la crontab, l'échange de vhost de la maintenance, systemd et
+  les scripts de maintenance (seulement `bash -n`), Postfix, les durées et les volumes de la prod.
 
 ## Prod
 
