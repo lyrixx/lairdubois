@@ -350,6 +350,8 @@ function delivery_dropped_tables(): array
  */
 function rehearse_migrations_on_a_copy(string $delivered): void
 {
+    // Nothing of a rehearsal taken again with --from
+    sql('DROP DATABASE IF EXISTS ' . COPY_DATABASE);
     play('sudo mariadb -e "CREATE DATABASE db_fr_lairdubois_www_livraison"', 'mariadb');
     play('zcat ~/ladb-backup/db.sql.gz | sudo mariadb db_fr_lairdubois_www_livraison', 'mariadb');
     expect(\count(ORPHAN_TABLES) === \count(orphan_tables(COPY_DATABASE)), 'The throwaway database has not the tables of the backup.');
@@ -364,8 +366,9 @@ function rehearse_migrations_on_a_copy(string $delivered): void
     run(['sh', '-c', 'git archive ' . escapeshellarg($delivered) . ' | tar -x -C ' . escapeshellarg($copy)], context: context()->withQuiet());
     play("sudo sed 's/^\\(\\s*database_name:\\s*\\).*/\\1db_fr_lairdubois_www_livraison/' app/config/parameters.yml | sudo --user=www-data tee /var/www/ladb-livraison/app/config/parameters.yml > /dev/null");
     // The variables of the builder for parameters.yml go, those of the code delivered: its
-    // DATABASE_NAME would point the copy to the database of the 3.4
-    play('sudo --user=www-data env SYMFONY_ENV=prod php8.5 "$(command -v composer)" --working-dir=/var/www/ladb-livraison install --no-dev --optimize-autoloader --no-interaction --ignore-platform-req=php+', prefix: php85() . unset_parameter_variables($copy . '/composer.json'));
+    // DATABASE_NAME would point the copy to the database of the 3.4. The builder of the 3.4 has
+    // not the extension amqp (php-amqplib), that the server has (P2), nor the migrations need
+    play('sudo --user=www-data env SYMFONY_ENV=prod php8.5 "$(command -v composer)" --working-dir=/var/www/ladb-livraison install --no-dev --optimize-autoloader --no-interaction --ignore-platform-req=php+', prefix: php85() . unset_parameter_variables($copy . '/composer.json'), suffix: ' --ignore-platform-req=ext-amqp');
     $prefix = php85();
     expect(1 === preg_match('{^\s+database_name:\s+db_fr_lairdubois_www_livraison$}m', file_get_contents($copy . '/app/config/parameters.yml')), 'The copy does not use the throwaway database.');
 
@@ -1160,10 +1163,10 @@ function edit_parameters(array $values): void
  * clients (as root). sudo goes, after a time and in a pipe: the containers run as the user of the
  * files, or as root.
  */
-function play(string $command, string $service = 'builder', string $prefix = '', bool $quiet = false, bool $allowFailure = false): string
+function play(string $command, string $service = 'builder', string $prefix = '', bool $quiet = false, bool $allowFailure = false, string $suffix = ''): string
 {
     guide_has($command);
-    $run = preg_replace('{(^|\| )(time )?sudo (--user=www-data )?}', '$1$2', $command);
+    $run = preg_replace('{(^|\| )(time )?sudo (--user=www-data )?}', '$1$2', $command) . $suffix;
     $process = 'builder' === $service ? in_builder($prefix . $run, $quiet) : in_service($service, $run, $quiet);
     if (!$allowFailure && !$process->isSuccessful()) {
         throw new \RuntimeException("`{$command}` failed:\n" . tail($process->getOutput() . $process->getErrorOutput()));
