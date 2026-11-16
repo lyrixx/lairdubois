@@ -247,7 +247,7 @@ castor qa:delivery-rehearsal-destroy          # stack, copie en 3.4 et conteneur
   migrations de l'époque, retirées depuis), que l'étape 2 voit et que la migration
   `Version20261115140000` supprime. Une seule stack à la fois : la 3.4 et le code livré sont le
   même projet, les conteneurs changent au déploiement.
-- Étape 20 (les migrations sur une copie de la base) : une base `db_fr_lairdubois_www_livraison`
+- Étape 21 (les migrations sur une copie de la base) : une base `db_fr_lairdubois_www_livraison`
   restaurée depuis `db.sql.gz`, et le code livré dans `/var/www/ladb-livraison` du builder (le
   dossier `ladb-livraison` de la copie en 3.4, par `git archive` du commit livré), installé par
   son propre composer : `php8.5` est un lien vers le PHP du builder, les variables de l'env-map
@@ -268,15 +268,15 @@ castor qa:delivery-rehearsal-destroy          # stack, copie en 3.4 et conteneur
   systemd = les services Compose, en `--env=prod` comme les unités (`docker-compose.override.yml`
   de la copie, écrit par la tâche) ; Mailpit sur le port 25 à la place de Postfix, et le double
   `push` des navigateurs ; composer sans les variables de l'env-map du builder (`env -u`), le
-  `parameters.yml` étant celui du guide. Depuis l'étape 40, le frontend sert la configuration
+  `parameters.yml` étant celui du guide. Depuis l'étape 42, le frontend sert la configuration
   nginx de l'image de prod (`services/php/prod/nginx.conf`, `web/app.php`) avec `TRUSTED_HOSTS`.
   Les paquets du serveur sont les images de la copie, reconstruites au déploiement ; MariaDB et
   RabbitMQ, ceux de Debian 13 (11.8 et 4.0, au lieu des 10.11 et 3.13 du dev), dès la 3.4.
   `/etc/rabbitmq/rabbitmq.conf` est le fichier `var/rabbitmq.conf` de la copie : le
   `consumer_timeout` de l'étape 17 (que la répétition pose toujours) reste quand Compose recrée
-  le conteneur, et l'étape 25 redémarre RabbitMQ. Il est donné à `rabbitmq` dans le conteneur :
+  le conteneur, et l'étape 27 redémarre RabbitMQ. Il est donné à `rabbitmq` dans le conteneur :
   `/etc/rabbitmq` est un dossier ouvert à tous avec le sticky bit, où le noyau refuse à root
-  d'écrire dans le fichier d'un autre (`fs.protected_regular`). Les étapes 11, 17 et 20 se
+  d'écrire dans le fichier d'un autre (`fs.protected_regular`). Les étapes 11, 17 et 21 se
   rejouent avec `--from` ; le tableau garde aussi les résultats des passages précédents.
 - Conteneurs jetables (`<projet>-check-*`, Debian 13 et 12, supprimés à la fin) : PHP 8.5 de Sury
   à côté de PHP 7.3 (l'alternative `php`, le pool et le `php.ini` repris), Composer, Node 24,
@@ -297,7 +297,7 @@ castor qa:delivery-rehearsal-destroy          # stack, copie en 3.4 et conteneur
   rempli »), sans échec.
 - Pas joués : la montée de Debian, la crontab (et les autres crontabs), `timedatectl`, l'échange
   de vhost de la maintenance, systemd et les scripts de maintenance (seulement `bash -n`), Postfix
-  et le relais (le mail de test de l'étape 44 va dans Mailpit), les durées et les volumes de la
+  et le relais (le mail de test de l'étape 46 va dans Mailpit), les durées et les volumes de la
   prod. L'effet du `consumer_timeout` sur un cron de plus de 30 minutes n'est pas joué dans la
   répétition : vérifié à part (#312), sur RabbitMQ 3.10 et 4.0 jetables, avec un message pris
   comme le fait Messenger (`basic.get`), gardé au-delà du délai.

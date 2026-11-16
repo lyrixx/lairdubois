@@ -13,6 +13,18 @@ const ELASTICSEARCH_56 = '5.6.16';
 // The digest of the archive of the hub, in the checksums.txt of its release (step 6)
 const MERCURE_SHA256 = 'a39416791da133775d1c81d1ec069f376cd938112a40a9bd7158a63771c7343b';
 
+// The check of step 53: the aliases of ~/.bash_aliases against those of the PROD server in
+// docs/01-installation.md
+const ALIASES_CHECK = <<<'BASH'
+    diff <(grep '^alias ladb' ~/.bash_aliases | sort) <(sed -n '/If you are on the \*\*PROD\*\* server/,/^```$/{/^alias ladb/p}' docs/01-installation.md | sort)
+    BASH;
+
+// An alias of the server that is not in docs/01-installation.md (the one of the DEV server)
+const SERVER_ALIAS = "alias ladb-git='sudo --user=www-data git'";
+
+// The one who delivers: an account with sudo, for whom the files of www-data may be unreadable
+const DELIVERER = 'livreur';
+
 /**
  * What Docker does not play, in throwaway Debian containers named after the project of the
  * rehearsal (removed at the end): the packages, PHP 8.5 next to an older PHP, the units of
@@ -250,7 +262,7 @@ function server_checks(Report $r, string $debian): void
         install_units($c);
         $verify = server_run($c, 'sudo systemd-analyze verify /etc/systemd/system/ladb_*.service', allowFailure: true);
         expect('' === trim($verify), "systemd-analyze verify:\n{$verify}");
-        // The units of master, kept by step 3: those the seds of step 42 change
+        // The units of master, kept by step 3: those the seds of step 44 change
         in_container($c, 'mkdir -p ~/ladb-backup && cp /rehearsal/units-master/ladb_consumer_view.service /rehearsal/units-master/ladb_consumer_webpush.service ~/ladb-backup/');
         $execStart = server_run($c, 'grep ExecStart ~/ladb-backup/ladb_consumer_view.service ~/ladb-backup/ladb_consumer_webpush.service');
         expect(str_contains($execStart, 'rabbitmq:consumer view') && str_contains($execStart, 'rabbitmq:consumer webpush_notification'), "The units of master:\n{$execStart}");
@@ -277,10 +289,22 @@ function server_checks(Report $r, string $debian): void
         $r->verified('Dépendances PHP', $where, static function () use ($c): void {
             // The code delivered, as git leaves it, in a folder of www-data, with a /var/www of root
             in_container($c, 'rm -rf /var/www/www.lairdubois.fr && cp -a /rehearsal/code /var/www/www.lairdubois.fr && chown -R www-data: /var/www/www.lairdubois.fr && test "$(stat -c %U /var/www)" = root');
-            $output = server_run($c, 'sudo --user=www-data env SYMFONY_ENV=prod composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-req=php+');
+            $output = server_run($c, COMPOSER_INSTALL);
             expect(str_contains($output, 'Generating optimized autoload files'), "composer install:\n" . tail($output));
             expect(str_contains(in_container($c, 'ls /var/www/www.lairdubois.fr/vendor/symfony'), 'framework-bundle'), 'No vendor/.');
             expect(!str_contains(in_container($c, 'ls /var/www/www.lairdubois.fr/vendor/symfony'), 'web-profiler-bundle'), 'The dev packages are installed.');
+            // The cache of var/, that www-data writes: its home, /var/www, is root's
+            expect(str_contains(in_container($c, 'ls /var/www/www.lairdubois.fr/var/composer'), 'files'), 'Composer did not write its cache in var/composer.');
+        });
+        $r->verified('Vérifier les données', $where, static function () use ($c): void {
+            // A parameters.yml that only www-data reads, read by the one who delivers
+            $file = '/var/www/www.lairdubois.fr/app/config/parameters.yml';
+            in_container($c, "chmod 600 {$file} && cp -a {$file} /root/parameters.yml");
+            expect(str_contains(as_deliverer($c, "cat {$file}", allowFailure: true, ofGuide: false), 'Permission denied'), 'parameters.yml is readable by the one who delivers.');
+            expect('1' === trim(as_deliverer($c, SECRET_CHECK, allowFailure: true)), 'The check of the secret does not read parameters.yml by sudo.');
+            in_container($c, "sed -i -E 's/^(\\s+secret:\\s+).*/\\1clé-secrète/' {$file}");
+            expect('0' === trim(as_deliverer($c, SECRET_CHECK, allowFailure: true)), 'The check of the secret does not see an accent.');
+            in_container($c, "cp -a /root/parameters.yml {$file}");
         });
         $r->verified('Paramètres du code livré', $where, static function () use ($c): void {
             percent_checks($c);
@@ -290,7 +314,29 @@ function server_checks(Report $r, string $debian): void
             server_run($c, 'sudo --user=www-data env npm_config_cache=var/npm npx vite build');
             server_run($c, 'ls web/build/manifest.json web/build/entrypoints.json');
         });
+        $r->verified('Les alias du serveur', $where, static function () use ($c): void {
+            aliases_checks($c);
+        });
     }
+}
+
+/**
+ * Step 53: the aliases of master in ~/.bash_aliases, with one of the server. The check of the
+ * guide names the two lines that change; once changed as the guide says, only the alias of the
+ * server.
+ */
+function aliases_checks(string $c): void
+{
+    in_container($c, 'mkdir -p ~/ladb-backup && cp /rehearsal/bash_aliases-master ~/.bash_aliases');
+    server_run($c, 'cp -a ~/.bash_aliases ~/ladb-backup/bash_aliases');
+    guide_has('nano ~/.bash_aliases');
+    $before = server_run($c, ALIASES_CHECK, allowFailure: true);
+    expect(1 === preg_match("{^< alias ladb-install='sudo --user=www-data composer install'$}m", $before) && 1 === preg_match('{^> alias ladb-install=.*COMPOSER_CACHE_DIR}m', $before) && 1 === preg_match('{^> alias ladb-assets=}m', $before), "The check does not name the aliases of master:\n{$before}");
+    // What the nano of the guide does
+    in_container($c, 'cp /rehearsal/bash_aliases-delivery ~/.bash_aliases');
+    $after = server_run($c, ALIASES_CHECK, allowFailure: true);
+    $changes = preg_grep('{^[<>] }', explode("\n", $after));
+    expect([SERVER_ALIAS] === array_values(array_map(static fn (string $line) => substr($line, 2), $changes)) && str_starts_with(array_values($changes)[0], '< '), "The check names other aliases than the one of the server:\n{$after}");
 }
 
 /**
@@ -301,21 +347,21 @@ function server_checks(Report $r, string $debian): void
 function percent_checks(string $c): void
 {
     $file = '/var/www/www.lairdubois.fr/app/config/parameters.yml';
-    $check = "sed 's/%%//g' app/config/parameters.yml | grep -n '%' | cut -d: -f1,2";
-    // As at step 35: without cache (step 32), composer install compiles the container
+    // As at step 37: without cache (step 34), composer install compiles the container
     // (cache:clear without the warmers, that would connect to MariaDB)
     $clear = 'sudo --user=www-data rm -rf var/cache/prod && sudo --user=www-data bin/console --env=prod cache:clear --no-warmup';
     $set = static fn (string $dsn) => in_container($c, "sudo --user=www-data sed -i -E 's#^(\\s+mailer_dsn:\\s+).*#\\1{$dsn}#' {$file}");
 
+    // By the one who delivers, parameters.yml readable by www-data only (step 9)
     $set('smtp://us%2Fer:p%40ss@localhost:25');
-    $found = server_run($c, $check, allowFailure: true);
+    $found = as_deliverer($c, PERCENT_CHECK, allowFailure: true);
     expect(1 === preg_match('{^\d+:\s+mailer_dsn$}', trim($found)), "The check does not name mailer_dsn:\n{$found}");
     $output = in_container($c, "cd /var/www/www.lairdubois.fr && {$clear}", allowFailure: true);
     // What is between the first two %: the name of a parameter, that does not exist
     expect(str_contains($output, 'non-existent parameter "2Fer:p"'), "The container compiles with a single %:\n" . tail($output));
 
     $set('smtp://us%%2Fer:p%%40ss@localhost:25');
-    expect('' === trim(server_run($c, $check, allowFailure: true)), 'The check names a parameter written with %%.');
+    expect('' === trim(as_deliverer($c, PERCENT_CHECK, allowFailure: true)), 'The check names a parameter written with %%.');
     in_container($c, "cd /var/www/www.lairdubois.fr && {$clear}");
     $dsn = in_container($c, 'cd /var/www/www.lairdubois.fr && sudo --user=www-data bin/console --env=prod debug:container --parameter=mailer_dsn');
     expect(str_contains($dsn, 'smtp://us%2Fer:p%40ss@localhost:25'), "The container does not read the DSN with a single %:\n{$dsn}");
@@ -324,7 +370,7 @@ function percent_checks(string $c): void
 
 /**
  * The packages of Elasticsearch, as the guide changes them, from the 5.6 of the server to the 9
- * (steps 15, 16 and 27 to 31), then back to the 5.6 (R5), in a container started as their units
+ * (steps 15, 16 and 29 to 33), then back to the 5.6 (R5), in a container started as their units
  * would: the 5.6 with its Java 8 in /etc/default/elasticsearch and a setting of systemd, and a
  * system account that takes the number of its user once the purge freed it.
  */
@@ -408,6 +454,10 @@ function elasticsearch_checks(Report $r): void
         expect(str_contains(in_container($c, 'apt-cache policy elasticsearch'), 'artifacts.elastic.co/packages/9.x'), 'apt does not read the repository of Elasticsearch 9.');
     });
     $r->verified('Elasticsearch 5.6', $where, static function () use ($c, $version): void {
+        // The repository of the 9 first (step 51): the 5.6 would be upgraded to its version
+        server_run($c, 'sudo rm -f /etc/apt/sources.list.d/elastic-9.x.list /usr/share/keyrings/elasticsearch-keyring.gpg');
+        server_run($c, 'sudo apt-get update');
+        expect(!str_contains(in_container($c, 'apt-cache policy elasticsearch'), 'artifacts.elastic.co/packages/9.x'), 'apt still reads the repository of Elasticsearch 9.');
         stop_elasticsearch($c, '/run/elasticsearch/elasticsearch.pid');
         server_run($c, 'sudo apt-get purge elasticsearch');
         server_run($c, 'sudo rm -rf /var/lib/elasticsearch /etc/elasticsearch');
@@ -522,6 +572,14 @@ function prepare_server_files(): void
         fs()->dumpFile("{$dir}/units-master/{$unit}.service", $contents);
     }
 
+    // ~/.bash_aliases of the server: the aliases of master, with one of its own and another one;
+    // then changed as step 53 says (the line ladb-install, and ladb-assets after it)
+    $master = "alias ll='ls -l'\n" . SERVER_ALIAS . "\n" . prod_aliases($show(INSTALLATION));
+    $delivered = array_values(preg_grep('{^alias ladb-(install|assets)=}', explode("\n", prod_aliases(installation()))));
+    expect(2 === \count($delivered), 'docs/01-installation.md has not the aliases ladb-install and ladb-assets.');
+    fs()->dumpFile($dir . '/bash_aliases-master', $master);
+    fs()->dumpFile($dir . '/bash_aliases-delivery', preg_replace_callback('{^alias ladb-install=.*$}m', static fn () => implode("\n", $delivered), $master, 1));
+
     preg_match('{```\n(\# /etc/mercure\.env\n.*?)```}s', installation(), $matches) or throw new \LogicException('No /etc/mercure.env in ' . INSTALLATION . '.');
     fs()->dumpFile($dir . '/mercure.env', str_replace('THE_SECRET', base64_encode(random_bytes(36)), $matches[1]));
 }
@@ -567,6 +625,16 @@ function apply_edits(string $vhost, array $edits): string
     }
 
     return $vhost;
+}
+
+/**
+ * The aliases of the PROD server in an installation guide (Step 0).
+ */
+function prod_aliases(string $installation): string
+{
+    preg_match('{> If you are on the \*\*PROD\*\* server :\n\n``` bash\n(alias .*?)```}s', $installation, $matches) or throw new \LogicException('No aliases of the PROD server in an installation guide.');
+
+    return $matches[1];
 }
 
 /**
@@ -635,6 +703,21 @@ function in_container(string $name, string $command, bool $allowFailure = false)
     }
 
     return $process->getOutput() . $process->getErrorOutput();
+}
+
+/**
+ * A command of the guide, as written, in the folder of the site, by the one who delivers (an
+ * account with sudo, created at the first call). ofGuide: false for a command of the rehearsal.
+ */
+function as_deliverer(string $name, string $command, bool $allowFailure = false, bool $ofGuide = true): string
+{
+    if ($ofGuide) {
+        guide_has($command);
+    }
+    $user = DELIVERER;
+    in_container($name, "id {$user} > /dev/null 2>&1 || (useradd --create-home {$user} && echo '{$user} ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/{$user})");
+
+    return in_container($name, "sudo --user={$user} bash -c " . escapeshellarg("cd /var/www/www.lairdubois.fr && {$command}"), $allowFailure);
 }
 
 /**

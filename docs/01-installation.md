@@ -313,11 +313,11 @@ alias ladb-maintenance-start='sudo scripts/maintenanceStart.sh'
 alias ladb-maintenance-stop='sudo scripts/maintenanceStop.sh'
 alias ladb-git-pull-master='sudo --user=www-data git pull origin master'
 alias ladb-log='sudo --user=www-data lnav var/logs/prod.log'
-alias ladb-install='sudo --user=www-data env SYMFONY_ENV=prod composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-req=php+'
+alias ladb-install='sudo --user=www-data env COMPOSER_CACHE_DIR=var/composer SYMFONY_ENV=prod composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-req=php+'
 alias ladb-assets='sudo --user=www-data env npm_config_cache=var/npm npm ci --no-audit --no-fund && sudo --user=www-data env npm_config_cache=var/npm npx vite build'
 ```
 
-`--ignore-platform-req=php+`: some dependencies (`facebook/graph-sdk`, `spomky-labs/base64url`) only declare PHP 7, and Composer refuses them in PHP 8.5 otherwise. `--no-dev` and `SYMFONY_ENV=prod`: no development packages (fixtures, profiler) on the **PROD** server, and the scripts of Composer (`cache:clear`, `assets:install`) in prod.
+`--ignore-platform-req=php+`: some dependencies (`facebook/graph-sdk`, `spomky-labs/base64url`) only declare PHP 7, and Composer refuses them in PHP 8.5 otherwise. `--no-dev` and `SYMFONY_ENV=prod`: no development packages (fixtures, profiler) on the **PROD** server, and the scripts of Composer (`cache:clear`, `assets:install`) in prod. `COMPOSER_CACHE_DIR=var/composer` and `npm_config_cache=var/npm`: the caches of Composer and npm in the `var/` folder of the site, that www-data writes (its home, `/var/www` on Debian, may belong to root): a deployment downloads only what changed.
 
 > If you are on the **DEV** server :
 
