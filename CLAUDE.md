@@ -229,7 +229,8 @@ castor qa:delivery-rehearsal-destroy          # stack, copie en 3.4 et conteneur
 - Parties : `server` (conteneurs jetables), `setup` (copie en 3.4 et ses données), `before`
   (phase 1), `during` (phase 2 jusqu'au déploiement), `deploy` (du déploiement aux crons, puis
   une connexion avant la réouverture), `rollback` (de R2 à R6), `redeploy` (le code livré à
-  nouveau, sur la base que R6 a rendue à la 3.4), `after` (les vérifications sur les données migrées). Une
+  nouveau, sur la base que R6 a rendue à la 3.4), `after` (les vérifications sur les données
+  migrées, et les étapes 49 à 52), `late-rollback` (le retour arrière après la réouverture). Une
   étape en échec arrête la répétition, sauf dans `server` et `after` ; après un échec, la stack
   reste, et `--from` reprend à une partie (`deploy` se rejoue sur lui-même).
 - Copie en 3.4 : un worktree git de la copie qui répète (`var/delivery-rehearsal/delivery-rehearsal-<copie>`,
@@ -247,14 +248,19 @@ castor qa:delivery-rehearsal-destroy          # stack, copie en 3.4 et conteneur
   migrations de l'époque, retirées depuis), que l'étape 2 voit et que la migration
   `Version20261115140000` supprime. Une seule stack à la fois : la 3.4 et le code livré sont le
   même projet, les conteneurs changent au déploiement.
-- Étape 21 (les migrations sur une copie de la base) : une base `db_fr_lairdubois_www_livraison`
-  restaurée depuis `db.sql.gz`, et le code livré dans `/var/www/ladb-livraison` du builder (le
+- Étape 20 (le code livré dans un dossier à part) : `/var/www/ladb-livraison` du builder (le
   dossier `ladb-livraison` de la copie en 3.4, par `git archive` du commit livré), installé par
-  son propre composer : `php8.5` est un lien vers le PHP du builder, les variables de l'env-map
-  du code livré sont retirées (son `DATABASE_NAME` mènerait la copie à la base de la 3.4), et
-  `--ignore-platform-req=ext-amqp` s'ajoute à la commande (le builder de la 3.4 n'a pas
-  l'extension `amqp`, qu'a le serveur, P2, et dont les migrations ne se servent pas). Puis la base
-  de la 3.4 n'a pas changé (51 lignes de `migration_versions` au format 1.8, tables gardées).
+  son propre composer, npm et Vite : `php8.5` est un lien vers le PHP du builder, les variables de
+  l'env-map du code livré sont retirées (son `DATABASE_NAME` mènerait la copie à la base de la
+  3.4), et `--ignore-platform-req=ext-amqp` s'ajoute à la commande (le builder de la 3.4 n'a pas
+  l'extension `amqp`, qu'a le serveur, P2, et dont les migrations ne se servent pas). Les caches
+  (`var/composer`, `var/npm` de la copie en 3.4) sont vidés avant : `composer install` et `npm ci`
+  y prennent le temps d'une coupure sans eux, et les étapes 37 et 38 celui d'une coupure avec eux
+  (une ligne du tableau compare les deux). L'étape 37 échoue sur une ligne `Downloading`, l'étape
+  38 sur une requête de npm qui n'est pas une `cache hit` (`--loglevel=http` ajouté).
+- Étape 21 (les migrations sur une copie de la base) : une base `db_fr_lairdubois_www_livraison`
+  restaurée depuis `db.sql.gz`, migrée par la copie de l'étape 20. Puis la base de la 3.4 n'a pas
+  changé (51 lignes de `migration_versions` au format 1.8, tables gardées).
 - Retour arrière (R6) : `migration_versions` remise depuis `db-migrations.sql.gz` (la 3.4 compte
   alors 51 migrations jouées, 0 inconnue, 0 nouvelle) ; le second déploiement rejoue donc les
   quatre migrations de la livraison, sur les tables que R6 a remises.
@@ -264,11 +270,12 @@ castor qa:delivery-rehearsal-destroy          # stack, copie en 3.4 et conteneur
   paramètres ou ses extraits de vhost oblige à changer la répétition.
 - Adaptations à Docker : `sudo --user=www-data` = le builder, `sudo mariadb` et `sudo rabbitmqctl`
   = leurs conteneurs (`/root/.my.cnf` et le code dans `/var/www` pour MariaDB), `~/ladb-backup`
-  monté dans les deux ; git sur l'hôte (`git checkout` à la place de `git pull` et `git reset`) ;
-  systemd = les services Compose, en `--env=prod` comme les unités (`docker-compose.override.yml`
-  de la copie, écrit par la tâche) ; Mailpit sur le port 25 à la place de Postfix, et le double
-  `push` des navigateurs ; composer sans les variables de l'env-map du builder (`env -u`), le
-  `parameters.yml` étant celui du guide. Depuis l'étape 42, le frontend sert la configuration
+  monté dans les deux ; `/var/www/www.lairdubois.fr` = `/var/www` des conteneurs ; git sur
+  l'hôte (`git checkout` à la place de `git pull` et `git reset`) ; systemd = les services
+  Compose, en `--env=prod` comme les unités (`docker-compose.override.yml` de la copie, écrit par
+  la tâche) ; Mailpit sur le port 25 à la place de Postfix, et le double `push` des navigateurs ;
+  composer sans les variables de l'env-map du builder (`env -u`), le `parameters.yml` étant celui
+  du guide. Depuis l'étape 42, le frontend sert la configuration
   nginx de l'image de prod (`services/php/prod/nginx.conf`, `web/app.php`) avec `TRUSTED_HOSTS`.
   Les paquets du serveur sont les images de la copie, reconstruites au déploiement ; MariaDB et
   RabbitMQ, ceux de Debian 13 (11.8 et 4.0, au lieu des 10.11 et 3.13 du dev), dès la 3.4.
@@ -276,7 +283,7 @@ castor qa:delivery-rehearsal-destroy          # stack, copie en 3.4 et conteneur
   `consumer_timeout` de l'étape 17 (que la répétition pose toujours) reste quand Compose recrée
   le conteneur, et l'étape 27 redémarre RabbitMQ. Il est donné à `rabbitmq` dans le conteneur :
   `/etc/rabbitmq` est un dossier ouvert à tous avec le sticky bit, où le noyau refuse à root
-  d'écrire dans le fichier d'un autre (`fs.protected_regular`). Les étapes 11, 17 et 21 se
+  d'écrire dans le fichier d'un autre (`fs.protected_regular`). Les étapes 11, 17, 20 et 21 se
   rejouent avec `--from` ; le tableau garde aussi les résultats des passages précédents.
 - Conteneurs jetables (`<projet>-check-*`, Debian 13 et 12, supprimés à la fin) : PHP 8.5 de Sury
   à côté de PHP 7.3 (l'alternative `php`, le pool et le `php.ini` repris), Composer, Node 24,
@@ -284,19 +291,36 @@ castor qa:delivery-rehearsal-destroy          # stack, copie en 3.4 et conteneur
   (identiques à `docs/nginx/conf/`, puis `nginx -t`), les unités de `docs/01-installation.md`
   (`systemd-analyze verify`, les `sed` du guide sur celles de `master`), le hub Mercure avec son
   `mercure.env` (lu par le parseur de systemd) et l'empreinte de son archive, le code livré
-  installé en www-data (composer `--no-dev`, npm, Vite), un `%` seul dans `mailer_dsn` (cité par la
-  vérification de l'étape 11, container qui ne compile pas) puis `%%` (le container lit un `%`),
-  la page de maintenance servie par nginx (503 et `Retry-After`, sur `/`, une URL en `.html` et une
+  installé en www-data (composer `--no-dev`, son cache dans `var/composer`, npm, Vite), les
+  vérifications de `parameters.yml` des étapes 9 et 11 par un compte `livreur` (sudo) sur un
+  fichier que seul www-data lit (`secret` en ASCII, puis accentué ; un `%` seul dans `mailer_dsn`,
+  cité par la vérification de l'étape 11, container qui ne compile pas, puis `%%`, le container
+  lit un `%`), les alias de `master` dans `~/.bash_aliases`, avec un alias du serveur, puis
+  changés comme le dit l'étape 53 (la vérification ne cite plus que l'alias du serveur), la page
+  de maintenance servie par nginx (503 et `Retry-After`, sur `/`, une URL en `.html` et une
   image). Elasticsearch, dans un conteneur Debian 13 : la 5.6 de son paquet, avec un Java 8
   (Temurin) réglé dans `/etc/default/elasticsearch`, un réglage de systemd et un index, mise de
-  côté et purgée par le guide, puis la 9 installée, configurée et démarrée, puis R5 : la 5.6
-  réinstallée depuis son paquet, alors qu'un compte système a pris entre-temps le numéro de
-  l'utilisateur `elasticsearch` (les `chown` le lui rendent), retrouve son Java, son réglage de
-  systemd et son index. P7 : la commande du guide sur le `composer.lock` du commit livré, comparée
-  aux versions instables du lock ; tant que le lock en a, le tableau le dit (« prérequis non
-  rempli »), sans échec.
+  côté et purgée par le guide, puis la 9 installée, configurée et démarrée, son dépôt ajouté
+  (étape 51), puis R5 : le dépôt retiré, la 5.6 réinstallée depuis son paquet, alors qu'un compte
+  système a pris entre-temps le numéro de l'utilisateur `elasticsearch` (les `chown` le lui
+  rendent), retrouve son Java, son réglage de systemd et son index. P7 : la commande du guide sur
+  le `composer.lock` du commit livré, comparée aux versions instables du lock ; tant que le lock
+  en a, le tableau le dit (« prérequis non rempli »), sans échec.
+- Étape 52, dans `after` : `chromium_sandbox: true`, `cache:clear`, puis les cinq services des
+  workers et des crons redémarrés (leur `StartedAt` après le `cache:clear`, pour
+  l'`ActiveEnterTimestamp` de systemd), avant les vérifications qui passent par eux ; le builder
+  et `worker_cron` ont le profil seccomp de Chromium. Étape 55 : le scheduler arrêté, un
+  `RunCommandMessage` de `fos:elastica:populate` mis dans la file `cron` par le bus (comme le
+  scheduler, `TransportNamesStamp`), puis l'arrêt du worker pendant qu'il le lance : il attend la
+  fin du cron, acquitte le message et sort en 0.
+- `late-rollback` : après `after` (files et échanges de la 3.4 supprimés, cache vidé, chaque
+  compte des fixtures connecté au code livré), les services du code livré arrêtés, R2, R5, R6,
+  `fos:elastica:populate` de la 3.4, ses consumers qui recréent leurs files et leurs échanges et
+  comptent une vue, puis `user`, refusé, repasse par « mot de passe oublié » (le jeton lu en base,
+  le mail reste dans le spool).
 - Pas joués : la montée de Debian, la crontab (et les autres crontabs), `timedatectl`, l'échange
-  de vhost de la maintenance, systemd et les scripts de maintenance (seulement `bash -n`), Postfix
+  de vhost de la maintenance, systemd et les scripts de maintenance (seulement `bash -n` ;
+  `systemctl enable php7.3-fpm` de R7, `systemctl restart` et `stop` des étapes 52 et 55), Postfix
   et le relais (le mail de test de l'étape 46 va dans Mailpit), les durées et les volumes de la
   prod. L'effet du `consumer_timeout` sur un cron de plus de 30 minutes n'est pas joué dans la
   répétition : vérifié à part (#312), sur RabbitMQ 3.10 et 4.0 jetables, avec un message pris

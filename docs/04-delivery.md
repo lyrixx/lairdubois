@@ -48,7 +48,7 @@ l'expliquent.
 - La place disque, dans `~/ladb-backup` et sur les disques de MariaDB et d'Elasticsearch : deux
   sauvegardes de la base (étapes 18 et 22) et une du code (`vendor/` compris), une copie de la base
   et du code livré le temps des étapes 20 et 21, les caches de Composer et de npm dans `var/` du
-  site (étape 20, @@CACHE_SIZES@@ dans la répétition), les données d'Elasticsearch 5.6 gardées pour
+  site (étape 20, 41 Mo et 20 Mo dans la répétition), les données d'Elasticsearch 5.6 gardées pour
   le retour arrière à côté de celles de la 9, et les paquets d'Elasticsearch 9 (650 Mo) et 5.6
   (35 Mo). La file `mailer` de RabbitMQ garde aussi sur disque la lettre de la semaine, le temps de
   l'envoyer. La mémoire de deux PHP-FPM à la fois pendant la phase 1 (étape 12) et du hub Mercure.
@@ -68,15 +68,16 @@ l'expliquent.
 
 Tout ce qui peut se faire site ouvert est dans la phase 1, les jours d'avant. La coupure va de
 l'étape 23 à l'étape 47. Dans la répétition (fixtures, une machine de développement), ses
-commandes prennent @@CUT_TOTAL@@ en tout, dont @@COMPOSER_WARM@@ pour `composer install`, @@ASSETS_WARM@@ pour le CSS et
-le JS et 40 s pour installer et démarrer Elasticsearch 9 : le reste de la coupure est le temps de
-copier les commandes et de lire les vérifications, une demi-heure environ.
+commandes prennent 1 min 30 s en tout, dont 5 à 7 s pour `composer install`, 7 à 8 s pour le CSS
+et le JS et 40 s pour installer et démarrer Elasticsearch 9 : le reste de la coupure est le temps
+de copier les commandes et de lire les vérifications, une demi-heure environ.
 
 `composer install` et `npm ci` (étapes 37 et 38) ne téléchargent rien : les paquets du code livré
 sont dans les caches de Composer et de npm, remplis à l'étape 20, et la coupure ne dépend ni de
-Packagist, ni de GitHub, ni de npm. Dans la répétition, ils prennent @@COMPOSER_WARM@@ et @@NPM_WARM@@, contre
-@@COMPOSER_COLD@@ et @@NPM_COLD@@ avec des caches vides ; sur le serveur, l'écart dépend du réseau. Un code livré qui
-change après l'étape 20 (P7) télécharge ce qui manque : refaire l'étape 20.
+Packagist, ni de GitHub, ni de npm. Dans la répétition, sur un réseau rapide, le gain de temps est
+faible : `composer install` passe de 10 s (caches vides) à 5 à 7 s, `npm ci` reste à 2 s. Sur le
+serveur, il dépend de son réseau et de la charge de ces services. Un code livré qui change après
+l'étape 20 (P7) télécharge ce qui manque : refaire l'étape 20.
 
 Sur le serveur, trois étapes dépendent du volume :
 
@@ -854,11 +855,13 @@ sudo --user=www-data env COMPOSER_CACHE_DIR=/var/www/www.lairdubois.fr/var/compo
 Vérification : les trois dernières commandes finissent sans erreur,
 `ls /var/www/ladb-livraison/web/build/manifest.json` trouve le fichier (le CSS et le JS se
 construisent avec le Node du serveur), et `sudo du -sh var/composer var/npm` donne la taille des
-caches (@@CACHE_SIZES@@ dans la répétition). Sinon : ne pas livrer, envoyer la sortie. Le dossier
-reste pour l'étape 21, qui le supprime. Un dossier laissé par un passage précédent fait échouer le
-`mkdir` : `sudo rm -rf /var/www/ladb-livraison` avant. À refaire si le code livré change (P7) : les
-caches n'auraient pas ses nouveaux paquets. Répétition : jouée (`composer install` en @@COMPOSER_COLD@@ et
-`npm ci` en @@NPM_COLD@@, caches vides). (#314)
+caches (41 Mo et 20 Mo dans la répétition). Sinon : ne pas livrer, envoyer la sortie ; un dossier
+de cache que `du` ne trouve pas, c'est que www-data n'écrit pas dans `var/` (`ls -ld var`), et que
+Composer ou npm ont tout téléchargé sans le garder. Le dossier reste pour l'étape 21, qui le
+supprime. Un dossier laissé par un passage précédent fait échouer le `mkdir` :
+`sudo rm -rf /var/www/ladb-livraison` avant. À refaire si le code livré change (P7) : les caches
+n'auraient pas ses nouveaux paquets. Répétition : jouée (`composer install` en 10 s et `npm ci` en
+2 s, caches vides). (#314)
 
 ### 21. Rejouer les migrations sur une copie de la base
 
@@ -1165,7 +1168,7 @@ sudo --user=www-data env COMPOSER_CACHE_DIR=var/composer SYMFONY_ENV=prod compos
 Vérification : la commande finit sans erreur, sans ligne `Downloading` (tout vient du cache ;
 sinon, elle télécharge ce qui manque, en plus de temps), et
 `sudo grep -c -E '^\s+(mailer_host|websocket_uri|ga_tracking_id|node):' app/config/parameters.yml`
-affiche `0`. Durée : @@COMPOSER_WARM@@ (@@COMPOSER_COLD@@ avec un cache vide). Relance : oui. Répétition : jouée, sans rien
+affiche `0`. Durée : 5 à 7 s (10 s avec un cache vide). Relance : oui. Répétition : jouée, sans rien
 télécharger ; aussi dans un conteneur Debian 13, en www-data avec un `/var/www` à root, sur une
 copie du code livré. (#101, #190, #314)
 
@@ -1179,10 +1182,10 @@ sudo --user=www-data env npm_config_cache=var/npm npx vite build
 ```
 
 Vérification : `ls web/build/manifest.json web/build/entrypoints.json` liste les deux fichiers.
-Sans eux, toutes les pages répondent 500. Durée : @@ASSETS_WARM@@, dont @@NPM_WARM@@ pour `npm ci` (@@NPM_COLD@@ avec un
-cache vide). Relance : oui. Répétition : jouée, sans requête au registre de npm (`--loglevel=http`
-ajouté : chaque paquet vient du cache) ; aussi dans un conteneur Debian 13, comme l'étape 37.
-(#17, #112, #314)
+Sans eux, toutes les pages répondent 500. Durée : 7 à 8 s, dont 2 s pour `npm ci` (autant avec un
+cache vide, sur le réseau de la répétition). Relance : oui. Répétition : jouée, sans requête au
+registre de npm (`--loglevel=http` ajouté : chaque paquet vient du cache) ; aussi dans un conteneur
+Debian 13, comme l'étape 37. (#17, #112, #314)
 
 ### 39. Cache
 
@@ -1434,9 +1437,10 @@ systemctl show -p ActiveEnterTimestamp ladb_scheduler ladb_consumer_cron ladb_co
 
 donne cinq heures de démarrage, toutes après le `cache:clear`, et la dernière commande finit sans
 `No usable sandbox!`. Sinon : remettre `false`, puis `cache:clear` et le redémarrage. Répétition :
-jouée (le `cache:clear`, puis les services Docker redémarrés après lui ; une vue, une notification,
-un mail et un cron passent ensuite par eux) ; le bac à sable est vérifié par `castor qa:prod-smoke`.
-(#291, #295, #314)
+jouée (`chromium_sandbox: true`, le `cache:clear`, les services Docker redémarrés après lui, puis la
+capture d'un processus par Chromium dans son bac à sable, avec le profil seccomp de la stack ; une
+vue, une notification, un mail et un cron passent ensuite par les workers redémarrés) ; le `sysctl`
+et systemd non joués. (#291, #295, #314)
 
 ### 53. Les alias du serveur
 
@@ -1479,10 +1483,10 @@ non jouée.
 - Déploiement : `scripts/maintenanceStart.sh` et `maintenanceStop.sh` sont à jour (PHP-FPM 8.5,
   workers et crons), comme les alias (étape 53). Le consumer `mailer` est à redémarrer à chaque
   déploiement : `maintenanceStop.sh` le fait.
-- Un déploiement peut laisser le site fermé une heure : `maintenanceStart.sh` passe en maintenance, puis arrête
-  `ladb_consumer_cron`, qui finit d'abord le cron en cours (`TimeoutStopSec=1h` de son unité :
-  systemd le tuerait sinon au bout de 90 secondes, au milieu du cron). Pour ne pas l'attendre site
-  fermé, arrêter les crons avant, site ouvert :
+- Un déploiement peut laisser le site fermé une heure : `maintenanceStart.sh` passe en
+  maintenance, puis arrête `ladb_consumer_cron`, qui finit d'abord le cron en cours
+  (`TimeoutStopSec=1h` de son unité : systemd le tuerait sinon au bout de 90 secondes, au milieu
+  du cron). Pour ne pas l'attendre site fermé, arrêter les crons avant, site ouvert :
 
   ```bash
   sudo systemctl stop ladb_scheduler ladb_consumer_cron
@@ -1493,8 +1497,9 @@ non jouée.
   `sudo scripts/maintenanceStart.sh`, qui les trouve arrêtés. Le scheduler, redémarré par
   `maintenanceStop.sh`, rattrape les crons manqués entre-temps (le dernier passage de chacun). Le
   plus long, les sitemaps, passe à 3 h (étape 17) : déployer à une autre heure. Répétition :
-  vérifiée autrement (services Docker : un cron mis dans la file `cron` pendant que le worker
-  tourne ; son arrêt attend la fin du cron, puis le message est acquitté). (#300, #314)
+  vérifiée autrement (services Docker : un cron, la reconstruction de l'index, mis dans la file
+  `cron` ; arrêté pendant qu'il tourne, le worker recrée encore des index après le signal, va au
+  bout, acquitte le message et sort en 0). (#300, #314)
 - Schéma : ne jamais lancer `doctrine:schema:update --force` sur la prod. Le code livré (ORM 3)
   compare tout le schéma : il supprimerait les tables hors du mapping et ramènerait les colonnes à
   la collation de leur table, au risque de perdre des caractères. Le schéma change par une
@@ -1673,4 +1678,10 @@ Vérification : `curl -s 'http://127.0.0.1:9200/_cat/indices?v'` liste les index
 leurs documents. Puis R7, et, si l'étape 53 est faite, les anciens alias :
 `cp -a ~/ladb-backup/bash_aliases ~/.bash_aliases`.
 
-Répétition : @@LATE_ROLLBACK@@
+Répétition : jouée après les vérifications de la phase 3 et les étapes 49, 50 et 52 (les files et
+les échanges de la 3.4 supprimés, le cache du code livré vidé, chaque compte des fixtures connecté
+au code livré) : les services du code livré arrêtés, R2, R5 et R6, puis l'index reconstruit par la
+3.4, qui y trouve ses contenus ; ses consumers recréent leurs files et leurs échanges, et une vue
+est comptée ; un compte connecté au code livré est refusé, repasse par « mot de passe oublié » et
+se connecte. Le dépôt de la 9 retiré par R5 est vérifié autrement (conteneur Debian 13) ;
+`maintenanceStart.sh`, R1, R3, R4 et R7 (systemd, crontab) ne sont pas joués tels quels.

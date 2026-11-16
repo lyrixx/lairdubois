@@ -548,13 +548,15 @@ function part_late_rollback(Report $r): void
         check_search();
     });
     $r->check('Après la réouverture : les anciens consumers recréent les files et les échanges supprimés à l\'étape 50 ; une vue comptée', static function (): void {
-        guide_has('sudo rabbitmqctl list_queues name');
         compose(['up', '--detach', '--no-build', 'worker_consumer_view', 'worker_consumer_webpush_notification', 'websocket']);
+        // Each queue with its consumer
         wait_for(static function (): bool {
-            $queues = play('sudo rabbitmqctl list_queues name consumers', 'rabbitmq', quiet: true, allowFailure: true);
+            $queues = in_service('rabbitmq', 'rabbitmqctl -q list_queues name consumers', quiet: true)->getOutput();
 
             return 1 === preg_match('{^view_queue\s+1$}m', $queues) && 1 === preg_match('{^webpush_notification_queue\s+1$}m', $queues);
         }, 'The old consumers do not create their queues again.');
+        $queues = play('sudo rabbitmqctl list_queues name', 'rabbitmq', quiet: true);
+        expect(1 === preg_match('{^view_queue$}m', $queues) && 1 === preg_match('{^webpush_notification_queue$}m', $queues), "The old queues are not listed:\n{$queues}");
         $exchanges = play('sudo rabbitmqctl list_exchanges name', 'rabbitmq', quiet: true);
         expect(1 === preg_match('{^view_exchange$}m', $exchanges) && 1 === preg_match('{^webpush_notification_exchange$}m', $exchanges), "The old exchanges are not created again:\n{$exchanges}");
         // A new anonymous session: its first view of the creation is counted by the old consumer
@@ -687,8 +689,9 @@ function deploy(Report $r, string $delivered): void
         $r->state['npm_warm'] = timed(static function () use (&$output): void {
             $output = play('sudo --user=www-data env npm_config_cache=var/npm npm ci --no-audit --no-fund', suffix: ' --loglevel=http');
         });
-        preg_match_all('{^npm http fetch .*$}m', $output, $fetches);
-        $network = preg_grep('{\(cache hit\)$}', $fetches[0], \PREG_GREP_INVERT);
+        // "npm http cache … (cache hit)" for a package of the cache, "npm http fetch …" for a request
+        preg_match_all('{^npm http (?:cache|fetch) .*$}m', $output, $fetches);
+        $network = preg_grep('{^npm http cache .*\(cache hit\)$}', $fetches[0], \PREG_GREP_INVERT);
         expect([] === $network, \count($network) . " requests of npm not answered by its cache:\n" . implode("\n", \array_slice($network, 0, 10)));
         $r->state['assets_warm'] = $r->state['npm_warm'] + timed(static fn () => play('sudo --user=www-data env npm_config_cache=var/npm npx vite build'));
         expect(is_file(tree_dir() . '/web/build/manifest.json') && is_file(tree_dir() . '/web/build/entrypoints.json'), 'No manifest.json or entrypoints.json in web/build.');
@@ -1166,17 +1169,35 @@ function check_cron_stop(): void
         $kernel->boot();
         $kernel->getContainer()->get('messenger.default_bus')->dispatch(new Symfony\Component\Console\Messenger\RunCommandMessage('fos:elastica:populate'), [new Symfony\Component\Messenger\Stamp\TransportNamesStamp(['cron'])]);
         PHP;
+    // The indexes and their documents: the cron creates each of them again, one after the other
+    $indices = static fn () => array_map(static fn (string $line) => preg_split('{\s+}', $line), array_filter(explode("\n", trim(in_builder("curl -s 'http://elasticsearch:9200/_cat/indices/ladb_*?h=index,creation.date,docs.count&s=index'", quiet: true)->getOutput()))));
+    $before = $indices();
+    $dispatched = (int) (microtime(true) * 1000);
     $process = in_builder('php -r ' . escapeshellarg($dispatch), quiet: true);
     expect($process->isSuccessful(), "The cron is not put in the queue:\n" . tail($process->getOutput() . $process->getErrorOutput()));
-    $queue = static fn () => trim(play('sudo rabbitmqctl list_queues name messages_ready messages_unacknowledged', 'rabbitmq', quiet: true));
-    wait_for(static fn () => 1 === preg_match('{^cron\s+0\s+1$}m', $queue()), "The worker of the crons does not take the cron:\n" . $queue());
+    $queue = static fn () => trim(in_service('rabbitmq', 'rabbitmqctl -q list_queues name messages_ready messages_unacknowledged', quiet: true)->getOutput());
+    // Taken by the worker, not acknowledged yet: the cron runs
+    $end = time() + 60;
+    while (1 !== preg_match('{^cron\s+0\s+1$}m', $queue())) {
+        expect(time() < $end, "The worker of the crons does not take the cron:\n" . $queue());
+        usleep(200000);
+    }
+    $stopped = (int) (microtime(true) * 1000);
     $seconds = timed(static fn () => compose(['stop', 'worker_cron']));
     $container = trim(compose(['ps', '--all', '--quiet', 'worker_cron']));
     $exit = trim(run(['docker', 'inspect', '-f', '{{.State.ExitCode}}', $container], context: context()->withQuiet())->getOutput());
     io()->text("The worker of the crons stopped in {$seconds} s, exit code {$exit}.");
     expect(1 === preg_match('{^cron\s+0\s+0$}m', $queue()), "The cron is not acknowledged:\n" . $queue());
     expect('0' === $exit, "The worker of the crons exits with {$exit}.");
-    expect($seconds >= 2, "The worker of the crons stopped in {$seconds} s: it did not wait for the cron.");
+    // Every index created again after the cron was put in the queue, with its documents: the cron
+    // went to its end
+    $after = $indices();
+    expect(array_column($before, 0) === array_column($after, 0) && array_column($before, 2) === array_column($after, 2), "The indexes are not those of before the cron:\n" . json_encode([$before, $after]));
+    expect([] === array_filter($after, static fn (array $index) => (int) $index[1] < $dispatched), "Indexes not created again by the cron:\n" . json_encode($after));
+    // The last ones after the signal: the worker waited for them
+    $late = \count(array_filter($after, static fn (array $index) => (int) $index[1] > $stopped));
+    io()->text("{$late} of " . \count($after) . ' indexes created by the cron after the signal.');
+    expect($late > 0, 'The cron ended before the stop of the worker: nothing to wait for.');
     compose(['up', '--detach', '--no-build', 'scheduler', 'worker_cron']);
     // The index rebuilt by the cron is whole
     check_search();
