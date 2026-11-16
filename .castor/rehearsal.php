@@ -39,7 +39,7 @@ const INSTALLATION = 'docs/01-installation.md';
 const WORK_DIR = 'var/delivery-rehearsal';
 
 // The parts of a rehearsal, in their order
-const PARTS = ['server', 'setup', 'before', 'during', 'deploy', 'rollback', 'redeploy', 'after'];
+const PARTS = ['server', 'setup', 'before', 'during', 'deploy', 'rollback', 'redeploy', 'after', 'late-rollback'];
 
 // The hub of the stack signs with it (MERCURE_JWT_SECRET of docker-compose.yml)
 const MERCURE_SECRET = 'lairdubois-dev-mercure-jwt-secret-not-secret';
@@ -77,9 +77,22 @@ const ORPHAN_TABLES = [
     ],
 ];
 
-// The throwaway database and the folder of the copy of the code delivered (step 20 of the guide)
+// The throwaway database and the folder of the copy of the code delivered (steps 20 and 21 of the
+// guide)
 const COPY_DATABASE = 'db_fr_lairdubois_www_livraison';
 const COPY_DIR = 'ladb-livraison';
+
+// The checks of parameters.yml of steps 9 and 11, by sudo: the file may be readable by www-data
+// only (rehearsal_server.php plays them so)
+const SECRET_CHECK = "sudo grep -E '^\\s*secret:' app/config/parameters.yml | LC_ALL=C grep -c -v -P '[^\\x00-\\x7F]'";
+const PERCENT_CHECK = "sudo sed 's/%%//g' app/config/parameters.yml | grep -n '%' | cut -d: -f1,2";
+
+// Step 37, with the cache of Composer that step 20 fills
+const COMPOSER_INSTALL = 'sudo --user=www-data env COMPOSER_CACHE_DIR=var/composer SYMFONY_ENV=prod composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-req=php+';
+
+// The workers and the crons, restarted after a cache:clear (steps 46 and 52)
+const RESTART_WORKERS = 'sudo systemctl restart ladb_scheduler ladb_consumer_cron ladb_consumer_mailer ladb_consumer_view ladb_consumer_webpush';
+const WORKER_SERVICES = ['scheduler', 'worker_cron', 'worker_consumer_mailer', 'worker_consumer_view', 'worker_consumer_webpush_notification'];
 
 // The p256dh and auth keys of a browser (tests/Webpush/SubscriptionTest.php), for the
 // subscriptions of the accounts, to the double "push"
@@ -99,7 +112,7 @@ const PUSH_SUBSCRIPTION_KEYS = [
 function rehearsal(
     #[AsOption(description: 'Keeps the stack and the copy in 3.4 at the end (castor qa:delivery-rehearsal-destroy removes them)')]
     bool $keep = false,
-    #[AsOption(description: 'Starts from this part, on a stack kept by --keep: server, setup, before, during, deploy, rollback, redeploy or after')]
+    #[AsOption(description: 'Starts from this part, on a stack kept by --keep: server, setup, before, during, deploy, rollback, redeploy, after or late-rollback')]
     ?string $from = null,
     #[AsOption(description: 'Stops after this part, and keeps the stack (server alone: the packages, systemd and nginx in the throwaway containers)')]
     ?string $to = null,
@@ -140,6 +153,7 @@ function rehearsal(
                 'rollback' => part_rollback($report),
                 'redeploy' => part_redeploy($report, $delivered),
                 'after' => part_after($report),
+                'late-rollback' => part_late_rollback($report),
             };
             $report->save();
         }
@@ -228,7 +242,7 @@ function part_before(Report $r, string $delivered): void
         $head = trim(run(['git', 'log', '-1', '--format=%H'], context: context()->withWorkingDirectory(tree_dir())->withQuiet())->getOutput());
         expect(OLD_COMMIT === $head, "The copy is at {$head}.");
         // The files of master that the commit in 3.4 does not write (sensio/distribution-bundle,
-        // Assetic, robloach/component-installer), ignored by the .gitignore of master: step 32
+        // Assetic, robloach/component-installer), ignored by the .gitignore of master: step 34
         // removes them
         in_builder('mkdir -p web/css web/js components/jquery && touch var/bootstrap.php.cache var/SymfonyRequirements.php web/css/base.css web/js/base.js components/jquery/jquery.js');
     });
@@ -257,11 +271,11 @@ function part_before(Report $r, string $delivered): void
     $r->step('Vérifier les données', static function (): void {
         $invalid = play('sudo mariadb db_fr_lairdubois_www -e "SELECT COUNT(*) FROM tbl_webpush_user_subscription WHERE NOT JSON_VALID(subscription)"', 'mariadb');
         expect(1 === preg_match('{^\D*0\s*$}', $invalid), "Invalid JSON in tbl_webpush_user_subscription:\n{$invalid}");
-        $ascii = play("grep -E '^\\s*secret:' app/config/parameters.yml | LC_ALL=C grep -c -P '[^\\x00-\\x7F]'", allowFailure: true);
-        expect('0' === trim($ascii), "The secret is not in ASCII: {$ascii}");
+        $ascii = play(SECRET_CHECK, allowFailure: true);
+        expect('1' === trim($ascii), "The secret is not in ASCII: {$ascii}");
     });
     $r->step('Préparer le DSN des mails', static function (): void {
-        $output = play("grep -E '^\\s*mailer_' app/config/parameters.yml");
+        $output = play("sudo grep -E '^\\s*mailer_' app/config/parameters.yml");
         // smtp://localhost:25 in production, Mailpit instead of Postfix here
         foreach (['mailer_transport:\s+smtp', 'mailer_host:\s+mailpit', 'mailer_user:\s+null', 'mailer_password:\s+null'] as $expected) {
             expect(1 === preg_match("{{$expected}}", $output), "The mailer_* parameters are not those of a local SMTP:\n{$output}");
@@ -270,7 +284,7 @@ function part_before(Report $r, string $delivered): void
     });
     $r->step('Paramètres du code livré', static function (): void {
         add_delivery_parameters();
-        $percents = play("sed 's/%%//g' app/config/parameters.yml | grep -n '%' | cut -d: -f1,2", allowFailure: true);
+        $percents = play(PERCENT_CHECK, allowFailure: true);
         expect('' === trim($percents), "A parameter has a single %:\n{$percents}");
         check_old_site();
     });
@@ -279,7 +293,7 @@ function part_before(Report $r, string $delivered): void
         $output = play('time sudo --user=www-data bin/console --env=prod ladb:cron:sitemaps --force');
         expect(1 === preg_match('{real\s+(\d+)m([\d.]+)s}', $output, $matches), "No duration:\n{$output}");
         io()->text("The sitemaps of the 3.4: {$matches[1]} min {$matches[2]} s.");
-        // The setting anyway, read when RabbitMQ starts again (step 25). /etc/rabbitmq/rabbitmq.conf
+        // The setting anyway, read when RabbitMQ starts again (step 27). /etc/rabbitmq/rabbitmq.conf
         // is a file of the copy (write_override()): it stays when Compose creates the container
         // again. It belongs to rabbitmq, as its folder: in a sticky folder open to all, the kernel
         // refuses to root to write in a file of another user (fs.protected_regular). Once only, for
@@ -298,8 +312,14 @@ function part_before(Report $r, string $delivered): void
         play('sudo tar -czf ~/ladb-backup/code-3.4.tar.gz --ignore-failed-read vendor web/bundles web/css web/js components app/config/parameters.yml var/bootstrap.php.cache');
         expect('1' === trim(play("tar -tzf ~/ladb-backup/code-3.4.tar.gz | grep -c '^vendor/autoload.php$'")), 'vendor/ is not in the backup of the code.');
     });
-    $r->step('Rejouer les migrations sur une copie de la base', static fn () => rehearse_migrations_on_a_copy($delivered));
+    $r->step('Installer le code livré dans un dossier à part', static fn () => install_a_copy($r, $delivered));
+    $r->step('Rejouer les migrations sur une copie de la base', rehearse_migrations_on_a_copy(...));
     $r->check('La 3.4 marche après la phase 1 : connexion, pages, session écrite', check_old_site(...));
+    // The last one before the maintenance, site open
+    $r->step('Sauvegarder la base, le jour même', static function (): void {
+        play('sudo mariadb-dump --single-transaction --quick --routines db_fr_lairdubois_www | gzip > ~/ladb-backup/db-avant-maintenance.sql.gz', 'mariadb');
+        expect(str_contains(play('zcat ~/ladb-backup/db-avant-maintenance.sql.gz | tail -1'), '-- Dump completed on'), 'The dump of the database is not complete.');
+    });
 }
 
 /**
@@ -344,33 +364,47 @@ function delivery_dropped_tables(): array
 }
 
 /**
- * Step 20 of the guide: the backup of the database in a throwaway one, migrated by a copy of the
- * code delivered (git archive, its own composer install). The database of the 3.4 and its site do
- * not change.
+ * Step 20 of the guide: a copy of the code delivered (git archive), installed by its own composer
+ * and npm, with the caches of var/ of the site that steps 37 and 38 take again. They start empty:
+ * the timings are those of a cutover without them.
  */
-function rehearse_migrations_on_a_copy(string $delivered): void
+function install_a_copy(Report $r, string $delivered): void
 {
-    // Nothing of a rehearsal taken again with --from
-    sql('DROP DATABASE IF EXISTS ' . COPY_DATABASE);
-    play('sudo mariadb -e "CREATE DATABASE db_fr_lairdubois_www_livraison"', 'mariadb');
-    play('zcat ~/ladb-backup/db.sql.gz | sudo mariadb db_fr_lairdubois_www_livraison', 'mariadb');
-    expect(\count(ORPHAN_TABLES) === \count(orphan_tables(COPY_DATABASE)), 'The throwaway database has not the tables of the backup.');
-
     // /var/www/ladb-livraison in the builder: the commit delivered, by git archive on the host
     foreach (['sudo mkdir /var/www/ladb-livraison', 'sudo chown www-data: /var/www/ladb-livraison', 'sudo --user=www-data git archive origin/master | sudo --user=www-data tar -x -C /var/www/ladb-livraison'] as $command) {
         guide_has($command);
     }
     $copy = tree_dir() . '/' . COPY_DIR;
-    fs()->remove($copy);
+    fs()->remove([$copy, tree_dir() . '/var/composer', tree_dir() . '/var/npm']);
     fs()->mkdir($copy);
     run(['sh', '-c', 'git archive ' . escapeshellarg($delivered) . ' | tar -x -C ' . escapeshellarg($copy)], context: context()->withQuiet());
     play("sudo sed 's/^\\(\\s*database_name:\\s*\\).*/\\1db_fr_lairdubois_www_livraison/' app/config/parameters.yml | sudo --user=www-data tee /var/www/ladb-livraison/app/config/parameters.yml > /dev/null");
     // The variables of the builder for parameters.yml go, those of the code delivered: its
     // DATABASE_NAME would point the copy to the database of the 3.4. The builder of the 3.4 has
     // not the extension amqp (php-amqplib), that the server has (P2), nor the migrations need
-    play('sudo --user=www-data env SYMFONY_ENV=prod php8.5 "$(command -v composer)" --working-dir=/var/www/ladb-livraison install --no-dev --optimize-autoloader --no-interaction --ignore-platform-req=php+', prefix: php85() . unset_parameter_variables($copy . '/composer.json'), suffix: ' --ignore-platform-req=ext-amqp');
-    $prefix = php85();
+    $r->state['composer_cold'] = timed(static fn () => play('sudo --user=www-data env COMPOSER_CACHE_DIR=/var/www/www.lairdubois.fr/var/composer SYMFONY_ENV=prod php8.5 "$(command -v composer)" --working-dir=/var/www/ladb-livraison install --no-dev --optimize-autoloader --no-interaction --ignore-platform-req=php+', prefix: php85() . unset_parameter_variables($copy . '/composer.json'), suffix: ' --ignore-platform-req=ext-amqp'));
     expect(1 === preg_match('{^\s+database_name:\s+db_fr_lairdubois_www_livraison$}m', file_get_contents($copy . '/app/config/parameters.yml')), 'The copy does not use the throwaway database.');
+    $r->state['npm_cold'] = timed(static fn () => play('(cd /var/www/ladb-livraison && sudo --user=www-data env npm_config_cache=/var/www/www.lairdubois.fr/var/npm npm ci --no-audit --no-fund)'));
+    play('(cd /var/www/ladb-livraison && sudo --user=www-data env npm_config_cache=/var/www/www.lairdubois.fr/var/npm npx vite build)');
+    guide_has('ls /var/www/ladb-livraison/web/build/manifest.json');
+    expect(is_file($copy . '/web/build/manifest.json'), 'The copy has no web/build/manifest.json.');
+    $r->state['cache_sizes'] = trim(play('sudo du -sh var/composer var/npm'));
+    io()->text(\sprintf('composer install in %s, npm ci in %s, with empty caches. Caches: %s', format_duration($r->state['composer_cold']), format_duration($r->state['npm_cold']), str_replace("\n", ', ', $r->state['cache_sizes'])));
+}
+
+/**
+ * Step 21 of the guide: the backup of the database in a throwaway one, migrated by the copy of
+ * step 20, then both removed. The database of the 3.4 and its site do not change.
+ */
+function rehearse_migrations_on_a_copy(): void
+{
+    // Nothing of a rehearsal taken again with --from
+    sql('DROP DATABASE IF EXISTS ' . COPY_DATABASE);
+    play('sudo mariadb -e "CREATE DATABASE db_fr_lairdubois_www_livraison"', 'mariadb');
+    play('zcat ~/ladb-backup/db.sql.gz | sudo mariadb db_fr_lairdubois_www_livraison', 'mariadb');
+    expect(\count(ORPHAN_TABLES) === \count(orphan_tables(COPY_DATABASE)), 'The throwaway database has not the tables of the backup.');
+    $copy = tree_dir() . '/' . COPY_DIR;
+    $prefix = php85();
 
     $output = play('time sudo --user=www-data php8.5 /var/www/ladb-livraison/bin/console --env=prod doctrine:migrations:migrate --no-interaction', prefix: $prefix);
     preg_match_all('{Migrating up to (\S+)}', $output, $matches);
@@ -457,6 +491,12 @@ function part_during(Report $r): void
 function part_deploy(Report $r, string $delivered): void
 {
     deploy($r, $delivered);
+    $s = $r->state;
+    $time = static fn (string $key) => isset($s[$key]) ? format_duration($s[$key]) : '?';
+    $label = \sprintf("Caches de l'étape 20 : composer install en %s au lieu de %s, npm ci en %s au lieu de %s (caches vides) ; caches : %s", $time('composer_warm'), $time('composer_cold'), $time('npm_warm'), $time('npm_cold'), str_replace("\n", ', ', $s['cache_sizes'] ?? '?'));
+    $r->check($label, static function () use ($s): void {
+        expect(isset($s['composer_cold'], $s['composer_warm'], $s['npm_cold'], $s['npm_warm']), 'No timings of composer install and npm ci (steps 20, 37 and 38).');
+    }, strict: false);
     $r->check('Avant la réouverture : connexion au code livré d\'un compte au hash sha512 (user2), refait en bcrypt', static function (): void {
         $browser = new Browser();
         expect($browser->login('user2'), 'user2 does not log in.');
@@ -470,10 +510,77 @@ function part_deploy(Report $r, string $delivered): void
  */
 function part_rollback(Report $r): void
 {
+    rollback_code_and_index($r);
+    $r->step('La base', static function (): void {
+        rollback_database();
+        // The 3.4 on the migrated database, its consumers and its websocket
+        compose(['up', '--detach', '--no-build', 'worker_consumer_view', 'worker_consumer_webpush_notification', 'websocket']);
+        check_old_site('user');
+        check_search();
+    });
+    $r->check('La 3.4 refuse le compte refait en bcrypt par le code livré (user2) : le point de non-retour', static function (): void {
+        expect(!(new Browser())->login('user2'), 'user2 logs in to the 3.4 with a password hashed by the code delivered.');
+    });
+    $r->check('Retour à l\'état de la maintenance : anciens consumers arrêtés, Elasticsearch 5.6 arrêté', static function (): void {
+        compose(['stop', 'worker_consumer_view', 'worker_consumer_webpush_notification', 'websocket', 'elasticsearch']);
+        play('sudo rm -rf var/bootstrap.php.cache var/SymfonyRequirements.php web/css web/js components var/cache/prod var/cache/dev');
+    });
+}
+
+/**
+ * The rollback after the reopening ("Après la réouverture" of the guide), on the stack after the
+ * checks of phase 3: the old queues and exchanges deleted (step 50), the caches of the code
+ * delivered cleared (step 52), every account of the fixtures logged in to the code delivered. The
+ * maintenance, R2 to R6, the index rebuilt by the 3.4, then its consumers and a password reset.
+ */
+function part_late_rollback(Report $r): void
+{
+    $r->check('Après la réouverture : repasser en maintenance (maintenanceStart.sh : arrêt des workers et des crons)', static function (): void {
+        guide_has('sudo scripts/maintenanceStart.sh');
+        compose(['stop', ...WORKER_SERVICES]);
+    });
+    rollback_code_and_index($r);
+    $r->step('La base', rollback_database(...));
+    $r->check('Après la réouverture : l\'index de la 5.6 reconstruit par la 3.4 (fos:elastica:populate)', static function (): void {
+        play('sudo --user=www-data bin/console --env=prod fos:elastica:populate');
+        $indices = in_builder("curl -s 'http://elasticsearch:9200/_cat/indices?v'", quiet: true)->getOutput();
+        io()->text($indices);
+        check_search();
+    });
+    $r->check('Après la réouverture : les anciens consumers recréent les files et les échanges supprimés à l\'étape 50 ; une vue comptée', static function (): void {
+        compose(['up', '--detach', '--no-build', 'worker_consumer_view', 'worker_consumer_webpush_notification', 'websocket']);
+        // Each queue with its consumer
+        wait_for(static function (): bool {
+            $queues = in_service('rabbitmq', 'rabbitmqctl -q list_queues name consumers', quiet: true)->getOutput();
+
+            return 1 === preg_match('{^view_queue\s+1$}m', $queues) && 1 === preg_match('{^webpush_notification_queue\s+1$}m', $queues);
+        }, 'The old consumers do not create their queues again.');
+        $queues = play('sudo rabbitmqctl list_queues name', 'rabbitmq', quiet: true);
+        expect(1 === preg_match('{^view_queue$}m', $queues) && 1 === preg_match('{^webpush_notification_queue$}m', $queues), "The old queues are not listed:\n{$queues}");
+        $exchanges = play('sudo rabbitmqctl list_exchanges name', 'rabbitmq', quiet: true);
+        expect(1 === preg_match('{^view_exchange$}m', $exchanges) && 1 === preg_match('{^webpush_notification_exchange$}m', $exchanges), "The old exchanges are not created again:\n{$exchanges}");
+        // A new anonymous session: its first view of the creation is counted by the old consumer
+        $before = (int) sql('SELECT view_count FROM tbl_wonder_creation WHERE id = 1');
+        expect(200 === (new Browser())->request('GET', '/creations/1.html')->getStatusCode(), 'The creation does not answer 200 in the 3.4.');
+        wait_for(static fn () => (int) sql('SELECT view_count FROM tbl_wonder_creation WHERE id = 1') > $before, 'The view is not counted by the old consumer.');
+    });
+    $r->check('Après la réouverture : un compte connecté au code livré (user) refusé par la 3.4, puis « mot de passe oublié »', static function (): void {
+        expect(!(new Browser())->login('user'), 'user logs in to the 3.4 with a password hashed by the code delivered.');
+        reset_old_password('user');
+        check_old_site('user');
+    });
+}
+
+/**
+ * R2 and R5 of the guide in Docker: the copy at OLD_COMMIT, the code of the backup, the stack in
+ * 3.4 with the index of Elasticsearch 5.6 that its volume kept.
+ */
+function rollback_code_and_index(Report $r): void
+{
     $r->step('Le code de la 3.4', static function (): void {
         // R1, the services of the code delivered stopped (a rehearsal taken again may be past it)
         if (OLD_COMMIT !== tree_head()) {
-            compose(['stop', 'scheduler', 'worker_cron', 'worker_consumer_mailer', 'worker_consumer_view', 'worker_consumer_webpush_notification']);
+            compose(['stop', ...WORKER_SERVICES]);
         }
         // git reset --hard on the branch of the server, a commit of the copy here
         guide_has('sudo --user=www-data git reset --hard b8848c0c05c3ec80ee1968db9f66ea28e38a5b1f');
@@ -490,26 +597,54 @@ function part_rollback(Report $r): void
         $output = in_builder('curl -s http://elasticsearch:9200', quiet: true)->getOutput();
         expect(str_contains($output, '"number" : "5.6.'), "Elasticsearch is not the 5.6 with its index:\n{$output}");
     });
-    $r->step('La base', static function (): void {
-        // migration_versions as the 3.4 reads it, and the two other tables of step 26
-        play('zcat ~/ladb-backup/db-migrations.sql.gz | sudo mariadb db_fr_lairdubois_www', 'mariadb');
-        $status = play('sudo --user=www-data bin/console --env=prod doctrine:migrations:status');
-        foreach (['Executed Migrations:\s+51\b', 'Executed Unavailable Migrations:\s+0\b', 'New Migrations:\s+0\b'] as $expected) {
-            expect(1 === preg_match("{{$expected}}", $status), "doctrine:migrations:status of the 3.4:\n{$status}");
+}
+
+/**
+ * R6 of the guide: migration_versions as the 3.4 reads it, and the two other tables of step 28.
+ */
+function rollback_database(): void
+{
+    play('zcat ~/ladb-backup/db-migrations.sql.gz | sudo mariadb db_fr_lairdubois_www', 'mariadb');
+    $status = play('sudo --user=www-data bin/console --env=prod doctrine:migrations:status');
+    foreach (['Executed Migrations:\s+51\b', 'Executed Unavailable Migrations:\s+0\b', 'New Migrations:\s+0\b'] as $expected) {
+        expect(1 === preg_match("{{$expected}}", $status), "doctrine:migrations:status of the 3.4:\n{$status}");
+    }
+}
+
+/**
+ * The search finds the creation 1 in the index, of the 3.4 or of the code delivered.
+ */
+function check_search(): void
+{
+    $page = (new Browser())->request('GET', '/creations/?q=' . rawurlencode(search_word()));
+    expect(200 === $page->getStatusCode() && str_contains($page->getContent(false), '/creations/1'), 'The search does not find the creation 1.');
+}
+
+/**
+ * "Mot de passe oublié" of the 3.4 (FOSUserBundle): the request, then the form of the token, that
+ * the mail of the spool would give, with the username as password again (fixtures).
+ */
+function reset_old_password(string $username): void
+{
+    $browser = new Browser();
+    $browser->request('GET', '/resetting/request');
+    $response = $browser->request('POST', '/resetting/send-email', form: ['username' => $username]);
+    expect(\in_array($response->getStatusCode(), [200, 302], true), "/resetting/send-email answers {$response->getStatusCode()}.");
+    $token = sql(\sprintf("SELECT IFNULL(confirmation_token, '') FROM tbl_core_user WHERE username = '%s'", addslashes($username)));
+    expect('' !== $token, "No token of password reset for {$username}.");
+    $page = $browser->request('GET', '/resetting/reset/' . $token);
+    expect(200 === $page->getStatusCode(), "/resetting/reset answers {$page->getStatusCode()}.");
+    preg_match('{<form[^>]*action="([^"]*/resetting/reset/[^"]*)"[^>]*>(.*?)</form>}s', $page->getContent(false), $form) or throw new \RuntimeException('No form of password reset.');
+    $fields = [];
+    preg_match_all('{<input\b[^>]*>}', $form[2], $inputs);
+    foreach ($inputs[0] as $input) {
+        if (preg_match('{name="([^"]+)"}', $input, $name)) {
+            preg_match('{value="([^"]*)"}', $input, $value);
+            $fields[html_entity_decode($name[1])] = str_contains($name[1], 'plainPassword') ? $username : html_entity_decode($value[1] ?? '');
         }
-        // The 3.4 on the migrated database, its consumers and its websocket
-        compose(['up', '--detach', '--no-build', 'worker_consumer_view', 'worker_consumer_webpush_notification', 'websocket']);
-        check_old_site('user');
-        $page = (new Browser())->request('GET', '/creations/?q=' . rawurlencode(search_word()));
-        expect(200 === $page->getStatusCode() && str_contains($page->getContent(false), '/creations/1'), 'The search of the 3.4 does not find the creation 1 in the index 5.6.');
-    });
-    $r->check('La 3.4 refuse le compte refait en bcrypt par le code livré (user2) : le point de non-retour', static function (): void {
-        expect(!(new Browser())->login('user2'), 'user2 logs in to the 3.4 with a password hashed by the code delivered.');
-    });
-    $r->check('Retour à l\'état de la maintenance : anciens consumers arrêtés, Elasticsearch 5.6 arrêté', static function (): void {
-        compose(['stop', 'worker_consumer_view', 'worker_consumer_webpush_notification', 'websocket', 'elasticsearch']);
-        play('sudo rm -rf var/bootstrap.php.cache var/SymfonyRequirements.php web/css web/js components var/cache/prod var/cache/dev');
-    });
+    }
+    $response = $browser->request('POST', parse_url(html_entity_decode($form[1]), \PHP_URL_PATH), form: $fields);
+    expect(302 === $response->getStatusCode(), "The reset of the password answers {$response->getStatusCode()}: " . implode(', ', array_keys($fields)));
 }
 
 /**
@@ -536,16 +671,31 @@ function deploy(Report $r, string $delivered): void
         with(static fn () => build(), context: stack());
         compose(['up', '--detach', '--no-build', '--remove-orphans', '--wait', ...default_services()]);
     });
-    $r->step('Dépendances PHP', static function (): void {
+    $r->step('Dépendances PHP', static function () use ($r): void {
         // The variables of the builder for parameters.yml go: the server has none
-        $output = play('sudo --user=www-data env SYMFONY_ENV=prod composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-req=php+', prefix: unset_parameter_variables());
-        expect('0' === trim(play("grep -c -E '^\\s+(mailer_host|websocket_uri|ga_tracking_id|node):' app/config/parameters.yml", allowFailure: true)), 'An old parameter is still in parameters.yml.');
-        io()->text(substr_count($output, 'Installing') . ' packages installed.');
+        $output = '';
+        $r->state['composer_warm'] = timed(static function () use (&$output): void {
+            $output = play(COMPOSER_INSTALL, prefix: unset_parameter_variables());
+        });
+        expect('0' === trim(play("sudo grep -c -E '^\\s+(mailer_host|websocket_uri|ga_tracking_id|node):' app/config/parameters.yml", allowFailure: true)), 'An old parameter is still in parameters.yml.');
+        // Everything from the cache of step 20
+        preg_match_all('{^\s*- Downloading .*$}m', $output, $downloads);
+        expect([] === $downloads[0], \count($downloads[0]) . " packages downloaded, not taken from the cache of step 20:\n" . implode("\n", \array_slice($downloads[0], 0, 10)));
+        io()->text(substr_count($output, 'Installing') . ' packages installed from the cache in ' . format_duration($r->state['composer_warm']) . '.');
     });
-    $r->step('CSS et JS', static function (): void {
-        play('sudo --user=www-data env npm_config_cache=var/npm npm ci --no-audit --no-fund');
-        play('sudo --user=www-data env npm_config_cache=var/npm npx vite build');
+    $r->step('CSS et JS', static function () use ($r): void {
+        $output = '';
+        // The requests of npm: each package from the cache of step 20, none to the registry
+        $r->state['npm_warm'] = timed(static function () use (&$output): void {
+            $output = play('sudo --user=www-data env npm_config_cache=var/npm npm ci --no-audit --no-fund', suffix: ' --loglevel=http');
+        });
+        // "npm http cache … (cache hit)" for a package of the cache, "npm http fetch …" for a request
+        preg_match_all('{^npm http (?:cache|fetch) .*$}m', $output, $fetches);
+        $network = preg_grep('{^npm http cache .*\(cache hit\)$}', $fetches[0], \PREG_GREP_INVERT);
+        expect([] === $network, \count($network) . " requests of npm not answered by its cache:\n" . implode("\n", \array_slice($network, 0, 10)));
+        $r->state['assets_warm'] = $r->state['npm_warm'] + timed(static fn () => play('sudo --user=www-data env npm_config_cache=var/npm npx vite build'));
         expect(is_file(tree_dir() . '/web/build/manifest.json') && is_file(tree_dir() . '/web/build/entrypoints.json'), 'No manifest.json or entrypoints.json in web/build.');
+        io()->text(\count($fetches[0]) . ' packages of npm from the cache, npm ci in ' . format_duration($r->state['npm_warm']) . '.');
     });
     $r->step('Cache', static function (): void {
         play('sudo --user=www-data bin/console --env=prod cache:warmup');
@@ -668,10 +818,7 @@ function part_after(Report $r): void
         }
         expect([] === $failures, 'Pages not in 200: ' . implode(', ', $failures));
     }, strict: false);
-    $r->check('Recherche dans l\'index Elasticsearch 9', static function (): void {
-        $page = (new Browser())->request('GET', '/creations/?q=' . rawurlencode(search_word()));
-        expect(200 === $page->getStatusCode() && str_contains($page->getContent(false), '/creations/1'), 'The search does not find the creation 1.');
-    }, strict: false);
+    $r->check('Recherche dans l\'index Elasticsearch 9', check_search(...), strict: false);
     $r->step('Anciennes files et échanges de RabbitMQ', static function (): void {
         play('sudo rabbitmqctl delete_queue view_queue', 'rabbitmq');
         play('sudo rabbitmqctl delete_queue webpush_notification_queue', 'rabbitmq');
@@ -703,6 +850,8 @@ function part_after(Report $r): void
             expect(1 === preg_match('{\[  \] rabbitmq_management\b}', $plugins), "The plugin rabbitmq_management is still on:\n{$plugins}");
         }
     }, strict: false);
+    // Before the checks of the workers: they pass by the workers started again
+    $r->step('Chromium dans son bac à sable', check_sandbox_and_restart(...), strict: false);
     $r->check('Une vue comptée par le nouveau worker', static function (): void {
         $before = (int) sql('SELECT view_count FROM tbl_wonder_creation WHERE id = 1');
         $page = (new Browser())->request('GET', '/creations/1.html');
@@ -746,6 +895,7 @@ function part_after(Report $r): void
     $r->step('Messages non lus', static function (): void {
         play('sudo --user=www-data bin/console --env=prod ladb:reset:unreadmessagecount --force');
     }, strict: false);
+    $r->verified('À savoir pour la suite', 'services Docker', check_cron_stop(...));
     $r->check('Aucune erreur 500 dans var/logs/prod.log', static function (): void {
         $log = tree_dir() . '/var/logs/prod.log';
         $lines = is_file($log) ? file($log) : [];
@@ -935,7 +1085,7 @@ function add_delivery_parameters(): void
     if (!str_contains(file_get_contents($file), 'database_server_version:')) {
         fs()->dumpFile($file, rtrim(file_get_contents($file)) . "\n" . $block);
     }
-    $count = trim(play("grep -c -E '^\\s+(database_server_version|mailer_dsn|mercure_url|mercure_public_url|mercure_jwt_secret|ga_measurement_id|router_default_uri|chromium_sandbox):' app/config/parameters.yml"));
+    $count = trim(play("sudo grep -c -E '^\\s+(database_server_version|mailer_dsn|mercure_url|mercure_public_url|mercure_jwt_secret|ga_measurement_id|router_default_uri|chromium_sandbox):' app/config/parameters.yml"));
     expect('8' === $count, "{$count} parameters of the code delivered in parameters.yml, not 8.");
 }
 
@@ -980,6 +1130,92 @@ function check_mercure(): void
 }
 
 /**
+ * Step 52 of the guide: chromium_sandbox, the cache, then the workers and the crons started again
+ * after it (the services of Docker for those of systemd). The builder and the worker of the crons
+ * have the seccomp profile of Chromium: the capture of a workflow starts it in its sandbox, then
+ * does not reach the router of the host.
+ */
+function check_sandbox_and_restart(): void
+{
+    guide_has('sysctl kernel.unprivileged_userns_clone');
+    edit_parameters(['chromium_sandbox' => 'true']);
+    play('sudo --user=www-data bin/console --env=prod cache:clear');
+    $cleared = time();
+    guide_has(RESTART_WORKERS);
+    compose(['restart', ...WORKER_SERVICES]);
+    guide_has('systemctl show -p ActiveEnterTimestamp ladb_scheduler ladb_consumer_cron ladb_consumer_mailer ladb_consumer_view ladb_consumer_webpush');
+    foreach (WORKER_SERVICES as $service) {
+        expect(started_at($service) >= $cleared, "{$service} did not start again after the cache:clear.");
+    }
+    // A workflow without its thumbnail: the command captures it
+    sql('UPDATE tbl_workflow SET main_picture_id = NULL WHERE id = 1');
+    $output = play('sudo --user=www-data bin/console --env=prod ladb:cron:workflow:thumbnails --force', allowFailure: true, suffix: ' -v');
+    io()->text(tail($output, 10));
+    expect(1 === preg_match('{\[[1-9]\d* workflows\]}', $output) && !str_contains($output, 'No usable sandbox'), "Chromium does not start in its sandbox:\n" . tail($output));
+}
+
+/**
+ * Following deployments (step 55): a cron in the queue "cron", as the scheduler puts them (the
+ * rebuilding of the index, a few seconds), then the worker stopped while it runs it. The stop
+ * waits for its end, the message is acknowledged, the worker exits with 0.
+ */
+function check_cron_stop(): void
+{
+    guide_has('sudo systemctl stop ladb_scheduler ladb_consumer_cron');
+    compose(['stop', 'scheduler']);
+    $dispatch = <<<'PHP'
+        require 'app/autoload.php';
+        $kernel = new AppKernel('prod', false);
+        $kernel->boot();
+        $kernel->getContainer()->get('messenger.default_bus')->dispatch(new Symfony\Component\Console\Messenger\RunCommandMessage('fos:elastica:populate'), [new Symfony\Component\Messenger\Stamp\TransportNamesStamp(['cron'])]);
+        PHP;
+    // The indexes and their documents: the cron creates each of them again, one after the other
+    $indices = static fn () => array_map(static fn (string $line) => preg_split('{\s+}', $line), array_filter(explode("\n", trim(in_builder("curl -s 'http://elasticsearch:9200/_cat/indices/ladb_*?h=index,creation.date,docs.count&s=index'", quiet: true)->getOutput()))));
+    $before = $indices();
+    $dispatched = (int) (microtime(true) * 1000);
+    $process = in_builder('php -r ' . escapeshellarg($dispatch), quiet: true);
+    expect($process->isSuccessful(), "The cron is not put in the queue:\n" . tail($process->getOutput() . $process->getErrorOutput()));
+    $queue = static fn () => trim(in_service('rabbitmq', 'rabbitmqctl -q list_queues name messages_ready messages_unacknowledged', quiet: true)->getOutput());
+    // Taken by the worker, not acknowledged yet: the cron runs
+    $end = time() + 60;
+    while (1 !== preg_match('{^cron\s+0\s+1$}m', $queue())) {
+        expect(time() < $end, "The worker of the crons does not take the cron:\n" . $queue());
+        usleep(200000);
+    }
+    $stopped = (int) (microtime(true) * 1000);
+    $seconds = timed(static fn () => compose(['stop', 'worker_cron']));
+    $container = trim(compose(['ps', '--all', '--quiet', 'worker_cron']));
+    $exit = trim(run(['docker', 'inspect', '-f', '{{.State.ExitCode}}', $container], context: context()->withQuiet())->getOutput());
+    io()->text("The worker of the crons stopped in {$seconds} s, exit code {$exit}.");
+    expect(1 === preg_match('{^cron\s+0\s+0$}m', $queue()), "The cron is not acknowledged:\n" . $queue());
+    expect('0' === $exit, "The worker of the crons exits with {$exit}.");
+    // Every index created again after the cron was put in the queue, with its documents: the cron
+    // went to its end
+    $after = $indices();
+    expect(array_column($before, 0) === array_column($after, 0) && array_column($before, 2) === array_column($after, 2), "The indexes are not those of before the cron:\n" . json_encode([$before, $after]));
+    expect([] === array_filter($after, static fn (array $index) => (int) $index[1] < $dispatched), "Indexes not created again by the cron:\n" . json_encode($after));
+    // The last ones after the signal: the worker waited for them
+    $late = \count(array_filter($after, static fn (array $index) => (int) $index[1] > $stopped));
+    io()->text("{$late} of " . \count($after) . ' indexes created by the cron after the signal.');
+    expect($late > 0, 'The cron ended before the stop of the worker: nothing to wait for.');
+    compose(['up', '--detach', '--no-build', 'scheduler', 'worker_cron']);
+    // The index rebuilt by the cron is whole
+    check_search();
+}
+
+/**
+ * When the container of a service started, as a timestamp (systemctl show -p ActiveEnterTimestamp).
+ */
+function started_at(string $service): int
+{
+    $container = trim(compose(['ps', '--quiet', $service]));
+    expect('' !== $container, "{$service} does not run.");
+    $started = trim(run(['docker', 'inspect', '-f', '{{.State.StartedAt}}', $container], context: context()->withQuiet())->getOutput());
+
+    return (int) strtotime(substr($started, 0, 19) . 'Z');
+}
+
+/**
  * The words of the title of the creation 1, the longest: the search finds it.
  */
 function search_word(): string
@@ -995,7 +1231,7 @@ function search_word(): string
  * versions read (gitignored): Mailpit on the port 25 (the Postfix of the server), the service of
  * push of the browsers, the backup folder of the guide, the client of MariaDB without password
  * (sudo mariadb on the server). For the code delivered: the workers in prod (the units of
- * docs/01-installation.md), the scheduler and the worker of the crons, and, from step 40, the site
+ * docs/01-installation.md), the scheduler and the worker of the crons, and, from step 42, the site
  * of the image nginx of production in the frontend.
  */
 function write_override(bool $delivered, bool $productionVhost = false): void
@@ -1105,6 +1341,9 @@ function write_override(bool $delivered, bool $productionVhost = false): void
                 user: "\${USER_ID}:\${USER_ID}"
                 command: php bin/console --env=prod messenger:consume cron --memory-limit=256M
                 stop_grace_period: 1h
+                # Chromium in its sandbox (step 52), as in docker-compose.prod.yml
+                security_opt:
+                    - "seccomp=services/php/chromium-seccomp.json"
                 depends_on:
                     - mariadb
                     - memcached
@@ -1160,13 +1399,14 @@ function edit_parameters(array $values): void
 /**
  * Runs a command of the guide, written as in it: the guide must have it. In the builder (the files
  * of the site and bin/console, as www-data), or in the container of MariaDB or RabbitMQ for their
- * clients (as root). sudo goes, after a time and in a pipe: the containers run as the user of the
- * files, or as root.
+ * clients (as root). sudo goes, after a time, in a pipe and in a subshell: the containers run as
+ * the user of the files, or as root. The folder of the site is /var/www in the containers.
  */
 function play(string $command, string $service = 'builder', string $prefix = '', bool $quiet = false, bool $allowFailure = false, string $suffix = ''): string
 {
     guide_has($command);
-    $run = preg_replace('{(^|\| )(time )?sudo (--user=www-data )?}', '$1$2', $command) . $suffix;
+    $run = preg_replace('{(^|\| |&& |\()(time )?sudo (--user=www-data )?}', '$1$2', $command);
+    $run = str_replace('/var/www/www.lairdubois.fr/', '/var/www/', $run) . $suffix;
     $process = 'builder' === $service ? in_builder($prefix . $run, $quiet) : in_service($service, $run, $quiet);
     if (!$allowFailure && !$process->isSuccessful()) {
         throw new \RuntimeException("`{$command}` failed:\n" . tail($process->getOutput() . $process->getErrorOutput()));
@@ -1308,6 +1548,17 @@ function backup_dir(): string
 function base_url(): string
 {
     return 'https://' . stack()['root_domain'] . ':' . get_worktree_ports(stack()['ports_name'])['https'];
+}
+
+/**
+ * The seconds a callable takes.
+ */
+function timed(callable $callable): float
+{
+    $start = microtime(true);
+    $callable();
+
+    return round(microtime(true) - $start, 1);
 }
 
 function wait_for(callable $condition, string $message, int $timeout = 60): void

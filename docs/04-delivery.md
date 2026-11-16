@@ -42,15 +42,17 @@ l'expliquent.
 - Un accès `sudo` au serveur, et `/var/www/www.lairdubois.fr` comme dossier courant : toutes les
   commandes partent de là (`cd /var/www/www.lairdubois.fr`).
 - Le code livré dans la branche `master` du dépôt du serveur (`origin`), et le hash de son dernier
-  commit (étape 33), sur des versions stables (P7). Les fichiers du code livré cités ici se lisent
+  commit (étape 35), sur des versions stables (P7). Les fichiers du code livré cités ici se lisent
   sur GitHub, ou sur le serveur après `sudo --user=www-data git fetch origin` :
   `sudo --user=www-data git show origin/master:docs/01-installation.md`.
-- La place disque, dans `~/ladb-backup` et sur les disques de MariaDB et d'Elasticsearch : une
-  sauvegarde de la base et du code (`vendor/` compris), une copie de la base le temps de l'étape 20,
-  les données d'Elasticsearch 5.6 gardées pour le retour arrière à côté de celles de la 9, et les
-  paquets d'Elasticsearch 9 (650 Mo) et 5.6 (35 Mo). La file `mailer` de RabbitMQ garde aussi sur
-  disque la lettre de la semaine, le temps de l'envoyer. La mémoire de deux PHP-FPM à la fois
-  pendant la phase 1 (étape 12) et du hub Mercure. Pour le voir :
+- La place disque, dans `~/ladb-backup` et sur les disques de MariaDB et d'Elasticsearch : deux
+  sauvegardes de la base (étapes 18 et 22) et une du code (`vendor/` compris), une copie de la base
+  et du code livré le temps des étapes 20 et 21, les caches de Composer et de npm dans `var/` du
+  site (étape 20, 41 Mo et 20 Mo dans la répétition), les données d'Elasticsearch 5.6 gardées pour
+  le retour arrière à côté de celles de la 9, et les paquets d'Elasticsearch 9 (650 Mo) et 5.6
+  (35 Mo). La file `mailer` de RabbitMQ garde aussi sur disque la lettre de la semaine, le temps de
+  l'envoyer. La mémoire de deux PHP-FPM à la fois pendant la phase 1 (étape 12) et du hub Mercure.
+  Pour le voir :
 
   ```bash
   df -h / /var /home
@@ -60,24 +62,31 @@ l'expliquent.
 
 - Une fenêtre de maintenance, en dehors du vendredi matin : la lettre de la semaine part le
   vendredi à 4 h et remplit le spool de Swiftmailer, qui ne se vide qu'à 100 mails toutes les
-  2 minutes (étape 23).
+  2 minutes (étape 25).
 
 ### Durée de la coupure
 
 Tout ce qui peut se faire site ouvert est dans la phase 1, les jours d'avant. La coupure va de
-l'étape 21 à l'étape 45. Dans la répétition (fixtures, une machine de développement), ses
-commandes prennent 1 min 30 s en tout, dont 10 s pour `composer install`, 8 s pour le CSS et le JS
-et 40 s pour installer et démarrer Elasticsearch 9 : le reste de la coupure est le temps de copier
-les commandes et de lire les vérifications, une demi-heure environ. Sur le serveur, quatre étapes
-dépendent du volume :
+l'étape 23 à l'étape 47. Dans la répétition (fixtures, une machine de développement), ses
+commandes prennent 1 min 30 s en tout, dont 5 à 7 s pour `composer install`, 7 à 8 s pour le CSS
+et le JS et 40 s pour installer et démarrer Elasticsearch 9 : le reste de la coupure est le temps
+de copier les commandes et de lire les vérifications, une demi-heure environ.
 
-- le spool (étape 23), selon le nombre de mails en attente : le vider site ouvert juste avant, pour
+`composer install` et `npm ci` (étapes 37 et 38) ne téléchargent rien : les paquets du code livré
+sont dans les caches de Composer et de npm, remplis à l'étape 20, et la coupure ne dépend ni de
+Packagist, ni de GitHub, ni de npm. Dans la répétition, sur un réseau rapide, le gain de temps est
+faible : `composer install` passe de 10 s (caches vides) à 5 à 7 s, `npm ci` reste à 2 s. Sur le
+serveur, il dépend de son réseau et de la charge de ces services. Un code livré qui change après
+l'étape 20 (P7) télécharge ce qui manque : refaire l'étape 20.
+
+Sur le serveur, trois étapes dépendent du volume :
+
+- le spool (étape 25), selon le nombre de mails en attente : le vider site ouvert juste avant, pour
   qu'il n'en reste que quelques-uns, par `sudo --user=www-data bin/console --env=prod swiftmailer:spool:send`
   (sans `--recover-timeout=0` : le cron envoie en même temps, un mail en cours d'envoi partirait
   deux fois) ;
-- les téléchargements de `composer install` et `npm ci` (étapes 35 et 36), selon le réseau ;
-- les migrations (étape 39), sur la base de la prod : l'étape 20 les chronomètre ;
-- la reconstruction de l'index (étape 41) : 89 s pour 210 000 documents sur une machine de
+- les migrations (étape 41), sur la base de la prod : l'étape 21 les chronomètre ;
+- la reconstruction de l'index (étape 43) : 89 s pour 210 000 documents sur une machine de
   24 cœurs (jeu de volume de #282), à multiplier selon le nombre de contenus de la prod (étape 2)
   et les cœurs du serveur. Tant qu'elle tourne, la recherche et les listes ne marchent pas : elle
   se fait site fermé.
@@ -205,7 +214,7 @@ sudo mariadb db_fr_lairdubois_www -e "SELECT COUNT(*), MIN(version), MAX(version
 ```
 
 La 3.4 ne propose jamais de supprimer une table sans `--complete`, et ne compare pas la collation
-d'une colonne. Le code livré fait les deux à l'étape 39 : la deuxième et la troisième commande
+d'une colonne. Le code livré fait les deux à l'étape 41 : la deuxième et la troisième commande
 voient la base comme il la verra.
 
 Vérification :
@@ -220,13 +229,13 @@ Vérification :
 
   et, pour une table de la liste de `app/DoctrineMigrations/Version20261115140000.php` du code
   livré, son `DROP TABLE` et les `ALTER TABLE … DROP FOREIGN KEY` qui la visent : des tables
-  d'entités retirées de `master`, que cette migration supprime à l'étape 39 ;
+  d'entités retirées de `master`, que cette migration supprime à l'étape 41 ;
 - aucune ligne pour la requête des collations ;
 - `Executed Migrations: 51` et `New Migrations: 0`, puis `51`, `20200323183209` et
   `20210515091743`. Les migrations de la livraison partent de cet état.
 
 Sinon (une autre table, une colonne, une collation) : ne pas livrer, envoyer la sortie des
-commandes. Le code livré arrêterait la coupure à l'étape 39.
+commandes. Le code livré arrêterait la coupure à l'étape 41.
 
 Pour estimer la sauvegarde et l'index :
 
@@ -254,12 +263,12 @@ Vérification :
   (`swiftmailer:spool:send`, `ladb:cron:…`) ;
 - la quatrième commande n'affiche que `/var/spool/cron/crontabs/www-data`. Un autre fichier (la
   crontab de root, un fichier de `/etc/cron.d/`) a aussi des crons du site : le copier dans
-  `~/ladb-backup` (`sudo cp -a LE_FICHIER ~/ladb-backup/`). L'étape 22 en retire les lignes, sinon
+  `~/ladb-backup` (`sudo cp -a LE_FICHIER ~/ladb-backup/`). L'étape 24 en retire les lignes, sinon
   ces crons tourneraient en plus de ceux du code livré ;
 - la cinquième affiche les lignes de la crontab de www-data qui ne sont pas des crons du site (une
-  sauvegarde…) : l'étape 22 les garde ;
+  sauvegarde…) : l'étape 24 les garde ;
 - la dernière affiche `Timezone=Europe/Paris`. La crontab tourne à l'heure du serveur, et le code
-  livré lance les crons à l'heure de Paris (étape 43) : sur un serveur à une autre heure
+  livré lance les crons à l'heure de Paris (étape 45) : sur un serveur à une autre heure
   (`Etc/UTC`), la lettre de la semaine et les mails de notifications partiraient une ou deux heures
   plus tôt ou plus tard. Sinon : ne pas livrer, envoyer la sortie.
 
@@ -358,18 +367,22 @@ abonnement sans JWT ; dans la répétition, le hub est le conteneur `mercure`). 
 
 ```bash
 sudo mariadb db_fr_lairdubois_www -e "SELECT COUNT(*) FROM tbl_webpush_user_subscription WHERE NOT JSON_VALID(subscription)"
-grep -E '^\s*secret:' app/config/parameters.yml | LC_ALL=C grep -c -P '[^\x00-\x7F]'
+sudo grep -E '^\s*secret:' app/config/parameters.yml | LC_ALL=C grep -c -v -P '[^\x00-\x7F]'
 ```
 
-Vérification : `0`, puis `0`.
+Vérification : `0`, puis `1`.
 
-- Le premier : sinon, la migration de la colonne JSON (étape 39) échoue. Supprimer ces lignes
+- Le premier : sinon, la migration de la colonne JSON (étape 41) échoue. Supprimer ces lignes
   (des abonnements web push illisibles) avec la même requête en `DELETE`. (#177, #190)
-- Le second : le `secret` est en ASCII. Sinon, les numéros des dons (reçus envoyés par mail) et
-  les identifiants de groupe des notifications changeraient pour les nouveaux : ne pas livrer, en
-  parler. (#255, #258)
+- Le second compte les lignes `secret:` sans caractère hors de l'ASCII : `1`, le `secret` est en
+  ASCII. `0` : il a un autre caractère (`sudo grep -E '^\s*secret:' app/config/parameters.yml` le
+  montre), et les numéros des dons (reçus envoyés par mail) et les identifiants de groupe des
+  notifications changeraient pour les nouveaux : ne pas livrer, en parler. `sudo` : le fichier
+  n'est peut-être lisible que par www-data, et une lecture refusée ne doit pas passer pour un
+  `secret` en ASCII. (#255, #258)
 
-Répétition : jouée.
+Répétition : jouée ; vérifiée autrement (conteneur Debian 13 : un `parameters.yml` que seul
+www-data lit, lu par un autre compte : `1`, puis `0` avec un `secret` accentué).
 
 ### 10. Préparer le DSN des mails
 
@@ -377,7 +390,7 @@ Les quatre paramètres `mailer_*` de Swiftmailer deviennent un seul, `mailer_dsn
 valeurs d'aujourd'hui :
 
 ```bash
-grep -E '^\s*mailer_' app/config/parameters.yml
+sudo grep -E '^\s*mailer_' app/config/parameters.yml
 ```
 
 - `mailer_transport: smtp`, `mailer_host: localhost`, `mailer_user` et `mailer_password` à
@@ -392,8 +405,8 @@ grep -E '^\s*mailer_' app/config/parameters.yml
   certificat au nom de `HOTE`.
 
 Le relais voit passer les mails au même débit qu'avant : 100 toutes les 2 minutes au plus, comme le
-spool (étape 52). Répétition : jouée pour les `mailer_*` (un SMTP local sur le port 25 : Mailpit à
-la place de Postfix) ; Postfix non joué. Le vrai envoi est vérifié à l'étape 44. (#19, #180, #312)
+spool (étape 55). Répétition : jouée pour les `mailer_*` (un SMTP local sur le port 25 : Mailpit à
+la place de Postfix) ; Postfix non joué. Le vrai envoi est vérifié à l'étape 46. (#19, #180, #312)
 
 ### 11. Paramètres du code livré
 
@@ -419,36 +432,37 @@ sudo --user=www-data nano app/config/parameters.yml
   (`10.11.x-MariaDB-…`, « MariaDB » doit y être).
 - `LE_DSN_DES_MAILS` : celui de l'étape 10. `LE_SECRET_DE_MERCURE` : celui de l'étape 7.
 - Un `%` s'écrit `%%` (un caractère encodé du DSN, `%40` : `%%40`) : Symfony lit `%…%` comme le
-  nom d'un autre paramètre, et la compilation du container du code livré échouerait à l'étape 35.
+  nom d'un autre paramètre, et la compilation du container du code livré échouerait à l'étape 37.
   Le cache de la 3.4 est déjà construit : le site n'en dit rien d'ici là.
-- `chromium_sandbox` passe à `true` après la livraison (étape 50).
+- `chromium_sandbox` passe à `true` après la livraison (étape 52).
 
 Les anciens paramètres (`mailer_*`, `websocket_*`, `ga_tracking_id`, `router.request_context.*`,
-`node`, `node_paths`) restent jusqu'à la livraison : `composer install` les retire (étape 35). Un
+`node`, `node_paths`) restent jusqu'à la livraison : `composer install` les retire (étape 37). Un
 `composer install` de l'ancien code retirerait au contraire les nouveaux : refaire cette étape
 s'il y en a un d'ici la livraison. Coller deux fois le bloc doublerait ses clés, ce que
 `composer install` refuse : chacune n'apparaît qu'une fois.
 
 Vérification :
-`grep -c -E '^\s+(database_server_version|mailer_dsn|mercure_url|mercure_public_url|mercure_jwt_secret|ga_measurement_id|router_default_uri|chromium_sandbox):' app/config/parameters.yml`
+`sudo grep -c -E '^\s+(database_server_version|mailer_dsn|mercure_url|mercure_public_url|mercure_jwt_secret|ga_measurement_id|router_default_uri|chromium_sandbox):' app/config/parameters.yml`
 affiche `8`, puis
 
 ```bash
-sed 's/%%//g' app/config/parameters.yml | grep -n '%' | cut -d: -f1,2
+sudo sed 's/%%//g' app/config/parameters.yml | grep -n '%' | cut -d: -f1,2
 ```
 
 n'affiche rien (sinon : le numéro de ligne et le nom de chaque paramètre qui a un `%` seul), et le
-site marche. Répétition : jouée (avec les adresses des conteneurs), puis la 3.4 connecte un compte
-par le formulaire et écrit sa session ; vérifiée autrement (conteneur Debian 13 : avec un `%` seul
-dans `mailer_dsn`, la vérification le cite et le code livré ne compile pas son container ; avec
-`%%`, elle n'affiche rien et le code livré lit le DSN avec un `%`). (#19, #21, #178, #240, #266,
-#291, #312)
+site marche. Les deux lisent le fichier par `sudo`, comme à l'étape 9 : sans lui, une lecture
+refusée n'afficherait rien non plus. Répétition : jouée (avec les adresses des conteneurs), puis la
+3.4 connecte un compte par le formulaire et écrit sa session ; vérifiée autrement (conteneur
+Debian 13, par un autre compte que www-data : avec un `%` seul dans `mailer_dsn`, la vérification
+le cite et le code livré ne compile pas son container ; avec `%%`, elle n'affiche rien et le code
+livré lit le DSN avec un `%`). (#19, #21, #178, #240, #266, #291, #312)
 
 ### 12. PHP-FPM 8.5
 
 Les réglages du pool et du `php.ini` de l'ancien PHP, repris pour la 8.5, plus ceux d'OPcache des
 images Docker (le code livré a plus de fichiers que les 10 000 par défaut). PHP-FPM 8.5 a son
-propre socket : rien ne passe par lui avant la réouverture (étape 45).
+propre socket : rien ne passe par lui avant la réouverture (étape 47).
 
 D'abord, ce que l'ancien PHP règle d'autre :
 
@@ -491,7 +505,7 @@ pool et de son `php.ini`). (#312)
 
 Les fichiers de `docs/01-installation.md` du code livré : `ladb_consumer_mailer` (étape 14.3),
 `ladb_scheduler` et `ladb_consumer_cron` (étapes 13.1 et 13.2). Ils ne sont ni activés ni
-démarrés : ils le sont aux étapes 42 et 43.
+démarrés : ils le sont aux étapes 44 et 45.
 
 ```bash
 sudo nano /etc/systemd/system/ladb_consumer_mailer.service
@@ -499,7 +513,7 @@ sudo nano /etc/systemd/system/ladb_scheduler.service
 sudo nano /etc/systemd/system/ladb_consumer_cron.service
 ```
 
-Les unités existantes et le compte du site sur RabbitMQ, dont l'étape 42 dépend :
+Les unités existantes et le compte du site sur RabbitMQ, dont l'étape 44 dépend :
 
 ```bash
 grep ExecStart ~/ladb-backup/ladb_consumer_view.service ~/ladb-backup/ladb_consumer_webpush.service
@@ -508,10 +522,10 @@ sudo rabbitmqctl list_permissions
 
 Vérification : `sudo systemd-analyze verify /etc/systemd/system/ladb_*.service` n'affiche rien ;
 les deux `ExecStart` finissent par `rabbitmq:consumer view` et
-`rabbitmq:consumer webpush_notification`, que l'étape 42 remplace par `sed` ; le compte
+`rabbitmq:consumer webpush_notification`, que l'étape 44 remplace par `sed` ; le compte
 `rabbitmq_user` de `parameters.yml` a `.*` dans les trois colonnes (`configure`, `write`, `read`) :
 Messenger crée ses échanges et ses files (`mailer`, `view`, `webpush_notification`, `cron`,
-`delays`) à leur premier message. Sinon : noter la ligne `ExecStart`, l'étape 42 se fait alors à la
+`delays`) à leur premier message. Sinon : noter la ligne `ExecStart`, l'étape 44 se fait alors à la
 main, ou donner les droits au compte (`sudo rabbitmqctl set_permissions -p / LE_COMPTE '.*' '.*' '.*'`).
 Répétition : vérifiée autrement (conteneurs Debian 13 et 12 : `systemd-analyze verify` de toutes
 les unités) ; les droits sont ceux du compte de la stack. (#19, #185, #300, #312)
@@ -520,7 +534,7 @@ les unités) ; les droits sont ceux du compte de la stack. (#19, #185, #300, #31
 
 Le vhost livré est `docs/nginx/conf/www.lairdubois.fr.conf`. Celui du serveur a peut-être des
 lignes à lui (adresses bannies) : il est modifié, pas remplacé. Les modifications se font sur une
-copie, mise en place à l'étape 40.
+copie, mise en place à l'étape 42.
 
 ```bash
 sudo cp -a /etc/nginx/sites-available/www.lairdubois.fr.conf /etc/nginx/sites-available/www.lairdubois.fr.conf.livraison
@@ -725,7 +739,7 @@ de l'image de prod, tirée de ce vhost). (#21, #158, #276, #312)
 
 ### 15. Télécharger Elasticsearch 9
 
-Le paquet, téléchargé site ouvert : à l'étape 29, il s'installe sans attendre.
+Le paquet, téléchargé site ouvert : à l'étape 31, il s'installe sans attendre.
 
 ```bash
 curl -fsSL -o ~/ladb-backup/elasticsearch-9.5.5-amd64.deb https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-9.5.5-amd64.deb
@@ -738,7 +752,7 @@ CI. Répétition : vérifiée autrement (conteneur Debian 13). (#31, #161, #204)
 
 ### 16. Télécharger Elasticsearch 5.6, pour le retour arrière
 
-L'étape 28 supprime le dépôt de la 5.6 : son paquet, gardé ici, permet de la réinstaller (R5).
+L'étape 30 supprime le dépôt de la 5.6 : son paquet, gardé ici, permet de la réinstaller (R5).
 D'abord la version installée :
 
 ```bash
@@ -762,13 +776,13 @@ grep -rs JAVA_HOME /etc/default/elasticsearch /etc/systemd/system/elasticsearch.
 
 Vérification : `elasticsearch-5.6.16.deb: OK`, puis la ligne de `JAVA_HOME`, ou rien : la 5.6
 prend alors le `java` du `PATH` (`readlink -f "$(command -v java)"` le montre). La purge de
-l'étape 28 supprime `/etc/default/elasticsearch`, et un réglage de systemd pour la 5.6
-s'appliquerait à la 9 : l'étape 27 met les deux de côté. Répétition : vérifiée autrement
+l'étape 30 supprime `/etc/default/elasticsearch`, et un réglage de systemd pour la 5.6
+s'appliquerait à la 9 : l'étape 29 met les deux de côté. Répétition : vérifiée autrement
 (conteneur Debian 13, avec un Java 8 réglé dans `/etc/default/elasticsearch`). (#312)
 
 ### 17. Durée du cron le plus long
 
-Le code livré lance les crons l'un après l'autre, dans un seul worker (étape 43), qui garde le
+Le code livré lance les crons l'un après l'autre, dans un seul worker (étape 45), qui garde le
 message d'un cron sans l'acquitter tant qu'il tourne. RabbitMQ ferme le canal d'un worker qui
 garde un message plus de 30 minutes (`consumer_timeout`, de 3.10 à 4.0) : le cron va au bout, mais
 le worker s'arrête en erreur en acquittant son message, que systemd relance ; le message, rendu à
@@ -790,7 +804,7 @@ RabbitMQ (RabbitMQ 3.10 ne connaît pas de délai par file, et refuse la politiq
 echo 'consumer_timeout = 14400000' | sudo tee -a /etc/rabbitmq/rabbitmq.conf
 ```
 
-RabbitMQ le lit à son prochain démarrage : l'étape 25 le redémarre, quand plus rien ne s'y
+RabbitMQ le lit à son prochain démarrage : l'étape 27 le redémarre, quand plus rien ne s'y
 connecte. Le délai vaut pour toutes les files : un worker bloqué sur un message le garde 4 heures
 avant que RabbitMQ le rende. Répétition : jouée (les sitemaps de la 3.4, puis ce réglage, quelle
 que soit leur durée) ; vérifiée autrement (RabbitMQ 3.10 et 4.0 jetables : un message pris comme
@@ -805,8 +819,9 @@ sudo mariadb-dump --single-transaction --quick --routines db_fr_lairdubois_www |
 
 Vérification : `zcat ~/ladb-backup/db.sql.gz | tail -1` affiche `-- Dump completed on …`. Une
 sauvegarde complète, site ouvert (`--single-transaction` : une image cohérente de la base, sans la
-bloquer). Pendant la coupure, seules les tables que les migrations modifient sont sauvegardées
-(étape 26) : le site fermé, rien d'autre ne change dans la base. Répétition : jouée.
+bloquer). Elle sert à l'étape 21, et peut donc se faire des jours avant : l'étape 22 en refait une
+le jour même. Pendant la coupure, seules les tables que les migrations modifient sont sauvegardées
+(étape 28) : le site fermé, rien d'autre ne change dans la base. Répétition : jouée.
 
 ### 19. Sauvegarder le code de la 3.4
 
@@ -819,13 +834,42 @@ sudo tar -czf ~/ladb-backup/code-3.4.tar.gz --ignore-failed-read vendor web/bund
 Vérification : `tar -tzf ~/ladb-backup/code-3.4.tar.gz | grep -c '^vendor/autoload.php$'` affiche
 `1`. Répétition : jouée.
 
-### 20. Rejouer les migrations sur une copie de la base
+### 20. Installer le code livré dans un dossier à part
+
+Le code livré, sans son historique, installé comme aux étapes 37 et 38 mais dans un dossier à part,
+avec PHP 8.5 : l'étape 21 y joue les migrations. Ses paramètres sont ceux du site, sur la base à
+part de l'étape 21. Composer et npm gardent ce qu'ils téléchargent dans `var/composer` et `var/npm`
+du site, que les étapes 37 et 38 reprennent : la coupure n'a plus rien à télécharger. Rien de la
+3.4 ne change : `var/` n'est pas suivi par git, et ses services ne sont pas touchés.
+
+```bash
+sudo mkdir /var/www/ladb-livraison
+sudo chown www-data: /var/www/ladb-livraison
+sudo --user=www-data git archive origin/master | sudo --user=www-data tar -x -C /var/www/ladb-livraison
+sudo sed 's/^\(\s*database_name:\s*\).*/\1db_fr_lairdubois_www_livraison/' app/config/parameters.yml | sudo --user=www-data tee /var/www/ladb-livraison/app/config/parameters.yml > /dev/null
+sudo --user=www-data env COMPOSER_CACHE_DIR=/var/www/www.lairdubois.fr/var/composer SYMFONY_ENV=prod php8.5 "$(command -v composer)" --working-dir=/var/www/ladb-livraison install --no-dev --optimize-autoloader --no-interaction --ignore-platform-req=php+
+(cd /var/www/ladb-livraison && sudo --user=www-data env npm_config_cache=/var/www/www.lairdubois.fr/var/npm npm ci --no-audit --no-fund)
+(cd /var/www/ladb-livraison && sudo --user=www-data env npm_config_cache=/var/www/www.lairdubois.fr/var/npm npx vite build)
+```
+
+Vérification : les trois dernières commandes finissent sans erreur,
+`ls /var/www/ladb-livraison/web/build/manifest.json` trouve le fichier (le CSS et le JS se
+construisent avec le Node du serveur), et `sudo du -sh var/composer var/npm` donne la taille des
+caches (41 Mo et 20 Mo dans la répétition). Sinon : ne pas livrer, envoyer la sortie ; un dossier
+de cache que `du` ne trouve pas, c'est que www-data n'écrit pas dans `var/` (`ls -ld var`), et que
+Composer ou npm ont tout téléchargé sans le garder. Le dossier reste pour l'étape 21, qui le
+supprime. Un dossier laissé par un passage précédent fait échouer le `mkdir` :
+`sudo rm -rf /var/www/ladb-livraison` avant. À refaire si le code livré change (P7) : les caches
+n'auraient pas ses nouveaux paquets. Répétition : jouée (`composer install` en 10 s et `npm ci` en
+2 s, caches vides). (#314)
+
+### 21. Rejouer les migrations sur une copie de la base
 
 Plusieurs jours avant : la sauvegarde de l'étape 18, restaurée dans une base à part, migrée par le
-code livré, installé dans un dossier à part avec PHP 8.5. Elle dit ce que l'étape 39 trouvera sur
-les vraies données, et combien de temps elle prendra. Rien de la prod n'est touché : sa base, son
-code et ses services restent tels quels (les migrations et le contrôle du schéma ne parlent qu'à
-MariaDB). La restauration charge MariaDB : à une heure creuse.
+code livré de l'étape 20. Elle dit ce que l'étape 41 trouvera sur les vraies données, et combien de
+temps elle prendra. Rien de la prod n'est touché : sa base, son code et ses services restent tels
+quels (les migrations et le contrôle du schéma ne parlent qu'à MariaDB). La restauration charge
+MariaDB : à une heure creuse.
 
 La base à part :
 
@@ -839,17 +883,7 @@ Le site s'y connecte avec le compte de `parameters.yml` : s'il n'a de droits que
 `database_user` de `parameters.yml`), lui donner les mêmes sur la copie, le temps de l'étape :
 `sudo mariadb -e "GRANT ALL PRIVILEGES ON db_fr_lairdubois_www_livraison.* TO 'LE_COMPTE'@'localhost'"`.
 
-Le code livré, sans son historique, et ses paramètres : ceux du site, sur la base à part.
-
-```bash
-sudo mkdir /var/www/ladb-livraison
-sudo chown www-data: /var/www/ladb-livraison
-sudo --user=www-data git archive origin/master | sudo --user=www-data tar -x -C /var/www/ladb-livraison
-sudo sed 's/^\(\s*database_name:\s*\).*/\1db_fr_lairdubois_www_livraison/' app/config/parameters.yml | sudo --user=www-data tee /var/www/ladb-livraison/app/config/parameters.yml > /dev/null
-sudo --user=www-data env SYMFONY_ENV=prod php8.5 "$(command -v composer)" --working-dir=/var/www/ladb-livraison install --no-dev --optimize-autoloader --no-interaction --ignore-platform-req=php+
-```
-
-Les migrations et le contrôle du schéma, comme à l'étape 39 :
+Les migrations et le contrôle du schéma, comme à l'étape 41 :
 
 ```bash
 time sudo --user=www-data php8.5 /var/www/ladb-livraison/bin/console --env=prod doctrine:migrations:migrate --no-interaction
@@ -858,9 +892,10 @@ sudo --user=www-data php8.5 /var/www/ladb-livraison/bin/console --env=prod doctr
 ```
 
 Vérification : la première joue les quatre migrations de la livraison (`real` : la durée de
-l'étape 39), puis `Up-to-date!` et `Nothing to update`. Sinon : ne pas livrer, envoyer la sortie
-des trois commandes. Ensuite, la base et le dossier à part s'en vont (et le `GRANT`, s'il y en a
-eu un : `REVOKE ALL PRIVILEGES ON db_fr_lairdubois_www_livraison.* FROM 'LE_COMPTE'@'localhost'`) :
+l'étape 41), puis `Up-to-date!` et `Nothing to update`. Sinon : ne pas livrer, envoyer la sortie
+des trois commandes. Ensuite, la base et le dossier de l'étape 20 s'en vont (et le `GRANT`, s'il y
+en a eu un : `REVOKE ALL PRIVILEGES ON db_fr_lairdubois_www_livraison.* FROM 'LE_COMPTE'@'localhost'`),
+les caches de `var/` restent :
 
 ```bash
 sudo mariadb -e "DROP DATABASE db_fr_lairdubois_www_livraison"
@@ -872,11 +907,26 @@ Vérification : `sudo mariadb -e "SHOW DATABASES LIKE 'db_fr_lairdubois_www%'"` 
 des tables d'entités retirées de `master` : la migration les supprime ; puis la base de la 3.4 et
 son site n'ont pas changé). (#312)
 
+### 22. Sauvegarder la base, le jour même
+
+Le jour de la livraison, site ouvert, juste avant de passer en maintenance (étape 23) : la
+sauvegarde de l'étape 18 a peut-être plusieurs jours, et la coupure ne sauvegarde que les tables
+que les migrations modifient (étape 28).
+
+```bash
+sudo mariadb-dump --single-transaction --quick --routines db_fr_lairdubois_www | gzip > ~/ladb-backup/db-avant-maintenance.sql.gz
+```
+
+Vérification : `zcat ~/ladb-backup/db-avant-maintenance.sql.gz | tail -1` affiche
+`-- Dump completed on …`. Elle prend le temps de celle de l'étape 18. Ce que le site écrit entre sa
+fin et l'étape 23 n'y est pas : passer en maintenance juste après. Elle ne sert qu'en dernier
+recours (voir « Retour arrière »). Répétition : jouée. (#314)
+
 ## Phase 2 : pendant la livraison, site en maintenance
 
-Le site est fermé de l'étape 21 à l'étape 45.
+Le site est fermé de l'étape 23 à l'étape 47.
 
-### 21. Passer en maintenance
+### 23. Passer en maintenance
 
 ```bash
 sudo ln -sfn /etc/nginx/sites-available/www.lairdubois.fr-maintenance.conf /etc/nginx/sites-enabled/www.lairdubois.fr.conf
@@ -885,7 +935,7 @@ sudo systemctl reload nginx
 ```
 
 Ne pas lancer `scripts/maintenanceStart.sh` : celui du serveur est encore celui de la 3.4, qui
-arrête les consumers avant qu'ils aient vidé leurs files (étape 24).
+arrête les consumers avant qu'ils aient vidé leurs files (étape 26).
 
 Vérification : `curl -s https://www.lairdubois.fr/ | grep -c 'Maintenance en cours'` affiche `1`,
 et `curl -sI https://www.lairdubois.fr/ | grep -iE '^(HTTP|retry-after)'` affiche `HTTP/2 503` et
@@ -893,7 +943,7 @@ et `curl -sI https://www.lairdubois.fr/ | grep -iE '^(HTTP|retry-after)'` affich
 ces commandes, puis `nginx -t`, et la page de maintenance servie par nginx : 503 et `Retry-After`
 sur `/` et sur une URL en `.html`). (#312)
 
-### 22. Arrêter les crons
+### 24. Arrêter les crons
 
 Les lignes des crons du site (`bin/console`) s'en vont de la crontab de www-data, les autres
 restent :
@@ -909,10 +959,10 @@ Vérification : `sudo grep -rs 'bin/console' /etc/crontab /etc/cron.d/ /var/spoo
 n'affiche rien, et `sudo crontab -u www-data -l` n'a plus que les lignes de l'étape 3 qui ne sont
 pas des crons du site. Puis attendre la fin des crons en cours :
 `pgrep -a -u www-data -f 'bin/console --env=prod (ladb|swiftmailer):'` n'affiche plus rien. Les
-crons reviennent à l'étape 43, en services. Relance : oui. Répétition : non jouée (pas de crontab
+crons reviennent à l'étape 45, en services. Relance : oui. Répétition : non jouée (pas de crontab
 dans Docker). (#300, #312)
 
-### 23. Vider le spool de Swiftmailer
+### 25. Vider le spool de Swiftmailer
 
 Le code livré ne lit plus `app/spool/` : les mails qui y restent sont à envoyer par l'ancien code.
 
@@ -925,7 +975,7 @@ sudo --user=www-data bin/console --env=prod swiftmailer:spool:send --recover-tim
 Vérification : `find app/spool -type f | wc -l` affiche `0`. Sinon : relancer la commande. Durée :
 4 s pour 3 mails. Relance : oui. Répétition : jouée, les mails arrivent dans Mailpit. (#19, #180)
 
-### 24. Laisser les anciens consumers vider leurs files
+### 26. Laisser les anciens consumers vider leurs files
 
 ```bash
 sudo rabbitmqctl list_queues name messages
@@ -935,7 +985,7 @@ Vérification : `view_queue` et `webpush_notification_queue` à `0`. Sinon : att
 secondes et relancer la commande. Le site est fermé, plus rien ne les remplit. Relance : oui.
 Répétition : jouée, l'ancien consumer envoie la notification web push qui attendait. (#22, #152)
 
-### 25. Arrêter les anciens consumers et le serveur websocket
+### 27. Arrêter les anciens consumers et le serveur websocket
 
 ```bash
 sudo systemctl stop ladb_consumer_view ladb_consumer_webpush
@@ -947,7 +997,7 @@ affiche trois fois `inactive`. Sans `disable`, systemd relancerait `ladb_websock
 après le déploiement, sur une commande qui n'existe plus.
 
 Si l'étape 17 a réglé `consumer_timeout`, redémarrer RabbitMQ : plus rien ne s'y connecte, et ses
-files sont vides (étape 24).
+files sont vides (étape 26).
 
 ```bash
 sudo systemctl restart rabbitmq-server
@@ -957,7 +1007,7 @@ sudo rabbitmq-diagnostics environment | grep consumer_timeout
 Vérification : `{consumer_timeout,14400000}`. Relance : oui. Répétition : jouée (services
 Docker). (#22, #158, #312)
 
-### 26. Sauvegarder les tables que les migrations modifient
+### 28. Sauvegarder les tables que les migrations modifient
 
 ```bash
 sudo mariadb-dump --single-transaction db_fr_lairdubois_www migration_versions ext_log_entries tbl_webpush_user_subscription | gzip > ~/ladb-backup/db-migrations.sql.gz
@@ -966,13 +1016,13 @@ sudo mariadb-dump --single-transaction db_fr_lairdubois_www migration_versions e
 Les trois premières migrations ne modifient que ces tables, plus les commentaires de six colonnes ;
 la quatrième supprime des tables que le site n'utilise plus, qui sont dans la sauvegarde de
 l'étape 18. Vérification : `zcat ~/ladb-backup/db-migrations.sql.gz | tail -1` affiche
-`-- Dump completed on …`. Relance : oui jusqu'à l'étape 39, jamais après : la sauvegarde aurait les
+`-- Dump completed on …`. Relance : oui jusqu'à l'étape 41, jamais après : la sauvegarde aurait les
 tables migrées, et le retour arrière (R6) ne rendrait pas à la 3.4 sa `migration_versions`.
 Répétition : jouée.
 
-### 27. Elasticsearch 5.6 : l'arrêter et le mettre de côté
+### 29. Elasticsearch 5.6 : l'arrêter et le mettre de côté
 
-Elasticsearch 9 ne lit pas les données de la 5.6 : l'index est reconstruit à l'étape 41.
+Elasticsearch 9 ne lit pas les données de la 5.6 : l'index est reconstruit à l'étape 43.
 
 ```bash
 sudo systemctl stop elasticsearch
@@ -991,12 +1041,12 @@ sudo mv /etc/systemd/system/elasticsearch.service.d ~/ladb-backup/elasticsearch-
 
 Vérification : `ls -d /var/lib/elasticsearch-5.6 /etc/elasticsearch-5.6 ~/ladb-backup/elasticsearch-5.6.default`
 liste les trois, et `curl -s http://127.0.0.1:9200` ne répond plus. Relance : non. Le `mv` et le
-`cp -a` relancés rangeraient le dossier déjà déplacé, ou celui de la 9 après l'étape 29, dans la
+`cp -a` relancés rangeraient le dossier déjà déplacé, ou celui de la 9 après l'étape 31, dans la
 copie de la 5.6 : ne relancer que les commandes qui n'ont pas marché. Répétition : jouée (conteneur
 arrêté, son volume gardé) ; vérifiée autrement (conteneur Debian 13 : la 5.6 de son paquet, avec un
 Java 8 réglé dans `/etc/default/elasticsearch`). (#31, #204, #312)
 
-### 28. Elasticsearch 5.6 : le désinstaller
+### 30. Elasticsearch 5.6 : le désinstaller
 
 ```bash
 sudo apt-get purge elasticsearch
@@ -1009,10 +1059,10 @@ le `rm -rf` le retire, la copie est faite, et le paquet 9 part d'un dossier vide
 supprime aussi l'utilisateur `elasticsearch`. Supprimer le fichier que donne la dernière commande
 (`/etc/apt/sources.list.d/elastic-5.x.list` d'après l'ancienne doc d'installation).
 Vérification : `ls -d /etc/elasticsearch` ne le trouve plus, et la dernière commande n'affiche plus
-rien. Relance : oui jusqu'à l'étape 29, jamais après : elle désinstallerait la 9. Répétition :
+rien. Relance : oui jusqu'à l'étape 31, jamais après : elle désinstallerait la 9. Répétition :
 vérifiée autrement (conteneur Debian 13). (#204, #312)
 
-### 29. Elasticsearch 9 : l'installer
+### 31. Elasticsearch 9 : l'installer
 
 ```bash
 sudo apt-get install ~/ladb-backup/elasticsearch-9.5.5-amd64.deb
@@ -1022,7 +1072,7 @@ Vérification : `/usr/share/elasticsearch/bin/elasticsearch --version` affiche `
 paquet a son propre Java. Durée : 14 s (conteneur Debian 13). Relance : oui. Répétition : vérifiée
 autrement (conteneur Debian 13). (#31, #161, #204)
 
-### 30. Elasticsearch 9 : le configurer
+### 32. Elasticsearch 9 : le configurer
 
 Le paquet active la sécurité (TLS, mot de passe) et écoute sur toutes les interfaces. Le site s'y
 connecte sans TLS ni mot de passe, comme à la 5.6 : le bloc de sécurité du paquet
@@ -1054,7 +1104,7 @@ vérification affiche alors `4` et `2` : retirer les lignes en double), et le se
 vérifiée autrement (conteneur Debian 13 : sans ce `remove`, Elasticsearch ne démarre pas). (#31,
 #204)
 
-### 31. Elasticsearch 9 : le démarrer
+### 33. Elasticsearch 9 : le démarrer
 
 ```bash
 sudo systemctl daemon-reload
@@ -1068,22 +1118,22 @@ Répétition : vérifiée autrement (conteneur Debian 13 : Elasticsearch 9 déma
 configuration et répond sans mot de passe ; dans la répétition, c'est le conteneur
 `elasticsearch` en 9). (#204)
 
-### 32. Supprimer ce que le code livré n'utilise plus
+### 34. Supprimer ce que le code livré n'utilise plus
 
 ```bash
 sudo rm -rf var/bootstrap.php.cache var/SymfonyRequirements.php web/css web/js components var/cache/prod var/cache/dev
 ```
 
 Le cache de la 3.4 ne se reconstruit pas avec le code livré : `bin/console` chargerait l'ancien
-container et échouerait dès `composer install` (étape 35). Les autres fichiers sont ceux de
+container et échouerait dès `composer install` (étape 37). Les autres fichiers sont ceux de
 `sensio/distribution-bundle`, d'Assetic et de `robloach/component-installer`. Ils sont dans la
 sauvegarde de l'étape 19.
 
 Vérification : `ls -d var/cache/prod web/css components` ne trouve aucun des trois. Relance : oui ;
-après l'étape 37, elle supprime aussi le cache du code livré : refaire alors l'étape 37.
+après l'étape 39, elle supprime aussi le cache du code livré : refaire alors l'étape 39.
 Répétition : jouée. (#17, #101, #112, #126)
 
-### 33. Déployer le code
+### 35. Déployer le code
 
 ```bash
 sudo --user=www-data git pull origin master
@@ -1093,7 +1143,7 @@ Vérification : `sudo --user=www-data git log -1 --format=%H` affiche le hash du
 « Ce qu'il faut avoir »). Relance : oui. Répétition : jouée (`git checkout` du commit livré, le
 dépôt du serveur n'étant pas joignable ; les paquets du serveur sont ceux des images de `next`).
 
-### 34. PHP en ligne de commande
+### 36. PHP en ligne de commande
 
 ```bash
 sudo update-alternatives --set php /usr/bin/php8.5
@@ -1102,24 +1152,29 @@ sudo update-alternatives --set php /usr/bin/php8.5
 Vérification : `php -v` affiche `PHP 8.5.x`. Les unités de systemd et Composer appellent `php`.
 Relance : oui. Répétition : vérifiée autrement (conteneurs Debian 13 et 12).
 
-### 35. Dépendances PHP
+### 37. Dépendances PHP
 
 ```bash
-sudo --user=www-data env SYMFONY_ENV=prod composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-req=php+
+sudo --user=www-data env COMPOSER_CACHE_DIR=var/composer SYMFONY_ENV=prod composer install --no-dev --optimize-autoloader --no-interaction --ignore-platform-req=php+
 ```
 
 - `--ignore-platform-req=php+` : deux dépendances (`facebook/graph-sdk`, `spomky-labs/base64url`)
   ne déclarent que PHP 7, et le code tourne en 8.5 ; Composer refuse sinon.
 - `--no-dev` et `SYMFONY_ENV=prod`, comme les images Docker : sans les paquets de développement
   (fixtures, profiler), et les scripts de Composer (`cache:clear`, `assets:install`) en prod.
+- `COMPOSER_CACHE_DIR=var/composer` : le cache de l'étape 20, qui a les paquets du code livré.
 - `composer install` retire de `parameters.yml` les anciens paramètres.
 
-Vérification : la commande finit sans erreur, et
-`grep -c -E '^\s+(mailer_host|websocket_uri|ga_tracking_id|node):' app/config/parameters.yml`
-affiche `0`. Durée : 10 s. Relance : oui. Répétition : jouée ; aussi dans un conteneur Debian 13,
-en www-data avec un `/var/www` à root, sur une copie du code livré. (#101, #190)
+Vérification : la commande finit sans erreur, sans ligne `Downloading` (tout vient du cache ;
+sinon, elle télécharge ce qui manque, en plus de temps), et
+`sudo grep -c -E '^\s+(mailer_host|websocket_uri|ga_tracking_id|node):' app/config/parameters.yml`
+affiche `0`. Durée : 5 à 7 s (10 s avec un cache vide). Relance : oui. Répétition : jouée, sans rien
+télécharger ; aussi dans un conteneur Debian 13, en www-data avec un `/var/www` à root, sur une
+copie du code livré. (#101, #190, #314)
 
-### 36. CSS et JS
+### 38. CSS et JS
+
+Les paquets de npm viennent du cache de l'étape 20 (`var/npm`).
 
 ```bash
 sudo --user=www-data env npm_config_cache=var/npm npm ci --no-audit --no-fund
@@ -1127,10 +1182,12 @@ sudo --user=www-data env npm_config_cache=var/npm npx vite build
 ```
 
 Vérification : `ls web/build/manifest.json web/build/entrypoints.json` liste les deux fichiers.
-Sans eux, toutes les pages répondent 500. Durée : 8 s. Relance : oui. Répétition : jouée ; aussi
-dans un conteneur Debian 13, comme l'étape 35. (#17, #112)
+Sans eux, toutes les pages répondent 500. Durée : 7 à 8 s, dont 2 s pour `npm ci` (autant avec un
+cache vide, sur le réseau de la répétition). Relance : oui. Répétition : jouée, sans requête au
+registre de npm (`--loglevel=http` ajouté : chaque paquet vient du cache) ; aussi dans un conteneur
+Debian 13, comme l'étape 37. (#17, #112, #314)
 
-### 37. Cache
+### 39. Cache
 
 ```bash
 sudo --user=www-data bin/console --env=prod cache:warmup
@@ -1140,7 +1197,7 @@ Vérification : `sudo --user=www-data bin/console --env=prod about | grep -E 'En
 affiche `prod` et `false`. Le cache du routeur est construit avant la première requête. Relance :
 oui. Répétition : jouée. (#18, #128)
 
-### 38. Table des sessions
+### 40. Table des sessions
 
 La table des sessions de la 3.4 est remplacée par une table neuve : toutes les sessions sont
 fermées de toute façon (le cookie change de nom, #301).
@@ -1156,7 +1213,7 @@ colonne (`MEDIUMINT`), toute page qui écrit la session répondrait 500. Relance
 repart vide. Répétition : jouée, puis le code livré connecte un compte et écrit sa session dans la
 nouvelle table. (#18, #128, #301)
 
-### 39. Migrations
+### 41. Migrations
 
 ```bash
 sudo --user=www-data bin/console --env=prod doctrine:migrations:migrate --no-interaction
@@ -1184,23 +1241,23 @@ sudo --user=www-data bin/console --env=prod doctrine:schema:update --dump-sql
 
 `Up-to-date!`, puis `55` et `4` (les 51 de la 3.4 gardent leur ligne, aucune n'est rejouée), puis
 `Nothing to update`. Sinon : ne pas rouvrir, envoyer la sortie. Ne jamais corriger le schéma par
-`doctrine:schema:update --force` (étape 52). Durée : 5 s, celle de l'étape 20 sur le serveur.
+`doctrine:schema:update --force` (étape 55). Durée : 5 s, celle de l'étape 21 sur le serveur.
 Relance : oui, seules les migrations qui manquent sont jouées. Répétition : jouée, sur la
 `migration_versions` de doctrine/migrations 1.8 avec ses 51 lignes. (#149, #190, #200, #312)
 
-### 40. Mettre en place le vhost du code livré
+### 42. Mettre en place le vhost du code livré
 
 ```bash
 sudo cp -a /etc/nginx/sites-available/www.lairdubois.fr.conf.livraison /etc/nginx/sites-available/www.lairdubois.fr.conf
 ```
 
-Il ne sert qu'à la réouverture (étape 45). Vérification :
+Il ne sert qu'à la réouverture (étape 47). Vérification :
 `diff /etc/nginx/sites-available/www.lairdubois.fr.conf.livraison /etc/nginx/sites-available/www.lairdubois.fr.conf`
 n'affiche rien. Relance : oui. Répétition : jouée pour le site (la configuration nginx de l'image
 de prod, tirée de ce vhost, sert alors `web/app.php` en prod) ; le vhost lui-même est vérifié à
 l'étape 14.
 
-### 41. Index Elasticsearch
+### 43. Index Elasticsearch
 
 ```bash
 sudo --user=www-data bin/console --env=prod fos:elastica:populate
@@ -1211,7 +1268,7 @@ Tant qu'elle tourne, les listes et la recherche sont vides ou en erreur. Vérifi
 Durée : 6 s sur les fixtures ; voir « Durée de la coupure » pour la prod. Relance : oui, les index
 sont recréés. Répétition : jouée. (#31, #204)
 
-### 42. Workers
+### 44. Workers
 
 Les deux consumers existants changent de commande, et celui des mails (étape 13) démarre :
 
@@ -1231,7 +1288,7 @@ jouée (services Docker) ; les deux `sed` appliqués aux unités de `master` don
 `docs/01-installation.md`, vérifiées par `systemd-analyze verify` (conteneurs Debian 13 et 12).
 (#19, #22, #152, #185)
 
-### 43. Crons
+### 45. Crons
 
 ```bash
 sudo systemctl enable --now ladb_scheduler ladb_consumer_cron
@@ -1246,7 +1303,7 @@ passage (limite d'ip-api.com). Relance : oui. Répétition : jouée (services Do
 `ladb:cron:notification:populate` mis dans la file par le scheduler et lancé par le worker).
 (#71, #94, #300, #303)
 
-### 44. Envoyer un mail de test
+### 46. Envoyer un mail de test
 
 Un mail par le transport de `mailer_dsn`, comme le worker `mailer` les envoie, à une adresse de
 celui qui livre (à la place de `UNE_ADRESSE`) :
@@ -1260,12 +1317,14 @@ original (« Afficher l'original » dans Gmail) a `DKIM: 'PASS'` pour `lairduboi
 `sudo grep 'status=sent' /var/log/mail.log | tail -n 3` (`sudo journalctl -t postfix/smtp -n 20`
 sans rsyslog) a la ligne de son envoi au relais. Sinon : ne pas rouvrir, lire
 `/var/log/mail.log` et `var/logs/prod.log`. Un `mailer_dsn` à corriger (étapes 10 et 11) se
-prend en compte par `sudo --user=www-data bin/console --env=prod cache:clear`, puis
-`sudo systemctl restart ladb_consumer_mailer`, avant de relancer le test : un mail qui n'arrive
-pas au relais est rejoué 5 fois en 2 heures, puis perdu. Relance : oui. Répétition : jouée (le mail
-arrive dans Mailpit, signé DKIM) ; Postfix et le relais non joués. (#19, #180, #312)
+prend en compte par `sudo --user=www-data bin/console --env=prod cache:clear`, puis le
+redémarrage des workers et des crons, qui gardent sinon l'ancien container (étape 52) :
+`sudo systemctl restart ladb_scheduler ladb_consumer_cron ladb_consumer_mailer ladb_consumer_view ladb_consumer_webpush`,
+avant de relancer le test : un mail qui n'arrive pas au relais est rejoué 5 fois en 2 heures, puis
+perdu. Relance : oui. Répétition : jouée (le mail arrive dans Mailpit, signé DKIM) ; Postfix et le
+relais non joués. (#19, #180, #312, #314)
 
-### 45. Rouvrir le site
+### 47. Rouvrir le site
 
 C'est le dernier moment pour revenir en arrière sans perte (voir « Retour arrière »).
 
@@ -1282,7 +1341,7 @@ puis se connecter, ouvrir une création, chercher un mot. Sinon : `tail -n 50 va
 pour les vérifications (pages en anonyme et connecté, connexion, recherche) ; le script ne l'est
 pas (systemd, nginx du serveur).
 
-### 46. Arrêter l'ancien PHP-FPM
+### 48. Arrêter l'ancien PHP-FPM
 
 ```bash
 sudo systemctl disable --now php7.3-fpm
@@ -1293,7 +1352,7 @@ non jouée.
 
 ## Phase 3 : après la livraison
 
-### 47. Messages non lus
+### 49. Messages non lus
 
 ```bash
 sudo --user=www-data bin/console --env=prod ladb:reset:unreadmessagecount --force
@@ -1303,9 +1362,9 @@ Chaque fil reçu depuis fin 2020 a laissé un message non lu fantôme. La comman
 comme la lecture d'un fil (réponses et fils de collectif compris). Vérification : elle finit sans
 erreur. Répétition : jouée. (#69, #93, #94, #98)
 
-### 48. Anciennes files et échanges de RabbitMQ
+### 50. Anciennes files et échanges de RabbitMQ
 
-Les files sont vides depuis l'étape 24. Les supprimer :
+Les files sont vides depuis l'étape 26. Les supprimer :
 
 ```bash
 sudo rabbitmqctl delete_queue view_queue
@@ -1339,7 +1398,7 @@ Vérification : chaque `curl` répond `204`, `sudo rabbitmqctl list_queues name`
 d'avant (`[  ]` s'il ne l'était pas). Messenger crée aussi l'échange `delays` et des files `delay_*`
 au premier nouvel essai d'un message. Répétition : jouée (RabbitMQ 4.0). (#22, #152, #312)
 
-### 49. Dépôt d'Elasticsearch 9
+### 51. Dépôt d'Elasticsearch 9
 
 Pour ses mises à jour de sécurité, comme le reste du serveur :
 
@@ -1352,25 +1411,65 @@ sudo apt-get update
 Vérification : `apt-cache policy elasticsearch` cite `artifacts.elastic.co/packages/9.x`.
 Répétition : vérifiée autrement (conteneur Debian 13). (#204)
 
-### 50. Chromium dans son bac à sable
+### 52. Chromium dans son bac à sable
 
 ```bash
 sysctl kernel.unprivileged_userns_clone
 ```
 
 Si la valeur est `1` (le défaut depuis Debian 11) : `chromium_sandbox: true` dans
-`app/config/parameters.yml`, puis :
+`app/config/parameters.yml`, puis le cache, et le redémarrage des workers et des crons. Ils gardent
+l'ancien container tant qu'ils tournent : le worker des crons lancerait encore Chromium hors de son
+bac à sable, et chacun peut tomber sur un fichier du cache que `cache:clear` a supprimé.
 
 ```bash
 sudo --user=www-data bin/console --env=prod cache:clear
+sudo systemctl restart ladb_scheduler ladb_consumer_cron ladb_consumer_mailer ladb_consumer_view ladb_consumer_webpush
 sudo --user=www-data bin/console --env=prod ladb:cron:workflow:thumbnails --force
 ```
 
-Vérification : la commande finit sans `No usable sandbox!`. Sinon : remettre `false`, puis
-`cache:clear`. Répétition : non jouée (le bac à sable est vérifié par `castor qa:prod-smoke`).
-(#291, #295)
+Le redémarrage de `ladb_consumer_cron` attend la fin du cron en cours : une heure au plus
+(étape 55). Vérification :
 
-### 51. Ménage, quand le retour arrière n'est plus envisagé
+```bash
+systemctl show -p ActiveEnterTimestamp ladb_scheduler ladb_consumer_cron ladb_consumer_mailer ladb_consumer_view ladb_consumer_webpush
+```
+
+donne cinq heures de démarrage, toutes après le `cache:clear`, et la dernière commande finit sans
+`No usable sandbox!`. Sinon : remettre `false`, puis `cache:clear` et le redémarrage. Répétition :
+jouée (`chromium_sandbox: true`, le `cache:clear`, les services Docker redémarrés après lui, puis la
+capture d'un processus par Chromium dans son bac à sable, avec le profil seccomp de la stack ; une
+vue, une notification, un mail et un cron passent ensuite par les workers redémarrés) ; le `sysctl`
+et systemd non joués. (#291, #295, #314)
+
+### 53. Les alias du serveur
+
+Les alias de `~/.bash_aliases` (`docs/01-installation.md`, « Step 0 ») changent : `ladb-install`
+est la commande de l'étape 37, et `ladb-assets`, nouveau, celles de l'étape 38. L'ancien
+`ladb-install` (`composer install` seul) échouerait : sans `--ignore-platform-req=php+`, Composer
+refuse deux dépendances en PHP 8.5.
+
+```bash
+cp -a ~/.bash_aliases ~/ladb-backup/bash_aliases
+nano ~/.bash_aliases
+```
+
+La ligne `alias ladb-install=…` est remplacée par celle de `docs/01-installation.md` (le bloc « If
+you are on the **PROD** server », sous `nano ~/.bash_aliases`), et la ligne `alias ladb-assets=…`
+ajoutée. Vérification :
+
+```bash
+diff <(grep '^alias ladb' ~/.bash_aliases | sort) <(sed -n '/If you are on the \*\*PROD\*\* server/,/^```$/{/^alias ladb/p}' docs/01-installation.md | sort)
+```
+
+n'affiche rien, ou seulement des alias propres au serveur (lignes en `<`) ; une ligne en `>` manque
+au fichier. Les alias servent dans un nouveau shell. D'autres comptes en ont peut-être :
+`sudo grep -l 'alias ladb' /root/.bash_aliases /home/*/.bash_aliases` les liste, la même chose dans
+chacun. Répétition : vérifiée autrement (conteneur Debian 13 : les alias de `master` dans
+`~/.bash_aliases`, ces deux lignes changées, puis la vérification n'affiche rien ; sur les alias de
+`master`, elle cite ces deux lignes). (#314)
+
+### 54. Ménage, quand le retour arrière n'est plus envisagé
 
 ```bash
 sudo rm -rf /var/lib/elasticsearch-5.6 /etc/elasticsearch-5.6 /etc/nginx/sites-available/www.lairdubois.fr.conf.livraison
@@ -1379,11 +1478,28 @@ sudo rm -rf /var/lib/elasticsearch-5.6 /etc/elasticsearch-5.6 /etc/nginx/sites-a
 Puis les paquets de l'ancien PHP, le Java 8 d'Elasticsearch 5.6 et `~/ladb-backup`. Répétition :
 non jouée.
 
-### 52. À savoir pour la suite
+### 55. À savoir pour la suite
 
 - Déploiement : `scripts/maintenanceStart.sh` et `maintenanceStop.sh` sont à jour (PHP-FPM 8.5,
-  workers et crons), comme les alias de `docs/01-installation.md` (`ladb-install`, `ladb-assets`).
-  Le consumer `mailer` est à redémarrer à chaque déploiement : `maintenanceStop.sh` le fait.
+  workers et crons), comme les alias (étape 53). Le consumer `mailer` est à redémarrer à chaque
+  déploiement : `maintenanceStop.sh` le fait.
+- Un déploiement peut laisser le site fermé une heure : `maintenanceStart.sh` passe en
+  maintenance, puis arrête `ladb_consumer_cron`, qui finit d'abord le cron en cours
+  (`TimeoutStopSec=1h` de son unité : systemd le tuerait sinon au bout de 90 secondes, au milieu
+  du cron). Pour ne pas l'attendre site fermé, arrêter les crons avant, site ouvert :
+
+  ```bash
+  sudo systemctl stop ladb_scheduler ladb_consumer_cron
+  ```
+
+  La commande rend la main à la fin du cron en cours. Vérification :
+  `systemctl is-active ladb_scheduler ladb_consumer_cron` affiche deux fois `inactive`. Puis
+  `sudo scripts/maintenanceStart.sh`, qui les trouve arrêtés. Le scheduler, redémarré par
+  `maintenanceStop.sh`, rattrape les crons manqués entre-temps (le dernier passage de chacun). Le
+  plus long, les sitemaps, passe à 3 h (étape 17) : déployer à une autre heure. Répétition :
+  vérifiée autrement (services Docker : un cron, la reconstruction de l'index, mis dans la file
+  `cron` ; arrêté pendant qu'il tourne, le worker recrée encore des index après le signal, va au
+  bout, acquitte le message et sort en 0). (#300, #314)
 - Schéma : ne jamais lancer `doctrine:schema:update --force` sur la prod. Le code livré (ORM 3)
   compare tout le schéma : il supprimerait les tables hors du mapping et ramènerait les colonnes à
   la collation de leur table, au risque de perdre des caractères. Le schéma change par une
@@ -1395,16 +1511,19 @@ non jouée.
   rejoué 5 fois en environ 2 h (files `delay_mailer_*`), puis supprimé avec un log critical ; si
   RabbitMQ est injoignable, le mail part en direct, sans attendre, avec un warning. Surveiller la
   place disque de RabbitMQ le vendredi (la lettre y met tous ses mails d'un coup), et laisser le
-  worker vider la file avant chaque saut de Symfony. `mailer:test` (étape 44) vérifie l'envoi.
+  worker vider la file avant chaque saut de Symfony. `mailer:test` (étape 46) vérifie l'envoi.
   (#19, #180, #312)
 - `doctrine:query:sql` est dépréciée : `dbal:run-sql` la remplace. (#190)
 
 ## Retour arrière
 
-### Jusqu'à la réouverture (étape 45)
+### Jusqu'à la réouverture (étape 47)
 
 On peut revenir à la 3.4 sans perte : la base migrée reste lisible par la 3.4. Le site reste en
-maintenance pendant ce temps.
+maintenance pendant ce temps. En dernier recours, si la base elle-même est abîmée et que R6 ne
+suffit pas, la sauvegarde de l'étape 22 la rend telle qu'avant la maintenance, à la place de R6 :
+`zcat ~/ladb-backup/db-avant-maintenance.sql.gz | sudo mariadb db_fr_lairdubois_www` (le temps de
+la restauration de l'étape 21).
 
 R1. Arrêter les services du code livré :
 
@@ -1437,7 +1556,16 @@ sudo systemctl daemon-reload
 
 R5. Elasticsearch 5.6 :
 
-Arrêter la 9 et la désinstaller, puis réinstaller la 5.6 depuis le paquet de l'étape 16 (`5.6.16`
+D'abord le dépôt de la 9, si l'étape 51 l'a ajouté : sinon, la mise à jour suivante des paquets
+remonterait la 5.6 en 9.
+
+```bash
+sudo rm -f /etc/apt/sources.list.d/elastic-9.x.list /usr/share/keyrings/elasticsearch-keyring.gpg
+sudo apt-get update
+```
+
+Vérification : `apt-cache policy elasticsearch` ne cite plus `artifacts.elastic.co/packages/9.x`.
+Puis arrêter la 9 et la désinstaller, réinstaller la 5.6 depuis le paquet de l'étape 16 (`5.6.16`
 remplacé par sa version), et lui rendre ses dossiers et ses réglages :
 
 ```bash
@@ -1454,7 +1582,7 @@ sudo cp -a ~/ladb-backup/elasticsearch-5.6.default /etc/default/elasticsearch
 ```
 
 Les purges ont supprimé l'utilisateur `elasticsearch`, que le paquet recrée, peut-être avec un
-autre numéro : les `chown` lui rendent les dossiers. Si l'étape 27 a mis de côté
+autre numéro : les `chown` lui rendent les dossiers. Si l'étape 29 a mis de côté
 `elasticsearch.service.d`, le remettre :
 `sudo mv ~/ladb-backup/elasticsearch-5.6.service.d /etc/systemd/system/elasticsearch.service.d`.
 Puis :
@@ -1473,8 +1601,8 @@ R6. La base :
 zcat ~/ladb-backup/db-migrations.sql.gz | sudo mariadb db_fr_lairdubois_www
 ```
 
-La 3.4 lit la base migrée, sauf `migration_versions`, que l'étape 39 a convertie : sans la
-sauvegarde de l'étape 26, `doctrine:migrations:status` de la 3.4 compterait 55 migrations
+La 3.4 lit la base migrée, sauf `migration_versions`, que l'étape 41 a convertie : sans la
+sauvegarde de l'étape 28, `doctrine:migrations:status` de la 3.4 compterait 55 migrations
 inconnues et 51 nouvelles, et un `migrate` rejouerait celles de 2020. La sauvegarde rend aussi
 `ext_log_entries` et `tbl_webpush_user_subscription` d'avant les migrations, que le site fermé n'a
 pas changées. Les tables que la quatrième migration a supprimées ne servaient plus : elles restent
@@ -1485,16 +1613,22 @@ dans la sauvegarde de l'étape 18. Vérification :
 R7. Les services et les crons de la 3.4 :
 
 ```bash
+sudo systemctl enable --now php7.3-fpm
 sudo systemctl enable --now ladb_websocket
 sudo systemctl start ladb_consumer_view ladb_consumer_webpush
 sudo crontab -u www-data ~/ladb-backup/crontab-www-data
 sudo scripts/maintenanceStop.sh
 ```
 
-Et les crons retirés d'un autre fichier à l'étape 22 : le remettre depuis `~/ladb-backup`. Le
-`maintenanceStop.sh` est alors celui de la 3.4. Vérification : le site répond, on se connecte.
-Un compte qui s'est connecté au code livré pendant la maintenance (pour tester) ne se connecte
-plus : son mot de passe est à refaire par « mot de passe oublié ».
+Et les crons retirés d'un autre fichier à l'étape 24 : le remettre depuis `~/ladb-backup`. Le
+`maintenanceStop.sh` est alors celui de la 3.4 : il redémarre `php7.3-fpm` sans l'activer, et
+l'étape 48 l'a peut-être désactivé, d'où le premier `enable` (sans lui, il ne repartirait pas après
+un redémarrage du serveur). Vérification : `systemctl is-enabled php7.3-fpm ladb_websocket`
+affiche deux fois `enabled`, et `sudo rabbitmqctl list_queues name` liste `view_queue` et
+`webpush_notification_queue` (les anciens consumers les recréent à leur démarrage, après
+l'étape 50 qui les supprime). Puis le site répond, on se connecte. Un compte qui s'est connecté au
+code livré pendant la maintenance (pour tester) ne se connecte plus : son mot de passe est à
+refaire par « mot de passe oublié ».
 
 Répétition : jouée de R2 à R6 juste avant la réouverture, après les migrations et un premier
 démarrage des workers et des crons, puis le code livré est déployé à nouveau. La 3.4 connecte un
@@ -1502,9 +1636,9 @@ compte qui ne s'est pas encore connecté au code livré, affiche ses pages, écr
 trouve ses contenus dans l'index 5.6, et `doctrine:migrations:status` retrouve ses 51 migrations ;
 un compte qui s'est connecté au code livré est refusé ; au second déploiement,
 `doctrine:migrations:migrate` rejoue les quatre migrations sur les tables que R6 a remises. R5 est
-vérifiée autrement (conteneur Debian 13 : la 5.6 réinstallée depuis son paquet, alors qu'un autre
-compte a pris le numéro de l'utilisateur `elasticsearch`, retrouve son Java, ses données et son
-index). R1, R3, R4 et R7 (systemd, crontab) ne sont pas joués tels quels.
+vérifiée autrement (conteneur Debian 13 : le dépôt de la 9 retiré, puis la 5.6 réinstallée depuis
+son paquet, alors qu'un autre compte a pris le numéro de l'utilisateur `elasticsearch`, retrouve son
+Java, ses données et son index). R1, R3, R4 et R7 (systemd, crontab) ne sont pas joués tels quels.
 
 ### Après la réouverture
 
@@ -1516,8 +1650,38 @@ Le retour arrière n'est plus sans perte :
 - les mails en attente dans la file `mailer`, et les vues et notifications des files `view` et
   `webpush_notification`, ne sont pas lus par la 3.4 ;
 - les contenus créés depuis manquent dans l'index 5.6, jusqu'à un `fos:elastica:populate` de la
-  3.4 ;
+  3.4 (plus bas) ;
+- les abonnements web push pris depuis la réouverture : R6 rend la table d'avant la maintenance ;
 - tous les membres sont déconnectés une seconde fois.
 
 Plus le site reste ouvert, plus il y a de comptes concernés : un retour arrière après la
-réouverture se décide vite.
+réouverture se décide vite. Après le ménage de l'étape 54, il n'est plus possible : les données
+d'Elasticsearch 5.6 et l'ancien PHP sont partis.
+
+Ce sont les étapes R1 à R7, avec deux de plus. D'abord, repasser en maintenance, par le script du
+code livré, qui arrête aussi les workers et les crons :
+
+```bash
+sudo scripts/maintenanceStart.sh
+```
+
+Il attend la fin du cron en cours, une heure au plus (étape 55). Vérification : celle de
+l'étape 23, la page de maintenance en 503. Puis R1 à R6. Ensuite, avant R7, l'index de la 5.6
+reconstruit par la 3.4, pour les contenus créés depuis la réouverture (la recherche et les listes
+ne marchent pas tant qu'il tourne, comme à l'étape 43) :
+
+```bash
+sudo --user=www-data bin/console --env=prod fos:elastica:populate
+```
+
+Vérification : `curl -s 'http://127.0.0.1:9200/_cat/indices?v'` liste les index de la 5.6, avec
+leurs documents. Puis R7, et, si l'étape 53 est faite, les anciens alias :
+`cp -a ~/ladb-backup/bash_aliases ~/.bash_aliases`.
+
+Répétition : jouée après les vérifications de la phase 3 et les étapes 49, 50 et 52 (les files et
+les échanges de la 3.4 supprimés, le cache du code livré vidé, chaque compte des fixtures connecté
+au code livré) : les services du code livré arrêtés, R2, R5 et R6, puis l'index reconstruit par la
+3.4, qui y trouve ses contenus ; ses consumers recréent leurs files et leurs échanges, et une vue
+est comptée ; un compte connecté au code livré est refusé, repasse par « mot de passe oublié » et
+se connecte. Le dépôt de la 9 retiré par R5 est vérifié autrement (conteneur Debian 13) ;
+`maintenanceStart.sh`, R1, R3, R4 et R7 (systemd, crontab) ne sont pas joués tels quels.
