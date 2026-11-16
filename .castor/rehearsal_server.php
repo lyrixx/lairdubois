@@ -572,8 +572,8 @@ function prepare_server_files(): void
         fs()->dumpFile("{$dir}/units-master/{$unit}.service", $contents);
     }
 
-    // ~/.bash_aliases of the server: the aliases of master, with one of its own and another one;
-    // then changed as step 53 says (the line ladb-install, and ladb-assets after it)
+    // ~/.bash_aliases of the server: the aliases of master, an alias of the server and one that is
+    // not of the site; then changed as step 53 says (the line ladb-install, ladb-assets after it)
     $master = "alias ll='ls -l'\n" . SERVER_ALIAS . "\n" . prod_aliases($show(INSTALLATION));
     $delivered = array_values(preg_grep('{^alias ladb-(install|assets)=}', explode("\n", prod_aliases(installation()))));
     expect(2 === \count($delivered), 'docs/01-installation.md has not the aliases ladb-install and ladb-assets.');

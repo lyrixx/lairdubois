@@ -215,8 +215,8 @@ Le guide est `docs/04-delivery.md`, en français, pour Boris : les prérequis, p
 (avant la livraison site ouvert, la coupure, après) et le retour arrière. Chaque étape : la
 commande à copier, sa vérification, quoi faire sinon, et ce que la répétition en fait.
 `castor qa:delivery-rehearsal` (`.castor/rehearsal.php`, `rehearsal_server.php`) le rejoue, à la
-main, hors CI : 12 à 14 min avec les images dans le cache de Docker (une vingtaine la première
-fois), 2 Go de RAM au pic.
+main, hors CI : 15 min avec les images dans le cache de Docker (une vingtaine la première fois),
+2 Go de RAM au pic.
 
 ```bash
 castor qa:delivery-rehearsal [--keep]         # tout, puis le tableau des étapes (var/delivery-rehearsal/report.md)
